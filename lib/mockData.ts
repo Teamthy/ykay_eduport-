@@ -1,0 +1,83 @@
+﻿// Shared mock data for all portal demos
+
+export const MOCK_STUDENTS = [
+  { id: "YKC/2025/001", name: "Adeola Ogunlade", class: "JSS1", arm: "A", gender: "Female", age: 12, grade: "A1", attendance: 94, feeStatus: "Partial", feeBalance: 45000 },
+  { id: "YKC/2025/002", name: "Emmanuel Adebayo", class: "SS2", arm: "B", gender: "Male", age: 15, grade: "A1", attendance: 92, feeStatus: "Paid", feeBalance: 0 },
+  { id: "YKC/2025/003", name: "Fatima Ibrahim", class: "SS1", arm: "A", gender: "Female", age: 14, grade: "B2", attendance: 88, feeStatus: "Paid", feeBalance: 0 },
+  { id: "YKC/2025/004", name: "Chidi Okonkwo", class: "JSS2", arm: "B", gender: "Male", age: 13, grade: "A1", attendance: 96, feeStatus: "Paid", feeBalance: 0 },
+  { id: "YKC/2025/005", name: "Aisha Mohammed", class: "SS3", arm: "A", gender: "Female", age: 16, grade: "B2", attendance: 82, feeStatus: "Unpaid", feeBalance: 145000 },
+  { id: "YKC/2025/006", name: "David Okoro", class: "JSS3", arm: "C", gender: "Male", age: 13, grade: "A1", attendance: 91, feeStatus: "Partial", feeBalance: 30000 },
+  { id: "YKC/2025/007", name: "Blessing Eze", class: "SS1", arm: "B", gender: "Female", age: 14, grade: "C4", attendance: 76, feeStatus: "Paid", feeBalance: 0 },
+  { id: "YKC/2025/008", name: "Ibrahim Yusuf", class: "JSS1", arm: "B", gender: "Male", age: 12, grade: "B3", attendance: 89, feeStatus: "Paid", feeBalance: 0 },
+];
+
+export const MOCK_STAFF = [
+  { id: "STF-001", name: "Dr. Grace Okonkwo", role: "HOD Sciences", subjects: ["Mathematics", "Physics"], email: "grace.o@ykaycollege.com", status: "Active", classes: 4 },
+  { id: "STF-002", name: "Mr. Tunde Bakare", role: "Teacher", subjects: ["English Literature", "History"], email: "tunde.b@ykaycollege.com", status: "Active", classes: 3 },
+  { id: "STF-003", name: "Mrs. Amina Sule", role: "Teacher", subjects: ["Chemistry", "Biology"], email: "amina.s@ykaycollege.com", status: "Active", classes: 5 },
+  { id: "STF-004", name: "Mr. Kolawole Adeyemi", role: "Class Teacher JSS1A", subjects: ["Basic Science", "ICT"], email: "kolawole.a@ykaycollege.com", status: "Active", classes: 2 },
+  { id: "STF-005", name: "Ms. Ruth Okafor", role: "Teacher", subjects: ["Economics", "Commerce"], email: "ruth.o@ykaycollege.com", status: "Pending", classes: 0 },
+];
+
+export const MOCK_ANNOUNCEMENTS = [
+  { id: 1, title: "First Term Report Cards Released", desc: "All 420 report cards have been generated and delivered via WhatsApp and email.", time: "2 hours ago", type: "success", audience: "All Parents" },
+  { id: 2, title: "Parent-Teacher Conference", desc: "Scheduled for Friday, 25 July at 10:00 AM in the school auditorium.", time: "1 day ago", type: "info", audience: "All Parents" },
+  { id: 3, title: "Mid-Term Exams Schedule", desc: "Exams begin Monday, 4 August 2025. Timetable available in student portal.", time: "3 days ago", type: "warning", audience: "Students & Parents" },
+  { id: 4, title: "New Library Books Arrived", desc: "Over 200 new titles available in the library, including WAEC/JAMB prep materials.", time: "5 days ago", type: "success", audience: "All Students" },
+  { id: 5, title: "Fee Payment Reminder", desc: "Second term fees due by 15 September 2025. Pay online via Paystack.", time: "1 week ago", type: "warning", audience: "All Parents" },
+];
+
+export const MOCK_TIMETABLE = [
+  { day: "Monday", periods: [
+    { time: "08:00", subject: "Mathematics", teacher: "Dr. Okonkwo", room: "Room 12" },
+    { time: "09:00", subject: "English", teacher: "Mr. Bakare", room: "Room 8" },
+    { time: "10:00", subject: "Break", teacher: "", room: "" },
+    { time: "10:30", subject: "Physics", teacher: "Dr. Okonkwo", room: "Lab 1" },
+    { time: "11:30", subject: "Chemistry", teacher: "Mrs. Sule", room: "Lab 2" },
+    { time: "12:30", subject: "Lunch", teacher: "", room: "" },
+    { time: "13:30", subject: "History", teacher: "Mr. Bakare", room: "Room 8" },
+  ]},
+  { day: "Tuesday", periods: [
+    { time: "08:00", subject: "Biology", teacher: "Mrs. Sule", room: "Lab 2" },
+    { time: "09:00", subject: "Mathematics", teacher: "Dr. Okonkwo", room: "Room 12" },
+    { time: "10:00", subject: "Break", teacher: "", room: "" },
+    { time: "10:30", subject: "Economics", teacher: "Ms. Okafor", room: "Room 5" },
+    { time: "11:30", subject: "English", teacher: "Mr. Bakare", room: "Room 8" },
+    { time: "12:30", subject: "Lunch", teacher: "", room: "" },
+    { time: "13:30", subject: "ICT", teacher: "Mr. Adeyemi", room: "Computer Lab" },
+  ]},
+  { day: "Wednesday", periods: [
+    { time: "08:00", subject: "Physics", teacher: "Dr. Okonkwo", room: "Lab 1" },
+    { time: "09:00", subject: "Chemistry", teacher: "Mrs. Sule", room: "Lab 2" },
+    { time: "10:00", subject: "Break", teacher: "", room: "" },
+    { time: "10:30", subject: "Mathematics", teacher: "Dr. Okonkwo", room: "Room 12" },
+    { time: "11:30", subject: "Basic Science", teacher: "Mr. Adeyemi", room: "Lab 3" },
+    { time: "12:30", subject: "Lunch", teacher: "", room: "" },
+    { time: "13:30", subject: "Sports", teacher: "Coach Tunde", room: "Field" },
+  ]},
+];
+
+export const MOCK_EVENTS = [
+  { id: 1, title: "Parent-Teacher Conference", date: "2025-07-25", time: "10:00 AM", location: "School Auditorium", type: "meeting", rsvp: true },
+  { id: 2, title: "Inter-House Sports Competition", date: "2025-08-02", time: "9:00 AM", location: "Sports Field", type: "event", rsvp: false },
+  { id: 3, title: "Mid-Term Examinations Begin", date: "2025-08-04", time: "8:00 AM", location: "Various Halls", type: "exam", rsvp: false },
+  { id: 4, title: "Cultural Day Celebration", date: "2025-08-15", time: "10:00 AM", location: "Main Hall", type: "event", rsvp: true },
+  { id: 5, title: "Term Break Begins", date: "2025-08-22", time: "12:00 PM", location: "", type: "holiday", rsvp: false },
+  { id: 6, title: "Second Term Resumption", date: "2025-09-15", time: "7:30 AM", location: "All Campuses", type: "term", rsvp: false },
+];
+
+export const MOCK_MESSAGES = [
+  { id: 1, from: "Mrs. Grace Okonkwo", role: "Mathematics Teacher", subject: "Adeola's Progress", preview: "I wanted to share that Adeola has shown remarkable improvement in her recent tests...", time: "2 hours ago", unread: true, avatar: "GO" },
+  { id: 2, from: "School Administration", role: "Admin", subject: "Fee Payment Confirmation", preview: "This is to confirm receipt of your payment of ₦80,000 for the first term...", time: "1 day ago", unread: false, avatar: "SA" },
+  { id: 3, from: "Mr. Tunde Bakare", role: "English Teacher", subject: "Assignment Submission", preview: "Adeola submitted her literature essay on time. Excellent work overall...", time: "3 days ago", unread: false, avatar: "TB" },
+  { id: 4, from: "Dr. Adeyemi Ogunlade", role: "Director", subject: "Welcome to New Term", preview: "Dear parents, I want to personally welcome you to the 2025/2026 academic session...", time: "1 week ago", unread: false, avatar: "AO" },
+];
+
+export const MOCK_ACTIVITY = [
+  { id: 1, action: "New student enrolled", user: "Admin", detail: "Chidi Okonkwo added to JSS1B", time: "10 min ago", type: "enrollment" },
+  { id: 2, action: "Fee payment received", user: "Paystack", detail: "₦80,000 from Mrs. Ogunlade", time: "1 hour ago", type: "payment" },
+  { id: 3, action: "Report cards released", user: "Admin", detail: "First Term 2025/2026 · 420 students", time: "2 hours ago", type: "report" },
+  { id: 4, action: "Attendance submitted", user: "Dr. Grace Okonkwo", detail: "Mathematics · JSS1A · 38/40 present", time: "3 hours ago", type: "attendance" },
+  { id: 5, action: "Broadcast sent", user: "Admin", detail: "PTM reminder to all parents · 156 delivered", time: "5 hours ago", type: "broadcast" },
+  { id: 6, action: "Staff invitation sent", user: "Admin", detail: "Ms. Ruth Okafor · Teacher role", time: "1 day ago", type: "staff" },
+];
