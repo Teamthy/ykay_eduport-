@@ -7,7 +7,7 @@ import { ArrowUp, Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react"
 const linkGroups = {
   "School": [
     { label: "About", href: "/about" },
-    { label: "Director", href: "/director" },
+
     { label: "Academics", href: "/academics" },
     { label: "Campus Life", href: "/campus-life" },
   ],

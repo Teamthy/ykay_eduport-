@@ -16,12 +16,17 @@ const navLinks = [
     label: "About", href: "/about",
     dropdown: [
       { label: "Our Story", href: "/about" },
-      { label: "Director's Message", href: "/director" },
       { label: "Alumni", href: "/alumni" },
       { label: "Testimonials", href: "/testimonials" },
     ],
   },
-  { label: "Academics", href: "/academics" },
+  {
+    label: "Academics", href: "/academics",
+    dropdown: [
+      { label: "Academic Programs", href: "/academics" },
+      { label: "IT Education", href: "/it-education" },
+    ],
+  },
   { label: "Admissions", href: "/admissions" },
   { label: "Campus Life", href: "/campus-life" },
   { label: "News", href: "/news-events" },
@@ -33,7 +38,7 @@ const navLinks = [
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { resolvedTheme, toggleTheme } = useTheme();
 
   useEffect(() => {
@@ -56,16 +61,17 @@ export default function Header() {
         <ul className="hidden lg:flex items-center gap-4 xl:gap-5">
           {navLinks.map(link => (
             <li key={link.href} className="relative"
-              onMouseEnter={() => link.dropdown && setAboutOpen(true)}
-              onMouseLeave={() => link.dropdown && setAboutOpen(false)}>
+              onMouseEnter={() => link.dropdown && setActiveDropdown(link.label)}
+              onMouseLeave={() => link.dropdown && setActiveDropdown(null)}>
+
               {link.dropdown ? (
                 <>
                   <button className="flex items-center gap-1 font-body text-xs xl:text-sm text-[var(--nav-text)] hover:text-[var(--nav-text-active)] transition-colors tracking-wide uppercase">
                     {link.label}
-                    <ChevronDown size={12} className={`transition-transform ${aboutOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown size={12} className={`transition-transform ${activeDropdown === link.label ? "rotate-180" : ""}`} />
                   </button>
                   <AnimatePresence>
-                    {aboutOpen && (
+                    {activeDropdown === link.label && (
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}
                         className="absolute top-full left-1/2 -translate-x-1/2 pt-4" style={{ zIndex: 60 }}>
                         <div className="w-56 rounded-2xl overflow-hidden shadow-2xl border border-white/10" style={{ backgroundColor: "#0C1824" }}>
