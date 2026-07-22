@@ -5,3 +5,4 @@ out/
 .env.local
 .history/
 *.tsbuildinfo
+.md
