@@ -1,14 +1,24 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import PaystackModal from "@/components/PaystackModal";
 import ReceiptModal from "@/components/ReceiptModal";
 import { useToast } from "@/components/Toast";
-import { LayoutDashboard, CalendarDays, CreditCard, FileText, MessageCircle, Calendar, Download, Receipt as ReceiptIcon } from "lucide-react";
 import { ReceiptData } from "@/lib/receipt";
+import {
+  Calendar,
+  CalendarDays,
+  CreditCard,
+  Download,
+  FileText,
+  LayoutDashboard,
+  LoaderCircle,
+  MessageCircle,
+  Receipt as ReceiptIcon,
+} from "lucide-react";
 
 const SIDEBAR_ITEMS = [
   { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
@@ -19,234 +29,422 @@ const SIDEBAR_ITEMS = [
   { label: "Events", href: "/parent/events", icon: Calendar },
 ];
 
-const INVOICE = {
-  invoiceNo: "YKC-INV-2025-003",
-  studentName: "Adeola Ogunlade",
-  studentClass: "JSS1",
-  studentId: "YKC/2025/001",
-  parentName: "Mrs. Chinwe Ogunlade",
-  parentPhone: "07015374411",
-  parentEmail: "parent.a@email.com",
-  term: "First Term 2025/2026",
-  feeItems: [
-    { label: "Tuition Fee (JSS)", amount: 85000 },
-    { label: "Development Levy", amount: 15000 },
-    { label: "Exam Fee", amount: 8000 },
-    { label: "ICT Levy", amount: 12000 },
-    { label: "PTA Levy", amount: 5000 },
-  ],
-  total: 125000,
-  dueDate: "2025-08-15",
+type ParentFeesResponse = {
+  parent: {
+    displayName: string;
+    phone: string | null;
+    email: string | null;
+  };
+  children: Array<{
+    id: string;
+    studentId: string;
+    displayName: string;
+    className: string;
+    relationship?: string | null;
+    isPrimary: boolean;
+  }>;
+  selectedChild: {
+    id: string;
+    studentId: string;
+    displayName: string;
+    className: string;
+    relationship?: string | null;
+    isPrimary: boolean;
+  } | null;
+  invoices: Array<{
+    id: string;
+    invoiceNumber: string;
+    title: string;
+    termLabel: string;
+    status: string;
+    totalAmount: number;
+    amountPaid: number;
+    balanceDue: number;
+    dueDate: string | null;
+    issuedAt: string;
+  }>;
+  selectedInvoice: {
+    id: string;
+    invoiceNumber: string;
+    title: string;
+    termLabel: string;
+    status: string;
+    totalAmount: number;
+    amountPaid: number;
+    balanceDue: number;
+    dueDate: string | null;
+    issuedAt: string;
+    items: Array<{ id: string; label: string; amount: number; mandatory: boolean }>;
+  } | null;
+  payments: Array<{
+    id: string;
+    amount: number;
+    method: string;
+    status: string;
+    reference: string;
+    receiptNumber: string;
+    paidAt: string;
+  }>;
+  summary: {
+    totalBilled: number;
+    totalPaid: number;
+    totalOutstanding: number;
+  };
 };
 
-interface Payment {
-  id: string;
-  date: string;
-  amount: number;
-  method: string;
-  ref: string;
-  receiptNo: string;
-}
+type PaymentResponse = {
+  payment: {
+    id: string;
+    amount: number;
+    method: string;
+    status: string;
+    reference: string;
+    receiptNumber: string;
+    paidAt: string;
+  };
+  invoice: {
+    id: string;
+    invoiceNumber: string;
+    title: string;
+    termLabel: string;
+    status: string;
+    totalAmount: number;
+    amountPaid: number;
+    balanceDue: number;
+    dueDate: string | null;
+    items: Array<{ id: string; label: string; amount: number; mandatory: boolean }>;
+    student: {
+      studentId: string;
+      displayName: string;
+      className: string;
+    };
+  };
+};
 
-const INITIAL_HISTORY: Payment[] = [
-  { id: "1", date: "2025-07-19", amount: 80000, method: "Bank Transfer", ref: "TRF-7732-9901", receiptNo: "YKC-RCP-2025-0001" },
-];
+function formatMethod(method: string) {
+  return method.replaceAll("_", " ");
+}
 
 export default function ParentFeesPage() {
   const { toast } = useToast();
+  const [data, setData] = useState<ParentFeesResponse | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showPaystack, setShowPaystack] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
-  const [history, setHistory] = useState<Payment[]>(INITIAL_HISTORY);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
-  const totalPaid = history.reduce((s, p) => s + p.amount, 0);
-  const remaining = INVOICE.total - totalPaid;
+  async function loadFees(opts?: { studentId?: string; invoiceId?: string }) {
+    setLoading(true);
+    setError("");
+    try {
+      const params = new URLSearchParams();
+      const studentId = opts?.studentId || selectedStudentId;
+      const invoiceId = opts?.invoiceId || selectedInvoiceId;
+      if (studentId) params.set("studentId", studentId);
+      if (invoiceId) params.set("invoiceId", invoiceId);
+      const response = await fetch(`/api/parent/fees?${params.toString()}`, { cache: "no-store" });
+      const body = (await response.json()) as ParentFeesResponse & { error?: string };
+      if (!response.ok) throw new Error(body.error || "Unable to load fee records.");
+      setData(body);
+      if (body.selectedChild?.id) setSelectedStudentId(body.selectedChild.id);
+      if (body.selectedInvoice?.id) setSelectedInvoiceId(body.selectedInvoice.id);
+    } catch (loadError) {
+      setData(null);
+      setError(loadError instanceof Error ? loadError.message : "Unable to load fee records.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  const buildReceiptData = (payment: Payment): ReceiptData => ({
-    receiptNo: payment.receiptNo,
-    date: payment.date,
-    studentName: INVOICE.studentName,
-    studentClass: INVOICE.studentClass,
-    studentId: INVOICE.studentId,
-    parentName: INVOICE.parentName,
-    parentPhone: INVOICE.parentPhone,
-    parentEmail: INVOICE.parentEmail,
-    feeItems: INVOICE.feeItems,
-    totalPaid: payment.amount,
-    paymentMethod: payment.method,
-    paymentReference: payment.ref,
-    term: INVOICE.term,
+  useEffect(() => {
+    void loadFees();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedStudentId, selectedInvoiceId]);
+
+  const selectedInvoice = data?.selectedInvoice || null;
+  const remaining = selectedInvoice?.balanceDue || 0;
+
+  const paymentSummary = useMemo(() => {
+    if (!data) return { receipts: 0 };
+    return { receipts: data.payments.length };
+  }, [data]);
+
+  const buildReceiptData = (result: PaymentResponse): ReceiptData => ({
+    receiptNo: result.payment.receiptNumber,
+    date: new Date(result.payment.paidAt).toLocaleDateString(),
+    studentName: result.invoice.student.displayName,
+    studentClass: result.invoice.student.className,
+    studentId: result.invoice.student.studentId,
+    parentName: data?.parent.displayName || "Parent",
+    parentPhone: data?.parent.phone || "",
+    parentEmail: data?.parent.email || "",
+    feeItems: result.invoice.items.map((item) => ({ label: item.label, amount: item.amount })),
+    totalPaid: result.payment.amount,
+    paymentMethod: formatMethod(result.payment.method),
+    paymentReference: result.payment.reference,
+    term: result.invoice.termLabel,
   });
 
-  const handlePaymentSuccess = (ref: string) => {
-    const receiptNo = `YKC-RCP-${new Date().getFullYear()}-${String(history.length + 1).padStart(4, "0")}`;
-    const newPayment: Payment = {
-      id: String(history.length + 1),
-      date: new Date().toISOString().split("T")[0],
-      amount: remaining,
-      method: "Paystack Card",
-      ref,
-      receiptNo,
-    };
-
-    setHistory([...history, newPayment]);
-    toast(`Payment of ₦${remaining.toLocaleString()} successful!`, "success");
-
-    // Auto-open receipt modal after payment
-    setTimeout(() => {
-      setReceiptData(buildReceiptData(newPayment));
+  async function handlePaymentSuccess(reference: string) {
+    if (!selectedInvoice) return;
+    setProcessingPayment(true);
+    try {
+      const response = await fetch("/api/parent/fees/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          invoiceId: selectedInvoice.id,
+          amount: selectedInvoice.balanceDue,
+          reference,
+          method: "PAYSTACK",
+        }),
+      });
+      const body = (await response.json()) as PaymentResponse & { error?: string };
+      if (!response.ok) throw new Error(body.error || "Unable to record payment.");
+      toast(`Payment of â‚¦${body.payment.amount.toLocaleString()} recorded successfully.`, "success");
+      setReceiptData(buildReceiptData(body));
       setShowReceipt(true);
-    }, 500);
-  };
-
-  const viewReceipt = (payment: Payment) => {
-    setReceiptData(buildReceiptData(payment));
-    setShowReceipt(true);
-  };
+      await loadFees({ studentId: selectedStudentId, invoiceId: selectedInvoice.id });
+    } catch (paymentError) {
+      toast(paymentError instanceof Error ? paymentError.message : "Unable to record payment.", "error");
+    } finally {
+      setProcessingPayment(false);
+      setShowPaystack(false);
+    }
+  }
 
   return (
     <>
       <Header />
-      <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        <section className="pt-32 pb-10 bg-brand-navy px-6">
+      <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+        <section className="bg-brand-navy px-6 pb-10 pt-24">
           <div className="mx-auto max-w-7xl">
-            <h1 className="font-display text-[42px] md:text-[64px] tracking-[3px] text-white mb-4">
+            <h1 className="font-display text-[42px] tracking-[3px] text-white md:text-[64px]">
               PARENT <span className="text-brand-green">FEES</span>
             </h1>
-            <p className="text-white/60">Pay fees securely via Paystack. Save or share your receipt to WhatsApp instantly.</p>
+            <p className="mt-3 text-white/60">Live fee invoices, payment history, and receipts backed by the database.</p>
           </div>
         </section>
 
-        <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
+        <section className="px-6 py-10">
+          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
             <PortalSidebar portalName="Parent" portalType="parent" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 space-y-6">
-              {/* Invoice Card */}
-              <div className="rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] overflow-hidden shadow-[var(--card-shadow)]">
-                <div className="bg-brand-navy p-8">
-                  <div className="flex items-center justify-between mb-2">
-                    <h2 className="font-display text-2xl text-white">Current Term Invoice</h2>
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${
-                      remaining === 0 ? "bg-brand-green text-white" : "bg-brand-orange text-white"
-                    }`}>
-                      {remaining === 0 ? "Fully Paid ✓" : "Partial"}
-                    </span>
+              {loading ? (
+                <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
+                  <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading fee ledger...
                   </div>
-                  <p className="text-white/60 text-sm">{INVOICE.invoiceNo} · {INVOICE.term}</p>
-                  <p className="text-white/60 text-xs mt-1">For: {INVOICE.studentName} · {INVOICE.studentClass}</p>
                 </div>
+              ) : null}
 
-                <div className="p-8">
-                  <table className="w-full mb-6">
-                    <tbody>
-                      {INVOICE.feeItems.map((item, i) => (
-                        <tr key={i} className="border-b border-[var(--border-subtle)]">
-                          <td className="py-3 text-[var(--text-primary)]">{item.label}</td>
-                          <td className="py-3 text-brand-green font-bold text-right">₦{item.amount.toLocaleString()}</td>
-                        </tr>
+              {!loading && error ? (
+                <div className="rounded-[2rem] border border-brand-orange/30 bg-brand-orange/10 p-6 shadow-[var(--card-shadow)] text-sm text-[var(--text-secondary)]">
+                  {error}
+                </div>
+              ) : null}
+
+              {!loading && data ? (
+                <>
+                  <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                    <h3 className="mb-4 font-display text-sm tracking-[2px] text-[var(--text-primary)]">My Children</h3>
+                    <div className="flex flex-wrap gap-3">
+                      {data.children.map((child) => (
+                        <button
+                          key={child.id}
+                          onClick={() => {
+                            setSelectedStudentId(child.id);
+                            setSelectedInvoiceId("");
+                          }}
+                          className={`rounded-xl border px-5 py-4 text-left transition-all ${
+                            data.selectedChild?.id === child.id
+                              ? "border-brand-green/30 bg-brand-green/5"
+                              : "border-[var(--border-subtle)] bg-[var(--surface-disabled)] hover:border-brand-green/20"
+                          }`}
+                        >
+                          <div className="font-display text-base tracking-[2px] text-[var(--text-primary)]">{child.displayName}</div>
+                          <div className="text-[10px] text-[var(--text-muted)]">{child.className} Â· ID: {child.studentId}</div>
+                        </button>
                       ))}
-                      <tr className="bg-[var(--surface-disabled)]">
-                        <td className="py-3 px-3 font-bold text-[var(--text-primary)]">Total Bill</td>
-                        <td className="py-3 px-3 font-display text-xl text-[var(--text-primary)] text-right">₦{INVOICE.total.toLocaleString()}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <div className={`rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                    remaining > 0 ? "bg-brand-orange/10 border border-brand-orange/30" : "bg-brand-green/10 border border-brand-green/30"
-                  }`}>
-                    <div>
-                      <div className="text-xs uppercase tracking-widest text-[var(--text-muted)] mb-1">
-                        {remaining > 0 ? "Outstanding Balance" : "Status"}
-                      </div>
-                      <div className={`font-display text-3xl ${remaining > 0 ? "text-brand-orange" : "text-brand-green"}`}>
-                        {remaining > 0 ? `₦${remaining.toLocaleString()}` : "Fully Paid ✓"}
-                      </div>
-                      <div className="text-xs text-[var(--text-muted)] mt-1">
-                        {remaining > 0 ? `Paid so far: ₦${totalPaid.toLocaleString()}` : "Thank you for your prompt payment"}
-                      </div>
                     </div>
-                    {remaining > 0 && (
-                      <button
-                        onClick={() => setShowPaystack(true)}
-                        className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-brand-green text-white font-bold uppercase tracking-widest text-sm hover:bg-brand-green-dark transition-all shadow-lg animate-pulse"
-                      >
-                        <CreditCard size={18} /> Pay ₦{remaining.toLocaleString()} Now
-                      </button>
-                    )}
                   </div>
-                </div>
-              </div>
 
-              {/* Payment History with clickable receipts */}
-              <div className="rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] p-8 shadow-[var(--card-shadow)]">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-display text-xl text-[var(--text-primary)]">Payment History & Receipts</h3>
-                  <span className="text-xs px-3 py-1 rounded-full bg-brand-green/10 text-brand-green font-bold">{history.length} receipts</span>
-                </div>
-
-                {history.length === 0 ? (
-                  <p className="text-center py-8 text-[var(--text-muted)]">No payments yet.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {history.map(p => (
-                      <div key={p.id} className="p-5 rounded-xl bg-[var(--surface-disabled)] hover:bg-[var(--surface-card-hover)] transition-colors">
-                        <div className="flex flex-col md:flex-row md:items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-brand-green/10 text-brand-green flex items-center justify-center shrink-0">
-                            <ReceiptIcon size={22} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-1">
-                              <span className="font-bold text-[var(--text-primary)] text-lg">₦{p.amount.toLocaleString()}</span>
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green/20 text-brand-green font-bold uppercase tracking-widest">
-                                Paid
-                              </span>
-                            </div>
-                            <div className="text-xs text-[var(--text-muted)]">
-                              {p.date} · {p.method}
-                            </div>
-                            <div className="text-[10px] text-[var(--text-muted)] font-mono mt-1">
-                              {p.receiptNo}
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => viewReceipt(p)}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green text-white font-bold text-xs uppercase tracking-widest hover:bg-brand-green-dark transition-all shrink-0"
-                          >
-                            <Download size={14} /> View & Save
-                          </button>
-                        </div>
+                  <div className="grid gap-6 md:grid-cols-3">
+                    {[
+                      { label: "Total Billed", value: data.summary.totalBilled, accent: "text-brand-green" },
+                      { label: "Total Paid", value: data.summary.totalPaid, accent: "text-brand-green" },
+                      { label: "Outstanding", value: data.summary.totalOutstanding, accent: "text-brand-orange" },
+                    ].map((card) => (
+                      <div key={card.label} className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]">
+                        <div className="mb-2 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{card.label}</div>
+                        <div className={`font-display text-2xl ${card.accent}`}>â‚¦{card.value.toLocaleString()}</div>
                       </div>
                     ))}
                   </div>
-                )}
 
-                <div className="mt-6 p-4 rounded-xl bg-brand-orange/10 border border-brand-orange/30 text-xs text-brand-orange">
-                  💡 <strong>Tip:</strong> Click "View & Save" on any receipt to download as PDF or share directly to WhatsApp.
-                </div>
-              </div>
+                  <div className="grid gap-8 xl:grid-cols-[1.05fr_0.95fr]">
+                    <div className="space-y-6">
+                      <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] overflow-hidden shadow-[var(--card-shadow)]">
+                        <div className="bg-brand-navy p-8">
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <h2 className="font-display text-2xl text-white">Current Invoice</h2>
+                              <p className="mt-1 text-xs text-white/60">{selectedInvoice?.invoiceNumber || "No invoice selected"}</p>
+                            </div>
+                            {selectedInvoice ? (
+                              <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest ${selectedInvoice.status === "PAID" ? "bg-brand-green text-white" : selectedInvoice.status === "PARTIAL" ? "bg-brand-orange text-white" : "bg-red-500 text-white"}`}>
+                                {selectedInvoice.status}
+                              </span>
+                            ) : null}
+                          </div>
+                          {data.invoices.length > 1 ? (
+                            <select
+                              value={selectedInvoiceId}
+                              onChange={(event) => setSelectedInvoiceId(event.target.value)}
+                              className="mt-6 w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white outline-none"
+                            >
+                              {data.invoices.map((invoice) => (
+                                <option key={invoice.id} value={invoice.id} className="text-black">
+                                  {invoice.termLabel} Â· {invoice.invoiceNumber}
+                                </option>
+                              ))}
+                            </select>
+                          ) : null}
+                        </div>
+
+                        <div className="p-8">
+                          {selectedInvoice ? (
+                            <>
+                              <div className="mb-6 grid gap-3 text-sm text-[var(--text-secondary)] md:grid-cols-2">
+                                <div>
+                                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Title</div>
+                                  <div className="mt-1 font-semibold text-[var(--text-primary)]">{selectedInvoice.title}</div>
+                                </div>
+                                <div>
+                                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Term</div>
+                                  <div className="mt-1 font-semibold text-[var(--text-primary)]">{selectedInvoice.termLabel}</div>
+                                </div>
+                              </div>
+
+                              <table className="mb-6 w-full">
+                                <tbody>
+                                  {selectedInvoice.items.map((item) => (
+                                    <tr key={item.id} className="border-b border-[var(--border-subtle)]">
+                                      <td className="py-3 text-[var(--text-primary)]">{item.label}</td>
+                                      <td className="py-3 text-right font-bold text-brand-green">â‚¦{item.amount.toLocaleString()}</td>
+                                    </tr>
+                                  ))}
+                                  <tr className="bg-[var(--surface-disabled)]">
+                                    <td className="px-3 py-3 font-bold text-[var(--text-primary)]">Total Bill</td>
+                                    <td className="px-3 py-3 text-right font-display text-xl text-[var(--text-primary)]">â‚¦{selectedInvoice.totalAmount.toLocaleString()}</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+
+                              <div className={`flex flex-col justify-between gap-4 rounded-xl border p-6 md:flex-row md:items-center ${remaining > 0 ? "border-brand-orange/30 bg-brand-orange/10" : "border-brand-green/30 bg-brand-green/10"}`}>
+                                <div>
+                                  <div className="mb-1 text-xs uppercase tracking-widest text-[var(--text-muted)]">Outstanding Balance</div>
+                                  <div className={`font-display text-3xl ${remaining > 0 ? "text-brand-orange" : "text-brand-green"}`}>
+                                    {remaining > 0 ? `â‚¦${remaining.toLocaleString()}` : "Fully Paid âœ“"}
+                                  </div>
+                                  <div className="mt-1 text-xs text-[var(--text-muted)]">Paid so far: â‚¦{selectedInvoice.amountPaid.toLocaleString()}</div>
+                                </div>
+                                {remaining > 0 ? (
+                                  <button
+                                    onClick={() => setShowPaystack(true)}
+                                    disabled={processingPayment}
+                                    className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-4 text-sm font-bold uppercase tracking-widest text-white shadow-lg transition-all hover:bg-brand-green-dark disabled:opacity-50"
+                                  >
+                                    {processingPayment ? <LoaderCircle className="animate-spin" size={18} /> : <CreditCard size={18} />} Pay â‚¦{remaining.toLocaleString()} Now
+                                  </button>
+                                ) : null}
+                              </div>
+                            </>
+                          ) : (
+                            <p className="text-sm text-[var(--text-muted)]">No invoice available for the selected child yet.</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
+                      <div className="mb-6 flex items-center justify-between">
+                        <h3 className="font-display text-xl text-[var(--text-primary)]">Payment History & Receipts</h3>
+                        <span className="rounded-full bg-brand-green/10 px-3 py-1 text-xs font-bold text-brand-green">{paymentSummary.receipts} receipt{paymentSummary.receipts === 1 ? "" : "s"}</span>
+                      </div>
+
+                      {data.payments.length ? (
+                        <div className="space-y-3">
+                          {data.payments.map((payment) => (
+                            <button
+                              key={payment.id}
+                              onClick={() => {
+                                if (!selectedInvoice) return;
+                                setReceiptData({
+                                  receiptNo: payment.receiptNumber,
+                                  date: new Date(payment.paidAt).toLocaleDateString(),
+                                  studentName: data.selectedChild?.displayName || "Student",
+                                  studentClass: data.selectedChild?.className || "Class",
+                                  studentId: data.selectedChild?.studentId || "ID",
+                                  parentName: data.parent.displayName,
+                                  parentPhone: data.parent.phone || "",
+                                  parentEmail: data.parent.email || "",
+                                  feeItems: selectedInvoice.items.map((item) => ({ label: item.label, amount: item.amount })),
+                                  totalPaid: payment.amount,
+                                  paymentMethod: formatMethod(payment.method),
+                                  paymentReference: payment.reference,
+                                  term: selectedInvoice.termLabel,
+                                });
+                                setShowReceipt(true);
+                              }}
+                              className="w-full rounded-xl bg-[var(--surface-disabled)] p-5 text-left transition-colors hover:bg-[var(--surface-card-hover)]"
+                            >
+                              <div className="flex flex-col gap-4 md:flex-row md:items-center">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-green/10 text-brand-green shrink-0">
+                                  <ReceiptIcon size={22} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="mb-1 flex items-center gap-3">
+                                    <span className="text-lg font-bold text-[var(--text-primary)]">â‚¦{payment.amount.toLocaleString()}</span>
+                                    <span className="rounded-full bg-brand-green/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-brand-green">{payment.status}</span>
+                                  </div>
+                                  <div className="text-xs text-[var(--text-muted)]">{new Date(payment.paidAt).toLocaleDateString()} Â· {formatMethod(payment.method)}</div>
+                                  <div className="mt-1 font-mono text-[10px] text-[var(--text-muted)]">{payment.receiptNumber}</div>
+                                </div>
+                                <div className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white">
+                                  <Download size={14} /> View receipt
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="py-8 text-center text-[var(--text-muted)]">No payments recorded yet for the selected invoice.</p>
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : null}
             </div>
           </div>
         </section>
       </main>
       <Footer />
 
-      {/* Paystack Payment Modal */}
       <PaystackModal
         open={showPaystack}
         amount={remaining}
-        email={INVOICE.parentEmail}
+        email={data?.parent.email || "parent@example.com"}
         onClose={() => setShowPaystack(false)}
         onSuccess={handlePaymentSuccess}
       />
 
-      {/* Receipt Preview & Share Modal */}
-      <ReceiptModal
-        open={showReceipt}
-        data={receiptData}
-        onClose={() => setShowReceipt(false)}
-      />
+      <ReceiptModal open={showReceipt} data={receiptData} onClose={() => setShowReceipt(false)} />
     </>
   );
 }

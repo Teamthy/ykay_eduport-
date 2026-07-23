@@ -1,192 +1,218 @@
-﻿"use client";
+"use client";
 
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import {
-  CreditCard, TrendingUp, TrendingDown, DollarSign, Calendar,
-  Download, BarChart3, ArrowUpCircle, ArrowDownCircle, Wallet,
-  PiggyBank, Receipt
+  ArrowUpCircle,
+  BarChart3,
+  CreditCard,
+  Download,
+  LoaderCircle,
+  PiggyBank,
+  Wallet,
 } from "lucide-react";
 
-const FINANCE_CARDS = [
-  { period: "Today", income: 285000, expenses: 45000 },
-  { period: "This Week", income: 1250000, expenses: 320000 },
-  { period: "This Month", income: 4850000, expenses: 1200000 },
-  { period: "This Year", income: 28500000, expenses: 8400000 },
-];
-
-const RECENT_INCOME = [
-  { date: "Jul 21", category: "Tuition", amount: 125000, desc: "Emmanuel Adebayo — SS2 fees" },
-  { date: "Jul 20", category: "Tuition", amount: 85000, desc: "Adeola Ogunlade — JSS1 fees" },
-  { date: "Jul 19", category: "Application", amount: 5000, desc: "New application fee" },
-  { date: "Jul 18", category: "PTA", amount: 15000, desc: "PTA levy collection" },
-];
-
-const RECENT_EXPENSES = [
-  { date: "Jul 21", category: "Utilities", amount: 25000, desc: "Generator fuel" },
-  { date: "Jul 20", category: "Supplies", amount: 15000, desc: "Lab chemicals restock" },
-  { date: "Jul 18", category: "Maintenance", amount: 45000, desc: "Classroom repairs" },
-];
+type FinanceOverviewResponse = {
+  cards: Array<{
+    period: string;
+    income: number;
+    expenses: number;
+    net: number;
+  }>;
+  totals: {
+    totalIncome: number;
+    totalBilled: number;
+    totalOutstanding: number;
+    collectionRate: number;
+  };
+  recentIncome: Array<{
+    id: string;
+    date: string;
+    category: string;
+    amount: number;
+    desc: string;
+    receiptNumber: string;
+  }>;
+  classCollections: Array<{
+    className: string;
+    billed: number;
+    paid: number;
+    balance: number;
+    collectionRate: number;
+  }>;
+};
 
 export default function FinanceDashboardPage() {
+  const [data, setData] = useState<FinanceOverviewResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadFinance() {
+      setLoading(true);
+      setError("");
+      try {
+        const response = await fetch("/api/admin/finances/overview", { cache: "no-store" });
+        const body = (await response.json()) as FinanceOverviewResponse & { error?: string };
+        if (!response.ok) throw new Error(body.error || "Unable to load finance overview.");
+        if (!active) return;
+        setData(body);
+      } catch (financeError) {
+        if (!active) return;
+        setData(null);
+        setError(financeError instanceof Error ? financeError.message : "Unable to load finance overview.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    void loadFinance();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <>
       <Header />
-      <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        <section className="pt-24 pb-10 bg-brand-navy px-6">
-          <div className="mx-auto max-w-7xl flex items-center justify-between">
+      <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+        <section className="bg-brand-navy px-6 pb-10 pt-24">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-6">
             <div>
-              <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
+              <h1 className="font-display text-4xl tracking-widest text-white md:text-5xl">
                 FINANCE <span className="text-brand-green">DASHBOARD</span>
               </h1>
-              <p className="text-white/60 text-sm">Track income, expenses, and financial health.</p>
+              <p className="mt-2 text-sm text-white/60">Live income visibility, class collection performance, and fee cashflow summaries.</p>
             </div>
-            <button className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green text-white text-sm font-bold hover:bg-brand-green-dark transition-all shadow-lg">
+            <button className="hidden items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-brand-green-dark md:inline-flex">
               <Download size={14} /> Reports
             </button>
           </div>
         </section>
 
-        <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
+        <section className="px-6 py-10">
+          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
             <AdminSidebar />
 
             <div className="flex-1 min-w-0 space-y-6">
-              {/* Quick Actions */}
-              <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                <h3 className="text-brand-green font-bold mb-4">Quick Actions</h3>
-                <div className="flex flex-wrap gap-3">
-                  {[
-                    { label: "Record Income", icon: ArrowUpCircle, color: "bg-brand-green text-white" },
-                    { label: "Record Expense", icon: ArrowDownCircle, color: "bg-red-500 text-white" },
-                    { label: "Budgets", icon: Wallet, color: "bg-blue-500 text-white" },
-                    { label: "Savings", icon: PiggyBank, color: "bg-brand-orange text-white" },
-                  ].map(a => (
-                    <button key={a.label} className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full ${a.color} text-sm font-bold hover:opacity-90 transition-all shadow-lg`}>
-                      <a.icon size={14} /> {a.label}
-                    </button>
-                  ))}
+              {loading ? (
+                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
+                  <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading finance dashboard...
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
-              {/* Finance Cards Grid */}
-              {FINANCE_CARDS.map(fc => {
-                const net = fc.income - fc.expenses;
-                const isProfit = net >= 0;
-                return (
-                  <div key={fc.period}>
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">{fc.period}</h3>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] text-center">
-                        <div className="w-12 h-12 rounded-full bg-brand-green/10 flex items-center justify-center mx-auto mb-3">
-                          <ArrowUpCircle className="text-brand-green" size={22} />
-                        </div>
-                        <div className="text-xs text-[var(--text-muted)] mb-1">{fc.period}&apos;s Income</div>
-                        <div className="font-display text-xl text-[var(--text-primary)]">₦{fc.income.toLocaleString()}</div>
+              {!loading && error ? (
+                <div className="rounded-2xl border border-brand-orange/30 bg-brand-orange/10 p-6 shadow-[var(--card-shadow)] text-sm text-[var(--text-secondary)]">
+                  {error}
+                </div>
+              ) : null}
+
+              {!loading && data ? (
+                <>
+                  <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                    <h3 className="mb-4 font-bold text-brand-green">Quick Actions</h3>
+                    <div className="flex flex-wrap gap-3">
+                      {[
+                        { label: "Record Income", icon: ArrowUpCircle, color: "bg-brand-green text-white" },
+                        { label: "Invoice Registry", icon: CreditCard, color: "bg-brand-orange text-white" },
+                        { label: "Collections", icon: Wallet, color: "bg-blue-500 text-white" },
+                        { label: "Fee Savings", icon: PiggyBank, color: "bg-brand-green text-white" },
+                      ].map((action) => (
+                        <button key={action.label} className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold shadow-lg transition-all hover:opacity-90 ${action.color}`}>
+                          <action.icon size={14} /> {action.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                    {data.cards.map((card) => (
+                      <div key={card.period} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]">
+                        <div className="mb-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{card.period}</div>
+                        <div className="font-display text-3xl text-brand-green">â‚¦{card.income.toLocaleString()}</div>
+                        <div className="mt-1 text-xs text-[var(--text-muted)]">Net: â‚¦{card.net.toLocaleString()}</div>
                       </div>
-                      <div className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] text-center">
-                        <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-3">
-                          <ArrowDownCircle className="text-red-500" size={22} />
-                        </div>
-                        <div className="text-xs text-[var(--text-muted)] mb-1">{fc.period}&apos;s Expenses</div>
-                        <div className="font-display text-xl text-[var(--text-primary)]">₦{fc.expenses.toLocaleString()}</div>
+                    ))}
+                  </div>
+
+                  <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
+                    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                      <h3 className="font-display text-xl text-[var(--text-primary)]">Recent Income</h3>
+                      <div className="mt-5 space-y-3">
+                        {data.recentIncome.length ? (
+                          data.recentIncome.map((item) => (
+                            <div key={item.id} className="rounded-xl bg-[var(--surface-disabled)] p-4">
+                              <div className="flex items-center justify-between gap-3">
+                                <div>
+                                  <div className="font-semibold text-[var(--text-primary)]">{item.desc}</div>
+                                  <div className="text-xs text-[var(--text-muted)]">{new Date(item.date).toLocaleDateString()} Â· {item.category}</div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-display text-xl text-brand-green">â‚¦{item.amount.toLocaleString()}</div>
+                                  <div className="text-[10px] font-mono text-[var(--text-muted)]">{item.receiptNumber}</div>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-[var(--text-muted)]">No recent income entries found.</p>
+                        )}
                       </div>
-                      <div className={`p-5 rounded-2xl border-l-4 ${isProfit ? "border-brand-green" : "border-red-500"} bg-[var(--surface-card)] border-y border-r border-[var(--border-subtle)] shadow-[var(--card-shadow)] text-center`}>
-                        <div className={`w-12 h-12 rounded-full ${isProfit ? "bg-brand-green/10" : "bg-red-500/10"} flex items-center justify-center mx-auto mb-3`}>
-                          <TrendingUp className={isProfit ? "text-brand-green" : "text-red-500"} size={22} />
-                        </div>
-                        <div className="text-xs text-[var(--text-muted)] mb-1">{fc.period}&apos;s Net</div>
-                        <div className={`font-display text-xl ${isProfit ? "text-brand-green" : "text-red-500"}`}>
-                          {isProfit ? "+" : ""}₦{net.toLocaleString()}
-                        </div>
-                        <div className={`text-[10px] ${isProfit ? "text-brand-green" : "text-red-500"} uppercase font-bold`}>
-                          {isProfit ? "Profit" : "Loss"}
-                        </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                      <h3 className="font-display text-xl text-[var(--text-primary)]">Class Collection Performance</h3>
+                      <div className="mt-5 space-y-4">
+                        {data.classCollections.length ? (
+                          data.classCollections.map((item) => (
+                            <div key={item.className} className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-disabled)] p-4">
+                              <div className="flex items-center justify-between gap-3">
+                                <div>
+                                  <div className="font-semibold text-[var(--text-primary)]">{item.className}</div>
+                                  <div className="text-xs text-[var(--text-muted)]">Billed: â‚¦{item.billed.toLocaleString()} Â· Paid: â‚¦{item.paid.toLocaleString()}</div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="font-display text-xl text-brand-green">{item.collectionRate}%</div>
+                                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">collection</div>
+                                </div>
+                              </div>
+                              <div className="mt-4 h-3 overflow-hidden rounded-full bg-white">
+                                <div className="h-full rounded-full bg-gradient-to-r from-brand-green to-brand-green-light" style={{ width: `${item.collectionRate}%` }} />
+                              </div>
+                              <div className="mt-3 text-xs text-brand-orange">Outstanding: â‚¦{item.balance.toLocaleString()}</div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-[var(--text-muted)]">No class finance data found.</p>
+                        )}
                       </div>
                     </div>
                   </div>
-                );
-              })}
 
-              {/* Recent Income & Expenses */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-brand-green font-bold">Recent Income</h3>
-                    <button className="text-xs text-brand-green font-bold hover:underline">View All</button>
+                  <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                    <h3 className="mb-4 font-bold text-brand-green text-lg">Yearly Summary</h3>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                      {[
+                        { label: "Total Income", value: data.totals.totalIncome, accent: "text-brand-green" },
+                        { label: "Total Billed", value: data.totals.totalBilled, accent: "text-[var(--text-primary)]" },
+                        { label: "Outstanding", value: data.totals.totalOutstanding, accent: "text-brand-orange" },
+                        { label: "Collection Rate", value: `${data.totals.collectionRate}%`, accent: "text-brand-green", raw: true },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-xl bg-[var(--surface-disabled)] p-5 text-center">
+                          <div className="mb-1 text-xs text-[var(--text-muted)]">{item.label}</div>
+                          <div className={`font-display text-2xl ${item.accent}`}>{item.raw ? item.value : `â‚¦${Number(item.value).toLocaleString()}`}</div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead><tr className="border-b border-[var(--border-subtle)]">
-                        <th className="text-left py-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Date</th>
-                        <th className="text-left py-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Category</th>
-                        <th className="text-right py-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Amount</th>
-                      </tr></thead>
-                      <tbody>
-                        {RECENT_INCOME.length > 0 ? RECENT_INCOME.map((r, i) => (
-                          <tr key={i} className="border-b border-[var(--border-subtle)] last:border-0">
-                            <td className="py-2 text-xs text-[var(--text-muted)]">{r.date}</td>
-                            <td className="py-2 text-xs text-[var(--text-primary)]">{r.category}</td>
-                            <td className="py-2 text-xs text-brand-green font-bold text-right">₦{r.amount.toLocaleString()}</td>
-                          </tr>
-                        )) : (
-                          <tr><td colSpan={3} className="py-6 text-center text-sm text-[var(--text-muted)]">No recent income</td></tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-red-500 font-bold">Recent Expenses</h3>
-                    <button className="text-xs text-red-500 font-bold hover:underline">View All</button>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead><tr className="border-b border-[var(--border-subtle)]">
-                        <th className="text-left py-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Date</th>
-                        <th className="text-left py-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Category</th>
-                        <th className="text-right py-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Amount</th>
-                      </tr></thead>
-                      <tbody>
-                        {RECENT_EXPENSES.length > 0 ? RECENT_EXPENSES.map((r, i) => (
-                          <tr key={i} className="border-b border-[var(--border-subtle)] last:border-0">
-                            <td className="py-2 text-xs text-[var(--text-muted)]">{r.date}</td>
-                            <td className="py-2 text-xs text-[var(--text-primary)]">{r.category}</td>
-                            <td className="py-2 text-xs text-red-500 font-bold text-right">₦{r.amount.toLocaleString()}</td>
-                          </tr>
-                        )) : (
-                          <tr><td colSpan={3} className="py-6 text-center text-sm text-[var(--text-muted)]">No recent expenses</td></tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              {/* Yearly Summary */}
-              <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                <h3 className="text-brand-green font-bold text-lg mb-4">Yearly Summary</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="p-5 rounded-xl bg-[var(--surface-disabled)] text-center">
-                    <div className="text-xs text-[var(--text-muted)] mb-1">Total Income</div>
-                    <div className="font-display text-2xl text-brand-green">₦28.5M</div>
-                    <div className="text-[10px] text-brand-green mt-1">+12% from last year</div>
-                  </div>
-                  <div className="p-5 rounded-xl bg-[var(--surface-disabled)] text-center">
-                    <div className="text-xs text-[var(--text-muted)] mb-1">Total Expenses</div>
-                    <div className="font-display text-2xl text-red-500">₦8.4M</div>
-                    <div className="text-[10px] text-red-500 mt-1">+8% from last year</div>
-                  </div>
-                  <div className="p-5 rounded-xl bg-[var(--surface-disabled)] text-center">
-                    <div className="text-xs text-[var(--text-muted)] mb-1">Net Balance</div>
-                    <div className="font-display text-2xl text-brand-green">₦20.1M</div>
-                    <div className="text-[10px] text-brand-green mt-1">Profit</div>
-                  </div>
-                </div>
-              </div>
+                </>
+              ) : null}
             </div>
           </div>
         </section>
