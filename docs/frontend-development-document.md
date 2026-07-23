@@ -59,30 +59,29 @@ The frontend should also support a future-ready CBT experience that allows users
 
 ---
 
-## 3. Current Frontend Status
+## 3. Current Frontend Status (Updated 2026-07-23)
 
 ### Implemented and Visible
-The frontend already has a solid foundation, including:
+The frontend now has a much stronger foundation, including:
 - a branded header and footer,
 - a modern layout system,
-- public marketing pages,
-- portal-style dashboard shells,
-- reusable UI components,
+- public marketing pages for admissions, academics, campus life, alumni, and contact,
+- portal-style dashboard shells for admin, teacher, student, parent, and IT portal users,
+- reusable UI components for auth, portals, payments, and notifications,
 - and a visual theme aligned to the school brand.
 
 ### Partially Implemented
-- admissions flow UI,
-- portal entry experience,
-- role-based page structure,
-- IT education section framing,
-- and early content organization.
+- the admissions flow UI is now connected to real backend APIs for draft creation, document upload, payment start, submission, and status lookup,
+- the login experience is connected to backend authentication and role-based routing,
+- the IT education experience is visually complete and has content-driven course pages,
+- the admin and teacher dashboards are connected to live backend data endpoints.
 
 ### Still Missing or Incomplete
-- fully connected authentication,
-- real user data and permissions,
-- complete role-based navigation,
-- dynamic portal data,
-- fully integrated IT education and CBT flows.
+- several portal screens still rely on shared mock/demo data for some modules,
+- the full student/parent/teacher operational experience is not yet fully wired through production-grade data flows,
+- role-based navigation needs further refinement for all modules and edge cases,
+- the CBT experience is present in structure but still needs fuller content, results workflows, and polished student journeys,
+- some public and portal flows still need stronger loading, empty-state, error-state, and accessibility treatment.
 
 ---
 

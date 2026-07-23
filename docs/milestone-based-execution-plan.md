@@ -6,125 +6,82 @@ This document breaks the implementation roadmap into practical milestones so the
 
 ---
 
-## 2. Milestone Structure
+## 2. Milestone Structure (Updated 2026-07-23)
 
 ## Milestone 1 — Foundation and Product Alignment
 
-### Target
-Finalize the core product direction and ensure the current frontend is aligned with the intended school platform.
+### Status
+- Mostly complete for the public-facing product experience.
+- The site now has a strong visual foundation, public pages, portal shells, and supporting docs.
 
-### Deliverables
-- Finalized public pages and navigation
-- Consistent branding and layout structure
-- Clear page hierarchy for public and portal users
-- Ready-to-use documentation for product flow and implementation status
-
-### Exit Criteria
-- The site feels complete and coherent to a first-time visitor.
-- The main routes are stable and usable.
+### Remaining work
+- Tighten the content architecture and ensure every page reflects the current product direction.
 
 ---
 
 ## Milestone 2 — Secure Authentication Layer
 
-### Target
-Replace the current demo login experience with a real authentication system.
+### Status
+- Implemented at a functional level.
+- Login, session cookies, middleware-based route protection, logout, and password reset APIs are present.
 
-### Deliverables
-- Secure login for all user roles
-- Session handling and logout flow
-- Role-based route protection
-- Password reset flow foundation
-
-### Exit Criteria
-- Users can authenticate and access the correct portal safely.
-- Unauthorized access is blocked.
+### Remaining work
+- Add stronger account lifecycle controls, first-login password change enforcement, invitation-driven onboarding, and tighter permission audits.
 
 ---
 
 ## Milestone 3 — Admissions System MVP
 
-### Target
-Make admissions fully functional for the first launch-ready use case.
+### Status
+- Substantially implemented.
+- The project now has a database-backed admissions workflow with draft sessions, document upload support, Paystack payment handling, status lookup, and submission audit logs.
 
-### Deliverables
-- Real admission form submission
-- Application persistence in the database
-- Application status lookup
-- Admin review actions
-- Notification support for parents
-
-### Exit Criteria
-- A parent can submit an application and receive a tracked response.
-- An admin can review and update the application lifecycle.
+### Remaining work
+- Complete the full admissions operations workflow for review, approval, waitlist, document requests, and student record handoff.
 
 ---
 
 ## Milestone 4 — Student and Parent Records
 
-### Target
-Create the data layer and workflows for student and parent management.
+### Status
+- Partially implemented.
+- Student, parent, and teacher dashboards and related APIs exist, but some record management and enrollment handoff flows are still incomplete.
 
-### Deliverables
-- Student enrollment and profile management
-- Parent linkage to students
-- Student dashboard content sourced from real data
-- Parent dashboard content sourced from real data
-
-### Exit Criteria
-- Students and parents can access their own records through the portal.
-- Records are stored and retrieved from the backend.
+### Remaining work
+- Build the full student and parent lifecycle, including enrollment onboarding, account linking, record maintenance, and richer portal data.
 
 ---
 
 ## Milestone 5 — Core School Operations
 
-### Target
-Deliver operational features that make the portal useful for school administration.
+### Status
+- Partially implemented.
+- Attendance, finance, report-card, gradebook, and school admin APIs exist, but the end-to-end production workflow is still being completed.
 
-### Deliverables
-- Attendance recording
-- Class and subject management
-- Fee invoice generation
-- Payment tracking
-- Basic reporting
-
-### Exit Criteria
-- Admins can manage day-to-day academic and financial operations with the platform.
+### Remaining work
+- Finalize class management, attendance operations, fee invoicing/payment reconciliation, and reporting workflows.
 
 ---
 
 ## Milestone 6 — Teacher and Academic Workflow Support
 
-### Target
-Support the teacher-facing workflows needed for school delivery.
+### Status
+- Partially implemented.
+- Teacher dashboards, class attendance, exams, gradebooks, and question-bank areas are present.
 
-### Deliverables
-- Teacher dashboard with real class information
-- Gradebook or assessment entry support
-- Attendance tools and class actions
-- Communication tools for announcements and messages
-
-### Exit Criteria
-- Teachers can complete at least one complete workflow through the system.
+### Remaining work
+- Complete teacher assignment workflow, classroom communications, exam moderation, and result-release operations.
 
 ---
 
 ## Milestone 7 — Production Hardening
 
-### Target
-Prepare the platform for real-world use and deployment.
+### Status
+- Not yet complete.
+- The codebase now has a strong foundation, but deployment hardening, monitoring, retention policies, and disaster recovery still need formal implementation.
 
-### Deliverables
-- Validation and error handling
-- Audit logging
-- Performance tuning
-- Accessibility improvements
-- Deployment and environment setup
-- Monitoring and reliability checks
-
-### Exit Criteria
-- The system is stable, secure, and usable in a production environment.
+### Remaining work
+- Add monitoring, backups, restore procedures, audit retention, performance checks, and production environment validation.
 
 ---
 

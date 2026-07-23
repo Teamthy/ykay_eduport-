@@ -7,6 +7,7 @@ import { LockKeyhole, ShieldCheck, AlertCircle, GraduationCap, User, Users } fro
 import { useAuth } from "@/components/AuthProvider";
 
 const destinations: Record<string, string> = {
+  SUPER_ADMIN: "/super-admin",
   ADMIN: "/admin",
   DIRECTOR: "/admin",
   COORDINATOR: "/admin-admissions",

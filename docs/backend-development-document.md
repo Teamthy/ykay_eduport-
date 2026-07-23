@@ -59,25 +59,31 @@ The current backend has a strong architectural foundation, but it is still not y
 
 ---
 
-## 4. Current State Assessment
+## 4. Current State Assessment (Updated 2026-07-23)
 
-### Implemented
-- Prisma schema covering core school entities
-- Route-based API structure under the app API layer
-- Basic admissions and login route handling
-- Initial structure aligned to a role-based school platform
+### Implemented Now
+- A full Next.js App Router project with many route-based API handlers under the app API layer.
+- A Prisma-backed data model for school, users, admissions, attendance, fees, report cards, IT enrollments, gradebooks, exams, notifications, and audit logs.
+- A real authentication flow with password hashing, HTTP-only session cookies, role-aware middleware, and login/logout/me/password-reset endpoints.
+- An admissions workflow with draft sessions, signed document upload support, Paystack-backed payment start/submit/webhook handling, status lookup, and audit logging.
+- Admin, teacher, student, parent, and IT portal dashboards and sidebar-based navigation shells.
+- IT education content pages and backend support for course surfacing and enrollment progress.
+- Teacher and student exam-related APIs for CBT-style exam creation, attempts, results, and gradebook workflows.
 
 ### Partially Implemented
-- Admissions flow logic
-- Authentication flow behavior
-- Lightweight data persistence for demo use
+- Admin review and approval workflows for admissions are present at the route level, but the full business process still needs operational hardening and UI polish.
+- Role-based routing is enforced in middleware, but some portal areas still rely on UI shells or seed/mock data for a complete experience.
+- Notifications and audit trails exist in the backend structure, but delivery automation, retry handling, and preference management are not yet fully production-grade.
+- The IT education experience is visually strong and data-backed at the content/API layer, but certification tracking and portal integration remain incomplete.
 
 ### Missing or Not Yet Production-Ready
-- Real database-backed persistence for core workflows
-- Secure authentication and session management
-- Role-based authorization enforcement
-- Service-layer architecture for business logic
-- End-to-end workflows for admissions, fees, portals, IT education, and CBT
+- A first-time school setup wizard for school profile, session, term, grading scale, and CA configuration.
+- Full end-to-end enrollment and staff onboarding workflows for student/parent account creation and role assignment.
+- A complete admission review workflow with document review, approval/decline/waitlist actions, and handoff to student records.
+- Production-grade fee and payment operations beyond the current API scaffolding, including receipt reconciliation, invoice lifecycle management, and strong reporting.
+- Full archival and retention policy automation for historical student records and financial documents.
+- Deployment hardening, monitoring, and disaster-recovery procedures, including backup/restore and environment validation.
+- A fully mature CBT experience with complete proctoring, question moderation, and report delivery beyond the current draft/published structures.
 
 ---
 
