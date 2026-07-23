@@ -61,27 +61,27 @@ The frontend should also support a future-ready CBT experience that allows users
 
 ## 3. Current Frontend Status (Updated 2026-07-23)
 
-### Implemented and Visible
-The frontend now has a much stronger foundation, including:
-- a branded header and footer,
-- a modern layout system,
-- public marketing pages for admissions, academics, campus life, alumni, and contact,
-- portal-style dashboard shells for admin, teacher, student, parent, and IT portal users,
-- reusable UI components for auth, portals, payments, and notifications,
-- and a visual theme aligned to the school brand.
+### Implemented and visible in the repository
+- A branded public experience with a header, footer, hero sections, and reusable layout components.
+- Public pages for admissions, academics, campus life, alumni, contact, news, testimonials, privacy policy, and IT education.
+- Portal-style dashboard shells for admin, teacher, student, parent, super-admin, and IT portal users.
+- A working admissions workflow UI for multi-step application entry, document upload, payment, and status checks.
+- A role-aware login experience and middleware-driven route handling for protected portal areas.
+- An IT education hub with course cards, certification-focused content, and a student-facing interest experience.
+- Reusable UI components for payments, notifications, receipts, modals, sidebars, and portal navigation.
 
-### Partially Implemented
-- the admissions flow UI is now connected to real backend APIs for draft creation, document upload, payment start, submission, and status lookup,
-- the login experience is connected to backend authentication and role-based routing,
-- the IT education experience is visually complete and has content-driven course pages,
-- the admin and teacher dashboards are connected to live backend data endpoints.
+### Partially implemented
+- The admissions experience is connected to real backend APIs, but some operational review and handoff screens still need completion.
+- The login and portal shell experience is live, but several modules still depend on partial data or shell-based placeholders rather than full production data flows.
+- Admin and teacher dashboards are present and connected to endpoints, but some cards and modules still need stronger real-data wiring and empty/error state handling.
+- The CBT experience exists structurally, but the student journey, result workflows, and analytics presentation are still not fully polished.
 
-### Still Missing or Incomplete
-- several portal screens still rely on shared mock/demo data for some modules,
-- the full student/parent/teacher operational experience is not yet fully wired through production-grade data flows,
-- role-based navigation needs further refinement for all modules and edge cases,
-- the CBT experience is present in structure but still needs fuller content, results workflows, and polished student journeys,
-- some public and portal flows still need stronger loading, empty-state, error-state, and accessibility treatment.
+### Still missing or incomplete
+- A complete first-time school setup wizard UI for school profile, session/term, grading scale, and CA configuration.
+- Fully data-backed student, parent, and staff onboarding experiences.
+- Mature role-based navigation and portal-specific workflows for all edge cases.
+- Stronger loading, empty-state, error-state, accessibility, and responsive behavior across portal modules.
+- A fully complete IT certification and CBT experience that feels end-to-end rather than promotional or scaffolded.
 
 ---
 

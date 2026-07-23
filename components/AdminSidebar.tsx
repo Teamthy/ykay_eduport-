@@ -15,6 +15,7 @@ const ADMIN_NAV = [
   { label: "Admissions Queue", href: "/admin-admissions", icon: ClipboardCheck },
   { label: "Student Records", href: "/admin/students", icon: Users },
   { label: "Staff Accounts", href: "/admin/staff", icon: UserPlus },
+  { label: "Staff QR Attendance", href: "/admin/staff-attendance", icon: ClipboardCheck },
   { label: "Class Manager", href: "/admin/class-manager", icon: School },
   { label: "Staff Assignments", href: "/admin/staff-assignments", icon: BookOpen },
   { label: "Fee Management", href: "/admin/fees", icon: CreditCard },

@@ -87,6 +87,7 @@ export default function TeacherSidebar() {
     { label: "Dashboard", href: "/teacher/dashboard", icon: LayoutDashboard },
     { label: "My Students", href: "/teacher/students", icon: Users },
     { label: "My Profile", href: "/teacher/profile", icon: Award },
+    { label: "My attendance", href: "/staff/attendance", icon: UserCheck },
   ];
 
   const subject: NavItem[] = [
