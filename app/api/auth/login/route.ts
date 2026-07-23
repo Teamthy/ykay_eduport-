@@ -1,73 +1,11 @@
-﻿import { NextResponse } from "next/server";
-import { readFileSync, existsSync } from "fs";
-import { join } from "path";
+import bcrypt from "bcryptjs";
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { getClientIp } from "@/lib/requests";
+import { sessionCookie, signSession } from "@/lib/session";
 
-const DATA_FILE = join(process.cwd(), ".data", "users.json");
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  role: "admin" | "teacher" | "student" | "parent";
-}
-
-interface UsersData {
-  users: User[];
-}
-
-function loadUsers(): UsersData {
-  if (!existsSync(DATA_FILE)) return { users: [] };
-  try {
-    return JSON.parse(readFileSync(DATA_FILE, "utf8")) as UsersData;
-  } catch {
-    return { users: [] };
-  }
-}
-
-export async function POST(request: Request) {
-  try {
-    const { email, password } = await request.json();
-
-    if (!email || !password) {
-      return NextResponse.json(
-        { success: false, message: "Invalid email or password" },
-        { status: 401 }
-      );
-    }
-
-    const data = loadUsers();
-    const user = data.users.find(
-      (u) => u.email === email && u.password === password
-    );
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "Invalid email or password" },
-        { status: 401 }
-      );
-    }
-
-    // Generate mock JWT token (replace with real signing in production)
-    const token = `jwt_${user.id}_${Date.now()}`;
-
-    return NextResponse.json(
-      {
-        success: true,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
-        token,
-      },
-      { status: 200 }
-    );
-  } catch {
-    return NextResponse.json(
-      { success: false, message: "Login failed" },
-      { status: 500 }
-    );
-  }
+const schema=z.object({email:z.string().trim().toLowerCase().email(),password:z.string().min(1)});
+export async function POST(request:NextRequest){
+ try { const {email,password}=schema.parse(await request.json()); const user=await prisma.user.findUnique({where:{email}}); const valid=!!user && user.isActive && !user.isSuspended && await bcrypt.compare(password,user.passwordHash); if(!valid) return NextResponse.json({error:"Invalid email or password."},{status:401}); const token=await signSession({id:user.id,schoolId:user.schoolId,role:user.role,name:user.name,email:user.email}); await prisma.user.update({where:{id:user.id},data:{lastLoginAt:new Date()}}); await prisma.auditLog.create({data:{schoolId:user.schoolId,actorUserId:user.id,action:"USER_SIGNED_IN",entityType:"User",entityId:user.id,ipAddress:getClientIp(request)}}); const response=NextResponse.json({user:{name:user.name,email:user.email,role:user.role}}); const cookie=sessionCookie(token); response.cookies.set(cookie.name,cookie.value,cookie.options); return response; } catch { return NextResponse.json({error:"Invalid email or password."},{status:401}); }
 }
