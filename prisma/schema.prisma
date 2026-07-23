@@ -77,6 +77,32 @@ enum AttendanceCorrectionStatus {
   REJECTED
 }
 
+enum FeeInvoiceStatus {
+  UNPAID
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum FeePaymentMethod {
+  PAYSTACK
+  BANK_TRANSFER
+  CASH
+  CARD
+  USSD
+}
+
+enum FeePaymentStatus {
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum ReportCardStatus {
+  DRAFT
+  RELEASED
+}
+
 model School {
   id                     String                      @id @default(cuid())
   slug                   String                      @unique
@@ -99,6 +125,9 @@ model School {
   attendanceSessions      AttendanceSession[]
   attendanceAlertJobs     AttendanceAlertJob[]
   correctionRequests      AttendanceCorrectionRequest[]
+  feeInvoices             FeeInvoice[]
+  feePayments             FeePayment[]
+  reportCards             ReportCard[]
 }
 
 model User {
@@ -163,6 +192,9 @@ model ParentProfile {
   user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   studentLinks    ParentStudentLink[]
   attendanceJobs  AttendanceAlertJob[]
+  feeInvoices     FeeInvoice[]
+  feePayments     FeePayment[]
+  reportCards     ReportCard[]
 
   @@index([schoolId, displayName])
 }
@@ -211,6 +243,9 @@ model StudentProfile {
   attendanceEntries AttendanceEntry[]
   parentLinks      ParentStudentLink[]
   attendanceJobs   AttendanceAlertJob[]
+  feeInvoices      FeeInvoice[]
+  feePayments      FeePayment[]
+  reportCards      ReportCard[]
 
   @@unique([schoolId, studentId])
   @@index([currentClassId, isActive])
@@ -344,6 +379,128 @@ model AttendanceCorrectionRequest {
 
   @@index([schoolId, status, createdAt])
   @@index([attendanceSessionId, status])
+}
+
+model FeeInvoice {
+  id              String           @id @default(cuid())
+  schoolId        String
+  studentProfileId String
+  parentProfileId String?
+  invoiceNumber   String           @unique
+  title           String
+  termLabel       String
+  status          FeeInvoiceStatus @default(UNPAID)
+  totalAmount     Int
+  amountPaid      Int              @default(0)
+  balanceDue      Int
+  dueDate         DateTime?
+  issuedAt        DateTime         @default(now())
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  school          School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentProfile  StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  parentProfile   ParentProfile?   @relation(fields: [parentProfileId], references: [id], onDelete: SetNull)
+  items           FeeInvoiceItem[]
+  payments        FeePayment[]
+
+  @@index([schoolId, status, dueDate])
+  @@index([studentProfileId, issuedAt])
+  @@index([parentProfileId, issuedAt])
+}
+
+model FeeInvoiceItem {
+  id         String     @id @default(cuid())
+  invoiceId  String
+  label      String
+  amount     Int
+  mandatory  Boolean    @default(true)
+  sortOrder  Int        @default(0)
+  createdAt  DateTime   @default(now())
+
+  invoice    FeeInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId, sortOrder])
+}
+
+model FeePayment {
+  id              String            @id @default(cuid())
+  schoolId        String
+  invoiceId       String
+  studentProfileId String
+  parentProfileId String?
+  amount          Int
+  method          FeePaymentMethod
+  status          FeePaymentStatus  @default(COMPLETED)
+  reference       String            @unique
+  receiptNumber   String            @unique
+  providerData    Json?
+  paidAt          DateTime          @default(now())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  school          School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  invoice         FeeInvoice        @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  studentProfile  StudentProfile    @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  parentProfile   ParentProfile?    @relation(fields: [parentProfileId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, paidAt])
+  @@index([invoiceId, paidAt])
+  @@index([parentProfileId, paidAt])
+}
+
+model ReportCard {
+  id                 String           @id @default(cuid())
+  schoolId           String
+  studentProfileId   String
+  parentProfileId    String?
+  reportNumber       String           @unique
+  sessionLabel       String
+  termLabel          String
+  classNameSnapshot  String
+  status             ReportCardStatus @default(DRAFT)
+  overallTotal       Int
+  overallAverage     Int
+  overallGrade       String
+  classPosition      String?
+  attendancePresent  Int
+  attendanceTotal    Int
+  classTeacherRemark String
+  directorRemark     String
+  nextResumption     String
+  feeBalance         Int              @default(0)
+  generatedAt        DateTime         @default(now())
+  releasedAt         DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  school             School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentProfile     StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  parentProfile      ParentProfile?   @relation(fields: [parentProfileId], references: [id], onDelete: SetNull)
+  subjects           ReportCardSubject[]
+
+  @@index([schoolId, status, generatedAt])
+  @@index([studentProfileId, generatedAt])
+  @@index([parentProfileId, generatedAt])
+}
+
+model ReportCardSubject {
+  id           String     @id @default(cuid())
+  reportCardId String
+  subject      String
+  ca1          Int
+  ca2          Int
+  midterm      Int
+  assignment   Int
+  exam         Int
+  total        Int
+  grade        String
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+
+  reportCard   ReportCard  @relation(fields: [reportCardId], references: [id], onDelete: Cascade)
+
+  @@index([reportCardId, sortOrder])
 }
 
 model AdmissionApplication {

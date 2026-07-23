@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -26,7 +26,8 @@ const ADMIN_NAV = [
   { label: "View Questions", href: "/admin/questions", icon: HelpCircle },
   { label: "Mark Presence", href: "/admin/mark-presence", icon: UserCheck },
   { label: "Generate ID Cards", href: "/admin/id-cards", icon: IdCard },
-  { label: "View Admin Attendance", href: "/admin/admin-attendance", icon: ClipboardCheck },
+  { label: "Attendance Analytics", href: "/admin/attendance-analytics", icon: BarChart3, badge: "Live" },
+  { label: "Attendance Corrections", href: "/admin/attendance-corrections", icon: ClipboardCheck, badge: "Live" },
   { label: "Academic Overview", href: "/admin/academic-overview", icon: BarChart3 },
   { label: "View Student Attendance", href: "/admin/student-attendance", icon: Users },
   { label: "View Student Information", href: "/admin/students", icon: BookOpen },

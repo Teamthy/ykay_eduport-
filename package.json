@@ -12,7 +12,10 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:migrate:dev": "prisma migrate dev",
     "prebuild": "prisma generate",
-    "db:seed-admin": "tsx prisma/seed.ts"
+    "db:seed-admin": "tsx prisma/seed.ts",
+    "db:bootstrap-attendance": "tsx prisma/seed-attendance.ts",
+    "db:bootstrap-finance": "tsx prisma/seed-finance.ts",
+    "db:bootstrap-report-cards": "tsx prisma/seed-report-cards.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",
