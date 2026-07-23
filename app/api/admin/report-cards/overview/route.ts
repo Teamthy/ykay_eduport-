@@ -1,9 +1,10 @@
-import { ReportCardStatus, UserRole } from "@prisma/client";
+import { AlertChannel, NotificationKind, ReportCardStatus, UserRole } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
 import { requireRole } from "@/lib/session";
+import { createInAppNotification, queueNotificationJob } from "@/lib/notifications";
 
 const allowedRoles = [UserRole.ADMIN, UserRole.DIRECTOR, UserRole.COORDINATOR];
 const updateSchema = z.object({
@@ -99,6 +100,60 @@ export async function PATCH(request: NextRequest) {
 
       return report;
     });
+
+    if (payload.status === ReportCardStatus.RELEASED) {
+      const student = await prisma.studentProfile.findUnique({
+        where: { id: updated.studentProfileId },
+        select: {
+          userId: true,
+          displayName: true,
+          guardianName: true,
+          guardianEmail: true,
+          parentLinks: {
+            where: { isPrimary: true },
+            take: 1,
+            select: { parentProfile: { select: { userId: true, displayName: true } } },
+          },
+        },
+      });
+
+      const message = `The ${updated.termLabel} (${updated.sessionLabel}) report card for ${student?.displayName || "your child"} has been released. Overall: ${updated.overallAverage}% (${updated.overallGrade}). Sign in to the EduPortal to view and download it.`;
+
+      if (student?.guardianEmail) {
+        await queueNotificationJob({
+          schoolId: user.schoolId,
+          kind: NotificationKind.REPORT_RELEASED,
+          channel: AlertChannel.EMAIL,
+          subject: "Report card released — Ykay College",
+          body: message,
+          recipientName: student.guardianName,
+          recipientEmail: student.guardianEmail,
+          dedupeKey: `report:${updated.id}:email`,
+          metadata: { reportCardId: updated.id, reportNumber: updated.reportNumber },
+        });
+      }
+      const parentUserId = student?.parentLinks[0]?.parentProfile?.userId;
+      if (parentUserId) {
+        await createInAppNotification({
+          schoolId: user.schoolId,
+          userId: parentUserId,
+          kind: NotificationKind.REPORT_RELEASED,
+          title: "Report Card Released",
+          body: message,
+          link: "/parent/report-cards",
+        });
+      }
+      if (student?.userId) {
+        await createInAppNotification({
+          schoolId: user.schoolId,
+          userId: student.userId,
+          kind: NotificationKind.REPORT_RELEASED,
+          title: "Your Report Card Is Ready",
+          body: `Your ${updated.termLabel} report card has been released. Overall: ${updated.overallAverage}% (${updated.overallGrade}).`,
+          link: "/student/report-cards",
+        });
+      }
+    }
 
     return NextResponse.json({
       report: {

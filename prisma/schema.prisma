@@ -109,6 +109,15 @@ enum ItEnrollmentStatus {
   COMPLETED
 }
 
+enum NotificationKind {
+  ATTENDANCE_ALERT
+  FEE_REMINDER
+  REPORT_RELEASED
+  BROADCAST
+  ADMISSION_UPDATE
+  SYSTEM
+}
+
 model School {
   id                     String                      @id @default(cuid())
   slug                   String                      @unique
@@ -135,6 +144,8 @@ model School {
   feePayments             FeePayment[]
   reportCards             ReportCard[]
   itEnrollments           ItEnrollment[]
+  notificationJobs        NotificationJob[]
+  userNotifications       UserNotification[]
 }
 
 model User {
@@ -160,6 +171,7 @@ model User {
   requestedCorrectionRequests AttendanceCorrectionRequest[] @relation("CorrectionRequester")
   reviewedCorrectionRequests  AttendanceCorrectionRequest[] @relation("CorrectionReviewer")
   itEnrollments               ItEnrollment[]
+  userNotifications           UserNotification[]
 
   @@index([schoolId, role])
 }
@@ -587,6 +599,53 @@ model ItCertificate {
   issuedAt          DateTime     @default(now())
 
   enrollment        ItEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+}
+
+model NotificationJob {
+  id             String              @id @default(cuid())
+  schoolId       String
+  kind           NotificationKind
+  channel        AlertChannel
+  status         AlertDeliveryStatus @default(PENDING)
+  recipientName  String?
+  recipientEmail String?
+  recipientPhone String?
+  subject        String
+  body           String
+  dedupeKey      String?             @unique
+  attempts       Int                 @default(0)
+  maxAttempts    Int                 @default(3)
+  nextAttemptAt  DateTime            @default(now())
+  lastError      String?
+  sentAt         DateTime?
+  metadata       Json?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  school         School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, status, nextAttemptAt])
+  @@index([schoolId, kind, createdAt])
+  @@index([schoolId, channel, status])
+}
+
+model UserNotification {
+  id        String           @id @default(cuid())
+  schoolId  String
+  userId    String
+  kind      NotificationKind
+  title     String
+  body      String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  school    School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@index([schoolId, kind, createdAt])
 }
 
 model AdmissionApplication {
