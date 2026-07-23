@@ -8,6 +8,7 @@ datasource db {
 }
 
 enum UserRole {
+  SUPER_ADMIN
   ADMIN
   DIRECTOR
   BURSAR
@@ -173,6 +174,7 @@ model School {
   userNotifications       UserNotification[]
   gradebooks              SubjectGradebook[]
   exams                   Exam[]
+  newsPosts               NewsPost[]
 }
 
 model User {
@@ -199,6 +201,7 @@ model User {
   reviewedCorrectionRequests  AttendanceCorrectionRequest[] @relation("CorrectionReviewer")
   itEnrollments               ItEnrollment[]
   userNotifications           UserNotification[]
+  newsPosts                   NewsPost[]
 
   @@index([schoolId, role])
 }
@@ -829,6 +832,26 @@ model ExamRetake {
   studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
 
   @@unique([examId, studentProfileId])
+}
+
+model NewsPost {
+  id           String    @id @default(cuid())
+  schoolId     String
+  authorUserId String?
+  title        String
+  slug         String    @unique
+  category     String    @default("News")
+  excerpt      String
+  content      String
+  isPublished  Boolean   @default(false)
+  publishedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  school       School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  author       User?     @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, isPublished, publishedAt])
 }
 
 model AdmissionApplication {

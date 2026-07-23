@@ -1,8 +1,24 @@
 Ykay College EduPortal — Full User Flow Documentation
 
+Current implementation snapshot (Updated 2026-07-23)
 
+The project has moved beyond a brochure-only website and now includes a working Next.js application with Prisma-backed APIs, role-aware authentication, admissions workflows, teacher/student/parent dashboards, and an IT education experience. The current implementation is strong in structure and visible functionality, but several flows are still only partially complete or not yet production-ready.
 
- HOW TO READ THIS DOCUMENT
+What is implemented now:
+- Public website pages and portal shells for admin, teacher, student, parent, and IT users
+- Authentication and role-based route protection
+- Admissions draft submission, document upload, payment start, payment verification, and status lookup
+- Admin and teacher APIs for attendance, gradebooks, exams, and school operations
+- IT education landing pages and portal-facing course enrollment scaffolding
+
+What is still missing or incomplete:
+- Full school setup wizard and school configuration onboarding
+- Full admissions approval/review operations and student/parent account handoff
+- Complete teacher, student, and parent record management beyond dashboard shells
+- Production-grade finance, notification, archival, and disaster-recovery flows
+- A fully polished CBT experience with complete exam moderation and analytics
+
+HOW TO READ THIS DOCUMENT
 
 This document has been optimized around the current implementation reality of the project. Some journeys are already visible in the frontend, some are partially implemented, and others remain planned for the next phase of development.
 

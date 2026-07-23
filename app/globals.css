@@ -958,6 +958,44 @@ svg {
 }
 
 /* ============================================================
+   BUTTON VISIBILITY HARDENING
+   Ensures button/link text is always visible; removes hover
+   colour inversions that made labels disappear on some themes.
+   ============================================================ */
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Outline buttons: keep text colour on hover (no inversion) */
+.btn-outline:hover {
+  background-color: transparent;
+  color: var(--btn-outline-text);
+  border-color: var(--accent-primary);
+}
+
+/* Ghost buttons: subtle background only, text colour unchanged */
+.btn-ghost:hover {
+  color: var(--btn-ghost-text);
+}
+
+/* Solid buttons: text is always white, hover only darkens bg */
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:active,
+.btn-secondary,
+.btn-secondary:hover,
+.btn-secondary:active {
+  color: #ffffff;
+}
+
+/* Safety net: disabled buttons keep readable text */
+button:disabled {
+  color: inherit;
+}
+
+/* ============================================================
    PRINT STYLES
    ============================================================ */
 @media print {
