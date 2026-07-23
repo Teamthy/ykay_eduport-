@@ -179,6 +179,8 @@ model School {
   newsPosts               NewsPost[]
   staffInvites            StaffInvite[]
   idempotencyRecords      IdempotencyRecord[]
+  expenses                Expense[]
+  budgets                 Budget[]
 }
 
 model User {
@@ -1054,4 +1056,43 @@ model IdempotencyRecord {
 
   @@unique([schoolId, scope, key])
   @@index([schoolId, createdAt])
+}
+
+model Expense {
+  id               String   @id @default(cuid())
+  schoolId         String
+  category         String
+  title            String
+  amount           Int
+  spentAt          DateTime @default(now())
+  vendor           String?
+  paymentMethod    String?
+  reference        String?
+  notes            String?
+  recordedByUserId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, spentAt])
+  @@index([schoolId, category])
+}
+
+model Budget {
+  id              String   @id @default(cuid())
+  schoolId        String
+  category        String
+  termLabel       String
+  sessionLabel    String
+  amountLimit     Int
+  notes           String?
+  createdByUserId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, category, termLabel, sessionLabel])
+  @@index([schoolId, sessionLabel])
 }

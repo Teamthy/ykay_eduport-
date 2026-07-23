@@ -19,6 +19,8 @@ const ADMIN_NAV = [
   { label: "Staff Assignments", href: "/admin/staff-assignments", icon: BookOpen },
   { label: "Fee Management", href: "/admin/fees", icon: CreditCard },
   { label: "Transfer Review", href: "/admin/fees/transfers", icon: CreditCard },
+  { label: "Expenses", href: "/admin/expenses", icon: CreditCard },
+  { label: "Budgets", href: "/admin/budgets", icon: CreditCard },
   { label: "Finances", href: "/admin/finances", icon: CreditCard },
   { label: "Attendance Analytics", href: "/admin/attendance-analytics", icon: BarChart3 },
   { label: "Attendance Corrections", href: "/admin/attendance-corrections", icon: ClipboardCheck },
