@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useToast } from "@/components/Toast";
 import {
@@ -221,7 +220,7 @@ export default function TeacherCbtCenterPage() {
 
   return (
     <>
-      <Header />
+      <PortalTopbar title="CBT center" />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-6 pt-28 pb-14">
           <div className="mx-auto max-w-7xl">
@@ -504,7 +503,6 @@ export default function TeacherCbtCenterPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import PortalTopbar from "@/components/PortalTopbar";
 import {
   Award,
   BookOpen,
@@ -68,7 +67,7 @@ export default function StudentExamsPage() {
 
   return (
     <>
-      <Header />
+      <PortalTopbar title="My exams" />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-6 pt-28 pb-14">
           <div className="mx-auto max-w-6xl">
@@ -160,7 +159,7 @@ export default function StudentExamsPage() {
           </div>
         </section>
       </main>
-      <Footer />
+
     </>
   );
 }

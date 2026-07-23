@@ -1,6 +1,7 @@
 import { ExamAttemptStatus, ExamStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { getStudentExamContext } from "@/lib/exams";
+import { getStudentFeeLock } from "@/lib/fee-lock";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -8,6 +9,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const context = await getStudentExamContext();
   if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const feeLock = await getStudentFeeLock(context.user.schoolId, context.studentProfile.id);
 
   const exams = await prisma.exam.findMany({
     where: {
@@ -27,6 +30,7 @@ export async function GET() {
   });
 
   return NextResponse.json({
+    feeLock,
     student: {
       displayName: context.studentProfile.displayName,
       studentId: context.studentProfile.studentId,
@@ -55,8 +59,9 @@ export async function GET() {
         hasEssay: exam.questions.some((question) => question.type === "ESSAY"),
         status: exam.status,
         instructions: exam.instructions,
-        canStart,
-        canResume,
+        canStart: feeLock ? false : canStart,
+        canResume: feeLock ? false : canResume,
+        feeLocked: Boolean(feeLock),
         attempt: latestAttempt
           ? {
               id: latestAttempt.id,
@@ -74,3 +79,4 @@ export async function GET() {
     }),
   });
 }
+

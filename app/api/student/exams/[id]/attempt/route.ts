@@ -2,6 +2,7 @@ import { ExamAttemptStatus, ExamStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { finalizeAttempt, getStudentExamContext } from "@/lib/exams";
+import { getStudentFeeLock } from "@/lib/fee-lock";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -50,6 +51,20 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
     if (exam.status !== ExamStatus.PUBLISHED) {
       return NextResponse.json({ error: "This exam is not open for new attempts." }, { status: 409 });
     }
+
+    const feeLock = await getStudentFeeLock(studentContext.user.schoolId, studentContext.studentProfile.id);
+    if (feeLock) {
+      return NextResponse.json(
+        {
+          error: feeLock.message,
+          code: "FEE_LOCK",
+          totalOutstanding: feeLock.totalOutstanding,
+          invoices: feeLock.invoices,
+        },
+        { status: 402 }
+      );
+    }
+
     if (existing) {
       const retake = await prisma.examRetake.findUnique({
         where: {
