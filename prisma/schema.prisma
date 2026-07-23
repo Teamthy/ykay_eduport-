@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated/client"
 }
 
 datasource db {
@@ -8,687 +7,204 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Core entities per PRD section 5.2
+enum UserRole {
+  ADMIN
+  DIRECTOR
+  BURSAR
+  COORDINATOR
+  HOD
+  TEACHER
+  PARENT
+  STUDENT
+}
+
+enum ApplicationStatus {
+  DRAFT
+  PENDING_REVIEW
+  DOCUMENTS_REQUESTED
+  APPROVED
+  DECLINED
+  WAITLISTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  ABANDONED
+}
+
+enum AdmissionDocumentType {
+  BIRTH_CERTIFICATE
+  PASSPORT_PHOTO
+  REPORT_CARD
+  TRANSFER_CERTIFICATE
+}
+
+enum PaymentProvider {
+  PAYSTACK
+  BANK_TRANSFER
+  CASH
+}
 
 model School {
-  id          String   @id @default(cuid())
-  name        String
-  address     String
-  phone       String
-  email       String?
-  logoUrl     String?
-  motto       String?
-  city        String?
-  state       String?
-  type        String?  // "Day Secondary School"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  address   String
+  phone     String
+  email     String?
+  motto     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  sessions    Session[]
-  terms       Term[]
-  users       User[]
-  students    Student[]
-  staff       Staff[]
-  classes     Class[]
-  subjects    Subject[]
-  feeInvoices FeeInvoice[]
-  notifications Notification[]
-  auditLogs  AuditLog[]
+  users        User[]
+  applications AdmissionApplication[]
+  auditLogs    AuditLog[]
 }
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  name        String
-  role        String   // Admin | Teacher | Student | Parent | Bursar | HOD | Coordinator
-  schoolId    String
-  password    String
-  isActive    Boolean  @default(true)
-  isSuspended Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  lastLogin   DateTime?
+  id           String    @id @default(cuid())
+  schoolId     String
+  email        String    @unique
+  name         String
+  role         UserRole
+  passwordHash String
+  isActive     Boolean   @default(true)
+  isSuspended  Boolean   @default(false)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  school      School   @relation(fields: [schoolId], references: [id])
-  refreshTokens RefreshToken[]
-  notifications Notification[]
-  auditLogs  AuditLog[]
-}
+  school              School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  auditLogs           AuditLog[]
 
-model Role {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  description String?
-  createdAt   DateTime @default(now())
-}
-
-model Session {
-  id          String   @id @default(cuid())
-  schoolId    String
-  name        String   // 2024/2025
-  startDate   DateTime
-  endDate     DateTime
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  school      School   @relation(fields: [schoolId], references: [id])
-  terms       Term[]
-}
-
-model Term {
-  id          String   @id @default(cuid())
-  sessionId   String
-  name        String   // 1st Term, 2nd Term, 3rd Term
-  startDate   DateTime
-  endDate     DateTime
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  session     Session  @relation(fields: [sessionId], references: [id])
-  feeInvoices FeeInvoice[]
-  caScores    CAScore[]
-  reportCards ReportCard[]
-  attendanceRecords AttendanceRecord[]
-}
-
-model Class {
-  id          String   @id @default(cuid())
-  schoolId    String
-  level       String   // JSS1, JSS2, JSS3, SS1, SS2, SS3
-  arm         String?  // A, B, C
-  maxCapacity Int      @default(50)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  school      School   @relation(fields: [schoolId], references: [id])
-  classTeacher Staff?  @relation(fields: [classTeacherId], references: [id])
-  classTeacherId String?
-  students    Student[]
-  subjectAssignments SubjectAssignment[]
-  attendanceRecords AttendanceRecord[]
-}
-
-model Arm {
-  id          String   @id @default(cuid())
-  classId     String
-  name        String
-  createdAt   DateTime @default(now())
-
-  class       Class    @relation(fields: [classId], references: [id])
-}
-
-model Subject {
-  id          String   @id @default(cuid())
-  schoolId    String
-  name        String
-  code        String?
-  description String?
-  createdAt   DateTime @default(now())
-
-  school      School   @relation(fields: [schoolId], references: [id])
-  assignments SubjectAssignment[]
-  caScores    CAScore[]
-  questions   Question[]
-}
-
-model SubjectAssignment {
-  id          String   @id @default(cuid())
-  subjectId   String
-  classId     String
-  teacherId   String?
-  termId      String?
-  createdAt   DateTime @default(now())
-
-  subject     Subject  @relation(fields: [subjectId], references: [id])
-  class       Class    @relation(fields: [classId], references: [id])
-  teacher     Staff?   @relation(fields: [teacherId], references: [id])
-}
-
-model Student {
-  id          String   @id @default(cuid())
-  studentId   String   @unique // YKC/2025/001
-  schoolId    String
-  firstName   String
-  middleName  String?
-  lastName    String
-  dateOfBirth DateTime
-  gender      String
-  stateOfOrigin String?
-  lga         String?
-  religion    String?
-  bloodGroup  String?
-  genotype    String?
-  classId     String
-  arm         String?
-  photoUrl    String?
-  status      String   @default("Active") // Active | Suspended | Withdrawn | Graduated
-  healthNotes String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  school      School   @relation(fields: [schoolId], references: [id])
-  class       Class    @relation(fields: [classId], references: [id])
-  parents     ParentStudentLink[]
-  attendanceRecords AttendanceRecord[]
-  caScores    CAScore[]
-  examAttempts ExamAttempt[]
-  assignmentSubmissions AssignmentSubmission[]
-  healthRecords HealthRecord[]
-  notifications Notification[]
-  feeInvoices FeeInvoice[]
-  reportCards ReportCard[]
-}
-
-model Parent {
-  id          String   @id @default(cuid())
-  firstName   String
-  lastName    String
-  phone       String
-  whatsapp    String?
-  email       String?
-  address     String?
-  occupation  String?
-  relationship String? // Father, Mother, Guardian
-  schoolId    String
-  isPrimary   Boolean  @default(true)
-  userId      String?
-  createdAt   DateTime @default(now())
-
-  school      School   @relation(fields: [schoolId], references: [id])
-  studentLinks ParentStudentLink[]
-  user        User?    @relation(fields: [userId], references: [id])
-  feePayments FeePayment[]
-  notifications Notification[]
-}
-
-model ParentStudentLink {
-  id          String   @id @default(cuid())
-  parentId    String
-  studentId   String
-  createdAt   DateTime @default(now())
-
-  parent      Parent   @relation(fields: [parentId], references: [id])
-  student     Student  @relation(fields: [studentId], references: [id])
-
-  @@unique([parentId, studentId])
-}
-
-model Staff {
-  id          String   @id @default(cuid())
-  schoolId    String
-  firstName   String
-  lastName    String
-  photoUrl    String?
-  qualifications String?
-  role        String?
-  department  String?
-  employmentDate DateTime?
-  bankAccount String?
-  salaryGrade String?
-  status      String   @default("Active")
-  userId      String?
-  createdAt   DateTime @default(now())
-
-  school      School   @relation(fields: [schoolId], references: [id])
-  user        User?    @relation(fields: [userId], references: [id])
-  classAssignments Class[] @relation("ClassTeacher")
-  subjectAssignments SubjectAssignment[]
-  auditLogs  AuditLog[]
+  @@index([schoolId, role])
 }
 
 model AdmissionApplication {
-  id          String   @id @default(cuid())
-  applicationId String @unique // YKC-APP-YYYY-XXXX
-  schoolId    String
-  studentName String
-  dateOfBirth DateTime?
-  gender      String?
-  stateOfOrigin String?
-  lga         String?
-  religion    String?
-  parentName  String
-  parentPhone String
-  parentEmail String?
-  parentAddress String?
-  classApplying String
-  previousSchool String?
-  reasonForLeaving String?
-  docBirthCertUrl String?
-  docPhotoUrl String?
-  docReportCardUrl String?
-  docTransferCertUrl String?
-  status      String   @default("Pending Review") // Pending | Documents Requested | Approved | Declined | Waitlisted
-  paymentStatus String @default("Pending") // Pending | Paid | Failed
-  paymentReference String?
-  submittedAt DateTime @default(now())
-  reviewedAt  DateTime?
-  createdAt   DateTime @default(now())
+  id                   String            @id @default(cuid())
+  applicationId        String            @unique
+  schoolId             String
+  firstName            String
+  middleName           String?
+  lastName             String
+  dateOfBirth          DateTime
+  gender               String
+  stateOfOrigin        String
+  lga                  String
+  religion             String?
+  bloodGroup           String?
+  genotype             String?
+  classApplying        String
+  preferredArm         String?
+  fatherName           String?
+  motherName           String?
+  guardianName         String?
+  guardianRelationship String?
+  primaryContact       String
+  parentPhone          String
+  whatsappPhone        String?
+  parentEmail          String
+  parentAddress        String
+  occupation           String?
+  previousSchool       String
+  previousClass        String
+  reasonForLeaving     String?
+  achievements         String?
+  status               ApplicationStatus @default(DRAFT)
+  statusNote           String?
+  paymentStatus        PaymentStatus     @default(PENDING)
+  paymentReference     String?           @unique
+  uploadTokenHash      String?
+  uploadTokenExpiresAt DateTime?
+  submittedAt          DateTime?
+  reviewedAt           DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
 
-  school      School   @relation(fields: [schoolId], references: [id])
+  school    School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  documents AdmissionDocument[]
+  payment   PaymentTransaction?
+
+  @@index([schoolId, status, createdAt])
+  @@index([schoolId, parentEmail])
 }
 
-model FeeStructure {
-  id          String   @id @default(cuid())
-  schoolId    String
-  name        String
-  category    String?
-  amount      Decimal  @db.Decimal(10, 2)
-  appliesToClass String?
-  appliesToTerm String?
-  isMandatory Boolean  @default(true)
-  isDiscountEligible Boolean @default(false)
-  createdAt   DateTime @default(now())
+model AdmissionDocument {
+  id            String                @id @default(cuid())
+  applicationId String
+  type          AdmissionDocumentType
+  fileName      String
+  contentType   String
+  sizeBytes     Int
+  storageKey    String                @unique
+  uploadedAt    DateTime              @default(now())
 
-  school      School   @relation(fields: [schoolId], references: [id])
-  invoices    FeeInvoice[]
+  application AdmissionApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, type])
+  @@index([applicationId])
 }
 
-model FeeInvoice {
-  id          String   @id @default(cuid())
-  schoolId    String
-  studentId   String
-  termId      String?
-  totalAmount Decimal  @db.Decimal(10, 2)
-  amountPaid  Decimal  @db.Decimal(10, 2) @default(0)
-  balanceDue  Decimal  @db.Decimal(10, 2) @default(0)
-  status      String   @default("Unpaid") // Unpaid | Partial | Paid | Overdue
-  invoiceNumber String @unique
-  createdAt   DateTime @default(now())
+model PaymentTransaction {
+  id            String          @id @default(cuid())
+  applicationId String          @unique
+  reference     String          @unique
+  provider      PaymentProvider @default(PAYSTACK)
+  amountKobo    Int
+  currency      String          @default("NGN")
+  status        PaymentStatus   @default(PENDING)
+  paidAt        DateTime?
+  providerData  Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
-  school      School   @relation(fields: [schoolId], references: [id])
-  student     Student  @relation(fields: [studentId], references: [id])
-  term        Term?    @relation(fields: [termId], references: [id])
-  items       FeeInvoiceItem[]
-  payments    FeePayment[]
-  reminders   Notification[]
-}
-
-model FeeInvoiceItem {
-  id          String   @id @default(cuid())
-  invoiceId   String
-  feeStructureId String
-  amount      Decimal  @db.Decimal(10, 2)
-  description String?
-
-  invoice     FeeInvoice @relation(fields: [invoiceId], references: [id])
-  feeStructure FeeStructure @relation(fields: [feeStructureId], references: [id])
-}
-
-model FeePayment {
-  id              String   @id @default(cuid())
-  schoolId        String
-  invoiceId       String
-  amount          Decimal  @db.Decimal(10, 2)
-  paymentMethod   String?
-  transactionReference String?
-  receiptUrl      String?
-  status          String   @default("Completed")
-  paidAt          DateTime @default(now())
-
-  school          School   @relation(fields: [schoolId], references: [id])
-  invoice         FeeInvoice @relation(fields: [invoiceId], references: [id])
-  parent          Parent?  @relation(fields: [parentId], references: [id])
-  parentId        String?
-}
-
-model AttendanceRecord {
-  id          String   @id @default(cuid())
-  schoolId    String
-  studentId   String
-  classId     String?
-  period      String?
-  date        DateTime
-  status      String   // Present | Absent | Late
-  note        String?
-  recordedBy  String?
-  recordedAt  DateTime @default(now())
-
-  school      School   @relation(fields: [schoolId], references: [id])
-  student     Student  @relation(fields: [studentId], references: [id])
-  class       Class?   @relation(fields: [classId], references: [id])
-}
-
-model CAScore {
-  id          String   @id @default(cuid())
-  schoolId    String
-  studentId   String
-  termId      String
-  subjectId   String?
-  classId     String?
-  ca1         Decimal? @db.Decimal(5, 2)
-  ca2         Decimal? @db.Decimal(5, 2)
-  midTerm     Decimal? @db.Decimal(10, 2)
-  assignment  Decimal? @db.Decimal(10, 2)
-  exam        Decimal? @db.Decimal(60, 2)
-  total       Decimal? @db.Decimal(10, 2)
-  grade       String?
-  isLocked    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  school      School   @relation(fields: [schoolId], references: [id])
-  student     Student  @relation(fields: [studentId], references: [id])
-  term        Term?    @relation(fields: [termId], references: [id])
-  subject     Subject? @relation(fields: [subjectId], references: [id])
-}
-
-model Exam {
-  id              String   @id @default(cuid())
-  schoolId        String
-  title           String
-  subjectId       String?
-  classLevel      String?
-  examType        String   // CA | MidTerm | FinalExam | Mock | Practice
-  arms            String[]
-  instructions    String?
-  durationMinutes Int?
-  totalMarks      Int?
-  passMark        Int?
-  allowCalculator Boolean @default(false)
-  startTime       DateTime?
-  endTime         DateTime?
-  randomizeQuestions Boolean @default(false)
-  randomizeOptions Boolean @default(false)
-  negativeMarking Boolean @default(false)
-  fullscreenLock Boolean @default(true)
-  tabSwitchDetection Boolean @default(true)
-  disableCopyPaste Boolean @default(true)
-  maxAttempts     Int      @default(1)
-  status          String   @default("Draft") // Draft | Scheduled | Active | Ended | ResultReleased
-  resultReleased  Boolean @default(false)
-  createdBy       String?
-  createdAt       DateTime @default(now())
-
-  school          School   @relation(fields: [schoolId], references: [id])
-  subject         Subject? @relation(fields: [subjectId], references: [id])
-  questions       Question[]
-  attempts        ExamAttempt[]
-}
-
-model Question {
-  id              String   @id @default(cuid())
-  schoolId        String
-  organizationId  String?
-  subjectId       String
-  classLevel      String?
-  topic           String?
-  questionType    String   // MCQ | TrueFalse | FillBlank | ShortAnswer | Essay | MultiSelect | ImageMCQ | Equation | Audio | Hotspot | DragDrop
-  questionText    String
-  options         String?
-  correctAnswer   String?
-  explanation     String?
-  marks           Int
-  difficulty      String?
-  bloomsLevel     String?
-  isApproved      Boolean  @default(false)
-  approvedBy      String?
-  createdBy       String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  school          School   @relation(fields: [schoolId], references: [id])
-  subject         Subject  @relation(fields: [subjectId], references: [id])
-}
-
-model ExamAttempt {
-  id              String   @id @default(cuid())
-  examId          String
-  studentId       String
-  questionSequence String?
-  answers         String?
-  flaggedQuestions String[]
-  startedAt       DateTime?
-  submittedAt     DateTime?
-  timeSpentSeconds Int?
-  autoSubmitted   Boolean @default(false)
-  score           Int?
-  percentage      Decimal? @db.Decimal(5, 2)
-  grade           String?
-  tabSwitches     Int @default(0)
-  snapshots       String?
-  ipAddress       String?
-  deviceFingerprint String?
-  createdAt       DateTime @default(now())
-
-  exam            Exam     @relation(fields: [examId], references: [id])
-  student         Student  @relation(fields: [studentId], references: [id])
-}
-
-model ReportCard {
-  id              String   @id @default(cuid())
-  schoolId        String
-  studentId       String
-  termId          String
-  sessionId       String?
-  classPosition   Int?
-  overallAverage  Decimal  @db.Decimal(5, 2)?
-  totalScore      Decimal  @db.Decimal(5, 2)?
-  attendancePresent Int?
-  attendanceAbsent Int?
-  attendanceLate Int?
-  attendanceRate  Decimal  @db.Decimal(5, 2)?
-  classTeacherRemark String?
-  directorRemark  String?
-  nextResumptionDate DateTime?
-  feeBalance      Decimal? @db.Decimal(10, 2)
-  pdfUrl          String?
-  qrCodeUrl       String?
-  isReleased      Boolean @default(false)
-  deliveredViaWhatsApp Boolean @default(false)
-  deliveredViaEmail Boolean @default(false)
-  createdAt       DateTime @default(now())
-
-  school          School   @relation(fields: [schoolId], references: [id])
-  student         Student  @relation(fields: [studentId], references: [id])
-  term            Term?    @relation(fields: [termId], references: [id])
-}
-
-model Assignment {
-  id              String   @id @default(cuid())
-  schoolId        String
-  title           String
-  classId         String?
-  subjectId       String?
-  assignmentType  String?
-  instructions    String?
-  referenceFiles  String?
-  maxScore        Int?
-  deadline        DateTime?
-  allowResubmission Boolean @default(false)
-  rubricCriteria  String?
-  status          String @default("Active")
-  createdBy       String?
-  createdAt       DateTime @default(now())
-
-  school          School   @relation(fields: [schoolId], references: [id])
-  class           Class?   @relation(fields: [classId], references: [id])
-  subject         Subject? @relation(fields: [subjectId], references: [id])
-  submissions     AssignmentSubmission[]
-}
-
-model AssignmentSubmission {
-  id              String   @id @default(cuid())
-  assignmentId    String
-  studentId       String
-  submittedFileUrl String?
-  submittedText    String?
-  submittedVideoUrl String?
-  submittedAt     DateTime?
-  grade           Decimal? @db.Decimal(5, 2)
-  rubricScores    String?
-  feedback        String?
-  gradedBy        String?
-  gradedAt        DateTime?
-  resubmitted     Boolean @default(false)
-  plagiarismDetected Boolean @default(false)
-  plagiarismScore Decimal? @db.Decimal(5, 2)
-
-  assignment      Assignment @relation(fields: [assignmentId], references: [id])
-  student         Student  @relation(fields: [studentId], references: [id])
-}
-
-model LessonPlan {
-  id              String   @id @default(cuid())
-  schoolId        String
-  title           String
-  subjectId       String?
-  classId         String?
-  termId          String?
-  weekNumber      Int?
-  durationPeriods Int?
-  learningObjectives String?
-  priorKnowledge  String?
-  teachingAids    String?
-  procedureSteps  String?
-  assessmentStrategy String?
-  followUpAssignmentId String?
-  isAIGenerated   Boolean @default(false)
-  status          String @default("Draft")
-  submittedForReview DateTime?
-  approvedBy      String?
-  approvedAt      DateTime?
-  createdBy       String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  school          School   @relation(fields: [schoolId], references: [id])
-  subject         Subject? @relation(fields: [subjectId], references: [id])
-  class           Class?   @relation(fields: [classId], references: [id])
-  term            Term?    @relation(fields: [termId], references: [id])
-}
-
-model Notification {
-  id              String   @id @default(cuid())
-  schoolId        String
-  userId          String?
-  title           String?
-  message         String
-  notificationType String?
-  channel         String?  // InApp | SMS | WhatsApp | Email | Push
-  status          String   @default("Pending")
-  deliveredAt     DateTime?
-  readAt          DateTime?
-  createdAt       DateTime @default(now())
-
-  school          School   @relation(fields: [schoolId], references: [id])
-  user            User?    @relation(fields: [userId], references: [id])
-  deliveries      NotificationDelivery[]
-}
-
-model NotificationDelivery {
-  id              String   @id @default(cuid())
-  notificationId  String
-  recipientPhone  String?
-  recipientEmail  String?
-  recipientWhatsApp String?
-  deliveryStatus  String   // Sent | Delivered | Failed | Read
-  failureReason   String?
-  deliveredAt     DateTime?
-  readAt          DateTime?
-  createdAt       DateTime @default(now())
-
-  notification    Notification @relation(fields: [notificationId], references: [id])
-}
-
-model InventoryItem {
-  id              String   @id @default(cuid())
-  schoolId        String
-  name            String
-  category        String?
-  quantity        Int
-  status          String?
-  assignedTo      String?
-  condition       String?
-  createdAt       DateTime @default(now())
-
-  school          School   @relation(fields: [schoolId], references: [id])
-}
-
-model HealthRecord {
-  id              String   @id @default(cuid())
-  schoolId        String
-  studentId       String
-  bloodGroup      String?
-  genotype        String?
-  allergies       String?
-  chronicConditions String?
-  immunizations   String?
-  sickBayVisits   String?
-  medicalAlerts   String?
-  accessRestricted Boolean @default(true)
-  createdAt       DateTime @default(now())
-
-  school          School   @relation(fields: [schoolId], references: [id])
-  student         Student  @relation(fields: [studentId], references: [id])
-}
-
-model CanteenTransaction {
-  id              String   @id @default(cuid())
-  schoolId        String
-  studentId       String
-  walletBalanceBefore Decimal @db.Decimal(10, 2)
-  walletBalanceAfter Decimal @db.Decimal(10, 2)
-  amountSpent     Decimal @db.Decimal(10, 2)
-  itemName        String
-  transactionTime DateTime @default(now())
-
-  school          School   @relation(fields: [schoolId], references: [id])
-  student         Student  @relation(fields: [studentId], references: [id])
-}
-
-model AlumniRecord {
-  id              String   @id @default(cuid())
-  schoolId        String
-  fullName        String
-  graduationYear  Int?
-  graduationClass String?
-  currentLocation String?
-  occupation      String?
-  university      String?
-  contactEmail    String?
-  contactPhone    String?
-  profilePhotoUrl String?
-  isMentor        Boolean @default(false)
-  isDonor         Boolean @default(false)
-  consentForStory Boolean @default(false)
-  registeredAt    DateTime @default(now())
-
-  school          School   @relation(fields: [schoolId], references: [id])
+  application AdmissionApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
 
 model PasswordResetToken {
-  id          String   @id @default(cuid())
-  userId      String
-  token       String   @unique
-  expiresAt   DateTime
-  used        Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 
-  user        User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
 }
 
 model RefreshToken {
-  id          String   @id @default(cuid())
-  userId      String
-  token       String   @unique
-  expiresAt   DateTime
-  revoked     Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
 
-  user        User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
 }
 
 model AuditLog {
   id          String   @id @default(cuid())
   schoolId    String
-  userId      String?
+  actorUserId String?
   action      String
   entityType  String
   entityId    String?
-  previousValue String?
-  newValue    String?
+  metadata    Json?
   ipAddress   String?
   createdAt   DateTime @default(now())
 
-  school      School   @relation(fields: [schoolId], references: [id])
-  user        User?    @relation(fields: [userId], references: [id])
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  actor  User?  @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, entityType, entityId])
+  @@index([actorUserId, createdAt])
 }

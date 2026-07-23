@@ -1,34 +1,3 @@
-﻿import { NextResponse } from "next/server";
-
-export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-
-    if (!body.token || !body.newPassword) {
-      return NextResponse.json(
-        { success: false, message: "Token and new password are required" },
-        { status: 400 }
-      );
-    }
-
-    // In production:
-    // 1. Verify the token from DB (check expiry, hash)
-    // 2. Hash the new password with bcrypt
-    // 3. Update the user's passwordHash
-    // 4. Invalidate all existing refresh tokens for that user
-    // 5. Mark the reset token as used
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Password has been reset. Please log in with your new password.",
-      },
-      { status: 200 }
-    );
-  } catch {
-    return NextResponse.json(
-      { success: false, message: "Password reset failed" },
-      { status: 500 }
-    );
-  }
-}
+import bcrypt from "bcryptjs";import {createHash} from "crypto";import {NextRequest,NextResponse} from "next/server";import {z} from "zod";import {prisma} from "@/lib/prisma";
+const schema=z.object({token:z.string().min(20),password:z.string().min(12,"Use at least 12 characters.")});
+export async function POST(request:NextRequest){try{const {token,password}=schema.parse(await request.json());const record=await prisma.passwordResetToken.findUnique({where:{tokenHash:createHash("sha256").update(token).digest("hex")}});if(!record||record.usedAt||record.expiresAt<new Date())return NextResponse.json({error:"This reset link is invalid or has expired."},{status:400});await prisma.$transaction([prisma.user.update({where:{id:record.userId},data:{passwordHash:await bcrypt.hash(password,12)}}),prisma.passwordResetToken.update({where:{id:record.id},data:{usedAt:new Date()}}),prisma.refreshToken.updateMany({where:{userId:record.userId,revokedAt:null},data:{revokedAt:new Date()}})]);return NextResponse.json({ok:true});}catch(e){return NextResponse.json({error:"Unable to reset password."},{status:400});}}

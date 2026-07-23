@@ -5,3 +5,6 @@ out/
 .env.local
 .history/
 *.tsbuildinfo
+.md
+_backups/
+Inject-Ykay-Phase*.ps1
