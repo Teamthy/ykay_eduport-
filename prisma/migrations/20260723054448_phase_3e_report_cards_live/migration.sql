@@ -1,2 +1,0 @@
--- RenameIndex
-ALTER INDEX "public"."AttendanceAlertJob_attendanceSessionId_studentProfileId_channel" RENAME TO "AttendanceAlertJob_attendanceSessionId_studentProfileId_cha_key";

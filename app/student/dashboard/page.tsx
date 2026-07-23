@@ -1,102 +1,144 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import {
   LayoutDashboard, CalendarDays, FileText, User, Bell, ClipboardCheck,
-  TrendingUp, Award, GraduationCap, Clock, Users, Calendar,
-  BookOpen, Activity, Sparkles, Sun, Cloud, ChevronRight
+  TrendingUp, GraduationCap, LoaderCircle, ChevronRight, Activity,
+  Award, Wallet, CheckCircle2, XCircle, Clock, MonitorSmartphone,
 } from "lucide-react";
 
 const SIDEBAR_ITEMS = [
   { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
   { label: "Attendance", href: "/student/attendance", icon: CalendarDays },
   { label: "Timetable", href: "/student/timetable", icon: CalendarDays },
-  { label: "CBT Tests", href: "/student/exams", icon: ClipboardCheck, badge: "2" },
-  { label: "E-Exams", href: "/student/e-exams", icon: FileText },
+  { label: "CBT Tests", href: "/student/exams", icon: ClipboardCheck },
   { label: "Report Cards", href: "/student/report-cards", icon: FileText },
-  { label: "Announcements", href: "/student/announcements", icon: Bell, badge: "3" },
+  { label: "Announcements", href: "/student/announcements", icon: Bell },
   { label: "My Profile", href: "/student/profile", icon: User },
   { label: "Teachers", href: "/student/teachers", icon: GraduationCap },
 ];
 
-const QUICK_ACCESS = [
-  { title: "Performance", desc: "Track academic progress", icon: TrendingUp, href: "/student/report-cards", color: "text-brand-green", badge: "Updated", badgeColor: "bg-brand-green" },
-  { title: "Attendance", desc: "Monitor attendance", icon: CalendarDays, href: "/student/attendance", color: "text-blue-500", badge: "Daily", badgeColor: "bg-blue-500" },
-  { title: "CBT Tests", desc: "Computer-based testing", icon: ClipboardCheck, href: "/student/exams", color: "text-brand-orange", badge: "Active", badgeColor: "bg-brand-orange" },
-  { title: "E-Exams", desc: "Online examination", icon: FileText, href: "/student/e-exams", color: "text-red-500", badge: "Available", badgeColor: "bg-red-500" },
-  { title: "Profile", desc: "View profile details", icon: User, href: "/student/profile", color: "text-cyan-500", badge: "View", badgeColor: "bg-cyan-500" },
-  { title: "Teachers", desc: "Faculty information", icon: GraduationCap, href: "/student/teachers", color: "text-purple-500", badge: "Directory", badgeColor: "bg-purple-500" },
-  { title: "Schedule", desc: "Class timetable", icon: Calendar, href: "/student/timetable", color: "text-pink-500", badge: "Soon", badgeColor: "bg-pink-500" },
-];
+type DashboardResponse = {
+  student: { displayName: string; studentId: string; className: string };
+  stats: {
+    attendanceRate: number | null;
+    averageScore: number | null;
+    overallGrade: string | null;
+    feeBalance: number;
+  };
+  latestReport: {
+    reportNumber: string;
+    termLabel: string;
+    sessionLabel: string;
+    overallAverage: number;
+    overallGrade: string;
+    classPosition: string | null;
+    releasedAt: string | null;
+  } | null;
+  recentAttendance: Array<{ date: string; status: string }>;
+  activity: Array<{ action: string; entityType: string; at: string }>;
+};
 
-const RECENT_ACTIVITY = [
-  { text: "Mathematics CA1 result released — 87%", time: "2 hours ago", type: "grade" },
-  { text: "Attendance marked: Present", time: "Today 8:05 AM", type: "attendance" },
-  { text: "New announcement: Mid-term schedule", time: "Yesterday", type: "announcement" },
-  { text: "Report card available for download", time: "3 days ago", type: "report" },
-];
+function actionLabel(action: string) {
+  return action
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
-const UPCOMING_EVENTS = [
-  { title: "Physics Mid-Term Exam", date: "Aug 4, 2025", time: "10:00 AM", type: "exam" },
-  { title: "Cultural Day", date: "Aug 15, 2025", time: "10:00 AM", type: "event" },
-  { title: "Term Break", date: "Aug 22, 2025", time: "12:00 PM", type: "holiday" },
-];
+function timeAgo(iso: string) {
+  const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (seconds < 3600) return `${Math.max(1, Math.floor(seconds / 60))} min ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)} hr ago`;
+  return `${Math.floor(seconds / 86400)} day(s) ago`;
+}
 
 export default function StudentDashboardPage() {
-  const now = new Date();
-  const hour = now.getHours();
+  const [data, setData] = useState<DashboardResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await fetch("/api/student/dashboard", { cache: "no-store" });
+        const body = (await response.json()) as DashboardResponse & { error?: string };
+        if (!response.ok) throw new Error(body.error || "Unable to load your dashboard.");
+        setData(body);
+      } catch (loadError) {
+        setError(loadError instanceof Error ? loadError.message : "Unable to load your dashboard.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
+  const initials = data
+    ? data.student.displayName.split(" ").map((part) => part[0]).slice(0, 2).join("")
+    : "";
+
+  const heroStats = [
+    {
+      label: "Attendance",
+      value: data?.stats.attendanceRate !== null && data?.stats.attendanceRate !== undefined ? `${data.stats.attendanceRate}%` : "—",
+      color: "text-brand-green",
+    },
+    {
+      label: "Avg. Score",
+      value: data?.stats.averageScore !== null && data?.stats.averageScore !== undefined ? `${data.stats.averageScore}%` : "—",
+      color: "text-brand-orange",
+    },
+    { label: "Grade", value: data?.stats.overallGrade || "—", color: "text-brand-green" },
+    {
+      label: "Fee Balance",
+      value: data ? (data.stats.feeBalance > 0 ? `₦${(data.stats.feeBalance / 1000).toFixed(0)}k` : "Paid") : "—",
+      color: data && data.stats.feeBalance > 0 ? "text-brand-orange" : "text-brand-green",
+    },
+  ];
 
   return (
     <>
       <Header />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        {/* Hero Welcome */}
+        {/* Hero */}
         <section className="pt-24 pb-10 bg-brand-navy px-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-gradient-to-l from-brand-green to-transparent" />
           <div className="mx-auto max-w-7xl relative z-10">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="font-display text-4xl md:text-5xl text-white tracking-widest">{greeting}</h1>
-                  <div className="flex items-center gap-1 text-brand-orange">
-                    <Sun size={20} />
-                    <Cloud size={16} className="-ml-2 mt-1" />
-                  </div>
-                </div>
-                <p className="text-white/60 text-sm">Welcome back to your dashboard</p>
+                <h1 className="font-display text-4xl md:text-5xl text-white tracking-widest">{greeting}</h1>
+                <p className="text-white/60 text-sm mt-2">Welcome back to your dashboard</p>
               </div>
-
-              {/* Stats cards */}
               <div className="flex gap-3">
-                {[
-                  { label: "Attendance", value: "Coming Soon", color: "brand-green" },
-                  { label: "Avg. Grade", value: "Coming Soon", color: "brand-orange" },
-                  { label: "Days Left", value: "Coming Soon", color: "brand-green" },
-                  { label: "Alerts", value: "Soon", color: "brand-orange" },
-                ].map(s => (
-                  <div key={s.label} className="p-3 rounded-xl bg-white/5 border border-white/10 text-center min-w-[80px]">
-                    <div className={`font-display text-sm text-${s.color} mb-0.5`}>{s.value}</div>
-                    <div className="text-[9px] text-white/60 uppercase tracking-widest">{s.label}</div>
+                {heroStats.map((stat) => (
+                  <div key={stat.label} className="p-3 rounded-xl bg-white/5 border border-white/10 text-center min-w-[80px]">
+                    <div className={`font-display text-sm ${stat.color} mb-0.5`}>{stat.value}</div>
+                    <div className="text-[9px] text-white/60 uppercase tracking-widest">{stat.label}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Student card */}
-            <div className="mt-6 p-5 rounded-2xl bg-white/5 border border-white/10 inline-flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-brand-green to-brand-green-dark flex items-center justify-center text-white font-display text-xl">
-                EA
+            {data ? (
+              <div className="mt-6 p-5 rounded-2xl bg-white/5 border border-white/10 inline-flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-brand-green to-brand-green-dark flex items-center justify-center text-white font-display text-xl">
+                  {initials}
+                </div>
+                <div>
+                  <div className="font-bold text-white text-lg">{data.student.displayName.toUpperCase()}</div>
+                  <div className="text-xs text-white/60">
+                    {data.student.studentId} · {data.student.className}
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="font-bold text-white text-lg">EMMANUEL ADEBAYO</div>
-                <div className="text-xs text-white/60">Student · Grade N/A</div>
-              </div>
-            </div>
+            ) : null}
           </div>
         </section>
 
@@ -105,91 +147,160 @@ export default function StudentDashboardPage() {
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 space-y-8">
-              {/* Quick Access Grid */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h2 className="font-display text-xl text-[var(--text-primary)]">Quick Access</h2>
-                    <p className="text-xs text-[var(--text-muted)]">{QUICK_ACCESS.length} features available</p>
-                  </div>
-                  <span className="text-[10px] px-3 py-1 rounded-full bg-brand-green/10 text-brand-green font-bold uppercase tracking-widest">Updated daily</span>
-                </div>
+              {error ? (
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">{error}</div>
+              ) : null}
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {QUICK_ACCESS.map(item => (
+              {loading ? (
+                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
+                  <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading your dashboard...
+                  </div>
+                </div>
+              ) : null}
+
+              {!loading && data ? (
+                <>
+                  {/* Latest report card */}
+                  {data.latestReport ? (
                     <Link
-                      key={item.title}
-                      href={item.href}
-                      className="group p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/40 hover:-translate-y-1 hover:shadow-[var(--card-shadow-hover)] transition-all relative overflow-hidden"
+                      href="/student/report-cards"
+                      className="group block rounded-[2rem] border border-brand-green/25 bg-brand-green/5 p-6 transition-all hover:border-brand-green hover:shadow-[var(--card-shadow-hover)]"
                     >
-                      {/* Badge */}
-                      <span className={`absolute top-3 right-3 text-[8px] px-1.5 py-0.5 rounded ${item.badgeColor} text-white font-bold uppercase`}>
-                        {item.badge}
-                      </span>
-
-                      <div className={`w-12 h-12 rounded-2xl bg-[var(--surface-disabled)] flex items-center justify-center mb-4 group-hover:bg-brand-green/10 transition-colors ${item.color}`}>
-                        <item.icon size={22} />
+                      <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-green text-white">
+                            <Award size={26} />
+                          </div>
+                          <div>
+                            <div className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                              Latest Report Card — {data.latestReport.termLabel} {data.latestReport.sessionLabel}
+                            </div>
+                            <div className="mt-1 font-display text-2xl text-[var(--text-primary)]">
+                              {data.latestReport.overallAverage}% · {data.latestReport.overallGrade}
+                              {data.latestReport.classPosition ? ` · ${data.latestReport.classPosition}` : ""}
+                            </div>
+                          </div>
+                        </div>
+                        <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-green group-hover:gap-2 transition-all">
+                          View Report <ChevronRight size={16} />
+                        </span>
                       </div>
-                      <h3 className="font-bold text-[var(--text-primary)] text-sm mb-1">{item.title}</h3>
-                      <p className="text-[10px] text-[var(--text-muted)]">{item.desc}</p>
-                      <ChevronRight size={14} className="absolute bottom-4 right-4 text-[var(--text-muted)] group-hover:text-brand-green group-hover:translate-x-1 transition-all" />
                     </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Two-column layout */}
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Recent Activity */}
-                <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Activity className="text-brand-green" size={18} />
-                    <h3 className="font-display text-lg text-[var(--text-primary)]">Recent Activity</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {RECENT_ACTIVITY.map((a, i) => (
-                      <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]">
-                        <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
-                          a.type === "grade" ? "bg-brand-green" :
-                          a.type === "attendance" ? "bg-blue-500" :
-                          a.type === "announcement" ? "bg-brand-orange" :
-                          "bg-purple-500"
-                        }`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm text-[var(--text-primary)]">{a.text}</div>
-                          <div className="text-[10px] text-[var(--text-muted)] mt-1">{a.time}</div>
-                        </div>
+                  ) : (
+                    <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                      <div className="flex items-center gap-3 text-sm text-[var(--text-muted)]">
+                        <FileText size={18} /> No report card has been released yet this term.
                       </div>
+                    </div>
+                  )}
+
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    {/* Recent attendance */}
+                    <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                      <div className="mb-5 flex items-center justify-between">
+                        <h2 className="font-display text-xl text-[var(--text-primary)]">Recent Attendance</h2>
+                        <Link href="/student/attendance" className="text-xs font-bold text-brand-green hover:underline">
+                          View all
+                        </Link>
+                      </div>
+                      {data.recentAttendance.length ? (
+                        <div className="space-y-2">
+                          {data.recentAttendance.map((entry) => (
+                            <div
+                              key={entry.date}
+                              className="flex items-center justify-between rounded-xl bg-[var(--surface-disabled)] px-4 py-3"
+                            >
+                              <span className="text-sm text-[var(--text-secondary)]">
+                                {new Date(entry.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}
+                              </span>
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${
+                                  entry.status === "PRESENT"
+                                    ? "bg-brand-green/10 text-brand-green"
+                                    : entry.status === "LATE"
+                                      ? "bg-brand-orange/10 text-brand-orange"
+                                      : "bg-red-500/10 text-red-500"
+                                }`}
+                              >
+                                {entry.status === "PRESENT" ? <CheckCircle2 size={11} /> : entry.status === "LATE" ? <Clock size={11} /> : <XCircle size={11} />}
+                                {entry.status}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-[var(--text-muted)]">No attendance has been recorded yet.</p>
+                      )}
+                    </div>
+
+                    {/* Activity feed */}
+                    <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                      <div className="mb-5 flex items-center gap-2">
+                        <Activity size={18} className="text-brand-green" />
+                        <h2 className="font-display text-xl text-[var(--text-primary)]">Recent Activity</h2>
+                      </div>
+                      {data.activity.length ? (
+                        <div className="space-y-3">
+                          {data.activity.map((entry, index) => (
+                            <div key={`${entry.at}-${index}`} className="flex items-start gap-3">
+                              <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
+                              <div className="min-w-0">
+                                <div className="text-sm text-[var(--text-primary)]">{actionLabel(entry.action)}</div>
+                                <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{timeAgo(entry.at)}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-[var(--text-muted)]">Your account activity will appear here.</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* IT Education cross-link */}
+                  <Link
+                    href="/it-portal/dashboard"
+                    className="group flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-brand-orange/25 bg-gradient-to-br from-brand-navy to-brand-navy-light p-6 transition-all hover:border-brand-orange"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-orange text-white">
+                        <MonitorSmartphone size={26} />
+                      </div>
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-brand-orange">Ykay IT Hub</div>
+                        <div className="mt-1 font-display text-xl text-white">Build Digital Skills — Python, AI, Cybersecurity</div>
+                        <p className="mt-1 text-xs text-white/60">Enroll free with your student account and earn certificates.</p>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-orange px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white group-hover:gap-2 transition-all">
+                      Start Learning <ChevronRight size={14} />
+                    </span>
+                  </Link>
+
+                  {/* Quick links */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                      { title: "Report Cards", icon: FileText, href: "/student/report-cards", color: "text-brand-green" },
+                      { title: "Attendance", icon: CalendarDays, href: "/student/attendance", color: "text-blue-500" },
+                      { title: "CBT Tests", icon: ClipboardCheck, href: "/student/exams", color: "text-brand-orange" },
+                      { title: "Performance", icon: TrendingUp, href: "/student/report-cards", color: "text-purple-500" },
+                    ].map((item) => (
+                      <Link
+                        key={item.title}
+                        href={item.href}
+                        className="group p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/40 hover:-translate-y-1 hover:shadow-[var(--card-shadow-hover)] transition-all"
+                      >
+                        <div className={`w-12 h-12 rounded-2xl bg-[var(--surface-disabled)] flex items-center justify-center mb-4 group-hover:bg-brand-green/10 transition-colors ${item.color}`}>
+                          <item.icon size={22} />
+                        </div>
+                        <h3 className="font-bold text-[var(--text-primary)] text-sm">{item.title}</h3>
+                        <ChevronRight size={14} className="mt-2 text-[var(--text-muted)] group-hover:text-brand-green group-hover:translate-x-1 transition-all" />
+                      </Link>
                     ))}
                   </div>
-                </div>
-
-                {/* Upcoming Events */}
-                <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Calendar className="text-brand-orange" size={18} />
-                    <h3 className="font-display text-lg text-[var(--text-primary)]">Upcoming Events</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {UPCOMING_EVENTS.map((e, i) => (
-                      <div key={i} className="flex items-center gap-4 p-3 rounded-xl bg-[var(--surface-disabled)]">
-                        <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center text-center shrink-0 ${
-                          e.type === "exam" ? "bg-red-500/10 text-red-500" :
-                          e.type === "event" ? "bg-brand-green/10 text-brand-green" :
-                          "bg-blue-500/10 text-blue-500"
-                        }`}>
-                          <div className="text-[8px] uppercase font-bold">{e.date.split(" ")[0]}</div>
-                          <div className="font-display text-lg">{e.date.split(" ")[1]?.replace(",", "")}</div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-sm text-[var(--text-primary)]">{e.title}</div>
-                          <div className="text-[10px] text-[var(--text-muted)]">{e.time}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                </>
+              ) : null}
             </div>
           </div>
         </section>

@@ -1,74 +1,129 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
-import { MOCK_STUDENTS, MOCK_STAFF, MOCK_ACTIVITY } from "@/lib/mockData";
 import {
-  School, Users, GraduationCap, TrendingUp, Activity, Shield,
-  CheckCircle2, ChevronDown, ChevronUp, Edit3, Mail, Phone,
-  MapPin, Calendar, Award, BarChart3, Settings, ListChecks
-, CreditCard} from "lucide-react";
+  Users, GraduationCap, School, FileText, CreditCard, ClipboardCheck,
+  LoaderCircle, Activity, AlertCircle, ArrowRight, CheckCircle2,
+  MonitorSmartphone, UserCheck, Wallet,
+} from "lucide-react";
+
+type DashboardResponse = {
+  admin: { name: string; role: string };
+  stats: {
+    studentCount: number;
+    teacherCount: number;
+    parentCount: number;
+    classCount: number;
+    pendingApplications: number;
+    pendingCorrections: number;
+    draftReports: number;
+    releasedReports: number;
+    outstandingFees: number;
+    openInvoiceCount: number;
+    attendanceMarkedToday: number;
+    presentToday: number;
+    attendanceRateToday: number | null;
+    itEnrollments: number;
+  };
+  activity: Array<{
+    action: string;
+    entityType: string;
+    actorName: string;
+    actorRole: string | null;
+    at: string;
+  }>;
+};
+
+function actionLabel(action: string) {
+  return action
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function timeAgo(iso: string) {
+  const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (seconds < 3600) return `${Math.max(1, Math.floor(seconds / 60))} min ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)} hr ago`;
+  return `${Math.floor(seconds / 86400)} day(s) ago`;
+}
 
 export default function AdminDashboardPage() {
-  const [showDetails, setShowDetails] = useState(true);
+  const [data, setData] = useState<DashboardResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await fetch("/api/admin/dashboard", { cache: "no-store" });
+        const body = (await response.json()) as DashboardResponse & { error?: string };
+        if (!response.ok) throw new Error(body.error || "Unable to load the admin dashboard.");
+        setData(body);
+      } catch (loadError) {
+        setError(loadError instanceof Error ? loadError.message : "Unable to load the admin dashboard.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const attentionItems = data
+    ? [
+        {
+          label: "Admission applications awaiting review",
+          count: data.stats.pendingApplications,
+          href: "/admin-admissions",
+          icon: ClipboardCheck,
+        },
+        {
+          label: "Attendance correction requests",
+          count: data.stats.pendingCorrections,
+          href: "/admin/attendance-corrections",
+          icon: UserCheck,
+        },
+        {
+          label: "Draft report cards to review & release",
+          count: data.stats.draftReports,
+          href: "/admin/report-cards",
+          icon: FileText,
+        },
+        {
+          label: "Open fee invoices",
+          count: data.stats.openInvoiceCount,
+          href: "/admin/fees",
+          icon: Wallet,
+        },
+      ].filter((item) => item.count > 0)
+    : [];
 
   return (
     <>
       <Header />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        {/* Hero Banner */}
-        <section className="pt-24 pb-10 bg-brand-navy px-6 relative overflow-hidden">
+        {/* Hero */}
+        <section className="pt-24 pb-12 bg-brand-navy px-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-gradient-to-l from-brand-green to-transparent" />
           <div className="mx-auto max-w-7xl relative z-10">
-            <div className="flex items-center gap-3 mb-3">
-              <span className="inline-block px-3 py-1 rounded-full bg-brand-green/10 text-brand-green text-[10px] font-bold uppercase tracking-widest">
-                <Shield size={10} className="inline mr-1" /> Admin Portal · Session 2025/2026
-              </span>
-            </div>
-            <div className="flex flex-col md:flex-row md:items-center gap-6">
-              <div className="flex-1">
-                <p className="text-brand-green text-sm mb-2 flex items-center gap-1.5">
-                  <Award size={14} /> Welcome, Administrator
-                </p>
-                <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-3">
-                  ADMIN <span className="text-brand-green">DASHBOARD</span>
-                </h1>
-                <p className="text-white/60 text-sm max-w-2xl">
-                  Complete school administration — manage students, staff, finances, and academic operations from a single interface.
-                </p>
-                <div className="flex gap-3 mt-4">
-                  <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition-all">
-                    <ListChecks size={14} /> View Tasks
-                  </button>
-                  <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition-all">
-                    <Settings size={14} /> Settings
-                  </button>
-                </div>
-              </div>
-              <div className="relative group">
-                <div className="w-32 h-32 rounded-3xl bg-white p-3 shadow-2xl border-4 border-brand-green/30">
-                  <Image src="/ykay-logo.png" alt="Ykay College" width={120} height={120} className="w-full h-full object-contain" />
-                </div>
-                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-brand-green text-white text-[9px] font-bold uppercase tracking-widest flex items-center gap-1">
-                  <CheckCircle2 size={10} /> Administrator
-                </span>
-              </div>
-            </div>
-
-            {/* System Reminder */}
-            <div className="mt-6 p-4 rounded-2xl bg-brand-navy-light border border-white/10 flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-brand-green/20 text-brand-green flex items-center justify-center shrink-0 mt-0.5">
-                <Activity size={16} />
-              </div>
-              <p className="text-sm text-white/80">
-                <strong className="text-brand-green">Reminder:</strong> At the beginning of a new term or session, please go to{" "}
-                <a href="/admin/academic-overview" className="text-brand-green underline">Academic Overview → Session/Term</a>{" "}
-                to set the current term or session.
+            <span className="inline-block px-4 py-1.5 rounded-full bg-brand-green/10 border border-brand-green/30 text-brand-green text-[10px] font-bold tracking-[0.2em] uppercase mb-4">
+              School Administration
+            </span>
+            <h1 className="font-display text-4xl md:text-6xl text-white tracking-widest">
+              ADMIN <span className="text-brand-green">DASHBOARD</span>
+            </h1>
+            {data ? (
+              <p className="mt-3 text-sm text-white/60">
+                Signed in as {data.admin.name} · {data.admin.role}
+                {data.stats.attendanceRateToday !== null
+                  ? ` — Today's attendance: ${data.stats.attendanceRateToday}% present (${data.stats.presentToday}/${data.stats.attendanceMarkedToday} marked)`
+                  : " — No attendance has been marked today yet"}
               </p>
-            </div>
+            ) : null}
           </div>
         </section>
 
@@ -76,176 +131,150 @@ export default function AdminDashboardPage() {
           <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
             <AdminSidebar />
 
-            <div className="flex-1 min-w-0 space-y-6">
-              {/* School Profile Card */}
-              <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] overflow-hidden shadow-[var(--card-shadow)]">
-                <div className="p-6 bg-gradient-to-r from-brand-green to-brand-green-dark flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-white p-2 shadow-lg">
-                    <Image src="/ykay-logo.png" alt="Ykay" width={60} height={60} className="w-full h-full object-contain" />
-                  </div>
-                  <div className="text-white">
-                    <h2 className="font-display text-2xl tracking-widest">Ykay Training College</h2>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Excellence in Education</span>
-                      <span className="text-[10px] flex items-center gap-1 bg-brand-green-dark px-2 py-0.5 rounded-full">
-                        <CheckCircle2 size={10} /> Verified
-                      </span>
-                    </div>
-                    <div className="text-xs text-white/80 mt-1 flex items-center gap-1">
-                      <Users size={11} /> Owner: Mr. Adeyinka Oladimeji, MSc
-                    </div>
+            <div className="flex-1 min-w-0 space-y-8">
+              {error ? (
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">{error}</div>
+              ) : null}
+
+              {loading ? (
+                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
+                  <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading live school data...
                   </div>
                 </div>
+              ) : null}
 
-                <button onClick={() => setShowDetails(!showDetails)} className="w-full p-3 bg-[var(--surface-disabled)] text-sm text-[var(--text-primary)] font-bold flex items-center justify-center gap-2 hover:bg-[var(--surface-card-hover)] transition-colors">
-                  {showDetails ? "Hide" : "Show"} Details {showDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </button>
-
-                {showDetails && (
-                  <div className="p-6 grid md:grid-cols-2 gap-6">
-                    {/* School Info */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-4">
-                        <School className="text-brand-green" size={18} />
-                        <h3 className="font-bold text-[var(--text-primary)]">School Information</h3>
+              {!loading && data ? (
+                <>
+                  {/* Core stats */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[
+                      { label: "Students", value: data.stats.studentCount, icon: Users, color: "text-brand-green" },
+                      { label: "Teachers", value: data.stats.teacherCount, icon: GraduationCap, color: "text-brand-orange" },
+                      { label: "Parents", value: data.stats.parentCount, icon: Users, color: "text-brand-green" },
+                      { label: "Class Arms", value: data.stats.classCount, icon: School, color: "text-brand-orange" },
+                    ].map((stat) => (
+                      <div key={stat.label} className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]">
+                        <stat.icon size={18} className={`mb-3 ${stat.color}`} />
+                        <div className={`font-display text-3xl ${stat.color}`}>{stat.value}</div>
+                        <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mt-1">{stat.label}</div>
                       </div>
-                      <div className="space-y-3">
-                        {[
-                          { label: "Address", value: "Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State", icon: MapPin },
-                          { label: "Type", value: "Day Secondary School", icon: School },
-                          { label: "Email", value: "info@ykaycollege.com", icon: Mail },
-                          { label: "Phone", value: "0701 537 4411", icon: Phone },
-                          { label: "Status", value: "Approved", icon: CheckCircle2 },
-                        ].map(item => (
-                          <div key={item.label} className="flex items-start gap-3 pb-3 border-b border-[var(--border-subtle)] last:border-0">
-                            <item.icon size={14} className="text-brand-green mt-0.5 shrink-0" />
-                            <div>
-                              <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest">{item.label}</div>
-                              <div className="text-sm text-[var(--text-primary)]">
-                                {item.label === "Status" ? (
-                                  <span className="text-brand-green font-bold flex items-center gap-1"><CheckCircle2 size={12} /> {item.value}</span>
-                                ) : item.value}
+                    ))}
+                  </div>
+
+                  {/* Secondary stats */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[
+                      {
+                        label: "Outstanding Fees",
+                        value: data.stats.outstandingFees > 0 ? `₦${data.stats.outstandingFees.toLocaleString()}` : "₦0",
+                        icon: CreditCard,
+                        color: data.stats.outstandingFees > 0 ? "text-brand-orange" : "text-brand-green",
+                      },
+                      { label: "Released Reports", value: data.stats.releasedReports, icon: FileText, color: "text-brand-green" },
+                      {
+                        label: "Attendance Today",
+                        value: data.stats.attendanceRateToday !== null ? `${data.stats.attendanceRateToday}%` : "—",
+                        icon: UserCheck,
+                        color: "text-brand-green",
+                      },
+                      { label: "IT Enrollments", value: data.stats.itEnrollments, icon: MonitorSmartphone, color: "text-brand-orange" },
+                    ].map((stat) => (
+                      <div key={stat.label} className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]">
+                        <stat.icon size={18} className={`mb-3 ${stat.color}`} />
+                        <div className={`font-display text-2xl ${stat.color}`}>{stat.value}</div>
+                        <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mt-1">{stat.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Needs attention */}
+                  {attentionItems.length ? (
+                    <div className="rounded-[2rem] border border-brand-orange/25 bg-brand-orange/5 p-6">
+                      <div className="mb-4 flex items-center gap-2">
+                        <AlertCircle size={18} className="text-brand-orange" />
+                        <h2 className="font-display text-xl text-[var(--text-primary)]">Needs Attention</h2>
+                      </div>
+                      <div className="space-y-2">
+                        {attentionItems.map((item) => (
+                          <Link
+                            key={item.label}
+                            href={item.href}
+                            className="group flex items-center justify-between rounded-xl bg-[var(--surface-card)] border border-[var(--border-subtle)] px-5 py-4 transition-all hover:border-brand-orange"
+                          >
+                            <div className="flex items-center gap-3">
+                              <item.icon size={18} className="text-brand-orange" />
+                              <span className="text-sm text-[var(--text-primary)]">{item.label}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="rounded-full bg-brand-orange/10 px-3 py-1 text-xs font-bold text-brand-orange">{item.count}</span>
+                              <ArrowRight size={14} className="text-[var(--text-muted)] group-hover:text-brand-orange group-hover:translate-x-1 transition-all" />
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3 rounded-[2rem] border border-brand-green/25 bg-brand-green/5 p-6">
+                      <CheckCircle2 size={22} className="text-brand-green" />
+                      <p className="text-sm text-[var(--text-secondary)]">
+                        All clear — no pending applications, corrections, draft reports, or open invoices.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Activity + quick actions */}
+                  <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+                    <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                      <div className="mb-5 flex items-center gap-2">
+                        <Activity size={18} className="text-brand-green" />
+                        <h2 className="font-display text-xl text-[var(--text-primary)]">School Activity Feed</h2>
+                      </div>
+                      {data.activity.length ? (
+                        <div className="space-y-3">
+                          {data.activity.map((entry, index) => (
+                            <div key={`${entry.at}-${index}`} className="flex items-start gap-3 rounded-xl bg-[var(--surface-disabled)] px-4 py-3">
+                              <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
+                              <div className="min-w-0 flex-1">
+                                <div className="text-sm text-[var(--text-primary)]">{actionLabel(entry.action)}</div>
+                                <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                  {entry.actorName}
+                                  {entry.actorRole ? ` · ${entry.actorRole}` : ""} · {timeAgo(entry.at)}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
-                        <div className="flex items-center justify-between pt-2">
-                          <span className="text-[10px] text-[var(--text-muted)]">Last updated: July 20, 2025</span>
-                          <button className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-brand-green text-white text-xs font-bold hover:bg-brand-green-dark transition-all">
-                            <Edit3 size={11} /> Update
-                          </button>
+                          ))}
                         </div>
-                      </div>
+                      ) : (
+                        <p className="text-sm text-[var(--text-muted)]">School activity will appear here as staff use the portal.</p>
+                      )}
                     </div>
 
-                    {/* School Statistics */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-4">
-                        <BarChart3 className="text-brand-green" size={18} />
-                        <h3 className="font-bold text-[var(--text-primary)]">School Statistics</h3>
-                      </div>
-                      <div className="grid grid-cols-3 gap-3 mb-3">
-                        {[
-                          { label: "Classes", value: 12, icon: School },
-                          { label: "Students", value: MOCK_STUDENTS.length, icon: Users },
-                          { label: "Teachers", value: MOCK_STAFF.length, icon: GraduationCap },
-                        ].map(s => (
-                          <div key={s.label} className="p-4 rounded-xl bg-[var(--surface-disabled)] text-center">
-                            <div className="font-display text-3xl text-brand-green">{s.value}</div>
-                            <div className="flex items-center justify-center gap-1 mt-1 text-[10px] text-[var(--text-muted)]">
-                              <s.icon size={11} /> {s.label}
+                    <div className="space-y-4">
+                      {[
+                        { title: "Review Admissions", icon: ClipboardCheck, href: "/admin-admissions" },
+                        { title: "Attendance Analytics", icon: UserCheck, href: "/admin/attendance-analytics" },
+                        { title: "Fee Management", icon: CreditCard, href: "/admin/fees" },
+                        { title: "Report Cards", icon: FileText, href: "/admin/report-cards" },
+                      ].map((item) => (
+                        <Link
+                          key={item.title}
+                          href={item.href}
+                          className="group flex items-center justify-between rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] px-5 py-4 hover:border-brand-green transition-all"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green/10 text-brand-green group-hover:bg-brand-green group-hover:text-white transition-colors">
+                              <item.icon size={18} />
                             </div>
+                            <span className="text-sm font-bold text-[var(--text-primary)]">{item.title}</span>
                           </div>
-                        ))}
-                      </div>
-                      <p className="text-[10px] text-[var(--text-muted)]">Automatically generated from school records</p>
-
-                      {/* Additional Stats */}
-                      <div className="mt-4 space-y-2">
-                        {[
-                          { label: "Fee Collection Rate", value: "72%", color: "brand-green" },
-                          { label: "Average Attendance", value: "88%", color: "brand-orange" },
-                          { label: "WAEC Pass Rate", value: "92%", color: "brand-green" },
-                        ].map(s => (
-                          <div key={s.label}>
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="text-[var(--text-muted)]">{s.label}</span>
-                              <span className={`font-bold text-${s.color}`}>{s.value}</span>
-                            </div>
-                            <div className="w-full h-2 rounded-full bg-[var(--surface-disabled)] overflow-hidden">
-                              <div className={`h-full bg-${s.color}`} style={{ width: s.value }} />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                          <ArrowRight size={14} className="text-[var(--text-muted)] group-hover:text-brand-green group-hover:translate-x-1 transition-all" />
+                        </Link>
+                      ))}
                     </div>
                   </div>
-                )}
-              </div>
-
-              {/* Quick Actions */}
-              <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                <h3 className="text-brand-green font-bold text-lg mb-4">Quick Actions</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {[
-                    { label: "Add Student", href: "/admin/students", icon: Users, color: "brand-green" },
-                    { label: "Record Payment", href: "/admin/fees", icon: CreditCard, color: "brand-orange" },
-                    { label: "Send Broadcast", href: "/admin/broadcasts", icon: Mail, color: "blue-500" },
-                    { label: "View Reports", href: "/admin/report-cards", icon: BarChart3, color: "purple-500" },
-                  ].map(a => (
-                    <a key={a.label} href={a.href} className={`p-4 rounded-xl bg-[var(--surface-disabled)] hover:bg-brand-green/10 hover:border-brand-green transition-all border border-transparent text-center group`}>
-                      <div className={`w-10 h-10 rounded-xl bg-${a.color}/10 text-${a.color} flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
-                        <a.icon size={18} />
-                      </div>
-                      <div className="font-bold text-[var(--text-primary)] text-xs">{a.label}</div>
-                    </a>
-                  ))}
-                </div>
-              </div>
-
-              {/* Recent Activity */}
-              <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-display text-lg text-[var(--text-primary)]">Recent Activity</h3>
-                  <Activity size={16} className="text-brand-green" />
-                </div>
-                <div className="space-y-3">
-                  {MOCK_ACTIVITY.slice(0, 6).map(item => (
-                    <div key={item.id} className="flex items-start gap-3 pb-3 border-b border-[var(--border-subtle)] last:border-0">
-                      <div className="w-8 h-8 rounded-lg bg-brand-green/10 flex items-center justify-center shrink-0">
-                        <Activity size={12} className="text-brand-green" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm text-[var(--text-primary)] font-medium">{item.action}</div>
-                        <div className="text-xs text-[var(--text-muted)] mt-0.5">{item.detail}</div>
-                        <div className="text-[10px] text-[var(--text-muted)] mt-1">{item.user} · {item.time}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Enrollment by Class */}
-              <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                <h3 className="font-display text-lg text-[var(--text-primary)] mb-4">Enrollment by Class</h3>
-                <div className="space-y-3">
-                  {["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"].map(cls => {
-                    const count = MOCK_STUDENTS.filter(s => s.class === cls).length;
-                    const percent = Math.max((count / MOCK_STUDENTS.length) * 100, 8);
-                    return (
-                      <div key={cls}>
-                        <div className="flex justify-between text-xs mb-1.5">
-                          <span className="text-[var(--text-secondary)] font-medium">{cls}</span>
-                          <span className="text-brand-green font-bold">{count} students</span>
-                        </div>
-                        <div className="h-3 rounded-full bg-[var(--surface-disabled)] overflow-hidden">
-                          <div className="h-full rounded-full bg-gradient-to-r from-brand-green to-brand-green-light transition-all" style={{ width: `${percent}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                </>
+              ) : null}
             </div>
           </div>
         </section>
@@ -254,4 +283,3 @@ export default function AdminDashboardPage() {
     </>
   );
 }
-
