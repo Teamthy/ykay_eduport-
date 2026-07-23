@@ -1,4 +1,4 @@
-import { AlertDeliveryStatus, UserRole } from "@prisma/client";
+import { AlertDeliveryStatus, FeePaymentStatus, UserRole } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
@@ -27,6 +27,11 @@ export async function GET() {
     reportCards,
     recentErrors,
     latestLogins,
+    feePayments,
+    feeInvoices,
+    expenses,
+    recentPayments,
+    recentAudit,
   ] = await Promise.all([
     prisma.user.groupBy({ by: ["role"], _count: true }),
     prisma.user.count({ where: { isActive: true, isSuspended: false } }),
@@ -52,7 +57,33 @@ export async function GET() {
       take: 8,
       include: { actor: { select: { name: true, email: true, role: true } } },
     }),
+    prisma.feePayment.findMany({
+      where: { status: FeePaymentStatus.COMPLETED },
+      select: { amount: true, paidAt: true },
+    }),
+    prisma.feeInvoice.findMany({ select: { totalAmount: true, amountPaid: true, balanceDue: true, status: true } }),
+    prisma.expense.findMany({ select: { amount: true } }).catch(() => []),
+    prisma.feePayment.findMany({
+      where: { status: FeePaymentStatus.COMPLETED },
+      orderBy: { paidAt: "desc" },
+      take: 12,
+      include: {
+        studentProfile: { select: { displayName: true, studentId: true } },
+      },
+    }),
+    prisma.auditLog.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 25,
+      include: { actor: { select: { name: true, email: true, role: true } } },
+    }),
   ]);
+
+  const incomeTotal = feePayments.reduce((s, p) => s + p.amount, 0);
+  const incomeToday = feePayments.filter((p) => p.paidAt >= dayAgo).reduce((s, p) => s + p.amount, 0);
+  const incomeWeek = feePayments.filter((p) => p.paidAt >= weekAgo).reduce((s, p) => s + p.amount, 0);
+  const expenseTotal = (expenses as Array<{ amount: number }>).reduce((s, e) => s + e.amount, 0);
+  const billed = feeInvoices.reduce((s, i) => s + i.totalAmount, 0);
+  const outstanding = feeInvoices.reduce((s, i) => s + i.balanceDue, 0);
 
   return NextResponse.json({
     platform: {
@@ -66,6 +97,26 @@ export async function GET() {
       itEnrollments,
       examAttempts,
       reportCards,
+    },
+    finance: {
+      incomeTotal,
+      incomeToday,
+      incomeWeek,
+      expenseTotal,
+      netPosition: incomeTotal - expenseTotal,
+      billed,
+      outstanding,
+      collectionRate: billed ? Math.round(((billed - outstanding) / billed) * 100) : 0,
+      recentPayments: recentPayments.map((p) => ({
+        id: p.id,
+        amount: p.amount,
+        method: p.method,
+        reference: p.reference,
+        receiptNumber: p.receiptNumber,
+        paidAt: p.paidAt.toISOString(),
+        student: p.studentProfile.displayName,
+        studentId: p.studentProfile.studentId,
+      })),
     },
     health: {
       failedNotifications,
@@ -82,6 +133,16 @@ export async function GET() {
     latestLogins: latestLogins.map((entry) => ({
       name: entry.actor?.name || "Unknown",
       email: entry.actor?.email || "—",
+      role: entry.actor?.role || "—",
+      ip: entry.ipAddress,
+      at: entry.createdAt.toISOString(),
+    })),
+    recentAudit: recentAudit.map((entry) => ({
+      id: entry.id,
+      action: entry.action,
+      entityType: entry.entityType,
+      entityId: entry.entityId,
+      actor: entry.actor?.email || "system",
       role: entry.actor?.role || "—",
       ip: entry.ipAddress,
       at: entry.createdAt.toISOString(),

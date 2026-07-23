@@ -17,11 +17,16 @@ The IT education experience is now much more visible and better structured than 
 - backend APIs for IT course surfacing, enrollment, and progress tracking,
 - and a stronger promotional story across the homepage and admissions-related pages.
 
-What is still missing or incomplete:
-- full certification progress tracking for enrolled students,
-- deep portal integration for personalized IT learning journeys,
-- a complete enrollment-to-certification workflow with real records and reporting,
-- and stronger replacement of any remaining placeholder or marketing-only IT content with production-ready curriculum and outcomes.
+### Verified implementation evidence
+- Public IT education pages are present under the app route structure, including the main hub and course-specific detail pages.
+- Backend endpoints are present for IT course discovery, enrollment, progress, and signup flows.
+- The homepage and admissions experience now reference IT education more prominently than before.
+
+### Still missing or incomplete
+- Full certification progress tracking for enrolled students is not yet implemented as a complete operational workflow.
+- The student portal does not yet provide a fully personalized IT learning journey with roadmap-based progress and credential visibility.
+- The enrollment-to-certification lifecycle is still incomplete; there is no complete record, reporting, and completion flow tied to real student outcomes.
+- Some IT content is still promotional or scaffolded rather than fully backed by a complete curriculum, assessment, and outcome system.
 
 ## 4. Strategic Goals
 

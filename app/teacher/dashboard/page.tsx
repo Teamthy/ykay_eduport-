@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import {
-  BookOpen, Users, TrendingUp, ClipboardCheck, ArrowRight,
-  UserCheck, AlertCircle, CheckCircle2, Sparkles, LoaderCircle,
-  Activity, FileText, School, Lock,
+  BookOpen, Users, ClipboardCheck, ArrowRight, UserCheck, AlertCircle,
+  CheckCircle2, LoaderCircle, Activity, FileText, School, Lock,
 } from "lucide-react";
 
 type DashboardResponse = {
@@ -26,13 +24,36 @@ type DashboardResponse = {
     subjectCount: number;
     pendingCorrections: number;
     todayRegisterDone: boolean;
+    openGradebooks: number;
+    liveExams: number;
   };
   assignments: Array<{
     id: string;
     role: string;
     subjectName: string | null;
+    classId: string;
     className: string;
     studentCount: number;
+    gradebookHref: string | null;
+    attendanceHref: string | null;
+  }>;
+  gradebooks: Array<{
+    id: string;
+    subjectName: string;
+    className: string;
+    status: string;
+    entryCount: number;
+    href: string;
+  }>;
+  exams: Array<{
+    id: string;
+    title: string;
+    subjectName: string;
+    className: string;
+    status: string;
+    questionCount: number;
+    attemptCount: number;
+    href: string;
   }>;
   recentSessions: Array<{
     className: string;
@@ -71,252 +92,257 @@ export default function TeacherDashboard() {
         const body = (await response.json()) as DashboardResponse & { error?: string };
         if (!response.ok) throw new Error(body.error || "Unable to load your dashboard.");
         setData(body);
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "Unable to load your dashboard.");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Unable to load your dashboard.");
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const initials = data
-    ? data.teacher.displayName.split(" ").map((part) => part[0]).slice(0, 2).join("")
-    : "";
+  const subjectAssignments = data?.assignments.filter((a) => a.role === "SUBJECT_TEACHER") || [];
+  const formAssignments = data?.assignments.filter((a) => a.role === "FORM_TEACHER") || [];
 
   return (
     <>
-      <Header />
-      <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        {/* Hero */}
-        <section className="pt-24 pb-12 bg-brand-navy px-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-gradient-to-l from-brand-green to-transparent" />
-          <div className="mx-auto max-w-7xl relative z-10 flex flex-col md:flex-row md:items-center gap-6">
-            <div className="w-24 h-24 md:w-32 md:h-32 rounded-3xl bg-gradient-to-br from-brand-green to-brand-green-dark border-4 border-brand-green shadow-2xl flex items-center justify-center font-display text-4xl text-white">
-              {initials || "…"}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2 text-brand-green">
-                <Sparkles size={14} />
-                <span className="text-xs font-bold uppercase tracking-widest">{greeting}</span>
-              </div>
-              <h1 className="font-display text-4xl md:text-5xl text-white mb-2 tracking-widest">
-                {data ? data.teacher.displayName.toUpperCase() : "TEACHER PORTAL"}
-              </h1>
-              {data ? (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {data.teacher.isSubjectTeacher ? (
-                    <span className="px-3 py-1 rounded-full bg-brand-green/20 border border-brand-green/40 text-brand-green text-[10px] font-bold uppercase tracking-widest">
-                      Subject Teacher · {data.stats.subjectCount} subject(s)
-                    </span>
-                  ) : null}
-                  {data.teacher.isFormTeacher ? (
-                    <span className="px-3 py-1 rounded-full bg-brand-orange/20 border border-brand-orange/40 text-brand-orange text-[10px] font-bold uppercase tracking-widest">
-                      Form Teacher · {data.teacher.formClassName}
-                    </span>
-                  ) : null}
-                </div>
-              ) : null}
-              {data ? (
-                <p className="text-white/60 text-sm">
-                  {data.stats.totalStudents} students across {data.stats.classCount} class arm(s).
-                  {data.stats.todayRegisterDone
-                    ? " Today's attendance register is submitted."
-                    : " Today's attendance register is still pending."}
-                </p>
-              ) : null}
-            </div>
+      <PortalTopbar title="Teacher dashboard" />
+      <main className="mx-auto flex max-w-[1600px] gap-8 px-4 py-6 sm:px-6">
+        <TeacherSidebar />
+        <section className="min-w-0 flex-1 space-y-6">
+          <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Live teaching hub</p>
+            <h1 className="mt-2 font-display text-4xl tracking-widest">
+              {loading ? "LOADING…" : `HI, ${(data?.teacher.displayName || "TEACHER").split(" ")[0].toUpperCase()}`}
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm text-white/65">
+              {data?.teacher.isFormTeacher && data?.teacher.isSubjectTeacher
+                ? "You teach subjects and own a form class — tools for both are below."
+                : data?.teacher.isFormTeacher
+                  ? "Form-teacher tools: attendance, roster, and class reports."
+                  : "Subject-teacher tools: gradebook, CBT, and class performance."}
+            </p>
           </div>
-        </section>
 
-        <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
-            <TeacherSidebar />
+          {error && (
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">{error}</div>
+          )}
 
-            <div className="flex-1 min-w-0 space-y-8">
-              {error ? (
-                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">{error}</div>
-              ) : null}
-
-              {loading ? (
-                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
-                  <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading your dashboard...
+          {loading || !data ? (
+            <div className="flex items-center gap-2 p-10 text-[var(--text-muted)]">
+              <LoaderCircle className="animate-spin" /> Loading dashboard…
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {[
+                  { label: "Students", value: data.stats.totalStudents, icon: Users, color: "text-brand-green" },
+                  { label: "Subjects", value: data.stats.subjectCount, icon: BookOpen, color: "text-brand-orange" },
+                  { label: "Open gradebooks", value: data.stats.openGradebooks, icon: FileText, color: "text-blue-500" },
+                  { label: "Live exams", value: data.stats.liveExams, icon: ClipboardCheck, color: "text-brand-green" },
+                ].map((card) => (
+                  <div key={card.label} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
+                    <card.icon className={`mb-2 ${card.color}`} size={18} />
+                    <div className="font-display text-2xl">{card.value}</div>
+                    <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{card.label}</div>
                   </div>
-                </div>
-              ) : null}
+                ))}
+              </div>
 
-              {!loading && data ? (
-                <>
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[
-                      { label: "Class Arms", value: data.stats.classCount, icon: School, color: "text-brand-green" },
-                      { label: "Students", value: data.stats.totalStudents, icon: Users, color: "text-brand-orange" },
-                      { label: "Subjects", value: data.stats.subjectCount, icon: BookOpen, color: "text-brand-green" },
-                      { label: "Pending Corrections", value: data.stats.pendingCorrections, icon: AlertCircle, color: data.stats.pendingCorrections ? "text-brand-orange" : "text-brand-green" },
-                    ].map((stat) => (
-                      <div key={stat.label} className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]">
-                        <stat.icon size={18} className={`mb-3 ${stat.color}`} />
-                        <div className={`font-display text-3xl ${stat.color}`}>{stat.value}</div>
-                        <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mt-1">{stat.label}</div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {data.teacher.isFormTeacher && (
+                  <Link
+                    href="/teacher/class/attendance"
+                    className="inline-flex items-center justify-between rounded-2xl bg-brand-orange px-4 py-3 text-sm font-bold text-white"
+                  >
+                    Take attendance <UserCheck size={16} />
+                  </Link>
+                )}
+                {data.teacher.isSubjectTeacher && (
+                  <Link
+                    href="/teacher/gradebook"
+                    className="inline-flex items-center justify-between rounded-2xl bg-brand-green px-4 py-3 text-sm font-bold text-white"
+                  >
+                    Open gradebook <BookOpen size={16} />
+                  </Link>
+                )}
+                <Link
+                  href="/teacher/cbt-center"
+                  className="inline-flex items-center justify-between rounded-2xl border border-[var(--border-default)] px-4 py-3 text-sm font-bold"
+                >
+                  CBT center <ClipboardCheck size={16} />
+                </Link>
+                <Link
+                  href="/teacher/students"
+                  className="inline-flex items-center justify-between rounded-2xl border border-[var(--border-default)] px-4 py-3 text-sm font-bold"
+                >
+                  My students <Users size={16} />
+                </Link>
+              </div>
+
+              {!!subjectAssignments.length && (
+                <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+                  <h2 className="font-display text-xl tracking-widest">SUBJECT ASSIGNMENTS</h2>
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    {subjectAssignments.map((a) => (
+                      <div key={a.id} className="rounded-2xl border border-[var(--border-subtle)] p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <b>{a.subjectName}</b>
+                            <div className="mt-1 text-xs text-[var(--text-muted)]">
+                              {a.className} · {a.studentCount} learners
+                            </div>
+                          </div>
+                          {a.gradebookHref && (
+                            <Link href={a.gradebookHref} className="inline-flex items-center gap-1 text-xs font-bold text-brand-green">
+                              Scores <ArrowRight size={12} />
+                            </Link>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
 
-                  {/* Attendance CTA */}
-                  <div
-                    className={`flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border p-6 ${
-                      data.stats.todayRegisterDone
-                        ? "border-brand-green/25 bg-brand-green/5"
-                        : "border-brand-orange/25 bg-brand-orange/5"
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`flex h-14 w-14 items-center justify-center rounded-2xl text-white ${
-                          data.stats.todayRegisterDone ? "bg-brand-green" : "bg-brand-orange"
-                        }`}
-                      >
-                        {data.stats.todayRegisterDone ? <CheckCircle2 size={26} /> : <UserCheck size={26} />}
-                      </div>
-                      <div>
-                        <div className="font-display text-xl text-[var(--text-primary)]">
-                          {data.stats.todayRegisterDone ? "Today's register is submitted" : "Mark today's attendance"}
+              {!!formAssignments.length && (
+                <div className="rounded-3xl border border-brand-orange/30 bg-brand-orange/5 p-5">
+                  <h2 className="font-display text-xl tracking-widest text-brand-orange">FORM CLASS</h2>
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    {formAssignments.map((a) => (
+                      <div key={a.id} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
+                        <div className="flex items-center gap-2">
+                          <School size={16} className="text-brand-orange" />
+                          <b>{a.className}</b>
                         </div>
-                        <p className="text-xs text-[var(--text-muted)] mt-1">
-                          {data.stats.todayRegisterDone
-                            ? "You can review the register or raise a correction request."
-                            : "Parents receive automatic alerts for absences once you submit."}
-                        </p>
+                        <div className="mt-1 text-xs text-[var(--text-muted)]">{a.studentCount} learners</div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Link href="/teacher/class/attendance" className="rounded-full bg-brand-orange px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                            Attendance
+                          </Link>
+                          <Link href="/teacher/students" className="rounded-full border border-[var(--border-default)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest">
+                            Roster
+                          </Link>
+                        </div>
                       </div>
-                    </div>
-                    <Link
-                      href="/teacher/class/attendance"
-                      className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-all ${
-                        data.stats.todayRegisterDone ? "bg-brand-green hover:bg-brand-green-dark" : "bg-brand-orange hover:bg-brand-orange-dark"
-                      }`}
-                    >
-                      Open Register <ArrowRight size={14} />
-                    </Link>
+                    ))}
                   </div>
-
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    {/* My assignments */}
-                    <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-                      <h2 className="mb-5 font-display text-xl text-[var(--text-primary)]">My Assignments</h2>
-                      {data.assignments.length ? (
-                        <div className="space-y-2">
-                          {data.assignments.map((assignment) => (
-                            <div key={assignment.id} className="flex items-center justify-between rounded-xl bg-[var(--surface-disabled)] px-4 py-3">
-                              <div>
-                                <div className="text-sm font-bold text-[var(--text-primary)]">
-                                  {assignment.subjectName || "Form Duty"} — {assignment.className}
-                                </div>
-                                <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                                  {assignment.role === "FORM_TEACHER" ? "Form Teacher" : "Subject Teacher"} · {assignment.studentCount} students
-                                </div>
-                              </div>
-                              <Link
-                                href={assignment.role === "FORM_TEACHER" ? "/teacher/class/attendance" : "/teacher/gradebook"}
-                                className="text-xs font-bold text-brand-green hover:underline"
-                              >
-                                Open
-                              </Link>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-[var(--text-muted)]">No active class assignments. Contact the administrator.</p>
-                      )}
-                    </div>
-
-                    {/* Recent registers */}
-                    <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-                      <div className="mb-5 flex items-center justify-between">
-                        <h2 className="font-display text-xl text-[var(--text-primary)]">Recent Registers</h2>
-                        <Link href="/teacher/class/attendance-history" className="text-xs font-bold text-brand-green hover:underline">
-                          History
-                        </Link>
-                      </div>
-                      {data.recentSessions.length ? (
-                        <div className="space-y-2">
-                          {data.recentSessions.map((session, index) => (
-                            <div key={`${session.date}-${index}`} className="flex items-center justify-between rounded-xl bg-[var(--surface-disabled)] px-4 py-3">
-                              <div>
-                                <div className="text-sm font-bold text-[var(--text-primary)]">{session.className}</div>
-                                <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                                  {new Date(session.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-brand-green">
-                                  {session.present}/{session.total} present
-                                </span>
-                                {session.isLocked ? <Lock size={12} className="text-[var(--text-muted)]" /> : null}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-[var(--text-muted)]">No submitted registers yet.</p>
-                      )}
-                    </div>
+                  <div className="mt-4 flex items-center gap-2 text-sm">
+                    {data.stats.todayRegisterDone ? (
+                      <>
+                        <CheckCircle2 className="text-brand-green" size={16} /> Today&apos;s register submitted
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="text-brand-orange" size={16} /> Attendance not submitted yet today
+                      </>
+                    )}
                   </div>
+                </div>
+              )}
 
-                  {/* Quick actions + activity */}
-                  <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-                    <div className="grid grid-cols-2 gap-4">
-                      {[
-                        { title: "Gradebook", desc: "Enter CA & exam scores", icon: BookOpen, href: "/teacher/gradebook" },
-                        { title: "Attendance", desc: "Daily class register", icon: ClipboardCheck, href: "/teacher/class/attendance" },
-                        { title: "Report Cards", desc: "Class result overview", icon: FileText, href: "/teacher/class/report-cards" },
-                        { title: "Analytics", desc: "Performance insight", icon: TrendingUp, href: "/teacher/analytics" },
-                      ].map((item) => (
-                        <Link
-                          key={item.title}
-                          href={item.href}
-                          className="group p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/40 hover:-translate-y-1 hover:shadow-[var(--card-shadow-hover)] transition-all"
-                        >
-                          <div className="w-12 h-12 rounded-2xl bg-[var(--surface-disabled)] flex items-center justify-center mb-4 text-brand-green group-hover:bg-brand-green/10 transition-colors">
-                            <item.icon size={22} />
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+                  <h2 className="font-display text-xl tracking-widest">GRADEBOOKS</h2>
+                  {data.gradebooks.length ? (
+                    <ul className="mt-4 space-y-3">
+                      {data.gradebooks.map((g) => (
+                        <li key={g.id} className="flex items-center justify-between gap-3 rounded-2xl bg-[var(--surface-disabled)] p-3 text-sm">
+                          <div>
+                            <b>
+                              {g.subjectName} · {g.className}
+                            </b>
+                            <div className="text-xs text-[var(--text-muted)]">
+                              {g.entryCount} entries · {g.status}
+                            </div>
                           </div>
-                          <h3 className="font-bold text-[var(--text-primary)] text-sm mb-1">{item.title}</h3>
-                          <p className="text-[10px] text-[var(--text-muted)]">{item.desc}</p>
-                        </Link>
+                          <Link href={g.href} className="text-xs font-bold text-brand-green">
+                            Open
+                          </Link>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
+                  ) : (
+                    <p className="mt-4 text-sm text-[var(--text-muted)]">No open gradebooks yet.</p>
+                  )}
+                </div>
 
-                    <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-                      <div className="mb-5 flex items-center gap-2">
-                        <Activity size={18} className="text-brand-green" />
-                        <h2 className="font-display text-xl text-[var(--text-primary)]">My Activity</h2>
-                      </div>
-                      {data.activity.length ? (
-                        <div className="space-y-3">
-                          {data.activity.map((entry, index) => (
-                            <div key={`${entry.at}-${index}`} className="flex items-start gap-3">
-                              <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
-                              <div className="min-w-0">
-                                <div className="text-sm text-[var(--text-primary)]">{actionLabel(entry.action)}</div>
-                                <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{timeAgo(entry.at)}</div>
-                              </div>
+                <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+                  <h2 className="font-display text-xl tracking-widest">EXAMS</h2>
+                  {data.exams.length ? (
+                    <ul className="mt-4 space-y-3">
+                      {data.exams.map((e) => (
+                        <li key={e.id} className="flex items-center justify-between gap-3 rounded-2xl bg-[var(--surface-disabled)] p-3 text-sm">
+                          <div>
+                            <b>{e.title}</b>
+                            <div className="text-xs text-[var(--text-muted)]">
+                              {e.subjectName} · {e.className} · {e.questionCount} Q · {e.attemptCount} attempts
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-[var(--text-muted)]">Your recent actions will appear here.</p>
-                      )}
-                    </div>
-                  </div>
-                </>
-              ) : null}
-            </div>
-          </div>
+                          </div>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-brand-green">{e.status}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-4 text-sm text-[var(--text-muted)]">No draft/published exams yet.</p>
+                  )}
+                  <Link href="/teacher/cbt-center" className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-brand-green">
+                    Manage CBT <ArrowRight size={12} />
+                  </Link>
+                </div>
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-2">
+                <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+                  <h2 className="mb-4 font-display text-xl tracking-widest">RECENT ATTENDANCE</h2>
+                  {data.recentSessions.length ? (
+                    <ul className="space-y-3">
+                      {data.recentSessions.map((s, i) => (
+                        <li key={`${s.className}-${s.date}-${i}`} className="flex items-center justify-between text-sm">
+                          <div>
+                            <b>{s.className}</b>
+                            <div className="text-xs text-[var(--text-muted)]">{new Date(s.date).toLocaleDateString()}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span>
+                              {s.present}/{s.total}
+                            </span>
+                            {s.isLocked && <Lock size={12} className="text-[var(--text-muted)]" />}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-[var(--text-muted)]">No submitted registers yet.</p>
+                  )}
+                </div>
+
+                <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+                  <h2 className="mb-4 flex items-center gap-2 font-display text-xl tracking-widest">
+                    <Activity size={18} className="text-brand-green" /> ACTIVITY
+                  </h2>
+                  {data.activity.length ? (
+                    <ul className="space-y-3">
+                      {data.activity.map((entry, i) => (
+                        <li key={`${entry.at}-${i}`} className="text-sm">
+                          <div className="text-[var(--text-primary)]">{actionLabel(entry.action)}</div>
+                          <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{timeAgo(entry.at)}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-[var(--text-muted)]">Your recent actions will appear here.</p>
+                  )}
+                  {data.stats.pendingCorrections > 0 && (
+                    <p className="mt-4 text-xs font-bold text-brand-orange">
+                      {data.stats.pendingCorrections} attendance correction(s) pending admin review
+                    </p>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </section>
       </main>
-      <Footer />
     </>
   );
 }

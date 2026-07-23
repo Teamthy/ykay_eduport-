@@ -4,7 +4,7 @@ import { Clock, MapPin } from "lucide-react";
 
 export default function ServiceInfo() {
   return (
-    <section className="relative z-20 -mt-16 md:-mt-24 mx-4 md:mx-auto max-w-5xl px-6 md:px-10">
+    <section className="relative z-20 -mt-10 md:-mt-14 mx-4 md:mx-auto max-w-5xl px-6 md:px-10">
       <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-[2rem] p-8 md:p-10 shadow-[var(--card-shadow-hover)] backdrop-blur-md theme-transition">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div className="flex-1">

@@ -1,7 +1,7 @@
 import { jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedPrefixes = ["/admin", "/admin-admissions", "/teacher", "/student", "/parent", "/it-portal", "/super-admin", "/change-password"];
+const protectedPrefixes = ["/admin", "/admin-admissions", "/teacher", "/student", "/parent", "/it-portal", "/super-admin", "/change-password", "/staff"];
 const publicItPaths = ["/it-portal/auth"];
 const encoder = new TextEncoder();
 
@@ -33,6 +33,7 @@ export async function middleware(request: NextRequest) {
     const parentPath = pathname.startsWith("/parent");
     const studentPath = pathname.startsWith("/student");
     const itPath = pathname.startsWith("/it-portal");
+    const staffPath = pathname.startsWith("/staff");
     const superPath = pathname.startsWith("/super-admin");
     const allowed =
       (changePasswordPath) ||
@@ -41,7 +42,8 @@ export async function middleware(request: NextRequest) {
       (teacherPath && ["TEACHER", "HOD", "ADMIN", "DIRECTOR"].includes(role)) ||
       (parentPath && role === "PARENT") ||
       (studentPath && role === "STUDENT") ||
-      (itPath && ["IT_STUDENT", "STUDENT", "ADMIN", "DIRECTOR"].includes(role));
+      (itPath && ["IT_STUDENT", "STUDENT", "ADMIN", "DIRECTOR"].includes(role)) ||
+      (staffPath && ["TEACHER", "HOD", "ADMIN", "DIRECTOR", "COORDINATOR", "BURSAR"].includes(role));
     if (!allowed) return NextResponse.redirect(new URL(destinationFor(role), request.url));
     return NextResponse.next();
   } catch {
@@ -57,5 +59,5 @@ function redirectToLogin(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/admin-admissions/:path*", "/teacher/:path*", "/student/:path*", "/parent/:path*", "/it-portal/:path*", "/super-admin/:path*"],
+  matcher: ["/admin/:path*", "/admin-admissions/:path*", "/teacher/:path*", "/student/:path*", "/parent/:path*", "/it-portal/:path*", "/super-admin/:path*", "/staff/:path*", "/change-password"],
 };

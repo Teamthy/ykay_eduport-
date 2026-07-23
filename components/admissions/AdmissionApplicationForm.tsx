@@ -164,7 +164,7 @@ function Field({
   );
 }
 
-const inputClass = "w-full rounded-xl border bg-[var(--input-bg)] px-4 py-3.5 text-sm text-[var(--input-text)] outline-none transition placeholder:text-[var(--input-placeholder)] focus:border-[var(--input-border-focus)] focus:ring-4 focus:ring-brand-green/10";
+const inputClass = "form-input form-select w-full rounded-xl border border-[var(--input-border)] bg-white px-4 py-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-green focus:ring-4 focus:ring-brand-green/15 [color-scheme:light]";
 
 export default function AdmissionApplicationForm() {
   const [step, setStep] = useState(1);

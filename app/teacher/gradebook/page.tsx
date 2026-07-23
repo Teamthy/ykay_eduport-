@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { useRouter, useSearchParams } from "next/navigation";
+import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useToast } from "@/components/Toast";
@@ -75,6 +75,8 @@ function waecGrade(total: number) {
 
 export default function TeacherGradebookPage() {
   const { toast } = useToast();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [data, setData] = useState<GradebookResponse | null>(null);
   const [rows, setRows] = useState<EntryRow[]>([]);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState("");
@@ -85,7 +87,7 @@ export default function TeacherGradebookPage() {
   const [confirmSubmit, setConfirmSubmit] = useState(false);
 
   const loadGradebook = useCallback(
-    async (assignmentId: string) => {
+    async (assignmentId: string, pushUrl = false) => {
       setLoading(true);
       setError("");
       try {
@@ -107,7 +109,9 @@ export default function TeacherGradebookPage() {
   );
 
   useEffect(() => {
-    void loadGradebook("");
+    const fromUrl = searchParams.get("assignmentId") || "";
+    void loadGradebook(fromUrl, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadGradebook]);
 
   const limits = data?.scoreLimits || { ca1: 10, ca2: 10, midterm: 10, assignment: 10, exam: 60 };
@@ -173,7 +177,7 @@ export default function TeacherGradebookPage() {
 
   return (
     <>
-      <Header />
+      <PortalTopbar title="Gradebook" />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-6 pt-28 pb-14">
           <div className="mx-auto max-w-7xl">
@@ -397,7 +401,6 @@ export default function TeacherGradebookPage() {
           </div>
         </section>
       </main>
-      <Footer />
 
       <ConfirmDialog
         open={confirmSubmit}

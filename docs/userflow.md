@@ -2,21 +2,21 @@ Ykay College EduPortal — Full User Flow Documentation
 
 Current implementation snapshot (Updated 2026-07-23)
 
-The project has moved beyond a brochure-only website and now includes a working Next.js application with Prisma-backed APIs, role-aware authentication, admissions workflows, teacher/student/parent dashboards, and an IT education experience. The current implementation is strong in structure and visible functionality, but several flows are still only partially complete or not yet production-ready.
+The project has moved beyond a brochure-only website and now includes a working Next.js application with Prisma-backed APIs, role-aware authentication, admissions workflows, teacher/student/parent dashboards, and an IT education experience. The current implementation is structurally strong and visibly functional, but several flows are still partially complete or not yet production-ready.
 
 What is implemented now:
-- Public website pages and portal shells for admin, teacher, student, parent, and IT users
-- Authentication and role-based route protection
+- Public website pages and portal shells for admin, teacher, student, parent, super-admin, and IT users
+- Authentication and role-based route protection through middleware and session-based API routes
 - Admissions draft submission, document upload, payment start, payment verification, and status lookup
-- Admin and teacher APIs for attendance, gradebooks, exams, and school operations
+- Admin, teacher, student, parent, and IT portal API routes for dashboards, attendance, exams, grades, fees, report cards, and notifications
 - IT education landing pages and portal-facing course enrollment scaffolding
 
 What is still missing or incomplete:
-- Full school setup wizard and school configuration onboarding
-- Full admissions approval/review operations and student/parent account handoff
-- Complete teacher, student, and parent record management beyond dashboard shells
-- Production-grade finance, notification, archival, and disaster-recovery flows
-- A fully polished CBT experience with complete exam moderation and analytics
+- A first-time school setup wizard and full school configuration onboarding
+- Complete admissions review/approval operations and seamless student/parent account handoff
+- Full teacher, student, and parent record management beyond dashboard shells
+- Production-grade finance, notification, archival, and disaster-recovery workflows
+- A fully polished CBT experience with complete moderation, analytics, and result-delivery quality
 
 HOW TO READ THIS DOCUMENT
 
