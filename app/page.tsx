@@ -3,8 +3,8 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import ServiceInfo from "@/components/ServiceInfo";
 import AdmissionsBanner from "@/components/AdmissionsBanner";
-import ITAwarenessCTA from "@/components/ITAwarenessCTA";  // <-- NEW
-
+import ITFlagshipSection from "@/components/ITFlagshipSection";
+import ITAwarenessCTA from "@/components/ITAwarenessCTA";
 import Services from "@/components/Services";
 import Churches from "@/components/Churches";
 import Groups from "@/components/Groups";
@@ -18,10 +18,10 @@ export default function HomePage() {
       <Header />
       <main>
         <Hero />
+        <ITFlagshipSection />
         <ServiceInfo />
         <AdmissionsBanner />
-        <ITAwarenessCTA />  {/* <-- ADD THIS WHERE YOU WANT */}
-
+        <ITAwarenessCTA />
         <Services />
         <Churches />
         <Groups />

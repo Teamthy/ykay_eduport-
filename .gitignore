@@ -8,3 +8,14 @@ out/
 .md
 _backups/
 Inject-Ykay-Phase*.ps1
+
+# Local inject / scratch artifacts (keep repo clean for deploy)
+deliverables/
+screens/
+_backups/
+.data/
+phase-*-ingest*.ps1
+phase-*-hotfix*.ps1
+Inject-*.ps1
+FULL_PHASE*.ps1
+YKAY_Phase*Inject.ps1

@@ -18,7 +18,10 @@
     "db:bootstrap-report-cards": "tsx prisma/seed-report-cards.ts",
     "db:seed-it-courses": "tsx prisma/seed-it-courses.ts",
     "db:bootstrap-gradebooks": "tsx prisma/seed-gradebooks.ts",
-    "db:seed-super-admin": "tsx prisma/seed-super-admin.ts"
+    "db:seed-super-admin": "tsx prisma/seed-super-admin.ts",
+    "test:e2e": "tsx scripts/e2e-smoke.ts",
+    "cleanup:artifacts": "tsx scripts/cleanup-artifacts.ts",
+    "audit:routes": "tsx scripts/e2e-smoke.ts --list-only"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",
