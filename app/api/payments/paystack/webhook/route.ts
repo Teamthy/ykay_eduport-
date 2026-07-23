@@ -1,9 +1,10 @@
-import { PaymentStatus } from "@prisma/client";
+import { FeePaymentMethod, PaymentStatus } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { APPLICATION_FEE_KOBO } from "@/lib/admissions";
 import { markApplicationPaid } from "@/lib/admission-service";
+import { postCompletedFeePayment } from "@/lib/fee-payment-service";
 import { prisma } from "@/lib/prisma";
-import { verifyPaystackWebhookSignature } from "@/lib/paystack";
+import { toPrismaJson, verifyPaystackWebhookSignature } from "@/lib/paystack";
 import { jsonNoStore } from "@/lib/requests";
 
 export const runtime = "nodejs";
@@ -16,6 +17,7 @@ interface PaystackWebhookPayload {
     currency?: string;
     status?: string;
     paid_at?: string | null;
+    metadata?: { kind?: string; paymentAttemptId?: string; invoiceId?: string };
   };
 }
 
@@ -32,8 +34,36 @@ export async function POST(request: NextRequest) {
       return jsonNoStore({ ok: true });
     }
 
+    const reference = payload.data.reference;
+
+    // 1) School fee attempts (preferred path)
+    const feeAttempt = await prisma.feePaymentAttempt.findUnique({ where: { reference } });
+    if (feeAttempt) {
+      if (payload.data.amount !== feeAttempt.amount * 100 || payload.data.currency !== "NGN" || payload.data.status !== "success") {
+        await prisma.feePaymentAttempt.update({
+          where: { id: feeAttempt.id },
+          data: { status: PaymentStatus.FAILED, providerData: toPrismaJson(payload) },
+        });
+        return jsonNoStore({ ok: true });
+      }
+
+      await postCompletedFeePayment({
+        attemptId: feeAttempt.id,
+        schoolId: feeAttempt.schoolId,
+        invoiceId: feeAttempt.invoiceId,
+        studentProfileId: feeAttempt.studentProfileId,
+        parentProfileId: feeAttempt.parentProfileId,
+        amount: feeAttempt.amount,
+        method: FeePaymentMethod.PAYSTACK,
+        reference: feeAttempt.reference,
+        providerData: toPrismaJson(payload),
+      });
+      return jsonNoStore({ ok: true });
+    }
+
+    // 2) Admissions application fee
     const application = await prisma.admissionApplication.findUnique({
-      where: { paymentReference: payload.data.reference },
+      where: { paymentReference: reference },
       select: { applicationId: true, parentEmail: true },
     });
 
@@ -41,13 +71,13 @@ export async function POST(request: NextRequest) {
 
     if (payload.data.amount !== APPLICATION_FEE_KOBO || payload.data.currency !== "NGN" || payload.data.status !== "success") {
       await prisma.paymentTransaction.updateMany({
-        where: { reference: payload.data.reference },
-        data: { status: PaymentStatus.FAILED, providerData: payload as object },
+        where: { reference },
+        data: { status: PaymentStatus.FAILED, providerData: toPrismaJson(payload) },
       });
       return jsonNoStore({ ok: true });
     }
 
-    await markApplicationPaid(application.applicationId, payload.data.reference, payload as object);
+    await markApplicationPaid(application.applicationId, reference, toPrismaJson(payload));
     return jsonNoStore({ ok: true });
   } catch (error) {
     console.error("Paystack webhook failed", error);

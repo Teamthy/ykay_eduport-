@@ -11,10 +11,10 @@ function secret() {
   return encoder.encode(value);
 }
 
-export type SessionUser = { id: string; schoolId: string; role: UserRole; name: string; email: string };
+export type SessionUser = { id: string; schoolId: string; role: UserRole; name: string; email: string; mustChangePassword?: boolean };
 
 export async function signSession(user: SessionUser) {
-  return new SignJWT({ schoolId: user.schoolId, role: user.role, name: user.name, email: user.email })
+  return new SignJWT({ schoolId: user.schoolId, role: user.role, name: user.name, email: user.email, mustChangePassword: Boolean(user.mustChangePassword) })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
     .setIssuedAt()
@@ -26,7 +26,7 @@ export async function verifySession(token: string): Promise<SessionUser | null> 
   try {
     const { payload } = await jwtVerify(token, secret());
     if (!payload.sub || typeof payload.schoolId !== "string" || typeof payload.role !== "string" || typeof payload.name !== "string" || typeof payload.email !== "string") return null;
-    return { id: payload.sub, schoolId: payload.schoolId, role: payload.role as UserRole, name: payload.name, email: payload.email };
+    return { id: payload.sub, schoolId: payload.schoolId, role: payload.role as UserRole, name: payload.name, email: payload.email, mustChangePassword: payload.mustChangePassword === true };
   } catch { return null; }
 }
 
