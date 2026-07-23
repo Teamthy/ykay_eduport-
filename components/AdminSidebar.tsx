@@ -35,6 +35,7 @@ const ADMIN_NAV = [
   { label: "Report Cards", href: "/admin/report-cards", icon: FileText },
   { label: "Gradebook Lock", href: "/admin/gradebook-lock", icon: Lock },
   { label: "Staff Assignments", href: "/admin/staff-assignments", icon: UserPlus },
+  { label: "Notifications", href: "/admin/notifications", icon: Send, badge: "Live" },
   { label: "Broadcasts", href: "/admin/broadcasts", icon: Send },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
