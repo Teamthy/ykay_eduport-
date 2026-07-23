@@ -730,6 +730,69 @@ svg {
     opacity: 0.6;
   }
 
+  /* Form selects — always readable option menus (light popup) */
+  select,
+  .form-input,
+  .form-select {
+    color: var(--input-text);
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+  }
+
+  select.form-input,
+  select.form-select,
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    background-size: 16px;
+    padding-right: 2.5rem;
+  }
+
+  /* Native dropdown list: force light readable chrome in all browsers that support it */
+  select option,
+  select optgroup {
+    background-color: #ffffff !important;
+    color: #0C1824 !important;
+  }
+
+  [data-theme="dark"] select option,
+  [data-theme="dark"] select optgroup {
+    background-color: #ffffff !important;
+    color: #0C1824 !important;
+  }
+
+  /* High-contrast CTAs on dark panels */
+  .cta-on-dark {
+    background-color: #ffffff;
+    color: #0C1824;
+  }
+  .cta-on-dark:hover {
+    background-color: #F1F5F9;
+    color: #0C1824;
+  }
+  .cta-on-dark-primary {
+    background-color: #4EC54D;
+    color: #ffffff;
+  }
+  .cta-on-dark-primary:hover {
+    background-color: #3AA93A;
+    color: #ffffff;
+  }
+
+  /* Homepage section rhythm */
+  .home-section {
+    padding-block: 4rem;
+  }
+  @media (min-width: 768px) {
+    .home-section {
+      padding-block: 5.5rem;
+    }
+  }
+
+
   .form-label {
     display: block;
     color: var(--input-label);

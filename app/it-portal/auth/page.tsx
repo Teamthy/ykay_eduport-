@@ -53,7 +53,6 @@ export default function ItPortalAuthPage() {
   return (
     <main className="min-h-screen bg-brand-navy px-6 py-16">
       <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl md:grid-cols-2">
-        {/* Brand panel */}
         <section className="bg-brand-navy p-9 text-white md:p-12">
           <Link href="/portal" className="text-xs font-bold uppercase tracking-widest text-brand-green">
             ← All Portals
@@ -64,11 +63,11 @@ export default function ItPortalAuthPage() {
             <br />
             <span className="text-brand-green">DIGITAL SKILLS ACADEMY</span>
           </h1>
-          <p className="mt-5 max-w-sm text-sm leading-7 text-white/65">
-            Certification-ready IT training for the next generation. Learn Python, AI, Cybersecurity, and
-            the Microsoft Office suite with hands-on, project-driven lessons.
+          <p className="mt-5 max-w-sm text-sm leading-7 text-white/80">
+            Certification-ready IT training for the next generation. Learn Python, AI, Cybersecurity, and the Microsoft
+            Office suite with hands-on, project-driven lessons.
           </p>
-          <ul className="mt-8 space-y-3 text-sm text-white/70">
+          <ul className="mt-8 space-y-3 text-sm text-white/80">
             <li className="flex items-center gap-3">
               <BrainCircuit size={16} className="shrink-0 text-brand-green" /> 8 industry-aligned course tracks
             </li>
@@ -84,10 +83,8 @@ export default function ItPortalAuthPage() {
           </ul>
         </section>
 
-        {/* Form panel */}
-        <section className="p-9 md:p-12">
-          {/* Mode toggle */}
-          <div className="mb-8 grid grid-cols-2 rounded-full border border-slate-200 bg-slate-50 p-1 text-center text-xs font-bold uppercase tracking-widest">
+        <section className="bg-white p-9 text-slate-900 md:p-12">
+          <div className="mb-8 grid grid-cols-2 rounded-full border border-slate-200 bg-slate-100 p-1 text-center text-xs font-bold uppercase tracking-widest">
             <button
               type="button"
               onClick={() => {
@@ -95,7 +92,7 @@ export default function ItPortalAuthPage() {
                 setError("");
               }}
               className={`rounded-full px-4 py-2.5 transition-all ${
-                mode === "signin" ? "bg-brand-green text-white shadow" : "text-slate-500 hover:text-brand-navy"
+                mode === "signin" ? "bg-brand-navy text-white shadow" : "text-slate-600 hover:text-brand-navy"
               }`}
             >
               Sign In
@@ -107,7 +104,7 @@ export default function ItPortalAuthPage() {
                 setError("");
               }}
               className={`rounded-full px-4 py-2.5 transition-all ${
-                mode === "signup" ? "bg-brand-orange text-white shadow" : "text-slate-500 hover:text-brand-navy"
+                mode === "signup" ? "bg-brand-orange text-white shadow" : "text-slate-600 hover:text-brand-navy"
               }`}
             >
               Sign Up
@@ -117,43 +114,34 @@ export default function ItPortalAuthPage() {
           <h2 className="font-display text-3xl tracking-widest text-brand-navy">
             {mode === "signup" ? "CREATE ACCOUNT" : "WELCOME BACK"}
           </h2>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm leading-relaxed text-slate-600">
             {mode === "signup"
               ? "Join the Ykay IT Hub — free for Ykay students and external learners."
               : "Sign in to continue your IT learning journey."}
           </p>
 
-          {error && (
-            <p role="alert" className="mt-5 flex gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-700">
-              <AlertCircle size={17} className="shrink-0" /> {error}
-            </p>
-          )}
-
-          <form onSubmit={submit} className="mt-7 space-y-5">
-            {mode === "signup" ? (
+          <form onSubmit={submit} className="mt-8 space-y-4">
+            {mode === "signup" && (
               <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
-                Full Name
+                Full name
                 <input
                   required
-                  type="text"
-                  autoComplete="name"
                   value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Adaeze Okafor"
+                  className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-brand-green focus:ring-4 focus:ring-brand-green/15"
                 />
               </label>
-            ) : null}
+            )}
             <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
               Email
               <input
                 required
                 type="email"
-                autoComplete="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
+                className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-brand-green focus:ring-4 focus:ring-brand-green/15"
               />
             </label>
             <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
@@ -161,41 +149,47 @@ export default function ItPortalAuthPage() {
               <input
                 required
                 type="password"
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder={mode === "signup" ? "Min. 8 characters with a number" : "Your password"}
+                className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-brand-green focus:ring-4 focus:ring-brand-green/15"
               />
             </label>
+
+            {error && (
+              <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                {error}
+              </div>
+            )}
+
             <button
+              type="submit"
               disabled={loading}
-              className={`flex w-full items-center justify-center gap-2 rounded-full px-5 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all disabled:opacity-50 ${
-                mode === "signup" ? "bg-brand-orange hover:bg-brand-orange-dark" : "bg-brand-green hover:bg-brand-green-dark"
-              }`}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-orange-600 disabled:opacity-60"
             >
-              {mode === "signup" ? <UserPlus size={16} /> : <LockKeyhole size={16} />}
-              {loading ? "Please wait…" : mode === "signup" ? "Create Free Account" : "Sign In"}
+              {loading ? (
+                "Please wait…"
+              ) : mode === "signup" ? (
+                <>
+                  <UserPlus size={16} /> Create free account
+                </>
+              ) : (
+                <>
+                  <LockKeyhole size={16} /> Sign in
+                </>
+              )}
             </button>
           </form>
 
-          {mode === "signin" ? (
-            <Link
-              href="/reset-password"
-              className="mt-6 block text-center text-sm font-semibold text-brand-green hover:underline"
-            >
-              Forgot password?
+          <p className="mt-6 text-center text-xs leading-relaxed text-slate-500">
+            By creating an account you agree to receive learning updates from Ykay College. Your data is protected under
+            our{" "}
+            <Link href="/privacy-policy" className="font-semibold text-brand-green hover:underline">
+              privacy policy
             </Link>
-          ) : (
-            <p className="mt-6 text-center text-xs leading-5 text-slate-400">
-              By creating an account you agree to receive learning updates from Ykay College. Your data is
-              protected under our{" "}
-              <Link href="/privacy-policy" className="font-semibold text-brand-green hover:underline">
-                privacy policy
-              </Link>
-              .
-            </p>
-          )}
+            .
+          </p>
         </section>
       </div>
     </main>

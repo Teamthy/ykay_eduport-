@@ -20,7 +20,7 @@ const portals = [
   {
     label: "Staff Portal",
     title: "Teaching & Administration",
-    desc: "Attendance registers, gradebooks, class management, and school administration. Admins are routed to the admin console automatically after sign-in.",
+    desc: "For teachers and school officers — mark attendance, enter scores, manage classes, and run day-to-day school operations.",
     icon: GraduationCap,
     href: "/login?portal=staff",
     cta: "Sign In",
@@ -30,7 +30,7 @@ const portals = [
   {
     label: "Student Portal",
     title: "Learning & Results",
-    desc: "Your personal dashboard with live attendance, released report cards, timetables, and school announcements.",
+    desc: "See your attendance, results, exams, and announcements in one place.",
     icon: User,
     href: "/login?portal=student",
     cta: "Sign In",
@@ -40,7 +40,7 @@ const portals = [
   {
     label: "IT Education",
     title: "Digital Skills Academy",
-    desc: "Certification-ready IT training: Python, AI, Cybersecurity, Microsoft Office and more. Open to Ykay students and external learners — create your free account today.",
+    desc: "Learn Python, AI, cybersecurity, and Microsoft Office. Free accounts for Ykay students and external learners.",
     icon: MonitorSmartphone,
     href: "/it-portal/auth",
     cta: "Sign In / Sign Up",
@@ -50,7 +50,7 @@ const portals = [
   {
     label: "Parent Portal",
     title: "Child Monitoring & Fees",
-    desc: "Monitor your child's attendance and results, receive absence alerts, and pay school fees securely online.",
+    desc: "Follow your child's attendance and results, get alerts, and pay school fees securely.",
     icon: Users,
     href: "/login?portal=parent",
     cta: "Sign In",

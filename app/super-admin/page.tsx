@@ -21,6 +21,8 @@ import {
   TrendingUp,
   UserCog,
   Users,
+  Wallet,
+  UserPlus,
 } from "lucide-react";
 
 type Overview = {
@@ -40,6 +42,17 @@ type Overview = {
     failedNotifications: number;
     pendingNotifications: number;
     recentFailures: Array<{ id: string; channel: string; subject: string; lastError: string | null; attempts: number; at: string }>;
+  };
+  finance?: {
+    incomeTotal: number;
+    incomeToday: number;
+    incomeWeek: number;
+    expenseTotal: number;
+    netPosition: number;
+    billed: number;
+    outstanding: number;
+    collectionRate: number;
+    recentPayments: Array<{ id: string; amount: number; method: string; reference: string; receiptNumber: string; paidAt: string; student: string; studentId: string }>;
   };
   latestLogins: Array<{ name: string; email: string; role: string; ip: string | null; at: string }>;
 };
@@ -99,6 +112,9 @@ export default function SuperAdminPage() {
   const [userSearch, setUserSearch] = useState("");
   const [pendingAction, setPendingAction] = useState<{ user: ManagedUser; action: string; label: string } | null>(null);
   const [tempPassword, setTempPassword] = useState<{ name: string; password: string } | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({ name: "", email: "", role: "ADMIN" });
+  const [creating, setCreating] = useState(false);
 
   const loadOverview = useCallback(async () => {
     const response = await fetch("/api/super-admin/overview", { cache: "no-store" });
@@ -163,6 +179,36 @@ export default function SuperAdminPage() {
     } finally {
       setBusy(false);
       setPendingAction(null);
+    }
+  }
+
+
+  async function createAdmin() {
+    setCreating(true);
+    try {
+      const response = await fetch("/api/super-admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "CREATE_ADMIN",
+          name: createForm.name,
+          email: createForm.email,
+          role: createForm.role,
+        }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "Unable to create account.");
+      toast(body.message || "Admin created.", "success");
+      if (body.temporaryPassword) {
+        setTempPassword({ name: createForm.name || "New user", password: body.temporaryPassword });
+      }
+      setCreateOpen(false);
+      setCreateForm({ name: "", email: "", role: "ADMIN" });
+      await loadUsers(userSearch);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to create account.", "error");
+    } finally {
+      setCreating(false);
     }
   }
 
@@ -277,6 +323,50 @@ export default function SuperAdminPage() {
                   </div>
                 </div>
 
+                
+                {overview.finance ? (
+                  <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                    <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                      <h2 className="flex items-center gap-2 font-display text-xl text-[var(--text-primary)]">
+                        <Wallet size={18} className="text-brand-green" /> Income &amp; transactions
+                      </h2>
+                      <a href="/admin/finances" className="text-xs font-bold text-brand-green underline">Open finance console</a>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                      <div className="rounded-2xl bg-[var(--surface-disabled)] p-4">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Total income</div>
+                        <div className="mt-1 font-display text-2xl">₦{overview.finance.incomeTotal.toLocaleString()}</div>
+                      </div>
+                      <div className="rounded-2xl bg-[var(--surface-disabled)] p-4">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Income today</div>
+                        <div className="mt-1 font-display text-2xl">₦{overview.finance.incomeToday.toLocaleString()}</div>
+                      </div>
+                      <div className="rounded-2xl bg-[var(--surface-disabled)] p-4">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Expenses</div>
+                        <div className="mt-1 font-display text-2xl">₦{overview.finance.expenseTotal.toLocaleString()}</div>
+                      </div>
+                      <div className="rounded-2xl bg-[var(--surface-disabled)] p-4">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Outstanding fees</div>
+                        <div className="mt-1 font-display text-2xl">₦{overview.finance.outstanding.toLocaleString()}</div>
+                      </div>
+                    </div>
+                    <div className="mt-4 text-xs text-[var(--text-muted)]">
+                      Net ₦{overview.finance.netPosition.toLocaleString()} · Collection {overview.finance.collectionRate}% · Billed ₦{overview.finance.billed.toLocaleString()}
+                    </div>
+                    <div className="mt-5 space-y-2">
+                      {overview.finance.recentPayments.slice(0, 8).map((payment) => (
+                        <div key={payment.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--border-subtle)] px-4 py-3 text-xs">
+                          <div>
+                            <span className="font-bold text-[var(--text-primary)]">₦{payment.amount.toLocaleString()}</span>
+                            <span className="text-[var(--text-muted)]"> · {payment.student}</span>
+                          </div>
+                          <div className="text-[var(--text-muted)]">{payment.method} · {payment.receiptNumber}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
                 {/* Latest logins */}
                 <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
                   <h2 className="mb-5 font-display text-xl text-[var(--text-primary)]">Latest Sign-ins</h2>
@@ -318,7 +408,7 @@ export default function SuperAdminPage() {
                       value={logFilter.action}
                       onChange={(event) => setLogFilter({ ...logFilter, action: event.target.value })}
                       placeholder="e.g. SIGNED_IN"
-                      className="mt-2 block w-52 rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--input-text)]"
+                      className="mt-2 block w-52 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900"
                     />
                   </label>
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
@@ -327,7 +417,7 @@ export default function SuperAdminPage() {
                       value={logFilter.actor}
                       onChange={(event) => setLogFilter({ ...logFilter, actor: event.target.value })}
                       placeholder="e.g. admin@"
-                      className="mt-2 block w-52 rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--input-text)]"
+                      className="mt-2 block w-52 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900"
                     />
                   </label>
                   <button
@@ -412,6 +502,34 @@ export default function SuperAdminPage() {
             {/* ---------------- USERS ---------------- */}
             {!loading && tab === "users" ? (
               <>
+                <div className="flex justify-end">
+                  <button type="button" onClick={() => setCreateOpen((v) => !v)} className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white">
+                    <UserPlus size={13} /> Create staff / admin
+                  </button>
+                </div>
+                {createOpen ? (
+                  <div className="rounded-[2rem] border border-brand-green/30 bg-brand-green/5 p-5">
+                    <h3 className="font-display text-xl text-[var(--text-primary)]">Create account</h3>
+                    <p className="mt-1 text-xs text-[var(--text-muted)]">Super admin can create ADMIN and other staff roles. Temporary password is shown once.</p>
+                    <div className="mt-4 grid gap-3 md:grid-cols-3">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Full name
+                        <input value={createForm.name} onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900" />
+                      </label>
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Email
+                        <input type="email" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900" />
+                      </label>
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Role
+                        <select value={createForm.role} onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })} className="form-select mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900">
+                          {['ADMIN','DIRECTOR','BURSAR','COORDINATOR','HOD','TEACHER'].map((role) => <option key={role} value={role}>{role}</option>)}
+                        </select>
+                      </label>
+                    </div>
+                    <button type="button" disabled={creating || !createForm.name || !createForm.email} onClick={() => void createAdmin()} className="mt-4 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50">
+                      {creating ? 'Creating…' : 'Create account'}
+                    </button>
+                  </div>
+                ) : null}
+
                 <div className="flex flex-wrap items-end gap-3">
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
                     Search name or email
@@ -419,7 +537,7 @@ export default function SuperAdminPage() {
                       value={userSearch}
                       onChange={(event) => setUserSearch(event.target.value)}
                       placeholder="e.g. grace"
-                      className="mt-2 block w-64 rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--input-text)]"
+                      className="mt-2 block w-64 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900"
                     />
                   </label>
                   <button

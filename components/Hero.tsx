@@ -4,13 +4,13 @@ import { motion } from "framer-motion";
 
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-[95vh] md:min-h-screen bg-brand-navy-dark overflow-hidden flex items-center">
+    <section className="relative w-full min-h-[88vh] md:min-h-[92vh] bg-brand-navy-dark overflow-hidden flex items-center">
       {/* Background image with overlay */}
       <div className="absolute inset-0 z-0">
         <img
           src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1920&q=80"
           alt="Students in modern classroom"
-          className="w-full h-full object-cover opacity-50"
+          className="w-full h-full object-cover opacity-45"
         />
         {/* Left-to-right darkening for text readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-dark via-brand-navy-dark/80 to-brand-navy-dark/30" />
@@ -44,7 +44,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.7 }}
-            className="font-body text-base md:text-xl text-white/85 max-w-xl mb-8 md:mb-10 leading-relaxed"
+            className="font-body text-base md:text-xl text-white max-w-xl mb-8 md:mb-10 leading-relaxed drop-shadow"
           >
             A premium day secondary school in Sango Ota, Ogun State — raising role models through rigorous academics, leadership training, and character formation. JSS1 to SS3.
           </motion.p>
@@ -85,7 +85,7 @@ export default function Hero() {
             </a>
             <a
               href="/portal"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white/10 text-white border border-white/25 font-body text-sm font-bold tracking-[0.15em] uppercase hover:bg-white/20 hover:border-white/40 transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] backdrop-blur-sm"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white/15 border border-white/30 text-white border border-white/25 font-body text-sm font-bold tracking-[0.15em] uppercase hover:bg-white/20 hover:border-white/40 transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] backdrop-blur-sm"
             >
               Student Portal
             </a>

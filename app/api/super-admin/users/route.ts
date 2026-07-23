@@ -48,8 +48,11 @@ export async function GET(request: NextRequest) {
 }
 
 const actionSchema = z.object({
-  userId: z.string().trim().min(1),
-  action: z.enum(["SUSPEND", "UNSUSPEND", "RESET_PASSWORD", "PROMOTE_ADMIN", "DEMOTE_TEACHER"]),
+  userId: z.string().trim().min(1).optional(),
+  action: z.enum(["SUSPEND", "UNSUSPEND", "RESET_PASSWORD", "PROMOTE_ADMIN", "DEMOTE_TEACHER", "CREATE_ADMIN"]),
+  name: z.string().trim().min(2).max(120).optional(),
+  email: z.string().trim().email().optional(),
+  role: z.enum(["ADMIN", "DIRECTOR", "BURSAR", "COORDINATOR", "HOD", "TEACHER"]).optional(),
 });
 
 export async function PATCH(request: NextRequest) {
@@ -63,6 +66,58 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
+  let message = "";
+  let temporaryPassword: string | null = null;
+  let createdUser: { id: string; email: string; name: string; role: string } | null = null;
+
+  if (payload.action === "CREATE_ADMIN") {
+    if (!payload.name || !payload.email) {
+      return NextResponse.json({ error: "Name and email are required to create an admin." }, { status: 400 });
+    }
+    const email = payload.email.trim().toLowerCase();
+    if (await prisma.user.findUnique({ where: { email } })) {
+      return NextResponse.json({ error: "An account already uses this email." }, { status: 409 });
+    }
+    const role = (payload.role as UserRole) || UserRole.ADMIN;
+    temporaryPassword = `Ykay-${crypto.randomBytes(6).toString("base64url")}`;
+    const passwordHash = await bcrypt.hash(temporaryPassword, 12);
+    const created = await prisma.user.create({
+      data: {
+        schoolId: superAdmin.schoolId,
+        email,
+        name: payload.name,
+        role,
+        passwordHash,
+        mustChangePassword: true,
+      },
+    });
+    if (role === UserRole.TEACHER || role === UserRole.HOD) {
+      await prisma.teacherProfile.create({
+        data: {
+          schoolId: superAdmin.schoolId,
+          userId: created.id,
+          displayName: payload.name,
+          roleLabel: role === UserRole.HOD ? "Head of Department" : "Teacher",
+        },
+      });
+    }
+    createdUser = { id: created.id, email: created.email, name: created.name, role: created.role };
+    message = `Created ${role} account for ${created.email}. Temporary password shown once.`;
+    await prisma.auditLog.create({
+      data: {
+        schoolId: superAdmin.schoolId,
+        actorUserId: superAdmin.id,
+        action: "SUPER_ADMIN_CREATE_ADMIN",
+        entityType: "User",
+        entityId: created.id,
+        metadata: { email, role },
+        ipAddress: getClientIp(request),
+      },
+    });
+    return NextResponse.json({ ok: true, message, temporaryPassword, user: createdUser });
+  }
+
+  if (!payload.userId) return NextResponse.json({ error: "userId is required." }, { status: 400 });
   const target = await prisma.user.findUnique({ where: { id: payload.userId } });
   if (!target) return NextResponse.json({ error: "User not found." }, { status: 404 });
   if (target.role === UserRole.SUPER_ADMIN && target.id !== superAdmin.id) {
@@ -71,9 +126,6 @@ export async function PATCH(request: NextRequest) {
   if (target.id === superAdmin.id && (payload.action === "SUSPEND" || payload.action === "DEMOTE_TEACHER")) {
     return NextResponse.json({ error: "You cannot suspend or demote your own account." }, { status: 409 });
   }
-
-  let message = "";
-  let temporaryPassword: string | null = null;
 
   switch (payload.action) {
     case "SUSPEND":
@@ -87,7 +139,10 @@ export async function PATCH(request: NextRequest) {
     case "RESET_PASSWORD": {
       temporaryPassword = `Ykay-${crypto.randomBytes(6).toString("base64url")}`;
       const passwordHash = await bcrypt.hash(temporaryPassword, 12);
-      await prisma.user.update({ where: { id: target.id }, data: { passwordHash } });
+      await prisma.user.update({
+        where: { id: target.id },
+        data: { passwordHash, mustChangePassword: true },
+      });
       message = `Temporary password issued for ${target.name}. Share it securely — it is shown only once.`;
       break;
     }
@@ -99,6 +154,8 @@ export async function PATCH(request: NextRequest) {
       await prisma.user.update({ where: { id: target.id }, data: { role: UserRole.TEACHER } });
       message = `${target.name} set to TEACHER role.`;
       break;
+    default:
+      return NextResponse.json({ error: "Unsupported action." }, { status: 400 });
   }
 
   await prisma.auditLog.create({
