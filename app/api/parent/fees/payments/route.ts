@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       amount: attempt.amount,
       method: FeePaymentMethod.PAYSTACK,
       reference: attempt.reference,
-      providerData: verified as object,
+      providerData: verified,
       actorUserId: context.user.id,
     });
 

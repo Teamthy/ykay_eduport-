@@ -4,7 +4,7 @@ import { APPLICATION_FEE_KOBO } from "@/lib/admissions";
 import { markApplicationPaid } from "@/lib/admission-service";
 import { postCompletedFeePayment } from "@/lib/fee-payment-service";
 import { prisma } from "@/lib/prisma";
-import { verifyPaystackWebhookSignature } from "@/lib/paystack";
+import { toPrismaJson, verifyPaystackWebhookSignature } from "@/lib/paystack";
 import { jsonNoStore } from "@/lib/requests";
 
 export const runtime = "nodejs";
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       if (payload.data.amount !== feeAttempt.amount * 100 || payload.data.currency !== "NGN" || payload.data.status !== "success") {
         await prisma.feePaymentAttempt.update({
           where: { id: feeAttempt.id },
-          data: { status: PaymentStatus.FAILED, providerData: payload as object },
+          data: { status: PaymentStatus.FAILED, providerData: toPrismaJson(payload) },
         });
         return jsonNoStore({ ok: true });
       }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
         amount: feeAttempt.amount,
         method: FeePaymentMethod.PAYSTACK,
         reference: feeAttempt.reference,
-        providerData: payload as object,
+        providerData: toPrismaJson(payload),
       });
       return jsonNoStore({ ok: true });
     }
@@ -72,12 +72,12 @@ export async function POST(request: NextRequest) {
     if (payload.data.amount !== APPLICATION_FEE_KOBO || payload.data.currency !== "NGN" || payload.data.status !== "success") {
       await prisma.paymentTransaction.updateMany({
         where: { reference },
-        data: { status: PaymentStatus.FAILED, providerData: payload as object },
+        data: { status: PaymentStatus.FAILED, providerData: toPrismaJson(payload) },
       });
       return jsonNoStore({ ok: true });
     }
 
-    await markApplicationPaid(application.applicationId, reference, payload as object);
+    await markApplicationPaid(application.applicationId, reference, toPrismaJson(payload));
     return jsonNoStore({ ok: true });
   } catch (error) {
     console.error("Paystack webhook failed", error);

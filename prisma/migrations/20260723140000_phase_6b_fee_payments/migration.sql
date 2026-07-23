@@ -1,6 +1,4 @@
 -- Phase 6B: verified online fees and controlled cash/bank-transfer processing
--- Safe on PostgreSQL 15+ / Neon
-
 CREATE TABLE IF NOT EXISTS "FeePaymentAttempt" (
   "id" TEXT NOT NULL,
   "schoolId" TEXT NOT NULL,

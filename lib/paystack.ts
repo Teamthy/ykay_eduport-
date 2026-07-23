@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "crypto";
+import type { Prisma } from "@prisma/client";
 
 const PAYSTACK_URL = "https://api.paystack.co";
 
@@ -12,7 +13,7 @@ interface PaystackVerificationResponse {
     currency: string;
     paid_at: string | null;
     customer?: { email?: string | null };
-    metadata?: Record<string, unknown>;
+    metadata?: Record<string, string | number | boolean | null>;
   };
 }
 
@@ -38,12 +39,17 @@ function getPaystackSecretKey() {
   return key;
 }
 
+/** Deep-clone through JSON so the value is assignable to Prisma.InputJsonValue. */
+export function toPrismaJson(value: unknown): Prisma.InputJsonValue {
+  return JSON.parse(JSON.stringify(value ?? null)) as Prisma.InputJsonValue;
+}
+
 export async function initializePaystackTransaction(input: {
   email: string;
-  amount: number; // kobo
+  amount: number;
   reference: string;
   callbackUrl: string;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, string | number | boolean | null>;
 }) {
   const response = await fetch(`${PAYSTACK_URL}/transaction/initialize`, {
     method: "POST",
@@ -74,7 +80,7 @@ export async function verifyPaystackTransaction(
   reference: string,
   expectedAmountKobo: number,
   expectedEmail: string
-) {
+): Promise<Prisma.InputJsonObject> {
   const response = await fetch(`${PAYSTACK_URL}/transaction/verify/${encodeURIComponent(reference)}`, {
     headers: {
       Authorization: `Bearer ${getPaystackSecretKey()}`,
@@ -89,7 +95,8 @@ export async function verifyPaystackTransaction(
   if (
     !response.ok ||
     !payload.status ||
-    payload.data?.status !== "success" ||
+    !payload.data ||
+    payload.data.status !== "success" ||
     payload.data.amount !== expectedAmountKobo ||
     payload.data.currency !== "NGN" ||
     email !== expectedEmail.trim().toLowerCase()
@@ -97,11 +104,18 @@ export async function verifyPaystackTransaction(
     throw new Error("We could not verify this payment. Please contact the bursary if your account was charged.");
   }
 
-  return payload.data;
+  return toPrismaJson({
+    status: payload.data.status,
+    reference: payload.data.reference,
+    amount: payload.data.amount,
+    currency: payload.data.currency,
+    paid_at: payload.data.paid_at,
+    customer: payload.data.customer ? { email: payload.data.customer.email ?? null } : null,
+    metadata: payload.data.metadata ?? null,
+  }) as Prisma.InputJsonObject;
 }
 
-/** Lightweight verify used by webhooks (amount/email already checked by caller when needed). */
-export async function fetchPaystackVerification(reference: string) {
+export async function fetchPaystackVerification(reference: string): Promise<Prisma.InputJsonObject> {
   const response = await fetch(`${PAYSTACK_URL}/transaction/verify/${encodeURIComponent(reference)}`, {
     headers: {
       Authorization: `Bearer ${getPaystackSecretKey()}`,
@@ -113,7 +127,7 @@ export async function fetchPaystackVerification(reference: string) {
   if (!response.ok || !payload.status || !payload.data) {
     throw new Error(payload.message || "Paystack verification failed.");
   }
-  return payload.data;
+  return toPrismaJson(payload.data) as Prisma.InputJsonObject;
 }
 
 export function verifyPaystackWebhookSignature(rawBody: string, signature: string | null) {
