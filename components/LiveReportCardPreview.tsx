@@ -143,6 +143,26 @@ export default function LiveReportCardPreview({
           </div>
         </div>
       </div>
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border-subtle)] px-8 py-6">
+        <div className="flex items-center gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${encodeURIComponent(`${typeof window !== "undefined" ? window.location.origin : "https://ykaycollege.com"}/verify/report/${encodeURIComponent(reportNumber)}`)}`}
+            alt="Report verification QR code"
+            width={72}
+            height={72}
+            className="rounded-lg border border-[var(--border-subtle)] bg-white p-1"
+          />
+          <div>
+            <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Verify this document</div>
+            <div className="mt-1 text-xs text-[var(--text-secondary)]">Scan the QR code or visit:</div>
+            <div className="text-xs font-bold text-brand-green break-all">/verify/report/{reportNumber}</div>
+          </div>
+        </div>
+        <div className="text-right text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+          Official document of<br /><span className="font-bold text-[var(--text-primary)]">Ykay College &amp; Leadership Academy</span>
+        </div>
+      </div>
     </div>
   );
 }

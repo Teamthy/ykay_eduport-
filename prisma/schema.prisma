@@ -118,6 +118,31 @@ enum NotificationKind {
   SYSTEM
 }
 
+enum GradebookStatus {
+  OPEN
+  SUBMITTED
+  LOCKED
+}
+
+enum ExamStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum ExamQuestionType {
+  MCQ
+  TRUE_FALSE
+  FILL_BLANK
+  ESSAY
+}
+
+enum ExamAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  GRADED
+}
+
 model School {
   id                     String                      @id @default(cuid())
   slug                   String                      @unique
@@ -146,6 +171,8 @@ model School {
   itEnrollments           ItEnrollment[]
   notificationJobs        NotificationJob[]
   userNotifications       UserNotification[]
+  gradebooks              SubjectGradebook[]
+  exams                   Exam[]
 }
 
 model User {
@@ -193,6 +220,8 @@ model TeacherProfile {
   classAssignments   TeacherClassAssignment[]
   attendanceSessions AttendanceSession[]
   correctionRequests AttendanceCorrectionRequest[]
+  gradebooks         SubjectGradebook[]
+  exams              Exam[]
 
   @@index([schoolId, displayName])
 }
@@ -234,6 +263,8 @@ model SchoolClass {
   students           StudentProfile[]
   teacherAssignments TeacherClassAssignment[]
   attendanceSessions AttendanceSession[]
+  gradebooks         SubjectGradebook[]
+  exams              Exam[]
 
   @@unique([schoolId, displayName])
   @@index([schoolId, level, arm])
@@ -266,6 +297,9 @@ model StudentProfile {
   feeInvoices      FeeInvoice[]
   feePayments      FeePayment[]
   reportCards      ReportCard[]
+  gradebookEntries GradebookEntry[]
+  examAttempts     ExamAttempt[]
+  examRetakes      ExamRetake[]
 
   @@unique([schoolId, studentId])
   @@index([currentClassId, isActive])
@@ -646,6 +680,155 @@ model UserNotification {
   @@index([userId, readAt])
   @@index([userId, createdAt])
   @@index([schoolId, kind, createdAt])
+}
+
+model SubjectGradebook {
+  id               String          @id @default(cuid())
+  schoolId         String
+  classId          String
+  teacherProfileId String
+  subjectName      String
+  sessionLabel     String
+  termLabel        String
+  status           GradebookStatus @default(OPEN)
+  submittedAt      DateTime?
+  lockedAt         DateTime?
+  lockedByUserId   String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  school           School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classroom        SchoolClass     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacherProfile   TeacherProfile  @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  entries          GradebookEntry[]
+
+  @@unique([classId, subjectName, sessionLabel, termLabel])
+  @@index([schoolId, status, updatedAt])
+  @@index([teacherProfileId, updatedAt])
+}
+
+model GradebookEntry {
+  id               String           @id @default(cuid())
+  gradebookId      String
+  studentProfileId String
+  ca1              Int              @default(0)
+  ca2              Int              @default(0)
+  midterm          Int              @default(0)
+  assignment       Int              @default(0)
+  exam             Int              @default(0)
+  total            Int              @default(0)
+  grade            String           @default("F9")
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  gradebook        SubjectGradebook @relation(fields: [gradebookId], references: [id], onDelete: Cascade)
+  studentProfile   StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([gradebookId, studentProfileId])
+  @@index([studentProfileId, updatedAt])
+}
+
+model Exam {
+  id               String            @id @default(cuid())
+  schoolId         String
+  classId          String
+  teacherProfileId String
+  subjectName      String
+  title            String
+  examType         String            @default("CA")
+  durationMinutes  Int               @default(30)
+  totalMarks       Int               @default(0)
+  passMark         Int               @default(40)
+  instructions     String?
+  shuffleQuestions Boolean           @default(true)
+  status           ExamStatus        @default(DRAFT)
+  resultsReleased  Boolean           @default(false)
+  scheduledFor     DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  school           School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classroom        SchoolClass       @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacherProfile   TeacherProfile    @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  questions        ExamQuestion[]
+  attempts         ExamAttempt[]
+  retakes          ExamRetake[]
+
+  @@index([schoolId, status, createdAt])
+  @@index([classId, status])
+  @@index([teacherProfileId, createdAt])
+}
+
+model ExamQuestion {
+  id           String           @id @default(cuid())
+  examId       String
+  type         ExamQuestionType
+  questionText String
+  options      Json?
+  correctKey   String?
+  correctText  String?
+  marks        Int              @default(1)
+  sortOrder    Int              @default(0)
+  createdAt    DateTime         @default(now())
+
+  exam         Exam             @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers      ExamAnswer[]
+
+  @@index([examId, sortOrder])
+}
+
+model ExamAttempt {
+  id               String            @id @default(cuid())
+  examId           String
+  studentProfileId String
+  attemptNumber    Int               @default(1)
+  status           ExamAttemptStatus @default(IN_PROGRESS)
+  startedAt        DateTime          @default(now())
+  submittedAt      DateTime?
+  deadlineAt       DateTime
+  autoScore        Int               @default(0)
+  essayScore       Int               @default(0)
+  totalScore       Int               @default(0)
+  tabSwitches      Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  exam             Exam              @relation(fields: [examId], references: [id], onDelete: Cascade)
+  studentProfile   StudentProfile    @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  answers          ExamAnswer[]
+
+  @@unique([examId, studentProfileId, attemptNumber])
+  @@index([examId, status])
+  @@index([studentProfileId, createdAt])
+}
+
+model ExamAnswer {
+  id           String       @id @default(cuid())
+  attemptId    String
+  questionId   String
+  response     String?
+  isCorrect    Boolean?
+  awardedMarks Int?
+  updatedAt    DateTime     @updatedAt
+
+  attempt      ExamAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question     ExamQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+}
+
+model ExamRetake {
+  id               String         @id @default(cuid())
+  examId           String
+  studentProfileId String
+  grantedByUserId  String
+  used             Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+
+  exam             Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, studentProfileId])
 }
 
 model AdmissionApplication {
