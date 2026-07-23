@@ -22,25 +22,21 @@ const PORTAL_SWITCHER = [
 
 const ADMIN_NAV = [
   { label: "Admin Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Admissions Queue", href: "/admin-admissions", icon: ClipboardCheck },
   { label: "Finances", href: "/admin/finances", icon: CreditCard, badge: "New" },
   { label: "View Questions", href: "/admin/questions", icon: HelpCircle },
-  { label: "Mark Presence", href: "/admin/mark-presence", icon: UserCheck },
   { label: "Generate ID Cards", href: "/admin/id-cards", icon: IdCard },
   { label: "Attendance Analytics", href: "/admin/attendance-analytics", icon: BarChart3, badge: "Live" },
   { label: "Attendance Corrections", href: "/admin/attendance-corrections", icon: ClipboardCheck, badge: "Live" },
-  { label: "Academic Overview", href: "/admin/academic-overview", icon: BarChart3 },
-  { label: "View Student Attendance", href: "/admin/student-attendance", icon: Users },
-  { label: "View Student Information", href: "/admin/students", icon: BookOpen },
+  { label: "Student Records", href: "/admin/students", icon: Users },
   { label: "Fee Management", href: "/admin/fees", icon: CreditCard },
   { label: "Report Cards", href: "/admin/report-cards", icon: FileText },
   { label: "Gradebook Lock", href: "/admin/gradebook-lock", icon: Lock, badge: "Live" },
   { label: "Broadsheet", href: "/admin/broadsheet", icon: BarChart3, badge: "New" },
   { label: "Class Manager", href: "/admin/class-manager", icon: School, badge: "New" },
   { label: "Post & News", href: "/admin/news", icon: Send, badge: "New" },
-  { label: "Staff Assignments", href: "/admin/staff-assignments", icon: UserPlus },
+  { label: "Staff Accounts", href: "/admin/staff", icon: UserPlus },
   { label: "Notifications", href: "/admin/notifications", icon: Send, badge: "Live" },
-  { label: "Broadcasts", href: "/admin/broadcasts", icon: Send },
-  { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 export default function AdminSidebar() {
@@ -93,11 +89,6 @@ export default function AdminSidebar() {
               <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-brand-green" /><span className="text-[10px] text-brand-green font-bold">ADMIN</span></div>
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-orange/10 border border-brand-orange/30">
-          <Eye size={14} className="text-brand-orange" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-brand-orange">Demo Mode</span>
         </div>
 
         {/* Admin Tools Label */}

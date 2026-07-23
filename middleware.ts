@@ -1,7 +1,7 @@
 import { jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedPrefixes = ["/admin", "/admin-admissions", "/teacher", "/student", "/parent", "/it-portal", "/super-admin"];
+const protectedPrefixes = ["/admin", "/admin-admissions", "/teacher", "/student", "/parent", "/it-portal", "/super-admin", "/change-password"];
 const publicItPaths = ["/it-portal/auth"];
 const encoder = new TextEncoder();
 
@@ -26,6 +26,8 @@ export async function middleware(request: NextRequest) {
   try {
     const { payload } = await jwtVerify(token, encoder.encode(secret));
     const role = typeof payload.role === "string" ? payload.role : "";
+    if (payload.mustChangePassword === true && pathname !== "/change-password") return NextResponse.redirect(new URL("/change-password", request.url));
+    const changePasswordPath = pathname.startsWith("/change-password");
     const adminPath = pathname.startsWith("/admin") || pathname.startsWith("/admin-admissions");
     const teacherPath = pathname.startsWith("/teacher");
     const parentPath = pathname.startsWith("/parent");
@@ -33,6 +35,7 @@ export async function middleware(request: NextRequest) {
     const itPath = pathname.startsWith("/it-portal");
     const superPath = pathname.startsWith("/super-admin");
     const allowed =
+      (changePasswordPath) ||
       (superPath && role === "SUPER_ADMIN") ||
       (adminPath && ["ADMIN", "DIRECTOR", "COORDINATOR", "BURSAR", "SUPER_ADMIN"].includes(role)) ||
       (teacherPath && ["TEACHER", "HOD", "ADMIN", "DIRECTOR"].includes(role)) ||
