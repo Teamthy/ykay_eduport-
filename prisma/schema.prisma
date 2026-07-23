@@ -47,41 +47,303 @@ enum PaymentProvider {
   CASH
 }
 
-model School {
-  id        String   @id @default(cuid())
-  slug      String   @unique
-  name      String
-  address   String
-  phone     String
-  email     String?
-  motto     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum TeacherAssignmentRole {
+  FORM_TEACHER
+  SUBJECT_TEACHER
+}
 
-  users        User[]
-  applications AdmissionApplication[]
-  auditLogs    AuditLog[]
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum AlertChannel {
+  SMS
+  WHATSAPP
+  EMAIL
+}
+
+enum AlertDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+enum AttendanceCorrectionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model School {
+  id                     String                      @id @default(cuid())
+  slug                   String                      @unique
+  name                   String
+  address                String
+  phone                  String
+  email                  String?
+  motto                  String?
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+
+  users                   User[]
+  applications            AdmissionApplication[]
+  auditLogs               AuditLog[]
+  classes                 SchoolClass[]
+  teacherProfiles         TeacherProfile[]
+  parentProfiles          ParentProfile[]
+  studentProfiles         StudentProfile[]
+  teacherClassAssignments TeacherClassAssignment[]
+  attendanceSessions      AttendanceSession[]
+  attendanceAlertJobs     AttendanceAlertJob[]
+  correctionRequests      AttendanceCorrectionRequest[]
 }
 
 model User {
-  id           String    @id @default(cuid())
-  schoolId     String
-  email        String    @unique
-  name         String
-  role         UserRole
-  passwordHash String
-  isActive     Boolean   @default(true)
-  isSuspended  Boolean   @default(false)
-  lastLoginAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                         String                        @id @default(cuid())
+  schoolId                   String
+  email                      String                        @unique
+  name                       String
+  role                       UserRole
+  passwordHash               String
+  isActive                   Boolean                       @default(true)
+  isSuspended                Boolean                       @default(false)
+  lastLoginAt                DateTime?
+  createdAt                  DateTime                      @default(now())
+  updatedAt                  DateTime                      @updatedAt
 
-  school              School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  refreshTokens       RefreshToken[]
-  passwordResetTokens PasswordResetToken[]
-  auditLogs           AuditLog[]
+  school                      School                        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  refreshTokens               RefreshToken[]
+  passwordResetTokens         PasswordResetToken[]
+  auditLogs                   AuditLog[]
+  teacherProfile              TeacherProfile?
+  studentProfile              StudentProfile?
+  parentProfile               ParentProfile?
+  requestedCorrectionRequests AttendanceCorrectionRequest[] @relation("CorrectionRequester")
+  reviewedCorrectionRequests  AttendanceCorrectionRequest[] @relation("CorrectionReviewer")
 
   @@index([schoolId, role])
+}
+
+model TeacherProfile {
+  id                 String                        @id @default(cuid())
+  schoolId           String
+  userId             String                        @unique
+  displayName        String
+  phone              String?
+  photoUrl           String?
+  roleLabel          String?
+  isActive           Boolean                       @default(true)
+  createdAt          DateTime                      @default(now())
+  updatedAt          DateTime                      @updatedAt
+
+  school             School                        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user               User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classAssignments   TeacherClassAssignment[]
+  attendanceSessions AttendanceSession[]
+  correctionRequests AttendanceCorrectionRequest[]
+
+  @@index([schoolId, displayName])
+}
+
+model ParentProfile {
+  id              String              @id @default(cuid())
+  schoolId        String
+  userId          String              @unique
+  displayName     String
+  phone           String?
+  photoUrl        String?
+  isActive        Boolean             @default(true)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  school          School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentLinks    ParentStudentLink[]
+  attendanceJobs  AttendanceAlertJob[]
+
+  @@index([schoolId, displayName])
+}
+
+model SchoolClass {
+  id                 String                   @id @default(cuid())
+  schoolId           String
+  level              String
+  arm                String
+  displayName        String
+  isActive           Boolean                  @default(true)
+  capacity           Int?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  school             School                   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  students           StudentProfile[]
+  teacherAssignments TeacherClassAssignment[]
+  attendanceSessions AttendanceSession[]
+
+  @@unique([schoolId, displayName])
+  @@index([schoolId, level, arm])
+}
+
+model StudentProfile {
+  id               String              @id @default(cuid())
+  schoolId         String
+  currentClassId   String
+  userId           String?             @unique
+  studentId        String
+  firstName        String
+  lastName         String
+  otherNames       String?
+  displayName      String
+  gender           String?
+  guardianName     String?
+  guardianPhone    String?
+  guardianEmail    String?
+  isActive         Boolean             @default(true)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  school           School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  currentClass     SchoolClass         @relation(fields: [currentClassId], references: [id], onDelete: Restrict)
+  user             User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  attendanceEntries AttendanceEntry[]
+  parentLinks      ParentStudentLink[]
+  attendanceJobs   AttendanceAlertJob[]
+
+  @@unique([schoolId, studentId])
+  @@index([currentClassId, isActive])
+  @@index([schoolId, displayName])
+}
+
+model ParentStudentLink {
+  id              String         @id @default(cuid())
+  parentProfileId String
+  studentProfileId String
+  relationship    String?
+  isPrimary       Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+
+  parentProfile   ParentProfile  @relation(fields: [parentProfileId], references: [id], onDelete: Cascade)
+  studentProfile  StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([parentProfileId, studentProfileId])
+  @@index([studentProfileId, isPrimary])
+}
+
+model TeacherClassAssignment {
+  id                 String                @id @default(cuid())
+  schoolId           String
+  teacherProfileId   String
+  classId            String
+  role               TeacherAssignmentRole
+  subjectName        String?
+  isActive           Boolean               @default(true)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  school             School                @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  teacherProfile     TeacherProfile        @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  classroom          SchoolClass           @relation(fields: [classId], references: [id], onDelete: Cascade)
+  attendanceSessions AttendanceSession[]
+
+  @@unique([teacherProfileId, classId, role])
+  @@index([schoolId, classId, role])
+  @@index([teacherProfileId, isActive])
+}
+
+model AttendanceSession {
+  id                  String                        @id @default(cuid())
+  schoolId            String
+  classId             String
+  teacherProfileId    String
+  assignmentId        String?
+  sessionDate         DateTime
+  periodKey           String                        @default("DAILY_REGISTER")
+  notes               String?
+  submittedAt         DateTime?
+  isLocked            Boolean                       @default(false)
+  createdAt           DateTime                      @default(now())
+  updatedAt           DateTime                      @updatedAt
+
+  school              School                        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classroom           SchoolClass                   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacherProfile      TeacherProfile                @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  assignment          TeacherClassAssignment?       @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+  entries             AttendanceEntry[]
+  alertJobs           AttendanceAlertJob[]
+  correctionRequests  AttendanceCorrectionRequest[]
+
+  @@unique([classId, sessionDate, periodKey])
+  @@index([teacherProfileId, sessionDate])
+  @@index([schoolId, sessionDate])
+}
+
+model AttendanceEntry {
+  id               String           @id @default(cuid())
+  sessionId        String
+  studentProfileId String
+  status           AttendanceStatus
+  note             String?
+  markedAt         DateTime         @default(now())
+
+  session          AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentProfile   StudentProfile    @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentProfileId])
+  @@index([studentProfileId, markedAt])
+}
+
+model AttendanceAlertJob {
+  id               String              @id @default(cuid())
+  schoolId         String
+  attendanceSessionId String
+  studentProfileId String
+  parentProfileId  String?
+  channel          AlertChannel
+  status           AlertDeliveryStatus @default(PENDING)
+  recipientName    String?
+  recipientPhone   String?
+  recipientEmail   String?
+  messagePreview   String
+  payload          Json?
+  processedAt      DateTime?
+  failureReason    String?
+  createdAt        DateTime            @default(now())
+
+  school           School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  attendanceSession AttendanceSession  @relation(fields: [attendanceSessionId], references: [id], onDelete: Cascade)
+  studentProfile   StudentProfile      @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  parentProfile    ParentProfile?      @relation(fields: [parentProfileId], references: [id], onDelete: SetNull)
+
+  @@unique([attendanceSessionId, studentProfileId, channel])
+  @@index([schoolId, status, channel, createdAt])
+  @@index([parentProfileId, createdAt])
+}
+
+model AttendanceCorrectionRequest {
+  id                String                     @id @default(cuid())
+  schoolId          String
+  attendanceSessionId String
+  teacherProfileId  String
+  requestedByUserId String
+  reviewedByUserId  String?
+  reason            String
+  status            AttendanceCorrectionStatus @default(PENDING)
+  resolutionNote    String?
+  reviewedAt        DateTime?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+
+  school            School                     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  attendanceSession AttendanceSession          @relation(fields: [attendanceSessionId], references: [id], onDelete: Cascade)
+  teacherProfile    TeacherProfile             @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  requestedBy       User                       @relation("CorrectionRequester", fields: [requestedByUserId], references: [id], onDelete: Cascade)
+  reviewedBy        User?                      @relation("CorrectionReviewer", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, status, createdAt])
+  @@index([attendanceSessionId, status])
 }
 
 model AdmissionApplication {
@@ -125,7 +387,7 @@ model AdmissionApplication {
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
 
-  school    School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school    School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   documents AdmissionDocument[]
   payment   PaymentTransaction?
 
@@ -166,12 +428,12 @@ model PaymentTransaction {
 }
 
 model PasswordResetToken {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
-  tokenHash String    @unique
+  tokenHash String   @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -179,12 +441,12 @@ model PasswordResetToken {
 }
 
 model RefreshToken {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
-  tokenHash String    @unique
+  tokenHash String   @unique
   expiresAt DateTime
   revokedAt DateTime?
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
