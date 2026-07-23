@@ -1,55 +1,70 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
-import { X, CreditCard, Lock, CheckCircle2 } from "lucide-react";
+import { X, ExternalLink, LoaderCircle, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Props {
   open: boolean;
   amount: number;
   email: string;
+  /** When provided, Pay Now redirects to Paystack hosted checkout (production). */
+  authorizationUrl?: string | null;
+  busy?: boolean;
   onClose: () => void;
-  onSuccess: (ref: string) => void;
+  /** Optional legacy callback — unused when authorizationUrl is set. */
+  onSuccess?: (ref: string) => void;
+  onPaystackRedirect?: () => void;
 }
 
-export default function PaystackModal({ open, amount, email, onClose, onSuccess }: Props) {
-  const [step, setStep] = useState<"details" | "processing" | "success">("details");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
+/**
+ * Production modal: never collects card numbers.
+ * Redirects the parent to Paystack hosted checkout.
+ */
+export default function PaystackModal({
+  open,
+  amount,
+  email,
+  authorizationUrl,
+  busy,
+  onClose,
+  onPaystackRedirect,
+}: Props) {
+  const [leaving, setLeaving] = useState(false);
 
   const handlePay = () => {
-    setStep("processing");
-    setTimeout(() => {
-      setStep("success");
-      setTimeout(() => {
-        const ref = `PSK-${Date.now()}`;
-        onSuccess(ref);
-        setStep("details");
-        onClose();
-      }, 2000);
-    }, 2500);
+    if (!authorizationUrl) return;
+    setLeaving(true);
+    onPaystackRedirect?.();
+    window.location.href = authorizationUrl;
   };
 
   return (
     <AnimatePresence>
       {open && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[150] bg-black/70 backdrop-blur-sm flex items-center justify-center p-6"
-          onClick={step === "details" ? onClose : undefined}>
-          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
-            className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden"
-            onClick={e => e.stopPropagation()}>
-
-            <div className="bg-[#0ea5e9] p-6 text-white relative">
-              {step === "details" && (
-                <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[150] flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm"
+          onClick={busy || leaving ? undefined : onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.95 }}
+            className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative bg-[#0ea5e9] p-6 text-white">
+              {!busy && !leaving && (
+                <button onClick={onClose} className="absolute right-4 top-4 text-white/80 hover:text-white" aria-label="Close">
                   <X size={20} />
                 </button>
               )}
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#0ea5e9] font-bold">P</div>
-                <span className="font-bold text-lg">Paystack</span>
+              <div className="mb-2 flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white font-bold text-[#0ea5e9]">P</div>
+                <span className="text-lg font-bold">Paystack Checkout</span>
               </div>
               <div className="text-xs text-white/70">{email}</div>
               <div className="mt-4">
@@ -58,48 +73,33 @@ export default function PaystackModal({ open, amount, email, onClose, onSuccess 
               </div>
             </div>
 
-            {step === "details" && (
-              <div className="p-6 space-y-4 text-gray-800">
-                <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">Card Number</label>
-                  <input value={cardNumber} onChange={e => setCardNumber(e.target.value)} placeholder="0000 0000 0000 0000"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:border-[#0ea5e9] focus:outline-none" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">Expiry</label>
-                    <input value={expiry} onChange={e => setExpiry(e.target.value)} placeholder="MM/YY"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:border-[#0ea5e9] focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">CVV</label>
-                    <input value={cvv} onChange={e => setCvv(e.target.value)} placeholder="123"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:border-[#0ea5e9] focus:outline-none" />
-                  </div>
-                </div>
-                <button onClick={handlePay} className="w-full py-4 rounded-lg bg-[#0ea5e9] hover:bg-[#0284c7] text-white font-bold transition-all flex items-center justify-center gap-2">
-                  <Lock size={16} /> Pay ₦{amount.toLocaleString()}
-                </button>
-                <p className="text-[10px] text-center text-gray-400">Demo mode · No real transaction</p>
+            <div className="space-y-4 p-6 text-gray-800">
+              <div className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-sm">
+                <ShieldCheck className="mt-0.5 shrink-0 text-brand-green" size={18} />
+                <p>
+                  Card details are entered only on Paystack&apos;s secure page. Ykay College never stores or processes raw
+                  card numbers.
+                </p>
               </div>
-            )}
 
-            {step === "processing" && (
-              <div className="p-10 text-center">
-                <div className="w-16 h-16 rounded-full border-4 border-[#0ea5e9] border-t-transparent animate-spin mx-auto mb-4" />
-                <p className="text-gray-600">Processing payment...</p>
-              </div>
-            )}
+              <button
+                onClick={handlePay}
+                disabled={!authorizationUrl || busy || leaving}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#0ea5e9] py-4 font-bold text-white transition-all hover:bg-[#0284c7] disabled:opacity-50"
+              >
+                {busy || leaving ? <LoaderCircle className="animate-spin" size={18} /> : <ExternalLink size={18} />}
+                {authorizationUrl ? "Continue to Paystack" : "Preparing checkout…"}
+              </button>
 
-            {step === "success" && (
-              <div className="p-10 text-center">
-                <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle2 className="text-green-500" size={40} />
-                </div>
-                <h3 className="font-bold text-xl text-gray-800 mb-2">Payment Successful</h3>
-                <p className="text-sm text-gray-500">Receipt sent to {email}</p>
-              </div>
-            )}
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={busy || leaving}
+                className="w-full py-2 text-sm font-medium text-gray-500 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+            </div>
           </motion.div>
         </motion.div>
       )}

@@ -1,114 +1,88 @@
-import { readFileSync, readdirSync } from "fs";
-import { join } from "path";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Calendar, ArrowRight } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { ArrowRight, Calendar } from "lucide-react";
 
-interface NewsItem {
-  title: string;
-  date: string;
-  category: string;
-  summary: string;
-  file: string;
-}
+export const dynamic = "force-dynamic";
 
-function loadNewsContent(): NewsItem[] {
+async function loadPosts() {
   try {
-    const contentDir = join(process.cwd(), "content", "news");
-    const files = readdirSync(contentDir).filter((f: string) => f.endsWith(".md"));
-    return files
-      .map((file: string) => {
-        const raw = readFileSync(join(contentDir, file), "utf8");
-        const titleMatch = raw.match(/title: "([^"]+)"/);
-        const dateMatch = raw.match(/date: "([^"]+)"/);
-        const categoryMatch = raw.match(/category: "([^"]+)"/);
-        const body = raw.split("---").pop() || "";
-        return {
-          title: titleMatch ? titleMatch[1] : file,
-          date: dateMatch ? dateMatch[1] : "",
-          category: categoryMatch ? categoryMatch[1] : "News",
-          summary:
-            body.trim().substring(0, 160) +
-            (body.trim().length > 160 ? "..." : ""),
-          file,
-        };
-      })
-      .sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-      );
+    const school = await prisma.school.findFirst({ orderBy: { createdAt: "asc" } });
+    if (!school) return [];
+    return prisma.newsPost.findMany({
+      where: { schoolId: school.id, isPublished: true },
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      take: 40,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        category: true,
+        excerpt: true,
+        publishedAt: true,
+      },
+    });
   } catch {
     return [];
   }
 }
 
-export default function NewsPage() {
-  const news = loadNewsContent();
+export default async function NewsPage() {
+  const posts = await loadPosts();
 
   return (
     <>
       <Header />
-      <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        {/* Hero */}
-        <section className="relative w-full bg-[var(--bg-primary)] pt-32 pb-12 md:pt-40 md:pb-16">
-          <div className="mx-auto max-w-7xl px-6">
-            <p className="font-body text-xs font-bold tracking-[0.25em] uppercase text-[var(--accent-primary)] mb-4">
-              NEWS &amp; EVENTS
-            </p>
-            <h1 className="font-display text-[56px] md:text-[100px] lg:text-[130px] leading-[0.85] tracking-[4px] text-[var(--text-primary)] mb-4">
-              LATEST NEWS
+      <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+        <section className="bg-brand-navy px-6 pb-14 pt-28 text-white">
+          <div className="mx-auto max-w-7xl">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">School journal</p>
+            <h1 className="mt-3 font-display text-5xl tracking-widest">
+              NEWS & <span className="text-brand-green">EVENTS</span>
             </h1>
-            <p className="font-body text-base md:text-lg text-[var(--text-secondary)] max-w-xl">
-              Updates from campus, events, achievements, and announcements.
+            <p className="mt-3 max-w-2xl text-sm text-white/65">
+              Official updates from Ykay College — published by the school communications team.
             </p>
           </div>
         </section>
 
-        {/* News list */}
-        <section className="w-full bg-[var(--bg-primary)] pb-20 md:pb-32">
-          <div className="mx-auto max-w-5xl px-6">
-            {news.length > 0 ? (
-              <div className="space-y-6">
-                {news.map((item) => (
-                  <a
-                    key={item.title}
-                    href="#"
-                    className="group block rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-[var(--accent-primary)] hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-0.5 transition-all duration-300 p-8 md:p-10"
-                  >
-                    <div className="flex flex-wrap items-center gap-4 md:gap-6 mb-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-brand-green/10 font-body text-[10px] font-bold tracking-[0.2em] uppercase text-brand-green">
-                        {item.category}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 font-body text-xs text-[var(--text-muted)]">
-                        <Calendar size={12} /> {item.date}
-                      </span>
-                    </div>
-                    <h3 className="font-display text-xl md:text-2xl tracking-[2px] text-[var(--text-primary)] mb-3 group-hover:text-[var(--accent-primary)] transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="font-body text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
-                      {item.summary}
-                    </p>
-                    <span className="inline-flex items-center gap-2 font-body text-xs font-bold tracking-[0.15em] uppercase text-[var(--accent-primary)] group-hover:gap-3 transition-all">
-                      Read More <ArrowRight size={12} />
+        <section className="mx-auto max-w-7xl px-6 py-12">
+          {posts.length ? (
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {posts.map((post) => (
+                <article
+                  key={post.id}
+                  className="flex flex-col rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-brand-green/40"
+                >
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className="rounded-full bg-brand-green/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                      {post.category}
                     </span>
-                  </a>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] p-12 text-center">
-                <Calendar
-                  size={40}
-                  className="mx-auto mb-4 text-[var(--text-muted)]"
-                />
-                <h3 className="font-display text-xl tracking-[2px] text-[var(--text-primary)] mb-2">
-                  No News Articles Yet
-                </h3>
-                <p className="font-body text-sm text-[var(--text-secondary)]">
-                  Check back soon for the latest updates from Ykay College.
-                </p>
-              </div>
-            )}
-          </div>
+                    <span className="inline-flex items-center gap-1 text-[11px] text-[var(--text-muted)]">
+                      <Calendar size={12} />
+                      {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : "—"}
+                    </span>
+                  </div>
+                  <h2 className="font-display text-2xl tracking-wide text-[var(--text-primary)]">{post.title}</h2>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">{post.excerpt}</p>
+                  <Link
+                    href={`/news-events/${post.slug}`}
+                    className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-brand-green"
+                  >
+                    Read more <ArrowRight size={14} />
+                  </Link>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-3xl border border-dashed border-[var(--border-default)] bg-[var(--surface-card)] p-12 text-center">
+              <p className="font-display text-2xl tracking-widest text-[var(--text-primary)]">No published posts yet</p>
+              <p className="mt-2 text-sm text-[var(--text-muted)]">
+                When the admin team publishes from Post & News, stories appear here automatically.
+              </p>
+            </div>
+          )}
         </section>
       </main>
       <Footer />

@@ -12,6 +12,17 @@ interface PaystackVerificationResponse {
     currency: string;
     paid_at: string | null;
     customer?: { email?: string | null };
+    metadata?: Record<string, unknown>;
+  };
+}
+
+interface PaystackInitResponse {
+  status: boolean;
+  message: string;
+  data?: {
+    authorization_url: string;
+    access_code: string;
+    reference: string;
   };
 }
 
@@ -27,7 +38,43 @@ function getPaystackSecretKey() {
   return key;
 }
 
-export async function verifyPaystackTransaction(reference: string, expectedAmountKobo: number, expectedEmail: string) {
+export async function initializePaystackTransaction(input: {
+  email: string;
+  amount: number; // kobo
+  reference: string;
+  callbackUrl: string;
+  metadata?: Record<string, unknown>;
+}) {
+  const response = await fetch(`${PAYSTACK_URL}/transaction/initialize`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getPaystackSecretKey()}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      email: input.email,
+      amount: input.amount,
+      reference: input.reference,
+      currency: "NGN",
+      callback_url: input.callbackUrl,
+      metadata: input.metadata || {},
+    }),
+    cache: "no-store",
+  });
+
+  const payload = (await response.json()) as PaystackInitResponse;
+  if (!response.ok || !payload.status || !payload.data?.authorization_url) {
+    throw new Error(payload.message || "Unable to initialize Paystack checkout.");
+  }
+  return payload.data;
+}
+
+export async function verifyPaystackTransaction(
+  reference: string,
+  expectedAmountKobo: number,
+  expectedEmail: string
+) {
   const response = await fetch(`${PAYSTACK_URL}/transaction/verify/${encodeURIComponent(reference)}`, {
     headers: {
       Authorization: `Bearer ${getPaystackSecretKey()}`,
@@ -47,9 +94,25 @@ export async function verifyPaystackTransaction(reference: string, expectedAmoun
     payload.data.currency !== "NGN" ||
     email !== expectedEmail.trim().toLowerCase()
   ) {
-    throw new Error("We could not verify this payment. Please contact admissions if your account was charged.");
+    throw new Error("We could not verify this payment. Please contact the bursary if your account was charged.");
   }
 
+  return payload.data;
+}
+
+/** Lightweight verify used by webhooks (amount/email already checked by caller when needed). */
+export async function fetchPaystackVerification(reference: string) {
+  const response = await fetch(`${PAYSTACK_URL}/transaction/verify/${encodeURIComponent(reference)}`, {
+    headers: {
+      Authorization: `Bearer ${getPaystackSecretKey()}`,
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  });
+  const payload = (await response.json()) as PaystackVerificationResponse;
+  if (!response.ok || !payload.status || !payload.data) {
+    throw new Error(payload.message || "Paystack verification failed.");
+  }
   return payload.data;
 }
 

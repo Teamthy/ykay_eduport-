@@ -95,6 +95,7 @@ enum FeePaymentMethod {
 }
 
 enum FeePaymentStatus {
+  PENDING_REVIEW
   COMPLETED
   FAILED
   REFUNDED
@@ -168,6 +169,7 @@ model School {
   correctionRequests      AttendanceCorrectionRequest[]
   feeInvoices             FeeInvoice[]
   feePayments             FeePayment[]
+  feePaymentAttempts      FeePaymentAttempt[]
   reportCards             ReportCard[]
   itEnrollments           ItEnrollment[]
   notificationJobs        NotificationJob[]
@@ -243,13 +245,14 @@ model ParentProfile {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  school         School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  studentLinks   ParentStudentLink[]
-  attendanceJobs AttendanceAlertJob[]
-  feeInvoices    FeeInvoice[]
-  feePayments    FeePayment[]
-  reportCards    ReportCard[]
+  school             School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentLinks       ParentStudentLink[]
+  attendanceJobs     AttendanceAlertJob[]
+  feeInvoices        FeeInvoice[]
+  feePayments        FeePayment[]
+  feePaymentAttempts FeePaymentAttempt[]
+  reportCards        ReportCard[]
 
   @@index([schoolId, displayName])
 }
@@ -303,6 +306,7 @@ model StudentProfile {
   attendanceJobs       AttendanceAlertJob[]
   feeInvoices          FeeInvoice[]
   feePayments          FeePayment[]
+  feePaymentAttempts   FeePaymentAttempt[]
   reportCards          ReportCard[]
   gradebookEntries     GradebookEntry[]
   examAttempts         ExamAttempt[]
@@ -460,11 +464,12 @@ model FeeInvoice {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
-  school         School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  studentProfile StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
-  parentProfile  ParentProfile?   @relation(fields: [parentProfileId], references: [id], onDelete: SetNull)
-  items          FeeInvoiceItem[]
-  payments       FeePayment[]
+  school          School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentProfile  StudentProfile      @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  parentProfile   ParentProfile?      @relation(fields: [parentProfileId], references: [id], onDelete: SetNull)
+  items           FeeInvoiceItem[]
+  payments        FeePayment[]
+  paymentAttempts FeePaymentAttempt[]
 
   @@index([schoolId, status, dueDate])
   @@index([studentProfileId, issuedAt])
@@ -509,6 +514,34 @@ model FeePayment {
   @@index([schoolId, paidAt])
   @@index([invoiceId, paidAt])
   @@index([parentProfileId, paidAt])
+}
+
+model FeePaymentAttempt {
+  id                String          @id @default(cuid())
+  schoolId          String
+  invoiceId         String
+  studentProfileId  String
+  parentProfileId   String?
+  provider          PaymentProvider
+  amount            Int
+  reference         String          @unique
+  status            PaymentStatus   @default(PENDING)
+  payerEmail        String?
+  transferDate      DateTime?
+  transferNarration String?
+  providerData      Json?
+  reviewedByUserId  String?
+  reviewedAt        DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  school         School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  invoice        FeeInvoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  parentProfile  ParentProfile? @relation(fields: [parentProfileId], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, status, createdAt])
+  @@index([invoiceId, status])
 }
 
 model ReportCard {

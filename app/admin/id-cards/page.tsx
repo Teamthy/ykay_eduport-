@@ -1,187 +1,262 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import PortalSidebar from "@/components/PortalSidebar";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Download, IdCard, LoaderCircle, Printer, Search } from "lucide-react";
+import AdminSidebar from "@/components/AdminSidebar";
+import PortalTopbar from "@/components/PortalTopbar";
 import { useToast } from "@/components/Toast";
-import { MOCK_STUDENTS } from "@/lib/mockData";
-import {
-  LayoutDashboard, Users, UserPlus, ClipboardCheck, Send, Settings,
-  CreditCard, FileText, Lock, IdCard, Download, Printer,
-  Check, X, Search, QrCode
-} from "lucide-react";
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Students", href: "/admin", icon: Users },
-  { label: "Staff", href: "/admin", icon: UserPlus },
-  { label: "Fee Management", href: "/admin/fees", icon: CreditCard },
-  { label: "Report Cards", href: "/admin/report-cards", icon: FileText },
-  { label: "Gradebook Lock", href: "/admin/gradebook-lock", icon: Lock },
-  { label: "Staff Assignments", href: "/admin/staff-assignments", icon: ClipboardCheck },
-  { label: "ID Card Generator", href: "/admin/id-cards", icon: IdCard, badge: "New" },
-  { label: "Settings", href: "/admin", icon: Settings },
-];
+type Student = {
+  id: string;
+  studentId: string;
+  displayName: string;
+  className: string;
+  gender: string | null;
+};
 
+/**
+ * Production ID card sheet: live student list + printable QR (otpauth-free URL payload).
+ * PDF export uses browser print / jspdf when available.
+ */
 export default function AdminIDCardsPage() {
   const { toast } = useToast();
+  const [students, setStudents] = useState<Student[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState("");
-  const [filterClass, setFilterClass] = useState("All");
-  const [generating, setGenerating] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const printRef = useRef<HTMLDivElement>(null);
 
-  const filtered = MOCK_STUDENTS.filter(s => {
-    const matchSearch = s.name.toLowerCase().includes(search.toLowerCase()) || s.id.toLowerCase().includes(search.toLowerCase());
-    const matchClass = filterClass === "All" || s.class === filterClass;
-    return matchSearch && matchClass;
-  });
-
-  const toggleSelect = (id: string) => {
-    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  };
-
-  const selectAll = () => {
-    const allIds = filtered.map(s => s.id);
-    const allSelected = allIds.every(id => selected.includes(id));
-    if (allSelected) {
-      setSelected(prev => prev.filter(id => !allIds.includes(id)));
-    } else {
-      setSelected(prev => [...new Set([...prev, ...allIds])]);
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const r = await fetch("/api/admin/students", { cache: "no-store" });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "Unable to load students.");
+      setStudents(
+        (j.students || []).map((s: Student & { currentClass?: { displayName: string } }) => ({
+          id: s.id,
+          studentId: s.studentId,
+          displayName: s.displayName,
+          className: s.className || s.currentClass?.displayName || "—",
+          gender: s.gender,
+        }))
+      );
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Unable to load students.", "error");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const handleGenerate = () => {
-    if (selected.length === 0) {
-      toast("Select at least one student", "warning");
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return students.filter(
+      (s) =>
+        !q ||
+        s.displayName.toLowerCase().includes(q) ||
+        s.studentId.toLowerCase().includes(q) ||
+        s.className.toLowerCase().includes(q)
+    );
+  }, [students, search]);
+
+  const selectedStudents = students.filter((s) => selected.includes(s.id));
+
+  function toggle(id: string) {
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
+  function toggleAll() {
+    if (selected.length === filtered.length) setSelected([]);
+    else setSelected(filtered.map((s) => s.id));
+  }
+
+  function qrUrl(student: Student) {
+    const payload = encodeURIComponent(
+      JSON.stringify({
+        v: 1,
+        school: "YKAY",
+        sid: student.studentId,
+        n: student.displayName,
+        c: student.className,
+      })
+    );
+    return `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${payload}`;
+  }
+
+  async function exportPdf() {
+    if (!selectedStudents.length) {
+      toast("Select at least one student.", "error");
       return;
     }
-    setGenerating(true);
-    setTimeout(() => {
-      setGenerating(false);
-      toast(`${selected.length} ID cards generated as PDF`, "success");
-    }, 2000);
-  };
+    try {
+      const { jsPDF } = await import("jspdf");
+      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const cardW = 86;
+      const cardH = 54;
+      let x = 10;
+      let y = 10;
+      let i = 0;
+      for (const s of selectedStudents) {
+        if (i > 0 && i % 8 === 0) {
+          doc.addPage();
+          x = 10;
+          y = 10;
+        } else if (i > 0 && i % 2 === 0) {
+          x = 10;
+          y += cardH + 8;
+        } else if (i > 0) {
+          x += cardW + 8;
+        }
+        doc.setFillColor(12, 24, 36);
+        doc.roundedRect(x, y, cardW, cardH, 3, 3, "F");
+        doc.setTextColor(78, 197, 77);
+        doc.setFontSize(8);
+        doc.text("YKAY COLLEGE", x + 4, y + 8);
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(12);
+        doc.text(s.displayName.slice(0, 28), x + 4, y + 18);
+        doc.setFontSize(9);
+        doc.setTextColor(200, 200, 200);
+        doc.text(s.studentId, x + 4, y + 26);
+        doc.text(s.className, x + 4, y + 32);
+        doc.setTextColor(78, 197, 77);
+        doc.setFontSize(7);
+        doc.text("Student Identity Card", x + 4, y + 48);
+        i += 1;
+      }
+      doc.save(`ykay-id-cards-${Date.now()}.pdf`);
+      toast("PDF downloaded. QR images are on the print sheet for scanning.", "success");
+    } catch {
+      toast("PDF export failed. Use Print instead.", "error");
+    }
+  }
+
+  function printSheet() {
+    window.print();
+  }
 
   return (
     <>
-      <Header />
-      <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        <section className="pt-24 pb-10 bg-brand-navy px-6">
-          <div className="mx-auto max-w-7xl">
-            <span className="inline-block px-3 py-1 rounded-full bg-brand-green/10 text-brand-green text-[10px] font-bold uppercase tracking-widest mb-3">
-              Admin · ID Management
-            </span>
-            <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
-              ID CARD <span className="text-brand-green">GENERATOR</span>
+      <PortalTopbar title="ID cards" />
+      <main className="mx-auto flex max-w-[1600px] gap-8 px-4 py-6 sm:px-6 print:block">
+        <div className="print:hidden">
+          <AdminSidebar />
+        </div>
+        <section className="min-w-0 flex-1 space-y-6">
+          <div className="rounded-[2rem] bg-brand-navy p-7 text-white print:hidden">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Operations</p>
+            <h1 className="mt-2 font-display text-4xl tracking-widest">
+              ID <span className="text-brand-green">CARDS</span>
             </h1>
-            <p className="text-white/60 text-sm">Generate individual or bulk student ID cards with QR verification codes.</p>
+            <p className="mt-3 text-sm text-white/65">
+              Generate student identity cards from live records. Each card embeds a QR payload for gate verification.
+            </p>
           </div>
-        </section>
 
-        <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
-            <PortalSidebar portalName="Administration" portalType="admin" items={SIDEBAR_ITEMS} />
-
-            <div className="flex-1 min-w-0 space-y-6">
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="p-5 rounded-2xl bg-brand-green/10 border border-brand-green/30">
-                  <IdCard className="text-brand-green mb-2" size={22} />
-                  <div className="font-display text-3xl text-brand-green">{selected.length}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-brand-green">Selected</div>
-                </div>
-                <div className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
-                  <Users className="text-brand-orange mb-2" size={22} />
-                  <div className="font-display text-3xl text-[var(--text-primary)]">{MOCK_STUDENTS.length}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Total Students</div>
-                </div>
-                <div className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
-                  <QrCode className="text-blue-500 mb-2" size={22} />
-                  <div className="font-display text-3xl text-[var(--text-primary)]">QR</div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">With Verification</div>
-                </div>
-              </div>
-
-              {/* Search + Filter */}
-              <div className="flex flex-col md:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search students..."
-                    className="w-full pl-11 pr-5 py-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green" />
-                </div>
-                <select value={filterClass} onChange={e => setFilterClass(e.target.value)}
-                  className="px-5 py-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)]">
-                  <option>All</option>
-                  {["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"].map(c => <option key={c}>{c}</option>)}
-                </select>
-                <button onClick={selectAll} className="px-5 py-3 rounded-xl bg-brand-green/10 text-brand-green font-bold text-sm hover:bg-brand-green hover:text-white transition-all whitespace-nowrap">
-                  {filtered.every(s => selected.includes(s.id)) ? "Deselect All" : "Select All"}
-                </button>
-              </div>
-
-              {/* Student Grid */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filtered.map(s => {
-                  const isSelected = selected.includes(s.id);
-                  return (
-                    <label
-                      key={s.id}
-                      className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
-                        isSelected
-                          ? "bg-brand-green/10 border-brand-green"
-                          : "bg-[var(--surface-card)] border-[var(--border-subtle)] hover:border-brand-green/30"
-                      }`}
-                    >
-                      <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(s.id)} className="w-4 h-4 accent-brand-green" />
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-green to-brand-green-dark flex items-center justify-center text-white font-bold text-xs shrink-0">
-                        {s.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-bold text-[var(--text-primary)] text-sm truncate">{s.name}</div>
-                        <div className="text-[10px] text-[var(--text-muted)]">{s.id} · {s.class} {s.arm}</div>
-                      </div>
-                    </label>
-                  );
-                })}
-              </div>
-
-              {/* Generate Button */}
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={handleGenerate}
-                  disabled={selected.length === 0 || generating}
-                  className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-brand-green to-brand-green-dark text-white font-bold uppercase tracking-widest text-sm hover:opacity-90 transition-all shadow-2xl disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {generating ? (
-                    <>
-                      <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                      Generating {selected.length} cards...
-                    </>
-                  ) : (
-                    <>
-                      <Download size={16} /> Generate {selected.length} ID Card{selected.length !== 1 ? "s" : ""} (PDF)
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={() => { handleGenerate(); setTimeout(() => window.print(), 2500); }}
-                  disabled={selected.length === 0}
-                  className="px-6 py-4 rounded-2xl bg-[var(--surface-disabled)] text-[var(--text-primary)] font-bold text-sm hover:bg-brand-green hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  <Printer size={16} /> Print
-                </button>
-              </div>
-
-              {/* Info */}
-              <div className="p-4 rounded-2xl bg-brand-orange/10 border border-brand-orange/30 text-xs text-brand-orange">
-                Each ID card includes: Student photo placeholder, full name, student ID, class, session, blood group, genotype, QR code for verification, and school branding. Cards are generated as A4 PDF (4 per page for bulk).
-              </div>
+          <div className="flex flex-col gap-3 print:hidden sm:flex-row sm:items-center sm:justify-between">
+            <label className="relative flex-1">
+              <Search className="absolute left-3 top-3 text-[var(--text-muted)]" size={16} />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-full border border-[var(--input-border)] bg-[var(--input-bg)] py-2.5 pl-9 pr-4 text-sm"
+                placeholder="Search students"
+              />
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={toggleAll}
+                className="rounded-full border border-[var(--border-default)] px-4 py-2 text-xs font-bold uppercase tracking-widest"
+              >
+                {selected.length === filtered.length && filtered.length ? "Clear" : "Select page"}
+              </button>
+              <button
+                onClick={() => void exportPdf()}
+                className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-4 py-2 text-xs font-bold uppercase tracking-widest text-white"
+              >
+                <Download size={14} /> PDF
+              </button>
+              <button
+                onClick={printSheet}
+                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-4 py-2 text-xs font-bold uppercase tracking-widest text-white"
+              >
+                <Printer size={14} /> Print
+              </button>
             </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-2 print:hidden">
+            <div className="max-h-[480px] overflow-auto rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+              {loading ? (
+                <div className="flex items-center justify-center gap-2 p-10 text-sm text-[var(--text-muted)]">
+                  <LoaderCircle className="animate-spin" /> Loading…
+                </div>
+              ) : (
+                filtered.map((s) => (
+                  <label
+                    key={s.id}
+                    className="flex cursor-pointer items-center gap-3 border-b border-[var(--border-subtle)] p-4 text-sm hover:bg-[var(--surface-card-hover)]"
+                  >
+                    <input type="checkbox" checked={selected.includes(s.id)} onChange={() => toggle(s.id)} />
+                    <div className="min-w-0 flex-1">
+                      <b className="block truncate">{s.displayName}</b>
+                      <span className="text-xs text-[var(--text-muted)]">
+                        {s.studentId} · {s.className}
+                      </span>
+                    </div>
+                    <IdCard size={16} className="text-brand-green" />
+                  </label>
+                ))
+              )}
+            </div>
+
+            <div ref={printRef} className="grid gap-4 sm:grid-cols-2">
+              {selectedStudents.map((s) => (
+                <div
+                  key={s.id}
+                  className="relative overflow-hidden rounded-2xl border border-white/10 bg-brand-navy p-4 text-white shadow-lg"
+                  style={{ minHeight: 180 }}
+                >
+                  <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">Ykay College</div>
+                  <div className="mt-3 font-display text-xl tracking-wide">{s.displayName}</div>
+                  <div className="mt-1 font-mono text-xs text-white/70">{s.studentId}</div>
+                  <div className="mt-1 text-xs text-white/60">{s.className}</div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={qrUrl(s)}
+                    alt={`QR ${s.studentId}`}
+                    className="absolute bottom-3 right-3 h-16 w-16 rounded-md bg-white p-1"
+                  />
+                  <div className="mt-8 text-[9px] uppercase tracking-widest text-white/40">Student identity card</div>
+                </div>
+              ))}
+              {!selectedStudents.length && (
+                <p className="col-span-full rounded-2xl border border-dashed border-[var(--border-default)] p-10 text-center text-sm text-[var(--text-muted)]">
+                  Select students to preview ID cards.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Print-only sheet */}
+          <div className="hidden print:grid print:grid-cols-2 print:gap-4">
+            {selectedStudents.map((s) => (
+              <div key={`print-${s.id}`} className="relative border border-black p-4" style={{ height: 200 }}>
+                <div className="text-xs font-bold">YKAY COLLEGE & LEADERSHIP ACADEMY</div>
+                <div className="mt-3 text-lg font-bold">{s.displayName}</div>
+                <div className="font-mono text-sm">{s.studentId}</div>
+                <div className="text-sm">{s.className}</div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={qrUrl(s)} alt="" className="absolute bottom-3 right-3 h-20 w-20" />
+              </div>
+            ))}
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }
