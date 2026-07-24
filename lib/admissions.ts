@@ -53,11 +53,7 @@ export const DOCUMENT_RULES: Record<
 };
 
 const requiredText = (label: string, max = 120) =>
-  z
-    .string()
-    .trim()
-    .min(2, `${label} is required.`)
-    .max(max, `${label} is too long.`);
+  z.string().trim().min(2, `${label} is required.`).max(max, `${label} is too long.`);
 
 const optionalText = (max = 240) =>
   z
@@ -73,7 +69,7 @@ const normalizePhone = (value: unknown) =>
 
 const nigerianPhone = z.preprocess(
   normalizePhone,
-  z.string().regex(/^(?:\+234|234|0)[789][01]\d{8}$/, "Enter a valid Nigerian mobile number.")
+  z.string().regex(/^(?:\+234|234|0)[789][01]\d{8}$/, "Enter a valid Nigerian mobile number."),
 );
 
 export const admissionDraftSchema = z
@@ -84,14 +80,19 @@ export const admissionDraftSchema = z
     dateOfBirth: z
       .string()
       .regex(/^\d{4}-\d{2}-\d{2}$/, "Enter a valid date of birth.")
-      .refine((value) => !Number.isNaN(Date.parse(value)) && new Date(value) < new Date(), "Enter a valid date of birth."),
+      .refine(
+        (value) => !Number.isNaN(Date.parse(value)) && new Date(value) < new Date(),
+        "Enter a valid date of birth.",
+      ),
     gender: z.enum(["Female", "Male", "Prefer not to say"], {
       errorMap: () => ({ message: "Select the applicant's gender." }),
     }),
     stateOfOrigin: requiredText("State of origin", 80),
     lga: requiredText("Local Government Area", 100),
     religion: optionalText(80),
-    bloodGroup: z.enum(["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]).transform((value) => value || undefined),
+    bloodGroup: z
+      .enum(["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])
+      .transform((value) => value || undefined),
     genotype: z.enum(["", "AA", "AS", "AC", "SS", "SC"]).transform((value) => value || undefined),
     classApplying: z.enum(["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"], {
       errorMap: () => ({ message: "Select the class the applicant is applying for." }),
@@ -109,8 +110,11 @@ export const admissionDraftSchema = z
       normalizePhone,
       z
         .string()
-        .refine((value) => value === "" || /^(?:\+234|234|0)[789][01]\d{8}$/.test(value), "Enter a valid Nigerian WhatsApp number.")
-        .transform((value) => value || undefined)
+        .refine(
+          (value) => value === "" || /^(?:\+234|234|0)[789][01]\d{8}$/.test(value),
+          "Enter a valid Nigerian WhatsApp number.",
+        )
+        .transform((value) => value || undefined),
     ),
     parentEmail: z.string().trim().toLowerCase().email("Enter a valid email address.").max(254),
     parentAddress: requiredText("Home address", 300),
@@ -122,14 +126,26 @@ export const admissionDraftSchema = z
   })
   .superRefine((data, ctx) => {
     if (data.primaryContact === "FATHER" && !data.fatherName) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["fatherName"], message: "Add the father's name or select a different primary contact." });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["fatherName"],
+        message: "Add the father's name or select a different primary contact.",
+      });
     }
     if (data.primaryContact === "GUARDIAN") {
       if (!data.guardianName) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["guardianName"], message: "Add the guardian's name." });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["guardianName"],
+          message: "Add the guardian's name.",
+        });
       }
       if (!data.guardianRelationship) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["guardianRelationship"], message: "Add the guardian's relationship to the applicant." });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["guardianRelationship"],
+          message: "Add the guardian's relationship to the applicant.",
+        });
       }
     }
   });
@@ -139,7 +155,10 @@ export type AdmissionDraft = z.infer<typeof admissionDraftSchema>;
 export const createDraftSchema = admissionDraftSchema;
 
 export const draftAccessSchema = z.object({
-  applicationId: z.string().trim().regex(/^YKCAPP\d{4}[A-Z0-9]{6}$/, "Invalid application reference."),
+  applicationId: z
+    .string()
+    .trim()
+    .regex(/^YKCAPP\d{4}[A-Z0-9]{6}$/, "Invalid application reference."),
   uploadToken: z.string().trim().min(32).max(256),
 });
 
@@ -161,7 +180,11 @@ export const submitApplicationSchema = draftAccessSchema.extend({
 });
 
 export const applicationStatusSchema = z.object({
-  applicationId: z.string().trim().toUpperCase().regex(/^YKCAPP\d{4}[A-Z0-9]{6}$/, "Enter a valid Application ID."),
+  applicationId: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^YKCAPP\d{4}[A-Z0-9]{6}$/, "Enter a valid Application ID."),
 });
 
 export function formatApplicationId(value: string) {

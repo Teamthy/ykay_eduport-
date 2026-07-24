@@ -7,7 +7,10 @@ export const runtime = "nodejs";
 export async function GET() {
   const context = await getParentPortalProfile();
   if (!context) {
-    return jsonNoStore({ error: "No live parent profile is linked to this account yet." }, { status: 404 });
+    return jsonNoStore(
+      { error: "No live parent profile is linked to this account yet." },
+      { status: 404 },
+    );
   }
 
   const children = context.profile.studentLinks.map((link) => ({

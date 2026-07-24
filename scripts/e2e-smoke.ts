@@ -7,7 +7,14 @@
  */
 import { spawn } from "child_process";
 
-type Check = { name: string; path: string; expectStatus?: number[]; method?: string; body?: unknown; headers?: Record<string, string> };
+type Check = {
+  name: string;
+  path: string;
+  expectStatus?: number[];
+  method?: string;
+  body?: unknown;
+  headers?: Record<string, string>;
+};
 
 const PUBLIC_PAGES: Check[] = [
   { name: "Home", path: "/" },
@@ -62,7 +69,10 @@ function argValue(flag: string) {
   return pref ? pref.split("=").slice(1).join("=") : undefined;
 }
 
-const baseUrl = (argValue("--base-url") || process.env.BASE_URL || "http://127.0.0.1:3000").replace(/\/$/, "");
+const baseUrl = (argValue("--base-url") || process.env.BASE_URL || "http://127.0.0.1:3000").replace(
+  /\/$/,
+  "",
+);
 const listOnly = process.argv.includes("--list-only");
 const skipServer = process.argv.includes("--no-server") || process.env.E2E_NO_SERVER === "1";
 
@@ -150,7 +160,9 @@ async function main() {
     results.push(result);
     const mark = result.ok ? "PASS" : "FAIL";
     const err = "error" in result && result.error ? ` — ${result.error}` : "";
-    console.log(`${mark}  ${String(result.status).padStart(3)}  ${check.path}  (${check.name})${err}`);
+    console.log(
+      `${mark}  ${String(result.status).padStart(3)}  ${check.path}  (${check.name})${err}`,
+    );
   }
 
   const failed = results.filter((r) => !r.ok);
@@ -160,7 +172,10 @@ async function main() {
   }
   if (failed.length) {
     console.error("\nFailed checks:");
-    for (const f of failed) console.error(` - ${f.path} status=${f.status}${"error" in f && f.error ? " " + f.error : ""}`);
+    for (const f of failed)
+      console.error(
+        ` - ${f.path} status=${f.status}${"error" in f && f.error ? " " + f.error : ""}`,
+      );
     process.exit(1);
   }
   console.log("\nE2E smoke passed.");

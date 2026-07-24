@@ -14,7 +14,10 @@ export const runtime = "nodejs";
 
 const SAVE_SCHEMA = z.object({
   classId: z.string().trim().min(1),
-  sessionDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/),
+  sessionDate: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/),
   periodKey: z.string().trim().min(1).max(40).default("DAILY_REGISTER"),
   notes: z.string().trim().max(500).optional().nullable(),
   finalize: z.boolean().default(false),
@@ -24,12 +27,14 @@ const SAVE_SCHEMA = z.object({
         studentProfileId: z.string().trim().min(1),
         status: z.nativeEnum(AttendanceStatus),
         note: z.string().trim().max(280).optional().nullable(),
-      })
+      }),
     )
     .min(1),
 });
 
-function buildClassOptions(context: NonNullable<Awaited<ReturnType<typeof getTeacherAttendanceContext>>>) {
+function buildClassOptions(
+  context: NonNullable<Awaited<ReturnType<typeof getTeacherAttendanceContext>>>,
+) {
   const byClass = new Map<
     string,
     {
@@ -62,19 +67,27 @@ function buildClassOptions(context: NonNullable<Awaited<ReturnType<typeof getTea
     });
   }
 
-  return [...byClass.values()].sort((left, right) => left.displayName.localeCompare(right.displayName));
+  return [...byClass.values()].sort((left, right) =>
+    left.displayName.localeCompare(right.displayName),
+  );
 }
 
 function selectAssignment(
   context: NonNullable<Awaited<ReturnType<typeof getTeacherAttendanceContext>>>,
-  classId?: string | null
+  classId?: string | null,
 ) {
   if (classId) {
-    return context.teacherProfile.classAssignments.find((assignment) => assignment.classroom.id === classId) || null;
+    return (
+      context.teacherProfile.classAssignments.find(
+        (assignment) => assignment.classroom.id === classId,
+      ) || null
+    );
   }
 
   return (
-    context.teacherProfile.classAssignments.find((assignment) => assignment.role === "FORM_TEACHER") ||
+    context.teacherProfile.classAssignments.find(
+      (assignment) => assignment.role === "FORM_TEACHER",
+    ) ||
     context.teacherProfile.classAssignments[0] ||
     null
   );
@@ -95,7 +108,10 @@ function buildAlertMessage(input: {
 export async function GET(request: NextRequest) {
   const context = await getTeacherAttendanceContext();
   if (!context) {
-    return jsonNoStore({ error: "Teacher attendance access is not available for this account." }, { status: 403 });
+    return jsonNoStore(
+      { error: "Teacher attendance access is not available for this account." },
+      { status: 403 },
+    );
   }
 
   const availableClasses = buildClassOptions(context);
@@ -234,7 +250,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const context = await getTeacherAttendanceContext();
   if (!context) {
-    return jsonNoStore({ error: "Teacher attendance access is not available for this account." }, { status: 403 });
+    return jsonNoStore(
+      { error: "Teacher attendance access is not available for this account." },
+      { status: 403 },
+    );
   }
 
   try {
@@ -259,13 +278,19 @@ export async function POST(request: NextRequest) {
       payload.entries.length !== validStudents.length ||
       payload.entries.some((entry) => !validIds.has(entry.studentProfileId))
     ) {
-      return jsonNoStore({ error: "Attendance entries do not match the active class roster." }, { status: 422 });
+      return jsonNoStore(
+        { error: "Attendance entries do not match the active class roster." },
+        { status: 422 },
+      );
     }
 
     const duplicateCheck = new Set<string>();
     for (const entry of payload.entries) {
       if (duplicateCheck.has(entry.studentProfileId)) {
-        return jsonNoStore({ error: "A student appears more than once in this register." }, { status: 422 });
+        return jsonNoStore(
+          { error: "A student appears more than once in this register." },
+          { status: 422 },
+        );
       }
       duplicateCheck.add(entry.studentProfileId);
     }
@@ -300,7 +325,13 @@ export async function POST(request: NextRequest) {
               isLocked: payload.finalize,
               submittedAt: payload.finalize ? new Date() : null,
             },
-            select: { id: true, isLocked: true, submittedAt: true, periodKey: true, sessionDate: true },
+            select: {
+              id: true,
+              isLocked: true,
+              submittedAt: true,
+              periodKey: true,
+              sessionDate: true,
+            },
           })
         : await tx.attendanceSession.create({
             data: {
@@ -314,7 +345,13 @@ export async function POST(request: NextRequest) {
               isLocked: payload.finalize,
               submittedAt: payload.finalize ? new Date() : null,
             },
-            select: { id: true, isLocked: true, submittedAt: true, periodKey: true, sessionDate: true },
+            select: {
+              id: true,
+              isLocked: true,
+              submittedAt: true,
+              periodKey: true,
+              sessionDate: true,
+            },
           });
 
       await tx.attendanceEntry.deleteMany({ where: { sessionId: session.id } });
@@ -331,7 +368,10 @@ export async function POST(request: NextRequest) {
         await tx.attendanceAlertJob.deleteMany({ where: { attendanceSessionId: session.id } });
 
         const affectedIds = payload.entries
-          .filter((entry) => entry.status === AttendanceStatus.ABSENT || entry.status === AttendanceStatus.LATE)
+          .filter(
+            (entry) =>
+              entry.status === AttendanceStatus.ABSENT || entry.status === AttendanceStatus.LATE,
+          )
           .map((entry) => entry.studentProfileId);
 
         if (affectedIds.length) {
@@ -364,7 +404,9 @@ export async function POST(request: NextRequest) {
             },
           });
 
-          const entriesById = new Map(payload.entries.map((entry) => [entry.studentProfileId, entry]));
+          const entriesById = new Map(
+            payload.entries.map((entry) => [entry.studentProfileId, entry]),
+          );
           const alertRows: Array<{
             schoolId: string;
             attendanceSessionId: string;
@@ -390,7 +432,8 @@ export async function POST(request: NextRequest) {
             });
 
             const primaryParent = student.parentLinks[0]?.parentProfile;
-            const recipientName = primaryParent?.displayName || student.guardianName || student.displayName;
+            const recipientName =
+              primaryParent?.displayName || student.guardianName || student.displayName;
             const recipientPhone = primaryParent?.phone || student.guardianPhone || undefined;
             const recipientEmail = primaryParent?.user.email || student.guardianEmail || undefined;
 

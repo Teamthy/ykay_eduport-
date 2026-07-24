@@ -5,13 +5,13 @@ import Image from "next/image";
 import { ArrowUp, Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
 
 const linkGroups = {
-  "School": [
+  School: [
     { label: "About", href: "/about" },
 
     { label: "Academics", href: "/academics" },
     { label: "Campus Life", href: "/campus-life" },
   ],
-  "Community": [
+  Community: [
     { label: "Alumni", href: "/alumni" },
     { label: "Testimonials", href: "/testimonials" },
     { label: "News & Events", href: "/news-events" },
@@ -23,7 +23,7 @@ const linkGroups = {
     { label: "Careers", href: "/careers" },
     { label: "Contact", href: "/contact" },
   ],
-  "Resources": [
+  Resources: [
     { label: "FAQ", href: "/faq" },
     { label: "What's New", href: "/whats-new" },
     { label: "Privacy Policy", href: "/privacy-policy" },
@@ -48,17 +48,26 @@ export default function Footer() {
               </div>
               <div>
                 <h2 className="font-display text-2xl tracking-[3px] text-white">YKAY COLLEGE</h2>
-                <p className="text-[10px] font-bold tracking-widest uppercase text-brand-green">& LEADERSHIP ACADEMY</p>
+                <p className="text-[10px] font-bold tracking-widest uppercase text-brand-green">
+                  & LEADERSHIP ACADEMY
+                </p>
               </div>
             </div>
             <p className="text-sm text-[var(--footer-text-body)] leading-relaxed mb-6">
-              A premium day secondary school in Sango Ota, Ogun State. Raising future leaders through excellence in education.
+              A premium day secondary school in Sango Ota, Ogun State. Raising future leaders
+              through excellence in education.
             </p>
             <div className="flex gap-3">
-              <a href="#" className="w-9 h-9 rounded-full bg-white/5 hover:bg-brand-green text-white flex items-center justify-center transition-colors">
+              <a
+                href="#"
+                className="w-9 h-9 rounded-full bg-white/5 hover:bg-brand-green text-white flex items-center justify-center transition-colors"
+              >
                 <Facebook size={16} />
               </a>
-              <a href="#" className="w-9 h-9 rounded-full bg-white/5 hover:bg-brand-green text-white flex items-center justify-center transition-colors">
+              <a
+                href="#"
+                className="w-9 h-9 rounded-full bg-white/5 hover:bg-brand-green text-white flex items-center justify-center transition-colors"
+              >
                 <Instagram size={16} />
               </a>
             </div>
@@ -68,9 +77,12 @@ export default function Footer() {
             <div key={title}>
               <h4 className="font-display text-sm text-white mb-4 tracking-widest">{title}</h4>
               <ul className="space-y-2">
-                {links.map(link => (
+                {links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-[var(--footer-text-body)] hover:text-brand-green transition-colors">
+                    <Link
+                      href={link.href}
+                      className="text-sm text-[var(--footer-text-body)] hover:text-brand-green transition-colors"
+                    >
                       {link.label}
                     </Link>
                   </li>
@@ -85,28 +97,43 @@ export default function Footer() {
             <MapPin size={18} className="text-brand-green shrink-0 mt-0.5" />
             <div>
               <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Address</div>
-              <div className="text-sm text-white/80">Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State</div>
+              <div className="text-sm text-white/80">
+                Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State
+              </div>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <Phone size={18} className="text-brand-green shrink-0 mt-0.5" />
             <div>
               <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Phone</div>
-              <a href="tel:+2347015374411" className="text-sm text-white/80 hover:text-brand-green">0701 537 4411</a>
+              <a href="tel:+2347015374411" className="text-sm text-white/80 hover:text-brand-green">
+                0701 537 4411
+              </a>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <Mail size={18} className="text-brand-green shrink-0 mt-0.5" />
             <div>
               <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Email</div>
-              <a href="mailto:info@ykaycollege.com" className="text-sm text-white/80 hover:text-brand-green">info@ykaycollege.com</a>
+              <a
+                href="mailto:info@ykaycollege.com"
+                className="text-sm text-white/80 hover:text-brand-green"
+              >
+                info@ykaycollege.com
+              </a>
             </div>
           </div>
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-[var(--footer-border)]">
-          <p className="text-xs text-[var(--footer-text-body)]">© {new Date().getFullYear()} Ykay Training College & Leadership Academy. All rights reserved.</p>
-          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40 hover:text-brand-green transition-colors">
+          <p className="text-xs text-[var(--footer-text-body)]">
+            © {new Date().getFullYear()} Ykay Training College & Leadership Academy. All rights
+            reserved.
+          </p>
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40 hover:text-brand-green transition-colors"
+          >
             Back to Top <ArrowUp size={14} />
           </button>
         </div>

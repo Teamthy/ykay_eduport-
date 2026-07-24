@@ -4,8 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  LayoutDashboard, BookOpen, ClipboardCheck, FileText, Users, LogOut,
-  UserCheck, History, School, Award, BarChart3, LoaderCircle,
+  LayoutDashboard,
+  BookOpen,
+  ClipboardCheck,
+  FileText,
+  Users,
+  LogOut,
+  UserCheck,
+  History,
+  School,
+  Award,
+  BarChart3,
+  LoaderCircle,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { useToast } from "./Toast";
@@ -21,10 +31,22 @@ type Me = {
 
 type NavItem = { label: string; href: string; icon: typeof LayoutDashboard; badge?: string };
 
-function NavBlock({ title, color, items, pathname }: { title: string; color: string; items: NavItem[]; pathname: string }) {
+function NavBlock({
+  title,
+  color,
+  items,
+  pathname,
+}: {
+  title: string;
+  color: string;
+  items: NavItem[];
+  pathname: string;
+}) {
   return (
     <div>
-      <div className={`px-4 mb-2 text-[10px] font-bold uppercase tracking-widest ${color}`}>{title}</div>
+      <div className={`px-4 mb-2 text-[10px] font-bold uppercase tracking-widest ${color}`}>
+        {title}
+      </div>
       <nav className="space-y-1">
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -41,7 +63,9 @@ function NavBlock({ title, color, items, pathname }: { title: string; color: str
               <item.icon size={16} />
               <span className="flex-1 tracking-wide">{item.label}</span>
               {item.badge ? (
-                <span className="rounded-full bg-brand-orange px-2 py-0.5 text-[9px] font-bold text-white">{item.badge}</span>
+                <span className="rounded-full bg-brand-orange px-2 py-0.5 text-[9px] font-bold text-white">
+                  {item.badge}
+                </span>
               ) : null}
             </Link>
           );
@@ -111,7 +135,9 @@ export default function TeacherSidebar() {
     <aside className="hidden w-[280px] shrink-0 lg:block">
       <div className="sticky top-24 max-h-[calc(100vh-6rem)] space-y-4 overflow-y-auto pb-4">
         <div className="rounded-2xl border border-white/10 bg-brand-navy p-4">
-          <div className="text-[9px] font-bold uppercase tracking-widest text-brand-green">Teaching workspace</div>
+          <div className="text-[9px] font-bold uppercase tracking-widest text-brand-green">
+            Teaching workspace
+          </div>
           <div className="mt-1 font-display text-sm tracking-[1px] text-white">
             {loading ? "Loading…" : me?.displayName || user?.name || "Teacher"}
           </div>
@@ -135,9 +161,23 @@ export default function TeacherSidebar() {
           </div>
         ) : null}
 
-        <NavBlock title="General" color="text-[var(--text-muted)]" items={general} pathname={pathname} />
-        {isSubject ? <NavBlock title="Subject teaching" color="text-brand-green" items={subject} pathname={pathname} /> : null}
-        {isForm ? <NavBlock title="Form class" color="text-brand-orange" items={form} pathname={pathname} /> : null}
+        <NavBlock
+          title="General"
+          color="text-[var(--text-muted)]"
+          items={general}
+          pathname={pathname}
+        />
+        {isSubject ? (
+          <NavBlock
+            title="Subject teaching"
+            color="text-brand-green"
+            items={subject}
+            pathname={pathname}
+          />
+        ) : null}
+        {isForm ? (
+          <NavBlock title="Form class" color="text-brand-orange" items={form} pathname={pathname} />
+        ) : null}
 
         <button
           onClick={() => {

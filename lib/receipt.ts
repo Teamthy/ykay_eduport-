@@ -36,7 +36,9 @@ export function generateReceiptPDF(data: ReceiptData): jsPDF {
   doc.text("& LEADERSHIP ACADEMY", pageWidth / 2, 27, { align: "center" });
 
   doc.setFontSize(8);
-  doc.text("Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State", pageWidth / 2, 34, { align: "center" });
+  doc.text("Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State", pageWidth / 2, 34, {
+    align: "center",
+  });
   doc.text("Tel: 0701 537 4411  |  info@ykaycollege.com", pageWidth / 2, 39, { align: "center" });
 
   // Green accent line
@@ -180,11 +182,26 @@ export function generateReceiptPDF(data: ReceiptData): jsPDF {
   doc.setTextColor(100, 100, 100);
   doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
-  doc.text("This is an official electronic receipt from Ykay College. Keep for your records.", pageWidth / 2, footerY + 6, { align: "center" });
-  doc.text("For enquiries: bursary@ykaycollege.com  |  0701 537 4411", pageWidth / 2, footerY + 11, { align: "center" });
+  doc.text(
+    "This is an official electronic receipt from Ykay College. Keep for your records.",
+    pageWidth / 2,
+    footerY + 6,
+    { align: "center" },
+  );
+  doc.text(
+    "For enquiries: bursary@ykaycollege.com  |  0701 537 4411",
+    pageWidth / 2,
+    footerY + 11,
+    { align: "center" },
+  );
 
   doc.setFontSize(6);
-  doc.text(`Generated: ${new Date().toLocaleString("en-NG")}  |  Ref: ${data.receiptNo}`, pageWidth / 2, footerY + 17, { align: "center" });
+  doc.text(
+    `Generated: ${new Date().toLocaleString("en-NG")}  |  Ref: ${data.receiptNo}`,
+    pageWidth / 2,
+    footerY + 17,
+    { align: "center" },
+  );
 
   return doc;
 }
@@ -226,7 +243,9 @@ Ykay College & Leadership Academy
 
 export async function shareReceiptNative(data: ReceiptData) {
   if (typeof navigator === "undefined" || !navigator.share) {
-    alert("Native sharing is not supported on this device. Please use the download or WhatsApp button instead.");
+    alert(
+      "Native sharing is not supported on this device. Please use the download or WhatsApp button instead.",
+    );
     return;
   }
 

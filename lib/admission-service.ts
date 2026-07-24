@@ -65,7 +65,11 @@ export async function getRequiredDocumentTypes() {
   return ["BIRTH_CERTIFICATE", "PASSPORT_PHOTO", "REPORT_CARD"] as const;
 }
 
-export async function markApplicationPaid(applicationId: string, reference: string, providerData: Prisma.InputJsonValue) {
+export async function markApplicationPaid(
+  applicationId: string,
+  reference: string,
+  providerData: Prisma.InputJsonValue,
+) {
   return prisma.$transaction(async (tx) => {
     const application = await tx.admissionApplication.update({
       where: { applicationId },

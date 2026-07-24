@@ -46,7 +46,8 @@ export default function FindUs() {
                     Our Campus Address
                   </div>
                   <div className="text-[var(--text-primary)] font-medium leading-relaxed">
-                    Km 38, Lagos-Abeokuta Expressway,<br/>
+                    Km 38, Lagos-Abeokuta Expressway,
+                    <br />
                     Sango Ota, Ogun State
                   </div>
                   <a
@@ -101,7 +102,8 @@ export default function FindUs() {
                   Ykay College Opens 2025 / 2026 Admissions
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
-                  Applications are now open for JSS1 through SS3. Apply online and track your application status in real time.
+                  Applications are now open for JSS1 through SS3. Apply online and track your
+                  application status in real time.
                 </p>
                 <span className="inline-flex items-center gap-2 text-sm font-bold text-brand-green group-hover:gap-3 transition-all">
                   Read More <ArrowRight size={14} />
@@ -109,7 +111,10 @@ export default function FindUs() {
               </div>
             </Link>
 
-            <Link href="/news-events" className="inline-flex items-center gap-2 mt-6 text-sm text-[var(--text-primary)] hover:text-brand-green transition-colors font-bold uppercase tracking-widest">
+            <Link
+              href="/news-events"
+              className="inline-flex items-center gap-2 mt-6 text-sm text-[var(--text-primary)] hover:text-brand-green transition-colors font-bold uppercase tracking-widest"
+            >
               View All News <ArrowRight size={14} />
             </Link>
           </motion.div>

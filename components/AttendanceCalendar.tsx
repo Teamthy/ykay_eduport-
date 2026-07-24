@@ -122,23 +122,23 @@ export default function AttendanceCalendar({
           return (
             <div
               key={day}
-              className={`relative rounded-xl px-2 py-3 text-center transition-all duration-200 hover:scale-[1.08] ${isToday
+              className={`relative rounded-xl px-2 py-3 text-center transition-all duration-200 hover:scale-[1.08] ${
+                isToday
                   ? "ring-2 ring-brand-green/40 bg-brand-green/10"
                   : "bg-[var(--surface-disabled)] hover:bg-brand-green/5"
-                }`}
+              }`}
             >
               <div
-                className={`font-display text-xs tracking-[1px] mb-1 ${isToday
-                    ? "text-brand-green font-bold"
-                    : "text-[var(--text-secondary)]"
-                  }`}
+                className={`font-display text-xs tracking-[1px] mb-1 ${
+                  isToday ? "text-brand-green font-bold" : "text-[var(--text-secondary)]"
+                }`}
               >
                 {day}
               </div>
               {dayData ? (
                 <div
                   className={`w-6 h-6 mx-auto rounded-full flex items-center justify-center text-[8px] font-bold shadow-sm ${statusColor(
-                    dayData.status
+                    dayData.status,
                   )}`}
                   title={`${dayData.status}${dayData.note ? ` — ${dayData.note}` : ""}`}
                 >

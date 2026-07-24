@@ -12,8 +12,15 @@ export async function POST(request: NextRequest) {
   const limit = await enforceAdmissionRateLimit("upload", ipAddress);
   if (!limit.success) {
     return jsonNoStore(
-      { error: limit.configurationError ? "The upload service is temporarily unavailable." : "Too many upload attempts. Please wait and try again." },
-      { status: limit.configurationError ? 503 : 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
+      {
+        error: limit.configurationError
+          ? "The upload service is temporarily unavailable."
+          : "Too many upload attempts. Please wait and try again.",
+      },
+      {
+        status: limit.configurationError ? 503 : 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
     );
   }
 
@@ -22,21 +29,33 @@ export async function POST(request: NextRequest) {
     const rule = DOCUMENT_RULES[payload.documentType];
 
     if (!rule.acceptedTypes.includes(payload.contentType) || payload.sizeBytes > rule.maxBytes) {
-      return jsonNoStore({ error: `This file does not meet the requirements for ${rule.label}.` }, { status: 422 });
+      return jsonNoStore(
+        { error: `This file does not meet the requirements for ${rule.label}.` },
+        { status: 422 },
+      );
     }
 
     const application = await findAuthorizedApplication(payload.applicationId, payload.uploadToken);
     if (!application || application.status !== "DRAFT") {
-      return jsonNoStore({ error: "Your upload session has expired. Please restart your application." }, { status: 401 });
+      return jsonNoStore(
+        { error: "Your upload session has expired. Please restart your application." },
+        { status: 401 },
+      );
     }
 
     const { storageKey, uploadUrl } = await createSecureUploadUrl(payload);
     return jsonNoStore({ storageKey, uploadUrl, expiresInSeconds: 600 });
   } catch (error: unknown) {
     if (error instanceof Error && "issues" in error) {
-      return jsonNoStore({ error: "Please check the selected file and try again." }, { status: 422 });
+      return jsonNoStore(
+        { error: "Please check the selected file and try again." },
+        { status: 422 },
+      );
     }
     console.error("Admission upload URL failed", error);
-    return jsonNoStore({ error: "We could not prepare a secure upload. Please try again." }, { status: 500 });
+    return jsonNoStore(
+      { error: "We could not prepare a secure upload. Please try again." },
+      { status: 500 },
+    );
   }
 }

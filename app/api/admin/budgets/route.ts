@@ -37,7 +37,10 @@ export async function GET() {
   // Approximate term spend: current calendar window is enough for ops MVP
   const spentByCategory = new Map<string, number>();
   for (const e of expenses) {
-    spentByCategory.set(e.category.toLowerCase(), (spentByCategory.get(e.category.toLowerCase()) || 0) + e.amount);
+    spentByCategory.set(
+      e.category.toLowerCase(),
+      (spentByCategory.get(e.category.toLowerCase()) || 0) + e.amount,
+    );
   }
 
   return NextResponse.json({
@@ -54,7 +57,9 @@ export async function GET() {
         amountLimit: b.amountLimit,
         spent,
         remaining,
-        utilizationPct: b.amountLimit ? Math.min(999, Math.round((spent / b.amountLimit) * 100)) : 0,
+        utilizationPct: b.amountLimit
+          ? Math.min(999, Math.round((spent / b.amountLimit) * 100))
+          : 0,
         notes: b.notes,
         overBudget: spent > b.amountLimit,
       };
@@ -108,7 +113,12 @@ export async function POST(request: NextRequest) {
       entityType: "Budget",
       entityId: budget.id,
       ipAddress: getClientIp(request),
-      metadata: { category: budget.category, amountLimit: budget.amountLimit, termLabel, sessionLabel },
+      metadata: {
+        category: budget.category,
+        amountLimit: budget.amountLimit,
+        termLabel,
+        sessionLabel,
+      },
     },
   });
 

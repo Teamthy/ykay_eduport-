@@ -43,5 +43,8 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return NextResponse.json({ ok: true, message: `Enrolled in ${course.title}. Start learning now!` });
+  return NextResponse.json({
+    ok: true,
+    message: `Enrolled in ${course.title}. Start learning now!`,
+  });
 }

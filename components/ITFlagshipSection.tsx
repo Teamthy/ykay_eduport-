@@ -8,37 +8,43 @@ const TRACKS = [
     title: "Python",
     href: "/it-education/python",
     blurb: "Programming foundations to automation",
-    image: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=800&q=80",
   },
   {
     title: "Artificial Intelligence",
     href: "/it-education/ai",
     blurb: "Practical AI literacy for students",
-    image: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=800&q=80",
   },
   {
     title: "Cybersecurity",
     href: "/it-education/cybersecurity",
     blurb: "Defend systems and data",
-    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
   },
   {
     title: "Microsoft Office",
     href: "/it-education/microsoft-excel",
     blurb: "Word, Excel, PowerPoint pathways",
-    image: "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=800&q=80",
   },
   {
     title: "Digital Literacy",
     href: "/it-education/digital-literacy",
     blurb: "Essential computing for every learner",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
   },
   {
     title: "Excel Expert",
     href: "/it-education/excel-expert",
     blurb: "Advanced analysis and dashboards",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
   },
 ];
 
@@ -56,9 +62,9 @@ export default function ITFlagshipSection() {
               IT EDUCATION FOR THE <span className="text-brand-green">NEXT GENERATION</span>
             </h2>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--text-secondary)]">
-              Ykay College is not only a secondary school — it is a digital learning brand. Students build
-              certification-ready skills in programming, AI, cybersecurity, and Microsoft Office, with a dedicated
-              IT portal for progress and credentials.
+              Ykay College is not only a secondary school — it is a digital learning brand. Students
+              build certification-ready skills in programming, AI, cybersecurity, and Microsoft
+              Office, with a dedicated IT portal for progress and credentials.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
@@ -80,9 +86,14 @@ export default function ITFlagshipSection() {
                 { icon: Shield, label: "Cybersecurity" },
                 { icon: Award, label: "Certificates" },
               ].map((item) => (
-                <div key={item.label} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3 text-center">
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3 text-center"
+                >
                   <item.icon className="mx-auto mb-2 text-brand-green" size={18} />
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">{item.label}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                    {item.label}
+                  </div>
                 </div>
               ))}
             </div>
@@ -95,7 +106,11 @@ export default function ITFlagshipSection() {
                 href={track.href}
                 className="group relative overflow-hidden rounded-3xl border border-[var(--border-subtle)] min-h-[140px] shadow-sm transition hover:-translate-y-1 hover:border-brand-green/50 hover:shadow-xl"
               >
-                <img src={track.image} alt="" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+                <img
+                  src={track.image}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/80 to-brand-navy/30" />
                 <div className="relative z-10 flex h-full flex-col justify-end p-4">
                   <div className="font-display text-lg tracking-wide text-white">{track.title}</div>

@@ -95,7 +95,10 @@ export async function PATCH(request: NextRequest) {
 
   if (payload.action === "RETRY") {
     if (job.status === AlertDeliveryStatus.SENT) {
-      return NextResponse.json({ error: "This notification was already delivered." }, { status: 409 });
+      return NextResponse.json(
+        { error: "This notification was already delivered." },
+        { status: 409 },
+      );
     }
     await prisma.notificationJob.update({
       where: { id: job.id },
@@ -108,7 +111,10 @@ export async function PATCH(request: NextRequest) {
     });
   } else {
     if (job.status === AlertDeliveryStatus.SENT) {
-      return NextResponse.json({ error: "Delivered notifications cannot be cancelled." }, { status: 409 });
+      return NextResponse.json(
+        { error: "Delivered notifications cannot be cancelled." },
+        { status: 409 },
+      );
     }
     await prisma.notificationJob.update({
       where: { id: job.id },
@@ -120,7 +126,8 @@ export async function PATCH(request: NextRequest) {
     data: {
       schoolId: user.schoolId,
       actorUserId: user.id,
-      action: payload.action === "RETRY" ? "NOTIFICATION_RETRY_REQUESTED" : "NOTIFICATION_CANCELLED",
+      action:
+        payload.action === "RETRY" ? "NOTIFICATION_RETRY_REQUESTED" : "NOTIFICATION_CANCELLED",
       entityType: "NotificationJob",
       entityId: job.id,
       ipAddress: getClientIp(request),
@@ -129,6 +136,9 @@ export async function PATCH(request: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    message: payload.action === "RETRY" ? "Notification re-queued for delivery." : "Notification cancelled.",
+    message:
+      payload.action === "RETRY"
+        ? "Notification re-queued for delivery."
+        : "Notification cancelled.",
   });
 }

@@ -7,12 +7,15 @@ export const runtime = "nodejs";
 export async function GET(request: NextRequest) {
   const context = await getStudentPortalProfile();
   if (!context) {
-    return jsonNoStore({ error: "No live student profile is linked to this account yet." }, { status: 404 });
+    return jsonNoStore(
+      { error: "No live student profile is linked to this account yet." },
+      { status: 404 },
+    );
   }
 
   const attendance = await getStudentAttendanceMonth(
     context.profile.id,
-    request.nextUrl.searchParams.get("month")
+    request.nextUrl.searchParams.get("month"),
   );
 
   return jsonNoStore({

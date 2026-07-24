@@ -1,7 +1,11 @@
 import { AdmissionDocumentType, ApplicationStatus } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { APPLICATION_FEE_KOBO, submitApplicationSchema } from "@/lib/admissions";
-import { findAuthorizedApplication, markApplicationPaid, writeAdmissionAuditLog } from "@/lib/admission-service";
+import {
+  findAuthorizedApplication,
+  markApplicationPaid,
+  writeAdmissionAuditLog,
+} from "@/lib/admission-service";
 import { verifyPaystackTransaction } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
@@ -9,13 +13,20 @@ import { enforceAdmissionRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
-const requiredDocumentTypes: AdmissionDocumentType[] = ["BIRTH_CERTIFICATE", "PASSPORT_PHOTO", "REPORT_CARD"];
+const requiredDocumentTypes: AdmissionDocumentType[] = [
+  "BIRTH_CERTIFICATE",
+  "PASSPORT_PHOTO",
+  "REPORT_CARD",
+];
 
 export async function POST(request: NextRequest) {
   const ipAddress = getClientIp(request);
   const limit = await enforceAdmissionRateLimit("payment", ipAddress);
   if (!limit.success) {
-    return jsonNoStore({ error: "Please wait before trying again." }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } });
+    return jsonNoStore(
+      { error: "Please wait before trying again." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
   }
 
   try {
@@ -23,26 +34,40 @@ export async function POST(request: NextRequest) {
     const application = await findAuthorizedApplication(payload.applicationId, payload.uploadToken);
 
     if (!application) {
-      return jsonNoStore({ error: "Your application session has expired. Please restart your application." }, { status: 401 });
+      return jsonNoStore(
+        { error: "Your application session has expired. Please restart your application." },
+        { status: 401 },
+      );
     }
 
     if (application.status !== ApplicationStatus.DRAFT) {
-      return jsonNoStore({ applicationId: application.applicationId, status: application.status }, { status: 200 });
+      return jsonNoStore(
+        { applicationId: application.applicationId, status: application.status },
+        { status: 200 },
+      );
     }
 
     if (application.paymentReference !== payload.paymentReference) {
-      return jsonNoStore({ error: "The payment reference does not match this application." }, { status: 422 });
+      return jsonNoStore(
+        { error: "The payment reference does not match this application." },
+        { status: 422 },
+      );
     }
 
-    const uploaded = new Set<AdmissionDocumentType>(application.documents.map((document) => document.type));
+    const uploaded = new Set<AdmissionDocumentType>(
+      application.documents.map((document) => document.type),
+    );
     if (!requiredDocumentTypes.every((type) => uploaded.has(type))) {
-      return jsonNoStore({ error: "All required documents must be uploaded before you submit." }, { status: 422 });
+      return jsonNoStore(
+        { error: "All required documents must be uploaded before you submit." },
+        { status: 422 },
+      );
     }
 
     const transaction = await verifyPaystackTransaction(
       payload.paymentReference,
       APPLICATION_FEE_KOBO,
-      application.parentEmail
+      application.parentEmail,
     );
 
     await markApplicationPaid(application.applicationId, payload.paymentReference, transaction);
@@ -68,13 +93,19 @@ export async function POST(request: NextRequest) {
         status: submitted.status,
         submittedAt: submitted.submittedAt?.toISOString(),
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error: unknown) {
     if (error instanceof Error && "issues" in error) {
-      return jsonNoStore({ error: "Please check your application and try again." }, { status: 422 });
+      return jsonNoStore(
+        { error: "Please check your application and try again." },
+        { status: 422 },
+      );
     }
-    const message = error instanceof Error ? error.message : "We could not submit your application. Please try again.";
+    const message =
+      error instanceof Error
+        ? error.message
+        : "We could not submit your application. Please try again.";
     console.error("Admission submission failed", error);
     return jsonNoStore({ error: message }, { status: 500 });
   }

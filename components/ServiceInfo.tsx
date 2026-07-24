@@ -28,9 +28,7 @@ export default function ServiceInfo() {
                 <p className="font-body text-sm font-medium text-[var(--text-primary)]">
                   Monday — Friday
                 </p>
-                <p className="font-body text-sm text-[var(--text-secondary)]">
-                  7:30 AM — 2:30 PM
-                </p>
+                <p className="font-body text-sm text-[var(--text-secondary)]">7:30 AM — 2:30 PM</p>
               </div>
             </div>
 

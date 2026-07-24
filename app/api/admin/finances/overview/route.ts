@@ -70,7 +70,10 @@ export async function GET() {
     };
   });
 
-  const classCollectionsMap = new Map<string, { className: string; billed: number; paid: number }>();
+  const classCollectionsMap = new Map<
+    string,
+    { className: string; billed: number; paid: number }
+  >();
   for (const invoice of invoices) {
     const className = invoice.studentProfile.currentClass.displayName;
     const row = classCollectionsMap.get(className) || { className, billed: 0, paid: 0 };

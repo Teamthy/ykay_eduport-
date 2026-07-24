@@ -5,7 +5,11 @@ import { CheckCircle2, XCircle, Info, AlertTriangle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type ToastType = "success" | "error" | "info" | "warning";
-interface Toast { id: number; message: string; type: ToastType; }
+interface Toast {
+  id: number;
+  message: string;
+  type: ToastType;
+}
 
 interface ToastContextValue {
   toast: (message: string, type?: ToastType) => void;
@@ -18,8 +22,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const toast = useCallback((message: string, type: ToastType = "success") => {
     const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000);
   }, []);
 
   const icons = {
@@ -41,7 +45,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <div className="fixed top-6 right-6 z-[200] space-y-2 pointer-events-none">
         <AnimatePresence>
-          {toasts.map(t => {
+          {toasts.map((t) => {
             const Icon = icons[t.type];
             return (
               <motion.div
@@ -53,7 +57,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               >
                 <Icon size={18} strokeWidth={2.5} />
                 <span className="text-sm font-medium flex-1">{t.message}</span>
-                <button onClick={() => setToasts(prev => prev.filter(x => x.id !== t.id))} className="opacity-70 hover:opacity-100">
+                <button
+                  onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
+                  className="opacity-70 hover:opacity-100"
+                >
                   <X size={14} />
                 </button>
               </motion.div>

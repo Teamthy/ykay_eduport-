@@ -3,8 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, CreditCard, FileText, ClipboardCheck, Users, IdCard, BarChart3,
-  BookOpen, Lock, School, Send, UserPlus, HelpCircle, LogOut, Shield
+  LayoutDashboard,
+  CreditCard,
+  FileText,
+  ClipboardCheck,
+  Users,
+  IdCard,
+  BarChart3,
+  BookOpen,
+  Lock,
+  School,
+  Send,
+  UserPlus,
+  HelpCircle,
+  LogOut,
+  Shield,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { useToast } from "./Toast";
@@ -44,9 +57,17 @@ export default function AdminSidebar() {
       <div className="sticky top-24 space-y-4">
         <div className="rounded-2xl border border-white/10 bg-brand-navy p-4">
           <div className="flex items-center gap-3">
-            <Image src="/ykay-logo.png" alt="Ykay" width={36} height={36} className="h-9 w-9 object-contain" />
+            <Image
+              src="/ykay-logo.png"
+              alt="Ykay"
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain"
+            />
             <div>
-              <div className="text-[9px] font-bold uppercase tracking-widest text-brand-green">Admin workspace</div>
+              <div className="text-[9px] font-bold uppercase tracking-widest text-brand-green">
+                Admin workspace
+              </div>
               <div className="font-display text-sm tracking-[1px] text-white">YKAY COLLEGE</div>
             </div>
           </div>
@@ -66,7 +87,8 @@ export default function AdminSidebar() {
 
         <nav className="space-y-1">
           {ADMIN_NAV.map((item) => {
-            const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+            const isActive =
+              pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
             return (
               <Link
                 key={item.href}

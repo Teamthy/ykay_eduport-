@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
 
   const total = expenses.reduce((s, e) => s + e.amount, 0);
   const byCategory = new Map<string, number>();
-  for (const e of expenses) byCategory.set(e.category, (byCategory.get(e.category) || 0) + e.amount);
+  for (const e of expenses)
+    byCategory.set(e.category, (byCategory.get(e.category) || 0) + e.amount);
 
   return NextResponse.json({
     summary: {
@@ -105,7 +106,9 @@ export async function DELETE(request: NextRequest) {
   const id = request.nextUrl.searchParams.get("id")?.trim();
   if (!id) return NextResponse.json({ error: "Expense id required." }, { status: 400 });
 
-  const existing = await prisma.expense.findFirst({ where: { id, schoolId: context.user.schoolId } });
+  const existing = await prisma.expense.findFirst({
+    where: { id, schoolId: context.user.schoolId },
+  });
   if (!existing) return NextResponse.json({ error: "Expense not found." }, { status: 404 });
 
   await prisma.expense.delete({ where: { id } });

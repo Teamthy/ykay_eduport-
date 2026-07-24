@@ -3,7 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { jsonNoStore } from "@/lib/requests";
 import { attendanceDateKey, getTeacherAttendanceContext } from "@/lib/teacher-attendance";
 
-function buildClassOptions(context: NonNullable<Awaited<ReturnType<typeof getTeacherAttendanceContext>>>) {
+function buildClassOptions(
+  context: NonNullable<Awaited<ReturnType<typeof getTeacherAttendanceContext>>>,
+) {
   const byClass = new Map<
     string,
     {
@@ -27,7 +29,9 @@ function buildClassOptions(context: NonNullable<Awaited<ReturnType<typeof getTea
     });
   }
 
-  return [...byClass.values()].sort((left, right) => left.displayName.localeCompare(right.displayName));
+  return [...byClass.values()].sort((left, right) =>
+    left.displayName.localeCompare(right.displayName),
+  );
 }
 
 function monthWindow(monthValue?: string | null) {
@@ -47,7 +51,10 @@ function monthWindow(monthValue?: string | null) {
 export async function GET(request: NextRequest) {
   const context = await getTeacherAttendanceContext();
   if (!context) {
-    return jsonNoStore({ error: "Teacher attendance history is not available for this account." }, { status: 403 });
+    return jsonNoStore(
+      { error: "Teacher attendance history is not available for this account." },
+      { status: 403 },
+    );
   }
 
   const availableClasses = buildClassOptions(context);
@@ -64,8 +71,12 @@ export async function GET(request: NextRequest) {
 
   const requestedClassId = request.nextUrl.searchParams.get("classId");
   const selectedAssignment =
-    context.teacherProfile.classAssignments.find((assignment) => assignment.classroom.id === requestedClassId) ||
-    context.teacherProfile.classAssignments.find((assignment) => assignment.role === "FORM_TEACHER") ||
+    context.teacherProfile.classAssignments.find(
+      (assignment) => assignment.classroom.id === requestedClassId,
+    ) ||
+    context.teacherProfile.classAssignments.find(
+      (assignment) => assignment.role === "FORM_TEACHER",
+    ) ||
     context.teacherProfile.classAssignments[0];
 
   if (!selectedAssignment) {
@@ -127,7 +138,7 @@ export async function GET(request: NextRequest) {
       summary.total += record.total;
       return summary;
     },
-    { sessions: 0, present: 0, absent: 0, late: 0, total: 0 }
+    { sessions: 0, present: 0, absent: 0, late: 0, total: 0 },
   );
 
   return jsonNoStore({

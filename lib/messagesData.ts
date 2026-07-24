@@ -187,7 +187,11 @@ export function generateAttendanceHistory(month: number, year: number): Attendan
 
     // Fake some holidays
     if (day === 4 || day === 15) {
-      history.push({ date: dateStr, status: "Holiday", note: day === 4 ? "Mid-Term Break" : "Public Holiday" });
+      history.push({
+        date: dateStr,
+        status: "Holiday",
+        note: day === 4 ? "Mid-Term Break" : "Public Holiday",
+      });
       continue;
     }
 

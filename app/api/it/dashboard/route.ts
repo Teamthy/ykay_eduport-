@@ -14,7 +14,9 @@ export async function GET() {
   const certificates = await prisma.itCertificate.findMany({
     where: { enrollment: { userId: user.id } },
     orderBy: { issuedAt: "desc" },
-    include: { enrollment: { include: { course: { select: { title: true, certification: true } } } } },
+    include: {
+      enrollment: { include: { course: { select: { title: true, certification: true } } } },
+    },
   });
 
   return NextResponse.json({
@@ -24,7 +26,9 @@ export async function GET() {
       completedCourses: completed.length,
       certificatesEarned: certificates.length,
       averageProgress: enrolled.length
-        ? Math.round(enrolled.reduce((sum, course) => sum + course.progressPercent, 0) / enrolled.length)
+        ? Math.round(
+            enrolled.reduce((sum, course) => sum + course.progressPercent, 0) / enrolled.length,
+          )
         : 0,
     },
     catalog,

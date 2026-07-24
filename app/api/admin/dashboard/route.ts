@@ -6,7 +6,12 @@ import { requireRole } from "@/lib/session";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const user = await requireRole([UserRole.ADMIN, UserRole.DIRECTOR, UserRole.COORDINATOR, UserRole.BURSAR]);
+  const user = await requireRole([
+    UserRole.ADMIN,
+    UserRole.DIRECTOR,
+    UserRole.COORDINATOR,
+    UserRole.BURSAR,
+  ]);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const schoolId = user.schoolId;
@@ -55,7 +60,9 @@ export async function GET() {
     }),
   ]);
 
-  const presentToday = todayEntries.filter((entry) => entry.status === AttendanceStatus.PRESENT).length;
+  const presentToday = todayEntries.filter(
+    (entry) => entry.status === AttendanceStatus.PRESENT,
+  ).length;
 
   return NextResponse.json({
     admin: { name: user.name, role: user.role },
@@ -72,7 +79,9 @@ export async function GET() {
       openInvoiceCount: openInvoices._count,
       attendanceMarkedToday: todayEntries.length,
       presentToday,
-      attendanceRateToday: todayEntries.length ? Math.round((presentToday / todayEntries.length) * 100) : null,
+      attendanceRateToday: todayEntries.length
+        ? Math.round((presentToday / todayEntries.length) * 100)
+        : null,
       itEnrollments: itEnrollmentCount,
     },
     activity: recentActivity.map((entry) => ({

@@ -20,7 +20,11 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         orderBy: { startedAt: "desc" },
         include: {
           studentProfile: { select: { id: true, studentId: true, displayName: true } },
-          answers: { include: { question: { select: { id: true, type: true, marks: true, questionText: true } } } },
+          answers: {
+            include: {
+              question: { select: { id: true, type: true, marks: true, questionText: true } },
+            },
+          },
         },
       },
     },
@@ -52,7 +56,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       tabSwitches: attempt.tabSwitches,
       passed: totalMarks > 0 ? (attempt.totalScore / totalMarks) * 100 >= exam.passMark : false,
       pendingEssays: attempt.answers.filter(
-        (answer) => answer.question.type === ExamQuestionType.ESSAY && answer.awardedMarks === null
+        (answer) => answer.question.type === ExamQuestionType.ESSAY && answer.awardedMarks === null,
       ).length,
       essayAnswers: attempt.answers
         .filter((answer) => answer.question.type === ExamQuestionType.ESSAY)
@@ -89,7 +93,10 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       id: payload.answerId,
       attempt: { exam: { id, teacherProfileId: teacherContext.teacherProfile.id } },
     },
-    include: { question: { select: { type: true, marks: true } }, attempt: { select: { id: true } } },
+    include: {
+      question: { select: { type: true, marks: true } },
+      attempt: { select: { id: true } },
+    },
   });
   if (!answer) return NextResponse.json({ error: "Answer not found." }, { status: 404 });
   if (answer.question.type !== ExamQuestionType.ESSAY) {
@@ -112,7 +119,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       .filter((entry) => entry.question.type === ExamQuestionType.ESSAY)
       .reduce((sum, entry) => sum + (entry.awardedMarks || 0), 0);
     const pending = attempt.answers.some(
-      (entry) => entry.question.type === ExamQuestionType.ESSAY && entry.awardedMarks === null
+      (entry) => entry.question.type === ExamQuestionType.ESSAY && entry.awardedMarks === null,
     );
     await prisma.examAttempt.update({
       where: { id: attempt.id },

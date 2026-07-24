@@ -63,7 +63,8 @@ export async function PATCH(request: NextRequest) {
     const application = await prisma.admissionApplication.findFirst({
       where: { schoolId: user.schoolId, applicationId: input.applicationId },
     });
-    if (!application) return NextResponse.json({ error: "Application not found." }, { status: 404 });
+    if (!application)
+      return NextResponse.json({ error: "Application not found." }, { status: 404 });
 
     const updated = await prisma.admissionApplication.update({
       where: { id: application.id },
@@ -74,9 +75,13 @@ export async function PATCH(request: NextRequest) {
         entranceScore: input.entranceScore ?? application.entranceScore,
         entrancePassed: input.entrancePassed ?? application.entrancePassed,
         recommendedClassId:
-          input.recommendedClassId === undefined ? application.recommendedClassId : input.recommendedClassId,
+          input.recommendedClassId === undefined
+            ? application.recommendedClassId
+            : input.recommendedClassId,
         entranceReviewedAt:
-          input.entranceScore != null || input.entrancePassed != null ? new Date() : application.entranceReviewedAt,
+          input.entranceScore != null || input.entrancePassed != null
+            ? new Date()
+            : application.entranceReviewedAt,
       },
     });
 

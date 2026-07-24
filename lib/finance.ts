@@ -2,9 +2,18 @@ import { FeeInvoiceStatus, FeePaymentMethod, FeePaymentStatus, UserRole } from "
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 
-export const FINANCE_ADMIN_ROLES = [UserRole.ADMIN, UserRole.DIRECTOR, UserRole.BURSAR, UserRole.COORDINATOR];
+export const FINANCE_ADMIN_ROLES = [
+  UserRole.ADMIN,
+  UserRole.DIRECTOR,
+  UserRole.BURSAR,
+  UserRole.COORDINATOR,
+];
 
-export function computeInvoiceStatus(totalAmount: number, amountPaid: number, dueDate?: Date | null) {
+export function computeInvoiceStatus(
+  totalAmount: number,
+  amountPaid: number,
+  dueDate?: Date | null,
+) {
   if (amountPaid >= totalAmount) return FeeInvoiceStatus.PAID;
   if (amountPaid > 0) return FeeInvoiceStatus.PARTIAL;
   if (dueDate && dueDate.getTime() < Date.now()) return FeeInvoiceStatus.OVERDUE;

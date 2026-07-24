@@ -23,7 +23,9 @@ export default function AdmissionsBanner() {
                 2025 / 2026 Session — Now Open
               </span>
               <h2 className="font-display text-[36px] md:text-[56px] lg:text-[72px] leading-[0.9] tracking-[4px] md:tracking-[6px] text-white mb-4">
-                ADMISSIONS<br />OPEN
+                ADMISSIONS
+                <br />
+                OPEN
               </h2>
               <div className="flex flex-wrap gap-6 text-white/90 font-body text-sm md:text-base">
                 <span>JSS1 — SS3</span>

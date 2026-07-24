@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  badgePayload,
-  ensureTeacherBadge,
-  getStaffAttendanceAdmin,
-} from "@/lib/staff-attendance";
+import { badgePayload, ensureTeacherBadge, getStaffAttendanceAdmin } from "@/lib/staff-attendance";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";

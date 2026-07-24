@@ -32,11 +32,7 @@ export default function LoadingScreen() {
               <div className="absolute inset-0 animate-[rotate-ring_30s_linear_infinite]">
                 <svg viewBox="0 0 420 420" width="100%" height="100%" className="overflow-visible">
                   <defs>
-                    <path
-                      id="ring-path"
-                      d="M 210 36 A 174 174 0 1 1 209.99 36"
-                      fill="none"
-                    />
+                    <path id="ring-path" d="M 210 36 A 174 174 0 1 1 209.99 36" fill="none" />
                   </defs>
                   <text
                     fill="#4EC54D"

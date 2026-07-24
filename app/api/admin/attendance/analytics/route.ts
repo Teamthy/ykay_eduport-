@@ -126,15 +126,25 @@ export async function GET(request: NextRequest) {
   ]);
 
   const allEntries = sessions.flatMap((session) => session.entries);
-  const presentCount = allEntries.filter((entry) => entry.status === AttendanceStatus.PRESENT).length;
+  const presentCount = allEntries.filter(
+    (entry) => entry.status === AttendanceStatus.PRESENT,
+  ).length;
   const absentCount = allEntries.filter((entry) => entry.status === AttendanceStatus.ABSENT).length;
   const lateCount = allEntries.filter((entry) => entry.status === AttendanceStatus.LATE).length;
   const totalEntryCount = allEntries.length;
   const lockedSessions = sessions.filter((session) => session.isLocked).length;
-  const queuedAlerts = sessions.flatMap((session) => session.alertJobs).filter((job) => job.status === AlertDeliveryStatus.PENDING).length;
-  const sentAlerts = sessions.flatMap((session) => session.alertJobs).filter((job) => job.status === AlertDeliveryStatus.SENT).length;
-  const failedAlerts = sessions.flatMap((session) => session.alertJobs).filter((job) => job.status === AlertDeliveryStatus.FAILED).length;
-  const skippedAlerts = sessions.flatMap((session) => session.alertJobs).filter((job) => job.status === AlertDeliveryStatus.SKIPPED).length;
+  const queuedAlerts = sessions
+    .flatMap((session) => session.alertJobs)
+    .filter((job) => job.status === AlertDeliveryStatus.PENDING).length;
+  const sentAlerts = sessions
+    .flatMap((session) => session.alertJobs)
+    .filter((job) => job.status === AlertDeliveryStatus.SENT).length;
+  const failedAlerts = sessions
+    .flatMap((session) => session.alertJobs)
+    .filter((job) => job.status === AlertDeliveryStatus.FAILED).length;
+  const skippedAlerts = sessions
+    .flatMap((session) => session.alertJobs)
+    .filter((job) => job.status === AlertDeliveryStatus.SKIPPED).length;
   const activeStudentCount = validClassId
     ? classes.find((item) => item.id === validClassId)?.students.length || 0
     : classes.reduce((sum, item) => sum + item.students.length, 0);
@@ -144,9 +154,15 @@ export async function GET(request: NextRequest) {
     .map((item) => {
       const classSessions = sessions.filter((session) => session.classroom.id === item.id);
       const classEntries = classSessions.flatMap((session) => session.entries);
-      const classPresent = classEntries.filter((entry) => entry.status === AttendanceStatus.PRESENT).length;
-      const classAbsent = classEntries.filter((entry) => entry.status === AttendanceStatus.ABSENT).length;
-      const classLate = classEntries.filter((entry) => entry.status === AttendanceStatus.LATE).length;
+      const classPresent = classEntries.filter(
+        (entry) => entry.status === AttendanceStatus.PRESENT,
+      ).length;
+      const classAbsent = classEntries.filter(
+        (entry) => entry.status === AttendanceStatus.ABSENT,
+      ).length;
+      const classLate = classEntries.filter(
+        (entry) => entry.status === AttendanceStatus.LATE,
+      ).length;
       const classTotal = classEntries.length;
       const lastSession = classSessions[classSessions.length - 1];
 
@@ -163,7 +179,11 @@ export async function GET(request: NextRequest) {
         lastSessionDate: lastSession ? lastSession.sessionDate.toISOString() : null,
       };
     })
-    .sort((left, right) => right.attendanceRate - left.attendanceRate || left.displayName.localeCompare(right.displayName));
+    .sort(
+      (left, right) =>
+        right.attendanceRate - left.attendanceRate ||
+        left.displayName.localeCompare(right.displayName),
+    );
 
   const dailyTrendMap = new Map<
     string,
@@ -223,17 +243,29 @@ export async function GET(request: NextRequest) {
     .map((item) => ({
       ...item,
       concernScore: item.absent * 2 + item.late,
-      attendanceRate: item.total ? Math.round(((item.total - item.absent - item.late) / item.total) * 100) : 0,
+      attendanceRate: item.total
+        ? Math.round(((item.total - item.absent - item.late) / item.total) * 100)
+        : 0,
     }))
     .filter((item) => item.concernScore > 0)
-    .sort((left, right) => right.concernScore - left.concernScore || left.displayName.localeCompare(right.displayName))
+    .sort(
+      (left, right) =>
+        right.concernScore - left.concernScore || left.displayName.localeCompare(right.displayName),
+    )
     .slice(0, 8);
 
-  const alertBreakdownByChannel = [AlertChannel.SMS, AlertChannel.WHATSAPP, AlertChannel.EMAIL].map((channel) => ({
-    channel,
-    total: sessions.flatMap((session) => session.alertJobs).filter((job) => job.channel === channel).length,
-    pending: sessions.flatMap((session) => session.alertJobs).filter((job) => job.channel === channel && job.status === AlertDeliveryStatus.PENDING).length,
-  }));
+  const alertBreakdownByChannel = [AlertChannel.SMS, AlertChannel.WHATSAPP, AlertChannel.EMAIL].map(
+    (channel) => ({
+      channel,
+      total: sessions
+        .flatMap((session) => session.alertJobs)
+        .filter((job) => job.channel === channel).length,
+      pending: sessions
+        .flatMap((session) => session.alertJobs)
+        .filter((job) => job.channel === channel && job.status === AlertDeliveryStatus.PENDING)
+        .length,
+    }),
+  );
 
   const alertBreakdownByStatus = [
     AlertDeliveryStatus.PENDING,
@@ -242,15 +274,20 @@ export async function GET(request: NextRequest) {
     AlertDeliveryStatus.SKIPPED,
   ].map((status) => ({
     status,
-    total: sessions.flatMap((session) => session.alertJobs).filter((job) => job.status === status).length,
+    total: sessions.flatMap((session) => session.alertJobs).filter((job) => job.status === status)
+      .length,
   }));
 
   const recentSessions = [...sessions]
     .sort((left, right) => right.sessionDate.getTime() - left.sessionDate.getTime())
     .slice(0, 6)
     .map((session) => {
-      const present = session.entries.filter((entry) => entry.status === AttendanceStatus.PRESENT).length;
-      const absent = session.entries.filter((entry) => entry.status === AttendanceStatus.ABSENT).length;
+      const present = session.entries.filter(
+        (entry) => entry.status === AttendanceStatus.PRESENT,
+      ).length;
+      const absent = session.entries.filter(
+        (entry) => entry.status === AttendanceStatus.ABSENT,
+      ).length;
       const late = session.entries.filter((entry) => entry.status === AttendanceStatus.LATE).length;
       const total = session.entries.length;
       return {
@@ -269,7 +306,9 @@ export async function GET(request: NextRequest) {
       };
     });
 
-  const pendingCorrections = correctionRequests.filter((request) => request.status === AttendanceCorrectionStatus.PENDING).length;
+  const pendingCorrections = correctionRequests.filter(
+    (request) => request.status === AttendanceCorrectionStatus.PENDING,
+  ).length;
 
   return jsonNoStore({
     filters: {

@@ -45,14 +45,23 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
     // Resume — but auto-submit if the deadline has passed.
     if (existing.deadlineAt.getTime() < Date.now()) {
       await finalizeAttempt(existing.id);
-      return NextResponse.json({ error: "Time elapsed. Your attempt was submitted automatically." }, { status: 409 });
+      return NextResponse.json(
+        { error: "Time elapsed. Your attempt was submitted automatically." },
+        { status: 409 },
+      );
     }
   } else {
     if (exam.status !== ExamStatus.PUBLISHED) {
-      return NextResponse.json({ error: "This exam is not open for new attempts." }, { status: 409 });
+      return NextResponse.json(
+        { error: "This exam is not open for new attempts." },
+        { status: 409 },
+      );
     }
 
-    const feeLock = await getStudentFeeLock(studentContext.user.schoolId, studentContext.studentProfile.id);
+    const feeLock = await getStudentFeeLock(
+      studentContext.user.schoolId,
+      studentContext.studentProfile.id,
+    );
     if (feeLock) {
       return NextResponse.json(
         {
@@ -61,7 +70,7 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
           totalOutstanding: feeLock.totalOutstanding,
           invoices: feeLock.invoices,
         },
-        { status: 402 }
+        { status: 402 },
       );
     }
 
@@ -77,7 +86,7 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
       if (!retake || retake.used) {
         return NextResponse.json(
           { error: "You have already taken this exam. Ask your teacher to enable a retake." },
-          { status: 409 }
+          { status: 409 },
         );
       }
       await prisma.examRetake.update({ where: { id: retake.id }, data: { used: true } });
@@ -93,13 +102,16 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
     });
   }
 
-  if (!attempt) return NextResponse.json({ error: "Unable to start the attempt." }, { status: 500 });
+  if (!attempt)
+    return NextResponse.json({ error: "Unable to start the attempt." }, { status: 500 });
 
   const savedAnswers = await prisma.examAnswer.findMany({
     where: { attemptId: attempt.id },
     select: { questionId: true, response: true },
   });
-  const responses = Object.fromEntries(savedAnswers.map((answer) => [answer.questionId, answer.response]));
+  const responses = Object.fromEntries(
+    savedAnswers.map((answer) => [answer.questionId, answer.response]),
+  );
 
   const ordered = exam.shuffleQuestions ? shuffled(exam.questions, attempt.id) : exam.questions;
 
@@ -131,7 +143,12 @@ const saveSchema = z.object({
   attemptId: z.string().trim().min(1),
   action: z.enum(["SAVE", "SUBMIT", "TAB_SWITCH"]),
   answers: z
-    .array(z.object({ questionId: z.string().trim().min(1), response: z.string().max(10_000).nullable() }))
+    .array(
+      z.object({
+        questionId: z.string().trim().min(1),
+        response: z.string().max(10_000).nullable(),
+      }),
+    )
     .max(300)
     .optional(),
 });
@@ -171,7 +188,9 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   }
 
   const validQuestionIds = new Set(attempt.exam.questions.map((question) => question.id));
-  const answers = (payload.answers || []).filter((answer) => validQuestionIds.has(answer.questionId));
+  const answers = (payload.answers || []).filter((answer) =>
+    validQuestionIds.has(answer.questionId),
+  );
 
   for (const answer of answers) {
     await prisma.examAnswer.upsert({

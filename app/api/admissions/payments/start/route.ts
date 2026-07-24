@@ -9,15 +9,26 @@ import { enforceAdmissionRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
-const requiredDocumentTypes: AdmissionDocumentType[] = ["BIRTH_CERTIFICATE", "PASSPORT_PHOTO", "REPORT_CARD"];
+const requiredDocumentTypes: AdmissionDocumentType[] = [
+  "BIRTH_CERTIFICATE",
+  "PASSPORT_PHOTO",
+  "REPORT_CARD",
+];
 
 export async function POST(request: NextRequest) {
   const ipAddress = getClientIp(request);
   const limit = await enforceAdmissionRateLimit("payment", ipAddress);
   if (!limit.success) {
     return jsonNoStore(
-      { error: limit.configurationError ? "The payment service is temporarily unavailable." : "Too many payment attempts. Please wait and try again." },
-      { status: limit.configurationError ? 503 : 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
+      {
+        error: limit.configurationError
+          ? "The payment service is temporarily unavailable."
+          : "Too many payment attempts. Please wait and try again.",
+      },
+      {
+        status: limit.configurationError ? 503 : 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
     );
   }
 
@@ -26,15 +37,25 @@ export async function POST(request: NextRequest) {
     const application = await findAuthorizedApplication(payload.applicationId, payload.uploadToken);
 
     if (!application || application.status !== "DRAFT") {
-      return jsonNoStore({ error: "Your application session has expired. Please restart your application." }, { status: 401 });
+      return jsonNoStore(
+        { error: "Your application session has expired. Please restart your application." },
+        { status: 401 },
+      );
     }
 
-    const uploaded = new Set<AdmissionDocumentType>(application.documents.map((document) => document.type));
+    const uploaded = new Set<AdmissionDocumentType>(
+      application.documents.map((document) => document.type),
+    );
     if (!requiredDocumentTypes.every((type) => uploaded.has(type))) {
-      return jsonNoStore({ error: "Please upload all required documents before payment." }, { status: 422 });
+      return jsonNoStore(
+        { error: "Please upload all required documents before payment." },
+        { status: 422 },
+      );
     }
 
-    const reference = application.paymentReference || `YKC-${application.applicationId}-${crypto.randomUUID().replaceAll("-", "").slice(0, 10).toUpperCase()}`;
+    const reference =
+      application.paymentReference ||
+      `YKC-${application.applicationId}-${crypto.randomUUID().replaceAll("-", "").slice(0, 10).toUpperCase()}`;
     await prisma.admissionApplication.update({
       where: { id: application.id },
       data: { paymentReference: reference, paymentStatus: PaymentStatus.PENDING },
@@ -60,9 +81,15 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     if (error instanceof Error && "issues" in error) {
-      return jsonNoStore({ error: "Please restart your application and try again." }, { status: 422 });
+      return jsonNoStore(
+        { error: "Please restart your application and try again." },
+        { status: 422 },
+      );
     }
     console.error("Admission payment initialization failed", error);
-    return jsonNoStore({ error: "We could not start the payment. Please try again." }, { status: 500 });
+    return jsonNoStore(
+      { error: "We could not start the payment. Please try again." },
+      { status: 500 },
+    );
   }
 }

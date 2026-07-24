@@ -47,7 +47,9 @@ export async function GET(request: NextRequest) {
   }
   const rows = [...latestByStudent.values()];
 
-  const subjectNames = [...new Set(rows.flatMap((report) => report.subjects.map((subject) => subject.subject)))];
+  const subjectNames = [
+    ...new Set(rows.flatMap((report) => report.subjects.map((subject) => subject.subject))),
+  ];
 
   const students = rows
     .map((report) => ({
@@ -60,7 +62,9 @@ export async function GET(request: NextRequest) {
       overallAverage: report.overallAverage,
       overallGrade: report.overallGrade,
       classPosition: report.classPosition,
-      subjects: Object.fromEntries(report.subjects.map((subject) => [subject.subject, subject.total])),
+      subjects: Object.fromEntries(
+        report.subjects.map((subject) => [subject.subject, subject.total]),
+      ),
     }))
     .sort((a, b) => b.overallAverage - a.overallAverage);
 
@@ -70,7 +74,9 @@ export async function GET(request: NextRequest) {
       .filter((score): score is number => typeof score === "number");
     return {
       subject,
-      average: scores.length ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0,
+      average: scores.length
+        ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length)
+        : 0,
     };
   });
 
@@ -84,7 +90,9 @@ export async function GET(request: NextRequest) {
       students,
       subjectAverages,
       classAverage: students.length
-        ? Math.round(students.reduce((sum, student) => sum + student.overallAverage, 0) / students.length)
+        ? Math.round(
+            students.reduce((sum, student) => sum + student.overallAverage, 0) / students.length,
+          )
         : 0,
     },
   });

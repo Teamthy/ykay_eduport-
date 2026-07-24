@@ -2,7 +2,12 @@ import { ItEnrollmentStatus, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireRole, type SessionUser } from "@/lib/session";
 
-export const IT_PORTAL_ROLES: UserRole[] = [UserRole.IT_STUDENT, UserRole.STUDENT, UserRole.ADMIN, UserRole.DIRECTOR];
+export const IT_PORTAL_ROLES: UserRole[] = [
+  UserRole.IT_STUDENT,
+  UserRole.STUDENT,
+  UserRole.ADMIN,
+  UserRole.DIRECTOR,
+];
 
 export type ItCourseSummary = {
   id: string;
@@ -86,7 +91,9 @@ export async function completeModuleAndMaybeCertify(input: {
     create: { enrollmentId: enrollment.id, moduleId: input.moduleId },
   });
 
-  const completedCount = await prisma.itModuleProgress.count({ where: { enrollmentId: enrollment.id } });
+  const completedCount = await prisma.itModuleProgress.count({
+    where: { enrollmentId: enrollment.id },
+  });
   const total = enrollment.course.modules.length;
 
   if (total > 0 && completedCount >= total && enrollment.status !== ItEnrollmentStatus.COMPLETED) {
@@ -102,7 +109,12 @@ export async function completeModuleAndMaybeCertify(input: {
         create: { enrollmentId: enrollment.id, certificateNumber: certNumber },
       }),
     ]);
-    return { completed: true, certified: true, certificateNumber: certNumber, progressPercent: 100 };
+    return {
+      completed: true,
+      certified: true,
+      certificateNumber: certNumber,
+      progressPercent: 100,
+    };
   }
 
   return {

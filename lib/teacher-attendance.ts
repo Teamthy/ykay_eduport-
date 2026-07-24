@@ -43,10 +43,7 @@ export async function getTeacherAttendanceContext(): Promise<TeacherAttendanceCo
       displayName: true,
       classAssignments: {
         where: { isActive: true },
-        orderBy: [
-          { role: "asc" },
-          { classroom: { displayName: "asc" } },
-        ],
+        orderBy: [{ role: "asc" }, { classroom: { displayName: "asc" } }],
         select: {
           id: true,
           role: true,
@@ -69,7 +66,8 @@ export async function getTeacherAttendanceContext(): Promise<TeacherAttendanceCo
 }
 
 export function normalizeAttendanceDate(input?: string | null) {
-  const candidate = input && /^\d{4}-\d{2}-\d{2}$/.test(input) ? input : new Date().toISOString().slice(0, 10);
+  const candidate =
+    input && /^\d{4}-\d{2}-\d{2}$/.test(input) ? input : new Date().toISOString().slice(0, 10);
   return new Date(`${candidate}T12:00:00.000Z`);
 }
 
@@ -86,6 +84,6 @@ export function summarizeStatuses<T extends { status: AttendanceStatus }>(entrie
       summary.total += 1;
       return summary;
     },
-    { present: 0, absent: 0, late: 0, total: 0 }
+    { present: 0, absent: 0, late: 0, total: 0 },
   );
 }

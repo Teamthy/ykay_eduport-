@@ -38,7 +38,9 @@ export async function POST(request: NextRequest) {
       ...(input.invoiceIds?.length ? { id: { in: input.invoiceIds } } : {}),
     },
     include: {
-      studentProfile: { select: { displayName: true, studentId: true, guardianEmail: true, guardianName: true } },
+      studentProfile: {
+        select: { displayName: true, studentId: true, guardianEmail: true, guardianName: true },
+      },
       parentProfile: {
         select: {
           displayName: true,
@@ -57,9 +59,10 @@ export async function POST(request: NextRequest) {
 
   for (const invoice of invoices) {
     const parentName =
-      invoice.parentProfile?.displayName || invoice.studentProfile.guardianName || "Parent/Guardian";
-    const email =
-      invoice.parentProfile?.user.email || invoice.studentProfile.guardianEmail || null;
+      invoice.parentProfile?.displayName ||
+      invoice.studentProfile.guardianName ||
+      "Parent/Guardian";
+    const email = invoice.parentProfile?.user.email || invoice.studentProfile.guardianEmail || null;
     const amount = invoice.balanceDue;
     const subject = `Fee reminder — ${invoice.studentProfile.displayName} (${invoice.termLabel})`;
     const body =
@@ -105,7 +108,12 @@ export async function POST(request: NextRequest) {
       action: "FEE_REMINDERS_QUEUED",
       entityType: "FeeInvoice",
       ipAddress: getClientIp(request),
-      metadata: { invoiceCount: invoices.length, emailJobs: queued, inApp, onlyOverdue: Boolean(input.onlyOverdue) },
+      metadata: {
+        invoiceCount: invoices.length,
+        emailJobs: queued,
+        inApp,
+        onlyOverdue: Boolean(input.onlyOverdue),
+      },
     },
   });
 

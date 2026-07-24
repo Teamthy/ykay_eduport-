@@ -21,7 +21,12 @@ const enrollSchema = z.object({
 });
 
 async function teacherContext() {
-  const user = await requireRole([UserRole.TEACHER, UserRole.HOD, UserRole.ADMIN, UserRole.DIRECTOR]);
+  const user = await requireRole([
+    UserRole.TEACHER,
+    UserRole.HOD,
+    UserRole.ADMIN,
+    UserRole.DIRECTOR,
+  ]);
   if (!user) return null;
   const profile = await prisma.teacherProfile.findFirst({
     where: { schoolId: user.schoolId, userId: user.id, isActive: true },
@@ -48,7 +53,8 @@ async function teacherContext() {
 
 export async function GET(request: NextRequest) {
   const ctx = await teacherContext();
-  if (!ctx) return NextResponse.json({ error: "Unauthorized or no teacher profile." }, { status: 401 });
+  if (!ctx)
+    return NextResponse.json({ error: "Unauthorized or no teacher profile." }, { status: 401 });
 
   const formClassIds = ctx.profile.classAssignments
     .filter((a) => a.role === TeacherAssignmentRole.FORM_TEACHER)
@@ -59,11 +65,16 @@ export async function GET(request: NextRequest) {
   const allClassIds = [...new Set([...formClassIds, ...subjectClassIds])];
 
   const classFilter = request.nextUrl.searchParams.get("classId")?.trim();
-  const whereClassIds = classFilter && allClassIds.includes(classFilter) ? [classFilter] : allClassIds;
+  const whereClassIds =
+    classFilter && allClassIds.includes(classFilter) ? [classFilter] : allClassIds;
 
   const students = whereClassIds.length
     ? await prisma.studentProfile.findMany({
-        where: { schoolId: ctx.user.schoolId, isActive: true, currentClassId: { in: whereClassIds } },
+        where: {
+          schoolId: ctx.user.schoolId,
+          isActive: true,
+          currentClassId: { in: whereClassIds },
+        },
         include: { currentClass: { select: { id: true, displayName: true } } },
         orderBy: [{ currentClass: { displayName: "asc" } }, { displayName: "asc" }],
         take: 500,
@@ -75,7 +86,7 @@ export async function GET(request: NextRequest) {
     ...new Set(
       ctx.profile.classAssignments
         .filter((a) => a.role === TeacherAssignmentRole.FORM_TEACHER)
-        .map((a) => a.classroom.level)
+        .map((a) => a.classroom.level),
     ),
   ];
 
@@ -139,23 +150,29 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const ctx = await teacherContext();
-  if (!ctx) return NextResponse.json({ error: "Unauthorized or no teacher profile." }, { status: 401 });
+  if (!ctx)
+    return NextResponse.json({ error: "Unauthorized or no teacher profile." }, { status: 401 });
 
   const formClassIds = new Set(
     ctx.profile.classAssignments
       .filter((a) => a.role === TeacherAssignmentRole.FORM_TEACHER)
-      .map((a) => a.classroom.id)
+      .map((a) => a.classroom.id),
   );
   if (!formClassIds.size) {
     return NextResponse.json(
-      { error: "Only form (class) teachers can enrol students into a class. Ask an administrator." },
-      { status: 403 }
+      {
+        error: "Only form (class) teachers can enrol students into a class. Ask an administrator.",
+      },
+      { status: 403 },
     );
   }
 
   const key = request.headers.get("idempotency-key")?.trim();
   if (!key || key.length < 16) {
-    return NextResponse.json({ error: "An Idempotency-Key header (min. 16 chars) is required." }, { status: 400 });
+    return NextResponse.json(
+      { error: "An Idempotency-Key header (min. 16 chars) is required." },
+      { status: 400 },
+    );
   }
 
   let input: z.infer<typeof enrollSchema>;
@@ -166,13 +183,22 @@ export async function POST(request: NextRequest) {
   }
 
   if (!formClassIds.has(input.classId)) {
-    return NextResponse.json({ error: "You can only enrol students into your own form class." }, { status: 403 });
+    return NextResponse.json(
+      { error: "You can only enrol students into your own form class." },
+      { status: 403 },
+    );
   }
 
   const existing = await prisma.idempotencyRecord.findUnique({
-    where: { schoolId_scope_key: { schoolId: ctx.user.schoolId, scope: "TEACHER_STUDENT_ENROLLMENT", key } },
+    where: {
+      schoolId_scope_key: { schoolId: ctx.user.schoolId, scope: "TEACHER_STUDENT_ENROLLMENT", key },
+    },
   });
-  if (existing) return NextResponse.json({ ...(existing.response as object), idempotentReplay: true }, { status: existing.statusCode });
+  if (existing)
+    return NextResponse.json(
+      { ...(existing.response as object), idempotentReplay: true },
+      { status: existing.statusCode },
+    );
 
   const schoolClass = await prisma.schoolClass.findFirst({
     where: { id: input.classId, schoolId: ctx.user.schoolId, isActive: true },
@@ -262,7 +288,12 @@ export async function POST(request: NextRequest) {
     });
 
     const response = {
-      student: { id: result.student.id, studentId: number, displayName, className: schoolClass.displayName },
+      student: {
+        id: result.student.id,
+        studentId: number,
+        displayName,
+        className: schoolClass.displayName,
+      },
       parentAccount: input.guardianEmail
         ? {
             email: input.guardianEmail,
@@ -295,6 +326,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Enrollment could not be completed. No partial record was saved." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Enrollment could not be completed. No partial record was saved." },
+      { status: 500 },
+    );
   }
 }

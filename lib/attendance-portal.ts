@@ -63,7 +63,7 @@ export function summarizeCalendar(days: CalendarDay[]) {
 }
 
 export function aggregateCalendarDays(
-  entries: Array<{ status: AttendanceStatus; note: string | null; sessionDate: Date }>
+  entries: Array<{ status: AttendanceStatus; note: string | null; sessionDate: Date }>,
 ): CalendarDay[] {
   const byDate = new Map<string, { status: AttendanceStatus; note?: string }>();
 
@@ -162,7 +162,10 @@ export async function getParentPortalProfile() {
   return { user, profile };
 }
 
-export async function getStudentAttendanceMonth(studentProfileId: string, monthKey?: string | null) {
+export async function getStudentAttendanceMonth(
+  studentProfileId: string,
+  monthKey?: string | null,
+) {
   const range = parseMonth(monthKey);
   const entries = await prisma.attendanceEntry.findMany({
     where: {
@@ -191,7 +194,7 @@ export async function getStudentAttendanceMonth(studentProfileId: string, monthK
       status: entry.status,
       note: entry.note,
       sessionDate: entry.session.sessionDate,
-    }))
+    })),
   );
 
   return {

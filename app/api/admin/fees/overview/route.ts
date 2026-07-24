@@ -51,7 +51,9 @@ export async function GET() {
       invoiceCount: invoices.length,
       paidInvoices: invoices.filter((invoice) => invoice.status === "PAID").length,
       partialInvoices: invoices.filter((invoice) => invoice.status === "PARTIAL").length,
-      unpaidInvoices: invoices.filter((invoice) => invoice.status === "UNPAID" || invoice.status === "OVERDUE").length,
+      unpaidInvoices: invoices.filter(
+        (invoice) => invoice.status === "UNPAID" || invoice.status === "OVERDUE",
+      ).length,
     },
     invoices: invoices.map((invoice) => ({
       id: invoice.id,
@@ -70,7 +72,10 @@ export async function GET() {
         className: invoice.studentProfile.currentClass.displayName,
       },
       parent: {
-        displayName: invoice.parentProfile?.displayName || invoice.studentProfile.guardianName || "Parent record pending",
+        displayName:
+          invoice.parentProfile?.displayName ||
+          invoice.studentProfile.guardianName ||
+          "Parent record pending",
       },
     })),
     recentPayments: recentPayments.map((payment) => ({

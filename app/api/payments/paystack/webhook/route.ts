@@ -39,7 +39,11 @@ export async function POST(request: NextRequest) {
     // 1) School fee attempts (preferred path)
     const feeAttempt = await prisma.feePaymentAttempt.findUnique({ where: { reference } });
     if (feeAttempt) {
-      if (payload.data.amount !== feeAttempt.amount * 100 || payload.data.currency !== "NGN" || payload.data.status !== "success") {
+      if (
+        payload.data.amount !== feeAttempt.amount * 100 ||
+        payload.data.currency !== "NGN" ||
+        payload.data.status !== "success"
+      ) {
         await prisma.feePaymentAttempt.update({
           where: { id: feeAttempt.id },
           data: { status: PaymentStatus.FAILED, providerData: toPrismaJson(payload) },
@@ -69,7 +73,11 @@ export async function POST(request: NextRequest) {
 
     if (!application) return jsonNoStore({ ok: true });
 
-    if (payload.data.amount !== APPLICATION_FEE_KOBO || payload.data.currency !== "NGN" || payload.data.status !== "success") {
+    if (
+      payload.data.amount !== APPLICATION_FEE_KOBO ||
+      payload.data.currency !== "NGN" ||
+      payload.data.status !== "success"
+    ) {
       await prisma.paymentTransaction.updateMany({
         where: { reference },
         data: { status: PaymentStatus.FAILED, providerData: toPrismaJson(payload) },

@@ -79,15 +79,18 @@ export async function initializePaystackTransaction(input: {
 export async function verifyPaystackTransaction(
   reference: string,
   expectedAmountKobo: number,
-  expectedEmail: string
+  expectedEmail: string,
 ): Promise<Prisma.InputJsonObject> {
-  const response = await fetch(`${PAYSTACK_URL}/transaction/verify/${encodeURIComponent(reference)}`, {
-    headers: {
-      Authorization: `Bearer ${getPaystackSecretKey()}`,
-      Accept: "application/json",
+  const response = await fetch(
+    `${PAYSTACK_URL}/transaction/verify/${encodeURIComponent(reference)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${getPaystackSecretKey()}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
     },
-    cache: "no-store",
-  });
+  );
 
   const payload = (await response.json()) as PaystackVerificationResponse;
   const email = payload.data?.customer?.email?.trim().toLowerCase();
@@ -101,7 +104,9 @@ export async function verifyPaystackTransaction(
     payload.data.currency !== "NGN" ||
     email !== expectedEmail.trim().toLowerCase()
   ) {
-    throw new Error("We could not verify this payment. Please contact the bursary if your account was charged.");
+    throw new Error(
+      "We could not verify this payment. Please contact the bursary if your account was charged.",
+    );
   }
 
   return toPrismaJson({
@@ -115,14 +120,19 @@ export async function verifyPaystackTransaction(
   }) as Prisma.InputJsonObject;
 }
 
-export async function fetchPaystackVerification(reference: string): Promise<Prisma.InputJsonObject> {
-  const response = await fetch(`${PAYSTACK_URL}/transaction/verify/${encodeURIComponent(reference)}`, {
-    headers: {
-      Authorization: `Bearer ${getPaystackSecretKey()}`,
-      Accept: "application/json",
+export async function fetchPaystackVerification(
+  reference: string,
+): Promise<Prisma.InputJsonObject> {
+  const response = await fetch(
+    `${PAYSTACK_URL}/transaction/verify/${encodeURIComponent(reference)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${getPaystackSecretKey()}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
     },
-    cache: "no-store",
-  });
+  );
   const payload = (await response.json()) as PaystackVerificationResponse;
   if (!response.ok || !payload.status || !payload.data) {
     throw new Error(payload.message || "Paystack verification failed.");

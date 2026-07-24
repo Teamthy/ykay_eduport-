@@ -72,10 +72,13 @@ export async function POST(request: NextRequest) {
   }
 
   const assignment = context.teacherProfile.subjectAssignments.find(
-    (item) => item.id === payload.assignmentId
+    (item) => item.id === payload.assignmentId,
   );
   if (!assignment) {
-    return NextResponse.json({ error: "You are not assigned to this subject and class." }, { status: 403 });
+    return NextResponse.json(
+      { error: "You are not assigned to this subject and class." },
+      { status: 403 },
+    );
   }
 
   let parsed: ReturnType<typeof parseBulkQuestions> = { questions: [], errors: [] };
@@ -84,7 +87,7 @@ export async function POST(request: NextRequest) {
     if (parsed.errors.length) {
       return NextResponse.json(
         { error: `Question format problems: ${parsed.errors.slice(0, 5).join(" | ")}` },
-        { status: 400 }
+        { status: 400 },
       );
     }
   }
@@ -106,7 +109,9 @@ export async function POST(request: NextRequest) {
         create: parsed.questions.map((question, index) => ({
           type: question.type,
           questionText: question.questionText,
-          options: question.options ? (question.options as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
+          options: question.options
+            ? (question.options as unknown as Prisma.InputJsonValue)
+            : Prisma.JsonNull,
           correctKey: question.correctKey,
           correctText: question.correctText,
           marks: question.marks,
@@ -123,7 +128,11 @@ export async function POST(request: NextRequest) {
       action: "EXAM_CREATED",
       entityType: "Exam",
       entityId: exam.id,
-      metadata: { title: exam.title, subject: exam.subjectName, questions: parsed.questions.length },
+      metadata: {
+        title: exam.title,
+        subject: exam.subjectName,
+        questions: parsed.questions.length,
+      },
       ipAddress: getClientIp(request),
     },
   });
@@ -137,7 +146,14 @@ export async function POST(request: NextRequest) {
 
 const updateSchema = z.object({
   examId: z.string().trim().min(1),
-  action: z.enum(["PUBLISH", "CLOSE", "RELEASE_RESULTS", "UNRELEASE_RESULTS", "ADD_QUESTIONS", "GRANT_RETAKE"]),
+  action: z.enum([
+    "PUBLISH",
+    "CLOSE",
+    "RELEASE_RESULTS",
+    "UNRELEASE_RESULTS",
+    "ADD_QUESTIONS",
+    "GRANT_RETAKE",
+  ]),
   bulkQuestions: z.string().trim().max(100_000).optional(),
   studentProfileId: z.string().trim().min(1).optional(),
 });
@@ -161,13 +177,16 @@ export async function PATCH(request: NextRequest) {
 
   if (payload.action === "ADD_QUESTIONS") {
     if (exam.status !== ExamStatus.DRAFT) {
-      return NextResponse.json({ error: "Questions can only be added while the exam is a draft." }, { status: 409 });
+      return NextResponse.json(
+        { error: "Questions can only be added while the exam is a draft." },
+        { status: 409 },
+      );
     }
     const parsed = parseBulkQuestions(payload.bulkQuestions || "");
     if (!parsed.questions.length) {
       return NextResponse.json(
         { error: parsed.errors[0] || "No valid questions found in the pasted text." },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const startOrder = exam.questions.length;
@@ -177,7 +196,9 @@ export async function PATCH(request: NextRequest) {
           examId: exam.id,
           type: question.type,
           questionText: question.questionText,
-          options: question.options ? (question.options as unknown as Prisma.InputJsonValue) : Prisma.JsonNull,
+          options: question.options
+            ? (question.options as unknown as Prisma.InputJsonValue)
+            : Prisma.JsonNull,
           correctKey: question.correctKey,
           correctText: question.correctText,
           marks: question.marks,
@@ -193,15 +214,24 @@ export async function PATCH(request: NextRequest) {
         },
       }),
     ]);
-    return NextResponse.json({ ok: true, message: `${parsed.questions.length} question(s) added.` });
+    return NextResponse.json({
+      ok: true,
+      message: `${parsed.questions.length} question(s) added.`,
+    });
   }
 
   if (payload.action === "PUBLISH") {
     if (!exam.questions.length) {
-      return NextResponse.json({ error: "Add at least one question before publishing." }, { status: 409 });
+      return NextResponse.json(
+        { error: "Add at least one question before publishing." },
+        { status: 409 },
+      );
     }
     await prisma.exam.update({ where: { id: exam.id }, data: { status: ExamStatus.PUBLISHED } });
-    return NextResponse.json({ ok: true, message: "Exam published. Students in the class can now take it." });
+    return NextResponse.json({
+      ok: true,
+      message: "Exam published. Students in the class can now take it.",
+    });
   }
 
   if (payload.action === "CLOSE") {
@@ -236,7 +266,8 @@ export async function PATCH(request: NextRequest) {
     where: { id: payload.studentProfileId, currentClassId: exam.classId, isActive: true },
     select: { id: true, displayName: true },
   });
-  if (!student) return NextResponse.json({ error: "Student not found in this class." }, { status: 404 });
+  if (!student)
+    return NextResponse.json({ error: "Student not found in this class." }, { status: 404 });
 
   await prisma.examRetake.upsert({
     where: { examId_studentProfileId: { examId: exam.id, studentProfileId: student.id } },

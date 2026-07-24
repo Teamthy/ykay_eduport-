@@ -35,9 +35,11 @@ export default function FeeCalculator() {
 
       <div className="space-y-4 mb-6">
         <div>
-          <label className="text-xs font-bold uppercase tracking-widest text-[var(--text-primary)] block mb-2">Select Class</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-[var(--text-primary)] block mb-2">
+            Select Class
+          </label>
           <div className="grid grid-cols-3 gap-2">
-            {Object.keys(FEES).map(cls => (
+            {Object.keys(FEES).map((cls) => (
               <button
                 key={cls}
                 onClick={() => setSelectedClass(cls)}
@@ -54,11 +56,17 @@ export default function FeeCalculator() {
         </div>
 
         <label className="flex items-center gap-3 p-4 rounded-xl bg-[var(--surface-disabled)] cursor-pointer hover:bg-brand-green/5 transition-colors">
-          <input type="checkbox" checked={isNew} onChange={e => setIsNew(e.target.checked)}
-            className="w-4 h-4 rounded accent-brand-green" />
+          <input
+            type="checkbox"
+            checked={isNew}
+            onChange={(e) => setIsNew(e.target.checked)}
+            className="w-4 h-4 rounded accent-brand-green"
+          />
           <div className="flex-1">
             <div className="text-sm font-medium text-[var(--text-primary)]">New Student</div>
-            <div className="text-xs text-[var(--text-muted)]">Adds uniform + textbooks (₦45,000)</div>
+            <div className="text-xs text-[var(--text-muted)]">
+              Adds uniform + textbooks (₦45,000)
+            </div>
           </div>
         </label>
       </div>
@@ -67,7 +75,9 @@ export default function FeeCalculator() {
         {Object.entries(classFees).map(([label, amount]) => (
           <div key={label} className="flex justify-between text-sm">
             <span className="text-[var(--text-secondary)]">{label} Fee</span>
-            <span className="text-[var(--text-primary)] font-medium">₦{amount.toLocaleString()}</span>
+            <span className="text-[var(--text-primary)] font-medium">
+              ₦{amount.toLocaleString()}
+            </span>
           </div>
         ))}
         {isNew && (
@@ -80,12 +90,19 @@ export default function FeeCalculator() {
 
       <div className="pt-4">
         <div className="flex justify-between items-end mb-2">
-          <span className="text-xs uppercase tracking-widest text-[var(--text-muted)]">Total per Term</span>
-          <span className="font-display text-3xl text-brand-green">₦{grandTotal.toLocaleString()}</span>
+          <span className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
+            Total per Term
+          </span>
+          <span className="font-display text-3xl text-brand-green">
+            ₦{grandTotal.toLocaleString()}
+          </span>
         </div>
         <div className="text-xs text-[var(--text-muted)] flex items-start gap-2 p-3 rounded-lg bg-brand-orange/5 border border-brand-orange/20 mt-3">
           <Info size={12} className="text-brand-orange shrink-0 mt-0.5" />
-          <span>Fees are payable per term. Scholarships available for siblings, staff children, and academic excellence.</span>
+          <span>
+            Fees are payable per term. Scholarships available for siblings, staff children, and
+            academic excellence.
+          </span>
         </div>
       </div>
     </div>

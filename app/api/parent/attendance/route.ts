@@ -8,7 +8,10 @@ export const runtime = "nodejs";
 export async function GET(request: NextRequest) {
   const context = await getParentPortalProfile();
   if (!context) {
-    return jsonNoStore({ error: "No live parent profile is linked to this account yet." }, { status: 404 });
+    return jsonNoStore(
+      { error: "No live parent profile is linked to this account yet." },
+      { status: 404 },
+    );
   }
 
   const children = context.profile.studentLinks.map((link) => ({
@@ -38,7 +41,7 @@ export async function GET(request: NextRequest) {
   const selectedChild = children.find((child) => child.id === requestedStudentId) || children[0];
   const attendance = await getStudentAttendanceMonth(
     selectedChild.id,
-    request.nextUrl.searchParams.get("month")
+    request.nextUrl.searchParams.get("month"),
   );
 
   const recentAlerts = await prisma.attendanceAlertJob.findMany({

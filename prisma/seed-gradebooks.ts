@@ -135,13 +135,17 @@ async function main() {
       });
     }
 
-    console.log(`Gradebook ready: ${subjectName} — ${schoolClass.displayName} (${students.length} entries, SUBMITTED)`);
+    console.log(
+      `Gradebook ready: ${subjectName} — ${schoolClass.displayName} (${students.length} entries, SUBMITTED)`,
+    );
   }
 
   console.log("");
   console.log("Gradebook bootstrap complete.");
   console.log(`Session: ${sessionLabel} · Term: ${termLabel}`);
-  console.log("Next: sign in as an admin, open /admin/gradebook-lock, lock each subject, then generate report cards.");
+  console.log(
+    "Next: sign in as an admin, open /admin/gradebook-lock, lock each subject, then generate report cards.",
+  );
 }
 
 main()

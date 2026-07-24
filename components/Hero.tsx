@@ -46,7 +46,8 @@ export default function Hero() {
             transition={{ duration: 0.7, delay: 0.7 }}
             className="font-body text-base md:text-xl text-white max-w-xl mb-8 md:mb-10 leading-relaxed drop-shadow"
           >
-            A premium day secondary school in Sango Ota, Ogun State — raising role models through rigorous academics, leadership training, and character formation. JSS1 to SS3.
+            A premium day secondary school in Sango Ota, Ogun State — raising role models through
+            rigorous academics, leadership training, and character formation. JSS1 to SS3.
           </motion.p>
 
           <motion.div
@@ -56,17 +57,23 @@ export default function Hero() {
             className="flex flex-wrap items-center gap-6 md:gap-10 text-white font-body text-sm md:text-base"
           >
             <div>
-              <span className="block text-xs uppercase tracking-[0.15em] text-brand-green font-bold mb-1">Location</span>
+              <span className="block text-xs uppercase tracking-[0.15em] text-brand-green font-bold mb-1">
+                Location
+              </span>
               <span className="font-medium text-white/95">Sango Ota, Ogun State</span>
             </div>
             <div className="w-px h-10 bg-white/20 hidden sm:block" />
             <div>
-              <span className="block text-xs uppercase tracking-[0.15em] text-brand-green font-bold mb-1">Programmes</span>
+              <span className="block text-xs uppercase tracking-[0.15em] text-brand-green font-bold mb-1">
+                Programmes
+              </span>
               <span className="font-medium text-white/95">Junior &amp; Senior Secondary</span>
             </div>
             <div className="w-px h-10 bg-white/20 hidden sm:block" />
             <div>
-              <span className="block text-xs uppercase tracking-[0.15em] text-brand-green font-bold mb-1">Session</span>
+              <span className="block text-xs uppercase tracking-[0.15em] text-brand-green font-bold mb-1">
+                Session
+              </span>
               <span className="font-medium text-white/95">2025 / 2026</span>
             </div>
           </motion.div>

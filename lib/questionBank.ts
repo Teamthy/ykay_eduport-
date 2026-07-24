@@ -229,8 +229,10 @@ export const MATH_QUESTIONS: Question[] = [
     classLevel: "SS2",
     difficulty: "hard",
     marks: 5,
-    questionText: "A trader bought 100 oranges for ₦2,000 and sold them at ₦30 each. Calculate: (a) The total selling price (b) The profit made (c) The percentage profit. Show all working.",
-    explanation: "(a) TSP = 100 × 30 = ₦3,000 (b) Profit = 3000 - 2000 = ₦1,000 (c) %Profit = (1000/2000) × 100 = 50%",
+    questionText:
+      "A trader bought 100 oranges for ₦2,000 and sold them at ₦30 each. Calculate: (a) The total selling price (b) The profit made (c) The percentage profit. Show all working.",
+    explanation:
+      "(a) TSP = 100 × 30 = ₦3,000 (b) Profit = 3000 - 2000 = ₦1,000 (c) %Profit = (1000/2000) × 100 = 50%",
   },
 ];
 
@@ -315,7 +317,8 @@ export const PHYSICS_QUESTIONS: Question[] = [
       { id: "c", text: "Bifocal lens", isCorrect: false },
       { id: "d", text: "Plano-convex lens", isCorrect: false },
     ],
-    explanation: "Concave (diverging) lenses correct myopia by diverging light rays before they enter the eye.",
+    explanation:
+      "Concave (diverging) lenses correct myopia by diverging light rays before they enter the eye.",
     waecYear: 2020,
   },
 ];
@@ -332,7 +335,8 @@ export const ENGLISH_QUESTIONS: Question[] = [
     classLevel: "SS2",
     difficulty: "easy",
     marks: 2,
-    questionText: "Choose the word that best completes the sentence: 'The teacher ___ the students to be quiet.'",
+    questionText:
+      "Choose the word that best completes the sentence: 'The teacher ___ the students to be quiet.'",
     options: [
       { id: "a", text: "asked", isCorrect: true },
       { id: "b", text: "asking", isCorrect: false },
@@ -356,7 +360,8 @@ export const ENGLISH_QUESTIONS: Question[] = [
       { id: "c", text: "When I went to the market, I bought some fruits.", isCorrect: true },
       { id: "d", text: "I went to the market. I bought some fruits.", isCorrect: false },
     ],
-    explanation: "A complex sentence contains an independent clause and a dependent clause joined by a subordinating conjunction ('When').",
+    explanation:
+      "A complex sentence contains an independent clause and a dependent clause joined by a subordinating conjunction ('When').",
   },
   {
     id: "eng-003",
@@ -366,7 +371,8 @@ export const ENGLISH_QUESTIONS: Question[] = [
     classLevel: "SS2",
     difficulty: "hard",
     marks: 10,
-    questionText: "Write an essay of about 250 words on the topic: 'The Role of Technology in Modern Education'. Your essay should cover: (a) Introduction (b) Benefits of technology in education (c) Challenges (d) Conclusion.",
+    questionText:
+      "Write an essay of about 250 words on the topic: 'The Role of Technology in Modern Education'. Your essay should cover: (a) Introduction (b) Benefits of technology in education (c) Challenges (d) Conclusion.",
   },
 ];
 
@@ -385,11 +391,23 @@ export const SAMPLE_EXAMS: ExamConfig[] = [
     subject: "Mathematics",
     classLevel: "SS2",
     examType: "ca",
-    instructions: "Answer ALL questions. Each correct MCQ is worth 2 marks. Fill-in-the-blank questions require exact answers. Essay questions should show all working. No calculator is allowed for this test.",
+    instructions:
+      "Answer ALL questions. Each correct MCQ is worth 2 marks. Fill-in-the-blank questions require exact answers. Essay questions should show all working. No calculator is allowed for this test.",
     durationMinutes: 30,
     totalMarks: 24,
     passMark: 10,
-    questionIds: ["math-001", "math-002", "math-003", "math-004", "math-005", "math-006", "math-007", "math-008", "math-009", "math-010"],
+    questionIds: [
+      "math-001",
+      "math-002",
+      "math-003",
+      "math-004",
+      "math-005",
+      "math-006",
+      "math-007",
+      "math-008",
+      "math-009",
+      "math-010",
+    ],
     randomizeQuestions: true,
     randomizeOptions: true,
     fullscreenLock: true,
@@ -409,7 +427,8 @@ export const SAMPLE_EXAMS: ExamConfig[] = [
     subject: "Physics",
     classLevel: "SS2",
     examType: "midterm",
-    instructions: "Answer ALL questions. This test covers Mechanics, Waves, Electricity, and Optics. Show working where necessary.",
+    instructions:
+      "Answer ALL questions. This test covers Mechanics, Waves, Electricity, and Optics. Show working where necessary.",
     durationMinutes: 45,
     totalMarks: 9,
     passMark: 4,
@@ -456,7 +475,10 @@ export const SAMPLE_EXAMS: ExamConfig[] = [
 // ========================================
 // GRADING HELPERS
 // ========================================
-export function gradeExam(questions: Question[], answers: Record<string, string | string[]>): {
+export function gradeExam(
+  questions: Question[],
+  answers: Record<string, string | string[]>,
+): {
   score: number;
   totalMarks: number;
   percentage: number;
@@ -484,10 +506,12 @@ export function gradeExam(questions: Question[], answers: Record<string, string 
     let isCorrect = false;
 
     if (q.type === "mcq" || q.type === "true_false") {
-      const correctOption = q.options?.find(o => o.isCorrect);
+      const correctOption = q.options?.find((o) => o.isCorrect);
       isCorrect = answer === correctOption?.id;
     } else if (q.type === "fill_blank") {
-      isCorrect = typeof answer === "string" && answer.toLowerCase().trim() === q.correctAnswer?.toLowerCase().trim();
+      isCorrect =
+        typeof answer === "string" &&
+        answer.toLowerCase().trim() === q.correctAnswer?.toLowerCase().trim();
     } else if (q.type === "multi_select") {
       const selected = Array.isArray(answer) ? answer.sort() : [];
       const correct = (q.correctAnswers || []).sort();
@@ -500,9 +524,24 @@ export function gradeExam(questions: Question[], answers: Record<string, string 
   }
 
   const percentage = totalMarks > 0 ? Math.round((score / totalMarks) * 100) : 0;
-  const grade = percentage >= 75 ? "A1" : percentage >= 70 ? "B2" : percentage >= 65 ? "B3" :
-                percentage >= 60 ? "C4" : percentage >= 55 ? "C5" : percentage >= 50 ? "C6" :
-                percentage >= 45 ? "D7" : percentage >= 40 ? "E8" : "F9";
+  const grade =
+    percentage >= 75
+      ? "A1"
+      : percentage >= 70
+        ? "B2"
+        : percentage >= 65
+          ? "B3"
+          : percentage >= 60
+            ? "C4"
+            : percentage >= 55
+              ? "C5"
+              : percentage >= 50
+                ? "C6"
+                : percentage >= 45
+                  ? "D7"
+                  : percentage >= 40
+                    ? "E8"
+                    : "F9";
 
   return { score, totalMarks, percentage, grade, results };
 }
@@ -510,7 +549,9 @@ export function gradeExam(questions: Question[], answers: Record<string, string 
 export function shuffleArray<T>(array: T[], seed?: string): T[] {
   const shuffled = [...array];
   let currentIndex = shuffled.length;
-  const seedNum = seed ? seed.split("").reduce((a, c) => a + c.charCodeAt(0), 0) : Math.random() * 1000;
+  const seedNum = seed
+    ? seed.split("").reduce((a, c) => a + c.charCodeAt(0), 0)
+    : Math.random() * 1000;
   let rng = seedNum;
 
   const nextRandom = () => {
@@ -521,7 +562,10 @@ export function shuffleArray<T>(array: T[], seed?: string): T[] {
   while (currentIndex > 0) {
     const randomIndex = Math.floor(nextRandom() * currentIndex);
     currentIndex--;
-    [shuffled[currentIndex], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[currentIndex]];
+    [shuffled[currentIndex], shuffled[randomIndex]] = [
+      shuffled[randomIndex],
+      shuffled[currentIndex],
+    ];
   }
 
   return shuffled;

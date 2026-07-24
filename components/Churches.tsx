@@ -4,15 +4,51 @@ import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
 const departments = [
-  { name: "Junior Secondary (JSS1 — JSS3)", desc: "Foundational education with BECE preparation and digital literacy.", href: "/academics" },
-  { name: "Senior Secondary — Science", desc: "Physics, Chemistry, Biology, Mathematics, Technical Drawing.", href: "/academics" },
-  { name: "Senior Secondary — Arts", desc: "Literature, Government, History, Religious Studies, Fine Arts.", href: "/academics" },
-  { name: "Senior Secondary — Commercial", desc: "Economics, Commerce, Accounting, Business Studies.", href: "/academics" },
-  { name: "STEM & Digital Learning", desc: "Computer science, robotics programs, and technology-enhanced instruction.", href: "/academics" },
-  { name: "Sports & Physical Education", desc: "Football, basketball, athletics, table tennis, and inter-house competitions.", href: "/campus-life" },
-  { name: "Library & E-Resources", desc: "Curated digital textbooks, past exam archives, and study materials.", href: "/campus-life" },
-  { name: "Science Laboratories", desc: "Fully equipped biology, chemistry, and physics laboratories.", href: "/campus-life" },
-  { name: "Leadership & Character", desc: "Ethics, public speaking, debate, and student government programs.", href: "/campus-life" },
+  {
+    name: "Junior Secondary (JSS1 — JSS3)",
+    desc: "Foundational education with BECE preparation and digital literacy.",
+    href: "/academics",
+  },
+  {
+    name: "Senior Secondary — Science",
+    desc: "Physics, Chemistry, Biology, Mathematics, Technical Drawing.",
+    href: "/academics",
+  },
+  {
+    name: "Senior Secondary — Arts",
+    desc: "Literature, Government, History, Religious Studies, Fine Arts.",
+    href: "/academics",
+  },
+  {
+    name: "Senior Secondary — Commercial",
+    desc: "Economics, Commerce, Accounting, Business Studies.",
+    href: "/academics",
+  },
+  {
+    name: "STEM & Digital Learning",
+    desc: "Computer science, robotics programs, and technology-enhanced instruction.",
+    href: "/academics",
+  },
+  {
+    name: "Sports & Physical Education",
+    desc: "Football, basketball, athletics, table tennis, and inter-house competitions.",
+    href: "/campus-life",
+  },
+  {
+    name: "Library & E-Resources",
+    desc: "Curated digital textbooks, past exam archives, and study materials.",
+    href: "/campus-life",
+  },
+  {
+    name: "Science Laboratories",
+    desc: "Fully equipped biology, chemistry, and physics laboratories.",
+    href: "/campus-life",
+  },
+  {
+    name: "Leadership & Character",
+    desc: "Ethics, public speaking, debate, and student government programs.",
+    href: "/campus-life",
+  },
 ];
 
 export default function Departments() {
@@ -30,7 +66,9 @@ export default function Departments() {
             A COMPLETE EDUCATIONAL ECOSYSTEM
           </h2>
           <p className="font-body text-sm md:text-base text-[var(--text-secondary)] leading-relaxed">
-            From Junior Secondary through Senior Secondary, Ykay College offers rigorous academic tracks, world-class facilities, and leadership training designed to prepare students for university and life.
+            From Junior Secondary through Senior Secondary, Ykay College offers rigorous academic
+            tracks, world-class facilities, and leadership training designed to prepare students for
+            university and life.
           </p>
         </div>
 

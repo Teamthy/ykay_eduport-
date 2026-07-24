@@ -1,4 +1,10 @@
-import { FeeInvoiceStatus, FeePaymentMethod, FeePaymentStatus, PaymentStatus, Prisma } from "@prisma/client";
+import {
+  FeeInvoiceStatus,
+  FeePaymentMethod,
+  FeePaymentStatus,
+  PaymentStatus,
+  Prisma,
+} from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { computeInvoiceStatus, generateReceiptNumber } from "@/lib/finance";
 
@@ -35,7 +41,9 @@ export async function postCompletedFeePayment(input: {
         id: input.invoiceId,
         schoolId: input.schoolId,
         balanceDue: { gte: input.amount },
-        status: { in: [FeeInvoiceStatus.UNPAID, FeeInvoiceStatus.PARTIAL, FeeInvoiceStatus.OVERDUE] },
+        status: {
+          in: [FeeInvoiceStatus.UNPAID, FeeInvoiceStatus.PARTIAL, FeeInvoiceStatus.OVERDUE],
+        },
       },
       data: {
         amountPaid: { increment: input.amount },
@@ -45,7 +53,7 @@ export async function postCompletedFeePayment(input: {
 
     if (reserved.count !== 1) {
       throw new Error(
-        "The invoice balance changed before this payment could be posted. It has been held for finance review."
+        "The invoice balance changed before this payment could be posted. It has been held for finance review.",
       );
     }
 

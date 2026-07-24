@@ -42,12 +42,14 @@ export async function GET() {
   if (!profile) {
     return NextResponse.json(
       { error: "No student profile is linked to this account. Contact the school administrator." },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
   const totalMarked = profile.attendanceEntries.length;
-  const presentCount = profile.attendanceEntries.filter((entry) => entry.status === AttendanceStatus.PRESENT).length;
+  const presentCount = profile.attendanceEntries.filter(
+    (entry) => entry.status === AttendanceStatus.PRESENT,
+  ).length;
   const attendanceRate = totalMarked ? Math.round((presentCount / totalMarked) * 100) : null;
   const latestReport = profile.reportCards[0] || null;
   const feeBalance = profile.feeInvoices.reduce((sum, invoice) => sum + invoice.balanceDue, 0);
