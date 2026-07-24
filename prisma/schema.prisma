@@ -1126,3 +1126,44 @@ model StaffAttendanceEvent {
   @@index([teacherProfileId, workDate])
   @@index([schoolId, eventType, scannedAt])
 }
+
+// ──────────────────────────────────────────────────────────────────
+//  Phase 9.1 — Security forensics for super-admin
+// ──────────────────────────────────────────────────────────────────
+
+enum SecurityEventType {
+  LOGIN_FAILED_BAD_PASSWORD
+  LOGIN_FAILED_ACCOUNT_NOT_FOUND
+  LOGIN_FAILED_SUSPENDED
+  LOGIN_FAILED_INACTIVE
+  AUTH_DENIED_INSUFFICIENT_ROLE
+  AUTH_DENIED_SESSION_EXPIRED
+  AUTH_DENIED_SESSION_INVALID
+  IMPERSONATION_STARTED
+  IMPERSONATION_ENDED
+  PAYMENT_VOIDED
+  PAYMENT_REFUNDED
+  PASSWORD_RESET_REQUESTED
+  ACCOUNT_SUSPENDED
+  ACCOUNT_UNSUSPENDED
+  ROLE_CHANGED
+}
+
+model SecurityEvent {
+  id          String              @id @default(cuid())
+  schoolId    String?
+  eventType   SecurityEventType
+  userEmail   String?
+  userId      String?
+  ipAddress   String?
+  userAgent   String?
+  targetPath  String?
+  reason      String?
+  metadata    Json?
+  createdAt   DateTime            @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([schoolId, createdAt])
+  @@index([userEmail, createdAt])
+  @@index([createdAt])
+}
