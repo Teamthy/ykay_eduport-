@@ -106,7 +106,9 @@ export default function AdminExpensesPage() {
         <AdminSidebar />
         <section className="min-w-0 flex-1 space-y-6">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Bursary operations</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Bursary operations
+            </p>
             <h1 className="mt-2 font-display text-4xl tracking-widest">
               EXPENSE <span className="text-brand-green">LEDGER</span>
             </h1>
@@ -117,7 +119,9 @@ export default function AdminExpensesPage() {
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] px-5 py-3">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Total recorded</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                Total recorded
+              </div>
               <div className="font-display text-2xl">₦{total.toLocaleString()}</div>
             </div>
             <button
@@ -147,15 +151,25 @@ export default function AdminExpensesPage() {
                 <tbody>
                   {expenses.map((e) => (
                     <tr key={e.id} className="border-t border-[var(--border-subtle)]">
-                      <td className="p-4 text-xs text-[var(--text-muted)]">{new Date(e.spentAt).toLocaleDateString()}</td>
+                      <td className="p-4 text-xs text-[var(--text-muted)]">
+                        {new Date(e.spentAt).toLocaleDateString()}
+                      </td>
                       <td className="p-4">
                         <b>{e.title}</b>
-                        {e.vendor && <span className="mt-1 block text-xs text-[var(--text-muted)]">{e.vendor}</span>}
+                        {e.vendor && (
+                          <span className="mt-1 block text-xs text-[var(--text-muted)]">
+                            {e.vendor}
+                          </span>
+                        )}
                       </td>
                       <td className="p-4">{e.category}</td>
                       <td className="p-4 font-semibold">₦{e.amount.toLocaleString()}</td>
                       <td className="p-4">
-                        <button onClick={() => void remove(e.id)} className="text-red-500 hover:text-red-600" aria-label="Delete">
+                        <button
+                          onClick={() => void remove(e.id)}
+                          className="text-red-500 hover:text-red-600"
+                          aria-label="Delete"
+                        >
                           <Trash2 size={16} />
                         </button>
                       </td>
@@ -175,16 +189,27 @@ export default function AdminExpensesPage() {
 
       {open && (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4">
-          <form onSubmit={submit} className="w-full max-w-lg rounded-3xl bg-[var(--bg-primary)] p-7">
+          <form
+            onSubmit={submit}
+            className="w-full max-w-lg rounded-3xl bg-[var(--bg-primary)] p-7"
+          >
             <h2 className="font-display text-3xl tracking-widest">NEW EXPENSE</h2>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <label className="text-xs font-bold uppercase tracking-wider sm:col-span-2">
                 Title
-                <input name="title" required className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case" />
+                <input
+                  name="title"
+                  required
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                />
               </label>
               <label className="text-xs font-bold uppercase tracking-wider">
                 Category
-                <select name="category" required className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case">
+                <select
+                  name="category"
+                  required
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                >
                   {CATEGORIES.map((c) => (
                     <option key={c}>{c}</option>
                   ))}
@@ -192,15 +217,28 @@ export default function AdminExpensesPage() {
               </label>
               <label className="text-xs font-bold uppercase tracking-wider">
                 Amount (₦)
-                <input name="amount" type="number" min={1} required className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case" />
+                <input
+                  name="amount"
+                  type="number"
+                  min={1}
+                  required
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                />
               </label>
               <label className="text-xs font-bold uppercase tracking-wider">
                 Date
-                <input name="spentAt" type="date" className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case" />
+                <input
+                  name="spentAt"
+                  type="date"
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                />
               </label>
               <label className="text-xs font-bold uppercase tracking-wider">
                 Payment method
-                <select name="paymentMethod" className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case">
+                <select
+                  name="paymentMethod"
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                >
                   <option value="">—</option>
                   <option value="CASH">Cash</option>
                   <option value="BANK_TRANSFER">Bank transfer</option>
@@ -210,22 +248,39 @@ export default function AdminExpensesPage() {
               </label>
               <label className="text-xs font-bold uppercase tracking-wider sm:col-span-2">
                 Vendor
-                <input name="vendor" className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case" />
+                <input
+                  name="vendor"
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                />
               </label>
               <label className="text-xs font-bold uppercase tracking-wider sm:col-span-2">
                 Reference
-                <input name="reference" className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case" />
+                <input
+                  name="reference"
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                />
               </label>
               <label className="text-xs font-bold uppercase tracking-wider sm:col-span-2">
                 Notes
-                <textarea name="notes" rows={2} className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case" />
+                <textarea
+                  name="notes"
+                  rows={2}
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                />
               </label>
             </div>
             <div className="mt-6 flex gap-3">
-              <button type="button" onClick={() => setOpen(false)} className="flex-1 rounded-full border border-[var(--border-default)] py-3 text-xs font-bold uppercase tracking-widest">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="flex-1 rounded-full border border-[var(--border-default)] py-3 text-xs font-bold uppercase tracking-widest"
+              >
                 Cancel
               </button>
-              <button disabled={busy} className="flex-1 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50">
+              <button
+                disabled={busy}
+                className="flex-1 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+              >
                 {busy ? "Saving…" : "Save expense"}
               </button>
             </div>

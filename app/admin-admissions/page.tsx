@@ -29,12 +29,25 @@ type AppRow = {
   enrolledStudent?: { studentId: string; displayName: string } | null;
 };
 
-type SchoolClass = { id: string; displayName: string; level: string; capacity: number | null; studentCount?: number };
+type SchoolClass = {
+  id: string;
+  displayName: string;
+  level: string;
+  capacity: number | null;
+  studentCount?: number;
+};
 
-const statuses = ["PENDING_REVIEW", "DOCUMENTS_REQUESTED", "APPROVED", "DECLINED", "WAITLISTED"] as const;
+const statuses = [
+  "PENDING_REVIEW",
+  "DOCUMENTS_REQUESTED",
+  "APPROVED",
+  "DECLINED",
+  "WAITLISTED",
+] as const;
 
 function idemp() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID().replaceAll("-", "");
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto)
+    return crypto.randomUUID().replaceAll("-", "");
   return `${Date.now()}${Math.random().toString(16).slice(2)}`;
 }
 
@@ -66,7 +79,7 @@ export default function AdminAdmissionsPage() {
         (sj.classes || []).map((c: SchoolClass & { _count?: { students: number } }) => ({
           ...c,
           studentCount: c.studentCount ?? c._count?.students,
-        }))
+        })),
       );
     }
   }, []);
@@ -78,7 +91,9 @@ export default function AdminAdmissionsPage() {
 
   const matchingClasses = useMemo(() => {
     if (!selected) return [] as SchoolClass[];
-    return classes.filter((c) => c.level === selected.classApplying || c.displayName.startsWith(selected.classApplying));
+    return classes.filter(
+      (c) => c.level === selected.classApplying || c.displayName.startsWith(selected.classApplying),
+    );
   }, [classes, selected]);
 
   useEffect(() => {
@@ -89,7 +104,9 @@ export default function AdminAdmissionsPage() {
     setEntrancePassed(selected.entrancePassed ?? true);
     const preferred =
       selected.recommendedClassId ||
-      matchingClasses.find((c) => selected.preferredArm && c.displayName.includes(selected.preferredArm))?.id ||
+      matchingClasses.find(
+        (c) => selected.preferredArm && c.displayName.includes(selected.preferredArm),
+      )?.id ||
       matchingClasses[0]?.id ||
       "";
     setClassId(preferred);
@@ -145,7 +162,7 @@ export default function AdminAdmissionsPage() {
         ? ` Parent temporary password (copy now): ${j.parentAccount.temporaryPassword}`
         : "";
       setMsg(
-        `Enrolled ${j.student.displayName} as ${j.student.studentId} into ${j.student.className}.${temp}`
+        `Enrolled ${j.student.displayName} as ${j.student.studentId} into ${j.student.className}.${temp}`,
       );
       setSelected(null);
       await load();
@@ -165,13 +182,15 @@ export default function AdminAdmissionsPage() {
         <AdminSidebar />
         <section className="min-w-0 flex-1">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Protected admin area</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Protected admin area
+            </p>
             <h1 className="mt-2 font-display text-4xl tracking-widest">
               ADMISSIONS <span className="text-brand-green">QUEUE</span>
             </h1>
             <p className="mt-3 max-w-3xl text-sm text-white/65">
-              Review paid applications, record entrance results, and place successful applicants into the class they
-              applied for — with one-time parent credentials.
+              Review paid applications, record entrance results, and place successful applicants
+              into the class they applied for — with one-time parent credentials.
             </p>
           </div>
 
@@ -181,7 +200,9 @@ export default function AdminAdmissionsPage() {
             </div>
           )}
           {err && (
-            <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">{err}</div>
+            <div className="mt-5 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">
+              {err}
+            </div>
           )}
 
           <div className="mt-6 overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]">
@@ -204,7 +225,9 @@ export default function AdminAdmissionsPage() {
                         <b>
                           {app.firstName} {app.lastName}
                         </b>
-                        <span className="mt-1 block font-mono text-xs text-[var(--text-muted)]">{app.applicationId}</span>
+                        <span className="mt-1 block font-mono text-xs text-[var(--text-muted)]">
+                          {app.applicationId}
+                        </span>
                       </td>
                       <td className="p-4">{app.classApplying}</td>
                       <td className="p-4">{app.payment?.status || app.paymentStatus || "—"}</td>
@@ -229,7 +252,9 @@ export default function AdminAdmissionsPage() {
                 </tbody>
               </table>
               {!apps.length && (
-                <p className="p-10 text-center text-sm text-[var(--text-muted)]">No submitted applications yet.</p>
+                <p className="p-10 text-center text-sm text-[var(--text-muted)]">
+                  No submitted applications yet.
+                </p>
               )}
             </div>
           </div>
@@ -241,7 +266,9 @@ export default function AdminAdmissionsPage() {
           <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-[var(--bg-primary)] p-7">
             <div className="flex justify-between gap-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Application review</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+                  Application review
+                </p>
                 <h2 className="mt-2 font-display text-3xl">
                   {selected.firstName} {selected.lastName}
                 </h2>
@@ -302,18 +329,25 @@ export default function AdminAdmissionsPage() {
               className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--btn-outline-border)] py-3 text-xs font-bold uppercase tracking-widest text-[var(--btn-outline-text-hover)]"
               style={{ background: "var(--accent-navy)", color: "#fff" }}
             >
-              {busy ? <LoaderCircle className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
+              {busy ? (
+                <LoaderCircle className="animate-spin" size={16} />
+              ) : (
+                <CheckCircle2 size={16} />
+              )}
               Save decision and notify parent
             </button>
 
-            <form onSubmit={enrollApplicant} className="mt-8 rounded-3xl border border-brand-green/30 bg-brand-green/5 p-5">
+            <form
+              onSubmit={enrollApplicant}
+              className="mt-8 rounded-3xl border border-brand-green/30 bg-brand-green/5 p-5"
+            >
               <div className="flex items-center gap-2 text-brand-green">
                 <UserPlus size={18} />
                 <h3 className="font-display text-xl tracking-widest">PLACE INTO CLASS</h3>
               </div>
               <p className="mt-2 text-xs text-[var(--text-muted)]">
-                Requires verified admission payment and a passing entrance result. Placement class must match the applied
-                level ({selected.classApplying}).
+                Requires verified admission payment and a passing entrance result. Placement class
+                must match the applied level ({selected.classApplying}).
               </p>
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -363,7 +397,11 @@ export default function AdminAdmissionsPage() {
                 disabled={busy || !entrancePassed}
                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
               >
-                {busy ? <LoaderCircle className="animate-spin" size={16} /> : <UserPlus size={16} />}
+                {busy ? (
+                  <LoaderCircle className="animate-spin" size={16} />
+                ) : (
+                  <UserPlus size={16} />
+                )}
                 Enrol student into class
               </button>
             </form>

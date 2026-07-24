@@ -46,10 +46,14 @@ export default function PrivacyPolicyPage() {
                 </h2>
               </div>
               <p className="font-body text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
-                Ykay College &amp; Leadership Academy is committed to protecting the privacy and personal data of all students, parents, staff, and stakeholders in accordance with the Nigeria Data Protection Regulation (NDPR) 2019.
+                Ykay College &amp; Leadership Academy is committed to protecting the privacy and
+                personal data of all students, parents, staff, and stakeholders in accordance with
+                the Nigeria Data Protection Regulation (NDPR) 2019.
               </p>
               <p className="font-body text-sm text-[var(--text-secondary)] leading-relaxed">
-                We collect, process, and store personal data only for legitimate educational, administrative, and operational purposes. All data is handled with strict confidentiality and secured using industry-standard practices.
+                We collect, process, and store personal data only for legitimate educational,
+                administrative, and operational purposes. All data is handled with strict
+                confidentiality and secured using industry-standard practices.
               </p>
             </div>
 
@@ -95,7 +99,10 @@ export default function PrivacyPolicyPage() {
                   { title: "Deletion", desc: "Request deletion of your data where applicable." },
                   { title: "Portability", desc: "Request your data in a portable format." },
                   { title: "Restriction", desc: "Restrict processing of your data." },
-                  { title: "Objection", desc: "Object to processing based on legitimate interests." },
+                  {
+                    title: "Objection",
+                    desc: "Object to processing based on legitimate interests.",
+                  },
                 ].map((right) => (
                   <div
                     key={right.title}
@@ -120,7 +127,9 @@ export default function PrivacyPolicyPage() {
                   Cookie Consent
                 </h2>
                 <p className="font-body text-sm text-white/80 mb-6 leading-relaxed">
-                  This website uses cookies and similar technologies to enhance user experience, remember preferences, and analyze traffic. By continuing to use this site, you consent to our use of cookies in accordance with this policy.
+                  This website uses cookies and similar technologies to enhance user experience,
+                  remember preferences, and analyze traffic. By continuing to use this site, you
+                  consent to our use of cookies in accordance with this policy.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <span className="px-3 py-1.5 rounded-full bg-brand-green/20 border border-brand-green/40 text-brand-green-light text-[10px] font-bold tracking-[0.15em] uppercase">
@@ -147,14 +156,16 @@ export default function PrivacyPolicyPage() {
                 </h2>
               </div>
               <p className="font-body text-sm text-[var(--text-secondary)] leading-relaxed">
-                To request access to, correction of, or deletion of your personal data, please contact our Data Protection Officer at{" "}
+                To request access to, correction of, or deletion of your personal data, please
+                contact our Data Protection Officer at{" "}
                 <a
                   href="mailto:dpo@ykaycollege.com"
                   className="text-[var(--accent-primary)] font-bold hover:underline"
                 >
                   dpo@ykaycollege.com
                 </a>{" "}
-                or visit the school office. All requests will be processed within the timeframe required by NDPR.
+                or visit the school office. All requests will be processed within the timeframe
+                required by NDPR.
               </p>
             </div>
           </div>

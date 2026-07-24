@@ -70,10 +70,16 @@ export default function AdminAttendanceCorrectionsPage() {
       if (!response.ok) throw new Error(body.error || "Unable to update the correction request.");
       setSelected(null);
       setResolutionNote("");
-      setMessage(decision === "APPROVED" ? "Correction request approved and session unlocked." : "Correction request rejected.");
+      setMessage(
+        decision === "APPROVED"
+          ? "Correction request approved and session unlocked."
+          : "Correction request rejected.",
+      );
       await loadRequests();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to update the correction request.");
+      setMessage(
+        error instanceof Error ? error.message : "Unable to update the correction request.",
+      );
     } finally {
       setSaving(false);
     }
@@ -92,7 +98,8 @@ export default function AdminAttendanceCorrectionsPage() {
               ATTENDANCE <span className="text-brand-green">CORRECTIONS</span>
             </h1>
             <p className="mt-2 max-w-3xl text-sm text-white/65">
-              Review teacher requests to unlock submitted attendance sessions for correction and resubmission.
+              Review teacher requests to unlock submitted attendance sessions for correction and
+              resubmission.
             </p>
           </div>
         </section>
@@ -103,19 +110,24 @@ export default function AdminAttendanceCorrectionsPage() {
 
             <div className="flex-1 min-w-0 space-y-6">
               {message ? (
-                <div className="rounded-2xl border border-brand-green/20 bg-brand-green/5 p-4 text-sm text-[var(--text-secondary)]">{message}</div>
+                <div className="rounded-2xl border border-brand-green/20 bg-brand-green/5 p-4 text-sm text-[var(--text-secondary)]">
+                  {message}
+                </div>
               ) : null}
 
               {loading ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading correction requests...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    correction requests...
                   </div>
                 </div>
               ) : (
                 <div className="overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)]">
                   <div className="border-b border-[var(--border-subtle)] px-6 py-4">
-                    <h2 className="font-display text-xl text-[var(--text-primary)]">Correction queue</h2>
+                    <h2 className="font-display text-xl text-[var(--text-primary)]">
+                      Correction queue
+                    </h2>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
@@ -131,11 +143,19 @@ export default function AdminAttendanceCorrectionsPage() {
                       <tbody>
                         {requests.map((request) => (
                           <tr key={request.id} className="border-t border-[var(--border-subtle)]">
-                            <td className="px-6 py-4 font-medium text-[var(--text-primary)]">{request.attendanceSession.classroom.displayName}</td>
-                            <td className="px-6 py-4 text-[var(--text-secondary)]">{request.teacherProfile.displayName}</td>
-                            <td className="px-6 py-4 text-[var(--text-secondary)]">{new Date(request.attendanceSession.sessionDate).toLocaleDateString()}</td>
+                            <td className="px-6 py-4 font-medium text-[var(--text-primary)]">
+                              {request.attendanceSession.classroom.displayName}
+                            </td>
+                            <td className="px-6 py-4 text-[var(--text-secondary)]">
+                              {request.teacherProfile.displayName}
+                            </td>
+                            <td className="px-6 py-4 text-[var(--text-secondary)]">
+                              {new Date(request.attendanceSession.sessionDate).toLocaleDateString()}
+                            </td>
                             <td className="px-6 py-4">
-                              <span className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${request.status === "PENDING" ? "bg-brand-orange/15 text-brand-orange" : request.status === "APPROVED" ? "bg-brand-green/15 text-brand-green" : "bg-red-500/15 text-red-500"}`}>
+                              <span
+                                className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${request.status === "PENDING" ? "bg-brand-orange/15 text-brand-orange" : request.status === "APPROVED" ? "bg-brand-green/15 text-brand-green" : "bg-red-500/15 text-red-500"}`}
+                              >
                                 {request.status}
                               </span>
                             </td>
@@ -143,7 +163,9 @@ export default function AdminAttendanceCorrectionsPage() {
                               <button
                                 onClick={() => {
                                   setSelected(request);
-                                  setDecision(request.status === "REJECTED" ? "REJECTED" : "APPROVED");
+                                  setDecision(
+                                    request.status === "REJECTED" ? "REJECTED" : "APPROVED",
+                                  );
                                   setResolutionNote(request.resolutionNote || "");
                                 }}
                                 className="font-bold text-brand-green"
@@ -155,7 +177,11 @@ export default function AdminAttendanceCorrectionsPage() {
                         ))}
                       </tbody>
                     </table>
-                    {!requests.length ? <div className="px-6 py-10 text-center text-sm text-[var(--text-muted)]">No attendance correction requests found.</div> : null}
+                    {!requests.length ? (
+                      <div className="px-6 py-10 text-center text-sm text-[var(--text-muted)]">
+                        No attendance correction requests found.
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               )}
@@ -170,34 +196,82 @@ export default function AdminAttendanceCorrectionsPage() {
           <div className="w-full max-w-2xl rounded-3xl bg-white p-7 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-bold tracking-widest text-brand-green">ATTENDANCE CORRECTION REVIEW</p>
-                <h2 className="mt-2 font-display text-3xl text-brand-navy">{selected.attendanceSession.classroom.displayName}</h2>
-                <p className="mt-1 text-sm text-slate-500">{selected.teacherProfile.displayName} Â· {new Date(selected.attendanceSession.sessionDate).toLocaleDateString()}</p>
+                <p className="text-xs font-bold tracking-widest text-brand-green">
+                  ATTENDANCE CORRECTION REVIEW
+                </p>
+                <h2 className="mt-2 font-display text-3xl text-brand-navy">
+                  {selected.attendanceSession.classroom.displayName}
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  {selected.teacherProfile.displayName} Â·{" "}
+                  {new Date(selected.attendanceSession.sessionDate).toLocaleDateString()}
+                </p>
               </div>
-              <button onClick={() => setSelected(null)} className="text-slate-500 hover:text-slate-800">
+              <button
+                onClick={() => setSelected(null)}
+                className="text-slate-500 hover:text-slate-800"
+              >
                 <XCircle size={22} />
               </button>
             </div>
 
             <div className="mt-6 rounded-2xl bg-slate-50 p-5 text-sm text-slate-700">
-              <p><strong>Requested by:</strong> {selected.requestedBy.name} ({selected.requestedBy.email})</p>
-              <p className="mt-3"><strong>Reason:</strong> {selected.reason}</p>
-              {selected.resolutionNote ? <p className="mt-3"><strong>Current admin note:</strong> {selected.resolutionNote}</p> : null}
+              <p>
+                <strong>Requested by:</strong> {selected.requestedBy.name} (
+                {selected.requestedBy.email})
+              </p>
+              <p className="mt-3">
+                <strong>Reason:</strong> {selected.reason}
+              </p>
+              {selected.resolutionNote ? (
+                <p className="mt-3">
+                  <strong>Current admin note:</strong> {selected.resolutionNote}
+                </p>
+              ) : null}
             </div>
 
-            <label className="mt-6 block text-xs font-bold uppercase tracking-widest text-slate-700">Decision</label>
-            <select value={decision} onChange={(event) => setDecision(event.target.value as "APPROVED" | "REJECTED")} className="mt-2 w-full rounded-xl border border-slate-300 p-3 text-sm">
+            <label className="mt-6 block text-xs font-bold uppercase tracking-widest text-slate-700">
+              Decision
+            </label>
+            <select
+              value={decision}
+              onChange={(event) => setDecision(event.target.value as "APPROVED" | "REJECTED")}
+              className="mt-2 w-full rounded-xl border border-slate-300 p-3 text-sm"
+            >
               <option value="APPROVED">Approve and unlock session</option>
               <option value="REJECTED">Reject request</option>
             </select>
 
-            <label className="mt-5 block text-xs font-bold uppercase tracking-widest text-slate-700">Resolution note</label>
-            <textarea value={resolutionNote} onChange={(event) => setResolutionNote(event.target.value)} className="mt-2 min-h-28 w-full rounded-xl border border-slate-300 p-3 text-sm" />
+            <label className="mt-5 block text-xs font-bold uppercase tracking-widest text-slate-700">
+              Resolution note
+            </label>
+            <textarea
+              value={resolutionNote}
+              onChange={(event) => setResolutionNote(event.target.value)}
+              className="mt-2 min-h-28 w-full rounded-xl border border-slate-300 p-3 text-sm"
+            />
 
             <div className="mt-6 flex gap-3">
-              <button onClick={() => setSelected(null)} className="flex-1 rounded-full border border-slate-300 px-5 py-3 text-sm font-bold uppercase tracking-widest text-slate-700">Cancel</button>
-              <button onClick={() => void submitDecision()} disabled={saving} className="flex-1 rounded-full bg-brand-green px-5 py-3 text-sm font-bold uppercase tracking-widest text-white disabled:opacity-50">
-                {saving ? <span className="inline-flex items-center gap-2"><LoaderCircle className="animate-spin" size={16} /> Saving</span> : <span className="inline-flex items-center gap-2"><CheckCircle2 size={16} /> Save Decision</span>}
+              <button
+                onClick={() => setSelected(null)}
+                className="flex-1 rounded-full border border-slate-300 px-5 py-3 text-sm font-bold uppercase tracking-widest text-slate-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void submitDecision()}
+                disabled={saving}
+                className="flex-1 rounded-full bg-brand-green px-5 py-3 text-sm font-bold uppercase tracking-widest text-white disabled:opacity-50"
+              >
+                {saving ? (
+                  <span className="inline-flex items-center gap-2">
+                    <LoaderCircle className="animate-spin" size={16} /> Saving
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    <CheckCircle2 size={16} /> Save Decision
+                  </span>
+                )}
               </button>
             </div>
           </div>

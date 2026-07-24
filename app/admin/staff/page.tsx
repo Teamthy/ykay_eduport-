@@ -53,7 +53,9 @@ export default function StaffPage() {
     }
     setMode(null);
     const activation = `${window.location.origin}/staff/activate?token=${j.activationToken}`;
-    setNotice(`Invitation created for ${j.invite.email}. Copy this one-time activation link now: ${activation}`);
+    setNotice(
+      `Invitation created for ${j.invite.email}. Copy this one-time activation link now: ${activation}`,
+    );
     await load();
   }
 
@@ -72,7 +74,7 @@ export default function StaffPage() {
     }
     setMode(null);
     setNotice(
-      `Account created for ${j.user.email}. Temporary password (copy now): ${j.temporaryPassword}. They must change it on first login.`
+      `Account created for ${j.user.email}. Temporary password (copy now): ${j.temporaryPassword}. They must change it on first login.`,
     );
     await load();
   }
@@ -84,13 +86,16 @@ export default function StaffPage() {
         <AdminSidebar />
         <section className="min-w-0 flex-1">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Controlled access</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Controlled access
+            </p>
             <h1 className="mt-2 font-display text-4xl tracking-widest">
               STAFF <span className="text-brand-green">ACCOUNTS</span>
             </h1>
             <p className="mt-3 text-sm text-white/65">
-              Staff accounts are created only by school administration. There is no staff self-registration. Use an
-              invitation link or create an account with a one-time temporary password.
+              Staff accounts are created only by school administration. There is no staff
+              self-registration. Use an invitation link or create an account with a one-time
+              temporary password.
             </p>
           </div>
 
@@ -99,7 +104,9 @@ export default function StaffPage() {
               {notice}
             </div>
           )}
-          {error && <p className="mt-5 rounded-2xl bg-red-500/10 p-4 text-sm text-red-600">{error}</p>}
+          {error && (
+            <p className="mt-5 rounded-2xl bg-red-500/10 p-4 text-sm text-red-600">{error}</p>
+          )}
 
           <div className="mt-6 flex flex-wrap justify-end gap-3">
             <button
@@ -133,7 +140,9 @@ export default function StaffPage() {
                   </small>
                 </div>
               ))}
-              {!staff.length && <p className="p-6 text-sm text-[var(--text-muted)]">No staff accounts yet.</p>}
+              {!staff.length && (
+                <p className="p-6 text-sm text-[var(--text-muted)]">No staff accounts yet.</p>
+              )}
             </div>
             <div className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]">
               <h2 className="flex items-center gap-2 border-b border-[var(--border-subtle)] p-5 font-display text-xl">
@@ -142,13 +151,17 @@ export default function StaffPage() {
               {invites.map((i) => (
                 <div className="border-b border-[var(--border-subtle)] p-4" key={i.id}>
                   <b>{i.name}</b>
-                  <span className="float-right text-[10px] font-bold text-brand-orange">{i.role}</span>
+                  <span className="float-right text-[10px] font-bold text-brand-orange">
+                    {i.role}
+                  </span>
                   <small className="mt-1 block text-[var(--text-muted)]">
                     {i.email} · expires {new Date(i.expiresAt).toLocaleDateString()}
                   </small>
                 </div>
               ))}
-              {!invites.length && <p className="p-6 text-sm text-[var(--text-muted)]">No pending invitations.</p>}
+              {!invites.length && (
+                <p className="p-6 text-sm text-[var(--text-muted)]">No pending invitations.</p>
+              )}
             </div>
           </div>
         </section>
@@ -162,8 +175,12 @@ export default function StaffPage() {
           >
             <div className="flex justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Admin only</p>
-                <h2 className="font-display text-3xl">{mode === "invite" ? "INVITE STAFF" : "CREATE STAFF"}</h2>
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+                  Admin only
+                </p>
+                <h2 className="font-display text-3xl">
+                  {mode === "invite" ? "INVITE STAFF" : "CREATE STAFF"}
+                </h2>
               </div>
               <button type="button" onClick={() => setMode(null)} aria-label="Close">
                 <X />
@@ -172,15 +189,27 @@ export default function StaffPage() {
             <div className="mt-6 space-y-4">
               <label className="block text-xs font-bold uppercase tracking-wider">
                 Full name
-                <input name="name" required className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case" />
+                <input
+                  name="name"
+                  required
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                />
               </label>
               <label className="block text-xs font-bold uppercase tracking-wider">
                 Work email
-                <input name="email" type="email" required className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case" />
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                />
               </label>
               <label className="block text-xs font-bold uppercase tracking-wider">
                 Role
-                <select name="role" className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case">
+                <select
+                  name="role"
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                >
                   {roles.map((x) => (
                     <option key={x}>{x}</option>
                   ))}
@@ -189,7 +218,10 @@ export default function StaffPage() {
               {mode === "direct" && (
                 <label className="block text-xs font-bold uppercase tracking-wider">
                   Phone (optional)
-                  <input name="phone" className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case" />
+                  <input
+                    name="phone"
+                    className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                  />
                 </label>
               )}
             </div>

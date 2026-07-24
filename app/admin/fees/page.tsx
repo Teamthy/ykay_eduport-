@@ -168,21 +168,35 @@ export default function AdminFeesPage() {
             >
               Overdue only
             </button>
-            <Link href="/admin/fees/transfers" className="inline-flex items-center rounded-full border border-[var(--border-default)] px-4 py-2 text-[10px] font-bold uppercase tracking-widest">
+            <Link
+              href="/admin/fees/transfers"
+              className="inline-flex items-center rounded-full border border-[var(--border-default)] px-4 py-2 text-[10px] font-bold uppercase tracking-widest"
+            >
               Transfer review
             </Link>
-            <Link href="/admin/expenses" className="inline-flex items-center rounded-full border border-[var(--border-default)] px-4 py-2 text-[10px] font-bold uppercase tracking-widest">
+            <Link
+              href="/admin/expenses"
+              className="inline-flex items-center rounded-full border border-[var(--border-default)] px-4 py-2 text-[10px] font-bold uppercase tracking-widest"
+            >
               Expenses
             </Link>
-            <Link href="/admin/budgets" className="inline-flex items-center rounded-full border border-[var(--border-default)] px-4 py-2 text-[10px] font-bold uppercase tracking-widest">
+            <Link
+              href="/admin/budgets"
+              className="inline-flex items-center rounded-full border border-[var(--border-default)] px-4 py-2 text-[10px] font-bold uppercase tracking-widest"
+            >
               Budgets
             </Link>
-            <Link href="/admin/finances" className="inline-flex items-center rounded-full border border-[var(--border-default)] px-4 py-2 text-[10px] font-bold uppercase tracking-widest">
+            <Link
+              href="/admin/finances"
+              className="inline-flex items-center rounded-full border border-[var(--border-default)] px-4 py-2 text-[10px] font-bold uppercase tracking-widest"
+            >
               Finance dashboard
             </Link>
           </div>
 
-          {error && <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-600">{error}</div>}
+          {error && (
+            <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-600">{error}</div>
+          )}
 
           {loading || !summary ? (
             <div className="flex items-center gap-2 p-10 text-[var(--text-muted)]">
@@ -197,8 +211,13 @@ export default function AdminFeesPage() {
                   ["Outstanding", summary.totalOutstanding],
                   ["Collection rate", summary.collectionRate, "%"],
                 ].map(([label, value, suffix]) => (
-                  <div key={String(label)} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">{label}</div>
+                  <div
+                    key={String(label)}
+                    className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4"
+                  >
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                      {label}
+                    </div>
                     <div className="mt-1 font-display text-2xl">
                       {suffix === "%" ? `${value}%` : `₦${Number(value).toLocaleString()}`}
                     </div>
@@ -206,7 +225,10 @@ export default function AdminFeesPage() {
                 ))}
               </div>
 
-              <form onSubmit={recordCash} className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+              <form
+                onSubmit={recordCash}
+                className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5"
+              >
                 <h2 className="font-display text-xl tracking-widest">RECORD CASH PAYMENT</h2>
                 <div className="mt-4 grid gap-3 md:grid-cols-3">
                   <label className="text-xs font-bold uppercase tracking-wider md:col-span-2">
@@ -222,7 +244,8 @@ export default function AdminFeesPage() {
                         .filter((i) => i.balanceDue > 0)
                         .map((i) => (
                           <option key={i.id} value={i.id}>
-                            {i.invoiceNumber} · {i.student.displayName} · ₦{i.balanceDue.toLocaleString()} due
+                            {i.invoiceNumber} · {i.student.displayName} · ₦
+                            {i.balanceDue.toLocaleString()} due
                           </option>
                         ))}
                     </select>
@@ -302,13 +325,17 @@ export default function AdminFeesPage() {
                         </td>
                         <td className="p-4">₦{inv.totalAmount.toLocaleString()}</td>
                         <td className="p-4">₦{inv.amountPaid.toLocaleString()}</td>
-                        <td className="p-4 font-semibold text-brand-orange">₦{inv.balanceDue.toLocaleString()}</td>
+                        <td className="p-4 font-semibold text-brand-orange">
+                          ₦{inv.balanceDue.toLocaleString()}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 {!invoices.length && (
-                  <p className="p-10 text-center text-sm text-[var(--text-muted)]">No invoices match this filter.</p>
+                  <p className="p-10 text-center text-sm text-[var(--text-muted)]">
+                    No invoices match this filter.
+                  </p>
                 )}
               </div>
 
@@ -316,14 +343,19 @@ export default function AdminFeesPage() {
                 <h2 className="font-display text-xl tracking-widest">RECENT PAYMENTS</h2>
                 <ul className="mt-4 space-y-3">
                   {(data?.recentPayments || []).map((p) => (
-                    <li key={p.id} className="flex items-center justify-between gap-3 rounded-2xl bg-[var(--surface-disabled)] p-3 text-sm">
+                    <li
+                      key={p.id}
+                      className="flex items-center justify-between gap-3 rounded-2xl bg-[var(--surface-disabled)] p-3 text-sm"
+                    >
                       <div>
                         <b>₦{p.amount.toLocaleString()}</b>
                         <div className="text-xs text-[var(--text-muted)]">
                           {p.student.displayName} · {p.receiptNumber}
                         </div>
                       </div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-brand-green">{p.method}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                        {p.method}
+                      </span>
                     </li>
                   ))}
                   {!data?.recentPayments?.length && (
@@ -338,4 +370,3 @@ export default function AdminFeesPage() {
     </>
   );
 }
-

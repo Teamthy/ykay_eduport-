@@ -57,7 +57,9 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
     setLoading(true);
     setError("");
     try {
-      const response = await fetch(`/api/it/courses/${encodeURIComponent(slug)}`, { cache: "no-store" });
+      const response = await fetch(`/api/it/courses/${encodeURIComponent(slug)}`, {
+        cache: "no-store",
+      });
       const body = (await response.json()) as CourseResponse & { error?: string };
       if (!response.ok) throw new Error(body.error || "Unable to load this course.");
       setData(body);
@@ -83,12 +85,19 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ courseId: data.course.id, moduleId: module.id }),
       });
-      const body = (await response.json()) as { message?: string; error?: string; certified?: boolean };
+      const body = (await response.json()) as {
+        message?: string;
+        error?: string;
+        certified?: boolean;
+      };
       if (!response.ok) throw new Error(body.error || "Unable to update progress.");
       toast(body.message || "Progress saved.", body.certified ? "success" : "info");
       await load();
     } catch (completeError) {
-      toast(completeError instanceof Error ? completeError.message : "Unable to update progress.", "error");
+      toast(
+        completeError instanceof Error ? completeError.message : "Unable to update progress.",
+        "error",
+      );
     } finally {
       setBusyModuleId("");
     }
@@ -116,13 +125,16 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
                     {course.level}
                   </span>
                   <span className="flex items-center gap-1 text-xs text-white/50">
-                    <Clock size={12} /> {course.durationWeeks} weeks · {course.modules.length} modules
+                    <Clock size={12} /> {course.durationWeeks} weeks · {course.modules.length}{" "}
+                    modules
                   </span>
                 </div>
                 <h1 className="font-display text-4xl tracking-widest text-white md:text-5xl">
                   {course.title.toUpperCase()}
                 </h1>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60">{course.description}</p>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-white/60">
+                  {course.description}
+                </p>
                 <div className="mt-6 max-w-md">
                   <div className="mb-2 flex items-center justify-between text-xs">
                     <span className="text-white/50">Course progress</span>
@@ -154,7 +166,8 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
             {loading ? (
               <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
                 <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                  <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading course...
+                  <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                  course...
                 </div>
               </div>
             ) : null}
@@ -162,9 +175,12 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
             {!loading && course && !course.enrolled ? (
               <div className="rounded-[2rem] border border-brand-orange/25 bg-brand-orange/10 p-8 text-center">
                 <BookOpen className="mx-auto mb-3 text-brand-orange" size={32} />
-                <h2 className="font-display text-2xl text-[var(--text-primary)]">You are not enrolled yet</h2>
+                <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                  You are not enrolled yet
+                </h2>
                 <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-secondary)]">
-                  Enroll from your IT dashboard to unlock the modules and start earning your certificate.
+                  Enroll from your IT dashboard to unlock the modules and start earning your
+                  certificate.
                 </p>
                 <Link
                   href="/it-portal/dashboard"
@@ -182,8 +198,12 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
                     <Award size={22} />
                   </div>
                   <div>
-                    <div className="font-display text-xl text-[var(--text-primary)]">Course Completed — Certified!</div>
-                    <div className="text-xs text-[var(--text-secondary)]">{course.certification}</div>
+                    <div className="font-display text-xl text-[var(--text-primary)]">
+                      Course Completed — Certified!
+                    </div>
+                    <div className="text-xs text-[var(--text-secondary)]">
+                      {course.certification}
+                    </div>
                   </div>
                 </div>
                 <span className="rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white">
@@ -215,7 +235,9 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
                           <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
                             Module {index + 1} · {module.durationMinutes} min
                           </div>
-                          <div className="truncate font-display text-lg text-[var(--text-primary)]">{module.title}</div>
+                          <div className="truncate font-display text-lg text-[var(--text-primary)]">
+                            {module.title}
+                          </div>
                         </div>
                         <ChevronDown
                           size={18}
@@ -224,7 +246,9 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
                       </button>
                       {isOpen ? (
                         <div className="border-t border-[var(--border-subtle)] px-6 py-6">
-                          <p className="mb-4 text-sm font-medium text-[var(--text-primary)]">{module.summary}</p>
+                          <p className="mb-4 text-sm font-medium text-[var(--text-primary)]">
+                            {module.summary}
+                          </p>
                           <div className="mb-6 whitespace-pre-line text-sm leading-7 text-[var(--text-secondary)]">
                             {module.content}
                           </div>

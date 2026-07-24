@@ -19,7 +19,16 @@ type BudgetRow = {
   notes: string | null;
 };
 
-const CATEGORIES = ["Utilities", "Salaries", "Maintenance", "Supplies", "Transport", "Events", "ICT", "Other"];
+const CATEGORIES = [
+  "Utilities",
+  "Salaries",
+  "Maintenance",
+  "Supplies",
+  "Transport",
+  "Events",
+  "ICT",
+  "Other",
+];
 
 export default function AdminBudgetsPage() {
   const { toast } = useToast();
@@ -83,12 +92,15 @@ export default function AdminBudgetsPage() {
         <AdminSidebar />
         <section className="min-w-0 flex-1 space-y-6">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Financial control</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Financial control
+            </p>
             <h1 className="mt-2 font-display text-4xl tracking-widest">
               BUDGET <span className="text-brand-green">TRACKER</span>
             </h1>
             <p className="mt-3 text-sm text-white/65">
-              Set category limits for {sessionLabel} · {termLabel}. Spend is calculated from the expense ledger.
+              Set category limits for {sessionLabel} · {termLabel}. Spend is calculated from the
+              expense ledger.
             </p>
           </div>
 
@@ -111,7 +123,9 @@ export default function AdminBudgetsPage() {
                 <div
                   key={b.id}
                   className={`rounded-3xl border p-5 ${
-                    b.overBudget ? "border-red-500/40 bg-red-500/5" : "border-[var(--border-subtle)] bg-[var(--surface-card)]"
+                    b.overBudget
+                      ? "border-red-500/40 bg-red-500/5"
+                      : "border-[var(--border-subtle)] bg-[var(--surface-card)]"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -126,7 +140,9 @@ export default function AdminBudgetsPage() {
                     </div>
                     <span
                       className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-widest ${
-                        b.overBudget ? "bg-red-500/15 text-red-600" : "bg-brand-green/15 text-brand-green"
+                        b.overBudget
+                          ? "bg-red-500/15 text-red-600"
+                          : "bg-brand-green/15 text-brand-green"
                       }`}
                     >
                       {b.utilizationPct}% used
@@ -149,7 +165,9 @@ export default function AdminBudgetsPage() {
                     </div>
                     <div>
                       <div className="text-[var(--text-muted)]">Left</div>
-                      <b className={b.remaining < 0 ? "text-red-600" : ""}>₦{b.remaining.toLocaleString()}</b>
+                      <b className={b.remaining < 0 ? "text-red-600" : ""}>
+                        ₦{b.remaining.toLocaleString()}
+                      </b>
                     </div>
                   </div>
                 </div>
@@ -165,7 +183,10 @@ export default function AdminBudgetsPage() {
 
       {open && (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4">
-          <form onSubmit={submit} className="w-full max-w-md rounded-3xl bg-[var(--bg-primary)] p-7">
+          <form
+            onSubmit={submit}
+            className="w-full max-w-md rounded-3xl bg-[var(--bg-primary)] p-7"
+          >
             <h2 className="font-display text-3xl tracking-widest">BUDGET</h2>
             <p className="mt-2 text-xs text-[var(--text-muted)]">
               Applies to {termLabel} · {sessionLabel}
@@ -173,7 +194,11 @@ export default function AdminBudgetsPage() {
             <div className="mt-5 space-y-3">
               <label className="block text-xs font-bold uppercase tracking-wider">
                 Category
-                <select name="category" required className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case">
+                <select
+                  name="category"
+                  required
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                >
                   {CATEGORIES.map((c) => (
                     <option key={c}>{c}</option>
                   ))}
@@ -181,18 +206,35 @@ export default function AdminBudgetsPage() {
               </label>
               <label className="block text-xs font-bold uppercase tracking-wider">
                 Limit (₦)
-                <input name="amountLimit" type="number" min={1} required className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case" />
+                <input
+                  name="amountLimit"
+                  type="number"
+                  min={1}
+                  required
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                />
               </label>
               <label className="block text-xs font-bold uppercase tracking-wider">
                 Notes
-                <textarea name="notes" rows={2} className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case" />
+                <textarea
+                  name="notes"
+                  rows={2}
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                />
               </label>
             </div>
             <div className="mt-6 flex gap-3">
-              <button type="button" onClick={() => setOpen(false)} className="flex-1 rounded-full border py-3 text-xs font-bold uppercase tracking-widest">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="flex-1 rounded-full border py-3 text-xs font-bold uppercase tracking-widest"
+              >
                 Cancel
               </button>
-              <button disabled={busy} className="flex-1 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50">
+              <button
+                disabled={busy}
+                className="flex-1 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+              >
                 Save
               </button>
             </div>

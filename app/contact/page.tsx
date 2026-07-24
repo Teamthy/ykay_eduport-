@@ -11,8 +11,12 @@ export default function ContactPage() {
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-32 pb-20 bg-brand-navy px-6">
           <div className="mx-auto max-w-7xl text-center">
-            <h1 className="font-display text-[56px] md:text-[80px] text-white">CONTACT <span className="text-brand-green">US</span></h1>
-            <p className="text-white/50 max-w-md mx-auto mt-4">We are here to answer your questions and welcome you to our campus.</p>
+            <h1 className="font-display text-[56px] md:text-[80px] text-white">
+              CONTACT <span className="text-brand-green">US</span>
+            </h1>
+            <p className="text-white/50 max-w-md mx-auto mt-4">
+              We are here to answer your questions and welcome you to our campus.
+            </p>
           </div>
         </section>
 
@@ -26,11 +30,16 @@ export default function ContactPage() {
                   { icon: Phone, label: "Phone", val: "0701 537 4411" },
                   { icon: MessageCircle, label: "WhatsApp", val: "0701 537 4411" },
                   { icon: MapPin, label: "Address", val: "Sango Ota, Ogun State" },
-                ].map(i => (
-                  <div key={i.label} className="flex items-center gap-5 p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
+                ].map((i) => (
+                  <div
+                    key={i.label}
+                    className="flex items-center gap-5 p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]"
+                  >
                     <i.icon className="text-brand-green" size={20} />
                     <div>
-                      <p className="text-[10px] font-bold uppercase text-brand-green tracking-widest">{i.label}</p>
+                      <p className="text-[10px] font-bold uppercase text-brand-green tracking-widest">
+                        {i.label}
+                      </p>
                       <p className="text-sm text-[var(--text-primary)] font-medium">{i.val}</p>
                     </div>
                   </div>
@@ -38,11 +47,29 @@ export default function ContactPage() {
               </div>
             </div>
             <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] p-10 rounded-[2.5rem] shadow-[var(--card-shadow)]">
-              <h2 className="font-display text-3xl text-[var(--text-primary)] mb-8">Send a Message</h2>
-              <form className="space-y-4" onSubmit={e => { e.preventDefault(); alert("Enquiry Sent"); }}>
-                <input placeholder="Your Name" className="w-full p-4 rounded-xl bg-[var(--input-bg)] border border-[var(--border-subtle)] text-[var(--text-primary)]" />
-                <input placeholder="Email Address" className="w-full p-4 rounded-xl bg-[var(--input-bg)] border border-[var(--border-subtle)] text-[var(--text-primary)]" />
-                <textarea placeholder="How can we help?" rows={4} className="w-full p-4 rounded-xl bg-[var(--input-bg)] border border-[var(--border-subtle)] text-[var(--text-primary)] resize-none" />
+              <h2 className="font-display text-3xl text-[var(--text-primary)] mb-8">
+                Send a Message
+              </h2>
+              <form
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  alert("Enquiry Sent");
+                }}
+              >
+                <input
+                  placeholder="Your Name"
+                  className="w-full p-4 rounded-xl bg-[var(--input-bg)] border border-[var(--border-subtle)] text-[var(--text-primary)]"
+                />
+                <input
+                  placeholder="Email Address"
+                  className="w-full p-4 rounded-xl bg-[var(--input-bg)] border border-[var(--border-subtle)] text-[var(--text-primary)]"
+                />
+                <textarea
+                  placeholder="How can we help?"
+                  rows={4}
+                  className="w-full p-4 rounded-xl bg-[var(--input-bg)] border border-[var(--border-subtle)] text-[var(--text-primary)] resize-none"
+                />
                 <button className="btn-primary w-full py-4">Send Message</button>
               </form>
             </div>

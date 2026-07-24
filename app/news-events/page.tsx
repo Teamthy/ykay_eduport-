@@ -37,7 +37,9 @@ export default async function NewsPage() {
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-6 pb-14 pt-28 text-white">
           <div className="mx-auto max-w-7xl">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">School journal</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              School journal
+            </p>
             <h1 className="mt-3 font-display text-5xl tracking-widest">
               NEWS & <span className="text-brand-green">EVENTS</span>
             </h1>
@@ -64,8 +66,12 @@ export default async function NewsPage() {
                       {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : "—"}
                     </span>
                   </div>
-                  <h2 className="font-display text-2xl tracking-wide text-[var(--text-primary)]">{post.title}</h2>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">{post.excerpt}</p>
+                  <h2 className="font-display text-2xl tracking-wide text-[var(--text-primary)]">
+                    {post.title}
+                  </h2>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">
+                    {post.excerpt}
+                  </p>
                   <Link
                     href={`/news-events/${post.slug}`}
                     className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-brand-green"
@@ -77,7 +83,9 @@ export default async function NewsPage() {
             </div>
           ) : (
             <div className="rounded-3xl border border-dashed border-[var(--border-default)] bg-[var(--surface-card)] p-12 text-center">
-              <p className="font-display text-2xl tracking-widest text-[var(--text-primary)]">No published posts yet</p>
+              <p className="font-display text-2xl tracking-widest text-[var(--text-primary)]">
+                No published posts yet
+              </p>
               <p className="mt-2 text-sm text-[var(--text-muted)]">
                 When the admin team publishes from Post & News, stories appear here automatically.
               </p>

@@ -39,7 +39,7 @@ export default function AdminIDCardsPage() {
           displayName: s.displayName,
           className: s.className || s.currentClass?.displayName || "—",
           gender: s.gender,
-        }))
+        })),
       );
     } catch (e) {
       toast(e instanceof Error ? e.message : "Unable to load students.", "error");
@@ -59,7 +59,7 @@ export default function AdminIDCardsPage() {
         !q ||
         s.displayName.toLowerCase().includes(q) ||
         s.studentId.toLowerCase().includes(q) ||
-        s.className.toLowerCase().includes(q)
+        s.className.toLowerCase().includes(q),
     );
   }, [students, search]);
 
@@ -82,7 +82,7 @@ export default function AdminIDCardsPage() {
         sid: student.studentId,
         n: student.displayName,
         c: student.className,
-      })
+      }),
     );
     return `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${payload}`;
   }
@@ -148,12 +148,15 @@ export default function AdminIDCardsPage() {
         </div>
         <section className="min-w-0 flex-1 space-y-6">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white print:hidden">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Operations</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Operations
+            </p>
             <h1 className="mt-2 font-display text-4xl tracking-widest">
               ID <span className="text-brand-green">CARDS</span>
             </h1>
             <p className="mt-3 text-sm text-white/65">
-              Generate student identity cards from live records. Each card embeds a QR payload for gate verification.
+              Generate student identity cards from live records. Each card embeds a QR payload for
+              gate verification.
             </p>
           </div>
 
@@ -201,7 +204,11 @@ export default function AdminIDCardsPage() {
                     key={s.id}
                     className="flex cursor-pointer items-center gap-3 border-b border-[var(--border-subtle)] p-4 text-sm hover:bg-[var(--surface-card-hover)]"
                   >
-                    <input type="checkbox" checked={selected.includes(s.id)} onChange={() => toggle(s.id)} />
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(s.id)}
+                      onChange={() => toggle(s.id)}
+                    />
                     <div className="min-w-0 flex-1">
                       <b className="block truncate">{s.displayName}</b>
                       <span className="text-xs text-[var(--text-muted)]">
@@ -221,7 +228,9 @@ export default function AdminIDCardsPage() {
                   className="relative overflow-hidden rounded-2xl border border-white/10 bg-brand-navy p-4 text-white shadow-lg"
                   style={{ minHeight: 180 }}
                 >
-                  <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">Ykay College</div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">
+                    Ykay College
+                  </div>
                   <div className="mt-3 font-display text-xl tracking-wide">{s.displayName}</div>
                   <div className="mt-1 font-mono text-xs text-white/70">{s.studentId}</div>
                   <div className="mt-1 text-xs text-white/60">{s.className}</div>
@@ -231,7 +240,9 @@ export default function AdminIDCardsPage() {
                     alt={`QR ${s.studentId}`}
                     className="absolute bottom-3 right-3 h-16 w-16 rounded-md bg-white p-1"
                   />
-                  <div className="mt-8 text-[9px] uppercase tracking-widest text-white/40">Student identity card</div>
+                  <div className="mt-8 text-[9px] uppercase tracking-widest text-white/40">
+                    Student identity card
+                  </div>
                 </div>
               ))}
               {!selectedStudents.length && (
@@ -245,7 +256,11 @@ export default function AdminIDCardsPage() {
           {/* Print-only sheet */}
           <div className="hidden print:grid print:grid-cols-2 print:gap-4">
             {selectedStudents.map((s) => (
-              <div key={`print-${s.id}`} className="relative border border-black p-4" style={{ height: 200 }}>
+              <div
+                key={`print-${s.id}`}
+                className="relative border border-black p-4"
+                style={{ height: 200 }}
+              >
                 <div className="text-xs font-bold">YKAY COLLEGE & LEADERSHIP ACADEMY</div>
                 <div className="mt-3 text-lg font-bold">{s.displayName}</div>
                 <div className="font-mono text-sm">{s.studentId}</div>

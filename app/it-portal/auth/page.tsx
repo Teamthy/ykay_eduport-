@@ -54,7 +54,10 @@ export default function ItPortalAuthPage() {
     <main className="min-h-screen bg-brand-navy px-6 py-16">
       <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl md:grid-cols-2">
         <section className="bg-brand-navy p-9 text-white md:p-12">
-          <Link href="/portal" className="text-xs font-bold uppercase tracking-widest text-brand-green">
+          <Link
+            href="/portal"
+            className="text-xs font-bold uppercase tracking-widest text-brand-green"
+          >
             ← All Portals
           </Link>
           <MonitorSmartphone className="mt-14 text-brand-green" size={42} />
@@ -64,21 +67,25 @@ export default function ItPortalAuthPage() {
             <span className="text-brand-green">DIGITAL SKILLS ACADEMY</span>
           </h1>
           <p className="mt-5 max-w-sm text-sm leading-7 text-white/80">
-            Certification-ready IT training for the next generation. Learn Python, AI, Cybersecurity, and the Microsoft
-            Office suite with hands-on, project-driven lessons.
+            Certification-ready IT training for the next generation. Learn Python, AI,
+            Cybersecurity, and the Microsoft Office suite with hands-on, project-driven lessons.
           </p>
           <ul className="mt-8 space-y-3 text-sm text-white/80">
             <li className="flex items-center gap-3">
-              <BrainCircuit size={16} className="shrink-0 text-brand-green" /> 8 industry-aligned course tracks
+              <BrainCircuit size={16} className="shrink-0 text-brand-green" /> 8 industry-aligned
+              course tracks
             </li>
             <li className="flex items-center gap-3">
-              <Award size={16} className="shrink-0 text-brand-green" /> Certificates issued on completion
+              <Award size={16} className="shrink-0 text-brand-green" /> Certificates issued on
+              completion
             </li>
             <li className="flex items-center gap-3">
-              <Sparkles size={16} className="shrink-0 text-brand-green" /> Open to Ykay students and external learners
+              <Sparkles size={16} className="shrink-0 text-brand-green" /> Open to Ykay students and
+              external learners
             </li>
             <li className="flex items-center gap-3">
-              <ShieldCheck size={16} className="shrink-0 text-brand-green" /> Free account — start learning today
+              <ShieldCheck size={16} className="shrink-0 text-brand-green" /> Free account — start
+              learning today
             </li>
           </ul>
         </section>
@@ -92,7 +99,9 @@ export default function ItPortalAuthPage() {
                 setError("");
               }}
               className={`rounded-full px-4 py-2.5 transition-all ${
-                mode === "signin" ? "bg-brand-navy text-white shadow" : "text-slate-600 hover:text-brand-navy"
+                mode === "signin"
+                  ? "bg-brand-navy text-white shadow"
+                  : "text-slate-600 hover:text-brand-navy"
               }`}
             >
               Sign In
@@ -104,7 +113,9 @@ export default function ItPortalAuthPage() {
                 setError("");
               }}
               className={`rounded-full px-4 py-2.5 transition-all ${
-                mode === "signup" ? "bg-brand-orange text-white shadow" : "text-slate-600 hover:text-brand-navy"
+                mode === "signup"
+                  ? "bg-brand-orange text-white shadow"
+                  : "text-slate-600 hover:text-brand-navy"
               }`}
             >
               Sign Up
@@ -151,7 +162,9 @@ export default function ItPortalAuthPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={mode === "signup" ? "Min. 8 characters with a number" : "Your password"}
+                placeholder={
+                  mode === "signup" ? "Min. 8 characters with a number" : "Your password"
+                }
                 className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-brand-green focus:ring-4 focus:ring-brand-green/15"
               />
             </label>
@@ -183,8 +196,8 @@ export default function ItPortalAuthPage() {
           </form>
 
           <p className="mt-6 text-center text-xs leading-relaxed text-slate-500">
-            By creating an account you agree to receive learning updates from Ykay College. Your data is protected under
-            our{" "}
+            By creating an account you agree to receive learning updates from Ykay College. Your
+            data is protected under our{" "}
             <Link href="/privacy-policy" className="font-semibold text-brand-green hover:underline">
               privacy policy
             </Link>

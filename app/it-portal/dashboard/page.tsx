@@ -66,7 +66,9 @@ export default function ItPortalDashboardPage() {
       if (!response.ok) throw new Error(body.error || "Unable to load your IT dashboard.");
       setData(body);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Unable to load your IT dashboard.");
+      setError(
+        loadError instanceof Error ? loadError.message : "Unable to load your IT dashboard.",
+      );
     } finally {
       setLoading(false);
     }
@@ -116,7 +118,8 @@ export default function ItPortalDashboardPage() {
               {firstName ? `WELCOME, ${firstName.toUpperCase()}` : "MY IT DASHBOARD"}
             </h1>
             <p className="mt-3 max-w-2xl font-body text-sm text-white/60">
-              Track your digital skills journey — course progress, modules completed, and certificates earned.
+              Track your digital skills journey — course progress, modules completed, and
+              certificates earned.
             </p>
           </div>
         </section>
@@ -135,7 +138,8 @@ export default function ItPortalDashboardPage() {
             {loading ? (
               <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
                 <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                  <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading your dashboard...
+                  <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading your
+                  dashboard...
                 </div>
               </div>
             ) : null}
@@ -145,15 +149,40 @@ export default function ItPortalDashboardPage() {
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                   {[
-                    { label: "Enrolled Courses", value: data.summary.enrolledCourses, icon: BookOpen, tone: "text-brand-green" },
-                    { label: "Average Progress", value: `${data.summary.averageProgress}%`, icon: TrendingUp, tone: "text-brand-green" },
-                    { label: "Completed", value: data.summary.completedCourses, icon: CheckCircle2, tone: "text-brand-orange" },
-                    { label: "Certificates", value: data.summary.certificatesEarned, icon: Award, tone: "text-brand-orange" },
+                    {
+                      label: "Enrolled Courses",
+                      value: data.summary.enrolledCourses,
+                      icon: BookOpen,
+                      tone: "text-brand-green",
+                    },
+                    {
+                      label: "Average Progress",
+                      value: `${data.summary.averageProgress}%`,
+                      icon: TrendingUp,
+                      tone: "text-brand-green",
+                    },
+                    {
+                      label: "Completed",
+                      value: data.summary.completedCourses,
+                      icon: CheckCircle2,
+                      tone: "text-brand-orange",
+                    },
+                    {
+                      label: "Certificates",
+                      value: data.summary.certificatesEarned,
+                      icon: Award,
+                      tone: "text-brand-orange",
+                    },
                   ].map((card) => (
-                    <div key={card.label} className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]">
+                    <div
+                      key={card.label}
+                      className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]"
+                    >
                       <card.icon size={18} className={`mb-3 ${card.tone}`} />
                       <div className={`font-display text-3xl ${card.tone}`}>{card.value}</div>
-                      <div className="mt-1 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{card.label}</div>
+                      <div className="mt-1 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+                        {card.label}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -162,7 +191,9 @@ export default function ItPortalDashboardPage() {
                 {enrolledCourses.length ? (
                   <div>
                     <div className="mb-4 flex items-center justify-between">
-                      <h2 className="font-display text-2xl text-[var(--text-primary)]">My Courses</h2>
+                      <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                        My Courses
+                      </h2>
                       <span className="rounded-full bg-brand-green/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
                         {enrolledCourses.length} active
                       </span>
@@ -188,11 +219,17 @@ export default function ItPortalDashboardPage() {
                               </span>
                             )}
                           </div>
-                          <h3 className="mb-1 font-display text-xl text-[var(--text-primary)]">{course.title}</h3>
-                          <p className="mb-4 text-xs text-[var(--text-muted)]">{course.certification}</p>
+                          <h3 className="mb-1 font-display text-xl text-[var(--text-primary)]">
+                            {course.title}
+                          </h3>
+                          <p className="mb-4 text-xs text-[var(--text-muted)]">
+                            {course.certification}
+                          </p>
                           <div className="mb-2 flex items-center justify-between text-xs">
                             <span className="text-[var(--text-muted)]">Progress</span>
-                            <span className="font-bold text-brand-green">{course.progressPercent}%</span>
+                            <span className="font-bold text-brand-green">
+                              {course.progressPercent}%
+                            </span>
                           </div>
                           <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-disabled)]">
                             <div
@@ -214,11 +251,20 @@ export default function ItPortalDashboardPage() {
                     </h2>
                     <div className="grid gap-4 md:grid-cols-2">
                       {data.certificates.map((certificate) => (
-                        <div key={certificate.certificateNumber} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
-                          <div className="font-display text-lg text-[var(--text-primary)]">{certificate.courseTitle}</div>
-                          <div className="mt-1 text-xs text-[var(--text-secondary)]">{certificate.credential}</div>
+                        <div
+                          key={certificate.certificateNumber}
+                          className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5"
+                        >
+                          <div className="font-display text-lg text-[var(--text-primary)]">
+                            {certificate.courseTitle}
+                          </div>
+                          <div className="mt-1 text-xs text-[var(--text-secondary)]">
+                            {certificate.credential}
+                          </div>
                           <div className="mt-3 flex items-center justify-between text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                            <span className="font-bold text-brand-green">{certificate.certificateNumber}</span>
+                            <span className="font-bold text-brand-green">
+                              {certificate.certificateNumber}
+                            </span>
                             <span>{new Date(certificate.issuedAt).toLocaleDateString()}</span>
                           </div>
                         </div>
@@ -240,24 +286,38 @@ export default function ItPortalDashboardPage() {
                   {availableCourses.length ? (
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                       {availableCourses.map((course) => (
-                        <div key={course.id} className="flex flex-col rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                        <div
+                          key={course.id}
+                          className="flex flex-col rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]"
+                        >
                           <div className="mb-4 flex items-center justify-between">
                             <span className="rounded-full bg-[var(--surface-disabled)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
                               {course.level}
                             </span>
                             <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
-                              <Clock size={11} /> {course.durationWeeks} weeks · {course.moduleCount} modules
+                              <Clock size={11} /> {course.durationWeeks} weeks ·{" "}
+                              {course.moduleCount} modules
                             </span>
                           </div>
-                          <h3 className="mb-1 font-display text-xl text-[var(--text-primary)]">{course.title}</h3>
-                          <p className="mb-3 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">{course.tagline}</p>
-                          <p className="mb-5 text-[10px] font-bold uppercase tracking-widest text-brand-green">{course.certification}</p>
+                          <h3 className="mb-1 font-display text-xl text-[var(--text-primary)]">
+                            {course.title}
+                          </h3>
+                          <p className="mb-3 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">
+                            {course.tagline}
+                          </p>
+                          <p className="mb-5 text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                            {course.certification}
+                          </p>
                           <button
                             onClick={() => void enroll(course)}
                             disabled={Boolean(enrollingId)}
                             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg transition-all hover:bg-brand-green-dark disabled:opacity-50"
                           >
-                            {enrollingId === course.id ? <LoaderCircle size={14} className="animate-spin" /> : <PlayCircle size={14} />}
+                            {enrollingId === course.id ? (
+                              <LoaderCircle size={14} className="animate-spin" />
+                            ) : (
+                              <PlayCircle size={14} />
+                            )}
                             Enroll Free
                           </button>
                         </div>
@@ -265,8 +325,8 @@ export default function ItPortalDashboardPage() {
                     </div>
                   ) : (
                     <p className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 text-sm text-[var(--text-muted)]">
-                      You are enrolled in every available course. New tracks — robotics, data science, and web
-                      development — are coming soon.
+                      You are enrolled in every available course. New tracks — robotics, data
+                      science, and web development — are coming soon.
                     </p>
                   )}
                 </div>

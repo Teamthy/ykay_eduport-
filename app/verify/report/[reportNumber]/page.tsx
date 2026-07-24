@@ -54,20 +54,34 @@ export default async function VerifyReportPage({
                 </div>
                 <h2 className="font-display text-3xl text-brand-green">AUTHENTIC DOCUMENT</h2>
                 <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                  This report card was officially issued and released by Ykay College &amp; Leadership Academy.
+                  This report card was officially issued and released by Ykay College &amp;
+                  Leadership Academy.
                 </p>
                 <div className="mt-8 space-y-3 rounded-2xl bg-[var(--surface-disabled)] p-6 text-left text-sm">
                   {[
                     ["Report Number", report.reportNumber],
-                    ["Student", `${report.studentProfile.displayName} (${report.studentProfile.studentId})`],
+                    [
+                      "Student",
+                      `${report.studentProfile.displayName} (${report.studentProfile.studentId})`,
+                    ],
                     ["Class", report.classNameSnapshot],
                     ["Session · Term", `${report.sessionLabel} · ${report.termLabel}`],
-                    ["Overall", `${report.overallAverage}% · ${report.overallGrade}${report.classPosition ? ` · ${report.classPosition}` : ""}`],
-                    ["Released", report.releasedAt ? new Date(report.releasedAt).toLocaleDateString() : "—"],
+                    [
+                      "Overall",
+                      `${report.overallAverage}% · ${report.overallGrade}${report.classPosition ? ` · ${report.classPosition}` : ""}`,
+                    ],
+                    [
+                      "Released",
+                      report.releasedAt ? new Date(report.releasedAt).toLocaleDateString() : "—",
+                    ],
                   ].map(([label, value]) => (
                     <div key={label} className="flex items-start justify-between gap-6">
-                      <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">{label}</span>
-                      <span className="text-right font-medium text-[var(--text-primary)]">{value}</span>
+                      <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                        {label}
+                      </span>
+                      <span className="text-right font-medium text-[var(--text-primary)]">
+                        {value}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -80,8 +94,9 @@ export default async function VerifyReportPage({
                 <h2 className="font-display text-3xl text-red-500">NOT VERIFIED</h2>
                 <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-secondary)]">
                   No released report card matches the reference{" "}
-                  <span className="font-bold text-[var(--text-primary)]">{decoded}</span>. The document may be a
-                  draft, may have been withdrawn, or the reference may be incorrect.
+                  <span className="font-bold text-[var(--text-primary)]">{decoded}</span>. The
+                  document may be a draft, may have been withdrawn, or the reference may be
+                  incorrect.
                 </p>
                 <Link
                   href="/contact"
@@ -92,8 +107,8 @@ export default async function VerifyReportPage({
               </div>
             )}
             <p className="mt-6 text-center text-xs text-[var(--text-muted)]">
-              Verification reference: scan the QR code on any released Ykay College report card, or enter the
-              report number in the URL: /verify/report/&lt;report-number&gt;
+              Verification reference: scan the QR code on any released Ykay College report card, or
+              enter the report number in the URL: /verify/report/&lt;report-number&gt;
             </p>
           </div>
         </section>

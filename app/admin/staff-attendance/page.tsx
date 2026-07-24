@@ -136,13 +136,15 @@ export default function AdminStaffAttendancePage() {
         <AdminSidebar />
         <section className="min-w-0 flex-1 space-y-6">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Gate / office scanner</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Gate / office scanner
+            </p>
             <h1 className="mt-2 font-display text-4xl tracking-widest">
               STAFF <span className="text-brand-green">QR ATTENDANCE</span>
             </h1>
             <p className="mt-3 max-w-3xl text-sm text-white/65">
-              Scan staff badges for check-in and check-out. Arrivals after {data?.lateCutoff || "08:00"} (Africa/Lagos)
-              are marked late automatically.
+              Scan staff badges for check-in and check-out. Arrivals after{" "}
+              {data?.lateCutoff || "08:00"} (Africa/Lagos) are marked late automatically.
             </p>
           </div>
 
@@ -175,7 +177,11 @@ export default function AdminStaffAttendancePage() {
                 disabled={scanning || !scanValue.trim()}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
               >
-                {scanning ? <LoaderCircle className="animate-spin" size={16} /> : <QrCode size={16} />}
+                {scanning ? (
+                  <LoaderCircle className="animate-spin" size={16} />
+                ) : (
+                  <QrCode size={16} />
+                )}
                 Record
               </button>
               <button
@@ -200,31 +206,41 @@ export default function AdminStaffAttendancePage() {
             </div>
           ) : (
             <>
-                            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
                   <UsersIcon className="mb-2 text-brand-green" size={18} />
                   <div className="font-display text-2xl">{data.summary.staffTotal}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Staff</div>
+                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                    Staff
+                  </div>
                 </div>
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
                   <CheckCircle2 className="mb-2 text-brand-green" size={18} />
                   <div className="font-display text-2xl">{data.summary.present}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Present</div>
+                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                    Present
+                  </div>
                 </div>
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
                   <UserX className="mb-2 text-brand-green" size={18} />
                   <div className="font-display text-2xl">{data.summary.absent}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Absent</div>
+                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                    Absent
+                  </div>
                 </div>
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
                   <Clock3 className="mb-2 text-brand-green" size={18} />
                   <div className="font-display text-2xl">{data.summary.late}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Late</div>
+                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                    Late
+                  </div>
                 </div>
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
                   <LogIn className="mb-2 text-brand-green" size={18} />
                   <div className="font-display text-2xl">{data.summary.stillIn}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Still in</div>
+                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                    Still in
+                  </div>
                 </div>
               </div>
 
@@ -267,7 +283,10 @@ export default function AdminStaffAttendancePage() {
                   </thead>
                   <tbody>
                     {rows.map((r) => (
-                      <tr key={r.teacherProfileId} className="border-t border-[var(--border-subtle)]">
+                      <tr
+                        key={r.teacherProfileId}
+                        className="border-t border-[var(--border-subtle)]"
+                      >
                         <td className="p-4">
                           <b>{r.displayName}</b>
                           <span className="mt-1 block text-xs text-[var(--text-muted)]">
@@ -305,7 +324,9 @@ export default function AdminStaffAttendancePage() {
                   </tbody>
                 </table>
                 {!rows.length && (
-                  <p className="p-10 text-center text-sm text-[var(--text-muted)]">No staff match this filter.</p>
+                  <p className="p-10 text-center text-sm text-[var(--text-muted)]">
+                    No staff match this filter.
+                  </p>
                 )}
               </div>
 
@@ -350,14 +371,20 @@ export default function AdminStaffAttendancePage() {
                       <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">
                         Ykay staff badge
                       </div>
-                      <div className="mt-3 font-display text-2xl tracking-wide">{b.displayName}</div>
+                      <div className="mt-3 font-display text-2xl tracking-wide">
+                        {b.displayName}
+                      </div>
                       <div className="mt-1 text-xs text-white/60">
                         {b.role.replaceAll("_", " ")} · {b.email}
                       </div>
                       <div className="mt-4 flex items-end justify-between gap-3">
                         <div className="font-mono text-xs text-white/80">{b.badgeCode}</div>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={qrImg(b.qrPayload)} alt={b.badgeCode} className="h-24 w-24 rounded-md bg-white p-1" />
+                        <img
+                          src={qrImg(b.qrPayload)}
+                          alt={b.badgeCode}
+                          className="h-24 w-24 rounded-md bg-white p-1"
+                        />
                       </div>
                     </div>
                   ))}
@@ -373,7 +400,15 @@ export default function AdminStaffAttendancePage() {
 
 function UsersIcon({ className, size = 18 }: { className?: string; size?: number }) {
   return (
-    <svg viewBox="0 0 24 24" width={size} height={size} className={className} fill="none" stroke="currentColor" strokeWidth="2">
+    <svg
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
       <circle cx="9" cy="7" r="4" />
       <path d="M22 21v-2a4 4 0 0 0-3-3.87" />

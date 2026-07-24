@@ -17,7 +17,9 @@ export default function CampusLifePage() {
               BEYOND THE CLASSROOM
             </h1>
             <p className="font-body text-base md:text-lg text-[var(--text-secondary)] max-w-2xl leading-relaxed">
-              At Ykay College, education extends far beyond textbooks. Our students discover their talents, build character, and develop leadership skills through clubs, sports, and creative expression.
+              At Ykay College, education extends far beyond textbooks. Our students discover their
+              talents, build character, and develop leadership skills through clubs, sports, and
+              creative expression.
             </p>
           </div>
         </section>
@@ -97,7 +99,9 @@ export default function CampusLifePage() {
                     CAMPUS FACILITIES
                   </h2>
                   <p className="font-body text-sm md:text-base text-white/90 leading-relaxed mb-6">
-                    Modern science laboratories, a fully equipped library with digital resources, dedicated sports fields, a 360° virtual campus tour, and technology-enhanced classrooms across our day school campus in Sango Ota.
+                    Modern science laboratories, a fully equipped library with digital resources,
+                    dedicated sports fields, a 360° virtual campus tour, and technology-enhanced
+                    classrooms across our day school campus in Sango Ota.
                   </p>
                   <a
                     href="/contact"

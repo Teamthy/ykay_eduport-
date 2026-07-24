@@ -4,7 +4,9 @@ import { Sparkles, Zap, Bug, Package } from "lucide-react";
 
 const CHANGES = [
   {
-    date: "July 2025", version: "v2.0", title: "EduPortal Launch",
+    date: "July 2025",
+    version: "v2.0",
+    title: "EduPortal Launch",
     items: [
       { type: "feature", text: "Full Admin, Teacher, Student, and Parent portals live" },
       { type: "feature", text: "CBT Exam engine with anti-cheat controls" },
@@ -14,7 +16,9 @@ const CHANGES = [
     ],
   },
   {
-    date: "June 2025", version: "v1.5", title: "Website Redesign",
+    date: "June 2025",
+    version: "v1.5",
+    title: "Website Redesign",
     items: [
       { type: "feature", text: "Complete website redesign with dark mode" },
       { type: "feature", text: "Director's message page added" },
@@ -23,7 +27,9 @@ const CHANGES = [
     ],
   },
   {
-    date: "May 2025", version: "v1.0", title: "Foundation",
+    date: "May 2025",
+    version: "v1.0",
+    title: "Foundation",
     items: [
       { type: "feature", text: "Initial launch of ykaycollege.com" },
       { type: "feature", text: "Online admission application" },
@@ -33,7 +39,11 @@ const CHANGES = [
 ];
 
 const iconMap = { feature: Sparkles, improvement: Zap, fix: Bug };
-const colorMap = { feature: "text-brand-green", improvement: "text-brand-orange", fix: "text-red-500" };
+const colorMap = {
+  feature: "text-brand-green",
+  improvement: "text-brand-orange",
+  fix: "text-red-500",
+};
 
 export default function WhatsNewPage() {
   return (
@@ -57,20 +67,32 @@ export default function WhatsNewPage() {
         <section className="py-20 px-6">
           <div className="mx-auto max-w-4xl space-y-8">
             {CHANGES.map((release, i) => (
-              <div key={i} className="p-8 rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]">
+              <div
+                key={i}
+                className="p-8 rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]"
+              >
                 <div className="flex items-baseline justify-between mb-6">
                   <div>
-                    <div className="text-brand-green text-xs font-bold uppercase tracking-widest">{release.date}</div>
-                    <h3 className="font-display text-2xl text-[var(--text-primary)]">{release.title}</h3>
+                    <div className="text-brand-green text-xs font-bold uppercase tracking-widest">
+                      {release.date}
+                    </div>
+                    <h3 className="font-display text-2xl text-[var(--text-primary)]">
+                      {release.title}
+                    </h3>
                   </div>
-                  <span className="text-xs px-3 py-1 rounded-full bg-[var(--surface-disabled)] text-[var(--text-muted)] font-bold">{release.version}</span>
+                  <span className="text-xs px-3 py-1 rounded-full bg-[var(--surface-disabled)] text-[var(--text-muted)] font-bold">
+                    {release.version}
+                  </span>
                 </div>
                 <ul className="space-y-3">
                   {release.items.map((item, j) => {
                     const Icon = iconMap[item.type as keyof typeof iconMap];
                     return (
                       <li key={j} className="flex items-start gap-3">
-                        <Icon size={14} className={`${colorMap[item.type as keyof typeof colorMap]} mt-1 shrink-0`} />
+                        <Icon
+                          size={14}
+                          className={`${colorMap[item.type as keyof typeof colorMap]} mt-1 shrink-0`}
+                        />
                         <span className="text-sm text-[var(--text-secondary)]">{item.text}</span>
                       </li>
                     );

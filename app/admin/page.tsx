@@ -6,9 +6,20 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import {
-  Users, GraduationCap, School, FileText, CreditCard, ClipboardCheck,
-  LoaderCircle, Activity, AlertCircle, ArrowRight, CheckCircle2,
-  MonitorSmartphone, UserCheck, Wallet,
+  Users,
+  GraduationCap,
+  School,
+  FileText,
+  CreditCard,
+  ClipboardCheck,
+  LoaderCircle,
+  Activity,
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  MonitorSmartphone,
+  UserCheck,
+  Wallet,
 } from "lucide-react";
 
 type DashboardResponse = {
@@ -66,7 +77,9 @@ export default function AdminDashboardPage() {
         if (!response.ok) throw new Error(body.error || "Unable to load the admin dashboard.");
         setData(body);
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "Unable to load the admin dashboard.");
+        setError(
+          loadError instanceof Error ? loadError.message : "Unable to load the admin dashboard.",
+        );
       } finally {
         setLoading(false);
       }
@@ -133,13 +146,16 @@ export default function AdminDashboardPage() {
 
             <div className="flex-1 min-w-0 space-y-8">
               {error ? (
-                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">{error}</div>
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                  {error}
+                </div>
               ) : null}
 
               {loading ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading live school data...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    live school data...
                   </div>
                 </div>
               ) : null}
@@ -149,15 +165,40 @@ export default function AdminDashboardPage() {
                   {/* Core stats */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {[
-                      { label: "Students", value: data.stats.studentCount, icon: Users, color: "text-brand-green" },
-                      { label: "Teachers", value: data.stats.teacherCount, icon: GraduationCap, color: "text-brand-orange" },
-                      { label: "Parents", value: data.stats.parentCount, icon: Users, color: "text-brand-green" },
-                      { label: "Class Arms", value: data.stats.classCount, icon: School, color: "text-brand-orange" },
+                      {
+                        label: "Students",
+                        value: data.stats.studentCount,
+                        icon: Users,
+                        color: "text-brand-green",
+                      },
+                      {
+                        label: "Teachers",
+                        value: data.stats.teacherCount,
+                        icon: GraduationCap,
+                        color: "text-brand-orange",
+                      },
+                      {
+                        label: "Parents",
+                        value: data.stats.parentCount,
+                        icon: Users,
+                        color: "text-brand-green",
+                      },
+                      {
+                        label: "Class Arms",
+                        value: data.stats.classCount,
+                        icon: School,
+                        color: "text-brand-orange",
+                      },
                     ].map((stat) => (
-                      <div key={stat.label} className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]">
+                      <div
+                        key={stat.label}
+                        className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]"
+                      >
                         <stat.icon size={18} className={`mb-3 ${stat.color}`} />
                         <div className={`font-display text-3xl ${stat.color}`}>{stat.value}</div>
-                        <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mt-1">{stat.label}</div>
+                        <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mt-1">
+                          {stat.label}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -167,23 +208,45 @@ export default function AdminDashboardPage() {
                     {[
                       {
                         label: "Outstanding Fees",
-                        value: data.stats.outstandingFees > 0 ? `₦${data.stats.outstandingFees.toLocaleString()}` : "₦0",
+                        value:
+                          data.stats.outstandingFees > 0
+                            ? `₦${data.stats.outstandingFees.toLocaleString()}`
+                            : "₦0",
                         icon: CreditCard,
-                        color: data.stats.outstandingFees > 0 ? "text-brand-orange" : "text-brand-green",
+                        color:
+                          data.stats.outstandingFees > 0 ? "text-brand-orange" : "text-brand-green",
                       },
-                      { label: "Released Reports", value: data.stats.releasedReports, icon: FileText, color: "text-brand-green" },
+                      {
+                        label: "Released Reports",
+                        value: data.stats.releasedReports,
+                        icon: FileText,
+                        color: "text-brand-green",
+                      },
                       {
                         label: "Attendance Today",
-                        value: data.stats.attendanceRateToday !== null ? `${data.stats.attendanceRateToday}%` : "—",
+                        value:
+                          data.stats.attendanceRateToday !== null
+                            ? `${data.stats.attendanceRateToday}%`
+                            : "—",
                         icon: UserCheck,
                         color: "text-brand-green",
                       },
-                      { label: "IT Enrollments", value: data.stats.itEnrollments, icon: MonitorSmartphone, color: "text-brand-orange" },
+                      {
+                        label: "IT Enrollments",
+                        value: data.stats.itEnrollments,
+                        icon: MonitorSmartphone,
+                        color: "text-brand-orange",
+                      },
                     ].map((stat) => (
-                      <div key={stat.label} className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]">
+                      <div
+                        key={stat.label}
+                        className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]"
+                      >
                         <stat.icon size={18} className={`mb-3 ${stat.color}`} />
                         <div className={`font-display text-2xl ${stat.color}`}>{stat.value}</div>
-                        <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mt-1">{stat.label}</div>
+                        <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mt-1">
+                          {stat.label}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -193,7 +256,9 @@ export default function AdminDashboardPage() {
                     <div className="rounded-[2rem] border border-brand-orange/25 bg-brand-orange/5 p-6">
                       <div className="mb-4 flex items-center gap-2">
                         <AlertCircle size={18} className="text-brand-orange" />
-                        <h2 className="font-display text-xl text-[var(--text-primary)]">Needs Attention</h2>
+                        <h2 className="font-display text-xl text-[var(--text-primary)]">
+                          Needs Attention
+                        </h2>
                       </div>
                       <div className="space-y-2">
                         {attentionItems.map((item) => (
@@ -204,11 +269,18 @@ export default function AdminDashboardPage() {
                           >
                             <div className="flex items-center gap-3">
                               <item.icon size={18} className="text-brand-orange" />
-                              <span className="text-sm text-[var(--text-primary)]">{item.label}</span>
+                              <span className="text-sm text-[var(--text-primary)]">
+                                {item.label}
+                              </span>
                             </div>
                             <div className="flex items-center gap-3">
-                              <span className="rounded-full bg-brand-orange/10 px-3 py-1 text-xs font-bold text-brand-orange">{item.count}</span>
-                              <ArrowRight size={14} className="text-[var(--text-muted)] group-hover:text-brand-orange group-hover:translate-x-1 transition-all" />
+                              <span className="rounded-full bg-brand-orange/10 px-3 py-1 text-xs font-bold text-brand-orange">
+                                {item.count}
+                              </span>
+                              <ArrowRight
+                                size={14}
+                                className="text-[var(--text-muted)] group-hover:text-brand-orange group-hover:translate-x-1 transition-all"
+                              />
                             </div>
                           </Link>
                         ))}
@@ -218,7 +290,8 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center gap-3 rounded-[2rem] border border-brand-green/25 bg-brand-green/5 p-6">
                       <CheckCircle2 size={22} className="text-brand-green" />
                       <p className="text-sm text-[var(--text-secondary)]">
-                        All clear — no pending applications, corrections, draft reports, or open invoices.
+                        All clear — no pending applications, corrections, draft reports, or open
+                        invoices.
                       </p>
                     </div>
                   )}
@@ -228,32 +301,50 @@ export default function AdminDashboardPage() {
                     <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
                       <div className="mb-5 flex items-center gap-2">
                         <Activity size={18} className="text-brand-green" />
-                        <h2 className="font-display text-xl text-[var(--text-primary)]">School Activity Feed</h2>
+                        <h2 className="font-display text-xl text-[var(--text-primary)]">
+                          School Activity Feed
+                        </h2>
                       </div>
                       {data.activity.length ? (
                         <div className="space-y-3">
                           {data.activity.map((entry, index) => (
-                            <div key={`${entry.at}-${index}`} className="flex items-start gap-3 rounded-xl bg-[var(--surface-disabled)] px-4 py-3">
+                            <div
+                              key={`${entry.at}-${index}`}
+                              className="flex items-start gap-3 rounded-xl bg-[var(--surface-disabled)] px-4 py-3"
+                            >
                               <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
                               <div className="min-w-0 flex-1">
-                                <div className="text-sm text-[var(--text-primary)]">{actionLabel(entry.action)}</div>
+                                <div className="text-sm text-[var(--text-primary)]">
+                                  {actionLabel(entry.action)}
+                                </div>
                                 <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                                   {entry.actorName}
-                                  {entry.actorRole ? ` · ${entry.actorRole}` : ""} · {timeAgo(entry.at)}
+                                  {entry.actorRole ? ` · ${entry.actorRole}` : ""} ·{" "}
+                                  {timeAgo(entry.at)}
                                 </div>
                               </div>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-[var(--text-muted)]">School activity will appear here as staff use the portal.</p>
+                        <p className="text-sm text-[var(--text-muted)]">
+                          School activity will appear here as staff use the portal.
+                        </p>
                       )}
                     </div>
 
                     <div className="space-y-4">
                       {[
-                        { title: "Review Admissions", icon: ClipboardCheck, href: "/admin-admissions" },
-                        { title: "Attendance Analytics", icon: UserCheck, href: "/admin/attendance-analytics" },
+                        {
+                          title: "Review Admissions",
+                          icon: ClipboardCheck,
+                          href: "/admin-admissions",
+                        },
+                        {
+                          title: "Attendance Analytics",
+                          icon: UserCheck,
+                          href: "/admin/attendance-analytics",
+                        },
                         { title: "Fee Management", icon: CreditCard, href: "/admin/fees" },
                         { title: "Report Cards", icon: FileText, href: "/admin/report-cards" },
                       ].map((item) => (
@@ -266,9 +357,14 @@ export default function AdminDashboardPage() {
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green/10 text-brand-green group-hover:bg-brand-green group-hover:text-white transition-colors">
                               <item.icon size={18} />
                             </div>
-                            <span className="text-sm font-bold text-[var(--text-primary)]">{item.title}</span>
+                            <span className="text-sm font-bold text-[var(--text-primary)]">
+                              {item.title}
+                            </span>
                           </div>
-                          <ArrowRight size={14} className="text-[var(--text-muted)] group-hover:text-brand-green group-hover:translate-x-1 transition-all" />
+                          <ArrowRight
+                            size={14}
+                            className="text-[var(--text-muted)] group-hover:text-brand-green group-hover:translate-x-1 transition-all"
+                          />
                         </Link>
                       ))}
                     </div>

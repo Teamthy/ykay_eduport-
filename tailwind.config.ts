@@ -18,8 +18,8 @@ export default {
         "border-subtle": "rgba(255,255,255,0.1)",
       },
       fontFamily: {
-        display: ['"Anton"', 'system-ui', 'sans-serif'],
-        body: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        display: ['"Anton"', "system-ui", "sans-serif"],
+        body: ['"DM Sans"', "system-ui", "sans-serif"],
       },
       spacing: {
         128: "32rem",
@@ -48,7 +48,7 @@ export default {
         },
       },
       letterSpacing: {
-        "widest": "0.25em",
+        widest: "0.25em",
         "extra-wide": "0.2em",
       },
     },
