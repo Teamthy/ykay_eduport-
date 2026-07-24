@@ -1,7 +1,8 @@
-import { AlertDeliveryStatus, FeePaymentStatus, UserRole } from "@prisma/client";
+import { AlertDeliveryStatus, ApplicationStatus, FeePaymentStatus, UserRole } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { readSystemFlags } from "@/lib/system-flags";
 
 export const dynamic = "force-dynamic";
 
@@ -22,16 +23,20 @@ export async function GET() {
     failedNotifications,
     pendingNotifications,
     applications,
+    applicationsByStatus,
     itEnrollments,
     examAttempts,
     reportCards,
+    students,
+    classes,
+    teachers,
     recentErrors,
     latestLogins,
     feePayments,
     feeInvoices,
     expenses,
-    recentPayments,
-    recentAudit,
+    pendingTransfers,
+    staffInToday,
   ] = await Promise.all([
     prisma.user.groupBy({ by: ["role"], _count: true }),
     prisma.user.count({ where: { isActive: true, isSuspended: false } }),
@@ -41,15 +46,26 @@ export async function GET() {
     prisma.auditLog.count({ where: { createdAt: { gte: dayAgo } } }),
     prisma.notificationJob.count({ where: { status: AlertDeliveryStatus.FAILED } }),
     prisma.notificationJob.count({ where: { status: AlertDeliveryStatus.PENDING } }),
-    prisma.admissionApplication.count(),
+    prisma.admissionApplication.count({ where: { status: { not: ApplicationStatus.DRAFT } } }),
+    prisma.admissionApplication.groupBy({ by: ["status"], _count: true }),
     prisma.itEnrollment.count(),
     prisma.examAttempt.count(),
     prisma.reportCard.count(),
+    prisma.studentProfile.count({ where: { isActive: true } }),
+    prisma.schoolClass.count({ where: { isActive: true } }),
+    prisma.teacherProfile.count({ where: { isActive: true } }),
     prisma.notificationJob.findMany({
       where: { status: AlertDeliveryStatus.FAILED },
       orderBy: { updatedAt: "desc" },
       take: 5,
-      select: { id: true, channel: true, subject: true, lastError: true, attempts: true, updatedAt: true },
+      select: {
+        id: true,
+        channel: true,
+        subject: true,
+        lastError: true,
+        attempts: true,
+        updatedAt: true,
+      },
     }),
     prisma.auditLog.findMany({
       where: { action: "USER_SIGNED_IN" },
@@ -61,29 +77,39 @@ export async function GET() {
       where: { status: FeePaymentStatus.COMPLETED },
       select: { amount: true, paidAt: true },
     }),
-    prisma.feeInvoice.findMany({ select: { totalAmount: true, amountPaid: true, balanceDue: true, status: true } }),
-    prisma.expense.findMany({ select: { amount: true } }).catch(() => []),
-    prisma.feePayment.findMany({
-      where: { status: FeePaymentStatus.COMPLETED },
-      orderBy: { paidAt: "desc" },
-      take: 12,
-      include: {
-        studentProfile: { select: { displayName: true, studentId: true } },
-      },
+    prisma.feeInvoice.findMany({
+      select: { totalAmount: true, amountPaid: true, balanceDue: true },
     }),
-    prisma.auditLog.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 25,
-      include: { actor: { select: { name: true, email: true, role: true } } },
-    }),
+    prisma.expense
+      .findMany({ select: { amount: true } })
+      .catch(() => [] as Array<{ amount: number }>),
+    prisma.feePaymentAttempt
+      .count({ where: { status: "PENDING", provider: "BANK_TRANSFER" } })
+      .catch(() => 0),
+    prisma.staffAttendanceEvent
+      .groupBy({
+        by: ["teacherProfileId"],
+        where: {
+          eventType: "CHECK_IN",
+          scannedAt: { gte: new Date(new Date().toDateString()) },
+        },
+      })
+      .then((rows) => rows.length)
+      .catch(() => 0),
   ]);
 
   const incomeTotal = feePayments.reduce((s, p) => s + p.amount, 0);
-  const incomeToday = feePayments.filter((p) => p.paidAt >= dayAgo).reduce((s, p) => s + p.amount, 0);
-  const incomeWeek = feePayments.filter((p) => p.paidAt >= weekAgo).reduce((s, p) => s + p.amount, 0);
+  const incomeToday = feePayments
+    .filter((p) => p.paidAt >= dayAgo)
+    .reduce((s, p) => s + p.amount, 0);
+  const incomeWeek = feePayments
+    .filter((p) => p.paidAt >= weekAgo)
+    .reduce((s, p) => s + p.amount, 0);
   const expenseTotal = (expenses as Array<{ amount: number }>).reduce((s, e) => s + e.amount, 0);
   const billed = feeInvoices.reduce((s, i) => s + i.totalAmount, 0);
+  const collected = feeInvoices.reduce((s, i) => s + i.amountPaid, 0);
   const outstanding = feeInvoices.reduce((s, i) => s + i.balanceDue, 0);
+  const flags = readSystemFlags();
 
   return NextResponse.json({
     platform: {
@@ -94,9 +120,17 @@ export async function GET() {
       loginsWeek,
       auditEventsToday: auditToday,
       applications,
+      applicationsByStatus: applicationsByStatus.map((row) => ({
+        status: row.status,
+        count: row._count,
+      })),
       itEnrollments,
       examAttempts,
       reportCards,
+      students,
+      classes,
+      teachers,
+      staffCheckedInToday: staffInToday,
     },
     finance: {
       incomeTotal,
@@ -105,22 +139,15 @@ export async function GET() {
       expenseTotal,
       netPosition: incomeTotal - expenseTotal,
       billed,
+      collected,
       outstanding,
-      collectionRate: billed ? Math.round(((billed - outstanding) / billed) * 100) : 0,
-      recentPayments: recentPayments.map((p) => ({
-        id: p.id,
-        amount: p.amount,
-        method: p.method,
-        reference: p.reference,
-        receiptNumber: p.receiptNumber,
-        paidAt: p.paidAt.toISOString(),
-        student: p.studentProfile.displayName,
-        studentId: p.studentProfile.studentId,
-      })),
+      collectionRate: billed ? Math.round((collected / billed) * 100) : 0,
+      pendingBankTransfers: pendingTransfers,
     },
     health: {
       failedNotifications,
       pendingNotifications,
+      maintenanceMode: flags.maintenanceMode,
       recentFailures: recentErrors.map((job) => ({
         id: job.id,
         channel: job.channel,
@@ -133,16 +160,6 @@ export async function GET() {
     latestLogins: latestLogins.map((entry) => ({
       name: entry.actor?.name || "Unknown",
       email: entry.actor?.email || "—",
-      role: entry.actor?.role || "—",
-      ip: entry.ipAddress,
-      at: entry.createdAt.toISOString(),
-    })),
-    recentAudit: recentAudit.map((entry) => ({
-      id: entry.id,
-      action: entry.action,
-      entityType: entry.entityType,
-      entityId: entry.entityId,
-      actor: entry.actor?.email || "system",
       role: entry.actor?.role || "—",
       ip: entry.ipAddress,
       at: entry.createdAt.toISOString(),
