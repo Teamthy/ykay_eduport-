@@ -11,10 +11,28 @@ function secret() {
   return encoder.encode(value);
 }
 
-export type SessionUser = { id: string; schoolId: string; role: UserRole; name: string; email: string; mustChangePassword?: boolean };
+export type SessionUser = {
+  id: string;
+  schoolId: string;
+  role: UserRole;
+  name: string;
+  email: string;
+  mustChangePassword?: boolean;
+};
 
-export async function signSession(user: SessionUser) {
-  return new SignJWT({ schoolId: user.schoolId, role: user.role, name: user.name, email: user.email, mustChangePassword: Boolean(user.mustChangePassword) })
+export async function signSession(user: SessionUser & { impersonatedBy?: string }) {
+  const claims: Record<string, unknown> = {
+    schoolId: user.schoolId,
+    role: user.role,
+    name: user.name,
+    email: user.email,
+    mustChangePassword: Boolean(user.mustChangePassword),
+  };
+  if (user.impersonatedBy) {
+    claims.impersonatedBy = user.impersonatedBy;
+  }
+
+  return new SignJWT(claims)
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
     .setIssuedAt()
@@ -25,9 +43,25 @@ export async function signSession(user: SessionUser) {
 export async function verifySession(token: string): Promise<SessionUser | null> {
   try {
     const { payload } = await jwtVerify(token, secret());
-    if (!payload.sub || typeof payload.schoolId !== "string" || typeof payload.role !== "string" || typeof payload.name !== "string" || typeof payload.email !== "string") return null;
-    return { id: payload.sub, schoolId: payload.schoolId, role: payload.role as UserRole, name: payload.name, email: payload.email, mustChangePassword: payload.mustChangePassword === true };
-  } catch { return null; }
+    if (
+      !payload.sub ||
+      typeof payload.schoolId !== "string" ||
+      typeof payload.role !== "string" ||
+      typeof payload.name !== "string" ||
+      typeof payload.email !== "string"
+    )
+      return null;
+    return {
+      id: payload.sub,
+      schoolId: payload.schoolId,
+      role: payload.role as UserRole,
+      name: payload.name,
+      email: payload.email,
+      mustChangePassword: payload.mustChangePassword === true,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function getSession() {
@@ -36,7 +70,17 @@ export async function getSession() {
 }
 
 export function sessionCookie(token: string) {
-  return { name: SESSION_COOKIE, value: token, options: { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/", maxAge: 60 * 60 * 8 } };
+  return {
+    name: SESSION_COOKIE,
+    value: token,
+    options: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+      path: "/",
+      maxAge: 60 * 60 * 8,
+    },
+  };
 }
 
 export async function requireRole(allowed: UserRole[]) {
