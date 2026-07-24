@@ -1,4 +1,17 @@
+# Allow all crawlers
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /admin-admissions/
+Disallow: /teacher/
+Disallow: /student/
+Disallow: /parent/
+Disallow: /it-portal/
+Disallow: /super-admin/
+Disallow: /staff/
+Disallow: /login
+Disallow: /reset-password
+Disallow: /change-password
+Disallow: /api/
 
-Sitemap: https://ykaycollege.com/sitemap.xml
+Sitemap: https://ykaycollege.edu.ng/sitemap.xml
