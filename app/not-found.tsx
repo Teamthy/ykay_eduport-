@@ -1,21 +1,23 @@
-﻿import Link from "next/link";
-import { Home, ArrowLeft, MessageCircle } from "lucide-react";
+import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main className="bg-[var(--bg-primary)] min-h-screen flex items-center justify-center px-6 theme-transition">
-      <div className="max-w-2xl text-center">
-        <div className="font-display text-[120px] md:text-[200px] text-brand-green leading-none mb-4">404</div>
-        <h1 className="font-display text-3xl md:text-5xl text-[var(--text-primary)] mb-6 tracking-[2px]">PAGE NOT FOUND</h1>
-        <p className="text-[var(--text-secondary)] mb-10 max-w-md mx-auto">
-          The page you're looking for doesn't exist or has been moved. Let's get you back on track.
+    <main className="grid min-h-screen place-items-center bg-[#0a1628] p-6 text-center">
+      <div className="max-w-md">
+        <p className="text-8xl font-bold text-[#16a34a]">404</p>
+        <h1 className="mt-4 text-3xl font-bold tracking-tight text-white">Page not found</h1>
+        <p className="mt-3 text-sm text-slate-400">
+          The page you are looking for does not exist or may have been moved.
         </p>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-green text-white font-bold text-sm hover:bg-brand-green-dark transition-all shadow-lg">
-            <Home size={16} /> Back to Homepage
+        <div className="mt-8 flex flex-col gap-3">
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center rounded-full bg-[#16a34a] px-6 py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:bg-[#15803d]"
+          >
+            Go to homepage
           </Link>
-          <Link href="/contact" className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-[var(--border-default)] text-[var(--text-primary)] font-bold text-sm hover:bg-[var(--surface-disabled)] transition-all">
-            <MessageCircle size={16} /> Contact Support
+          <Link href="/admissions" className="text-sm text-slate-400 underline hover:text-white">
+            Apply for admission
           </Link>
         </div>
       </div>

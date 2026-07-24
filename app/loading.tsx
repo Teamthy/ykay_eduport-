@@ -6,8 +6,11 @@
           <div className="h-8 w-64 bg-[var(--surface-disabled)] rounded-lg animate-pulse" />
           <div className="h-16 w-96 bg-[var(--surface-disabled)] rounded-lg animate-pulse" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
-            {[1,2,3].map(i => (
-              <div key={i} className="h-40 bg-[var(--surface-disabled)] rounded-2xl animate-pulse" />
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-40 bg-[var(--surface-disabled)] rounded-2xl animate-pulse"
+              />
             ))}
           </div>
         </div>
