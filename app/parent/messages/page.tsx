@@ -1,11 +1,19 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
-import { LayoutDashboard, CalendarDays, CreditCard, FileText, MessageCircle, Calendar, Send } from "lucide-react";
-import { MOCK_MESSAGES } from "@/lib/mockData";
+import {
+  LayoutDashboard,
+  CalendarDays,
+  CreditCard,
+  FileText,
+  MessageCircle,
+  Calendar,
+  Send,
+} from "lucide-react";
+import { useApi } from "@/lib/useApi";
 
 const SIDEBAR_ITEMS = [
   { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
@@ -17,7 +25,7 @@ const SIDEBAR_ITEMS = [
 ];
 
 export default function ParentMessagesPage() {
-  const [selectedMsg, setSelectedMsg] = useState(MOCK_MESSAGES[0]);
+  const [selectedMsg, setSelectedMsg] = useState<any>(null);
   const [reply, setReply] = useState("");
 
   return (
@@ -29,7 +37,9 @@ export default function ParentMessagesPage() {
             <h1 className="font-display text-[42px] md:text-[56px] tracking-[3px] text-white mb-4">
               <span className="text-brand-green">MESSAGES</span> INBOX
             </h1>
-            <p className="text-white/60">Direct communication with teachers and school administration.</p>
+            <p className="text-white/60">
+              Direct communication with teachers and school administration.
+            </p>
           </div>
         </section>
 
@@ -40,15 +50,17 @@ export default function ParentMessagesPage() {
             <div className="flex-1 min-w-0 grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Message List */}
               <div className="lg:col-span-1 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-4 shadow-[var(--card-shadow)] max-h-[600px] overflow-y-auto">
-                <h3 className="font-display text-sm tracking-widest text-[var(--text-primary)] mb-4 px-2">INBOX</h3>
+                <h3 className="font-display text-sm tracking-widest text-[var(--text-primary)] mb-4 px-2">
+                  INBOX
+                </h3>
                 <div className="space-y-2">
-                  {MOCK_MESSAGES.map(msg => (
+                  {[].map((msg) => (
                     <button
                       key={msg.id}
                       onClick={() => setSelectedMsg(msg)}
                       className={`w-full text-left p-3 rounded-xl transition-all ${
-                        selectedMsg.id === msg.id 
-                          ? "bg-brand-green/10 border border-brand-green/30" 
+                        selectedMsg?.id === msg.id
+                          ? "bg-brand-green/10 border border-brand-green/30"
                           : "hover:bg-[var(--surface-disabled)] border border-transparent"
                       }`}
                     >
@@ -58,11 +70,19 @@ export default function ParentMessagesPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <div className="text-sm font-bold text-[var(--text-primary)] truncate">{msg.from}</div>
-                            {msg.unread && <div className="w-2 h-2 rounded-full bg-brand-green shrink-0" />}
+                            <div className="text-sm font-bold text-[var(--text-primary)] truncate">
+                              {msg.from}
+                            </div>
+                            {msg.unread && (
+                              <div className="w-2 h-2 rounded-full bg-brand-green shrink-0" />
+                            )}
                           </div>
-                          <div className="text-xs text-[var(--text-secondary)] truncate">{msg.subject}</div>
-                          <div className="text-[10px] text-[var(--text-muted)] mt-1">{msg.time}</div>
+                          <div className="text-xs text-[var(--text-secondary)] truncate">
+                            {msg.subject}
+                          </div>
+                          <div className="text-[10px] text-[var(--text-muted)] mt-1">
+                            {msg.time}
+                          </div>
                         </div>
                       </div>
                     </button>
@@ -75,31 +95,43 @@ export default function ParentMessagesPage() {
                 <div className="p-6 border-b border-[var(--border-subtle)]">
                   <div className="flex items-center gap-4 mb-3">
                     <div className="w-12 h-12 rounded-full bg-brand-navy text-white flex items-center justify-center font-bold">
-                      {selectedMsg.avatar}
+                      {selectedMsg?.avatar}
                     </div>
                     <div>
-                      <div className="font-bold text-[var(--text-primary)]">{selectedMsg.from}</div>
-                      <div className="text-xs text-brand-green">{selectedMsg.role}</div>
+                      <div className="font-bold text-[var(--text-primary)]">{selectedMsg?.from}</div>
+                      <div className="text-xs text-brand-green">{selectedMsg?.role}</div>
                     </div>
                   </div>
-                  <h2 className="font-display text-xl text-[var(--text-primary)] mb-1">{selectedMsg.subject}</h2>
-                  <p className="text-xs text-[var(--text-muted)]">{selectedMsg.time}</p>
+                  <h2 className="font-display text-xl text-[var(--text-primary)] mb-1">
+                    {selectedMsg?.subject}
+                  </h2>
+                  <p className="text-xs text-[var(--text-muted)]">{selectedMsg?.time}</p>
                 </div>
                 <div className="flex-1 p-6 text-sm text-[var(--text-secondary)] leading-relaxed">
-                  <p>{selectedMsg.preview}</p>
-                  <p className="mt-4">This is the full message content. In production, the entire conversation thread will be displayed here with proper formatting, attachments, and reply history.</p>
-                  <p className="mt-4">Regards,<br/>{selectedMsg.from}</p>
+                  <p>{selectedMsg?.preview}</p>
+                  <p className="mt-4">
+                    This is the full message content. In production, the entire conversation thread
+                    will be displayed here with proper formatting, attachments, and reply history.
+                  </p>
+                  <p className="mt-4">
+                    Regards,
+                    <br />
+                    {selectedMsg?.from}
+                  </p>
                 </div>
                 <div className="p-6 border-t border-[var(--border-subtle)]">
                   <textarea
                     value={reply}
-                    onChange={e => setReply(e.target.value)}
+                    onChange={(e) => setReply(e.target.value)}
                     placeholder="Type your reply..."
                     rows={3}
                     className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] resize-none focus:outline-none focus:border-brand-green"
                   />
                   <button
-                    onClick={() => { alert("Reply sent (demo)"); setReply(""); }}
+                    onClick={() => {
+                      alert("Reply sent (demo)");
+                      setReply("");
+                    }}
                     className="mt-3 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand-green text-white font-bold text-sm hover:bg-brand-green-dark transition-all"
                   >
                     <Send size={14} /> Send Reply

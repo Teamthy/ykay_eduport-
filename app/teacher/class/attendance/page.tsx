@@ -95,7 +95,7 @@ function summarize(rows: AttendanceRow[]) {
       summary.total += 1;
       return summary;
     },
-    { present: 0, absent: 0, late: 0, total: 0 }
+    { present: 0, absent: 0, late: 0, total: 0 },
   );
 }
 
@@ -123,7 +123,8 @@ export default function ClassAttendancePage() {
     setError("");
     try {
       const query = new URLSearchParams({ date: params?.date || selectedDate });
-      if (params?.classId || selectedClassId) query.set("classId", params?.classId || selectedClassId);
+      if (params?.classId || selectedClassId)
+        query.set("classId", params?.classId || selectedClassId);
       const response = await fetch(`/api/teacher/attendance/register?${query.toString()}`, {
         cache: "no-store",
       });
@@ -141,7 +142,9 @@ export default function ClassAttendancePage() {
     } catch (loadError) {
       setRegister(null);
       setRows([]);
-      setError(loadError instanceof Error ? loadError.message : "Unable to load the attendance register.");
+      setError(
+        loadError instanceof Error ? loadError.message : "Unable to load the attendance register.",
+      );
     } finally {
       setLoading(false);
     }
@@ -162,14 +165,16 @@ export default function ClassAttendancePage() {
               status,
               note: status === "PRESENT" ? "" : row.note,
             }
-          : row
-      )
+          : row,
+      ),
     );
   }
 
   function updateNote(studentProfileId: string, note: string) {
     if (isLocked || savingMode) return;
-    setRows((current) => current.map((row) => (row.studentProfileId === studentProfileId ? { ...row, note } : row)));
+    setRows((current) =>
+      current.map((row) => (row.studentProfileId === studentProfileId ? { ...row, note } : row)),
+    );
   }
 
   function markAllPresent() {
@@ -212,7 +217,7 @@ export default function ClassAttendancePage() {
           body.notificationPreview?.queuedParentAlerts
             ? `Attendance submitted. ${body.notificationPreview.queuedParentAlerts} alert job(s) queued.`
             : "Attendance submitted and locked successfully.",
-          "success"
+          "success",
         );
       } else {
         toast("Attendance draft saved successfully.", "success");
@@ -245,7 +250,11 @@ export default function ClassAttendancePage() {
       toast("Correction request submitted for admin review.", "success");
       await loadRegister({ classId: register.selectedClass?.id || undefined, date: selectedDate });
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Unable to create correction request.");
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to create correction request.",
+      );
       toast("Correction request failed.", "error");
     } finally {
       setRequestingCorrection(false);
@@ -262,13 +271,16 @@ export default function ClassAttendancePage() {
               <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
                 <Calendar size={11} /> Teacher attendance workflow
               </span>
-              {register?.selectedClass ? <span className="text-xs text-white/45">{register.selectedClass.displayName}</span> : null}
+              {register?.selectedClass ? (
+                <span className="text-xs text-white/45">{register.selectedClass.displayName}</span>
+              ) : null}
             </div>
             <h1 className="font-display text-4xl tracking-widest text-white md:text-5xl">
               ATTENDANCE <span className="text-brand-orange">REGISTER</span>
             </h1>
             <p className="mt-2 max-w-3xl text-sm text-white/65">
-              Live class attendance register backed by the database. Save progress while marking or submit to lock the register and queue parent attendance alerts.
+              Live class attendance register backed by the database. Save progress while marking or
+              submit to lock the register and queue parent attendance alerts.
             </p>
           </div>
         </section>
@@ -280,14 +292,18 @@ export default function ClassAttendancePage() {
             <div className="flex-1 min-w-0 space-y-6">
               <div className="grid gap-4 lg:grid-cols-[1fr_auto_auto]">
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]">
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Assigned class</label>
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                    Assigned class
+                  </label>
                   <select
                     value={selectedClassId}
                     onChange={(event) => setSelectedClassId(event.target.value)}
                     className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)] outline-none focus:border-[var(--input-border-focus)]"
-                    disabled={loading || !(register?.availableClasses.length)}
+                    disabled={loading || !register?.availableClasses.length}
                   >
-                    {!register?.availableClasses.length ? <option value="">No class assignment found</option> : null}
+                    {!register?.availableClasses.length ? (
+                      <option value="">No class assignment found</option>
+                    ) : null}
                     {register?.availableClasses.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item.displayName}
@@ -298,7 +314,9 @@ export default function ClassAttendancePage() {
                 </div>
 
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]">
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Session date</label>
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                    Session date
+                  </label>
                   <input
                     type="date"
                     value={selectedDate}
@@ -309,8 +327,12 @@ export default function ClassAttendancePage() {
                 </div>
 
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]">
-                  <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Register state</div>
-                  <div className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold uppercase tracking-widest ${isLocked ? "bg-brand-green/15 text-brand-green" : "bg-brand-orange/15 text-brand-orange"}`}>
+                  <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                    Register state
+                  </div>
+                  <div
+                    className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold uppercase tracking-widest ${isLocked ? "bg-brand-green/15 text-brand-green" : "bg-brand-orange/15 text-brand-orange"}`}
+                  >
                     <Lock size={12} /> {isLocked ? "Locked" : "Editable"}
                   </div>
                 </div>
@@ -319,13 +341,16 @@ export default function ClassAttendancePage() {
               {loading ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading attendance register...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    attendance register...
                   </div>
                 </div>
               ) : null}
 
               {!loading && error ? (
-                <div className="rounded-2xl border border-red-500/20 bg-red-500/8 p-4 text-sm text-red-500">{error}</div>
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/8 p-4 text-sm text-red-500">
+                  {error}
+                </div>
               ) : null}
 
               {!loading && register && !register.availableClasses.length ? (
@@ -333,9 +358,13 @@ export default function ClassAttendancePage() {
                   <div className="flex items-start gap-3">
                     <FileWarning className="mt-0.5 text-brand-orange" size={20} />
                     <div>
-                      <h2 className="font-display text-2xl text-[var(--text-primary)]">No class assignment found</h2>
+                      <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                        No class assignment found
+                      </h2>
                       <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
-                        This teacher account does not yet have an active class assignment in the database. Create a teacher profile and class assignment before using the attendance register.
+                        This teacher account does not yet have an active class assignment in the
+                        database. Create a teacher profile and class assignment before using the
+                        attendance register.
                       </p>
                     </div>
                   </div>
@@ -346,17 +375,50 @@ export default function ClassAttendancePage() {
                 <>
                   <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                     {[
-                      { label: "Present", value: stats.present, icon: UserCheck, color: "text-brand-green", bg: "bg-brand-green/10" },
-                      { label: "Absent", value: stats.absent, icon: X, color: "text-red-500", bg: "bg-red-500/10" },
-                      { label: "Late", value: stats.late, icon: Clock, color: "text-brand-orange", bg: "bg-brand-orange/10" },
-                      { label: "Attendance rate", value: stats.total ? `${Math.round((stats.present / stats.total) * 100)}%` : "0%", icon: Calendar, color: "text-brand-green", bg: "bg-brand-green/10" },
+                      {
+                        label: "Present",
+                        value: stats.present,
+                        icon: UserCheck,
+                        color: "text-brand-green",
+                        bg: "bg-brand-green/10",
+                      },
+                      {
+                        label: "Absent",
+                        value: stats.absent,
+                        icon: X,
+                        color: "text-red-500",
+                        bg: "bg-red-500/10",
+                      },
+                      {
+                        label: "Late",
+                        value: stats.late,
+                        icon: Clock,
+                        color: "text-brand-orange",
+                        bg: "bg-brand-orange/10",
+                      },
+                      {
+                        label: "Attendance rate",
+                        value: stats.total
+                          ? `${Math.round((stats.present / stats.total) * 100)}%`
+                          : "0%",
+                        icon: Calendar,
+                        color: "text-brand-green",
+                        bg: "bg-brand-green/10",
+                      },
                     ].map((card) => (
-                      <div key={card.label} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]">
-                        <div className={`mb-2 flex h-10 w-10 items-center justify-center rounded-xl ${card.bg} ${card.color}`}>
+                      <div
+                        key={card.label}
+                        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]"
+                      >
+                        <div
+                          className={`mb-2 flex h-10 w-10 items-center justify-center rounded-xl ${card.bg} ${card.color}`}
+                        >
                           <card.icon size={18} />
                         </div>
                         <div className={`font-display text-3xl ${card.color}`}>{card.value}</div>
-                        <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{card.label}</div>
+                        <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                          {card.label}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -369,35 +431,66 @@ export default function ClassAttendancePage() {
                     >
                       <Check size={14} /> Mark all present
                     </button>
-                    <span className="text-xs text-[var(--text-muted)]">{stats.total} active student{stats.total === 1 ? "" : "s"} in the selected class</span>
-                    {register.session?.submittedAt ? <span className="text-xs text-brand-green">Submitted: {new Date(register.session.submittedAt).toLocaleString()}</span> : null}
+                    <span className="text-xs text-[var(--text-muted)]">
+                      {stats.total} active student{stats.total === 1 ? "" : "s"} in the selected
+                      class
+                    </span>
+                    {register.session?.submittedAt ? (
+                      <span className="text-xs text-brand-green">
+                        Submitted: {new Date(register.session.submittedAt).toLocaleString()}
+                      </span>
+                    ) : null}
                   </div>
 
                   <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)]">
                     <div className="border-b border-[var(--border-subtle)] px-6 py-4">
-                      <h2 className="font-display text-xl text-[var(--text-primary)]">{register.selectedClass?.displayName} Â· Daily register</h2>
-                      <p className="mt-1 text-xs text-[var(--text-muted)]">Period key: {register.session?.periodKey || "DAILY_REGISTER"}</p>
+                      <h2 className="font-display text-xl text-[var(--text-primary)]">
+                        {register.selectedClass?.displayName} Â· Daily register
+                      </h2>
+                      <p className="mt-1 text-xs text-[var(--text-muted)]">
+                        Period key: {register.session?.periodKey || "DAILY_REGISTER"}
+                      </p>
                     </div>
 
                     <div className="divide-y divide-[var(--border-subtle)]">
                       {rows.map((row) => (
-                        <div key={row.studentProfileId} className="flex flex-col gap-4 px-6 py-4 lg:flex-row lg:items-center">
+                        <div
+                          key={row.studentProfileId}
+                          className="flex flex-col gap-4 px-6 py-4 lg:flex-row lg:items-center"
+                        >
                           <div className="min-w-0 flex-1">
-                            <div className="font-semibold text-[var(--text-primary)]">{row.displayName}</div>
-                            <div className="text-[11px] text-[var(--text-muted)]">{row.studentId}</div>
-                            {row.guardianPhone ? <div className="mt-1 text-[11px] text-[var(--text-muted)]">Guardian: {row.guardianName || "Linked parent"} Â· {row.guardianPhone}</div> : null}
+                            <div className="font-semibold text-[var(--text-primary)]">
+                              {row.displayName}
+                            </div>
+                            <div className="text-[11px] text-[var(--text-muted)]">
+                              {row.studentId}
+                            </div>
+                            {row.guardianPhone ? (
+                              <div className="mt-1 text-[11px] text-[var(--text-muted)]">
+                                Guardian: {row.guardianName || "Linked parent"} Â·{" "}
+                                {row.guardianPhone}
+                              </div>
+                            ) : null}
                           </div>
 
                           {(row.status === "ABSENT" || row.status === "LATE") && !isLocked ? (
                             <input
                               value={row.note}
-                              onChange={(event) => updateNote(row.studentProfileId, event.target.value)}
-                              placeholder={row.status === "ABSENT" ? "Optional absence note" : "Optional late note"}
+                              onChange={(event) =>
+                                updateNote(row.studentProfileId, event.target.value)
+                              }
+                              placeholder={
+                                row.status === "ABSENT"
+                                  ? "Optional absence note"
+                                  : "Optional late note"
+                              }
                               className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-2.5 text-sm text-[var(--input-text)] outline-none focus:border-[var(--input-border-focus)] lg:w-72"
                               disabled={Boolean(savingMode)}
                             />
                           ) : row.note ? (
-                            <div className="w-full rounded-xl bg-[var(--surface-disabled)] px-4 py-2.5 text-sm text-[var(--text-secondary)] lg:w-72">{row.note}</div>
+                            <div className="w-full rounded-xl bg-[var(--surface-disabled)] px-4 py-2.5 text-sm text-[var(--text-secondary)] lg:w-72">
+                              {row.note}
+                            </div>
                           ) : null}
 
                           <div className="flex gap-2">
@@ -421,7 +514,9 @@ export default function ClassAttendancePage() {
                     </div>
 
                     <div className="border-t border-[var(--border-subtle)] bg-[var(--surface-disabled)] px-6 py-4">
-                      <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Register note</label>
+                      <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                        Register note
+                      </label>
                       <textarea
                         value={notes}
                         onChange={(event) => setNotes(event.target.value)}
@@ -438,7 +533,8 @@ export default function ClassAttendancePage() {
                         <BellRing className="mt-0.5 shrink-0 text-brand-green" size={18} />
                         <p>
                           When submitted, this session becomes locked. Alert jobs can be queued for
-                          <strong className="text-brand-green"> {notificationPreview}</strong> absent/late case(s).
+                          <strong className="text-brand-green"> {notificationPreview}</strong>{" "}
+                          absent/late case(s).
                         </p>
                       </div>
                     </div>
@@ -449,14 +545,24 @@ export default function ClassAttendancePage() {
                         disabled={isLocked || Boolean(savingMode) || !rows.length}
                         className="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--border-default)] px-6 py-3 text-sm font-bold uppercase tracking-widest text-[var(--text-primary)] transition-all hover:bg-[var(--surface-disabled)] disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        {savingMode === "draft" ? <LoaderCircle className="animate-spin" size={16} /> : <Save size={16} />} Save draft
+                        {savingMode === "draft" ? (
+                          <LoaderCircle className="animate-spin" size={16} />
+                        ) : (
+                          <Save size={16} />
+                        )}{" "}
+                        Save draft
                       </button>
                       <button
                         onClick={() => void saveRegister(true)}
                         disabled={isLocked || Boolean(savingMode) || !rows.length}
                         className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3 text-sm font-bold uppercase tracking-widest text-white shadow-lg transition-all hover:bg-brand-green-dark disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        {savingMode === "submit" ? <LoaderCircle className="animate-spin" size={16} /> : <Send size={16} />} Submit & lock
+                        {savingMode === "submit" ? (
+                          <LoaderCircle className="animate-spin" size={16} />
+                        ) : (
+                          <Send size={16} />
+                        )}{" "}
+                        Submit & lock
                       </button>
                     </div>
                   </div>
@@ -464,27 +570,43 @@ export default function ClassAttendancePage() {
                   {isLocked ? (
                     <div className="rounded-2xl border border-brand-orange/20 bg-brand-orange/10 p-5">
                       <div className="flex items-start gap-3">
-                        <MessageSquareWarning className="mt-0.5 shrink-0 text-brand-orange" size={18} />
+                        <MessageSquareWarning
+                          className="mt-0.5 shrink-0 text-brand-orange"
+                          size={18}
+                        />
                         <div className="flex-1">
-                          <h3 className="font-display text-xl text-[var(--text-primary)]">Locked register correction workflow</h3>
+                          <h3 className="font-display text-xl text-[var(--text-primary)]">
+                            Locked register correction workflow
+                          </h3>
                           {correctionRequest ? (
                             <div className="mt-3 space-y-3 text-sm text-[var(--text-secondary)]">
                               <div>
-                                <span className="font-semibold text-brand-green">Current request status:</span> {correctionRequest.status.replaceAll("_", " ")}
+                                <span className="font-semibold text-brand-green">
+                                  Current request status:
+                                </span>{" "}
+                                {correctionRequest.status.replaceAll("_", " ")}
                               </div>
                               <div>
-                                <span className="font-semibold">Reason:</span> {correctionRequest.reason}
+                                <span className="font-semibold">Reason:</span>{" "}
+                                {correctionRequest.reason}
                               </div>
                               {correctionRequest.resolutionNote ? (
                                 <div>
-                                  <span className="font-semibold">Admin note:</span> {correctionRequest.resolutionNote}
+                                  <span className="font-semibold">Admin note:</span>{" "}
+                                  {correctionRequest.resolutionNote}
                                 </div>
                               ) : null}
-                              <div className="text-xs text-[var(--text-muted)]">Requested on {new Date(correctionRequest.createdAt).toLocaleString()}</div>
+                              <div className="text-xs text-[var(--text-muted)]">
+                                Requested on{" "}
+                                {new Date(correctionRequest.createdAt).toLocaleString()}
+                              </div>
                             </div>
                           ) : (
                             <div className="mt-3 space-y-3">
-                              <p className="text-sm text-[var(--text-secondary)]">If a locked attendance session needs an update, submit a correction request for admin approval.</p>
+                              <p className="text-sm text-[var(--text-secondary)]">
+                                If a locked attendance session needs an update, submit a correction
+                                request for admin approval.
+                              </p>
                               <textarea
                                 value={correctionReason}
                                 onChange={(event) => setCorrectionReason(event.target.value)}
@@ -494,10 +616,17 @@ export default function ClassAttendancePage() {
                               />
                               <button
                                 onClick={() => void requestCorrection()}
-                                disabled={requestingCorrection || correctionReason.trim().length < 10}
+                                disabled={
+                                  requestingCorrection || correctionReason.trim().length < 10
+                                }
                                 className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-5 py-3 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-brand-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
                               >
-                                {requestingCorrection ? <LoaderCircle className="animate-spin" size={16} /> : <Send size={16} />} Request correction
+                                {requestingCorrection ? (
+                                  <LoaderCircle className="animate-spin" size={16} />
+                                ) : (
+                                  <Send size={16} />
+                                )}{" "}
+                                Request correction
                               </button>
                             </div>
                           )}

@@ -1,21 +1,30 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
-import { CURRENT_TEACHER } from "@/lib/teacherData";
+import { useApi } from "@/lib/useApi";
 import { useToast } from "@/components/Toast";
 import {
-  Upload, School, BookOpen, FileText, CheckCircle2, Info,
-  FileSpreadsheet, File, Download, AlertCircle
+  Upload,
+  School,
+  BookOpen,
+  FileText,
+  CheckCircle2,
+  Info,
+  FileSpreadsheet,
+  File,
+  Download,
+  AlertCircle,
 } from "lucide-react";
 
 type FileFormat = "docx" | "xlsx" | "csv";
 
 export default function UploadQuestionsPage() {
   const { toast } = useToast();
-  const teacher = CURRENT_TEACHER;
+  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
+  const teacher = data?.teacher || ({} as any);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedClass, setSelectedClass] = useState("");
@@ -24,8 +33,10 @@ export default function UploadQuestionsPage() {
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
 
-  const allClasses = [...new Set(teacher.subjectAssignments.flatMap(sa => sa.classes))];
-  const availableCourses = teacher.subjectAssignments.filter(sa => sa.classes.includes(selectedClass)).map(sa => sa.subject);
+  const allClasses = [...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes))];
+  const availableCourses = (teacher.subjectAssignments || [])
+    .filter((sa: any) => sa.classes.includes(selectedClass))
+    .map((sa: any) => sa.subject);
 
   const acceptedFormats: Record<FileFormat, string> = {
     docx: ".docx",
@@ -34,9 +45,24 @@ export default function UploadQuestionsPage() {
   };
 
   const formatInfo: Record<FileFormat, { name: string; icon: any; color: string; desc: string }> = {
-    docx: { name: "Word Document", icon: FileText, color: "text-blue-500", desc: "Traditional format with Q/A/Correct labels" },
-    xlsx: { name: "Excel Spreadsheet", icon: FileSpreadsheet, color: "text-brand-green", desc: "Structured columns for bulk upload" },
-    csv: { name: "CSV File", icon: File, color: "text-brand-orange", desc: "Comma-separated values" },
+    docx: {
+      name: "Word Document",
+      icon: FileText,
+      color: "text-blue-500",
+      desc: "Traditional format with Q/A/Correct labels",
+    },
+    xlsx: {
+      name: "Excel Spreadsheet",
+      icon: FileSpreadsheet,
+      color: "text-brand-green",
+      desc: "Structured columns for bulk upload",
+    },
+    csv: {
+      name: "CSV File",
+      icon: File,
+      color: "text-brand-orange",
+      desc: "Comma-separated values",
+    },
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -97,7 +123,9 @@ Water freezes at? | 0°C | 32°C | 100°C | 273K | A`,
             <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2 text-center">
               UPLOAD TEST <span className="text-brand-green">QUESTIONS</span>
             </h1>
-            <p className="text-white/60 text-sm text-center">Bulk upload questions using DOCX, Excel, or CSV files</p>
+            <p className="text-white/60 text-sm text-center">
+              Bulk upload questions using DOCX, Excel, or CSV files
+            </p>
           </div>
         </section>
 
@@ -112,7 +140,7 @@ Water freezes at? | 0°C | 32°C | 100°C | 273K | A`,
                   <FileText size={11} /> Select Format
                 </label>
                 <div className="grid grid-cols-3 gap-3">
-                  {(Object.keys(formatInfo) as FileFormat[]).map(f => {
+                  {(Object.keys(formatInfo) as FileFormat[]).map((f) => {
                     const info = formatInfo[f];
                     return (
                       <button
@@ -120,8 +148,13 @@ Water freezes at? | 0°C | 32°C | 100°C | 273K | A`,
                         onClick={() => setFormat(f)}
                         className={`p-4 rounded-xl border-2 text-left transition-all ${format === f ? "border-brand-green bg-brand-green/10" : "border-[var(--border-subtle)] hover:border-brand-green/30"}`}
                       >
-                        <info.icon className={format === f ? "text-brand-green mb-2" : `${info.color} mb-2`} size={20} />
-                        <div className="font-bold text-[var(--text-primary)] text-sm">{info.name}</div>
+                        <info.icon
+                          className={format === f ? "text-brand-green mb-2" : `${info.color} mb-2`}
+                          size={20}
+                        />
+                        <div className="font-bold text-[var(--text-primary)] text-sm">
+                          {info.name}
+                        </div>
                         <div className="text-[10px] text-[var(--text-muted)] mt-1">{info.desc}</div>
                       </button>
                     );
@@ -137,11 +170,18 @@ Water freezes at? | 0°C | 32°C | 100°C | 273K | A`,
                   </label>
                   <select
                     value={selectedClass}
-                    onChange={e => { setSelectedClass(e.target.value); setSelectedCourse(""); }}
+                    onChange={(e) => {
+                      setSelectedClass(e.target.value);
+                      setSelectedCourse("");
+                    }}
                     className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                   >
                     <option value="">-- Select Class --</option>
-                    {allClasses.map(c => <option key={c} value={c}>{c}</option>)}
+                    {allClasses.map((c: any) => (
+                      <option key={String(c)} value={String(c)}>
+                        {c}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -151,12 +191,16 @@ Water freezes at? | 0°C | 32°C | 100°C | 273K | A`,
                   </label>
                   <select
                     value={selectedCourse}
-                    onChange={e => setSelectedCourse(e.target.value)}
+                    onChange={(e) => setSelectedCourse(e.target.value)}
                     disabled={!selectedClass}
                     className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green disabled:opacity-40"
                   >
                     <option value="">-- Select Course --</option>
-                    {availableCourses.map(c => <option key={c} value={c}>{c}</option>)}
+                    {availableCourses.map((c: any) => (
+                      <option key={String(c)} value={String(c)}>
+                        {c}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -165,23 +209,36 @@ Water freezes at? | 0°C | 32°C | 100°C | 273K | A`,
               <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
                 <div className="flex items-center gap-2 mb-4">
                   <Upload className="text-brand-green" size={18} />
-                  <span className="font-bold text-[var(--text-primary)]">Upload {formatInfo[format].name}</span>
+                  <span className="font-bold text-[var(--text-primary)]">
+                    Upload {formatInfo[format].name}
+                  </span>
                 </div>
 
                 <div
                   onDrop={handleDrop}
-                  onDragOver={e => { e.preventDefault(); setDragging(true); }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragging(true);
+                  }}
                   onDragLeave={() => setDragging(false)}
                   onClick={() => fileInputRef.current?.click()}
                   className={`border-2 border-dashed rounded-2xl p-16 text-center cursor-pointer transition-all ${dragging ? "border-brand-green bg-brand-green/10" : "border-[var(--border-subtle)] hover:border-brand-green/50"}`}
                 >
-                  <input ref={fileInputRef} type="file" accept={acceptedFormats[format]} onChange={handleFileChange} className="hidden" />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={acceptedFormats[format]}
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
 
                   {file ? (
                     <div>
                       <CheckCircle2 className="mx-auto text-brand-green mb-4" size={48} />
                       <div className="font-bold text-[var(--text-primary)] mb-1">{file.name}</div>
-                      <div className="text-xs text-[var(--text-muted)]">{(file.size / 1024).toFixed(1)} KB · Click to change</div>
+                      <div className="text-xs text-[var(--text-muted)]">
+                        {(file.size / 1024).toFixed(1)} KB · Click to change
+                      </div>
                     </div>
                   ) : (
                     <div>
@@ -189,10 +246,17 @@ Water freezes at? | 0°C | 32°C | 100°C | 273K | A`,
                       <div className="font-display text-xl text-[var(--text-primary)] mb-2">
                         Drop your {format.toUpperCase()} file here
                       </div>
-                      <div className="text-sm text-[var(--text-muted)] mb-4">or click to browse</div>
+                      <div className="text-sm text-[var(--text-muted)] mb-4">
+                        or click to browse
+                      </div>
                       <div className="flex items-center justify-center gap-4 text-xs text-[var(--text-muted)]">
-                        <span className="flex items-center gap-1"><CheckCircle2 size={11} className="text-brand-green" /> .{format} format only</span>
-                        <span className="flex items-center gap-1"><CheckCircle2 size={11} className="text-brand-green" /> Max 10MB file size</span>
+                        <span className="flex items-center gap-1">
+                          <CheckCircle2 size={11} className="text-brand-green" /> .{format} format
+                          only
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <CheckCircle2 size={11} className="text-brand-green" /> Max 10MB file size
+                        </span>
                       </div>
                     </div>
                   )}
@@ -217,21 +281,39 @@ Water freezes at? | 0°C | 32°C | 100°C | 273K | A`,
                 <div className="space-y-3 text-sm mb-4">
                   <div className="flex items-start gap-3">
                     <FileText size={14} className="text-brand-green shrink-0 mt-0.5" />
-                    <div><strong className="text-[var(--text-primary)]">File Format:</strong> <span className="text-[var(--text-muted)]">{formatInfo[format].name} ({acceptedFormats[format]}) only</span></div>
+                    <div>
+                      <strong className="text-[var(--text-primary)]">File Format:</strong>{" "}
+                      <span className="text-[var(--text-muted)]">
+                        {formatInfo[format].name} ({acceptedFormats[format]}) only
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <AlertCircle size={14} className="text-brand-orange shrink-0 mt-0.5" />
-                    <div><strong className="text-[var(--text-primary)]">Structure:</strong> <span className="text-[var(--text-muted)]">Each question should start with &quot;Q:&quot; and options with &quot;A:&quot;, &quot;B:&quot;, &quot;C:&quot;, &quot;D:&quot;</span></div>
+                    <div>
+                      <strong className="text-[var(--text-primary)]">Structure:</strong>{" "}
+                      <span className="text-[var(--text-muted)]">
+                        Each question should start with &quot;Q:&quot; and options with
+                        &quot;A:&quot;, &quot;B:&quot;, &quot;C:&quot;, &quot;D:&quot;
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <CheckCircle2 size={14} className="text-brand-green shrink-0 mt-0.5" />
-                    <div><strong className="text-[var(--text-primary)]">Answer:</strong> <span className="text-[var(--text-muted)]">Mark correct answer with &quot;Correct: A&quot; at end of each question</span></div>
+                    <div>
+                      <strong className="text-[var(--text-primary)]">Answer:</strong>{" "}
+                      <span className="text-[var(--text-muted)]">
+                        Mark correct answer with &quot;Correct: A&quot; at end of each question
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-[var(--surface-disabled)] mt-4">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-xs font-bold uppercase tracking-widest text-brand-green">Sample Template</div>
+                    <div className="text-xs font-bold uppercase tracking-widest text-brand-green">
+                      Sample Template
+                    </div>
                     <button className="text-xs px-3 py-1 rounded-full bg-brand-green text-white font-bold hover:bg-brand-green-dark transition-all flex items-center gap-1">
                       <Download size={11} /> Download Template
                     </button>

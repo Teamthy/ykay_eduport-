@@ -6,9 +6,23 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import {
-  LayoutDashboard, CalendarDays, FileText, User, Bell, ClipboardCheck,
-  TrendingUp, GraduationCap, LoaderCircle, ChevronRight, Activity,
-  Award, Wallet, CheckCircle2, XCircle, Clock, MonitorSmartphone,
+  LayoutDashboard,
+  CalendarDays,
+  FileText,
+  User,
+  Bell,
+  ClipboardCheck,
+  TrendingUp,
+  GraduationCap,
+  LoaderCircle,
+  ChevronRight,
+  Activity,
+  Award,
+  Wallet,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  MonitorSmartphone,
 } from "lucide-react";
 
 const SIDEBAR_ITEMS = [
@@ -81,24 +95,38 @@ export default function StudentDashboardPage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
   const initials = data
-    ? data.student.displayName.split(" ").map((part) => part[0]).slice(0, 2).join("")
+    ? data.student.displayName
+        .split(" ")
+        .map((part) => part[0])
+        .slice(0, 2)
+        .join("")
     : "";
 
   const heroStats = [
     {
       label: "Attendance",
-      value: data?.stats.attendanceRate !== null && data?.stats.attendanceRate !== undefined ? `${data.stats.attendanceRate}%` : "—",
+      value:
+        data?.stats.attendanceRate !== null && data?.stats.attendanceRate !== undefined
+          ? `${data.stats.attendanceRate}%`
+          : "—",
       color: "text-brand-green",
     },
     {
       label: "Avg. Score",
-      value: data?.stats.averageScore !== null && data?.stats.averageScore !== undefined ? `${data.stats.averageScore}%` : "—",
+      value:
+        data?.stats.averageScore !== null && data?.stats.averageScore !== undefined
+          ? `${data.stats.averageScore}%`
+          : "—",
       color: "text-brand-orange",
     },
     { label: "Grade", value: data?.stats.overallGrade || "—", color: "text-brand-green" },
     {
       label: "Fee Balance",
-      value: data ? (data.stats.feeBalance > 0 ? `₦${(data.stats.feeBalance / 1000).toFixed(0)}k` : "Paid") : "—",
+      value: data
+        ? data.stats.feeBalance > 0
+          ? `₦${(data.stats.feeBalance / 1000).toFixed(0)}k`
+          : "Paid"
+        : "—",
       color: data && data.stats.feeBalance > 0 ? "text-brand-orange" : "text-brand-green",
     },
   ];
@@ -113,14 +141,21 @@ export default function StudentDashboardPage() {
           <div className="mx-auto max-w-7xl relative z-10">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="font-display text-4xl md:text-5xl text-white tracking-widest">{greeting}</h1>
+                <h1 className="font-display text-4xl md:text-5xl text-white tracking-widest">
+                  {greeting}
+                </h1>
                 <p className="text-white/60 text-sm mt-2">Welcome back to your dashboard</p>
               </div>
               <div className="flex gap-3">
                 {heroStats.map((stat) => (
-                  <div key={stat.label} className="p-3 rounded-xl bg-white/5 border border-white/10 text-center min-w-[80px]">
+                  <div
+                    key={stat.label}
+                    className="p-3 rounded-xl bg-white/5 border border-white/10 text-center min-w-[80px]"
+                  >
                     <div className={`font-display text-sm ${stat.color} mb-0.5`}>{stat.value}</div>
-                    <div className="text-[9px] text-white/60 uppercase tracking-widest">{stat.label}</div>
+                    <div className="text-[9px] text-white/60 uppercase tracking-widest">
+                      {stat.label}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -132,7 +167,9 @@ export default function StudentDashboardPage() {
                   {initials}
                 </div>
                 <div>
-                  <div className="font-bold text-white text-lg">{data.student.displayName.toUpperCase()}</div>
+                  <div className="font-bold text-white text-lg">
+                    {data.student.displayName.toUpperCase()}
+                  </div>
                   <div className="text-xs text-white/60">
                     {data.student.studentId} · {data.student.className}
                   </div>
@@ -148,13 +185,16 @@ export default function StudentDashboardPage() {
 
             <div className="flex-1 min-w-0 space-y-8">
               {error ? (
-                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">{error}</div>
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                  {error}
+                </div>
               ) : null}
 
               {loading ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading your dashboard...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    your dashboard...
                   </div>
                 </div>
               ) : null}
@@ -174,11 +214,14 @@ export default function StudentDashboardPage() {
                           </div>
                           <div>
                             <div className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
-                              Latest Report Card — {data.latestReport.termLabel} {data.latestReport.sessionLabel}
+                              Latest Report Card — {data.latestReport.termLabel}{" "}
+                              {data.latestReport.sessionLabel}
                             </div>
                             <div className="mt-1 font-display text-2xl text-[var(--text-primary)]">
                               {data.latestReport.overallAverage}% · {data.latestReport.overallGrade}
-                              {data.latestReport.classPosition ? ` · ${data.latestReport.classPosition}` : ""}
+                              {data.latestReport.classPosition
+                                ? ` · ${data.latestReport.classPosition}`
+                                : ""}
                             </div>
                           </div>
                         </div>
@@ -199,8 +242,13 @@ export default function StudentDashboardPage() {
                     {/* Recent attendance */}
                     <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
                       <div className="mb-5 flex items-center justify-between">
-                        <h2 className="font-display text-xl text-[var(--text-primary)]">Recent Attendance</h2>
-                        <Link href="/student/attendance" className="text-xs font-bold text-brand-green hover:underline">
+                        <h2 className="font-display text-xl text-[var(--text-primary)]">
+                          Recent Attendance
+                        </h2>
+                        <Link
+                          href="/student/attendance"
+                          className="text-xs font-bold text-brand-green hover:underline"
+                        >
                           View all
                         </Link>
                       </div>
@@ -212,7 +260,11 @@ export default function StudentDashboardPage() {
                               className="flex items-center justify-between rounded-xl bg-[var(--surface-disabled)] px-4 py-3"
                             >
                               <span className="text-sm text-[var(--text-secondary)]">
-                                {new Date(entry.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}
+                                {new Date(entry.date).toLocaleDateString(undefined, {
+                                  weekday: "short",
+                                  day: "numeric",
+                                  month: "short",
+                                })}
                               </span>
                               <span
                                 className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${
@@ -223,14 +275,22 @@ export default function StudentDashboardPage() {
                                       : "bg-red-500/10 text-red-500"
                                 }`}
                               >
-                                {entry.status === "PRESENT" ? <CheckCircle2 size={11} /> : entry.status === "LATE" ? <Clock size={11} /> : <XCircle size={11} />}
+                                {entry.status === "PRESENT" ? (
+                                  <CheckCircle2 size={11} />
+                                ) : entry.status === "LATE" ? (
+                                  <Clock size={11} />
+                                ) : (
+                                  <XCircle size={11} />
+                                )}
                                 {entry.status}
                               </span>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-[var(--text-muted)]">No attendance has been recorded yet.</p>
+                        <p className="text-sm text-[var(--text-muted)]">
+                          No attendance has been recorded yet.
+                        </p>
                       )}
                     </div>
 
@@ -238,7 +298,9 @@ export default function StudentDashboardPage() {
                     <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
                       <div className="mb-5 flex items-center gap-2">
                         <Activity size={18} className="text-brand-green" />
-                        <h2 className="font-display text-xl text-[var(--text-primary)]">Recent Activity</h2>
+                        <h2 className="font-display text-xl text-[var(--text-primary)]">
+                          Recent Activity
+                        </h2>
                       </div>
                       {data.activity.length ? (
                         <div className="space-y-3">
@@ -246,14 +308,20 @@ export default function StudentDashboardPage() {
                             <div key={`${entry.at}-${index}`} className="flex items-start gap-3">
                               <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-green" />
                               <div className="min-w-0">
-                                <div className="text-sm text-[var(--text-primary)]">{actionLabel(entry.action)}</div>
-                                <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{timeAgo(entry.at)}</div>
+                                <div className="text-sm text-[var(--text-primary)]">
+                                  {actionLabel(entry.action)}
+                                </div>
+                                <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                  {timeAgo(entry.at)}
+                                </div>
                               </div>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-[var(--text-muted)]">Your account activity will appear here.</p>
+                        <p className="text-sm text-[var(--text-muted)]">
+                          Your account activity will appear here.
+                        </p>
                       )}
                     </div>
                   </div>
@@ -268,9 +336,15 @@ export default function StudentDashboardPage() {
                         <MonitorSmartphone size={26} />
                       </div>
                       <div>
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-brand-orange">Ykay IT Hub</div>
-                        <div className="mt-1 font-display text-xl text-white">Build Digital Skills — Python, AI, Cybersecurity</div>
-                        <p className="mt-1 text-xs text-white/60">Enroll free with your student account and earn certificates.</p>
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-brand-orange">
+                          Ykay IT Hub
+                        </div>
+                        <div className="mt-1 font-display text-xl text-white">
+                          Build Digital Skills — Python, AI, Cybersecurity
+                        </div>
+                        <p className="mt-1 text-xs text-white/60">
+                          Enroll free with your student account and earn certificates.
+                        </p>
                       </div>
                     </div>
                     <span className="inline-flex items-center gap-1 rounded-full bg-brand-orange px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white group-hover:gap-2 transition-all">
@@ -281,21 +355,48 @@ export default function StudentDashboardPage() {
                   {/* Quick links */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {[
-                      { title: "Report Cards", icon: FileText, href: "/student/report-cards", color: "text-brand-green" },
-                      { title: "Attendance", icon: CalendarDays, href: "/student/attendance", color: "text-blue-500" },
-                      { title: "CBT Tests", icon: ClipboardCheck, href: "/student/exams", color: "text-brand-orange" },
-                      { title: "Performance", icon: TrendingUp, href: "/student/report-cards", color: "text-purple-500" },
+                      {
+                        title: "Report Cards",
+                        icon: FileText,
+                        href: "/student/report-cards",
+                        color: "text-brand-green",
+                      },
+                      {
+                        title: "Attendance",
+                        icon: CalendarDays,
+                        href: "/student/attendance",
+                        color: "text-blue-500",
+                      },
+                      {
+                        title: "CBT Tests",
+                        icon: ClipboardCheck,
+                        href: "/student/exams",
+                        color: "text-brand-orange",
+                      },
+                      {
+                        title: "Performance",
+                        icon: TrendingUp,
+                        href: "/student/report-cards",
+                        color: "text-purple-500",
+                      },
                     ].map((item) => (
                       <Link
                         key={item.title}
                         href={item.href}
                         className="group p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/40 hover:-translate-y-1 hover:shadow-[var(--card-shadow-hover)] transition-all"
                       >
-                        <div className={`w-12 h-12 rounded-2xl bg-[var(--surface-disabled)] flex items-center justify-center mb-4 group-hover:bg-brand-green/10 transition-colors ${item.color}`}>
+                        <div
+                          className={`w-12 h-12 rounded-2xl bg-[var(--surface-disabled)] flex items-center justify-center mb-4 group-hover:bg-brand-green/10 transition-colors ${item.color}`}
+                        >
                           <item.icon size={22} />
                         </div>
-                        <h3 className="font-bold text-[var(--text-primary)] text-sm">{item.title}</h3>
-                        <ChevronRight size={14} className="mt-2 text-[var(--text-muted)] group-hover:text-brand-green group-hover:translate-x-1 transition-all" />
+                        <h3 className="font-bold text-[var(--text-primary)] text-sm">
+                          {item.title}
+                        </h3>
+                        <ChevronRight
+                          size={14}
+                          className="mt-2 text-[var(--text-muted)] group-hover:text-brand-green group-hover:translate-x-1 transition-all"
+                        />
                       </Link>
                     ))}
                   </div>

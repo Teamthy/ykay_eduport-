@@ -5,15 +5,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
-import {
-  BarChart3,
-  Calendar,
-  Check,
-  Clock,
-  FileWarning,
-  LoaderCircle,
-  X,
-} from "lucide-react";
+import { BarChart3, Calendar, Check, Clock, FileWarning, LoaderCircle, X } from "lucide-react";
 
 type HistoryResponse = {
   teacher: { displayName: string };
@@ -76,7 +68,11 @@ export default function AttendanceHistoryPage() {
       } catch (historyError) {
         if (!active) return;
         setHistory(null);
-        setError(historyError instanceof Error ? historyError.message : "Unable to load attendance history.");
+        setError(
+          historyError instanceof Error
+            ? historyError.message
+            : "Unable to load attendance history.",
+        );
       } finally {
         if (active) setLoading(false);
       }
@@ -101,7 +97,8 @@ export default function AttendanceHistoryPage() {
               ATTENDANCE <span className="text-brand-orange">HISTORY</span>
             </h1>
             <p className="mt-2 max-w-3xl text-sm text-white/65">
-              Review submitted attendance sessions by class and month, including present, absent, late, and attendance-rate summaries.
+              Review submitted attendance sessions by class and month, including present, absent,
+              late, and attendance-rate summaries.
             </p>
           </div>
         </section>
@@ -120,9 +117,11 @@ export default function AttendanceHistoryPage() {
                     value={selectedClassId}
                     onChange={(event) => setSelectedClassId(event.target.value)}
                     className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)] outline-none focus:border-[var(--input-border-focus)]"
-                    disabled={loading || !(history?.availableClasses.length)}
+                    disabled={loading || !history?.availableClasses.length}
                   >
-                    {!history?.availableClasses.length ? <option value="">No class assignment found</option> : null}
+                    {!history?.availableClasses.length ? (
+                      <option value="">No class assignment found</option>
+                    ) : null}
                     {history?.availableClasses.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item.displayName}
@@ -148,7 +147,8 @@ export default function AttendanceHistoryPage() {
               {loading ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading attendance history...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    attendance history...
                   </div>
                 </div>
               ) : null}
@@ -164,9 +164,12 @@ export default function AttendanceHistoryPage() {
                   <div className="flex items-start gap-3">
                     <FileWarning className="mt-0.5 text-brand-orange" size={20} />
                     <div>
-                      <h2 className="font-display text-2xl text-[var(--text-primary)]">No attendance classes assigned</h2>
+                      <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                        No attendance classes assigned
+                      </h2>
                       <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
-                        Attendance history will appear here when this teacher account has an active class assignment and submitted attendance sessions.
+                        Attendance history will appear here when this teacher account has an active
+                        class assignment and submitted attendance sessions.
                       </p>
                     </div>
                   </div>
@@ -177,17 +180,48 @@ export default function AttendanceHistoryPage() {
                 <>
                   <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                     {[
-                      { label: "Sessions", value: history.totals.sessions, icon: Calendar, color: "text-brand-green", bg: "bg-brand-green/10" },
-                      { label: "Present", value: history.totals.present, icon: Check, color: "text-brand-green", bg: "bg-brand-green/10" },
-                      { label: "Absent", value: history.totals.absent, icon: X, color: "text-red-500", bg: "bg-red-500/10" },
-                      { label: "Late", value: history.totals.late, icon: Clock, color: "text-brand-orange", bg: "bg-brand-orange/10" },
+                      {
+                        label: "Sessions",
+                        value: history.totals.sessions,
+                        icon: Calendar,
+                        color: "text-brand-green",
+                        bg: "bg-brand-green/10",
+                      },
+                      {
+                        label: "Present",
+                        value: history.totals.present,
+                        icon: Check,
+                        color: "text-brand-green",
+                        bg: "bg-brand-green/10",
+                      },
+                      {
+                        label: "Absent",
+                        value: history.totals.absent,
+                        icon: X,
+                        color: "text-red-500",
+                        bg: "bg-red-500/10",
+                      },
+                      {
+                        label: "Late",
+                        value: history.totals.late,
+                        icon: Clock,
+                        color: "text-brand-orange",
+                        bg: "bg-brand-orange/10",
+                      },
                     ].map((card) => (
-                      <div key={card.label} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]">
-                        <div className={`mb-2 flex h-10 w-10 items-center justify-center rounded-xl ${card.bg} ${card.color}`}>
+                      <div
+                        key={card.label}
+                        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]"
+                      >
+                        <div
+                          className={`mb-2 flex h-10 w-10 items-center justify-center rounded-xl ${card.bg} ${card.color}`}
+                        >
                           <card.icon size={18} />
                         </div>
                         <div className={`font-display text-3xl ${card.color}`}>{card.value}</div>
-                        <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{card.label}</div>
+                        <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                          {card.label}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -195,9 +229,14 @@ export default function AttendanceHistoryPage() {
                   <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <h2 className="font-display text-2xl text-[var(--text-primary)]">Monthly summary</h2>
+                        <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                          Monthly summary
+                        </h2>
                         <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                          Overall attendance rate for {selectedMonth}: <strong className="text-brand-green">{history.totals.attendanceRate}%</strong>
+                          Overall attendance rate for {selectedMonth}:{" "}
+                          <strong className="text-brand-green">
+                            {history.totals.attendanceRate}%
+                          </strong>
                         </p>
                       </div>
                       {history.selectedClassId ? (
@@ -213,8 +252,12 @@ export default function AttendanceHistoryPage() {
 
                   <div className="overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)]">
                     <div className="border-b border-[var(--border-subtle)] px-6 py-4">
-                      <h2 className="font-display text-xl text-[var(--text-primary)]">Submitted sessions</h2>
-                      <p className="mt-1 text-xs text-[var(--text-muted)]">Most recent sessions for the selected class and month.</p>
+                      <h2 className="font-display text-xl text-[var(--text-primary)]">
+                        Submitted sessions
+                      </h2>
+                      <p className="mt-1 text-xs text-[var(--text-muted)]">
+                        Most recent sessions for the selected class and month.
+                      </p>
                     </div>
 
                     <div className="overflow-x-auto">
@@ -236,11 +279,15 @@ export default function AttendanceHistoryPage() {
                               <td className="px-6 py-4 font-medium text-[var(--text-primary)]">
                                 {new Date(`${record.date}T12:00:00.000Z`).toLocaleDateString()}
                               </td>
-                              <td className="px-6 py-4 text-[var(--text-secondary)]">{record.periodKey}</td>
+                              <td className="px-6 py-4 text-[var(--text-secondary)]">
+                                {record.periodKey}
+                              </td>
                               <td className="px-6 py-4 text-brand-green">{record.present}</td>
                               <td className="px-6 py-4 text-red-500">{record.absent}</td>
                               <td className="px-6 py-4 text-brand-orange">{record.late}</td>
-                              <td className="px-6 py-4 font-semibold text-[var(--text-primary)]">{record.attendanceRate}%</td>
+                              <td className="px-6 py-4 font-semibold text-[var(--text-primary)]">
+                                {record.attendanceRate}%
+                              </td>
                               <td className="px-6 py-4">
                                 <span
                                   className={`inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${

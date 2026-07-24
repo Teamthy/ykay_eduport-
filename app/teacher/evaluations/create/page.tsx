@@ -1,16 +1,17 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
-import { CURRENT_TEACHER } from "@/lib/teacherData";
+import { useApi } from "@/lib/useApi";
 import { useToast } from "@/components/Toast";
 import { Award, Save, BookOpen, Calendar, Clock, ListChecks, FileText } from "lucide-react";
 
 export default function CreateEvaluationPage() {
   const { toast } = useToast();
-  const teacher = CURRENT_TEACHER;
+  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
+  const teacher = data?.teacher || ({} as any);
   const [subject, setSubject] = useState("");
   const [className, setClassName] = useState("");
   const [examName, setExamName] = useState("");
@@ -24,7 +25,7 @@ export default function CreateEvaluationPage() {
   const [term, setTerm] = useState("First Term 2025/2026");
 
   const availableClasses = subject
-    ? teacher.subjectAssignments.find(sa => sa.subject === subject)?.classes || []
+    ? (teacher.subjectAssignments || []).find((sa: any) => sa.subject === subject)?.classes || []
     : [];
 
   const handleSave = () => {
@@ -47,7 +48,9 @@ export default function CreateEvaluationPage() {
             <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
               CREATE <span className="text-brand-green">EVALUATION</span>
             </h1>
-            <p className="text-white/60 text-sm">Configure new CBT test — set duration, questions, and marks.</p>
+            <p className="text-white/60 text-sm">
+              Configure new CBT test — set duration, questions, and marks.
+            </p>
           </div>
         </section>
 
@@ -64,7 +67,9 @@ export default function CreateEvaluationPage() {
                   </div>
                   <div>
                     <h2 className="font-display text-2xl">Edit Test Courses</h2>
-                    <p className="text-white/80 text-sm">Set up a new evaluation for your students</p>
+                    <p className="text-white/80 text-sm">
+                      Set up a new evaluation for your students
+                    </p>
                   </div>
                 </div>
               </div>
@@ -87,12 +92,17 @@ export default function CreateEvaluationPage() {
                     </label>
                     <select
                       value={subject}
-                      onChange={e => { setSubject(e.target.value); setClassName(""); }}
+                      onChange={(e) => {
+                        setSubject(e.target.value);
+                        setClassName("");
+                      }}
                       className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                     >
                       <option value="">Select subject...</option>
-                      {teacher.subjectAssignments.map(sa => (
-                        <option key={sa.subject} value={sa.subject}>{sa.subject}</option>
+                      {(teacher.subjectAssignments || []).map((sa: any) => (
+                        <option key={sa.subject} value={sa.subject}>
+                          {sa.subject}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -104,7 +114,7 @@ export default function CreateEvaluationPage() {
                     <input
                       type="date"
                       value={examDate}
-                      onChange={e => setExamDate(e.target.value)}
+                      onChange={(e) => setExamDate(e.target.value)}
                       className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                     />
                   </div>
@@ -112,25 +122,33 @@ export default function CreateEvaluationPage() {
 
                 {/* Class */}
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 block">Class *</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 block">
+                    Class *
+                  </label>
                   <select
                     value={className}
-                    onChange={e => setClassName(e.target.value)}
+                    onChange={(e) => setClassName(e.target.value)}
                     disabled={!subject}
                     className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green disabled:opacity-40"
                   >
                     <option value="">Select class...</option>
-                    {availableClasses.map(c => <option key={c} value={c}>{c}</option>)}
+                    {availableClasses.map((c: any) => (
+                      <option key={String(c)} value={String(c)}>
+                        {c}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 {/* Exam Name */}
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 block">Exam Name *</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 block">
+                    Exam Name *
+                  </label>
                   <input
                     type="text"
                     value={examName}
-                    onChange={e => setExamName(e.target.value)}
+                    onChange={(e) => setExamName(e.target.value)}
                     placeholder="e.g., First Term CA1"
                     className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                   />
@@ -149,7 +167,7 @@ export default function CreateEvaluationPage() {
                         <input
                           type="number"
                           value={objectiveHours}
-                          onChange={e => setObjectiveHours(e.target.value)}
+                          onChange={(e) => setObjectiveHours(e.target.value)}
                           min="0"
                           max="5"
                           className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
@@ -160,7 +178,7 @@ export default function CreateEvaluationPage() {
                         <input
                           type="number"
                           value={objectiveMinutes}
-                          onChange={e => setObjectiveMinutes(e.target.value)}
+                          onChange={(e) => setObjectiveMinutes(e.target.value)}
                           min="0"
                           max="59"
                           className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
@@ -180,7 +198,7 @@ export default function CreateEvaluationPage() {
                         <input
                           type="number"
                           value={theoryHours}
-                          onChange={e => setTheoryHours(e.target.value)}
+                          onChange={(e) => setTheoryHours(e.target.value)}
                           min="0"
                           max="5"
                           className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-blue-500"
@@ -191,7 +209,7 @@ export default function CreateEvaluationPage() {
                         <input
                           type="number"
                           value={theoryMinutes}
-                          onChange={e => setTheoryMinutes(e.target.value)}
+                          onChange={(e) => setTheoryMinutes(e.target.value)}
                           min="0"
                           max="59"
                           className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-blue-500"
@@ -210,7 +228,7 @@ export default function CreateEvaluationPage() {
                     <input
                       type="number"
                       value={numQuestions}
-                      onChange={e => setNumQuestions(e.target.value)}
+                      onChange={(e) => setNumQuestions(e.target.value)}
                       min="1"
                       className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                     />
@@ -223,7 +241,7 @@ export default function CreateEvaluationPage() {
                     <input
                       type="number"
                       value={totalMarks}
-                      onChange={e => setTotalMarks(e.target.value)}
+                      onChange={(e) => setTotalMarks(e.target.value)}
                       min="1"
                       className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                     />
@@ -237,7 +255,7 @@ export default function CreateEvaluationPage() {
                   </label>
                   <select
                     value={term}
-                    onChange={e => setTerm(e.target.value)}
+                    onChange={(e) => setTerm(e.target.value)}
                     className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                   >
                     <option>First Term 2025/2026</option>

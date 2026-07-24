@@ -84,16 +84,21 @@ export default function ParentAttendancePage() {
       try {
         const params = new URLSearchParams({ month: selectedMonth });
         if (selectedStudentId) params.set("studentId", selectedStudentId);
-        const response = await fetch(`/api/parent/attendance?${params.toString()}`, { cache: "no-store" });
+        const response = await fetch(`/api/parent/attendance?${params.toString()}`, {
+          cache: "no-store",
+        });
         const body = (await response.json()) as ParentAttendanceResponse & { error?: string };
         if (!response.ok) throw new Error(body.error || "Unable to load attendance records.");
         if (!active) return;
         setData(body);
-        if (!selectedStudentId && body.selectedChild?.id) setSelectedStudentId(body.selectedChild.id);
+        if (!selectedStudentId && body.selectedChild?.id)
+          setSelectedStudentId(body.selectedChild.id);
       } catch (loadError) {
         if (!active) return;
         setData(null);
-        setError(loadError instanceof Error ? loadError.message : "Unable to load attendance records.");
+        setError(
+          loadError instanceof Error ? loadError.message : "Unable to load attendance records.",
+        );
       } finally {
         if (active) setLoading(false);
       }
@@ -117,11 +122,14 @@ export default function ParentAttendancePage() {
                   ATTENDANCE <span className="text-brand-green">MONITOR</span>
                 </h1>
                 <p className="mt-3 max-w-2xl text-base text-white/60">
-                  Your child&apos;s live attendance calendar, monthly trend, and queued parent alert history.
+                  Your child&apos;s live attendance calendar, monthly trend, and queued parent alert
+                  history.
                 </p>
               </div>
               <div className="rounded-2xl bg-white/5 px-4 py-3">
-                <label className="mb-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-white/55">Month</label>
+                <label className="mb-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-white/55">
+                  Month
+                </label>
                 <input
                   type="month"
                   value={selectedMonth}
@@ -141,7 +149,8 @@ export default function ParentAttendancePage() {
               {loading ? (
                 <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading attendance monitor...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    attendance monitor...
                   </div>
                 </div>
               ) : null}
@@ -151,7 +160,9 @@ export default function ParentAttendancePage() {
                   <div className="flex items-start gap-3">
                     <FileWarning className="mt-0.5 text-brand-orange" size={20} />
                     <div>
-                      <h2 className="font-display text-2xl text-[var(--text-primary)]">Parent profile not ready</h2>
+                      <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                        Parent profile not ready
+                      </h2>
                       <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{error}</p>
                     </div>
                   </div>
@@ -161,7 +172,9 @@ export default function ParentAttendancePage() {
               {!loading && data?.children.length ? (
                 <>
                   <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-                    <h3 className="mb-4 font-display text-sm tracking-[2px] text-[var(--text-primary)]">My Children</h3>
+                    <h3 className="mb-4 font-display text-sm tracking-[2px] text-[var(--text-primary)]">
+                      My Children
+                    </h3>
                     <div className="flex flex-wrap gap-3">
                       {data.children.map((child) => (
                         <button
@@ -173,8 +186,12 @@ export default function ParentAttendancePage() {
                               : "border-[var(--border-subtle)] bg-[var(--surface-disabled)] hover:border-brand-green/20"
                           }`}
                         >
-                          <div className="font-display text-base tracking-[2px] text-[var(--text-primary)]">{child.displayName}</div>
-                          <div className="text-[10px] text-[var(--text-muted)]">{child.className} Â· ID: {child.studentId}</div>
+                          <div className="font-display text-base tracking-[2px] text-[var(--text-primary)]">
+                            {child.displayName}
+                          </div>
+                          <div className="text-[10px] text-[var(--text-muted)]">
+                            {child.className} Â· ID: {child.studentId}
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -194,22 +211,34 @@ export default function ParentAttendancePage() {
 
                     <aside className="space-y-6">
                       <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
-                        <h3 className="mb-5 font-display text-xl text-[var(--text-primary)]">Attendance Snapshot</h3>
+                        <h3 className="mb-5 font-display text-xl text-[var(--text-primary)]">
+                          Attendance Snapshot
+                        </h3>
                         <div className="mb-4 rounded-xl bg-[var(--surface-disabled)] p-5">
-                          <div className="mb-1 text-xs uppercase tracking-wider text-[var(--text-muted)]">Attendance Rate</div>
-                          <div className="font-display text-4xl text-brand-green">{data.summary.attendanceRate}%</div>
+                          <div className="mb-1 text-xs uppercase tracking-wider text-[var(--text-muted)]">
+                            Attendance Rate
+                          </div>
+                          <div className="font-display text-4xl text-brand-green">
+                            {data.summary.attendanceRate}%
+                          </div>
                         </div>
                         <div className="grid grid-cols-3 gap-3">
                           <div className="rounded-xl bg-brand-green/10 p-4 text-center">
-                            <div className="font-display text-xl text-brand-green">{data.summary.present}</div>
+                            <div className="font-display text-xl text-brand-green">
+                              {data.summary.present}
+                            </div>
                             <div className="text-[9px] text-[var(--text-muted)]">Present</div>
                           </div>
                           <div className="rounded-xl bg-red-500/10 p-4 text-center">
-                            <div className="font-display text-xl text-red-500">{data.summary.absent}</div>
+                            <div className="font-display text-xl text-red-500">
+                              {data.summary.absent}
+                            </div>
                             <div className="text-[9px] text-[var(--text-muted)]">Absent</div>
                           </div>
                           <div className="rounded-xl bg-brand-orange/10 p-4 text-center">
-                            <div className="font-display text-xl text-brand-orange">{data.summary.late}</div>
+                            <div className="font-display text-xl text-brand-orange">
+                              {data.summary.late}
+                            </div>
                             <div className="text-[9px] text-[var(--text-muted)]">Late</div>
                           </div>
                         </div>
@@ -218,21 +247,34 @@ export default function ParentAttendancePage() {
                       <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl">
                         <div className="mb-4 flex items-center gap-2">
                           <BellRing size={16} className="text-brand-green" />
-                          <h3 className="font-display text-lg tracking-[2px] text-white">Alert Queue</h3>
+                          <h3 className="font-display text-lg tracking-[2px] text-white">
+                            Alert Queue
+                          </h3>
                         </div>
                         <div className="space-y-3">
                           {data.recentAlerts.length ? (
                             data.recentAlerts.map((alert) => (
-                              <div key={alert.id} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                              <div
+                                key={alert.id}
+                                className="rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+                              >
                                 <div className="flex items-center justify-between gap-3">
-                                  <span className="text-[10px] font-bold uppercase tracking-widest text-brand-green">{alert.channel}</span>
-                                  <span className="text-[10px] text-white/45">{new Date(alert.createdAt).toLocaleDateString()}</span>
+                                  <span className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                                    {alert.channel}
+                                  </span>
+                                  <span className="text-[10px] text-white/45">
+                                    {new Date(alert.createdAt).toLocaleDateString()}
+                                  </span>
                                 </div>
-                                <p className="mt-2 text-xs leading-6 text-white/80">{alert.messagePreview}</p>
+                                <p className="mt-2 text-xs leading-6 text-white/80">
+                                  {alert.messagePreview}
+                                </p>
                               </div>
                             ))
                           ) : (
-                            <p className="text-xs text-white/45">No attendance alert jobs recorded for this child yet.</p>
+                            <p className="text-xs text-white/45">
+                              No attendance alert jobs recorded for this child yet.
+                            </p>
                           )}
                         </div>
                       </div>
@@ -243,7 +285,9 @@ export default function ParentAttendancePage() {
 
               {!loading && data && !data.children.length ? (
                 <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
-                  <p className="text-sm text-[var(--text-secondary)]">No linked child records were found for this parent account yet.</p>
+                  <p className="text-sm text-[var(--text-secondary)]">
+                    No linked child records were found for this parent account yet.
+                  </p>
                 </div>
               ) : null}
             </div>

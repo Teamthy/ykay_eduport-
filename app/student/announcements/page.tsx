@@ -1,10 +1,19 @@
-﻿"use client";
+"use client";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
-import { LayoutDashboard, CalendarDays, FileText, User, Bell, Info, AlertCircle, CheckCircle2 } from "lucide-react";
-import { MOCK_ANNOUNCEMENTS } from "@/lib/mockData";
+import {
+  LayoutDashboard,
+  CalendarDays,
+  FileText,
+  User,
+  Bell,
+  Info,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
+import { useApi } from "@/lib/useApi";
 
 const SIDEBAR_ITEMS = [
   { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
@@ -40,18 +49,27 @@ export default function StudentAnnouncementsPage() {
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 space-y-4">
-              {MOCK_ANNOUNCEMENTS.map(a => {
+              {[].map((a) => {
                 const config = typeConfig[a.type as keyof typeof typeConfig];
                 return (
-                  <div key={a.id} className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/30 transition-all">
+                  <div
+                    key={a.id}
+                    className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/30 transition-all"
+                  >
                     <div className="flex items-start gap-4">
-                      <div className={`w-11 h-11 rounded-xl ${config.bg} ${config.color} flex items-center justify-center shrink-0`}>
+                      <div
+                        className={`w-11 h-11 rounded-xl ${config.bg} ${config.color} flex items-center justify-center shrink-0`}
+                      >
                         <config.icon size={20} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-4 mb-2">
-                          <h3 className="font-display text-lg text-[var(--text-primary)]">{a.title}</h3>
-                          <span className="text-[10px] text-[var(--text-muted)] shrink-0 uppercase tracking-widest">{a.time}</span>
+                          <h3 className="font-display text-lg text-[var(--text-primary)]">
+                            {a.title}
+                          </h3>
+                          <span className="text-[10px] text-[var(--text-muted)] shrink-0 uppercase tracking-widest">
+                            {a.time}
+                          </span>
                         </div>
                         <p className="text-sm text-[var(--text-secondary)] mb-3">{a.desc}</p>
                         <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-[var(--surface-disabled)] text-[var(--text-muted)] font-bold uppercase tracking-widest">

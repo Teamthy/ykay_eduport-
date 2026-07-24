@@ -6,8 +6,17 @@ import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useToast } from "@/components/Toast";
 import {
-  ClipboardCheck, BookOpen, Save, ChevronDown, ChevronUp,
-  CheckCircle2, Clock, AlertTriangle, Star, Eye, MessageSquare
+  ClipboardCheck,
+  BookOpen,
+  Save,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+  Star,
+  Eye,
+  MessageSquare,
 } from "lucide-react";
 
 interface PendingGrade {
@@ -32,10 +41,12 @@ const PENDING_GRADES: PendingGrade[] = [
     studentId: "YKC/2025/002",
     exam: "Mathematics CA1",
     subject: "Mathematics",
-    question: "A trader bought 100 oranges for ₦2,000 and sold them at ₦30 each. Calculate: (a) The total selling price (b) The profit made (c) The percentage profit.",
+    question:
+      "A trader bought 100 oranges for ₦2,000 and sold them at ₦30 each. Calculate: (a) The total selling price (b) The profit made (c) The percentage profit.",
     questionType: "essay",
     maxMarks: 5,
-    studentAnswer: "Total selling price = 100 x 30 = N3000\nProfit = 3000 - 2000 = N1000\nPercentage profit = 1000/2000 x 100 = 50%\n\nThe trader made a 50% profit on the oranges.",
+    studentAnswer:
+      "Total selling price = 100 x 30 = N3000\nProfit = 3000 - 2000 = N1000\nPercentage profit = 1000/2000 x 100 = 50%\n\nThe trader made a 50% profit on the oranges.",
     teacherScore: null,
     feedback: "",
     submittedAt: "Jul 21, 2025 · 9:28 AM",
@@ -46,10 +57,12 @@ const PENDING_GRADES: PendingGrade[] = [
     studentId: "YKC/2025/018",
     exam: "Mathematics CA1",
     subject: "Mathematics",
-    question: "A trader bought 100 oranges for ₦2,000 and sold them at ₦30 each. Calculate: (a) The total selling price (b) The profit made (c) The percentage profit.",
+    question:
+      "A trader bought 100 oranges for ₦2,000 and sold them at ₦30 each. Calculate: (a) The total selling price (b) The profit made (c) The percentage profit.",
     questionType: "essay",
     maxMarks: 5,
-    studentAnswer: "a) TSP = 100 × ₦30 = ₦3,000\nb) Profit = ₦3,000 − ₦2,000 = ₦1,000\nc) % Profit = (Profit/CP) × 100 = (1000/2000) × 100 = 50%",
+    studentAnswer:
+      "a) TSP = 100 × ₦30 = ₦3,000\nb) Profit = ₦3,000 − ₦2,000 = ₦1,000\nc) % Profit = (Profit/CP) × 100 = (1000/2000) × 100 = 50%",
     teacherScore: null,
     feedback: "",
     submittedAt: "Jul 21, 2025 · 9:35 AM",
@@ -63,7 +76,8 @@ const PENDING_GRADES: PendingGrade[] = [
     question: "Write an essay of about 250 words on 'The Role of Technology in Modern Education'.",
     questionType: "essay",
     maxMarks: 10,
-    studentAnswer: "Technology has become an important part of modern education. In today's world, students use computers, tablets, and smartphones to learn new things.\n\nOne of the main benefits is that technology makes learning more interesting. Students can watch videos, play educational games, and use interactive apps. This helps them understand difficult concepts better.\n\nAnother advantage is that technology gives students access to a lot of information. With the internet, students can research any topic from anywhere in the world. They don't have to rely only on textbooks.\n\nHowever, there are some challenges. Not all students have access to technology, especially in rural areas. Also, some students may get distracted by social media and games when they should be studying.\n\nIn conclusion, technology is very useful in education but it should be used wisely. Schools and parents should guide students on how to use technology for learning.",
+    studentAnswer:
+      "Technology has become an important part of modern education. In today's world, students use computers, tablets, and smartphones to learn new things.\n\nOne of the main benefits is that technology makes learning more interesting. Students can watch videos, play educational games, and use interactive apps. This helps them understand difficult concepts better.\n\nAnother advantage is that technology gives students access to a lot of information. With the internet, students can research any topic from anywhere in the world. They don't have to rely only on textbooks.\n\nHowever, there are some challenges. Not all students have access to technology, especially in rural areas. Also, some students may get distracted by social media and games when they should be studying.\n\nIn conclusion, technology is very useful in education but it should be used wisely. Schools and parents should guide students on how to use technology for learning.",
     teacherScore: null,
     feedback: "",
     submittedAt: "Jul 21, 2025 · 10:05 AM",
@@ -77,7 +91,8 @@ const PENDING_GRADES: PendingGrade[] = [
     question: "Write an essay of about 250 words on 'The Role of Technology in Modern Education'.",
     questionType: "essay",
     maxMarks: 10,
-    studentAnswer: "Technology is good for education because it helps students learn. Computers and phones are used in schools.",
+    studentAnswer:
+      "Technology is good for education because it helps students learn. Computers and phones are used in schools.",
     teacherScore: null,
     feedback: "",
     submittedAt: "Jul 21, 2025 · 10:12 AM",
@@ -89,34 +104,37 @@ export default function GradeExamsPage() {
   const [grades, setGrades] = useState(PENDING_GRADES);
   const [expanded, setExpanded] = useState<string | null>(grades[0]?.id || null);
 
-  const graded = grades.filter(g => g.teacherScore !== null).length;
-  const pending = grades.filter(g => g.teacherScore === null).length;
+  const graded = grades.filter((g) => g.teacherScore !== null).length;
+  const pending = grades.filter((g) => g.teacherScore === null).length;
 
   const updateScore = (id: string, score: number) => {
-    const grade = grades.find(g => g.id === id);
+    const grade = grades.find((g) => g.id === id);
     if (!grade) return;
     if (score > grade.maxMarks) {
       toast(`Score cannot exceed ${grade.maxMarks}`, "error");
       return;
     }
-    setGrades(prev => prev.map(g => g.id === id ? { ...g, teacherScore: score } : g));
+    setGrades((prev) => prev.map((g) => (g.id === id ? { ...g, teacherScore: score } : g)));
   };
 
   const updateFeedback = (id: string, feedback: string) => {
-    setGrades(prev => prev.map(g => g.id === id ? { ...g, feedback } : g));
+    setGrades((prev) => prev.map((g) => (g.id === id ? { ...g, feedback } : g)));
   };
 
   const handleSave = (id: string) => {
-    const grade = grades.find(g => g.id === id);
+    const grade = grades.find((g) => g.id === id);
     if (!grade || grade.teacherScore === null) {
       toast("Please enter a score before saving", "warning");
       return;
     }
-    toast(`Score saved for ${grade.studentName}: ${grade.teacherScore}/${grade.maxMarks}`, "success");
+    toast(
+      `Score saved for ${grade.studentName}: ${grade.teacherScore}/${grade.maxMarks}`,
+      "success",
+    );
   };
 
   const handleSaveAll = () => {
-    const unsaved = grades.filter(g => g.teacherScore === null);
+    const unsaved = grades.filter((g) => g.teacherScore === null);
     if (unsaved.length > 0) {
       toast(`${unsaved.length} submissions still need grading`, "warning");
       return;
@@ -136,7 +154,9 @@ export default function GradeExamsPage() {
             <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
               GRADE <span className="text-brand-green">ESSAYS</span>
             </h1>
-            <p className="text-white/60 text-sm">Review and score essay/theory submissions that require manual grading.</p>
+            <p className="text-white/60 text-sm">
+              Review and score essay/theory submissions that require manual grading.
+            </p>
           </div>
         </section>
 
@@ -159,8 +179,12 @@ export default function GradeExamsPage() {
                 </div>
                 <div className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
                   <BookOpen className="text-[var(--text-muted)] mb-2" size={20} />
-                  <div className="font-display text-3xl text-[var(--text-primary)]">{grades.length}</div>
-                  <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">Total</div>
+                  <div className="font-display text-3xl text-[var(--text-primary)]">
+                    {grades.length}
+                  </div>
+                  <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
+                    Total
+                  </div>
                 </div>
               </div>
 
@@ -174,12 +198,15 @@ export default function GradeExamsPage() {
 
               {/* Submissions */}
               <div className="space-y-4">
-                {grades.map(g => {
+                {grades.map((g) => {
                   const isExpanded = expanded === g.id;
                   const wordCount = g.studentAnswer.split(/\s+/).filter(Boolean).length;
 
                   return (
-                    <div key={g.id} className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] overflow-hidden">
+                    <div
+                      key={g.id}
+                      className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] overflow-hidden"
+                    >
                       {/* Header */}
                       <button
                         onClick={() => setExpanded(isExpanded ? null : g.id)}
@@ -187,11 +214,18 @@ export default function GradeExamsPage() {
                       >
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-green to-brand-green-dark flex items-center justify-center text-white font-bold text-sm">
-                            {g.studentName.split(" ").map(n => n[0]).join("")}
+                            {g.studentName
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
                           </div>
                           <div className="text-left">
-                            <div className="font-bold text-[var(--text-primary)]">{g.studentName}</div>
-                            <div className="text-xs text-[var(--text-muted)]">{g.studentId} · {g.exam} · {g.subject}</div>
+                            <div className="font-bold text-[var(--text-primary)]">
+                              {g.studentName}
+                            </div>
+                            <div className="text-xs text-[var(--text-muted)]">
+                              {g.studentId} · {g.exam} · {g.subject}
+                            </div>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -216,7 +250,9 @@ export default function GradeExamsPage() {
                             <div className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 flex items-center gap-1">
                               <BookOpen size={11} /> Question ({g.maxMarks} marks)
                             </div>
-                            <p className="text-sm text-[var(--text-primary)] font-medium">{g.question}</p>
+                            <p className="text-sm text-[var(--text-primary)] font-medium">
+                              {g.question}
+                            </p>
                           </div>
 
                           {/* Student Answer */}
@@ -225,10 +261,14 @@ export default function GradeExamsPage() {
                               <div className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-1">
                                 <MessageSquare size={11} /> Student's Answer
                               </div>
-                              <span className="text-[10px] text-[var(--text-muted)]">{wordCount} words · {g.submittedAt}</span>
+                              <span className="text-[10px] text-[var(--text-muted)]">
+                                {wordCount} words · {g.submittedAt}
+                              </span>
                             </div>
                             <div className="p-4 rounded-xl bg-[var(--surface-disabled)] border border-[var(--border-subtle)]">
-                              <p className="text-sm text-[var(--text-primary)] whitespace-pre-line leading-relaxed">{g.studentAnswer}</p>
+                              <p className="text-sm text-[var(--text-primary)] whitespace-pre-line leading-relaxed">
+                                {g.studentAnswer}
+                              </p>
                             </div>
                           </div>
 
@@ -243,19 +283,27 @@ export default function GradeExamsPage() {
                                 <input
                                   type="number"
                                   value={g.teacherScore ?? ""}
-                                  onChange={e => updateScore(g.id, Number(e.target.value))}
+                                  onChange={(e) => updateScore(g.id, Number(e.target.value))}
                                   min="0"
                                   max={g.maxMarks}
                                   step="0.5"
                                   placeholder="0"
                                   className="w-24 p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] text-2xl font-display text-center focus:outline-none focus:border-brand-green"
                                 />
-                                <span className="text-2xl text-[var(--text-muted)]">/ {g.maxMarks}</span>
+                                <span className="text-2xl text-[var(--text-muted)]">
+                                  / {g.maxMarks}
+                                </span>
                               </div>
 
                               {/* Quick score buttons */}
                               <div className="flex gap-2 mt-3">
-                                {[0, Math.round(g.maxMarks * 0.25), Math.round(g.maxMarks * 0.5), Math.round(g.maxMarks * 0.75), g.maxMarks].map(s => (
+                                {[
+                                  0,
+                                  Math.round(g.maxMarks * 0.25),
+                                  Math.round(g.maxMarks * 0.5),
+                                  Math.round(g.maxMarks * 0.75),
+                                  g.maxMarks,
+                                ].map((s) => (
                                   <button
                                     key={s}
                                     onClick={() => updateScore(g.id, s)}
@@ -278,7 +326,7 @@ export default function GradeExamsPage() {
                               </label>
                               <textarea
                                 value={g.feedback}
-                                onChange={e => updateFeedback(g.id, e.target.value)}
+                                onChange={(e) => updateFeedback(g.id, e.target.value)}
                                 rows={4}
                                 placeholder="e.g., Well structured answer but missing the formula..."
                                 className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] text-sm focus:outline-none focus:border-brand-green resize-none"

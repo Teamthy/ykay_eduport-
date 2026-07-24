@@ -5,7 +5,17 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
-import { Award, Calendar, CalendarDays, CreditCard, FileText, LayoutDashboard, LoaderCircle, MessageCircle, BellRing } from "lucide-react";
+import {
+  Award,
+  Calendar,
+  CalendarDays,
+  CreditCard,
+  FileText,
+  LayoutDashboard,
+  LoaderCircle,
+  MessageCircle,
+  BellRing,
+} from "lucide-react";
 
 const SIDEBAR_ITEMS = [
   { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
@@ -87,7 +97,11 @@ export default function ParentDashboardPage() {
       } catch (dashboardError) {
         if (!active) return;
         setData(null);
-        setError(dashboardError instanceof Error ? dashboardError.message : "Unable to load the parent dashboard.");
+        setError(
+          dashboardError instanceof Error
+            ? dashboardError.message
+            : "Unable to load the parent dashboard.",
+        );
       } finally {
         if (active) setLoading(false);
       }
@@ -109,7 +123,8 @@ export default function ParentDashboardPage() {
               PARENT <span className="text-brand-green">DASHBOARD</span>
             </h1>
             <p className="mt-4 max-w-2xl text-base text-white/60 md:text-lg">
-              Live child monitoring for attendance visibility, fee balance, recent alerts, and parent-ready academic access points.
+              Live child monitoring for attendance visibility, fee balance, recent alerts, and
+              parent-ready academic access points.
             </p>
           </div>
         </section>
@@ -122,7 +137,8 @@ export default function ParentDashboardPage() {
               {loading ? (
                 <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading parent dashboard...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    parent dashboard...
                   </div>
                 </div>
               ) : null}
@@ -136,12 +152,21 @@ export default function ParentDashboardPage() {
               {!loading && data ? (
                 <>
                   <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-                    <h3 className="mb-4 font-display text-sm tracking-[2px] text-[var(--text-primary)]">My Children</h3>
+                    <h3 className="mb-4 font-display text-sm tracking-[2px] text-[var(--text-primary)]">
+                      My Children
+                    </h3>
                     <div className="flex flex-wrap gap-3">
                       {data.children.map((child) => (
-                        <div key={child.id} className={`rounded-xl border px-5 py-4 ${data.selectedChild?.id === child.id ? "border-brand-green/30 bg-brand-green/5" : "border-[var(--border-subtle)] bg-[var(--surface-disabled)]"}`}>
-                          <div className="font-display text-base tracking-[2px] text-[var(--text-primary)]">{child.displayName}</div>
-                          <div className="text-[10px] text-[var(--text-muted)]">{child.className} Â· ID: {child.studentId}</div>
+                        <div
+                          key={child.id}
+                          className={`rounded-xl border px-5 py-4 ${data.selectedChild?.id === child.id ? "border-brand-green/30 bg-brand-green/5" : "border-[var(--border-subtle)] bg-[var(--surface-disabled)]"}`}
+                        >
+                          <div className="font-display text-base tracking-[2px] text-[var(--text-primary)]">
+                            {child.displayName}
+                          </div>
+                          <div className="text-[10px] text-[var(--text-muted)]">
+                            {child.className} Â· ID: {child.studentId}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -151,14 +176,39 @@ export default function ParentDashboardPage() {
                     <div className="lg:col-span-2 space-y-6">
                       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                         {[
-                          { label: "Attendance", value: `${data.attendance.attendanceRate}%`, icon: Award },
-                          { label: "Present Days", value: data.attendance.present, icon: CalendarDays },
-                          { label: "Fee Balance", value: `â‚¦${data.finance.totalOutstanding.toLocaleString()}`, icon: CreditCard },
-                          { label: "Latest Invoice", value: data.finance.latestInvoice ? data.finance.latestInvoice.status : "None", icon: FileText },
+                          {
+                            label: "Attendance",
+                            value: `${data.attendance.attendanceRate}%`,
+                            icon: Award,
+                          },
+                          {
+                            label: "Present Days",
+                            value: data.attendance.present,
+                            icon: CalendarDays,
+                          },
+                          {
+                            label: "Fee Balance",
+                            value: `â‚¦${data.finance.totalOutstanding.toLocaleString()}`,
+                            icon: CreditCard,
+                          },
+                          {
+                            label: "Latest Invoice",
+                            value: data.finance.latestInvoice
+                              ? data.finance.latestInvoice.status
+                              : "None",
+                            icon: FileText,
+                          },
                         ].map((stat) => (
-                          <div key={stat.label} className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]">
-                            <div className="mb-2 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{stat.label}</div>
-                            <div className="font-display text-2xl tracking-[2px] text-brand-green">{stat.value}</div>
+                          <div
+                            key={stat.label}
+                            className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]"
+                          >
+                            <div className="mb-2 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+                              {stat.label}
+                            </div>
+                            <div className="font-display text-2xl tracking-[2px] text-brand-green">
+                              {stat.value}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -166,52 +216,104 @@ export default function ParentDashboardPage() {
                       <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
                         <div className="flex items-center justify-between gap-4">
                           <div>
-                            <h2 className="mb-2 font-display text-xl tracking-[2px] text-[var(--text-primary)]">Latest Invoice Snapshot</h2>
+                            <h2 className="mb-2 font-display text-xl tracking-[2px] text-[var(--text-primary)]">
+                              Latest Invoice Snapshot
+                            </h2>
                             {data.finance.latestInvoice ? (
                               <>
-                                <p className="text-sm text-[var(--text-secondary)]">{data.finance.latestInvoice.title} Â· {data.finance.latestInvoice.termLabel}</p>
-                                <p className="mt-2 text-xs text-[var(--text-muted)]">Invoice {data.finance.latestInvoice.invoiceNumber}</p>
+                                <p className="text-sm text-[var(--text-secondary)]">
+                                  {data.finance.latestInvoice.title} Â·{" "}
+                                  {data.finance.latestInvoice.termLabel}
+                                </p>
+                                <p className="mt-2 text-xs text-[var(--text-muted)]">
+                                  Invoice {data.finance.latestInvoice.invoiceNumber}
+                                </p>
                               </>
                             ) : (
-                              <p className="text-sm text-[var(--text-muted)]">No invoice has been issued for the selected child yet.</p>
+                              <p className="text-sm text-[var(--text-muted)]">
+                                No invoice has been issued for the selected child yet.
+                              </p>
                             )}
                           </div>
-                          <Link href="/parent/fees" className="rounded-full bg-brand-green px-5 py-3 text-sm font-bold uppercase tracking-widest text-white shadow-lg transition-all hover:bg-brand-green-dark">
+                          <Link
+                            href="/parent/fees"
+                            className="rounded-full bg-brand-green px-5 py-3 text-sm font-bold uppercase tracking-widest text-white shadow-lg transition-all hover:bg-brand-green-dark"
+                          >
                             Open Fees
                           </Link>
                         </div>
                         {data.finance.latestInvoice ? (
                           <div className="mt-6 grid gap-4 md:grid-cols-3">
                             <div className="rounded-xl bg-[var(--surface-disabled)] p-4">
-                              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Total</div>
-                              <div className="mt-2 font-display text-2xl text-[var(--text-primary)]">â‚¦{data.finance.latestInvoice.totalAmount.toLocaleString()}</div>
+                              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                Total
+                              </div>
+                              <div className="mt-2 font-display text-2xl text-[var(--text-primary)]">
+                                â‚¦{data.finance.latestInvoice.totalAmount.toLocaleString()}
+                              </div>
                             </div>
                             <div className="rounded-xl bg-[var(--surface-disabled)] p-4">
-                              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Paid</div>
-                              <div className="mt-2 font-display text-2xl text-brand-green">â‚¦{data.finance.latestInvoice.amountPaid.toLocaleString()}</div>
+                              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                Paid
+                              </div>
+                              <div className="mt-2 font-display text-2xl text-brand-green">
+                                â‚¦{data.finance.latestInvoice.amountPaid.toLocaleString()}
+                              </div>
                             </div>
                             <div className="rounded-xl bg-[var(--surface-disabled)] p-4">
-                              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Outstanding</div>
-                              <div className="mt-2 font-display text-2xl text-brand-orange">â‚¦{data.finance.latestInvoice.balanceDue.toLocaleString()}</div>
+                              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                Outstanding
+                              </div>
+                              <div className="mt-2 font-display text-2xl text-brand-orange">
+                                â‚¦{data.finance.latestInvoice.balanceDue.toLocaleString()}
+                              </div>
                             </div>
                           </div>
                         ) : null}
                       </div>
 
                       <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
-                        <h2 className="mb-6 font-display text-xl tracking-[2px] text-[var(--text-primary)]">Quick Access</h2>
+                        <h2 className="mb-6 font-display text-xl tracking-[2px] text-[var(--text-primary)]">
+                          Quick Access
+                        </h2>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                           {[
-                            { title: "Attendance Calendar", desc: "View daily attendance and teacher notes.", link: "/parent/attendance", icon: CalendarDays },
-                            { title: "Report Cards", desc: "Download official academic reports.", link: "/parent/report-cards", icon: FileText },
-                            { title: "Fees & Payments", desc: "View and pay school fees.", link: "/parent/fees", icon: CreditCard },
-                            { title: "Messages", desc: "Read school and teacher updates.", link: "/parent/messages", icon: MessageCircle },
+                            {
+                              title: "Attendance Calendar",
+                              desc: "View daily attendance and teacher notes.",
+                              link: "/parent/attendance",
+                              icon: CalendarDays,
+                            },
+                            {
+                              title: "Report Cards",
+                              desc: "Download official academic reports.",
+                              link: "/parent/report-cards",
+                              icon: FileText,
+                            },
+                            {
+                              title: "Fees & Payments",
+                              desc: "View and pay school fees.",
+                              link: "/parent/fees",
+                              icon: CreditCard,
+                            },
+                            {
+                              title: "Messages",
+                              desc: "Read school and teacher updates.",
+                              link: "/parent/messages",
+                              icon: MessageCircle,
+                            },
                           ].map((item) => (
-                            <Link key={item.title} href={item.link} className="group rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-disabled)] p-5 transition-all hover:-translate-y-0.5 hover:border-brand-green/30">
+                            <Link
+                              key={item.title}
+                              href={item.link}
+                              className="group rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-disabled)] p-5 transition-all hover:-translate-y-0.5 hover:border-brand-green/30"
+                            >
                               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green/10 text-brand-green transition-colors group-hover:bg-brand-green group-hover:text-white">
                                 <item.icon size={20} />
                               </div>
-                              <h3 className="mb-1 text-sm font-bold text-[var(--text-primary)]">{item.title}</h3>
+                              <h3 className="mb-1 text-sm font-bold text-[var(--text-primary)]">
+                                {item.title}
+                              </h3>
                               <p className="text-xs text-[var(--text-muted)]">{item.desc}</p>
                             </Link>
                           ))}
@@ -223,21 +325,34 @@ export default function ParentDashboardPage() {
                       <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl">
                         <div className="mb-5 flex items-center gap-2">
                           <BellRing size={16} className="text-brand-green" />
-                          <h3 className="font-display text-xl tracking-[2px] text-white">Recent Attendance Alerts</h3>
+                          <h3 className="font-display text-xl tracking-[2px] text-white">
+                            Recent Attendance Alerts
+                          </h3>
                         </div>
                         <div className="space-y-3">
                           {data.recentAlerts.length ? (
                             data.recentAlerts.map((alert) => (
-                              <div key={alert.id} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                              <div
+                                key={alert.id}
+                                className="rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+                              >
                                 <div className="flex items-center justify-between gap-3">
-                                  <span className="text-[10px] font-bold uppercase tracking-widest text-brand-green">{alert.channel}</span>
-                                  <span className="text-[10px] text-white/45">{new Date(alert.createdAt).toLocaleDateString()}</span>
+                                  <span className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                                    {alert.channel}
+                                  </span>
+                                  <span className="text-[10px] text-white/45">
+                                    {new Date(alert.createdAt).toLocaleDateString()}
+                                  </span>
                                 </div>
-                                <p className="mt-2 text-xs leading-6 text-white/80">{alert.messagePreview}</p>
+                                <p className="mt-2 text-xs leading-6 text-white/80">
+                                  {alert.messagePreview}
+                                </p>
                               </div>
                             ))
                           ) : (
-                            <p className="text-xs text-white/45">No attendance alerts have been queued for the linked child yet.</p>
+                            <p className="text-xs text-white/45">
+                              No attendance alerts have been queued for the linked child yet.
+                            </p>
                           )}
                         </div>
                       </div>

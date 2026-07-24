@@ -41,7 +41,8 @@ type Suggestion = {
 };
 
 function idemp() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID().replaceAll("-", "");
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto)
+    return crypto.randomUUID().replaceAll("-", "");
   return `${Date.now()}${Math.random().toString(16).slice(2)}`;
 }
 
@@ -49,7 +50,11 @@ export default function TeacherStudentsPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [teacher, setTeacher] = useState({ displayName: "", isFormTeacher: false, isSubjectTeacher: false });
+  const [teacher, setTeacher] = useState({
+    displayName: "",
+    isFormTeacher: false,
+    isSubjectTeacher: false,
+  });
   const [search, setSearch] = useState("");
   const [classId, setClassId] = useState("All");
   const [error, setError] = useState("");
@@ -81,7 +86,7 @@ export default function TeacherStudentsPage() {
 
   const formClasses = useMemo(
     () => assignments.filter((a) => a.role === "FORM_TEACHER"),
-    [assignments]
+    [assignments],
   );
 
   const shown = useMemo(() => {
@@ -120,7 +125,9 @@ export default function TeacherStudentsPage() {
     const temp = j.parentAccount?.temporaryPassword
       ? ` Parent temp password (copy now): ${j.parentAccount.temporaryPassword}`
       : "";
-    setNotice(`Enrolled ${j.student.displayName} (${j.student.studentId}) into ${j.student.className}.${temp}`);
+    setNotice(
+      `Enrolled ${j.student.displayName} (${j.student.studentId}) into ${j.student.className}.${temp}`,
+    );
     await load();
   }
 
@@ -131,7 +138,9 @@ export default function TeacherStudentsPage() {
         <TeacherSidebar />
         <section className="min-w-0 flex-1 space-y-6">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Live class roster</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Live class roster
+            </p>
             <h1 className="mt-2 font-display text-4xl tracking-widest">
               MY <span className="text-brand-green">STUDENTS</span>
             </h1>
@@ -143,27 +152,37 @@ export default function TeacherStudentsPage() {
           </div>
 
           {notice && (
-            <div className="break-all rounded-2xl border border-brand-green/30 bg-brand-green/10 p-4 text-sm">{notice}</div>
+            <div className="break-all rounded-2xl border border-brand-green/30 bg-brand-green/10 p-4 text-sm">
+              {notice}
+            </div>
           )}
           {error && (
-            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">{error}</div>
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">
+              {error}
+            </div>
           )}
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
               <Users className="mb-2 text-brand-green" size={18} />
               <div className="font-display text-2xl">{students.length}</div>
-              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Visible students</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                Visible students
+              </div>
             </div>
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
               <BookOpen className="mb-2 text-brand-orange" size={18} />
               <div className="font-display text-2xl">{assignments.length}</div>
-              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Assignments</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                Assignments
+              </div>
             </div>
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
               <UserPlus className="mb-2 text-blue-500" size={18} />
               <div className="font-display text-2xl">{suggestions.length}</div>
-              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Entrance suggestions</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                Entrance suggestions
+              </div>
             </div>
           </div>
 
@@ -203,14 +222,19 @@ export default function TeacherStudentsPage() {
 
           {!!suggestions.length && teacher.isFormTeacher && (
             <div className="rounded-3xl border border-brand-orange/30 bg-brand-orange/5 p-5">
-              <h2 className="font-display text-xl tracking-widest text-brand-orange">ENTRANCE PASS — SUGGESTED</h2>
+              <h2 className="font-display text-xl tracking-widest text-brand-orange">
+                ENTRANCE PASS — SUGGESTED
+              </h2>
               <p className="mt-1 text-xs text-[var(--text-muted)]">
-                Paid applicants who passed entrance for your form class level. Complete placement from Admissions or enrol
-                manually with matching details.
+                Paid applicants who passed entrance for your form class level. Complete placement
+                from Admissions or enrol manually with matching details.
               </p>
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 {suggestions.map((s) => (
-                  <div key={s.applicationId} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-sm">
+                  <div
+                    key={s.applicationId}
+                    className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-sm"
+                  >
                     <b>
                       {s.firstName} {s.lastName}
                     </b>
@@ -247,17 +271,23 @@ export default function TeacherStudentsPage() {
                     <tr key={s.id} className="border-t border-[var(--border-subtle)]">
                       <td className="p-4">
                         <b>{s.displayName}</b>
-                        <span className="mt-1 block font-mono text-xs text-[var(--text-muted)]">{s.studentId}</span>
+                        <span className="mt-1 block font-mono text-xs text-[var(--text-muted)]">
+                          {s.studentId}
+                        </span>
                       </td>
                       <td className="p-4">{s.className}</td>
                       <td className="p-4">
                         {s.guardianName || "—"}
-                        <span className="mt-1 block text-xs text-[var(--text-muted)]">{s.guardianPhone || "—"}</span>
+                        <span className="mt-1 block text-xs text-[var(--text-muted)]">
+                          {s.guardianPhone || "—"}
+                        </span>
                       </td>
                       <td className="p-4">
                         <span
                           className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
-                            s.canManage ? "bg-brand-green/15 text-brand-green" : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
+                            s.canManage
+                              ? "bg-brand-green/15 text-brand-green"
+                              : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
                           }`}
                         >
                           {s.canManage ? "Form class" : "Subject only"}
@@ -269,14 +299,19 @@ export default function TeacherStudentsPage() {
               </table>
             )}
             {!loading && !shown.length && (
-              <p className="p-10 text-center text-sm text-[var(--text-muted)]">No students match this filter.</p>
+              <p className="p-10 text-center text-sm text-[var(--text-muted)]">
+                No students match this filter.
+              </p>
             )}
           </div>
 
           {!!formClasses.length && (
             <div className="grid gap-3 md:grid-cols-2">
               {formClasses.map((c) => (
-                <div key={c.id} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-sm">
+                <div
+                  key={c.id}
+                  className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-sm"
+                >
                   <b>{c.className}</b>
                   <div className="mt-1 text-xs text-[var(--text-muted)]">
                     Form teacher · {c.studentCount}
@@ -291,10 +326,15 @@ export default function TeacherStudentsPage() {
 
       {open && (
         <div className="fixed inset-0 z-[100] grid place-items-center bg-black/60 p-4">
-          <form onSubmit={submit} className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-[var(--bg-primary)] p-7">
+          <form
+            onSubmit={submit}
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-[var(--bg-primary)] p-7"
+          >
             <div className="flex justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Form teacher enrolment</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+                  Form teacher enrolment
+                </p>
                 <h2 className="font-display text-3xl tracking-widest">NEW STUDENT</h2>
               </div>
               <button type="button" onClick={() => setOpen(false)} aria-label="Close">
@@ -324,7 +364,10 @@ export default function TeacherStudentsPage() {
               ))}
               <label className="text-xs font-bold uppercase tracking-wider">
                 Gender
-                <select name="gender" className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case">
+                <select
+                  name="gender"
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+                >
                   <option value="">Prefer not to say</option>
                   <option>Female</option>
                   <option>Male</option>
@@ -348,7 +391,8 @@ export default function TeacherStudentsPage() {
               </label>
             </div>
             <p className="mt-5 text-xs text-[var(--text-muted)]">
-              Requests are idempotent. A new parent account receives a one-time temporary password shown once.
+              Requests are idempotent. A new parent account receives a one-time temporary password
+              shown once.
             </p>
             <button className="mt-6 w-full rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white">
               Create student in my class

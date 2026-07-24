@@ -1,14 +1,21 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
-import { CURRENT_TEACHER } from "@/lib/teacherData";
+import { useApi } from "@/lib/useApi";
 import { useToast } from "@/components/Toast";
 import {
-  FileText, Plus, Trash2, School, BookOpen, ChevronDown,
-  ChevronUp, Save, HelpCircle
+  FileText,
+  Plus,
+  Trash2,
+  School,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  Save,
+  HelpCircle,
 } from "lucide-react";
 
 interface Instruction {
@@ -20,7 +27,8 @@ interface Instruction {
 
 export default function AddInstructionsPage() {
   const { toast } = useToast();
-  const teacher = CURRENT_TEACHER;
+  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
+  const teacher = data?.teacher || ({} as any);
   const [selectedClass, setSelectedClass] = useState("SS 3");
   const [expanded, setExpanded] = useState(true);
   const [subject, setSubject] = useState("");
@@ -28,23 +36,25 @@ export default function AddInstructionsPage() {
     { id: "1", fromQ: "", toQ: "", text: "" },
   ]);
 
-  const allClasses = [...new Set(teacher.subjectAssignments.flatMap(sa => sa.classes))];
-  const availableSubjects = teacher.subjectAssignments.filter(sa => sa.classes.includes(selectedClass)).map(sa => sa.subject);
+  const allClasses = [...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes))];
+  const availableSubjects = (teacher.subjectAssignments || [])
+    .filter((sa: any) => sa.classes.includes(selectedClass))
+    .map((sa: any) => sa.subject);
 
   const addInstruction = () => {
     setInstructions([...instructions, { id: String(Date.now()), fromQ: "", toQ: "", text: "" }]);
   };
 
   const removeInstruction = (id: string) => {
-    setInstructions(instructions.filter(i => i.id !== id));
+    setInstructions(instructions.filter((i) => i.id !== id));
   };
 
   const updateInstruction = (id: string, field: keyof Instruction, value: string) => {
-    setInstructions(prev => prev.map(i => i.id === id ? { ...i, [field]: value } : i));
+    setInstructions((prev) => prev.map((i: any) => (i.id === id ? { ...i, [field]: value } : i)));
   };
 
   const handleSave = () => {
-    const valid = instructions.filter(i => i.fromQ && i.toQ && i.text);
+    const valid = instructions.filter((i) => i.fromQ && i.toQ && i.text);
     if (valid.length === 0) {
       toast("Please add at least one complete instruction", "warning");
       return;
@@ -64,7 +74,9 @@ export default function AddInstructionsPage() {
             <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2 text-center">
               ADD QUESTIONS & <span className="text-brand-green">INSTRUCTIONS</span>
             </h1>
-            <p className="text-white/60 text-sm text-center">Set up custom instructions for specific question ranges</p>
+            <p className="text-white/60 text-sm text-center">
+              Set up custom instructions for specific question ranges
+            </p>
           </div>
         </section>
 
@@ -84,11 +96,16 @@ export default function AddInstructionsPage() {
                     <span className="font-bold text-[var(--text-primary)]">Class:</span>
                     <select
                       value={selectedClass}
-                      onChange={e => { e.stopPropagation(); setSelectedClass(e.target.value); }}
-                      onClick={e => e.stopPropagation()}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        setSelectedClass(e.target.value);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
                       className="bg-white/50 dark:bg-white/10 border border-blue-500/30 rounded-lg px-3 py-1 text-sm font-bold text-[var(--text-primary)]"
                     >
-                      {allClasses.map(c => <option key={c}>{c}</option>)}
+                      {allClasses.map((c: any) => (
+                        <option key={String(c)}>{String(c)}</option>
+                      ))}
                     </select>
                   </div>
                   {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -98,23 +115,34 @@ export default function AddInstructionsPage() {
                   <div className="p-6 space-y-5">
                     {/* Subject Selector */}
                     <div>
-                      <label className="text-sm font-bold text-[var(--text-primary)] block mb-2">Subject</label>
+                      <label className="text-sm font-bold text-[var(--text-primary)] block mb-2">
+                        Subject
+                      </label>
                       <select
                         value={subject}
-                        onChange={e => setSubject(e.target.value)}
+                        onChange={(e) => setSubject(e.target.value)}
                         className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                       >
                         <option value="">-- Select a Subject --</option>
-                        {availableSubjects.map(s => <option key={s} value={s}>{s}</option>)}
+                        {availableSubjects.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
                     {/* Instructions Header */}
                     <div className="pt-4 border-t border-[var(--border-subtle)]">
-                      <h3 className="font-display text-xl text-[var(--text-primary)] mb-4">Instructions</h3>
+                      <h3 className="font-display text-xl text-[var(--text-primary)] mb-4">
+                        Instructions
+                      </h3>
 
                       {instructions.map((inst, idx) => (
-                        <div key={inst.id} className="mb-4 p-4 rounded-xl bg-[var(--surface-disabled)] relative">
+                        <div
+                          key={inst.id}
+                          className="mb-4 p-4 rounded-xl bg-[var(--surface-disabled)] relative"
+                        >
                           {instructions.length > 1 && (
                             <button
                               onClick={() => removeInstruction(inst.id)}
@@ -126,22 +154,28 @@ export default function AddInstructionsPage() {
 
                           <div className="grid md:grid-cols-2 gap-4 mb-3">
                             <div>
-                              <label className="text-sm font-medium text-[var(--text-primary)] block mb-2">From Question:</label>
+                              <label className="text-sm font-medium text-[var(--text-primary)] block mb-2">
+                                From Question:
+                              </label>
                               <input
                                 type="number"
                                 value={inst.fromQ}
-                                onChange={e => updateInstruction(inst.id, "fromQ", e.target.value)}
+                                onChange={(e) =>
+                                  updateInstruction(inst.id, "fromQ", e.target.value)
+                                }
                                 min="1"
                                 placeholder="e.g., 1"
                                 className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                               />
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-[var(--text-primary)] block mb-2">To Question:</label>
+                              <label className="text-sm font-medium text-[var(--text-primary)] block mb-2">
+                                To Question:
+                              </label>
                               <input
                                 type="number"
                                 value={inst.toQ}
-                                onChange={e => updateInstruction(inst.id, "toQ", e.target.value)}
+                                onChange={(e) => updateInstruction(inst.id, "toQ", e.target.value)}
                                 min="1"
                                 placeholder="e.g., 10"
                                 className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
@@ -150,10 +184,12 @@ export default function AddInstructionsPage() {
                           </div>
 
                           <div>
-                            <label className="text-sm font-medium text-[var(--text-primary)] block mb-2">Instruction:</label>
+                            <label className="text-sm font-medium text-[var(--text-primary)] block mb-2">
+                              Instruction:
+                            </label>
                             <textarea
                               value={inst.text}
-                              onChange={e => updateInstruction(inst.id, "text", e.target.value)}
+                              onChange={(e) => updateInstruction(inst.id, "text", e.target.value)}
                               rows={3}
                               placeholder="e.g., Read the following passage carefully and answer questions 1-10..."
                               className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green resize-none"
@@ -188,7 +224,9 @@ export default function AddInstructionsPage() {
                 <div className="flex items-start gap-3">
                   <HelpCircle className="text-blue-500 shrink-0 mt-0.5" size={20} />
                   <div>
-                    <h3 className="font-bold text-[var(--text-primary)] mb-2">How Instructions Work</h3>
+                    <h3 className="font-bold text-[var(--text-primary)] mb-2">
+                      How Instructions Work
+                    </h3>
                     <ul className="space-y-1 text-sm text-[var(--text-secondary)]">
                       <li>• Instructions appear at the top of questions in the specified range</li>
                       <li>• Useful for reading comprehension, multi-part problems, or context</li>

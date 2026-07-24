@@ -3,7 +3,21 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
-import { LayoutDashboard, CalendarDays, FileText, User, Bell, ClipboardCheck, GraduationCap, Mail, Phone, Calendar, MapPin, Heart, Shield } from "lucide-react";
+import {
+  LayoutDashboard,
+  CalendarDays,
+  FileText,
+  User,
+  Bell,
+  ClipboardCheck,
+  GraduationCap,
+  Mail,
+  Phone,
+  Calendar,
+  MapPin,
+  Heart,
+  Shield,
+} from "lucide-react";
 
 const SIDEBAR_ITEMS = [
   { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
@@ -44,61 +58,94 @@ export default function StudentProfilePage() {
                       EA
                     </div>
                     <div className="pb-2">
-                      <h2 className="font-display text-3xl text-[var(--text-primary)]">EMMANUEL ADEBAYO</h2>
+                      <h2 className="font-display text-3xl text-[var(--text-primary)]">
+                        EMMANUEL ADEBAYO
+                      </h2>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green font-bold uppercase tracking-widest">Student</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green text-white font-bold uppercase tracking-widest">Active</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green font-bold uppercase tracking-widest">
+                          Student
+                        </span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green text-white font-bold uppercase tracking-widest">
+                          Active
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-brand-green">Personal Info</h3>
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-brand-green">
+                        Personal Info
+                      </h3>
                       {[
                         { icon: User, label: "Full Name", value: "Emmanuel Oluwaseun Adebayo" },
                         { icon: Calendar, label: "Date of Birth", value: "November 22, 2009" },
                         { icon: User, label: "Gender", value: "Male" },
                         { icon: MapPin, label: "State of Origin", value: "Ogun State" },
                         { icon: Shield, label: "Student ID", value: "YKC/2025/002" },
-                      ].map(item => (
-                        <div key={item.label} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]">
+                      ].map((item) => (
+                        <div
+                          key={item.label}
+                          className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]"
+                        >
                           <item.icon size={14} className="text-brand-green mt-0.5 shrink-0" />
                           <div>
-                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{item.label}</div>
-                            <div className="text-sm text-[var(--text-primary)] font-medium">{item.value}</div>
+                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                              {item.label}
+                            </div>
+                            <div className="text-sm text-[var(--text-primary)] font-medium">
+                              {item.value}
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
 
                     <div className="space-y-4">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-brand-orange">Academic Info</h3>
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-brand-orange">
+                        Academic Info
+                      </h3>
                       {[
                         { icon: GraduationCap, label: "Class", value: "SS2 · Arm B" },
                         { icon: FileText, label: "Track", value: "Science" },
                         { icon: Calendar, label: "Session", value: "2025/2026" },
                         { icon: Calendar, label: "Entry Type", value: "New Student" },
-                      ].map(item => (
-                        <div key={item.label} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]">
+                      ].map((item) => (
+                        <div
+                          key={item.label}
+                          className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]"
+                        >
                           <item.icon size={14} className="text-brand-orange mt-0.5 shrink-0" />
                           <div>
-                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{item.label}</div>
-                            <div className="text-sm text-[var(--text-primary)] font-medium">{item.value}</div>
+                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                              {item.label}
+                            </div>
+                            <div className="text-sm text-[var(--text-primary)] font-medium">
+                              {item.value}
+                            </div>
                           </div>
                         </div>
                       ))}
 
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-red-500 pt-2">Health</h3>
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-red-500 pt-2">
+                        Health
+                      </h3>
                       {[
                         { icon: Heart, label: "Blood Group", value: "AB+" },
                         { icon: Heart, label: "Genotype", value: "AS" },
-                      ].map(item => (
-                        <div key={item.label} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]">
+                      ].map((item) => (
+                        <div
+                          key={item.label}
+                          className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]"
+                        >
                           <item.icon size={14} className="text-red-500 mt-0.5 shrink-0" />
                           <div>
-                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{item.label}</div>
-                            <div className="text-sm text-[var(--text-primary)] font-medium">{item.value}</div>
+                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                              {item.label}
+                            </div>
+                            <div className="text-sm text-[var(--text-primary)] font-medium">
+                              {item.value}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -109,18 +156,25 @@ export default function StudentProfilePage() {
 
               {/* Parent Contact */}
               <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                <h3 className="font-display text-lg text-[var(--text-primary)] mb-4">Parent / Guardian</h3>
+                <h3 className="font-display text-lg text-[var(--text-primary)] mb-4">
+                  Parent / Guardian
+                </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   {[
                     { icon: User, label: "Name", value: "Mr. Adebayo" },
                     { icon: Phone, label: "Phone", value: "0802 123 4567" },
                     { icon: Mail, label: "Email", value: "adebayo@email.com" },
                     { icon: MapPin, label: "Address", value: "12 Admiralty Way, Lekki Phase 1" },
-                  ].map(item => (
-                    <div key={item.label} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]">
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]"
+                    >
                       <item.icon size={14} className="text-blue-500 shrink-0" />
                       <div>
-                        <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest">{item.label}</div>
+                        <div className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest">
+                          {item.label}
+                        </div>
                         <div className="text-sm text-[var(--text-primary)]">{item.value}</div>
                       </div>
                     </div>
@@ -135,4 +189,3 @@ export default function StudentProfilePage() {
     </>
   );
 }
-

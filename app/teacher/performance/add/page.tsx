@@ -1,28 +1,31 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
-import { CURRENT_TEACHER, FORM_CLASS_STUDENTS } from "@/lib/teacherData";
+import { useApi } from "@/lib/useApi";
 import { useToast } from "@/components/Toast";
 import { Users, BookOpen, Save, Calculator, ChevronDown, Award } from "lucide-react";
 
 export default function AddPerformancePage() {
   const { toast } = useToast();
-  const teacher = CURRENT_TEACHER;
+  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
+  const teacher = data?.teacher || ({} as any);
   const [subject, setSubject] = useState("");
   const [className, setClassName] = useState("");
   const [student, setStudent] = useState("");
-  const [testType, setTestType] = useState<"CA1" | "CA2" | "Mid-Term Test" | "Assignment" | "Exam">("CA1");
+  const [testType, setTestType] = useState<"CA1" | "CA2" | "Mid-Term Test" | "Assignment" | "Exam">(
+    "CA1",
+  );
   const [score, setScore] = useState("");
   const [comment, setComment] = useState("");
 
-  const maxScores = { "CA1": 10, "CA2": 10, "Mid-Term Test": 20, "Assignment": 10, "Exam": 60 };
+  const maxScores = { CA1: 10, CA2: 10, "Mid-Term Test": 20, Assignment: 10, Exam: 60 };
   const currentMax = maxScores[testType];
 
   const availableClasses = subject
-    ? teacher.subjectAssignments.find(sa => sa.subject === subject)?.classes || []
+    ? (teacher.subjectAssignments || []).find((sa: any) => sa.subject === subject)?.classes || []
     : [];
 
   const handleSubmit = () => {
@@ -53,7 +56,9 @@ export default function AddPerformancePage() {
             <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
               ADD <span className="text-brand-green">PERFORMANCE</span>
             </h1>
-            <p className="text-white/60 text-sm">Record CA, test, or exam scores for your students.</p>
+            <p className="text-white/60 text-sm">
+              Record CA, test, or exam scores for your students.
+            </p>
           </div>
         </section>
 
@@ -66,8 +71,12 @@ export default function AddPerformancePage() {
                 <div className="w-16 h-16 rounded-2xl bg-brand-green flex items-center justify-center mx-auto mb-4 text-white">
                   <Award size={28} />
                 </div>
-                <h2 className="font-display text-2xl text-[var(--text-primary)] mb-2">Score Entry Form</h2>
-                <p className="text-sm text-[var(--text-muted)]">First Term 2025/2026 · {teacher.fullName}</p>
+                <h2 className="font-display text-2xl text-[var(--text-primary)] mb-2">
+                  Score Entry Form
+                </h2>
+                <p className="text-sm text-[var(--text-muted)]">
+                  First Term 2025/2026 · {teacher.fullName}
+                </p>
               </div>
 
               <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-8 shadow-[var(--card-shadow)] space-y-5">
@@ -78,12 +87,18 @@ export default function AddPerformancePage() {
                   </label>
                   <select
                     value={subject}
-                    onChange={e => { setSubject(e.target.value); setClassName(""); setStudent(""); }}
+                    onChange={(e) => {
+                      setSubject(e.target.value);
+                      setClassName("");
+                      setStudent("");
+                    }}
                     className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                   >
                     <option value="">Select subject...</option>
-                    {teacher.subjectAssignments.map(sa => (
-                      <option key={sa.subject} value={sa.subject}>{sa.subject}</option>
+                    {(teacher.subjectAssignments || []).map((sa: any) => (
+                      <option key={sa.subject} value={sa.subject}>
+                        {sa.subject}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -95,12 +110,19 @@ export default function AddPerformancePage() {
                   </label>
                   <select
                     value={className}
-                    onChange={e => { setClassName(e.target.value); setStudent(""); }}
+                    onChange={(e) => {
+                      setClassName(e.target.value);
+                      setStudent("");
+                    }}
                     disabled={!subject}
                     className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <option value="">Select class...</option>
-                    {availableClasses.map(c => <option key={c} value={c}>{c}</option>)}
+                    {availableClasses.map((c: any) => (
+                      <option key={String(c)} value={String(c)}>
+                        {c}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -111,12 +133,16 @@ export default function AddPerformancePage() {
                   </label>
                   <select
                     value={student}
-                    onChange={e => setStudent(e.target.value)}
+                    onChange={(e) => setStudent(e.target.value)}
                     disabled={!className}
                     className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <option value="">Select student...</option>
-                    {FORM_CLASS_STUDENTS.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                    {[].map((s) => (
+                      <option key={s.id} value={s.name}>
+                        {s.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -126,7 +152,7 @@ export default function AddPerformancePage() {
                     <Award size={11} /> Assessment Type *
                   </label>
                   <div className="grid grid-cols-5 gap-2">
-                    {(["CA1", "CA2", "Mid-Term Test", "Assignment", "Exam"] as const).map(t => (
+                    {(["CA1", "CA2", "Mid-Term Test", "Assignment", "Exam"] as const).map((t) => (
                       <button
                         key={t}
                         onClick={() => setTestType(t)}
@@ -140,7 +166,9 @@ export default function AddPerformancePage() {
                       </button>
                     ))}
                   </div>
-                  <p className="text-[10px] text-[var(--text-muted)] mt-2">Max score: {currentMax}</p>
+                  <p className="text-[10px] text-[var(--text-muted)] mt-2">
+                    Max score: {currentMax}
+                  </p>
                 </div>
 
                 {/* Score */}
@@ -151,7 +179,7 @@ export default function AddPerformancePage() {
                   <input
                     type="number"
                     value={score}
-                    onChange={e => setScore(e.target.value)}
+                    onChange={(e) => setScore(e.target.value)}
                     min="0"
                     max={currentMax}
                     step="0.5"
@@ -167,7 +195,7 @@ export default function AddPerformancePage() {
                   </label>
                   <textarea
                     value={comment}
-                    onChange={e => setComment(e.target.value)}
+                    onChange={(e) => setComment(e.target.value)}
                     rows={3}
                     placeholder="e.g., Excellent work! Keep it up."
                     className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green resize-none"
