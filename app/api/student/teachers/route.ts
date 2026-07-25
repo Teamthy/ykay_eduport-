@@ -19,7 +19,7 @@ export async function GET() {
   }
 
   // Get teachers assigned to the student's class
-  const assignments = await prisma.teacherClassAssignment.findMany({
+  const assignments = await prisma.teacherClassAssignment.findMany({ take: 100,
     where: { classId: student.currentClass.id, isActive: true },
     include: {
       teacherProfile: { select: { id: true, displayName: true, roleLabel: true, photoUrl: true } },

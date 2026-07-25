@@ -9,7 +9,7 @@ export async function GET() {
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const [attendanceRecords, auditLogs] = await Promise.all([
-    prisma.attendanceSession.findMany({
+    prisma.attendanceSession.findMany({ take: 100,
       where: { teacherProfileId: ctx.profile.id },
       orderBy: { sessionDate: "desc" },
       take: 20,
@@ -18,7 +18,7 @@ export async function GET() {
         entries: { select: { status: true } },
       },
     }),
-    prisma.auditLog.findMany({
+    prisma.auditLog.findMany({ take: 100,
       where: { actorUserId: ctx.user.id },
       orderBy: { createdAt: "desc" },
       take: 20,

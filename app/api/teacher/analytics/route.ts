@@ -12,7 +12,7 @@ export async function GET() {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   const [attendanceSessions, examStats, gradebooks] = await Promise.all([
-    prisma.attendanceSession.findMany({
+    prisma.attendanceSession.findMany({ take: 200,
       where: {
         teacherProfileId: ctx.profile.id,
         sessionDate: { gte: thirtyDaysAgo },
@@ -22,14 +22,14 @@ export async function GET() {
         entries: { select: { status: true } },
       },
     }),
-    prisma.exam.findMany({
+    prisma.exam.findMany({ take: 200,
       where: { teacherProfileId: ctx.profile.id },
       include: {
         classroom: { select: { displayName: true } },
         attempts: { select: { totalScore: true } },
       },
     }),
-    prisma.subjectGradebook.findMany({
+    prisma.subjectGradebook.findMany({ take: 200,
       where: { teacherProfileId: ctx.profile.id },
       include: {
         classroom: { select: { displayName: true } },

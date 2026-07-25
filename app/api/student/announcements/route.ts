@@ -9,7 +9,7 @@ export async function GET() {
   const user = await requireRole([UserRole.STUDENT]);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const notifications = await prisma.userNotification.findMany({
+  const notifications = await prisma.userNotification.findMany({ take: 100,
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
     take: 30,

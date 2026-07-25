@@ -9,14 +9,14 @@ export async function GET() {
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const [gradebooks, exams, attendanceSessions] = await Promise.all([
-    prisma.subjectGradebook.findMany({
+    prisma.subjectGradebook.findMany({ take: 100,
       where: { teacherProfileId: ctx.profile.id },
       include: {
         classroom: { select: { displayName: true } },
         entries: { select: { total: true } },
       },
     }),
-    prisma.exam.findMany({
+    prisma.exam.findMany({ take: 100,
       where: { teacherProfileId: ctx.profile.id },
       include: {
         classroom: { select: { displayName: true } },
