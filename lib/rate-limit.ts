@@ -41,13 +41,19 @@ function inMemoryCheck(
 
 // ── Limiter configuration ────────────────────────────────────────
 const limiterConfig = {
+  // Admissions
   draft: { maxRequests: 5, windowMs: 3_600_000, prefix: "ykay:admissions:draft" },
   upload: { maxRequests: 40, windowMs: 3_600_000, prefix: "ykay:admissions:upload" },
   payment: { maxRequests: 8, windowMs: 3_600_000, prefix: "ykay:admissions:payment" },
   status: { maxRequests: 30, windowMs: 600_000, prefix: "ykay:admissions:status" },
+  // Authentication — brute-force / credential-stuffing protection
+  login: { maxRequests: 10, windowMs: 900_000, prefix: "ykay:auth:login" }, // 10 attempts per 15 min
+  loginStrict: { maxRequests: 3, windowMs: 900_000, prefix: "ykay:auth:login-strict" }, // 3 failures per 15 min (per email)
+  passwordReset: { maxRequests: 3, windowMs: 3_600_000, prefix: "ykay:auth:pw-reset" }, // 3 resets per hour
+  changePassword: { maxRequests: 5, windowMs: 3_600_000, prefix: "ykay:auth:pw-change" }, // 5 changes per hour
 } as const;
 
-const redisLimiters = redis
+const redisLimiters: Record<string, Ratelimit | null> = redis
   ? {
       draft: new Ratelimit({
         redis,
@@ -69,17 +75,41 @@ const redisLimiters = redis
         limiter: Ratelimit.slidingWindow(30, "10 m"),
         prefix: "ykay:admissions:status",
       }),
+      login: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(10, "15 m"),
+        prefix: "ykay:auth:login",
+      }),
+      loginStrict: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(3, "15 m"),
+        prefix: "ykay:auth:login-strict",
+      }),
+      passwordReset: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(3, "1 h"),
+        prefix: "ykay:auth:pw-reset",
+      }),
+      changePassword: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(5, "1 h"),
+        prefix: "ykay:auth:pw-change",
+      }),
     }
-  : null;
+  : {};
 
-export type AdmissionRateLimit = keyof typeof limiterConfig;
+export type RateLimitKind = keyof typeof limiterConfig;
 
-export async function enforceAdmissionRateLimit(kind: AdmissionRateLimit, identifier: string) {
+/**
+ * Generic rate limiter — works for admissions, auth, and any future endpoint.
+ * Tries Redis first, falls back to in-memory if unavailable.
+ */
+export async function enforceRateLimit(kind: RateLimitKind, identifier: string) {
   // ── Try Redis first ──────────────────────────────────────
-  if (redisLimiters) {
+  const redisLimiter = redisLimiters[kind];
+  if (redisLimiter) {
     try {
-      const limiter = redisLimiters[kind];
-      const result = await limiter.limit(identifier);
+      const result = await redisLimiter.limit(identifier);
       const retryAfterSeconds = Math.max(1, Math.ceil((result.reset - Date.now()) / 1000));
       return {
         success: result.success,
@@ -100,4 +130,9 @@ export async function enforceAdmissionRateLimit(kind: AdmissionRateLimit, identi
   const { success, retryAfterSeconds } = inMemoryCheck(key, config.maxRequests, config.windowMs);
 
   return { success, retryAfterSeconds, configurationError: false };
+}
+
+/** @deprecated Use enforceRateLimit() instead */
+export async function enforceAdmissionRateLimit(kind: RateLimitKind, identifier: string) {
+  return enforceRateLimit(kind, identifier);
 }
