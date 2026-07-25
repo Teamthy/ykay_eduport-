@@ -3,10 +3,13 @@ import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { revokeAllSessions } from "@/lib/session";
+
 const schema = z.object({
   token: z.string().min(20),
   password: z.string().min(12, "Use at least 12 characters."),
 });
+
 export async function POST(request: NextRequest) {
   try {
     const { token, password } = schema.parse(await request.json());
@@ -29,6 +32,8 @@ export async function POST(request: NextRequest) {
         data: { revokedAt: new Date() },
       }),
     ]);
+    // Revoke all existing JWT sessions for this user
+    await revokeAllSessions(record.userId);
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: "Unable to reset password." }, { status: 400 });
