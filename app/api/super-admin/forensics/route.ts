@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 
   const [total, events, eventTypeCounts, hourlyBreakdown] = await Promise.all([
     prisma.securityEvent.count({ where }),
-    prisma.securityEvent.findMany({
+    prisma.securityEvent.findMany({ take: 100,
       where,
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
   ]);
 
   // Top offending IPs
-  const recentEvents = await prisma.securityEvent.findMany({
+  const recentEvents = await prisma.securityEvent.findMany({ take: 100,
     where: {
       ...where,
       eventType: { in: ["LOGIN_FAILED_BAD_PASSWORD", "LOGIN_FAILED_ACCOUNT_NOT_FOUND"] },

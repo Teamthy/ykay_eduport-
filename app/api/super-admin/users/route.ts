@@ -4,12 +4,10 @@ import { UserRole } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { getClientIp } from "@/lib/requests";
+import { revokeAllSessions } from "@/lib/session";
 import { requireRole } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
-
-const STAFF_ROLES = ["ADMIN", "DIRECTOR", "BURSAR", "COORDINATOR", "HOD", "TEACHER"] as const;
 
 export async function GET(request: NextRequest) {
   const user = await requireRole([UserRole.SUPER_ADMIN]);
@@ -21,7 +19,7 @@ export async function GET(request: NextRequest) {
     ? (roleParam as UserRole)
     : null;
 
-  const users = await prisma.user.findMany({
+  const users = await prisma.user.findMany({ take: 100,
     where: {
       ...(search
         ? {
@@ -34,7 +32,7 @@ export async function GET(request: NextRequest) {
       ...(roleFilter ? { role: roleFilter } : {}),
     },
     orderBy: [{ role: "asc" }, { name: "asc" }],
-    take: 150,
+    take: 100,
     select: {
       id: true,
       name: true,
@@ -42,25 +40,16 @@ export async function GET(request: NextRequest) {
       role: true,
       isActive: true,
       isSuspended: true,
-      mustChangePassword: true,
       lastLoginAt: true,
       createdAt: true,
-      _count: { select: { refreshTokens: true } },
     },
   });
 
   return NextResponse.json({
     users: users.map((entry) => ({
-      id: entry.id,
-      name: entry.name,
-      email: entry.email,
-      role: entry.role,
-      isActive: entry.isActive,
-      isSuspended: entry.isSuspended,
-      mustChangePassword: entry.mustChangePassword,
+      ...entry,
       lastLoginAt: entry.lastLoginAt?.toISOString() || null,
       createdAt: entry.createdAt.toISOString(),
-      activeSessions: entry._count.refreshTokens,
     })),
   });
 }
@@ -73,13 +62,11 @@ const actionSchema = z.object({
     "RESET_PASSWORD",
     "PROMOTE_ADMIN",
     "DEMOTE_TEACHER",
-    "CREATE_STAFF",
-    "SET_ROLE",
-    "REVOKE_SESSIONS",
+    "CREATE_ADMIN",
   ]),
   name: z.string().trim().min(2).max(120).optional(),
   email: z.string().trim().email().optional(),
-  role: z.enum(STAFF_ROLES).optional(),
+  role: z.enum(["ADMIN", "DIRECTOR", "BURSAR", "COORDINATOR", "HOD", "TEACHER"]).optional(),
 });
 
 export async function PATCH(request: NextRequest) {
@@ -95,18 +82,22 @@ export async function PATCH(request: NextRequest) {
 
   let message = "";
   let temporaryPassword: string | null = null;
+  let createdUser: { id: string; email: string; name: string; role: string } | null = null;
 
-  if (payload.action === "CREATE_STAFF") {
-    if (!payload.name || !payload.email || !payload.role) {
-      return NextResponse.json({ error: "Name, email and role are required." }, { status: 400 });
+  if (payload.action === "CREATE_ADMIN") {
+    if (!payload.name || !payload.email) {
+      return NextResponse.json(
+        { error: "Name and email are required to create an admin." },
+        { status: 400 },
+      );
     }
     const email = payload.email.trim().toLowerCase();
     if (await prisma.user.findUnique({ where: { email } })) {
       return NextResponse.json({ error: "An account already uses this email." }, { status: 409 });
     }
+    const role = (payload.role as UserRole) || UserRole.ADMIN;
     temporaryPassword = `Ykay-${crypto.randomBytes(6).toString("base64url")}`;
     const passwordHash = await bcrypt.hash(temporaryPassword, 12);
-    const role = payload.role as UserRole;
     const created = await prisma.user.create({
       data: {
         schoolId: superAdmin.schoolId,
@@ -127,23 +118,20 @@ export async function PATCH(request: NextRequest) {
         },
       });
     }
+    createdUser = { id: created.id, email: created.email, name: created.name, role: created.role };
+    message = `Created ${role} account for ${created.email}. Temporary password shown once.`;
     await prisma.auditLog.create({
       data: {
         schoolId: superAdmin.schoolId,
         actorUserId: superAdmin.id,
-        action: "SUPER_ADMIN_CREATE_STAFF",
+        action: "SUPER_ADMIN_CREATE_ADMIN",
         entityType: "User",
         entityId: created.id,
         metadata: { email, role },
         ipAddress: getClientIp(request),
       },
     });
-    return NextResponse.json({
-      ok: true,
-      message: `Created ${role} account for ${email}. Temporary password shown once.`,
-      temporaryPassword,
-      user: { id: created.id, email: created.email, name: created.name, role: created.role },
-    });
+    return NextResponse.json({ ok: true, message, temporaryPassword, user: createdUser });
   }
 
   if (!payload.userId) return NextResponse.json({ error: "userId is required." }, { status: 400 });
@@ -151,30 +139,25 @@ export async function PATCH(request: NextRequest) {
   if (!target) return NextResponse.json({ error: "User not found." }, { status: 404 });
   if (target.role === UserRole.SUPER_ADMIN && target.id !== superAdmin.id) {
     return NextResponse.json(
-      { error: "Other super admin accounts cannot be modified here." },
+      { error: "Super admin accounts cannot be modified here." },
       { status: 403 },
     );
   }
   if (
     target.id === superAdmin.id &&
-    ["SUSPEND", "DEMOTE_TEACHER", "SET_ROLE"].includes(payload.action)
+    (payload.action === "SUSPEND" || payload.action === "DEMOTE_TEACHER")
   ) {
     return NextResponse.json(
-      { error: "You cannot suspend or change your own privileged role here." },
+      { error: "You cannot suspend or demote your own account." },
       { status: 409 },
     );
   }
 
   switch (payload.action) {
     case "SUSPEND":
-      await prisma.$transaction([
-        prisma.user.update({ where: { id: target.id }, data: { isSuspended: true } }),
-        prisma.refreshToken.updateMany({
-          where: { userId: target.id, revokedAt: null },
-          data: { revokedAt: new Date() },
-        }),
-      ]);
-      message = `${target.name} suspended and sessions revoked.`;
+      await prisma.user.update({ where: { id: target.id }, data: { isSuspended: true } });
+      await revokeAllSessions(target.id);
+      message = `${target.name} suspended. All sessions revoked.`;
       break;
     case "UNSUSPEND":
       await prisma.user.update({
@@ -186,17 +169,12 @@ export async function PATCH(request: NextRequest) {
     case "RESET_PASSWORD": {
       temporaryPassword = `Ykay-${crypto.randomBytes(6).toString("base64url")}`;
       const passwordHash = await bcrypt.hash(temporaryPassword, 12);
-      await prisma.$transaction([
-        prisma.user.update({
-          where: { id: target.id },
-          data: { passwordHash, mustChangePassword: true },
-        }),
-        prisma.refreshToken.updateMany({
-          where: { userId: target.id, revokedAt: null },
-          data: { revokedAt: new Date() },
-        }),
-      ]);
-      message = `Temporary password issued for ${target.name}. Shown once.`;
+      await prisma.user.update({
+        where: { id: target.id },
+        data: { passwordHash, mustChangePassword: true },
+      });
+      await revokeAllSessions(target.id);
+      message = `Temporary password issued for ${target.name}. All sessions revoked.`;
       break;
     }
     case "PROMOTE_ADMIN":
@@ -205,34 +183,7 @@ export async function PATCH(request: NextRequest) {
       break;
     case "DEMOTE_TEACHER":
       await prisma.user.update({ where: { id: target.id }, data: { role: UserRole.TEACHER } });
-      message = `${target.name} set to TEACHER.`;
-      break;
-    case "SET_ROLE": {
-      if (!payload.role) return NextResponse.json({ error: "role is required." }, { status: 400 });
-      const role = payload.role as UserRole;
-      await prisma.user.update({ where: { id: target.id }, data: { role } });
-      if (
-        (role === UserRole.TEACHER || role === UserRole.HOD) &&
-        !(await prisma.teacherProfile.findUnique({ where: { userId: target.id } }))
-      ) {
-        await prisma.teacherProfile.create({
-          data: {
-            schoolId: target.schoolId,
-            userId: target.id,
-            displayName: target.name,
-            roleLabel: role === UserRole.HOD ? "Head of Department" : "Teacher",
-          },
-        });
-      }
-      message = `${target.name} role set to ${role}.`;
-      break;
-    }
-    case "REVOKE_SESSIONS":
-      await prisma.refreshToken.updateMany({
-        where: { userId: target.id, revokedAt: null },
-        data: { revokedAt: new Date() },
-      });
-      message = `All refresh sessions revoked for ${target.name}.`;
+      message = `${target.name} set to TEACHER role.`;
       break;
     default:
       return NextResponse.json({ error: "Unsupported action." }, { status: 400 });
@@ -245,7 +196,7 @@ export async function PATCH(request: NextRequest) {
       action: `SUPER_ADMIN_${payload.action}`,
       entityType: "User",
       entityId: target.id,
-      metadata: { targetEmail: target.email, role: payload.role || null },
+      metadata: { targetEmail: target.email },
       ipAddress: getClientIp(request),
     },
   });
