@@ -4,7 +4,7 @@ import { UserRole } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { getClientIp } from "@/lib/requests";
+import { revokeAllSessions } from "@/lib/session";
 import { requireRole } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -15,12 +15,19 @@ export async function GET(request: NextRequest) {
 
   const search = request.nextUrl.searchParams.get("q")?.trim().toLowerCase() || "";
   const roleParam = request.nextUrl.searchParams.get("role") || "";
-  const roleFilter = Object.values(UserRole).includes(roleParam as UserRole) ? (roleParam as UserRole) : null;
+  const roleFilter = Object.values(UserRole).includes(roleParam as UserRole)
+    ? (roleParam as UserRole)
+    : null;
 
-  const users = await prisma.user.findMany({
+  const users = await prisma.user.findMany({ take: 100,
     where: {
       ...(search
-        ? { OR: [{ email: { contains: search } }, { name: { contains: search, mode: "insensitive" } }] }
+        ? {
+            OR: [
+              { email: { contains: search } },
+              { name: { contains: search, mode: "insensitive" } },
+            ],
+          }
         : {}),
       ...(roleFilter ? { role: roleFilter } : {}),
     },
@@ -49,7 +56,14 @@ export async function GET(request: NextRequest) {
 
 const actionSchema = z.object({
   userId: z.string().trim().min(1).optional(),
-  action: z.enum(["SUSPEND", "UNSUSPEND", "RESET_PASSWORD", "PROMOTE_ADMIN", "DEMOTE_TEACHER", "CREATE_ADMIN"]),
+  action: z.enum([
+    "SUSPEND",
+    "UNSUSPEND",
+    "RESET_PASSWORD",
+    "PROMOTE_ADMIN",
+    "DEMOTE_TEACHER",
+    "CREATE_ADMIN",
+  ]),
   name: z.string().trim().min(2).max(120).optional(),
   email: z.string().trim().email().optional(),
   role: z.enum(["ADMIN", "DIRECTOR", "BURSAR", "COORDINATOR", "HOD", "TEACHER"]).optional(),
@@ -72,7 +86,10 @@ export async function PATCH(request: NextRequest) {
 
   if (payload.action === "CREATE_ADMIN") {
     if (!payload.name || !payload.email) {
-      return NextResponse.json({ error: "Name and email are required to create an admin." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Name and email are required to create an admin." },
+        { status: 400 },
+      );
     }
     const email = payload.email.trim().toLowerCase();
     if (await prisma.user.findUnique({ where: { email } })) {
@@ -121,19 +138,32 @@ export async function PATCH(request: NextRequest) {
   const target = await prisma.user.findUnique({ where: { id: payload.userId } });
   if (!target) return NextResponse.json({ error: "User not found." }, { status: 404 });
   if (target.role === UserRole.SUPER_ADMIN && target.id !== superAdmin.id) {
-    return NextResponse.json({ error: "Super admin accounts cannot be modified here." }, { status: 403 });
+    return NextResponse.json(
+      { error: "Super admin accounts cannot be modified here." },
+      { status: 403 },
+    );
   }
-  if (target.id === superAdmin.id && (payload.action === "SUSPEND" || payload.action === "DEMOTE_TEACHER")) {
-    return NextResponse.json({ error: "You cannot suspend or demote your own account." }, { status: 409 });
+  if (
+    target.id === superAdmin.id &&
+    (payload.action === "SUSPEND" || payload.action === "DEMOTE_TEACHER")
+  ) {
+    return NextResponse.json(
+      { error: "You cannot suspend or demote your own account." },
+      { status: 409 },
+    );
   }
 
   switch (payload.action) {
     case "SUSPEND":
       await prisma.user.update({ where: { id: target.id }, data: { isSuspended: true } });
-      message = `${target.name} suspended. They can no longer sign in.`;
+      await revokeAllSessions(target.id);
+      message = `${target.name} suspended. All sessions revoked.`;
       break;
     case "UNSUSPEND":
-      await prisma.user.update({ where: { id: target.id }, data: { isSuspended: false, isActive: true } });
+      await prisma.user.update({
+        where: { id: target.id },
+        data: { isSuspended: false, isActive: true },
+      });
       message = `${target.name} re-activated.`;
       break;
     case "RESET_PASSWORD": {
@@ -143,7 +173,8 @@ export async function PATCH(request: NextRequest) {
         where: { id: target.id },
         data: { passwordHash, mustChangePassword: true },
       });
-      message = `Temporary password issued for ${target.name}. Share it securely — it is shown only once.`;
+      await revokeAllSessions(target.id);
+      message = `Temporary password issued for ${target.name}. All sessions revoked.`;
       break;
     }
     case "PROMOTE_ADMIN":

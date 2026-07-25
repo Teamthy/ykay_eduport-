@@ -44,7 +44,9 @@ export async function GET() {
         exam.status === ExamStatus.PUBLISHED &&
         (!latestAttempt ||
           (latestAttempt.status !== ExamAttemptStatus.IN_PROGRESS && hasUnusedRetake));
-      const canResume = Boolean(latestAttempt && latestAttempt.status === ExamAttemptStatus.IN_PROGRESS);
+      const canResume = Boolean(
+        latestAttempt && latestAttempt.status === ExamAttemptStatus.IN_PROGRESS,
+      );
 
       return {
         id: exam.id,
@@ -68,9 +70,12 @@ export async function GET() {
               status: latestAttempt.status,
               totalScore: latestAttempt.totalScore,
               submittedAt: latestAttempt.submittedAt?.toISOString() || null,
-              scoreVisible: exam.resultsReleased && latestAttempt.status === ExamAttemptStatus.GRADED,
+              scoreVisible:
+                exam.resultsReleased && latestAttempt.status === ExamAttemptStatus.GRADED,
               percent:
-                exam.resultsReleased && latestAttempt.status === ExamAttemptStatus.GRADED && totalMarks
+                exam.resultsReleased &&
+                latestAttempt.status === ExamAttemptStatus.GRADED &&
+                totalMarks
                   ? Math.round((latestAttempt.totalScore / totalMarks) * 100)
                   : null,
             }
@@ -79,4 +84,3 @@ export async function GET() {
     }),
   });
 }
-

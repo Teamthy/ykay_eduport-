@@ -113,7 +113,7 @@ export default function AdminNotificationsPage() {
       if (!response.ok) throw new Error(body.error || "Dispatch failed.");
       toast(
         `Dispatch complete — bridged ${body.bridgedAttendanceAlerts || 0} attendance alert(s); sent ${body.sent || 0}, retried ${body.retried || 0}, failed ${body.failed || 0}, skipped ${body.skipped || 0}.`,
-        "success"
+        "success",
       );
       await load(tab);
     } catch (dispatchError) {
@@ -155,8 +155,8 @@ export default function AdminNotificationsPage() {
               NOTIFICATION <span className="text-brand-green">DELIVERY</span>
             </h1>
             <p className="mt-3 max-w-2xl font-body text-sm text-white/60">
-              Live queue of outbound messages — attendance alerts, report-card releases, fee reminders, and
-              broadcasts — with delivery status, retries, and failure detail.
+              Live queue of outbound messages — attendance alerts, report-card releases, fee
+              reminders, and broadcasts — with delivery status, retries, and failure detail.
             </p>
           </div>
         </section>
@@ -167,22 +167,49 @@ export default function AdminNotificationsPage() {
 
             <div className="min-w-0 flex-1 space-y-6">
               {error ? (
-                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">{error}</div>
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                  {error}
+                </div>
               ) : null}
 
               {/* Summary + dispatch */}
               <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
                 {data
                   ? [
-                      { label: "Pending", value: data.summary.pending, icon: Clock, tone: "text-brand-orange" },
-                      { label: "Sent", value: data.summary.sent, icon: CheckCircle2, tone: "text-brand-green" },
-                      { label: "Failed", value: data.summary.failed, icon: XCircle, tone: "text-red-500" },
-                      { label: "Skipped", value: data.summary.skipped, icon: SkipForward, tone: "text-[var(--text-muted)]" },
+                      {
+                        label: "Pending",
+                        value: data.summary.pending,
+                        icon: Clock,
+                        tone: "text-brand-orange",
+                      },
+                      {
+                        label: "Sent",
+                        value: data.summary.sent,
+                        icon: CheckCircle2,
+                        tone: "text-brand-green",
+                      },
+                      {
+                        label: "Failed",
+                        value: data.summary.failed,
+                        icon: XCircle,
+                        tone: "text-red-500",
+                      },
+                      {
+                        label: "Skipped",
+                        value: data.summary.skipped,
+                        icon: SkipForward,
+                        tone: "text-[var(--text-muted)]",
+                      },
                     ].map((card) => (
-                      <div key={card.label} className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]">
+                      <div
+                        key={card.label}
+                        className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]"
+                      >
                         <card.icon size={18} className={`mb-3 ${card.tone}`} />
                         <div className={`font-display text-3xl ${card.tone}`}>{card.value}</div>
-                        <div className="mt-1 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{card.label}</div>
+                        <div className="mt-1 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+                          {card.label}
+                        </div>
                       </div>
                     ))
                   : null}
@@ -191,8 +218,14 @@ export default function AdminNotificationsPage() {
                   disabled={dispatching}
                   className="flex flex-col items-center justify-center gap-2 rounded-[2rem] bg-brand-green p-5 text-white shadow-[var(--btn-primary-shadow)] transition-all hover:bg-brand-green-dark disabled:opacity-50"
                 >
-                  {dispatching ? <LoaderCircle size={22} className="animate-spin" /> : <Send size={22} />}
-                  <span className="text-xs font-bold uppercase tracking-widest">{dispatching ? "Dispatching…" : "Dispatch Now"}</span>
+                  {dispatching ? (
+                    <LoaderCircle size={22} className="animate-spin" />
+                  ) : (
+                    <Send size={22} />
+                  )}
+                  <span className="text-xs font-bold uppercase tracking-widest">
+                    {dispatching ? "Dispatching…" : "Dispatch Now"}
+                  </span>
                 </button>
               </div>
 
@@ -216,7 +249,8 @@ export default function AdminNotificationsPage() {
               {loading ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading delivery queue...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    delivery queue...
                   </div>
                 </div>
               ) : null}
@@ -227,7 +261,10 @@ export default function AdminNotificationsPage() {
                   {data.jobs.map((job) => {
                     const ChannelIcon = CHANNEL_ICON[job.channel] || Mail;
                     return (
-                      <div key={job.id} className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]">
+                      <div
+                        key={job.id}
+                        className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]"
+                      >
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div className="flex min-w-0 items-start gap-4">
                             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-green/10 text-brand-green">
@@ -235,19 +272,33 @@ export default function AdminNotificationsPage() {
                             </div>
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="font-bold text-[var(--text-primary)]">{job.subject}</span>
-                                <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest ${statusChip(job.status)}`}>
+                                <span className="font-bold text-[var(--text-primary)]">
+                                  {job.subject}
+                                </span>
+                                <span
+                                  className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest ${statusChip(job.status)}`}
+                                >
                                   {job.status}
                                 </span>
                                 <span className="rounded-full bg-[var(--surface-disabled)] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
                                   {kindLabel(job.kind)}
                                 </span>
                               </div>
-                              <p className="mt-1 line-clamp-2 text-sm text-[var(--text-secondary)]">{job.body}</p>
+                              <p className="mt-1 line-clamp-2 text-sm text-[var(--text-secondary)]">
+                                {job.body}
+                              </p>
                               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                                <span>To: {job.recipientName || job.recipientEmail || job.recipientPhone || "—"}</span>
+                                <span>
+                                  To:{" "}
+                                  {job.recipientName ||
+                                    job.recipientEmail ||
+                                    job.recipientPhone ||
+                                    "—"}
+                                </span>
                                 <span>{job.channel}</span>
-                                <span>Attempts: {job.attempts}/{job.maxAttempts}</span>
+                                <span>
+                                  Attempts: {job.attempts}/{job.maxAttempts}
+                                </span>
                                 <span>
                                   {job.sentAt
                                     ? `Sent ${new Date(job.sentAt).toLocaleString()}`
@@ -255,7 +306,9 @@ export default function AdminNotificationsPage() {
                                 </span>
                               </div>
                               {job.lastError ? (
-                                <p className="mt-2 rounded-lg bg-red-500/8 px-3 py-1.5 text-xs text-red-500">{job.lastError}</p>
+                                <p className="mt-2 rounded-lg bg-red-500/8 px-3 py-1.5 text-xs text-red-500">
+                                  {job.lastError}
+                                </p>
                               ) : null}
                             </div>
                           </div>
@@ -287,8 +340,9 @@ export default function AdminNotificationsPage() {
                     <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 text-center shadow-[var(--card-shadow)]">
                       <BellRing className="mx-auto mb-3 text-[var(--text-muted)]" size={30} />
                       <p className="text-sm text-[var(--text-muted)]">
-                        No notification jobs {tab ? `with status ${tab}` : "yet"}. Jobs are created when teachers
-                        submit attendance, report cards are released, or broadcasts are sent.
+                        No notification jobs {tab ? `with status ${tab}` : "yet"}. Jobs are created
+                        when teachers submit attendance, report cards are released, or broadcasts
+                        are sent.
                       </p>
                     </div>
                   ) : null}

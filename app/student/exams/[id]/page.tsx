@@ -27,7 +27,13 @@ type Question = {
 
 type StartResponse = {
   attempt: { id: string; deadlineAt: string; secondsLeft: number };
-  exam: { id: string; title: string; subjectName: string; instructions: string | null; durationMinutes: number };
+  exam: {
+    id: string;
+    title: string;
+    subjectName: string;
+    instructions: string | null;
+    durationMinutes: number;
+  };
   questions: Question[];
 };
 
@@ -87,9 +93,14 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      return (await response.json()) as { ok?: boolean; submitted?: boolean; message?: string; error?: string };
+      return (await response.json()) as {
+        ok?: boolean;
+        submitted?: boolean;
+        message?: string;
+        error?: string;
+      };
     },
-    [data, id]
+    [data, id],
   );
 
   // Autosave every 15 seconds when dirty
@@ -168,13 +179,16 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
   const question = data?.questions[index] || null;
-  const answeredCount = data ? data.questions.filter((entry) => (answers[entry.id] || "").length > 0).length : 0;
+  const answeredCount = data
+    ? data.questions.filter((entry) => (answers[entry.id] || "").length > 0).length
+    : 0;
 
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-brand-navy">
         <div className="flex items-center gap-3 text-white/70">
-          <LoaderCircle className="animate-spin text-brand-green" size={22} /> Preparing your exam...
+          <LoaderCircle className="animate-spin text-brand-green" size={22} /> Preparing your
+          exam...
         </div>
       </main>
     );
@@ -204,7 +218,9 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
       <header className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-brand-navy px-6 py-4">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="truncate font-display text-lg tracking-widest text-white">{data.exam.title}</div>
+            <div className="truncate font-display text-lg tracking-widest text-white">
+              {data.exam.title}
+            </div>
             <div className="text-[10px] uppercase tracking-widest text-white/50">
               {data.exam.subjectName} · {answeredCount}/{data.questions.length} answered
             </div>
@@ -218,7 +234,8 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
                 secondsLeft < 120 ? "bg-red-500 text-white" : "bg-brand-green/20 text-brand-green"
               }`}
             >
-              <Clock size={16} /> {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+              <Clock size={16} /> {String(minutes).padStart(2, "0")}:
+              {String(seconds).padStart(2, "0")}
             </span>
           </div>
         </div>
@@ -251,7 +268,9 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
                   <Flag size={11} /> {flagged.has(question.id) ? "Flagged" : "Flag"}
                 </button>
               </div>
-              <p className="text-lg leading-relaxed text-[var(--text-primary)]">{question.questionText}</p>
+              <p className="text-lg leading-relaxed text-[var(--text-primary)]">
+                {question.questionText}
+              </p>
 
               <div className="mt-6 space-y-3">
                 {question.options
@@ -315,7 +334,12 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
                 disabled={submitting}
                 className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
               >
-                {submitting ? <LoaderCircle size={14} className="animate-spin" /> : <Send size={14} />} Submit Exam
+                {submitting ? (
+                  <LoaderCircle size={14} className="animate-spin" />
+                ) : (
+                  <Send size={14} />
+                )}{" "}
+                Submit Exam
               </button>
             ) : (
               <button
@@ -330,7 +354,9 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
 
         {/* Navigator */}
         <aside className="lg:sticky lg:top-24 h-fit rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-          <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Question Navigator</div>
+          <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+            Question Navigator
+          </div>
           <div className="grid grid-cols-5 gap-2">
             {data.questions.map((entry, entryIndex) => {
               const isAnswered = (answers[entry.id] || "").length > 0;
@@ -348,15 +374,24 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
                   }`}
                 >
                   {entryIndex + 1}
-                  {isFlagged ? <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-brand-orange" /> : null}
+                  {isFlagged ? (
+                    <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-brand-orange" />
+                  ) : null}
                 </button>
               );
             })}
           </div>
           <div className="mt-5 space-y-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-            <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-brand-green/40" /> Answered ({answeredCount})</div>
-            <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-brand-orange" /> Flagged ({flagged.size})</div>
-            <div className="flex items-center gap-2"><span className="h-3 w-3 rounded bg-[var(--surface-disabled)]" /> Unanswered ({data.questions.length - answeredCount})</div>
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded bg-brand-green/40" /> Answered ({answeredCount})
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded bg-brand-orange" /> Flagged ({flagged.size})
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded bg-[var(--surface-disabled)]" /> Unanswered (
+              {data.questions.length - answeredCount})
+            </div>
           </div>
           <button
             onClick={() => setConfirmSubmit(true)}

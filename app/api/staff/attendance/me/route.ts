@@ -35,7 +35,7 @@ export async function GET() {
   if (!profile && (user.role === UserRole.TEACHER || user.role === UserRole.HOD)) {
     return NextResponse.json(
       { error: "No teacher profile is linked to this account. Contact admin." },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
@@ -66,9 +66,17 @@ export async function GET() {
       qrPayload: ensured?.badgeCode ? badgePayload(ensured.badgeCode, user.schoolId) : null,
     },
     today: {
-      status: !last ? "ABSENT" : last.eventType === StaffAttendanceEventType.CHECK_IN ? "IN" : "OUT",
+      status: !last
+        ? "ABSENT"
+        : last.eventType === StaffAttendanceEventType.CHECK_IN
+          ? "IN"
+          : "OUT",
       checkInAt: events.find((e) => e.eventType === "CHECK_IN")?.scannedAt.toISOString() || null,
-      checkOutAt: [...events].reverse().find((e) => e.eventType === "CHECK_OUT")?.scannedAt.toISOString() || null,
+      checkOutAt:
+        [...events]
+          .reverse()
+          .find((e) => e.eventType === "CHECK_OUT")
+          ?.scannedAt.toISOString() || null,
       isLate: events.some((e) => e.eventType === "CHECK_IN" && e.isLate),
       lateMinutes: events.find((e) => e.eventType === "CHECK_IN")?.lateMinutes || 0,
       events: events.map((e) => ({
@@ -89,7 +97,10 @@ export async function POST(request: NextRequest) {
 
   const profile = await myTeacherProfile(user.id, user.schoolId);
   if (!profile) {
-    return NextResponse.json({ error: "No teacher profile linked for self check-in." }, { status: 404 });
+    return NextResponse.json(
+      { error: "No teacher profile linked for self check-in." },
+      { status: 404 },
+    );
   }
 
   const ensured = await ensureTeacherBadge(profile.id);
@@ -120,7 +131,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to record attendance." },
-      { status: 409 }
+      { status: 409 },
     );
   }
 }

@@ -69,12 +69,18 @@ export default function ITCourseTrackPage({ course }: { course: ITCourseContent 
             >
               <ArrowLeft size={18} /> Back to IT Education
             </Link>
-            <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.25em] text-brand-green">{course.category}</p>
+            <p className="mt-8 text-[10px] font-bold uppercase tracking-[0.25em] text-brand-green">
+              {course.category}
+            </p>
             <h1 className="mt-3 max-w-4xl font-display text-4xl tracking-widest text-white md:text-6xl">
               {course.title}
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white md:text-lg">{course.heroTagline}</p>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/80">{course.heroDescription}</p>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-white md:text-lg">
+              {course.heroTagline}
+            </p>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/80">
+              {course.heroDescription}
+            </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <span className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white">
                 <Clock className="mr-1 inline" size={14} /> {course.duration}
@@ -107,14 +113,23 @@ export default function ITCourseTrackPage({ course }: { course: ITCourseContent 
           <div className="grid gap-10 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-10">
               <div>
-                <h2 className="font-display text-3xl tracking-widest text-[var(--text-primary)]">OVERVIEW</h2>
-                <p className="mt-4 text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">{course.overview}</p>
+                <h2 className="font-display text-3xl tracking-widest text-[var(--text-primary)]">
+                  OVERVIEW
+                </h2>
+                <p className="mt-4 text-sm leading-relaxed text-[var(--text-secondary)] md:text-base">
+                  {course.overview}
+                </p>
               </div>
               <div>
-                <h2 className="font-display text-3xl tracking-widest text-[var(--text-primary)]">WHAT YOU&apos;LL LEARN</h2>
+                <h2 className="font-display text-3xl tracking-widest text-[var(--text-primary)]">
+                  WHAT YOU&apos;LL LEARN
+                </h2>
                 <ul className="mt-5 grid gap-3 sm:grid-cols-2">
                   {course.learningObjectives.map((item) => (
-                    <li key={item} className="flex gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-sm text-[var(--text-secondary)]">
+                    <li
+                      key={item}
+                      className="flex gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-sm text-[var(--text-secondary)]"
+                    >
                       <Check className="mt-0.5 shrink-0 text-brand-green" size={16} />
                       {item}
                     </li>
@@ -122,10 +137,15 @@ export default function ITCourseTrackPage({ course }: { course: ITCourseContent 
                 </ul>
               </div>
               <div>
-                <h2 className="font-display text-3xl tracking-widest text-[var(--text-primary)]">CURRICULUM</h2>
+                <h2 className="font-display text-3xl tracking-widest text-[var(--text-primary)]">
+                  CURRICULUM
+                </h2>
                 <div className="mt-5 space-y-4">
                   {course.curriculum.map((block) => (
-                    <div key={block.week} className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+                    <div
+                      key={block.week}
+                      className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5"
+                    >
                       <h3 className="font-bold text-brand-green">{block.week}</h3>
                       <ul className="mt-3 space-y-2 text-sm text-[var(--text-secondary)]">
                         {block.topics.map((topic) => (
@@ -163,7 +183,10 @@ export default function ITCourseTrackPage({ course }: { course: ITCourseContent 
                 <h3 className="font-display text-xl tracking-wide">Career outcomes</h3>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {course.careerOutcomes.map((item) => (
-                    <span key={item} className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
+                    <span
+                      key={item}
+                      className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white"
+                    >
                       {item}
                     </span>
                   ))}
@@ -178,21 +201,27 @@ export default function ITCourseTrackPage({ course }: { course: ITCourseContent 
           <div className="mx-auto flex max-w-7xl flex-col items-center gap-8 rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 md:flex-row md:p-10">
             <div className="flex h-36 w-36 shrink-0 flex-col items-center justify-center rounded-3xl border-2 border-brand-green/30 bg-brand-navy p-4 text-center shadow-lg">
               <Award className="text-brand-green" size={36} />
-              <div className="mt-2 text-[10px] font-bold uppercase tracking-widest text-brand-green">Certified</div>
+              <div className="mt-2 text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                Certified
+              </div>
               <div className="mt-1 font-display text-sm leading-tight tracking-wide text-white">
                 {course.certificationDetails.logoText || course.shortTitle}
               </div>
             </div>
             <div className="min-w-0 flex-1 text-center md:text-left">
-              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-brand-orange">Get certified</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-brand-orange">
+                Get certified
+              </p>
               <h2 className="mt-2 font-display text-3xl tracking-widest text-[var(--text-primary)]">
                 {course.certificationDetails.name}
               </h2>
               <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                {course.certificationDetails.provider} · Exam {course.certificationDetails.examCode} · Pass mark{" "}
-                {course.certificationDetails.passingScore}
+                {course.certificationDetails.provider} · Exam {course.certificationDetails.examCode}{" "}
+                · Pass mark {course.certificationDetails.passingScore}
               </p>
-              <p className="mt-2 text-sm text-[var(--text-muted)]">{course.certificationDetails.recognition}</p>
+              <p className="mt-2 text-sm text-[var(--text-muted)]">
+                {course.certificationDetails.recognition}
+              </p>
               <Link
                 href="/it-portal/auth"
                 className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-brand-green-dark"
@@ -204,7 +233,9 @@ export default function ITCourseTrackPage({ course }: { course: ITCourseContent 
         </section>
 
         <section className="mx-auto max-w-7xl px-6 py-14">
-          <h2 className="font-display text-3xl tracking-widest text-[var(--text-primary)]">RELATED TRACKS</h2>
+          <h2 className="font-display text-3xl tracking-widest text-[var(--text-primary)]">
+            RELATED TRACKS
+          </h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {course.relatedCourses.map((item) => (
               <Link
@@ -212,7 +243,9 @@ export default function ITCourseTrackPage({ course }: { course: ITCourseContent 
                 href={item.href}
                 className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 transition hover:border-brand-green/40"
               >
-                <div className="font-display text-xl tracking-wide text-[var(--text-primary)]">{item.title}</div>
+                <div className="font-display text-xl tracking-wide text-[var(--text-primary)]">
+                  {item.title}
+                </div>
                 <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-brand-green">
                   View track <ArrowRight size={12} />
                 </span>

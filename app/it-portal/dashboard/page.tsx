@@ -8,17 +8,19 @@ import { useToast } from "@/components/Toast";
 import {
   Award,
   BookOpen,
-  CheckCircle2,
+  ChevronDown,
   Clock,
-  GraduationCap,
   LoaderCircle,
-  MonitorSmartphone,
   PlayCircle,
-  Sparkles,
+  Search,
   TrendingUp,
+  Trophy,
+  Grid3X3,
+  List,
+  LogOut,
 } from "lucide-react";
 
-type CatalogCourse = {
+type Course = {
   id: string;
   slug: string;
   title: string;
@@ -33,7 +35,7 @@ type CatalogCourse = {
   certificateNumber: string | null;
 };
 
-type DashboardResponse = {
+type DashboardData = {
   user: { name: string; email: string; role: string };
   summary: {
     enrolledCourses: number;
@@ -41,241 +43,482 @@ type DashboardResponse = {
     certificatesEarned: number;
     averageProgress: number;
   };
-  catalog: CatalogCourse[];
-  certificates: Array<{
+  catalog: Course[];
+  certificates: {
     certificateNumber: string;
     issuedAt: string;
     courseTitle: string;
     credential: string;
-  }>;
+  }[];
 };
 
-export default function ItPortalDashboardPage() {
+type Tab = "all" | "in-progress" | "completed" | "not-started";
+
+const COURSE_IMAGES: Record<string, string> = {
+  python:
+    "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=480&q=80",
+  ai: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=480&q=80",
+  cybersecurity:
+    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=480&q=80",
+  "digital-literacy":
+    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=480&q=80",
+  "microsoft-word":
+    "https://images.unsplash.com/photo-1589810264340-0ce27bfbf751?auto=format&fit=crop&w=480&q=80",
+  "microsoft-excel":
+    "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=480&q=80",
+  "microsoft-powerpoint":
+    "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=480&q=80",
+  "excel-expert":
+    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=480&q=80",
+};
+
+export default function ItPortalDashboard() {
   const { toast } = useToast();
-  const [data, setData] = useState<DashboardResponse | null>(null);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [enrollingId, setEnrollingId] = useState("");
-  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<Tab>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [view, setView] = useState<"grid" | "list">("grid");
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
     try {
-      const response = await fetch("/api/it/dashboard", { cache: "no-store" });
-      const body = (await response.json()) as DashboardResponse & { error?: string };
-      if (!response.ok) throw new Error(body.error || "Unable to load your IT dashboard.");
-      setData(body);
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Unable to load your IT dashboard.");
+      const r = await fetch("/api/it/dashboard", { cache: "no-store" });
+      if (r.ok) setData(await r.json());
+      else toast("Failed to load dashboard.", "error");
+    } catch {
+      toast("Network error.", "error");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  async function enroll(course: CatalogCourse) {
-    setEnrollingId(course.id);
-    try {
-      const response = await fetch("/api/it/enroll", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseId: course.id }),
-      });
-      const body = (await response.json()) as { message?: string; error?: string };
-      if (!response.ok) throw new Error(body.error || "Unable to enroll.");
-      toast(body.message || "Enrolled!", "success");
-      await load();
-    } catch (enrollError) {
-      toast(enrollError instanceof Error ? enrollError.message : "Unable to enroll.", "error");
-    } finally {
-      setEnrollingId("");
-    }
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="min-h-screen bg-[var(--bg-primary)] pt-28">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="h-10 w-72 rounded-lg bg-[var(--surface-disabled)] animate-pulse" />
+            <div className="mt-4 h-5 w-96 rounded-lg bg-[var(--surface-disabled)] animate-pulse" />
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="h-24 rounded-2xl bg-[var(--surface-disabled)] animate-pulse"
+                />
+              ))}
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
   }
 
-  const enrolledCourses = data?.catalog.filter((course) => course.enrolled) || [];
-  const availableCourses = data?.catalog.filter((course) => !course.enrolled) || [];
-  const firstName = data?.user.name.split(" ")[0] || "";
+  if (!data) {
+    return (
+      <>
+        <Header />
+        <main className="grid min-h-screen place-items-center bg-[var(--bg-primary)]">
+          <div className="text-center">
+            <BookOpen size={48} className="mx-auto mb-4 text-[var(--text-muted)]" />
+            <h1 className="text-xl font-bold text-[var(--text-primary)]">
+              Unable to load dashboard
+            </h1>
+            <Link
+              href="/it-portal/auth"
+              className="mt-4 inline-block text-sm font-bold text-brand-green hover:underline"
+            >
+              Sign in to continue
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  const enrolled = data.catalog.filter((c) => c.enrolled);
+  const notEnrolled = data.catalog.filter((c) => !c.enrolled);
+
+  const filteredCourses = (() => {
+    let courses = enrolled;
+    if (activeTab === "in-progress")
+      courses = enrolled.filter(
+        (c) => c.status === "ACTIVE" && c.progressPercent > 0 && c.progressPercent < 100,
+      );
+    if (activeTab === "completed") courses = enrolled.filter((c) => c.status === "COMPLETED");
+    if (activeTab === "not-started") courses = enrolled.filter((c) => c.progressPercent === 0);
+    if (searchQuery)
+      courses = courses.filter((c) => c.title.toLowerCase().includes(searchQuery.toLowerCase()));
+    return courses;
+  })();
+
+  const tabs: { key: Tab; label: string; count: number }[] = [
+    { key: "all", label: "All Courses", count: enrolled.length },
+    {
+      key: "in-progress",
+      label: "In Progress",
+      count: enrolled.filter((c) => c.status === "ACTIVE" && c.progressPercent > 0).length,
+    },
+    {
+      key: "completed",
+      label: "Completed",
+      count: enrolled.filter((c) => c.status === "COMPLETED").length,
+    },
+    {
+      key: "not-started",
+      label: "Not Started",
+      count: enrolled.filter((c) => c.progressPercent === 0).length,
+    },
+  ];
 
   return (
     <>
       <Header />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         {/* Hero */}
-        <section className="relative overflow-hidden bg-brand-navy px-6 pt-28 pb-14">
-          <div className="absolute top-0 right-0 h-full w-1/3 bg-gradient-to-l from-brand-green to-transparent opacity-10" />
-          <div className="relative z-10 mx-auto max-w-7xl">
-            <div className="mb-3 flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-green/40 bg-brand-green/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
-                <MonitorSmartphone size={11} /> IT Education Portal
+        <section className="bg-brand-navy px-6 pt-28 pb-14">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex items-center gap-3 mb-3">
+              <img src="/ykay-logo.png" alt="Ykay" className="h-10 w-10 rounded-lg" />
+              <span className="rounded-full bg-brand-green/20 border border-brand-green/40 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                IT Learning Hub
               </span>
             </div>
-            <h1 className="font-display text-4xl tracking-widest text-white md:text-6xl">
-              {firstName ? `WELCOME, ${firstName.toUpperCase()}` : "MY IT DASHBOARD"}
+            <h1 className="font-display text-4xl tracking-widest text-white md:text-5xl">
+              MY <span className="text-brand-green">COURSES</span>
             </h1>
-            <p className="mt-3 max-w-2xl font-body text-sm text-white/60">
-              Track your digital skills journey — course progress, modules completed, and certificates earned.
+            <p className="mt-3 max-w-2xl text-sm text-white/60">
+              Welcome back, {data.user.name}.{" "}
+              {enrolled.length > 0
+                ? `You have ${enrolled.filter((c) => c.status === "ACTIVE").length} course(s) in progress.`
+                : "Start your IT learning journey — enroll in a course below."}
             </p>
           </div>
         </section>
 
         <section className="px-6 py-10">
-          <div className="mx-auto max-w-7xl space-y-10">
-            {error ? (
-              <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
-                {error}{" "}
-                <Link href="/it-portal/auth" className="font-bold underline">
-                  Sign in to the IT portal
+          <div className="mx-auto max-w-7xl space-y-6">
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              {[
+                {
+                  label: "Enrolled Courses",
+                  value: data.summary.enrolledCourses,
+                  icon: BookOpen,
+                  color: "text-brand-green",
+                },
+                {
+                  label: "Completed",
+                  value: data.summary.completedCourses,
+                  icon: Trophy,
+                  color: "text-brand-orange",
+                },
+                {
+                  label: "Certificates",
+                  value: data.summary.certificatesEarned,
+                  icon: Award,
+                  color: "text-brand-orange",
+                },
+                {
+                  label: "Avg. Progress",
+                  value: `${data.summary.averageProgress}%`,
+                  icon: TrendingUp,
+                  color: "text-brand-green",
+                },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]"
+                >
+                  <div className="flex items-center gap-3">
+                    <stat.icon size={20} className={stat.color} />
+                    <div>
+                      <div className="text-2xl font-bold text-[var(--text-primary)]">
+                        {stat.value}
+                      </div>
+                      <div className="text-[11px] font-medium text-[var(--text-muted)]">
+                        {stat.label}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick links */}
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/it-portal/certificates"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-brand-green"
+              >
+                <Award size={14} /> My Certificates
+              </Link>
+              <Link
+                href="/it-portal/profile"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-brand-green"
+              >
+                Profile & Settings
+              </Link>
+              <Link
+                href="/it-portal/instructor"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-brand-green"
+              >
+                Instructor Dashboard
+              </Link>
+              <Link
+                href="/it-education"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-brand-green"
+              >
+                Browse Catalog
+              </Link>
+            </div>
+
+            {/* Search + tabs */}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="relative">
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+                />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search my courses..."
+                  className="w-64 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-input)] py-2.5 pl-10 pr-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:border-brand-green"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setView("grid")}
+                  className={`rounded-lg p-2 ${view === "grid" ? "bg-brand-green/10 text-brand-green" : "text-[var(--text-muted)]"}`}
+                >
+                  <Grid3X3 size={18} />
+                </button>
+                <button
+                  onClick={() => setView("list")}
+                  className={`rounded-lg p-2 ${view === "list" ? "bg-brand-green/10 text-brand-green" : "text-[var(--text-muted)]"}`}
+                >
+                  <List size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Tab bar */}
+            <div className="flex gap-0 border-b border-[var(--border-subtle)]">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`relative px-5 py-3 text-sm font-bold transition ${
+                    activeTab === tab.key
+                      ? "text-[var(--text-primary)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                  }`}
+                >
+                  {tab.label}
+                  <span
+                    className={`ml-1.5 text-xs ${activeTab === tab.key ? "text-brand-green" : "text-[var(--text-muted)]"}`}
+                  >
+                    ({tab.count})
+                  </span>
+                  {activeTab === tab.key && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full bg-brand-green" />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Course cards */}
+            {filteredCourses.length > 0 ? (
+              <div
+                className={
+                  view === "grid"
+                    ? "grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                    : "space-y-4"
+                }
+              >
+                {filteredCourses.map((course) => (
+                  <CourseCard key={course.id} course={course} view={view} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] py-16 text-center">
+                <BookOpen size={40} className="mx-auto mb-3 text-[var(--text-muted)]" />
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">
+                  {searchQuery
+                    ? "No courses match your search"
+                    : `No ${activeTab.replace("-", " ")} courses`}
+                </h3>
+                <p className="mt-1 text-sm text-[var(--text-muted)]">
+                  Browse the catalog to find courses.
+                </p>
+                <Link
+                  href="/it-education"
+                  className="mt-4 inline-block rounded-full bg-brand-green px-6 py-2.5 text-sm font-bold text-white hover:bg-brand-green-dark"
+                >
+                  Browse Courses
                 </Link>
               </div>
-            ) : null}
+            )}
 
-            {loading ? (
-              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
-                <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                  <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading your dashboard...
-                </div>
-              </div>
-            ) : null}
-
-            {!loading && data ? (
-              <>
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                  {[
-                    { label: "Enrolled Courses", value: data.summary.enrolledCourses, icon: BookOpen, tone: "text-brand-green" },
-                    { label: "Average Progress", value: `${data.summary.averageProgress}%`, icon: TrendingUp, tone: "text-brand-green" },
-                    { label: "Completed", value: data.summary.completedCourses, icon: CheckCircle2, tone: "text-brand-orange" },
-                    { label: "Certificates", value: data.summary.certificatesEarned, icon: Award, tone: "text-brand-orange" },
-                  ].map((card) => (
-                    <div key={card.label} className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]">
-                      <card.icon size={18} className={`mb-3 ${card.tone}`} />
-                      <div className={`font-display text-3xl ${card.tone}`}>{card.value}</div>
-                      <div className="mt-1 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{card.label}</div>
-                    </div>
+            {/* Recommended */}
+            {notEnrolled.length > 0 && activeTab === "all" && !searchQuery && (
+              <div className="mt-12">
+                <h2 className="mb-1 font-display text-2xl tracking-widest text-[var(--text-primary)]">
+                  RECOMMENDED <span className="text-brand-green">FOR YOU</span>
+                </h2>
+                <p className="mb-5 text-sm text-[var(--text-muted)]">
+                  Expand your skills with these courses
+                </p>
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {notEnrolled.slice(0, 4).map((course) => (
+                    <CourseCard key={course.id} course={course} view="grid" />
                   ))}
                 </div>
-
-                {/* My courses */}
-                {enrolledCourses.length ? (
-                  <div>
-                    <div className="mb-4 flex items-center justify-between">
-                      <h2 className="font-display text-2xl text-[var(--text-primary)]">My Courses</h2>
-                      <span className="rounded-full bg-brand-green/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
-                        {enrolledCourses.length} active
-                      </span>
-                    </div>
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                      {enrolledCourses.map((course) => (
-                        <Link
-                          key={course.id}
-                          href={`/it-portal/courses/${course.slug}`}
-                          className="group rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)] transition-all hover:-translate-y-1 hover:border-brand-green hover:shadow-[var(--card-shadow-hover)]"
-                        >
-                          <div className="mb-4 flex items-start justify-between">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-green/10 text-brand-green transition-colors group-hover:bg-brand-green group-hover:text-white">
-                              <GraduationCap size={22} />
-                            </div>
-                            {course.status === "COMPLETED" ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-brand-green/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-brand-green">
-                                <Award size={10} /> Certified
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-brand-orange/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-brand-orange">
-                                <PlayCircle size={10} /> In Progress
-                              </span>
-                            )}
-                          </div>
-                          <h3 className="mb-1 font-display text-xl text-[var(--text-primary)]">{course.title}</h3>
-                          <p className="mb-4 text-xs text-[var(--text-muted)]">{course.certification}</p>
-                          <div className="mb-2 flex items-center justify-between text-xs">
-                            <span className="text-[var(--text-muted)]">Progress</span>
-                            <span className="font-bold text-brand-green">{course.progressPercent}%</span>
-                          </div>
-                          <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-disabled)]">
-                            <div
-                              className="h-full rounded-full bg-gradient-to-r from-brand-green to-brand-green-light transition-all"
-                              style={{ width: `${course.progressPercent}%` }}
-                            />
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* Certificates */}
-                {data.certificates.length ? (
-                  <div className="rounded-[2rem] border border-brand-green/25 bg-brand-green/5 p-8">
-                    <h2 className="mb-5 flex items-center gap-2 font-display text-2xl text-[var(--text-primary)]">
-                      <Award size={22} className="text-brand-green" /> My Certificates
-                    </h2>
-                    <div className="grid gap-4 md:grid-cols-2">
-                      {data.certificates.map((certificate) => (
-                        <div key={certificate.certificateNumber} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
-                          <div className="font-display text-lg text-[var(--text-primary)]">{certificate.courseTitle}</div>
-                          <div className="mt-1 text-xs text-[var(--text-secondary)]">{certificate.credential}</div>
-                          <div className="mt-3 flex items-center justify-between text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                            <span className="font-bold text-brand-green">{certificate.certificateNumber}</span>
-                            <span>{new Date(certificate.issuedAt).toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* Course catalog */}
-                <div>
-                  <div className="mb-4 flex items-center justify-between">
-                    <h2 className="font-display text-2xl text-[var(--text-primary)]">
-                      {enrolledCourses.length ? "Explore More Courses" : "Start Your IT Journey"}
-                    </h2>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-orange/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
-                      <Sparkles size={10} /> Free enrollment
-                    </span>
-                  </div>
-                  {availableCourses.length ? (
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                      {availableCourses.map((course) => (
-                        <div key={course.id} className="flex flex-col rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-                          <div className="mb-4 flex items-center justify-between">
-                            <span className="rounded-full bg-[var(--surface-disabled)] px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                              {course.level}
-                            </span>
-                            <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
-                              <Clock size={11} /> {course.durationWeeks} weeks · {course.moduleCount} modules
-                            </span>
-                          </div>
-                          <h3 className="mb-1 font-display text-xl text-[var(--text-primary)]">{course.title}</h3>
-                          <p className="mb-3 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">{course.tagline}</p>
-                          <p className="mb-5 text-[10px] font-bold uppercase tracking-widest text-brand-green">{course.certification}</p>
-                          <button
-                            onClick={() => void enroll(course)}
-                            disabled={Boolean(enrollingId)}
-                            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg transition-all hover:bg-brand-green-dark disabled:opacity-50"
-                          >
-                            {enrollingId === course.id ? <LoaderCircle size={14} className="animate-spin" /> : <PlayCircle size={14} />}
-                            Enroll Free
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 text-sm text-[var(--text-muted)]">
-                      You are enrolled in every available course. New tracks — robotics, data science, and web
-                      development — are coming soon.
-                    </p>
-                  )}
-                </div>
-              </>
-            ) : null}
+              </div>
+            )}
           </div>
         </section>
       </main>
       <Footer />
     </>
+  );
+}
+
+function CourseCard({ course, view }: { course: Course; view: "grid" | "list" }) {
+  const img = COURSE_IMAGES[course.slug] || COURSE_IMAGES["digital-literacy"];
+  const isComplete = course.status === "COMPLETED";
+
+  if (view === "list") {
+    return (
+      <Link
+        href={`/it-portal/courses/${course.slug}${course.enrolled ? "/learn" : ""}`}
+        className="group flex gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)] transition hover:border-brand-green/30"
+      >
+        <div className="h-20 w-32 flex-shrink-0 overflow-hidden rounded-xl">
+          <img src={img} alt={course.title} className="h-full w-full object-cover" />
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col justify-center">
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-brand-green/10 px-2 py-0.5 text-[9px] font-bold uppercase text-brand-green">
+              {course.level}
+            </span>
+            {isComplete && (
+              <span className="rounded-full bg-brand-orange/10 px-2 py-0.5 text-[9px] font-bold uppercase text-brand-orange">
+                ✓ Completed
+              </span>
+            )}
+          </div>
+          <h3 className="mt-1 text-sm font-bold text-[var(--text-primary)] group-hover:text-brand-green">
+            {course.title}
+          </h3>
+          {course.enrolled && (
+            <div className="mt-2 flex items-center gap-3">
+              <div className="h-2 flex-1 max-w-[200px] overflow-hidden rounded-full bg-[var(--surface-disabled)]">
+                <div
+                  className="h-full rounded-full bg-brand-green transition-all"
+                  style={{ width: `${course.progressPercent}%` }}
+                />
+              </div>
+              <span className="text-xs font-bold text-[var(--text-muted)]">
+                {course.progressPercent}%
+              </span>
+            </div>
+          )}
+        </div>
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      href={`/it-portal/courses/${course.slug}${course.enrolled ? "/learn" : ""}`}
+      className="group"
+    >
+      <div className="overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)] transition hover:border-brand-green/30 hover:shadow-lg">
+        <div className="relative aspect-video overflow-hidden">
+          <img
+            src={img}
+            alt={course.title}
+            className="h-full w-full object-cover transition group-hover:scale-105"
+          />
+          {isComplete && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              <div className="flex items-center gap-1.5 rounded-full bg-brand-green px-3 py-1.5 text-xs font-bold text-white">
+                <Trophy size={14} /> Completed
+              </div>
+            </div>
+          )}
+          <div className="absolute bottom-2 left-2">
+            <span className="rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+              {course.level}
+            </span>
+          </div>
+          {course.enrolled && course.progressPercent > 0 && !isComplete && (
+            <div className="absolute bottom-0 left-0 right-0">
+              <div className="h-1.5 bg-black/20">
+                <div
+                  className="h-full bg-brand-green"
+                  style={{ width: `${course.progressPercent}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="p-4">
+          <h3 className="mb-1 text-sm font-bold text-[var(--text-primary)] line-clamp-2 group-hover:text-brand-green">
+            {course.title}
+          </h3>
+          <p className="mb-3 text-xs text-[var(--text-muted)] line-clamp-1">{course.tagline}</p>
+          {course.enrolled && (
+            <div className="mb-3 flex items-center gap-2">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--surface-disabled)]">
+                <div
+                  className="h-full rounded-full bg-brand-green transition-all"
+                  style={{ width: `${course.progressPercent}%` }}
+                />
+              </div>
+              <span className="text-xs font-bold text-[var(--text-muted)]">
+                {course.progressPercent}%
+              </span>
+            </div>
+          )}
+          <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+            <span className="flex items-center gap-1">
+              <BookOpen size={11} /> {course.moduleCount} modules
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock size={11} /> {course.durationWeeks} weeks
+            </span>
+          </div>
+          <div className="mt-3">
+            {isComplete ? (
+              <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-green/10 py-2.5 text-xs font-bold text-brand-green">
+                <Award size={14} /> View Certificate
+              </span>
+            ) : course.enrolled && course.progressPercent > 0 ? (
+              <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-green py-2.5 text-xs font-bold text-white group-hover:bg-brand-green-dark">
+                <PlayCircle size={14} /> Continue Learning
+              </span>
+            ) : course.enrolled ? (
+              <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-green py-2.5 text-xs font-bold text-white group-hover:bg-brand-green-dark">
+                <PlayCircle size={14} /> Start Course
+              </span>
+            ) : (
+              <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-brand-green bg-transparent py-2.5 text-xs font-bold text-brand-green group-hover:bg-brand-green group-hover:text-white">
+                Enroll Now — Free
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }

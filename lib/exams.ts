@@ -2,7 +2,12 @@ import { ExamAttemptStatus, ExamQuestionType, ExamStatus, UserRole } from "@pris
 import { prisma } from "@/lib/prisma";
 import { requireRole, type SessionUser } from "@/lib/session";
 
-export const EXAM_TEACHER_ROLES: UserRole[] = [UserRole.TEACHER, UserRole.HOD, UserRole.ADMIN, UserRole.DIRECTOR];
+export const EXAM_TEACHER_ROLES: UserRole[] = [
+  UserRole.TEACHER,
+  UserRole.HOD,
+  UserRole.ADMIN,
+  UserRole.DIRECTOR,
+];
 
 export type ExamTeacherContext = {
   user: SessionUser;
@@ -101,7 +106,10 @@ export function parseBulkQuestions(raw: string): { questions: ParsedQuestion[]; 
   const errors: string[] = [];
 
   blocks.forEach((block, index) => {
-    const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
+    const lines = block
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
     const qLine = lines.find((line) => /^Q[:.]/i.test(line));
     if (!qLine) {
       errors.push(`Block ${index + 1}: missing "Q:" line.`);
@@ -109,7 +117,9 @@ export function parseBulkQuestions(raw: string): { questions: ParsedQuestion[]; 
     }
     const questionText = qLine.replace(/^Q[:.]\s*/i, "");
     const marksLine = lines.find((line) => /^Marks[:.]/i.test(line));
-    const marks = marksLine ? Math.max(1, Math.min(20, parseInt(marksLine.replace(/^Marks[:.]\s*/i, ""), 10) || 1)) : 1;
+    const marks = marksLine
+      ? Math.max(1, Math.min(20, parseInt(marksLine.replace(/^Marks[:.]\s*/i, ""), 10) || 1))
+      : 1;
 
     const fillLine = lines.find((line) => /^FILL[:.]/i.test(line));
     if (fillLine) {
@@ -141,7 +151,10 @@ export function parseBulkQuestions(raw: string): { questions: ParsedQuestion[]; 
       errors.push(`Block ${index + 1}: missing "Correct:" line.`);
       return;
     }
-    const correctKey = correctLine.replace(/^Correct[:.]\s*/i, "").trim().toUpperCase();
+    const correctKey = correctLine
+      .replace(/^Correct[:.]\s*/i, "")
+      .trim()
+      .toUpperCase();
 
     if (correctKey === "TRUE" || correctKey === "FALSE") {
       questions.push({
@@ -171,7 +184,14 @@ export function parseBulkQuestions(raw: string): { questions: ParsedQuestion[]; 
       errors.push(`Block ${index + 1}: Correct answer "${correctKey}" does not match any option.`);
       return;
     }
-    questions.push({ type: ExamQuestionType.MCQ, questionText, options, correctKey, correctText: null, marks });
+    questions.push({
+      type: ExamQuestionType.MCQ,
+      questionText,
+      options,
+      correctKey,
+      correctText: null,
+      marks,
+    });
   });
 
   return { questions, errors };

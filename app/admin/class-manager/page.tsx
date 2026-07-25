@@ -65,7 +65,11 @@ export default function AdminClassManagerPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [confirm, setConfirm] = useState<{ label: string; run: () => Promise<void>; danger?: boolean } | null>(null);
+  const [confirm, setConfirm] = useState<{
+    label: string;
+    run: () => Promise<void>;
+    danger?: boolean;
+  } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -128,8 +132,8 @@ export default function AdminClassManagerPage() {
               TEACHER &amp; CLASS <span className="text-brand-green">MANAGER</span>
             </h1>
             <p className="mt-3 max-w-2xl font-body text-sm text-white/60">
-              Class list with live rosters — change form teachers, move students between arms, and archive or
-              restore student records.
+              Class list with live rosters — change form teachers, move students between arms, and
+              archive or restore student records.
             </p>
           </div>
         </section>
@@ -139,12 +143,17 @@ export default function AdminClassManagerPage() {
             <AdminSidebar />
 
             <div className="min-w-0 flex-1 space-y-6">
-              {error ? <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">{error}</div> : null}
+              {error ? (
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                  {error}
+                </div>
+              ) : null}
 
               {loading ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading class manager...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    class manager...
                   </div>
                 </div>
               ) : null}
@@ -153,7 +162,10 @@ export default function AdminClassManagerPage() {
                 <>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="relative">
-                      <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                      <Search
+                        size={15}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+                      />
                       <input
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
@@ -168,26 +180,42 @@ export default function AdminClassManagerPage() {
                       }}
                       className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow"
                     >
-                      <Archive size={13} /> {archived === null ? `Archived Students (${data.archivedCount})` : "Hide Archived"}
+                      <Archive size={13} />{" "}
+                      {archived === null
+                        ? `Archived Students (${data.archivedCount})`
+                        : "Hide Archived"}
                     </button>
                   </div>
 
                   {/* Archived panel */}
                   {archived !== null ? (
                     <div className="rounded-[2rem] border border-brand-orange/25 bg-brand-orange/5 p-6">
-                      <h2 className="mb-4 font-display text-xl text-[var(--text-primary)]">Archived Students</h2>
+                      <h2 className="mb-4 font-display text-xl text-[var(--text-primary)]">
+                        Archived Students
+                      </h2>
                       {archived.length ? (
                         <div className="space-y-2">
                           {archived.map((student) => (
-                            <div key={student.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--surface-card)] border border-[var(--border-subtle)] px-4 py-3">
+                            <div
+                              key={student.id}
+                              className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--surface-card)] border border-[var(--border-subtle)] px-4 py-3"
+                            >
                               <div>
-                                <div className="text-sm font-bold text-[var(--text-primary)]">{student.displayName}</div>
+                                <div className="text-sm font-bold text-[var(--text-primary)]">
+                                  {student.displayName}
+                                </div>
                                 <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                                  {student.studentId} · {student.className} · archived {new Date(student.archivedAt).toLocaleDateString()}
+                                  {student.studentId} · {student.className} · archived{" "}
+                                  {new Date(student.archivedAt).toLocaleDateString()}
                                 </div>
                               </div>
                               <button
-                                onClick={() => void act({ action: "RESTORE_STUDENT", studentProfileId: student.id }, true)}
+                                onClick={() =>
+                                  void act(
+                                    { action: "RESTORE_STUDENT", studentProfileId: student.id },
+                                    true,
+                                  )
+                                }
                                 disabled={busy}
                                 className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
                               >
@@ -210,12 +238,15 @@ export default function AdminClassManagerPage() {
                         ? schoolClass.students.filter(
                             (student) =>
                               student.displayName.toLowerCase().includes(query) ||
-                              student.studentId.toLowerCase().includes(query)
+                              student.studentId.toLowerCase().includes(query),
                           )
                         : schoolClass.students;
                       if (query && !visibleStudents.length) return null;
                       return (
-                        <div key={schoolClass.id} className="overflow-hidden rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)]">
+                        <div
+                          key={schoolClass.id}
+                          className="overflow-hidden rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)]"
+                        >
                           <button
                             onClick={() => setOpenClassId(isOpen ? "" : schoolClass.id)}
                             className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
@@ -225,9 +256,12 @@ export default function AdminClassManagerPage() {
                                 <School size={19} />
                               </div>
                               <div>
-                                <div className="font-display text-xl text-[var(--text-primary)]">{schoolClass.displayName}</div>
+                                <div className="font-display text-xl text-[var(--text-primary)]">
+                                  {schoolClass.displayName}
+                                </div>
                                 <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                                  Form teacher: {schoolClass.formTeacher?.displayName || "Not assigned"}
+                                  Form teacher:{" "}
+                                  {schoolClass.formTeacher?.displayName || "Not assigned"}
                                 </div>
                               </div>
                             </div>
@@ -235,7 +269,10 @@ export default function AdminClassManagerPage() {
                               <span className="inline-flex items-center gap-1 rounded-full bg-brand-green/10 px-3 py-1 text-xs font-bold text-brand-green">
                                 <Users size={12} /> {schoolClass.studentCount}
                               </span>
-                              <ChevronDown size={18} className={`text-[var(--text-muted)] transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                              <ChevronDown
+                                size={18}
+                                className={`text-[var(--text-muted)] transition-transform ${isOpen ? "rotate-180" : ""}`}
+                              />
                             </div>
                           </button>
 
@@ -250,7 +287,12 @@ export default function AdminClassManagerPage() {
                                 <div className="flex flex-wrap gap-3">
                                   <select
                                     value={teacherPick[schoolClass.id] || ""}
-                                    onChange={(event) => setTeacherPick({ ...teacherPick, [schoolClass.id]: event.target.value })}
+                                    onChange={(event) =>
+                                      setTeacherPick({
+                                        ...teacherPick,
+                                        [schoolClass.id]: event.target.value,
+                                      })
+                                    }
                                     className="w-64 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-white [&>option]:text-brand-navy"
                                   >
                                     <option value="">Select new teacher...</option>
@@ -267,7 +309,11 @@ export default function AdminClassManagerPage() {
                                         toast("Select a teacher first.", "warning");
                                         return;
                                       }
-                                      void act({ action: "CHANGE_FORM_TEACHER", classId: schoolClass.id, teacherProfileId });
+                                      void act({
+                                        action: "CHANGE_FORM_TEACHER",
+                                        classId: schoolClass.id,
+                                        teacherProfileId,
+                                      });
                                     }}
                                     disabled={busy}
                                     className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
@@ -280,19 +326,31 @@ export default function AdminClassManagerPage() {
                               {/* Roster */}
                               <div className="space-y-2">
                                 {visibleStudents.map((student) => (
-                                  <div key={student.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--surface-disabled)] px-4 py-3">
+                                  <div
+                                    key={student.id}
+                                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--surface-disabled)] px-4 py-3"
+                                  >
                                     <div className="min-w-0">
-                                      <div className="text-sm font-bold text-[var(--text-primary)]">{student.displayName}</div>
+                                      <div className="text-sm font-bold text-[var(--text-primary)]">
+                                        {student.displayName}
+                                      </div>
                                       <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                                         {student.studentId}
                                         {student.gender ? ` · ${student.gender}` : ""}
-                                        {student.guardianName ? ` · Guardian: ${student.guardianName}` : ""}
+                                        {student.guardianName
+                                          ? ` · Guardian: ${student.guardianName}`
+                                          : ""}
                                       </div>
                                     </div>
                                     <div className="flex flex-wrap items-center gap-2">
                                       <select
                                         value={movePick[student.id] || ""}
-                                        onChange={(event) => setMovePick({ ...movePick, [student.id]: event.target.value })}
+                                        onChange={(event) =>
+                                          setMovePick({
+                                            ...movePick,
+                                            [student.id]: event.target.value,
+                                          })
+                                        }
                                         className="rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-xs text-[var(--input-text)]"
                                       >
                                         <option value="">Move to...</option>
@@ -311,7 +369,11 @@ export default function AdminClassManagerPage() {
                                             toast("Choose a destination class.", "warning");
                                             return;
                                           }
-                                          void act({ action: "MOVE_STUDENT", studentProfileId: student.id, targetClassId });
+                                          void act({
+                                            action: "MOVE_STUDENT",
+                                            studentProfileId: student.id,
+                                            targetClassId,
+                                          });
                                         }}
                                         disabled={busy}
                                         className="inline-flex items-center gap-1 rounded-full bg-brand-green px-3.5 py-2 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
@@ -323,7 +385,14 @@ export default function AdminClassManagerPage() {
                                           setConfirm({
                                             label: `Archive ${student.displayName}? Their records are preserved and they can be restored later.`,
                                             danger: true,
-                                            run: () => act({ action: "ARCHIVE_STUDENT", studentProfileId: student.id }, true),
+                                            run: () =>
+                                              act(
+                                                {
+                                                  action: "ARCHIVE_STUDENT",
+                                                  studentProfileId: student.id,
+                                                },
+                                                true,
+                                              ),
                                           })
                                         }
                                         disabled={busy}
@@ -335,7 +404,9 @@ export default function AdminClassManagerPage() {
                                   </div>
                                 ))}
                                 {!visibleStudents.length ? (
-                                  <p className="text-sm text-[var(--text-muted)]">No active students in this class.</p>
+                                  <p className="text-sm text-[var(--text-muted)]">
+                                    No active students in this class.
+                                  </p>
                                 ) : null}
                               </div>
                             </div>

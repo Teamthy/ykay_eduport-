@@ -38,15 +38,18 @@ export default function AdmissionsPage() {
           </div>
           <div className="relative mx-auto max-w-7xl px-6">
             <div className="max-w-3xl">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-brand-green">2025 / 2026 admissions</p>
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-brand-green">
+                2025 / 2026 admissions
+              </p>
               <h1 className="mt-5 font-display text-5xl leading-[0.88] tracking-[0.08em] text-white sm:text-7xl md:text-8xl">
                 START YOUR
                 <br />
                 <span className="text-brand-green">APPLICATION</span>
               </h1>
               <p className="mt-7 max-w-2xl text-base leading-7 text-white md:text-lg">
-                Apply to Ykay College &amp; Leadership Academy for JSS1 through SS3. Before you begin, please prepare the
-                applicant&apos;s birth certificate, passport photograph, and most recent report card.
+                Apply to Ykay College &amp; Leadership Academy for JSS1 through SS3. Before you
+                begin, please prepare the applicant&apos;s birth certificate, passport photograph,
+                and most recent report card.
               </p>
               <div className="mt-8 flex flex-wrap gap-3 text-sm text-white">
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2">
@@ -70,8 +73,12 @@ export default function AdmissionsPage() {
               className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-sm"
             >
               <item.icon className="text-brand-green" size={22} />
-              <h2 className="mt-4 font-display text-xl tracking-wide text-[var(--text-primary)]">{item.title}</h2>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">{item.text}</p>
+              <h2 className="mt-4 font-display text-xl tracking-wide text-[var(--text-primary)]">
+                {item.title}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
+                {item.text}
+              </p>
             </div>
           ))}
         </section>

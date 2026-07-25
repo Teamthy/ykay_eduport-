@@ -36,7 +36,11 @@ function getClient() {
   });
 }
 
-export function createDocumentStorageKey(applicationId: string, documentType: AdmissionDocumentType, fileName: string) {
+export function createDocumentStorageKey(
+  applicationId: string,
+  documentType: AdmissionDocumentType,
+  fileName: string,
+) {
   const prefix = (process.env.S3_ADMISSIONS_PREFIX || "admissions").replace(/^\/+|\/+$/g, "");
   return `${prefix}/${applicationId}/${documentType.toLowerCase()}-${crypto.randomUUID()}.${safeFileName(fileName)}`;
 }
@@ -48,7 +52,11 @@ export async function createSecureUploadUrl(input: {
   contentType: string;
 }) {
   const config = getStorageConfig();
-  const storageKey = createDocumentStorageKey(input.applicationId, input.documentType, input.fileName);
+  const storageKey = createDocumentStorageKey(
+    input.applicationId,
+    input.documentType,
+    input.fileName,
+  );
   const command = new PutObjectCommand({
     Bucket: config.bucket,
     Key: storageKey,
@@ -71,7 +79,7 @@ export async function verifyStoredDocument(storageKey: string, expectedSize: num
     new HeadObjectCommand({
       Bucket: config.bucket,
       Key: storageKey,
-    })
+    }),
   );
 
   return result.ContentLength === expectedSize;

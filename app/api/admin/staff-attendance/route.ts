@@ -179,7 +179,8 @@ export async function POST(request: NextRequest) {
         where: { schoolId: user.schoolId, badgeCode: parsed, isActive: true },
         select: { id: true },
       });
-      if (!teacher) return NextResponse.json({ error: "Staff badge not recognized." }, { status: 404 });
+      if (!teacher)
+        return NextResponse.json({ error: "Staff badge not recognized." }, { status: 404 });
       const workDate = new Date(`${workDateKey()}T12:00:00.000Z`);
       const last = await prisma.staffAttendanceEvent.findFirst({
         where: { schoolId: user.schoolId, teacherProfileId: teacher.id, workDate },
@@ -200,23 +201,25 @@ export async function POST(request: NextRequest) {
       note: input.note || null,
     });
 
-    await prisma.auditLog.create({
-      data: {
-        schoolId: user.schoolId,
-        actorUserId: user.id,
-        action: "STAFF_QR_SCAN",
-        entityType: "StaffAttendanceEvent",
-        entityId: result.event.id,
-        ipAddress: getClientIp(request),
-        metadata: { eventType: result.event.eventType, staff: result.staff.displayName },
-      },
-    }).catch(() => undefined);
+    await prisma.auditLog
+      .create({
+        data: {
+          schoolId: user.schoolId,
+          actorUserId: user.id,
+          action: "STAFF_QR_SCAN",
+          entityType: "StaffAttendanceEvent",
+          entityId: result.event.id,
+          ipAddress: getClientIp(request),
+          metadata: { eventType: result.event.eventType, staff: result.staff.displayName },
+        },
+      })
+      .catch(() => undefined);
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Scan failed." },
-      { status: 409 }
+      { status: 409 },
     );
   }
 }

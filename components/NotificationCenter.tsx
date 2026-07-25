@@ -29,10 +29,7 @@ export default function NotificationCenter({
 }: NotificationCenterProps) {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const typeConfig: Record<
-    string,
-    { icon: typeof BellRing; color: string; bg: string }
-  > = {
+  const typeConfig: Record<string, { icon: typeof BellRing; color: string; bg: string }> = {
     welcome: { icon: UserPlus, color: "text-brand-green", bg: "bg-brand-green/10" },
     absence: { icon: AlertTriangle, color: "text-red-500", bg: "bg-red-500/10" },
     fee_receipt: { icon: CheckCircle2, color: "text-brand-green", bg: "bg-brand-green/10" },
@@ -44,9 +41,7 @@ export default function NotificationCenter({
   return (
     <div className="rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 md:p-8 shadow-[var(--card-shadow)] theme-transition">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="font-display text-lg tracking-[2px] text-[var(--text-primary)]">
-          {title}
-        </h3>
+        <h3 className="font-display text-lg tracking-[2px] text-[var(--text-primary)]">{title}</h3>
         {unreadCount > 0 && (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-brand-green/10 text-brand-green text-[10px] font-bold">
             {unreadCount} unread
@@ -60,10 +55,11 @@ export default function NotificationCenter({
           return (
             <div
               key={n.id}
-              className={`rounded-xl px-5 py-4 border transition-colors ${n.read
+              className={`rounded-xl px-5 py-4 border transition-colors ${
+                n.read
                   ? "bg-[var(--surface-disabled)] border-[var(--border-subtle)]"
                   : "bg-brand-green/5 border-brand-green/20"
-                }`}
+              }`}
             >
               <div className="flex items-start gap-3">
                 <div
@@ -74,22 +70,19 @@ export default function NotificationCenter({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <h4
-                      className={`font-body text-sm font-bold ${n.read ? "text-[var(--text-secondary)]" : "text-[var(--text-primary)]"
-                        }`}
+                      className={`font-body text-sm font-bold ${
+                        n.read ? "text-[var(--text-secondary)]" : "text-[var(--text-primary)]"
+                      }`}
                     >
                       {n.title}
                     </h4>
-                    {!n.read && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-green" />
-                    )}
+                    {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-brand-green" />}
                   </div>
                   <p className="font-body text-xs text-[var(--text-muted)] leading-relaxed">
                     {n.message}
                   </p>
                   <div className="flex items-center justify-between mt-2">
-                    <span className="font-body text-[10px] text-[var(--text-muted)]">
-                      {n.time}
-                    </span>
+                    <span className="font-body text-[10px] text-[var(--text-muted)]">{n.time}</span>
                     {n.action && (
                       <a
                         href="#"

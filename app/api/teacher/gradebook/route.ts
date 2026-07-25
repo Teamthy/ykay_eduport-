@@ -55,7 +55,9 @@ export async function GET(request: NextRequest) {
   const requestedAssignmentId = request.nextUrl.searchParams.get("assignmentId") || "";
   const assignments = teacherProfile.subjectAssignments;
   const selectedAssignment =
-    assignments.find((assignment) => assignment.id === requestedAssignmentId) || assignments[0] || null;
+    assignments.find((assignment) => assignment.id === requestedAssignmentId) ||
+    assignments[0] ||
+    null;
 
   if (!selectedAssignment) {
     return NextResponse.json({
@@ -137,9 +139,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid gradebook payload." }, { status: 400 });
   }
 
-  const assignment = await resolveAssignment(payload.assignmentId, teacherProfile.id, user.schoolId);
+  const assignment = await resolveAssignment(
+    payload.assignmentId,
+    teacherProfile.id,
+    user.schoolId,
+  );
   if (!assignment || !assignment.subjectName) {
-    return NextResponse.json({ error: "You are not assigned to this subject and class." }, { status: 403 });
+    return NextResponse.json(
+      { error: "You are not assigned to this subject and class." },
+      { status: 403 },
+    );
   }
 
   const gradebook = await ensureGradebook({
@@ -153,8 +162,10 @@ export async function POST(request: NextRequest) {
 
   if (gradebook.status !== GradebookStatus.OPEN) {
     return NextResponse.json(
-      { error: `This gradebook is ${gradebookStatusLabel(gradebook.status).toLowerCase()} and can no longer be edited. Contact the administrator.` },
-      { status: 409 }
+      {
+        error: `This gradebook is ${gradebookStatusLabel(gradebook.status).toLowerCase()} and can no longer be edited. Contact the administrator.`,
+      },
+      { status: 409 },
     );
   }
 
@@ -164,7 +175,7 @@ export async function POST(request: NextRequest) {
         where: { gradebookId: gradebook.id },
         select: { studentProfileId: true },
       })
-    ).map((entry) => entry.studentProfileId)
+    ).map((entry) => entry.studentProfileId),
   );
 
   const updates = payload.scores.filter((score) => validStudentIds.has(score.studentProfileId));

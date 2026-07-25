@@ -1,4 +1,10 @@
-import { AttendanceStatus, ExamStatus, GradebookStatus, TeacherAssignmentRole, UserRole } from "@prisma/client";
+import {
+  AttendanceStatus,
+  ExamStatus,
+  GradebookStatus,
+  TeacherAssignmentRole,
+  UserRole,
+} from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
@@ -6,7 +12,12 @@ import { requireRole } from "@/lib/session";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const user = await requireRole([UserRole.TEACHER, UserRole.HOD, UserRole.ADMIN, UserRole.DIRECTOR]);
+  const user = await requireRole([
+    UserRole.TEACHER,
+    UserRole.HOD,
+    UserRole.ADMIN,
+    UserRole.DIRECTOR,
+  ]);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const profile = await prisma.teacherProfile.findFirst({
@@ -30,13 +41,15 @@ export async function GET() {
   if (!profile) {
     return NextResponse.json(
       { error: "No teacher profile is linked to this account. Contact the school administrator." },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
-  const formAssignments = profile.classAssignments.filter((a) => a.role === TeacherAssignmentRole.FORM_TEACHER);
+  const formAssignments = profile.classAssignments.filter(
+    (a) => a.role === TeacherAssignmentRole.FORM_TEACHER,
+  );
   const subjectAssignments = profile.classAssignments.filter(
-    (a) => a.role === TeacherAssignmentRole.SUBJECT_TEACHER && a.subjectName
+    (a) => a.role === TeacherAssignmentRole.SUBJECT_TEACHER && a.subjectName,
   );
 
   const classIds = [...new Set(profile.classAssignments.map((a) => a.classroom.id))];
@@ -102,7 +115,10 @@ export async function GET() {
 
   // Map gradebooks back to assignment ids for deep-links
   const assignmentByKey = new Map(
-    subjectAssignments.map((a) => [`${a.classroom.id}::${(a.subjectName || "").toLowerCase()}`, a.id])
+    subjectAssignments.map((a) => [
+      `${a.classroom.id}::${(a.subjectName || "").toLowerCase()}`,
+      a.id,
+    ]),
   );
 
   return NextResponse.json({
@@ -118,7 +134,8 @@ export async function GET() {
     stats: {
       classCount: classIds.length,
       totalStudents,
-      subjectCount: [...new Set(subjectAssignments.map((a) => a.subjectName).filter(Boolean))].length,
+      subjectCount: [...new Set(subjectAssignments.map((a) => a.subjectName).filter(Boolean))]
+        .length,
       pendingCorrections,
       todayRegisterDone: todaySessions.some((session) => session.submittedAt),
       openGradebooks: openGradebooks.filter((g) => g.status === GradebookStatus.OPEN).length,
@@ -136,9 +153,7 @@ export async function GET() {
           ? `/teacher/gradebook?assignmentId=${encodeURIComponent(assignment.id)}`
           : null,
       attendanceHref:
-        assignment.role === TeacherAssignmentRole.FORM_TEACHER
-          ? `/teacher/class/attendance`
-          : null,
+        assignment.role === TeacherAssignmentRole.FORM_TEACHER ? `/teacher/class/attendance` : null,
     })),
     gradebooks: openGradebooks.map((g) => {
       const key = `${g.classId}::${g.subjectName.toLowerCase()}`;

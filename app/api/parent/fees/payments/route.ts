@@ -21,7 +21,10 @@ const schema = z.object({
 export async function POST(request: NextRequest) {
   const context = await getParentFinanceContext();
   if (!context) {
-    return jsonNoStore({ error: "No live parent finance profile is linked to this account yet." }, { status: 404 });
+    return jsonNoStore(
+      { error: "No live parent finance profile is linked to this account yet." },
+      { status: 404 },
+    );
   }
 
   let input: z.infer<typeof schema>;
@@ -52,11 +55,18 @@ export async function POST(request: NextRequest) {
     return jsonNoStore({ error: "Payment attempt not found for this account." }, { status: 404 });
   }
 
-  const existingPayment = await prisma.feePayment.findUnique({ where: { reference: attempt.reference } });
+  const existingPayment = await prisma.feePayment.findUnique({
+    where: { reference: attempt.reference },
+  });
   if (existingPayment || attempt.status === PaymentStatus.PAID) {
-    const payment = existingPayment || (await prisma.feePayment.findUnique({ where: { reference: attempt.reference } }));
+    const payment =
+      existingPayment ||
+      (await prisma.feePayment.findUnique({ where: { reference: attempt.reference } }));
     if (!payment) {
-      return jsonNoStore({ error: "Payment is marked paid but receipt is missing. Contact bursary." }, { status: 409 });
+      return jsonNoStore(
+        { error: "Payment is marked paid but receipt is missing. Contact bursary." },
+        { status: 409 },
+      );
     }
     return jsonNoStore({
       payment: {
@@ -77,7 +87,7 @@ export async function POST(request: NextRequest) {
     const verified = await verifyPaystackTransaction(
       attempt.reference,
       attempt.amount * 100,
-      attempt.payerEmail || context.profile.user.email
+      attempt.payerEmail || context.profile.user.email,
     );
 
     const result = await postCompletedFeePayment({

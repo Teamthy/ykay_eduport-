@@ -5,8 +5,18 @@ import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import {
-  BookOpen, Users, ClipboardCheck, ArrowRight, UserCheck, AlertCircle,
-  CheckCircle2, LoaderCircle, Activity, FileText, School, Lock,
+  BookOpen,
+  Users,
+  ClipboardCheck,
+  ArrowRight,
+  UserCheck,
+  AlertCircle,
+  CheckCircle2,
+  LoaderCircle,
+  Activity,
+  FileText,
+  School,
+  Lock,
 } from "lucide-react";
 
 type DashboardResponse = {
@@ -110,9 +120,13 @@ export default function TeacherDashboard() {
         <TeacherSidebar />
         <section className="min-w-0 flex-1 space-y-6">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Live teaching hub</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Live teaching hub
+            </p>
             <h1 className="mt-2 font-display text-4xl tracking-widest">
-              {loading ? "LOADING…" : `HI, ${(data?.teacher.displayName || "TEACHER").split(" ")[0].toUpperCase()}`}
+              {loading
+                ? "LOADING…"
+                : `HI, ${(data?.teacher.displayName || "TEACHER").split(" ")[0].toUpperCase()}`}
             </h1>
             <p className="mt-3 max-w-2xl text-sm text-white/65">
               {data?.teacher.isFormTeacher && data?.teacher.isSubjectTeacher
@@ -124,7 +138,9 @@ export default function TeacherDashboard() {
           </div>
 
           {error && (
-            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">{error}</div>
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">
+              {error}
+            </div>
           )}
 
           {loading || !data ? (
@@ -135,15 +151,40 @@ export default function TeacherDashboard() {
             <>
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {[
-                  { label: "Students", value: data.stats.totalStudents, icon: Users, color: "text-brand-green" },
-                  { label: "Subjects", value: data.stats.subjectCount, icon: BookOpen, color: "text-brand-orange" },
-                  { label: "Open gradebooks", value: data.stats.openGradebooks, icon: FileText, color: "text-blue-500" },
-                  { label: "Live exams", value: data.stats.liveExams, icon: ClipboardCheck, color: "text-brand-green" },
+                  {
+                    label: "Students",
+                    value: data.stats.totalStudents,
+                    icon: Users,
+                    color: "text-brand-green",
+                  },
+                  {
+                    label: "Subjects",
+                    value: data.stats.subjectCount,
+                    icon: BookOpen,
+                    color: "text-brand-orange",
+                  },
+                  {
+                    label: "Open gradebooks",
+                    value: data.stats.openGradebooks,
+                    icon: FileText,
+                    color: "text-blue-500",
+                  },
+                  {
+                    label: "Live exams",
+                    value: data.stats.liveExams,
+                    icon: ClipboardCheck,
+                    color: "text-brand-green",
+                  },
                 ].map((card) => (
-                  <div key={card.label} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
+                  <div
+                    key={card.label}
+                    className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4"
+                  >
                     <card.icon className={`mb-2 ${card.color}`} size={18} />
                     <div className="font-display text-2xl">{card.value}</div>
-                    <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{card.label}</div>
+                    <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                      {card.label}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -184,7 +225,10 @@ export default function TeacherDashboard() {
                   <h2 className="font-display text-xl tracking-widest">SUBJECT ASSIGNMENTS</h2>
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
                     {subjectAssignments.map((a) => (
-                      <div key={a.id} className="rounded-2xl border border-[var(--border-subtle)] p-4">
+                      <div
+                        key={a.id}
+                        className="rounded-2xl border border-[var(--border-subtle)] p-4"
+                      >
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <b>{a.subjectName}</b>
@@ -193,7 +237,10 @@ export default function TeacherDashboard() {
                             </div>
                           </div>
                           {a.gradebookHref && (
-                            <Link href={a.gradebookHref} className="inline-flex items-center gap-1 text-xs font-bold text-brand-green">
+                            <Link
+                              href={a.gradebookHref}
+                              className="inline-flex items-center gap-1 text-xs font-bold text-brand-green"
+                            >
                               Scores <ArrowRight size={12} />
                             </Link>
                           )}
@@ -206,20 +253,33 @@ export default function TeacherDashboard() {
 
               {!!formAssignments.length && (
                 <div className="rounded-3xl border border-brand-orange/30 bg-brand-orange/5 p-5">
-                  <h2 className="font-display text-xl tracking-widest text-brand-orange">FORM CLASS</h2>
+                  <h2 className="font-display text-xl tracking-widest text-brand-orange">
+                    FORM CLASS
+                  </h2>
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
                     {formAssignments.map((a) => (
-                      <div key={a.id} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
+                      <div
+                        key={a.id}
+                        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4"
+                      >
                         <div className="flex items-center gap-2">
                           <School size={16} className="text-brand-orange" />
                           <b>{a.className}</b>
                         </div>
-                        <div className="mt-1 text-xs text-[var(--text-muted)]">{a.studentCount} learners</div>
+                        <div className="mt-1 text-xs text-[var(--text-muted)]">
+                          {a.studentCount} learners
+                        </div>
                         <div className="mt-3 flex flex-wrap gap-2">
-                          <Link href="/teacher/class/attendance" className="rounded-full bg-brand-orange px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                          <Link
+                            href="/teacher/class/attendance"
+                            className="rounded-full bg-brand-orange px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white"
+                          >
                             Attendance
                           </Link>
-                          <Link href="/teacher/students" className="rounded-full border border-[var(--border-default)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest">
+                          <Link
+                            href="/teacher/students"
+                            className="rounded-full border border-[var(--border-default)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest"
+                          >
                             Roster
                           </Link>
                         </div>
@@ -229,11 +289,13 @@ export default function TeacherDashboard() {
                   <div className="mt-4 flex items-center gap-2 text-sm">
                     {data.stats.todayRegisterDone ? (
                       <>
-                        <CheckCircle2 className="text-brand-green" size={16} /> Today&apos;s register submitted
+                        <CheckCircle2 className="text-brand-green" size={16} /> Today&apos;s
+                        register submitted
                       </>
                     ) : (
                       <>
-                        <AlertCircle className="text-brand-orange" size={16} /> Attendance not submitted yet today
+                        <AlertCircle className="text-brand-orange" size={16} /> Attendance not
+                        submitted yet today
                       </>
                     )}
                   </div>
@@ -246,7 +308,10 @@ export default function TeacherDashboard() {
                   {data.gradebooks.length ? (
                     <ul className="mt-4 space-y-3">
                       {data.gradebooks.map((g) => (
-                        <li key={g.id} className="flex items-center justify-between gap-3 rounded-2xl bg-[var(--surface-disabled)] p-3 text-sm">
+                        <li
+                          key={g.id}
+                          className="flex items-center justify-between gap-3 rounded-2xl bg-[var(--surface-disabled)] p-3 text-sm"
+                        >
                           <div>
                             <b>
                               {g.subjectName} · {g.className}
@@ -271,21 +336,32 @@ export default function TeacherDashboard() {
                   {data.exams.length ? (
                     <ul className="mt-4 space-y-3">
                       {data.exams.map((e) => (
-                        <li key={e.id} className="flex items-center justify-between gap-3 rounded-2xl bg-[var(--surface-disabled)] p-3 text-sm">
+                        <li
+                          key={e.id}
+                          className="flex items-center justify-between gap-3 rounded-2xl bg-[var(--surface-disabled)] p-3 text-sm"
+                        >
                           <div>
                             <b>{e.title}</b>
                             <div className="text-xs text-[var(--text-muted)]">
-                              {e.subjectName} · {e.className} · {e.questionCount} Q · {e.attemptCount} attempts
+                              {e.subjectName} · {e.className} · {e.questionCount} Q ·{" "}
+                              {e.attemptCount} attempts
                             </div>
                           </div>
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-brand-green">{e.status}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                            {e.status}
+                          </span>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="mt-4 text-sm text-[var(--text-muted)]">No draft/published exams yet.</p>
+                    <p className="mt-4 text-sm text-[var(--text-muted)]">
+                      No draft/published exams yet.
+                    </p>
                   )}
-                  <Link href="/teacher/cbt-center" className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-brand-green">
+                  <Link
+                    href="/teacher/cbt-center"
+                    className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-brand-green"
+                  >
                     Manage CBT <ArrowRight size={12} />
                   </Link>
                 </div>
@@ -297,10 +373,15 @@ export default function TeacherDashboard() {
                   {data.recentSessions.length ? (
                     <ul className="space-y-3">
                       {data.recentSessions.map((s, i) => (
-                        <li key={`${s.className}-${s.date}-${i}`} className="flex items-center justify-between text-sm">
+                        <li
+                          key={`${s.className}-${s.date}-${i}`}
+                          className="flex items-center justify-between text-sm"
+                        >
                           <div>
                             <b>{s.className}</b>
-                            <div className="text-xs text-[var(--text-muted)]">{new Date(s.date).toLocaleDateString()}</div>
+                            <div className="text-xs text-[var(--text-muted)]">
+                              {new Date(s.date).toLocaleDateString()}
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <span>
@@ -324,13 +405,19 @@ export default function TeacherDashboard() {
                     <ul className="space-y-3">
                       {data.activity.map((entry, i) => (
                         <li key={`${entry.at}-${i}`} className="text-sm">
-                          <div className="text-[var(--text-primary)]">{actionLabel(entry.action)}</div>
-                          <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{timeAgo(entry.at)}</div>
+                          <div className="text-[var(--text-primary)]">
+                            {actionLabel(entry.action)}
+                          </div>
+                          <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                            {timeAgo(entry.at)}
+                          </div>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-sm text-[var(--text-muted)]">Your recent actions will appear here.</p>
+                    <p className="text-sm text-[var(--text-muted)]">
+                      Your recent actions will appear here.
+                    </p>
                   )}
                   {data.stats.pendingCorrections > 0 && (
                     <p className="mt-4 text-xs font-bold text-brand-orange">

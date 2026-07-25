@@ -14,13 +14,18 @@ export default function NewsletterSignup() {
     if (!email) return;
     setSubscribed(true);
     toast("Subscribed! Check your email for confirmation.", "success");
-    setTimeout(() => { setEmail(""); setSubscribed(false); }, 4000);
+    setTimeout(() => {
+      setEmail("");
+      setSubscribed(false);
+    }, 4000);
   };
 
   return (
     <div className="rounded-[2.5rem] bg-gradient-to-br from-brand-navy to-brand-navy-light p-10 text-white text-center">
       <Mail className="mx-auto text-brand-green mb-4" size={32} />
-      <h3 className="font-display text-3xl mb-3">STAY <span className="text-brand-green">CONNECTED</span></h3>
+      <h3 className="font-display text-3xl mb-3">
+        STAY <span className="text-brand-green">CONNECTED</span>
+      </h3>
       <p className="text-white/60 mb-6 max-w-md mx-auto text-sm">
         Get admission updates, school news, and academic tips delivered to your inbox monthly.
       </p>
@@ -30,11 +35,14 @@ export default function NewsletterSignup() {
             type="email"
             required
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
             className="flex-1 px-5 py-3 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-brand-green"
           />
-          <button type="submit" className="px-6 py-3 rounded-full bg-brand-orange hover:bg-brand-orange-dark text-white font-bold text-sm uppercase tracking-widest shadow-lg">
+          <button
+            type="submit"
+            className="px-6 py-3 rounded-full bg-brand-orange hover:bg-brand-orange-dark text-white font-bold text-sm uppercase tracking-widest shadow-lg"
+          >
             Subscribe
           </button>
         </form>

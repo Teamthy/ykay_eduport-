@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { ChevronRight, Home } from "lucide-react";
 
-interface Crumb { label: string; href?: string; }
+interface Crumb {
+  label: string;
+  href?: string;
+}
 
 export default function Breadcrumbs({ items }: { items: Crumb[] }) {
   return (
@@ -15,7 +18,9 @@ export default function Breadcrumbs({ items }: { items: Crumb[] }) {
         <div key={i} className="flex items-center gap-2">
           <ChevronRight size={12} />
           {item.href ? (
-            <Link href={item.href} className="hover:text-brand-green transition-colors">{item.label}</Link>
+            <Link href={item.href} className="hover:text-brand-green transition-colors">
+              {item.label}
+            </Link>
           ) : (
             <span className="text-[var(--text-primary)] font-medium">{item.label}</span>
           )}

@@ -1,14 +1,23 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
-import { CURRENT_TEACHER } from "@/lib/teacherData";
+import { useApi } from "@/lib/useApi";
 import { useToast } from "@/components/Toast";
 import {
-  BookOpen, Calendar, Clock, FileText, ChevronDown, ChevronUp,
-  Save, Award, Tag, ListChecks, School
+  BookOpen,
+  Calendar,
+  Clock,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  Save,
+  Award,
+  Tag,
+  ListChecks,
+  School,
 } from "lucide-react";
 
 interface TestCourse {
@@ -25,22 +34,45 @@ interface TestCourse {
 
 export default function TestCoursesPage() {
   const { toast } = useToast();
-  const teacher = CURRENT_TEACHER;
+  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
+  const teacher = data?.teacher || ({} as any);
   const [selectedClass, setSelectedClass] = useState("SS3");
-  const [expanded, setExpanded] = useState<string | null>(teacher.subjectAssignments[0]?.subject || null);
+  const [expanded, setExpanded] = useState<string | null>(
+    (teacher.subjectAssignments || [])[0]?.subject || null,
+  );
 
   const [courses, setCourses] = useState<Record<string, TestCourse>>({
-    "Mathematics": { subject: "Mathematics", examDate: "2026-02-17", objectiveHours: 0, objectiveMinutes: 20, theoryHours: 0, theoryMinutes: 0, numQuestions: 30, totalMarks: 30, academicTerm: "2026/2027 · 2nd Term" },
-    "Physics": { subject: "Physics", examDate: "2026-02-19", objectiveHours: 0, objectiveMinutes: 30, theoryHours: 1, theoryMinutes: 0, numQuestions: 40, totalMarks: 60, academicTerm: "2026/2027 · 2nd Term" },
+    Mathematics: {
+      subject: "Mathematics",
+      examDate: "2026-02-17",
+      objectiveHours: 0,
+      objectiveMinutes: 20,
+      theoryHours: 0,
+      theoryMinutes: 0,
+      numQuestions: 30,
+      totalMarks: 30,
+      academicTerm: "2026/2027 · 2nd Term",
+    },
+    Physics: {
+      subject: "Physics",
+      examDate: "2026-02-19",
+      objectiveHours: 0,
+      objectiveMinutes: 30,
+      theoryHours: 1,
+      theoryMinutes: 0,
+      numQuestions: 40,
+      totalMarks: 60,
+      academicTerm: "2026/2027 · 2nd Term",
+    },
   });
 
-  const allClasses = [...new Set(teacher.subjectAssignments.flatMap(sa => sa.classes))];
-  const teacherSubjects = teacher.subjectAssignments.map(sa => sa.subject);
+  const allClasses = [...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes))];
+  const teacherSubjects = (teacher.subjectAssignments || []).map((sa: any) => sa.subject);
 
   const updateCourse = (subject: string, field: keyof TestCourse, value: any) => {
-    setCourses(prev => ({
+    setCourses((prev) => ({
       ...prev,
-      [subject]: { ...(prev[subject] || { subject } as TestCourse), [field]: value }
+      [subject]: { ...(prev[subject] || ({ subject } as TestCourse)), [field]: value },
     }));
   };
 
@@ -60,7 +92,9 @@ export default function TestCoursesPage() {
             <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
               EDIT TEST <span className="text-brand-green">COURSES</span>
             </h1>
-            <p className="text-white/60 text-sm">Configure test parameters for each subject and class arm.</p>
+            <p className="text-white/60 text-sm">
+              Configure test parameters for each subject and class arm.
+            </p>
           </div>
         </section>
 
@@ -72,7 +106,9 @@ export default function TestCoursesPage() {
               {/* Title Banner */}
               <div className="p-8 rounded-[2rem] bg-gradient-to-br from-brand-green to-brand-green-dark text-white text-center">
                 <h2 className="font-display text-3xl mb-2">EDIT TEST COURSES</h2>
-                <p className="text-white/80 text-sm">Configure exam duration, marks, and academic terms</p>
+                <p className="text-white/80 text-sm">
+                  Configure exam duration, marks, and academic terms
+                </p>
               </div>
 
               {/* Class Selector */}
@@ -81,24 +117,37 @@ export default function TestCoursesPage() {
                 <span className="font-display text-xl tracking-widest">Class:</span>
                 <select
                   value={selectedClass}
-                  onChange={e => setSelectedClass(e.target.value)}
+                  onChange={(e) => setSelectedClass(e.target.value)}
                   className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white font-bold focus:outline-none focus:border-white"
                 >
-                  {allClasses.map(c => <option key={c} value={c}>{c}</option>)}
+                  {allClasses.map((c: any) => (
+                    <option key={String(c)} value={String(c)}>
+                      {c}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               {/* Subject Cards */}
-              {teacherSubjects.map(subj => {
+              {teacherSubjects.map((subj: any) => {
                 const course = courses[subj] || {
-                  subject: subj, examDate: "", objectiveHours: 0, objectiveMinutes: 30,
-                  theoryHours: 0, theoryMinutes: 0, numQuestions: 20, totalMarks: 30,
-                  academicTerm: "2025/2026 · 1st Term"
+                  subject: subj,
+                  examDate: "",
+                  objectiveHours: 0,
+                  objectiveMinutes: 30,
+                  theoryHours: 0,
+                  theoryMinutes: 0,
+                  numQuestions: 20,
+                  totalMarks: 30,
+                  academicTerm: "2025/2026 · 1st Term",
                 };
                 const isExpanded = expanded === subj;
 
                 return (
-                  <div key={subj} className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] overflow-hidden shadow-[var(--card-shadow)]">
+                  <div
+                    key={subj}
+                    className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] overflow-hidden shadow-[var(--card-shadow)]"
+                  >
                     <button
                       onClick={() => setExpanded(isExpanded ? null : subj)}
                       className="w-full p-5 bg-brand-green text-white flex items-center justify-between hover:bg-brand-green-dark transition-colors"
@@ -131,7 +180,7 @@ export default function TestCoursesPage() {
                             <input
                               type="date"
                               value={course.examDate}
-                              onChange={e => updateCourse(subj, "examDate", e.target.value)}
+                              onChange={(e) => updateCourse(subj, "examDate", e.target.value)}
                               className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                             />
                           </div>
@@ -146,22 +195,32 @@ export default function TestCoursesPage() {
                             </label>
                             <div className="grid grid-cols-2 gap-2">
                               <div>
-                                <div className="text-[10px] text-[var(--text-muted)] mb-1">Hours</div>
+                                <div className="text-[10px] text-[var(--text-muted)] mb-1">
+                                  Hours
+                                </div>
                                 <input
                                   type="number"
                                   value={course.objectiveHours}
-                                  onChange={e => updateCourse(subj, "objectiveHours", Number(e.target.value))}
-                                  min="0" max="5"
+                                  onChange={(e) =>
+                                    updateCourse(subj, "objectiveHours", Number(e.target.value))
+                                  }
+                                  min="0"
+                                  max="5"
                                   className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                                 />
                               </div>
                               <div>
-                                <div className="text-[10px] text-[var(--text-muted)] mb-1">Minutes</div>
+                                <div className="text-[10px] text-[var(--text-muted)] mb-1">
+                                  Minutes
+                                </div>
                                 <input
                                   type="number"
                                   value={course.objectiveMinutes}
-                                  onChange={e => updateCourse(subj, "objectiveMinutes", Number(e.target.value))}
-                                  min="0" max="59"
+                                  onChange={(e) =>
+                                    updateCourse(subj, "objectiveMinutes", Number(e.target.value))
+                                  }
+                                  min="0"
+                                  max="59"
                                   className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                                 />
                               </div>
@@ -175,22 +234,32 @@ export default function TestCoursesPage() {
                             </label>
                             <div className="grid grid-cols-2 gap-2">
                               <div>
-                                <div className="text-[10px] text-[var(--text-muted)] mb-1">Hours</div>
+                                <div className="text-[10px] text-[var(--text-muted)] mb-1">
+                                  Hours
+                                </div>
                                 <input
                                   type="number"
                                   value={course.theoryHours}
-                                  onChange={e => updateCourse(subj, "theoryHours", Number(e.target.value))}
-                                  min="0" max="5"
+                                  onChange={(e) =>
+                                    updateCourse(subj, "theoryHours", Number(e.target.value))
+                                  }
+                                  min="0"
+                                  max="5"
                                   className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-blue-500"
                                 />
                               </div>
                               <div>
-                                <div className="text-[10px] text-[var(--text-muted)] mb-1">Minutes</div>
+                                <div className="text-[10px] text-[var(--text-muted)] mb-1">
+                                  Minutes
+                                </div>
                                 <input
                                   type="number"
                                   value={course.theoryMinutes}
-                                  onChange={e => updateCourse(subj, "theoryMinutes", Number(e.target.value))}
-                                  min="0" max="59"
+                                  onChange={(e) =>
+                                    updateCourse(subj, "theoryMinutes", Number(e.target.value))
+                                  }
+                                  min="0"
+                                  max="59"
                                   className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-blue-500"
                                 />
                               </div>
@@ -207,7 +276,9 @@ export default function TestCoursesPage() {
                             <input
                               type="number"
                               value={course.numQuestions}
-                              onChange={e => updateCourse(subj, "numQuestions", Number(e.target.value))}
+                              onChange={(e) =>
+                                updateCourse(subj, "numQuestions", Number(e.target.value))
+                              }
                               min="1"
                               className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                             />
@@ -219,7 +290,9 @@ export default function TestCoursesPage() {
                             <input
                               type="number"
                               value={course.totalMarks}
-                              onChange={e => updateCourse(subj, "totalMarks", Number(e.target.value))}
+                              onChange={(e) =>
+                                updateCourse(subj, "totalMarks", Number(e.target.value))
+                              }
                               min="1"
                               className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                             />
@@ -232,7 +305,7 @@ export default function TestCoursesPage() {
                           </label>
                           <select
                             value={course.academicTerm}
-                            onChange={e => updateCourse(subj, "academicTerm", e.target.value)}
+                            onChange={(e) => updateCourse(subj, "academicTerm", e.target.value)}
                             className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
                           >
                             <option>2025/2026 · 1st Term</option>

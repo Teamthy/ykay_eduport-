@@ -13,7 +13,8 @@ import {
 
 export const metadata = {
   title: "EduPortal — Sign In",
-  description: "Access the Ykay College EduPortal: staff, student, parent, and IT education portals.",
+  description:
+    "Access the Ykay College EduPortal: staff, student, parent, and IT education portals.",
 };
 
 const portals = [
@@ -74,8 +75,9 @@ export default function PortalPage() {
               YKAY <span className="text-brand-green">EDUPORTAL</span>
             </h1>
             <p className="text-white/60 font-body max-w-2xl mx-auto mt-6 text-base md:text-lg">
-              One digital ecosystem for the whole school community. Choose your portal below and sign in
-              with the credentials issued by Ykay College — or join our IT Education academy.
+              One digital ecosystem for the whole school community. Choose your portal below and
+              sign in with the credentials issued by Ykay College — or join our IT Education
+              academy.
             </p>
           </div>
         </section>
@@ -142,8 +144,9 @@ export default function PortalPage() {
             <div className="mt-16 p-10 rounded-[2rem] bg-gradient-to-br from-brand-navy to-brand-navy-light border border-white/5 text-center">
               <h3 className="font-display text-2xl text-white mb-4">Need help signing in?</h3>
               <p className="font-body text-white/60 max-w-2xl mx-auto mb-6">
-                Staff, student, and parent credentials are issued by the school administration. If you have
-                lost access to your account, use the password reset option or contact the school office.
+                Staff, student, and parent credentials are issued by the school administration. If
+                you have lost access to your account, use the password reset option or contact the
+                school office.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-4">
                 <Link

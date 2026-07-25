@@ -19,23 +19,24 @@ const destinations: Record<string, string> = {
   IT_STUDENT: "/it-portal/dashboard",
 };
 
-const portalContext: Record<string, { heading: string; sub: string; icon: typeof GraduationCap }> = {
-  staff: {
-    heading: "STAFF SIGN IN",
-    sub: "For teachers, form masters, and school administrators. Admins are routed to the admin console automatically.",
-    icon: GraduationCap,
-  },
-  student: {
-    heading: "STUDENT SIGN IN",
-    sub: "Sign in with the student credentials issued by Ykay College.",
-    icon: User,
-  },
-  parent: {
-    heading: "PARENT SIGN IN",
-    sub: "Sign in to monitor your child's attendance, results, and fees.",
-    icon: Users,
-  },
-};
+const portalContext: Record<string, { heading: string; sub: string; icon: typeof GraduationCap }> =
+  {
+    staff: {
+      heading: "STAFF SIGN IN",
+      sub: "For teachers, form masters, and school administrators. Admins are routed to the admin console automatically.",
+      icon: GraduationCap,
+    },
+    student: {
+      heading: "STUDENT SIGN IN",
+      sub: "Sign in with the student credentials issued by Ykay College.",
+      icon: User,
+    },
+    parent: {
+      heading: "PARENT SIGN IN",
+      sub: "Sign in to monitor your child's attendance, results, and fees.",
+      icon: Users,
+    },
+  };
 
 function LoginForm() {
   const router = useRouter();
@@ -80,7 +81,10 @@ function LoginForm() {
     <main className="min-h-screen bg-brand-navy px-6 py-16">
       <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl md:grid-cols-2">
         <section className="bg-brand-navy p-9 text-white md:p-12">
-          <Link href="/portal" className="text-xs font-bold uppercase tracking-widest text-brand-green">
+          <Link
+            href="/portal"
+            className="text-xs font-bold uppercase tracking-widest text-brand-green"
+          >
             ← All Portals
           </Link>
           <ContextIcon className="mt-14 text-brand-green" size={42} />
@@ -90,8 +94,8 @@ function LoginForm() {
             <span className="text-brand-green">SECURE ACCESS</span>
           </h1>
           <p className="mt-5 max-w-sm text-sm leading-7 text-white/65">
-            Sign in with the credentials issued to you by Ykay College. For account help, contact the
-            school administration.
+            Sign in with the credentials issued to you by Ykay College. For account help, contact
+            the school administration.
           </p>
           <p className="mt-8 max-w-sm rounded-2xl border border-white/10 bg-white/5 p-4 text-xs leading-6 text-white/55">
             Looking for IT Education courses?{" "}
@@ -102,10 +106,15 @@ function LoginForm() {
           </p>
         </section>
         <section className="p-9 md:p-12">
-          <h2 className="font-display text-3xl tracking-widest text-brand-navy">{context.heading}</h2>
+          <h2 className="font-display text-3xl tracking-widest text-brand-navy">
+            {context.heading}
+          </h2>
           <p className="mt-2 text-sm text-slate-500">{context.sub}</p>
           {error && (
-            <p role="alert" className="mt-5 flex gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-700">
+            <p
+              role="alert"
+              className="mt-5 flex gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-700"
+            >
               <AlertCircle size={17} /> {error}
             </p>
           )}

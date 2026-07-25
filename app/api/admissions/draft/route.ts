@@ -1,6 +1,11 @@
 import { NextRequest } from "next/server";
 import { createDraftSchema, draftAccessSchema } from "@/lib/admissions";
-import { admissionDraftToData, findAuthorizedApplication, updateDraft, writeAdmissionAuditLog } from "@/lib/admission-service";
+import {
+  admissionDraftToData,
+  findAuthorizedApplication,
+  updateDraft,
+  writeAdmissionAuditLog,
+} from "@/lib/admission-service";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceAdmissionRateLimit } from "@/lib/rate-limit";
@@ -27,7 +32,10 @@ export async function POST(request: NextRequest) {
           ? "The application service is temporarily unavailable. Please try again shortly."
           : "Too many attempts. Please wait before trying again.",
       },
-      { status: limit.configurationError ? 503 : 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
+      {
+        status: limit.configurationError ? 503 : 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
     );
   }
 
@@ -63,20 +71,27 @@ export async function POST(request: NextRequest) {
             uploadToken,
             uploadTokenExpiresAt: uploadTokenExpiresAt.toISOString(),
           },
-          { status: 201 }
+          { status: 201 },
         );
       } catch (error: unknown) {
-        if (!(typeof error === "object" && error && "code" in error && error.code === "P2002")) throw error;
+        if (!(typeof error === "object" && error && "code" in error && error.code === "P2002"))
+          throw error;
       }
     }
 
     return jsonNoStore({ error: "Please try creating your application again." }, { status: 503 });
   } catch (error: unknown) {
     if (error instanceof Error && "issues" in error) {
-      return jsonNoStore({ error: "Please correct the highlighted fields and try again." }, { status: 422 });
+      return jsonNoStore(
+        { error: "Please correct the highlighted fields and try again." },
+        { status: 422 },
+      );
     }
     console.error("Admission draft creation failed", error);
-    return jsonNoStore({ error: "We could not start your application. Please try again." }, { status: 500 });
+    return jsonNoStore(
+      { error: "We could not start your application. Please try again." },
+      { status: 500 },
+    );
   }
 }
 
@@ -84,23 +99,35 @@ export async function PUT(request: NextRequest) {
   const ipAddress = getClientIp(request);
   const limit = await enforceAdmissionRateLimit("draft", ipAddress);
   if (!limit.success) {
-    return jsonNoStore({ error: "Please wait before trying again." }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } });
+    return jsonNoStore(
+      { error: "Please wait before trying again." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
   }
 
   try {
     const payload = updateDraftSchema.parse(await request.json());
     const application = await findAuthorizedApplication(payload.applicationId, payload.uploadToken);
     if (!application || application.status !== "DRAFT") {
-      return jsonNoStore({ error: "Your application session has expired. Please restart your application." }, { status: 401 });
+      return jsonNoStore(
+        { error: "Your application session has expired. Please restart your application." },
+        { status: 401 },
+      );
     }
 
     await updateDraft(application.applicationId, payload.draft);
     return jsonNoStore({ ok: true });
   } catch (error: unknown) {
     if (error instanceof Error && "issues" in error) {
-      return jsonNoStore({ error: "Please correct the highlighted fields and try again." }, { status: 422 });
+      return jsonNoStore(
+        { error: "Please correct the highlighted fields and try again." },
+        { status: 422 },
+      );
     }
     console.error("Admission draft update failed", error);
-    return jsonNoStore({ error: "We could not save your changes. Please try again." }, { status: 500 });
+    return jsonNoStore(
+      { error: "We could not save your changes. Please try again." },
+      { status: 500 },
+    );
   }
 }

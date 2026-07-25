@@ -1,18 +1,28 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
-import { CURRENT_TEACHER, FORM_CLASS_STUDENTS } from "@/lib/teacherData";
-import { Search, Users, School, Award, TrendingUp, Phone, MessageSquare, AlertCircle } from "lucide-react";
+import { useApi } from "@/lib/useApi";
+import {
+  Search,
+  Users,
+  School,
+  Award,
+  TrendingUp,
+  Phone,
+  MessageSquare,
+  AlertCircle,
+} from "lucide-react";
 
 export default function ClassRosterPage() {
-  const teacher = CURRENT_TEACHER;
+  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
+  const teacher = data?.teacher || ({} as any);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "excellent" | "good" | "attention">("all");
 
-  const filtered = FORM_CLASS_STUDENTS.filter(s => {
+  const filtered = [].filter((s: any) => {
     const matchSearch = s.name.toLowerCase().includes(search.toLowerCase());
     const matchFilter =
       filter === "all" ||
@@ -22,9 +32,9 @@ export default function ClassRosterPage() {
     return matchSearch && matchFilter;
   });
 
-  const excellent = FORM_CLASS_STUDENTS.filter(s => s.status === "Excellent").length;
-  const good = FORM_CLASS_STUDENTS.filter(s => s.status === "Good").length;
-  const attention = FORM_CLASS_STUDENTS.filter(s => s.status === "Needs Attention").length;
+  const excellent = [].filter((s: any) => s.status === "Excellent").length;
+  const good = [].filter((s: any) => s.status === "Good").length;
+  const attention = [].filter((s: any) => s.status === "Needs Attention").length;
 
   return (
     <>
@@ -38,7 +48,9 @@ export default function ClassRosterPage() {
             <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
               CLASS <span className="text-brand-orange">ROSTER</span>
             </h1>
-            <p className="text-white/60 text-sm">All {teacher.formClassStudentCount} students in {teacher.formClass} under your care.</p>
+            <p className="text-white/60 text-sm">
+              All {teacher.formClassStudentCount} students in {teacher.formClass} under your care.
+            </p>
           </div>
         </section>
 
@@ -51,13 +63,19 @@ export default function ClassRosterPage() {
               <div className="grid grid-cols-4 gap-4">
                 <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-4">
                   <Users className="text-brand-orange mb-2" size={18} />
-                  <div className="font-display text-2xl text-[var(--text-primary)]">{teacher.formClassStudentCount}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Total</div>
+                  <div className="font-display text-2xl text-[var(--text-primary)]">
+                    {teacher.formClassStudentCount}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                    Total
+                  </div>
                 </div>
                 <div className="rounded-2xl bg-brand-green/10 border border-brand-green/30 p-4">
                   <Award className="text-brand-green mb-2" size={18} />
                   <div className="font-display text-2xl text-brand-green">{excellent}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-brand-green">Excellent</div>
+                  <div className="text-[10px] uppercase tracking-widest text-brand-green">
+                    Excellent
+                  </div>
                 </div>
                 <div className="rounded-2xl bg-blue-500/10 border border-blue-500/30 p-4">
                   <TrendingUp className="text-blue-500 mb-2" size={18} />
@@ -67,17 +85,22 @@ export default function ClassRosterPage() {
                 <div className="rounded-2xl bg-red-500/10 border border-red-500/30 p-4">
                   <AlertCircle className="text-red-500 mb-2" size={18} />
                   <div className="font-display text-2xl text-red-500">{attention}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-red-500">Attention</div>
+                  <div className="text-[10px] uppercase tracking-widest text-red-500">
+                    Attention
+                  </div>
                 </div>
               </div>
 
               {/* Filters */}
               <div className="flex flex-col md:flex-row gap-3">
                 <div className="relative flex-1">
-                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                  <Search
+                    size={16}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+                  />
                   <input
                     value={search}
-                    onChange={e => setSearch(e.target.value)}
+                    onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search students..."
                     className="w-full pl-11 pr-5 py-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-orange"
                   />
@@ -88,7 +111,7 @@ export default function ClassRosterPage() {
                     { key: "excellent", label: "Excellent" },
                     { key: "good", label: "Good" },
                     { key: "attention", label: "Attention" },
-                  ].map(f => (
+                  ].map((f) => (
                     <button
                       key={f.key}
                       onClick={() => setFilter(f.key as any)}
@@ -106,46 +129,80 @@ export default function ClassRosterPage() {
 
               {/* Student Cards */}
               <div className="grid md:grid-cols-2 gap-4">
-                {filtered.map(s => (
-                  <div key={s.id} className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-orange/30 hover:-translate-y-0.5 transition-all">
+                {filtered.map((s) => (
+                  <div
+                    key={s.id}
+                    className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-orange/30 hover:-translate-y-0.5 transition-all"
+                  >
                     <div className="flex items-start gap-4">
-                      <img src={s.photoUrl} alt={s.name} className="w-16 h-16 rounded-2xl object-cover border-2 border-[var(--border-subtle)]" />
+                      <img
+                        src={s.photoUrl}
+                        alt={s.name}
+                        className="w-16 h-16 rounded-2xl object-cover border-2 border-[var(--border-subtle)]"
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <h3 className="font-bold text-[var(--text-primary)] truncate">{s.name}</h3>
-                          <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest shrink-0 ${
-                            s.status === "Excellent" ? "bg-brand-green/20 text-brand-green" :
-                            s.status === "Good" ? "bg-blue-500/20 text-blue-500" :
-                            "bg-red-500/20 text-red-500"
-                          }`}>
+                          <h3 className="font-bold text-[var(--text-primary)] truncate">
+                            {s.name}
+                          </h3>
+                          <span
+                            className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest shrink-0 ${
+                              s.status === "Excellent"
+                                ? "bg-brand-green/20 text-brand-green"
+                                : s.status === "Good"
+                                  ? "bg-blue-500/20 text-blue-500"
+                                  : "bg-red-500/20 text-red-500"
+                            }`}
+                          >
                             {s.status}
                           </span>
                         </div>
-                        <div className="text-[11px] text-[var(--text-muted)] mb-3">{s.studentId} · {s.gender}</div>
+                        <div className="text-[11px] text-[var(--text-muted)] mb-3">
+                          {s.studentId} · {s.gender}
+                        </div>
 
                         <div className="grid grid-cols-3 gap-2 mb-3">
                           <div className="text-center p-2 rounded-lg bg-[var(--surface-disabled)]">
-                            <div className="text-[9px] uppercase text-[var(--text-muted)]">Grade</div>
-                            <div className={`font-display text-sm ${
-                              s.overallGrade.startsWith("A") ? "text-brand-green" :
-                              s.overallGrade.startsWith("B") ? "text-blue-500" :
-                              "text-brand-orange"
-                            }`}>{s.overallGrade}</div>
+                            <div className="text-[9px] uppercase text-[var(--text-muted)]">
+                              Grade
+                            </div>
+                            <div
+                              className={`font-display text-sm ${
+                                s.overallGrade.startsWith("A")
+                                  ? "text-brand-green"
+                                  : s.overallGrade.startsWith("B")
+                                    ? "text-blue-500"
+                                    : "text-brand-orange"
+                              }`}
+                            >
+                              {s.overallGrade}
+                            </div>
                           </div>
                           <div className="text-center p-2 rounded-lg bg-[var(--surface-disabled)]">
-                            <div className="text-[9px] uppercase text-[var(--text-muted)]">Attend.</div>
-                            <div className={`font-display text-sm ${s.attendanceRate >= 90 ? "text-brand-green" : s.attendanceRate >= 75 ? "text-brand-orange" : "text-red-500"}`}>
+                            <div className="text-[9px] uppercase text-[var(--text-muted)]">
+                              Attend.
+                            </div>
+                            <div
+                              className={`font-display text-sm ${s.attendanceRate >= 90 ? "text-brand-green" : s.attendanceRate >= 75 ? "text-brand-orange" : "text-red-500"}`}
+                            >
                               {s.attendanceRate}%
                             </div>
                           </div>
                           <div className="text-center p-2 rounded-lg bg-[var(--surface-disabled)]">
-                            <div className="text-[9px] uppercase text-[var(--text-muted)]">Behavior</div>
-                            <div className="font-display text-sm text-[var(--text-primary)]">{s.behaviorScore}</div>
+                            <div className="text-[9px] uppercase text-[var(--text-muted)]">
+                              Behavior
+                            </div>
+                            <div className="font-display text-sm text-[var(--text-primary)]">
+                              {s.behaviorScore}
+                            </div>
                           </div>
                         </div>
 
                         <div className="flex gap-2">
-                          <a href={`tel:${s.parentContact}`} className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-green/10 text-brand-green text-[10px] font-bold hover:bg-brand-green hover:text-white transition-all">
+                          <a
+                            href={`tel:${s.parentContact}`}
+                            className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-green/10 text-brand-green text-[10px] font-bold hover:bg-brand-green hover:text-white transition-all"
+                          >
                             <Phone size={10} /> Call Parent
                           </a>
                           <button className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-orange/10 text-brand-orange text-[10px] font-bold hover:bg-brand-orange hover:text-white transition-all">

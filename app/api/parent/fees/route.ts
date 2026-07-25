@@ -9,7 +9,10 @@ export const runtime = "nodejs";
 export async function GET(request: NextRequest) {
   const context = await getParentFinanceContext();
   if (!context) {
-    return jsonNoStore({ error: "No live parent finance profile is linked to this account yet." }, { status: 404 });
+    return jsonNoStore(
+      { error: "No live parent finance profile is linked to this account yet." },
+      { status: 404 },
+    );
   }
 
   const children = context.profile.studentLinks.map((link) => ({
@@ -56,7 +59,8 @@ export async function GET(request: NextRequest) {
   });
 
   const selectedInvoiceId = request.nextUrl.searchParams.get("invoiceId")?.trim();
-  const selectedInvoice = invoices.find((invoice) => invoice.id === selectedInvoiceId) || invoices[0] || null;
+  const selectedInvoice =
+    invoices.find((invoice) => invoice.id === selectedInvoiceId) || invoices[0] || null;
   const payments = selectedInvoice?.payments || [];
 
   return jsonNoStore({

@@ -51,5 +51,7 @@ for (const dir of DIRS) {
   }
 }
 
-console.log(dry ? `\nDry-run complete (${removed} targets).` : `\nRemoved ${removed} artifact targets.`);
+console.log(
+  dry ? `\nDry-run complete (${removed} targets).` : `\nRemoved ${removed} artifact targets.`,
+);
 console.log("Kept: source app/, prisma/, public/, .env* (not touched).");

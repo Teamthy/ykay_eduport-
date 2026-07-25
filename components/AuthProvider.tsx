@@ -1,4 +1,36 @@
 "use client";
-import {createContext,useContext,useEffect,useState} from "react";
-type User={id:string;name:string;email:string;role:string};type Value={user:User|null;loading:boolean;refresh:()=>Promise<void>;logout:()=>Promise<void>};const Context=createContext<Value|undefined>(undefined);
-export function AuthProvider({children}:{children:React.ReactNode}){const [user,setUser]=useState<User|null>(null);const[loading,setLoading]=useState(true);const refresh=async()=>{try{const r=await fetch("/api/auth/me",{cache:"no-store"});setUser(r.ok?(await r.json()).user:null)}finally{setLoading(false)}};useEffect(()=>{void refresh()},[]);const logout=async()=>{await fetch("/api/auth/logout",{method:"POST"});setUser(null);window.location.assign("/login")};return <Context.Provider value={{user,loading,refresh,logout}}>{children}</Context.Provider>};export function useAuth(){const value=useContext(Context);if(!value)throw new Error("useAuth must be used within AuthProvider");return value;}
+import { createContext, useContext, useEffect, useState } from "react";
+type User = { id: string; name: string; email: string; role: string };
+type Value = {
+  user: User | null;
+  loading: boolean;
+  refresh: () => Promise<void>;
+  logout: () => Promise<void>;
+};
+const Context = createContext<Value | undefined>(undefined);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const refresh = async () => {
+    try {
+      const r = await fetch("/api/auth/me", { cache: "no-store" });
+      setUser(r.ok ? (await r.json()).user : null);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    void refresh();
+  }, []);
+  const logout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setUser(null);
+    window.location.assign("/login");
+  };
+  return <Context.Provider value={{ user, loading, refresh, logout }}>{children}</Context.Provider>;
+}
+export function useAuth() {
+  const value = useContext(Context);
+  if (!value) throw new Error("useAuth must be used within AuthProvider");
+  return value;
+}

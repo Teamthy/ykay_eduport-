@@ -13,7 +13,9 @@ export default function WhatsAppFloat() {
 
   if (!visible) return null;
 
-  const message = encodeURIComponent("Hello Ykay College, I'd like to learn more about admissions.");
+  const message = encodeURIComponent(
+    "Hello Ykay College, I'd like to learn more about admissions.",
+  );
 
   return (
     <a

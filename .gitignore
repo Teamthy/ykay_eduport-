@@ -1,21 +1,59 @@
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Build output
 .next/
 out/
+build/
+dist/
+
+# Environment files
 .env
 .env.local
-.history/
-*.tsbuildinfo
-.md
-_backups/
-Inject-Ykay-Phase*.ps1
+.env.*.local
 
-# Local inject / scratch artifacts (keep repo clean for deploy)
-deliverables/
-screens/
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.history/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Backups and scratch data
 _backups/
 .data/
-phase-*-ingest*.ps1
-phase-*-hotfix*.ps1
-Inject-*.ps1
-FULL_PHASE*.ps1
-YKAY_Phase*Inject.ps1
+screens/
+deliverables/
+
+# PowerShell ingest scripts (development artifacts)
+*.ps1
+
+# Phase notes (development artifacts)
+PHASE*_NOTES.md
+TRANSFORMATION_*.md
+PRODUCTION_CUTOVER.md
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# Vercel
+.vercel

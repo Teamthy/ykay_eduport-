@@ -8,35 +8,40 @@ const clubs = [
     title: "Science & Technology Club",
     subtitle: "STEM Leadership",
     desc: "A community of students passionate about science, engineering, and technology. Through hands-on experiments, robotics, coding challenges, and science fairs, members develop the skills to lead Nigeria's future innovation economy.",
-    image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80",
     href: "/campus-life",
   },
   {
     title: "Debate & Public Speaking",
     subtitle: "Leadership & Communication",
     desc: "Students train in structured debate, persuasive speaking, and critical reasoning. Our debaters compete at regional and national levels, developing the communication skills essential for leadership in any field.",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
     href: "/campus-life",
   },
   {
     title: "Sports & Athletics",
     subtitle: "Physical Excellence",
     desc: "Football, basketball, athletics, table tennis, volleyball — our sports program builds discipline, teamwork, and resilience. Students compete in inter-house tournaments and external competitions across Ogun State.",
-    image: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80",
     href: "/campus-life",
   },
   {
     title: "Music & Creative Arts",
     subtitle: "Arts & Expression",
     desc: "A vibrant community for students passionate about music, drama, visual arts, and creative writing. Students prepare for NAFDAC arts competitions, school productions, and cultural festivals throughout the year.",
-    image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
     href: "/campus-life",
   },
   {
     title: "Leadership Council",
     subtitle: "Student Governance",
     desc: "An elected student government that represents student interests, organizes school-wide events, promotes positive school culture, and develops leadership capacity in a structured, mentored environment.",
-    image: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80",
     href: "/campus-life",
   },
 ];
@@ -85,7 +90,11 @@ export default function Clubs() {
                   {club.desc}
                 </p>
                 <span className="inline-flex items-center gap-2 font-body text-xs font-bold tracking-[0.15em] uppercase text-white/70 group-hover:text-white transition-colors w-fit">
-                  Learn More <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                  Learn More{" "}
+                  <ArrowRight
+                    size={12}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
                 </span>
               </div>
             </motion.a>

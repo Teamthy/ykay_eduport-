@@ -86,27 +86,24 @@ export default function TeacherGradebookPage() {
   const [dirty, setDirty] = useState(false);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
 
-  const loadGradebook = useCallback(
-    async (assignmentId: string, pushUrl = false) => {
-      setLoading(true);
-      setError("");
-      try {
-        const query = assignmentId ? `?assignmentId=${encodeURIComponent(assignmentId)}` : "";
-        const response = await fetch(`/api/teacher/gradebook${query}`, { cache: "no-store" });
-        const body = (await response.json()) as GradebookResponse & { error?: string };
-        if (!response.ok) throw new Error(body.error || "Unable to load the gradebook.");
-        setData(body);
-        setRows(body.gradebook?.entries || []);
-        setSelectedAssignmentId(body.selectedAssignmentId || "");
-        setDirty(false);
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "Unable to load the gradebook.");
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+  const loadGradebook = useCallback(async (assignmentId: string, pushUrl = false) => {
+    setLoading(true);
+    setError("");
+    try {
+      const query = assignmentId ? `?assignmentId=${encodeURIComponent(assignmentId)}` : "";
+      const response = await fetch(`/api/teacher/gradebook${query}`, { cache: "no-store" });
+      const body = (await response.json()) as GradebookResponse & { error?: string };
+      if (!response.ok) throw new Error(body.error || "Unable to load the gradebook.");
+      setData(body);
+      setRows(body.gradebook?.entries || []);
+      setSelectedAssignmentId(body.selectedAssignmentId || "");
+      setDirty(false);
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Unable to load the gradebook.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const fromUrl = searchParams.get("assignmentId") || "";
@@ -135,10 +132,11 @@ export default function TeacherGradebookPage() {
       previous.map((row) => {
         if (row.studentProfileId !== studentProfileId) return row;
         const updated = { ...row, [field]: value };
-        updated.total = updated.ca1 + updated.ca2 + updated.midterm + updated.assignment + updated.exam;
+        updated.total =
+          updated.ca1 + updated.ca2 + updated.midterm + updated.assignment + updated.exam;
         updated.grade = waecGrade(updated.total);
         return updated;
-      })
+      }),
     );
     setDirty(true);
   }
@@ -195,8 +193,8 @@ export default function TeacherGradebookPage() {
               GRADEBOOK <span className="text-brand-green">& CA SCORES</span>
             </h1>
             <p className="mt-3 max-w-2xl font-body text-sm text-white/60">
-              Enter continuous assessment and exam scores. Save while working, then submit for administrative lock
-              when the term&apos;s scores are final.
+              Enter continuous assessment and exam scores. Save while working, then submit for
+              administrative lock when the term&apos;s scores are final.
             </p>
           </div>
         </section>
@@ -207,13 +205,16 @@ export default function TeacherGradebookPage() {
 
             <div className="min-w-0 flex-1 space-y-6">
               {error ? (
-                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">{error}</div>
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                  {error}
+                </div>
               ) : null}
 
               {loading ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading gradebook...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    gradebook...
                   </div>
                 </div>
               ) : null}
@@ -221,10 +222,12 @@ export default function TeacherGradebookPage() {
               {!loading && data && !data.assignments.length ? (
                 <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 text-center shadow-[var(--card-shadow)]">
                   <ShieldCheck className="mx-auto mb-4 text-brand-orange" size={36} />
-                  <h2 className="font-display text-2xl text-[var(--text-primary)]">No subject assignment found</h2>
+                  <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                    No subject assignment found
+                  </h2>
                   <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-secondary)]">
-                    You have no active subject-teacher assignment. Contact the school administrator to be assigned a
-                    subject and class before entering scores.
+                    You have no active subject-teacher assignment. Contact the school administrator
+                    to be assigned a subject and class before entering scores.
                   </p>
                 </div>
               ) : null}
@@ -250,7 +253,9 @@ export default function TeacherGradebookPage() {
                       </select>
                     </div>
                     <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]">
-                      <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Status</div>
+                      <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                        Status
+                      </div>
                       <div
                         className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold uppercase tracking-widest ${
                           data.gradebook.status === "LOCKED"
@@ -260,12 +265,18 @@ export default function TeacherGradebookPage() {
                               : "bg-brand-green/15 text-brand-green"
                         }`}
                       >
-                        {data.gradebook.status === "OPEN" ? <Clock size={12} /> : <Lock size={12} />}
+                        {data.gradebook.status === "OPEN" ? (
+                          <Clock size={12} />
+                        ) : (
+                          <Lock size={12} />
+                        )}
                         {data.gradebook.statusLabel}
                       </div>
                     </div>
                     <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]">
-                      <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Class Average</div>
+                      <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                        Class Average
+                      </div>
                       <div className="flex items-center gap-2 font-display text-2xl text-brand-green">
                         <TrendingUp size={18} /> {stats.average}%
                       </div>
@@ -290,7 +301,8 @@ export default function TeacherGradebookPage() {
                           {data.gradebook.subjectName} — {data.gradebook.className}
                         </h2>
                         <p className="text-xs text-[var(--text-muted)]">
-                          CA1: {limits.ca1} · CA2: {limits.ca2} · Midterm: {limits.midterm} · Assignment: {limits.assignment} · Exam: {limits.exam} — Total 100
+                          CA1: {limits.ca1} · CA2: {limits.ca2} · Midterm: {limits.midterm} ·
+                          Assignment: {limits.assignment} · Exam: {limits.exam} — Total 100
                         </p>
                       </div>
                       <div className="flex gap-3">
@@ -299,7 +311,12 @@ export default function TeacherGradebookPage() {
                           disabled={!isEditable || saving || !dirty}
                           className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-2.5 text-xs font-bold text-white shadow-lg transition-all hover:bg-brand-green-dark disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          {saving ? <LoaderCircle size={14} className="animate-spin" /> : <Save size={14} />} Save Progress
+                          {saving ? (
+                            <LoaderCircle size={14} className="animate-spin" />
+                          ) : (
+                            <Save size={14} />
+                          )}{" "}
+                          Save Progress
                         </button>
                         <button
                           onClick={() => setConfirmSubmit(true)}
@@ -315,14 +332,24 @@ export default function TeacherGradebookPage() {
                       <table className="w-full text-sm">
                         <thead className="bg-brand-navy">
                           <tr>
-                            <th className="px-4 py-3 text-left font-display text-[10px] uppercase tracking-wider text-white/70">Student</th>
+                            <th className="px-4 py-3 text-left font-display text-[10px] uppercase tracking-wider text-white/70">
+                              Student
+                            </th>
                             {SCORE_FIELDS.map((field) => (
-                              <th key={field.key} className="px-4 py-3 text-center font-display text-[10px] uppercase tracking-wider text-white/70">
-                                {field.label} <span className="text-white/40">/{limits[field.key]}</span>
+                              <th
+                                key={field.key}
+                                className="px-4 py-3 text-center font-display text-[10px] uppercase tracking-wider text-white/70"
+                              >
+                                {field.label}{" "}
+                                <span className="text-white/40">/{limits[field.key]}</span>
                               </th>
                             ))}
-                            <th className="px-4 py-3 text-center font-display text-[10px] uppercase tracking-wider text-white/70">Total</th>
-                            <th className="px-4 py-3 text-center font-display text-[10px] uppercase tracking-wider text-white/70">Grade</th>
+                            <th className="px-4 py-3 text-center font-display text-[10px] uppercase tracking-wider text-white/70">
+                              Total
+                            </th>
+                            <th className="px-4 py-3 text-center font-display text-[10px] uppercase tracking-wider text-white/70">
+                              Grade
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -334,8 +361,12 @@ export default function TeacherGradebookPage() {
                                 className={`border-b border-[var(--border-subtle)] transition-colors ${belowPass ? "bg-red-500/5" : "hover:bg-[var(--surface-disabled)]"}`}
                               >
                                 <td className="px-4 py-3">
-                                  <div className="font-bold text-[var(--text-primary)]">{row.displayName}</div>
-                                  <div className="text-[10px] text-[var(--text-muted)]">{row.studentId}</div>
+                                  <div className="font-bold text-[var(--text-primary)]">
+                                    {row.displayName}
+                                  </div>
+                                  <div className="text-[10px] text-[var(--text-muted)]">
+                                    {row.studentId}
+                                  </div>
                                 </td>
                                 {SCORE_FIELDS.map((field) => (
                                   <td key={field.key} className="px-2 py-3 text-center">
@@ -345,14 +376,22 @@ export default function TeacherGradebookPage() {
                                       min={0}
                                       max={limits[field.key]}
                                       value={row[field.key]}
-                                      onChange={(event) => handleScoreChange(row.studentProfileId, field.key, event.target.value)}
+                                      onChange={(event) =>
+                                        handleScoreChange(
+                                          row.studentProfileId,
+                                          field.key,
+                                          event.target.value,
+                                        )
+                                      }
                                       disabled={!isEditable || saving}
                                       aria-label={`${row.displayName} ${field.label}`}
                                       className="w-16 rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-2 py-2 text-center text-sm text-[var(--input-text)] outline-none focus:border-[var(--input-border-focus)] disabled:opacity-60"
                                     />
                                   </td>
                                 ))}
-                                <td className={`px-4 py-3 text-center font-display text-base font-bold ${belowPass ? "text-red-500" : "text-brand-green"}`}>
+                                <td
+                                  className={`px-4 py-3 text-center font-display text-base font-bold ${belowPass ? "text-red-500" : "text-brand-green"}`}
+                                >
                                   {row.total}
                                 </td>
                                 <td className="px-4 py-3 text-center">
@@ -373,7 +412,10 @@ export default function TeacherGradebookPage() {
                           })}
                           {!rows.length ? (
                             <tr>
-                              <td colSpan={8} className="px-6 py-10 text-center text-sm text-[var(--text-muted)]">
+                              <td
+                                colSpan={8}
+                                className="px-6 py-10 text-center text-sm text-[var(--text-muted)]"
+                              >
                                 No active students found in this class.
                               </td>
                             </tr>
@@ -384,15 +426,20 @@ export default function TeacherGradebookPage() {
 
                     <div className="flex flex-wrap items-center gap-6 border-t border-[var(--border-subtle)] px-8 py-5 text-xs text-[var(--text-muted)]">
                       <span className="inline-flex items-center gap-2">
-                        <CheckCircle2 size={14} className="text-brand-green" /> Highest score: <strong className="text-[var(--text-primary)]">{stats.highest}</strong>
+                        <CheckCircle2 size={14} className="text-brand-green" /> Highest score:{" "}
+                        <strong className="text-[var(--text-primary)]">{stats.highest}</strong>
                       </span>
                       <span className="inline-flex items-center gap-2">
-                        <TrendingUp size={14} className="text-brand-green" /> Class average: <strong className="text-[var(--text-primary)]">{stats.average}</strong>
+                        <TrendingUp size={14} className="text-brand-green" /> Class average:{" "}
+                        <strong className="text-[var(--text-primary)]">{stats.average}</strong>
                       </span>
                       <span className="inline-flex items-center gap-2">
-                        <ShieldCheck size={14} className="text-brand-orange" /> Below pass mark: <strong className="text-[var(--text-primary)]">{stats.belowPass}</strong>
+                        <ShieldCheck size={14} className="text-brand-orange" /> Below pass mark:{" "}
+                        <strong className="text-[var(--text-primary)]">{stats.belowPass}</strong>
                       </span>
-                      {dirty ? <span className="font-bold text-brand-orange">Unsaved changes</span> : null}
+                      {dirty ? (
+                        <span className="font-bold text-brand-orange">Unsaved changes</span>
+                      ) : null}
                     </div>
                   </div>
                 </>

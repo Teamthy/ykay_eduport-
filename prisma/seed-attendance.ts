@@ -45,8 +45,13 @@ async function upsertPortalUser(config: SeedUserConfig, schoolId: string): Promi
   const existing = await prisma.user.findUnique({ where: { email: config.email } });
   const providedPassword = config.passwordEnv ? optionalEnv(config.passwordEnv) : null;
   const shouldSetPassword = Boolean(providedPassword) || !existing;
-  const issuedPassword = shouldSetPassword ? providedPassword || generatedPassword(config.role) : null;
-  const passwordHash = shouldSetPassword && issuedPassword ? await bcrypt.hash(issuedPassword, 12) : existing?.passwordHash;
+  const issuedPassword = shouldSetPassword
+    ? providedPassword || generatedPassword(config.role)
+    : null;
+  const passwordHash =
+    shouldSetPassword && issuedPassword
+      ? await bcrypt.hash(issuedPassword, 12)
+      : existing?.passwordHash;
 
   if (!passwordHash) {
     throw new Error(`Unable to determine a password hash for ${config.email}.`);
@@ -87,7 +92,9 @@ async function upsertPortalUser(config: SeedUserConfig, schoolId: string): Promi
 
 function firstWeekdaysOfMonth(targetMonth: Date, count: number) {
   const dates: Date[] = [];
-  const cursor = new Date(Date.UTC(targetMonth.getUTCFullYear(), targetMonth.getUTCMonth(), 1, 12, 0, 0));
+  const cursor = new Date(
+    Date.UTC(targetMonth.getUTCFullYear(), targetMonth.getUTCMonth(), 1, 12, 0, 0),
+  );
 
   while (dates.length < count) {
     const day = cursor.getUTCDay();
@@ -122,7 +129,7 @@ async function main() {
       role: UserRole.TEACHER,
       passwordEnv: "BOOTSTRAP_TEACHER_PASSWORD",
     },
-    school.id
+    school.id,
   );
 
   const studentUser = await upsertPortalUser(
@@ -132,7 +139,7 @@ async function main() {
       role: UserRole.STUDENT,
       passwordEnv: "BOOTSTRAP_STUDENT_PASSWORD",
     },
-    school.id
+    school.id,
   );
 
   const parentUser = await upsertPortalUser(
@@ -142,7 +149,7 @@ async function main() {
       role: UserRole.PARENT,
       passwordEnv: "BOOTSTRAP_PARENT_PASSWORD",
     },
-    school.id
+    school.id,
   );
 
   const schoolClass = await prisma.schoolClass.upsert({
@@ -396,7 +403,10 @@ async function main() {
       date: sessionDates[3],
       notes: "Follow-up day with mixed attendance outcomes.",
       overrides: new Map<string, { status: AttendanceStatus; note?: string }>([
-        [studentProfiles[0].id, { status: AttendanceStatus.LATE, note: "Arrived after first bell." }],
+        [
+          studentProfiles[0].id,
+          { status: AttendanceStatus.LATE, note: "Arrived after first bell." },
+        ],
         [studentProfiles[3].id, { status: AttendanceStatus.ABSENT, note: "Family travel." }],
       ]),
     },
@@ -452,13 +462,18 @@ async function main() {
 
     await prisma.attendanceAlertJob.deleteMany({ where: { attendanceSessionId: session.id } });
 
-    const affectedStudents = studentProfiles.filter((student) => blueprint.overrides.has(student.id));
+    const affectedStudents = studentProfiles.filter((student) =>
+      blueprint.overrides.has(student.id),
+    );
     for (const student of affectedStudents) {
       const override = blueprint.overrides.get(student.id);
       if (!override || override.status === AttendanceStatus.PRESENT) continue;
 
-      const isLinkedParentStudent = student.id === studentProfiles[0].id || student.id === studentProfiles[1].id;
-      const recipientName = isLinkedParentStudent ? parentProfile.displayName : student.guardianName || student.displayName;
+      const isLinkedParentStudent =
+        student.id === studentProfiles[0].id || student.id === studentProfiles[1].id;
+      const recipientName = isLinkedParentStudent
+        ? parentProfile.displayName
+        : student.guardianName || student.displayName;
       const recipientPhone = isLinkedParentStudent ? parentProfile.phone : student.guardianPhone;
       const recipientEmail = isLinkedParentStudent ? parentUser.email : student.guardianEmail;
       const messagePreview = attendanceMessage({
@@ -592,7 +607,9 @@ async function main() {
   console.log(`Students seeded: ${studentProfiles.length}`);
   console.log(`Teacher profile: ${teacherProfile.displayName}`);
   console.log(`Parent profile: ${parentProfile.displayName}`);
-  console.log("Attendance history, alert queue items, and one pending correction request were seeded.");
+  console.log(
+    "Attendance history, alert queue items, and one pending correction request were seeded.",
+  );
   console.log("If a password shows 'unchanged', the existing stored password was preserved.");
 }
 

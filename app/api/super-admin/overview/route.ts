@@ -45,25 +45,34 @@ export async function GET() {
     prisma.itEnrollment.count(),
     prisma.examAttempt.count(),
     prisma.reportCard.count(),
-    prisma.notificationJob.findMany({
+    prisma.notificationJob.findMany({ take: 200,
       where: { status: AlertDeliveryStatus.FAILED },
       orderBy: { updatedAt: "desc" },
       take: 5,
-      select: { id: true, channel: true, subject: true, lastError: true, attempts: true, updatedAt: true },
+      select: {
+        id: true,
+        channel: true,
+        subject: true,
+        lastError: true,
+        attempts: true,
+        updatedAt: true,
+      },
     }),
-    prisma.auditLog.findMany({
+    prisma.auditLog.findMany({ take: 200,
       where: { action: "USER_SIGNED_IN" },
       orderBy: { createdAt: "desc" },
       take: 8,
       include: { actor: { select: { name: true, email: true, role: true } } },
     }),
-    prisma.feePayment.findMany({
+    prisma.feePayment.findMany({ take: 200,
       where: { status: FeePaymentStatus.COMPLETED },
       select: { amount: true, paidAt: true },
     }),
-    prisma.feeInvoice.findMany({ select: { totalAmount: true, amountPaid: true, balanceDue: true, status: true } }),
-    prisma.expense.findMany({ select: { amount: true } }).catch(() => []),
-    prisma.feePayment.findMany({
+    prisma.feeInvoice.findMany({ take: 200,
+      select: { totalAmount: true, amountPaid: true, balanceDue: true, status: true },
+    }),
+    prisma.expense.findMany({ take: 200, select: { amount: true } }).catch(() => []),
+    prisma.feePayment.findMany({ take: 200,
       where: { status: FeePaymentStatus.COMPLETED },
       orderBy: { paidAt: "desc" },
       take: 12,
@@ -71,7 +80,7 @@ export async function GET() {
         studentProfile: { select: { displayName: true, studentId: true } },
       },
     }),
-    prisma.auditLog.findMany({
+    prisma.auditLog.findMany({ take: 200,
       orderBy: { createdAt: "desc" },
       take: 25,
       include: { actor: { select: { name: true, email: true, role: true } } },
@@ -79,8 +88,12 @@ export async function GET() {
   ]);
 
   const incomeTotal = feePayments.reduce((s, p) => s + p.amount, 0);
-  const incomeToday = feePayments.filter((p) => p.paidAt >= dayAgo).reduce((s, p) => s + p.amount, 0);
-  const incomeWeek = feePayments.filter((p) => p.paidAt >= weekAgo).reduce((s, p) => s + p.amount, 0);
+  const incomeToday = feePayments
+    .filter((p) => p.paidAt >= dayAgo)
+    .reduce((s, p) => s + p.amount, 0);
+  const incomeWeek = feePayments
+    .filter((p) => p.paidAt >= weekAgo)
+    .reduce((s, p) => s + p.amount, 0);
   const expenseTotal = (expenses as Array<{ amount: number }>).reduce((s, e) => s + e.amount, 0);
   const billed = feeInvoices.reduce((s, i) => s + i.totalAmount, 0);
   const outstanding = feeInvoices.reduce((s, i) => s + i.balanceDue, 0);

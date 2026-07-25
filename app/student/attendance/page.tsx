@@ -68,9 +68,12 @@ export default function StudentAttendancePage() {
       setLoading(true);
       setError("");
       try {
-        const response = await fetch(`/api/student/attendance?month=${encodeURIComponent(selectedMonth)}`, {
-          cache: "no-store",
-        });
+        const response = await fetch(
+          `/api/student/attendance?month=${encodeURIComponent(selectedMonth)}`,
+          {
+            cache: "no-store",
+          },
+        );
         const body = (await response.json()) as StudentAttendanceResponse & { error?: string };
         if (!response.ok) throw new Error(body.error || "Unable to load attendance records.");
         if (!active) return;
@@ -78,7 +81,9 @@ export default function StudentAttendancePage() {
       } catch (loadError) {
         if (!active) return;
         setData(null);
-        setError(loadError instanceof Error ? loadError.message : "Unable to load attendance records.");
+        setError(
+          loadError instanceof Error ? loadError.message : "Unable to load attendance records.",
+        );
       } finally {
         if (active) setLoading(false);
       }
@@ -106,7 +111,9 @@ export default function StudentAttendancePage() {
                     MY <span className="text-brand-green">ATTENDANCE</span>
                   </h1>
                   <p className="text-sm text-white/60">
-                    {data ? `${data.student.displayName} Â· ${data.student.className}` : "Live attendance calendar"}
+                    {data
+                      ? `${data.student.displayName} Â· ${data.student.className}`
+                      : "Live attendance calendar"}
                   </p>
                 </div>
               </div>
@@ -133,7 +140,8 @@ export default function StudentAttendancePage() {
               {loading ? (
                 <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading student attendance...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    student attendance...
                   </div>
                 </div>
               ) : null}
@@ -143,7 +151,9 @@ export default function StudentAttendancePage() {
                   <div className="flex items-start gap-3">
                     <FileWarning className="mt-0.5 text-brand-orange" size={20} />
                     <div>
-                      <h2 className="font-display text-2xl text-[var(--text-primary)]">Attendance profile not ready</h2>
+                      <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                        Attendance profile not ready
+                      </h2>
                       <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{error}</p>
                     </div>
                   </div>
@@ -165,25 +175,37 @@ export default function StudentAttendancePage() {
 
                   <aside className="space-y-6">
                     <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
-                      <h3 className="mb-6 font-display text-xl text-[var(--text-primary)]">My Stats</h3>
+                      <h3 className="mb-6 font-display text-xl text-[var(--text-primary)]">
+                        My Stats
+                      </h3>
                       <div className="mb-4 rounded-xl bg-[var(--surface-disabled)] p-5">
-                        <div className="mb-1 text-xs uppercase tracking-wider text-[var(--text-muted)]">Attendance Rate</div>
-                        <div className="font-display text-4xl text-brand-green">{data.summary.attendanceRate}%</div>
+                        <div className="mb-1 text-xs uppercase tracking-wider text-[var(--text-muted)]">
+                          Attendance Rate
+                        </div>
+                        <div className="font-display text-4xl text-brand-green">
+                          {data.summary.attendanceRate}%
+                        </div>
                       </div>
                       <div className="grid grid-cols-3 gap-3">
                         <div className="rounded-xl bg-brand-green/10 p-4 text-center">
                           <Check size={18} className="mx-auto mb-1 text-brand-green" />
-                          <div className="font-display text-xl text-brand-green">{data.summary.present}</div>
+                          <div className="font-display text-xl text-brand-green">
+                            {data.summary.present}
+                          </div>
                           <div className="text-[9px] text-[var(--text-muted)]">Present</div>
                         </div>
                         <div className="rounded-xl bg-red-500/10 p-4 text-center">
                           <X size={18} className="mx-auto mb-1 text-red-500" />
-                          <div className="font-display text-xl text-red-500">{data.summary.absent}</div>
+                          <div className="font-display text-xl text-red-500">
+                            {data.summary.absent}
+                          </div>
                           <div className="text-[9px] text-[var(--text-muted)]">Absent</div>
                         </div>
                         <div className="rounded-xl bg-brand-orange/10 p-4 text-center">
                           <Clock size={18} className="mx-auto mb-1 text-brand-orange" />
-                          <div className="font-display text-xl text-brand-orange">{data.summary.late}</div>
+                          <div className="font-display text-xl text-brand-orange">
+                            {data.summary.late}
+                          </div>
                           <div className="text-[9px] text-[var(--text-muted)]">Late</div>
                         </div>
                       </div>
@@ -192,7 +214,9 @@ export default function StudentAttendancePage() {
                     <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
                       <div className="flex items-center gap-3">
                         <CalendarDays className="text-brand-green" size={18} />
-                        <h3 className="font-display text-lg text-[var(--text-primary)]">Attendance Notes</h3>
+                        <h3 className="font-display text-lg text-[var(--text-primary)]">
+                          Attendance Notes
+                        </h3>
                       </div>
                       <div className="mt-4 space-y-3">
                         {data.days.filter((day) => day.note).length ? (
@@ -201,15 +225,23 @@ export default function StudentAttendancePage() {
                             .slice(-5)
                             .reverse()
                             .map((day) => (
-                              <div key={day.date} className="rounded-xl bg-[var(--surface-disabled)] px-4 py-3">
+                              <div
+                                key={day.date}
+                                className="rounded-xl bg-[var(--surface-disabled)] px-4 py-3"
+                              >
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                                  {new Date(`${day.date}T12:00:00.000Z`).toLocaleDateString()} Â· {day.status}
+                                  {new Date(`${day.date}T12:00:00.000Z`).toLocaleDateString()} Â·{" "}
+                                  {day.status}
                                 </div>
-                                <p className="mt-1 text-sm text-[var(--text-secondary)]">{day.note}</p>
+                                <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                                  {day.note}
+                                </p>
                               </div>
                             ))
                         ) : (
-                          <p className="text-sm text-[var(--text-muted)]">No teacher notes recorded for the selected month.</p>
+                          <p className="text-sm text-[var(--text-muted)]">
+                            No teacher notes recorded for the selected month.
+                          </p>
                         )}
                       </div>
                     </div>

@@ -40,25 +40,80 @@ const HERO_IMAGES = [
 ];
 
 const FALLBACK: CatalogCourse[] = [
-  { slug: "python", title: "Python Programming", certification: "IT Specialist – Python", shortDesc: "From basics to automation and problem-solving.", href: "/it-education/python" },
-  { slug: "ai", title: "Artificial Intelligence", certification: "IT Specialist – AI", shortDesc: "Practical AI literacy and responsible use.", href: "/it-education/ai" },
-  { slug: "cybersecurity", title: "Cybersecurity", certification: "IT Specialist – Cybersecurity", shortDesc: "Protect systems, accounts, and data.", href: "/it-education/cybersecurity" },
-  { slug: "digital-literacy", title: "Digital Literacy", certification: "Ykay Digital Literacy Certificate", shortDesc: "Essential computing for every student.", href: "/it-education/digital-literacy" },
-  { slug: "microsoft-word", title: "Microsoft Word", certification: "Microsoft Office Specialist", shortDesc: "Professional documents and reports.", href: "/it-education/microsoft-word" },
-  { slug: "microsoft-excel", title: "Microsoft Excel", certification: "Microsoft Office Specialist", shortDesc: "Spreadsheets, charts, and analysis.", href: "/it-education/microsoft-excel" },
-  { slug: "microsoft-powerpoint", title: "Microsoft PowerPoint", certification: "Microsoft Office Specialist", shortDesc: "Confident presentations that persuade.", href: "/it-education/microsoft-powerpoint" },
-  { slug: "excel-expert", title: "Excel Expert", certification: "Microsoft Office Expert", shortDesc: "Advanced formulas, pivots, and dashboards.", href: "/it-education/excel-expert" },
+  {
+    slug: "python",
+    title: "Python Programming",
+    certification: "IT Specialist – Python",
+    shortDesc: "From basics to automation and problem-solving.",
+    href: "/it-education/python",
+  },
+  {
+    slug: "ai",
+    title: "Artificial Intelligence",
+    certification: "IT Specialist – AI",
+    shortDesc: "Practical AI literacy and responsible use.",
+    href: "/it-education/ai",
+  },
+  {
+    slug: "cybersecurity",
+    title: "Cybersecurity",
+    certification: "IT Specialist – Cybersecurity",
+    shortDesc: "Protect systems, accounts, and data.",
+    href: "/it-education/cybersecurity",
+  },
+  {
+    slug: "digital-literacy",
+    title: "Digital Literacy",
+    certification: "Ykay Digital Literacy Certificate",
+    shortDesc: "Essential computing for every student.",
+    href: "/it-education/digital-literacy",
+  },
+  {
+    slug: "microsoft-word",
+    title: "Microsoft Word",
+    certification: "Microsoft Office Specialist",
+    shortDesc: "Professional documents and reports.",
+    href: "/it-education/microsoft-word",
+  },
+  {
+    slug: "microsoft-excel",
+    title: "Microsoft Excel",
+    certification: "Microsoft Office Specialist",
+    shortDesc: "Spreadsheets, charts, and analysis.",
+    href: "/it-education/microsoft-excel",
+  },
+  {
+    slug: "microsoft-powerpoint",
+    title: "Microsoft PowerPoint",
+    certification: "Microsoft Office Specialist",
+    shortDesc: "Confident presentations that persuade.",
+    href: "/it-education/microsoft-powerpoint",
+  },
+  {
+    slug: "excel-expert",
+    title: "Excel Expert",
+    certification: "Microsoft Office Expert",
+    shortDesc: "Advanced formulas, pivots, and dashboards.",
+    href: "/it-education/excel-expert",
+  },
 ];
 
 const IMAGES: Record<string, string> = {
-  python: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=900&q=80",
+  python:
+    "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=900&q=80",
   ai: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=900&q=80",
-  cybersecurity: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=900&q=80",
-  "digital-literacy": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
-  "microsoft-word": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80",
-  "microsoft-excel": "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=900&q=80",
-  "microsoft-powerpoint": "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=900&q=80",
-  "excel-expert": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80",
+  cybersecurity:
+    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=900&q=80",
+  "digital-literacy":
+    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
+  "microsoft-word":
+    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80",
+  "microsoft-excel":
+    "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=900&q=80",
+  "microsoft-powerpoint":
+    "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=900&q=80",
+  "excel-expert":
+    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80",
 };
 
 const ICONS: Record<string, typeof Code> = {
@@ -94,7 +149,7 @@ export default function ITEducationHubPage() {
               ...c,
               shortDesc: c.tagline || c.shortDesc,
               href: c.href || `/it-education/${c.slug}`,
-            }))
+            })),
           );
         }
       } catch {
@@ -134,8 +189,9 @@ export default function ITEducationHubPage() {
               IT EDUCATION AT <span className="text-brand-green">YKAY COLLEGE</span>
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-white md:text-lg">
-              Industry-aligned pathways in programming, AI, cybersecurity, digital literacy, and Microsoft Office — with
-              a dedicated IT portal for enrollment, module progress, and certificates.
+              Industry-aligned pathways in programming, AI, cybersecurity, digital literacy, and
+              Microsoft Office — with a dedicated IT portal for enrollment, module progress, and
+              certificates.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -167,7 +223,9 @@ export default function ITEducationHubPage() {
 
         <section id="programmes" className="px-6 py-16">
           <div className="mx-auto max-w-7xl">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Programmes</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Programmes
+            </p>
             <h2 className="mt-2 font-display text-4xl tracking-widest text-[var(--text-primary)]">
               CHOOSE YOUR <span className="text-brand-green">TRACK</span>
             </h2>
@@ -194,7 +252,9 @@ export default function ITEducationHubPage() {
                       <div className="mt-6 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
                         {course.level || "Programme"}
                       </div>
-                      <h3 className="mt-2 font-display text-2xl tracking-wide text-white">{course.title}</h3>
+                      <h3 className="mt-2 font-display text-2xl tracking-wide text-white">
+                        {course.title}
+                      </h3>
                       <p className="mt-2 flex-1 text-sm leading-relaxed text-white/85">
                         {course.shortDesc || course.tagline}
                       </p>
@@ -216,19 +276,25 @@ export default function ITEducationHubPage() {
           <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
             <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8">
               <Award className="text-brand-green" size={28} />
-              <h2 className="mt-4 font-display text-3xl tracking-widest text-[var(--text-primary)]">HOW IT WORKS</h2>
+              <h2 className="mt-4 font-display text-3xl tracking-widest text-[var(--text-primary)]">
+                HOW IT WORKS
+              </h2>
               <ol className="mt-6 space-y-4 text-sm text-[var(--text-secondary)]">
                 <li>
-                  <b className="text-[var(--text-primary)]">1. Explore</b> — pick a track on this hub.
+                  <b className="text-[var(--text-primary)]">1. Explore</b> — pick a track on this
+                  hub.
                 </li>
                 <li>
-                  <b className="text-[var(--text-primary)]">2. Create IT portal access</b> — new IT learners sign up free.
+                  <b className="text-[var(--text-primary)]">2. Create IT portal access</b> — new IT
+                  learners sign up free.
                 </li>
                 <li>
-                  <b className="text-[var(--text-primary)]">3. Enrol & learn</b> — complete modules and track progress.
+                  <b className="text-[var(--text-primary)]">3. Enrol & learn</b> — complete modules
+                  and track progress.
                 </li>
                 <li>
-                  <b className="text-[var(--text-primary)]">4. Get recognized</b> — finish pathways toward certificates.
+                  <b className="text-[var(--text-primary)]">4. Get recognized</b> — finish pathways
+                  toward certificates.
                 </li>
               </ol>
             </div>
@@ -237,8 +303,8 @@ export default function ITEducationHubPage() {
                 READY TO <span className="text-brand-green">BEGIN?</span>
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-white/85">
-                Parents can highlight IT interest during school admissions. Community learners can start immediately in
-                the IT portal.
+                Parents can highlight IT interest during school admissions. Community learners can
+                start immediately in the IT portal.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link

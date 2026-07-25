@@ -83,7 +83,8 @@ export default function AdminReportCardsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const selected = data?.reports.find((report) => report.id === selectedReportId) || data?.reports[0] || null;
+  const selected =
+    data?.reports.find((report) => report.id === selectedReportId) || data?.reports[0] || null;
 
   async function updateStatus(status: "RELEASED" | "DRAFT") {
     if (!selected) return;
@@ -97,7 +98,11 @@ export default function AdminReportCardsPage() {
       });
       const body = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(body.error || "Unable to update report card status.");
-      setMessage(status === "RELEASED" ? "Report card released successfully." : "Report card moved back to draft.");
+      setMessage(
+        status === "RELEASED"
+          ? "Report card released successfully."
+          : "Report card moved back to draft.",
+      );
       await loadReports();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to update report card status.");
@@ -112,8 +117,12 @@ export default function AdminReportCardsPage() {
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy pt-24 pb-14">
           <div className="mx-auto max-w-7xl px-6">
-            <h1 className="font-display text-[42px] md:text-[72px] text-white">REPORT <span className="text-brand-green">CARDS</span></h1>
-            <p className="mt-4 font-body text-white/50">Live report-card registry, release workflow, and preview.</p>
+            <h1 className="font-display text-[42px] md:text-[72px] text-white">
+              REPORT <span className="text-brand-green">CARDS</span>
+            </h1>
+            <p className="mt-4 font-body text-white/50">
+              Live report-card registry, release workflow, and preview.
+            </p>
           </div>
         </section>
 
@@ -122,54 +131,119 @@ export default function AdminReportCardsPage() {
             <AdminSidebar />
 
             <div className="flex-1 min-w-0 space-y-6">
-              {message ? <div className="rounded-2xl border border-brand-green/20 bg-brand-green/5 p-4 text-sm text-[var(--text-secondary)]">{message}</div> : null}
-              {loading ? <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]"><div className="flex items-center gap-3 text-[var(--text-secondary)]"><LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading report cards...</div></div> : null}
+              {message ? (
+                <div className="rounded-2xl border border-brand-green/20 bg-brand-green/5 p-4 text-sm text-[var(--text-secondary)]">
+                  {message}
+                </div>
+              ) : null}
+              {loading ? (
+                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
+                  <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    report cards...
+                  </div>
+                </div>
+              ) : null}
 
               {!loading && data ? (
                 <>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                     {[
-                      { label: "Total Reports", value: data.summary.totalReports, icon: FileText, color: "text-brand-green" },
-                      { label: "Released", value: data.summary.releasedReports, icon: CheckCircle2, color: "text-brand-green" },
-                      { label: "Draft", value: data.summary.draftReports, icon: Clock, color: "text-brand-orange" },
-                      { label: "Average Score", value: `${data.summary.averageScore}%`, icon: Mail, color: "text-brand-green" },
+                      {
+                        label: "Total Reports",
+                        value: data.summary.totalReports,
+                        icon: FileText,
+                        color: "text-brand-green",
+                      },
+                      {
+                        label: "Released",
+                        value: data.summary.releasedReports,
+                        icon: CheckCircle2,
+                        color: "text-brand-green",
+                      },
+                      {
+                        label: "Draft",
+                        value: data.summary.draftReports,
+                        icon: Clock,
+                        color: "text-brand-orange",
+                      },
+                      {
+                        label: "Average Score",
+                        value: `${data.summary.averageScore}%`,
+                        icon: Mail,
+                        color: "text-brand-green",
+                      },
                     ].map((card) => (
-                      <div key={card.label} className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]">
-                        <div className="mb-2 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{card.label}</div>
+                      <div
+                        key={card.label}
+                        className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)]"
+                      >
+                        <div className="mb-2 text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+                          {card.label}
+                        </div>
                         <div className={`font-display text-2xl ${card.color}`}>{card.value}</div>
                       </div>
                     ))}
                   </div>
 
                   <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
-                    <h2 className="mb-6 font-display text-2xl text-[var(--text-primary)]">Report Card Registry</h2>
+                    <h2 className="mb-6 font-display text-2xl text-[var(--text-primary)]">
+                      Report Card Registry
+                    </h2>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead className="border-b border-[var(--border-subtle)]">
                           <tr>
-                            {["Report No.", "Student", "Class", "Status", "Overall", "Actions"].map((heading) => (
-                              <th key={heading} className="px-4 py-3 text-left font-display text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{heading}</th>
-                            ))}
+                            {["Report No.", "Student", "Class", "Status", "Overall", "Actions"].map(
+                              (heading) => (
+                                <th
+                                  key={heading}
+                                  className="px-4 py-3 text-left font-display text-[10px] uppercase tracking-wider text-[var(--text-muted)]"
+                                >
+                                  {heading}
+                                </th>
+                              ),
+                            )}
                           </tr>
                         </thead>
                         <tbody>
                           {data.reports.map((report) => (
-                            <tr key={report.id} className="border-b border-[var(--border-subtle)] hover:bg-[var(--surface-disabled)]">
-                              <td className="px-4 py-4 text-xs font-bold text-brand-green">{report.reportNumber}</td>
-                              <td className="px-4 py-4 font-bold text-[var(--text-primary)]">{report.student.displayName}</td>
-                              <td className="px-4 py-4 text-xs text-[var(--text-muted)]">{report.student.className}</td>
+                            <tr
+                              key={report.id}
+                              className="border-b border-[var(--border-subtle)] hover:bg-[var(--surface-disabled)]"
+                            >
+                              <td className="px-4 py-4 text-xs font-bold text-brand-green">
+                                {report.reportNumber}
+                              </td>
+                              <td className="px-4 py-4 font-bold text-[var(--text-primary)]">
+                                {report.student.displayName}
+                              </td>
+                              <td className="px-4 py-4 text-xs text-[var(--text-muted)]">
+                                {report.student.className}
+                              </td>
                               <td className="px-4 py-4">
-                                <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${report.status === "RELEASED" ? "bg-brand-green/10 text-brand-green" : "bg-brand-orange/10 text-brand-orange"}`}>
+                                <span
+                                  className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${report.status === "RELEASED" ? "bg-brand-green/10 text-brand-green" : "bg-brand-orange/10 text-brand-orange"}`}
+                                >
                                   {report.status}
                                 </span>
                               </td>
-                              <td className="px-4 py-4 font-display text-base font-bold text-brand-green">{report.overallAverage}% Â· {report.overallGrade}</td>
+                              <td className="px-4 py-4 font-display text-base font-bold text-brand-green">
+                                {report.overallAverage}% Â· {report.overallGrade}
+                              </td>
                               <td className="px-4 py-4 flex gap-2">
-                                <button onClick={() => setSelectedReportId(report.id)} className="inline-flex items-center gap-1 rounded-full bg-brand-green/10 px-3 py-1.5 text-[10px] font-bold text-brand-green hover:bg-brand-green hover:text-white">
+                                <button
+                                  onClick={() => setSelectedReportId(report.id)}
+                                  className="inline-flex items-center gap-1 rounded-full bg-brand-green/10 px-3 py-1.5 text-[10px] font-bold text-brand-green hover:bg-brand-green hover:text-white"
+                                >
                                   View
                                 </button>
                                 <button
-                                  onClick={() => void updateStatus(report.status === "RELEASED" ? "DRAFT" : "RELEASED")}
+                                  onClick={() =>
+                                    void updateStatus(
+                                      report.status === "RELEASED" ? "DRAFT" : "RELEASED",
+                                    )
+                                  }
                                   disabled={saving}
                                   className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-disabled)] px-3 py-1.5 text-[10px] font-bold text-[var(--text-secondary)] hover:bg-brand-green hover:text-white disabled:opacity-50"
                                 >

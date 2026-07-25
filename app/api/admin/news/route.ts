@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
   try {
     payload = createSchema.parse(await request.json());
   } catch (error) {
-    const message = error instanceof z.ZodError ? error.issues[0]?.message || "Invalid post." : "Invalid post.";
+    const message =
+      error instanceof z.ZodError ? error.issues[0]?.message || "Invalid post." : "Invalid post.";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
@@ -89,7 +90,10 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  return NextResponse.json({ ok: true, message: payload.publish ? "Post published." : "Draft saved." });
+  return NextResponse.json({
+    ok: true,
+    message: payload.publish ? "Post published." : "Draft saved.",
+  });
 }
 
 const patchSchema = z.object({
@@ -108,7 +112,9 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const post = await prisma.newsPost.findFirst({ where: { id: payload.postId, schoolId: user.schoolId } });
+  const post = await prisma.newsPost.findFirst({
+    where: { id: payload.postId, schoolId: user.schoolId },
+  });
   if (!post) return NextResponse.json({ error: "Post not found." }, { status: 404 });
 
   if (payload.action === "DELETE") {
@@ -121,5 +127,8 @@ export async function PATCH(request: NextRequest) {
     where: { id: post.id },
     data: { isPublished: publish, publishedAt: publish ? post.publishedAt || new Date() : null },
   });
-  return NextResponse.json({ ok: true, message: publish ? "Post published." : "Post unpublished." });
+  return NextResponse.json({
+    ok: true,
+    message: publish ? "Post published." : "Post unpublished.",
+  });
 }

@@ -2,14 +2,51 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { GraduationCap, ClipboardCheck, Trophy, ShieldCheck, Heart, ArrowRight } from "lucide-react";
+import {
+  GraduationCap,
+  ClipboardCheck,
+  Trophy,
+  ShieldCheck,
+  Heart,
+  ArrowRight,
+} from "lucide-react";
 
 const SERVICES = [
-  { icon: GraduationCap, title: "Academics", subtitle: "JSS1 — SS3", desc: "NERDC-aligned curriculum enhanced with digital literacy, STEM, and continuous assessment.", href: "/academics" },
-  { icon: ClipboardCheck, title: "Admissions", subtitle: "2025 / 2026 Now Open", desc: "Streamlined online application with document upload and Paystack fee payment.", href: "/admissions" },
-  { icon: Trophy, title: "Campus Life", subtitle: "Beyond the Classroom", desc: "Sports, clubs, leadership training, cultural events, and community service.", href: "/campus-life" },
-  { icon: ShieldCheck, title: "EduPortal", subtitle: "Digital School Management", desc: "Real-time attendance, grades, fees, and communication for parents and students.", href: "/portal" },
-  { icon: Heart, title: "Student Wellbeing", subtitle: "Character & Support", desc: "Anonymous mood check-ins, counselor messaging, and pastoral care programs.", href: "/contact" },
+  {
+    icon: GraduationCap,
+    title: "Academics",
+    subtitle: "JSS1 — SS3",
+    desc: "NERDC-aligned curriculum enhanced with digital literacy, STEM, and continuous assessment.",
+    href: "/academics",
+  },
+  {
+    icon: ClipboardCheck,
+    title: "Admissions",
+    subtitle: "2025 / 2026 Now Open",
+    desc: "Streamlined online application with document upload and Paystack fee payment.",
+    href: "/admissions",
+  },
+  {
+    icon: Trophy,
+    title: "Campus Life",
+    subtitle: "Beyond the Classroom",
+    desc: "Sports, clubs, leadership training, cultural events, and community service.",
+    href: "/campus-life",
+  },
+  {
+    icon: ShieldCheck,
+    title: "EduPortal",
+    subtitle: "Digital School Management",
+    desc: "Real-time attendance, grades, fees, and communication for parents and students.",
+    href: "/portal",
+  },
+  {
+    icon: Heart,
+    title: "Student Wellbeing",
+    subtitle: "Character & Support",
+    desc: "Anonymous mood check-ins, counselor messaging, and pastoral care programs.",
+    href: "/contact",
+  },
 ];
 
 export default function Services() {
@@ -34,7 +71,10 @@ export default function Services() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
             >
-              <Link href={s.href} className="group block p-8 rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-1 transition-all duration-300 h-full">
+              <Link
+                href={s.href}
+                className="group block p-8 rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-1 transition-all duration-300 h-full"
+              >
                 <div className="w-12 h-12 rounded-2xl bg-brand-green/10 text-brand-green flex items-center justify-center mb-6 group-hover:bg-brand-green group-hover:text-white transition-colors">
                   <s.icon size={22} />
                 </div>

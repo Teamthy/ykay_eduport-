@@ -143,7 +143,11 @@ export default function AdminAttendanceAnalyticsPage() {
       } catch (analyticsError) {
         if (!active) return;
         setData(null);
-        setError(analyticsError instanceof Error ? analyticsError.message : "Unable to load attendance analytics.");
+        setError(
+          analyticsError instanceof Error
+            ? analyticsError.message
+            : "Unable to load attendance analytics.",
+        );
       } finally {
         if (active) setLoading(false);
       }
@@ -157,7 +161,10 @@ export default function AdminAttendanceAnalyticsPage() {
 
   const filteredClassLabel = useMemo(() => {
     if (!data?.filters.selectedClassId) return "All active classes";
-    return data.availableClasses.find((item) => item.id === data.filters.selectedClassId)?.displayName || "Selected class";
+    return (
+      data.availableClasses.find((item) => item.id === data.filters.selectedClassId)?.displayName ||
+      "Selected class"
+    );
   }, [data]);
 
   return (
@@ -173,7 +180,8 @@ export default function AdminAttendanceAnalyticsPage() {
               ATTENDANCE <span className="text-brand-green">ANALYTICS</span>
             </h1>
             <p className="mt-2 max-w-3xl text-sm text-white/65">
-              School-wide attendance intelligence for leadership: live session coverage, class performance, alert queue pressure, and correction oversight.
+              School-wide attendance intelligence for leadership: live session coverage, class
+              performance, alert queue pressure, and correction oversight.
             </p>
           </div>
         </section>
@@ -185,7 +193,9 @@ export default function AdminAttendanceAnalyticsPage() {
             <div className="flex-1 min-w-0 space-y-6">
               <div className="grid gap-4 md:grid-cols-[1fr_220px] xl:grid-cols-[1fr_220px_220px]">
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]">
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Class scope</label>
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                    Class scope
+                  </label>
                   <select
                     value={selectedClassId}
                     onChange={(event) => setSelectedClassId(event.target.value)}
@@ -195,14 +205,17 @@ export default function AdminAttendanceAnalyticsPage() {
                     <option value="">All active classes</option>
                     {data?.availableClasses.map((item) => (
                       <option key={item.id} value={item.id}>
-                        {item.displayName} Â· {item.activeStudents} student{item.activeStudents === 1 ? "" : "s"}
+                        {item.displayName} Â· {item.activeStudents} student
+                        {item.activeStudents === 1 ? "" : "s"}
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]">
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Month</label>
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                    Month
+                  </label>
                   <input
                     type="month"
                     value={selectedMonth}
@@ -213,16 +226,23 @@ export default function AdminAttendanceAnalyticsPage() {
                 </div>
 
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)] xl:block hidden">
-                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Current scope</div>
-                  <div className="mt-3 font-display text-2xl text-[var(--text-primary)]">{filteredClassLabel}</div>
-                  <div className="mt-1 text-xs text-[var(--text-muted)]">{data ? `${data.filters.monthLabel} ${data.filters.year}` : "Loadingâ€¦"}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                    Current scope
+                  </div>
+                  <div className="mt-3 font-display text-2xl text-[var(--text-primary)]">
+                    {filteredClassLabel}
+                  </div>
+                  <div className="mt-1 text-xs text-[var(--text-muted)]">
+                    {data ? `${data.filters.monthLabel} ${data.filters.year}` : "Loadingâ€¦"}
+                  </div>
                 </div>
               </div>
 
               {loading ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading attendance analytics...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    attendance analytics...
                   </div>
                 </div>
               ) : null}
@@ -232,7 +252,9 @@ export default function AdminAttendanceAnalyticsPage() {
                   <div className="flex items-start gap-3">
                     <FileWarning className="mt-0.5 text-brand-orange" size={20} />
                     <div>
-                      <h2 className="font-display text-2xl text-[var(--text-primary)]">Analytics unavailable</h2>
+                      <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                        Analytics unavailable
+                      </h2>
                       <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{error}</p>
                     </div>
                   </div>
@@ -286,12 +308,19 @@ export default function AdminAttendanceAnalyticsPage() {
                         bg: "bg-brand-orange/10",
                       },
                     ].map((card) => (
-                      <div key={card.label} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]">
-                        <div className={`mb-2 flex h-10 w-10 items-center justify-center rounded-xl ${card.bg} ${card.color}`}>
+                      <div
+                        key={card.label}
+                        className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)]"
+                      >
+                        <div
+                          className={`mb-2 flex h-10 w-10 items-center justify-center rounded-xl ${card.bg} ${card.color}`}
+                        >
                           <card.icon size={18} />
                         </div>
                         <div className={`font-display text-3xl ${card.color}`}>{card.value}</div>
-                        <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{card.label}</div>
+                        <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                          {card.label}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -300,38 +329,64 @@ export default function AdminAttendanceAnalyticsPage() {
                     <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <h2 className="font-display text-2xl text-[var(--text-primary)]">Class performance</h2>
-                          <p className="mt-1 text-sm text-[var(--text-secondary)]">Attendance rate by class for the selected month.</p>
+                          <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                            Class performance
+                          </h2>
+                          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                            Attendance rate by class for the selected month.
+                          </p>
                         </div>
                         <div className="text-right text-xs text-[var(--text-muted)]">
-                          <div>{data.summary.classesCovered} class{data.summary.classesCovered === 1 ? "" : "es"} covered</div>
-                          <div>{data.summary.activeStudents} active student{data.summary.activeStudents === 1 ? "" : "s"}</div>
+                          <div>
+                            {data.summary.classesCovered} class
+                            {data.summary.classesCovered === 1 ? "" : "es"} covered
+                          </div>
+                          <div>
+                            {data.summary.activeStudents} active student
+                            {data.summary.activeStudents === 1 ? "" : "s"}
+                          </div>
                         </div>
                       </div>
 
                       <div className="mt-6 space-y-4">
                         {data.classStats.length ? (
                           data.classStats.map((item) => (
-                            <div key={item.id} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-disabled)] p-4">
+                            <div
+                              key={item.id}
+                              className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-disabled)] p-4"
+                            >
                               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                                 <div>
-                                  <div className="font-display text-xl text-[var(--text-primary)]">{item.displayName}</div>
+                                  <div className="font-display text-xl text-[var(--text-primary)]">
+                                    {item.displayName}
+                                  </div>
                                   <div className="mt-1 text-xs text-[var(--text-muted)]">
-                                    {item.activeStudents} student{item.activeStudents === 1 ? "" : "s"} Â· {item.sessions} session{item.sessions === 1 ? "" : "s"}
+                                    {item.activeStudents} student
+                                    {item.activeStudents === 1 ? "" : "s"} Â· {item.sessions}{" "}
+                                    session{item.sessions === 1 ? "" : "s"}
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <div className="font-display text-2xl text-brand-green">{item.attendanceRate}%</div>
-                                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">attendance rate</div>
+                                  <div className="font-display text-2xl text-brand-green">
+                                    {item.attendanceRate}%
+                                  </div>
+                                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                    attendance rate
+                                  </div>
                                 </div>
                               </div>
                               <div className="mt-4 h-3 overflow-hidden rounded-full bg-white">
-                                <div className="h-full rounded-full bg-gradient-to-r from-brand-green to-brand-green-light" style={{ width: `${item.attendanceRate}%` }} />
+                                <div
+                                  className="h-full rounded-full bg-gradient-to-r from-brand-green to-brand-green-light"
+                                  style={{ width: `${item.attendanceRate}%` }}
+                                />
                               </div>
                               <div className="mt-4 grid grid-cols-2 gap-3 text-xs md:grid-cols-5">
                                 <div>
                                   <div className="text-[var(--text-muted)]">Present</div>
-                                  <div className="font-semibold text-brand-green">{item.present}</div>
+                                  <div className="font-semibold text-brand-green">
+                                    {item.present}
+                                  </div>
                                 </div>
                                 <div>
                                   <div className="text-[var(--text-muted)]">Absent</div>
@@ -343,42 +398,66 @@ export default function AdminAttendanceAnalyticsPage() {
                                 </div>
                                 <div>
                                   <div className="text-[var(--text-muted)]">Locked</div>
-                                  <div className="font-semibold text-[var(--text-primary)]">{item.lockedSessions}</div>
+                                  <div className="font-semibold text-[var(--text-primary)]">
+                                    {item.lockedSessions}
+                                  </div>
                                 </div>
                                 <div>
                                   <div className="text-[var(--text-muted)]">Last session</div>
                                   <div className="font-semibold text-[var(--text-primary)]">
-                                    {item.lastSessionDate ? new Date(item.lastSessionDate).toLocaleDateString() : "â€”"}
+                                    {item.lastSessionDate
+                                      ? new Date(item.lastSessionDate).toLocaleDateString()
+                                      : "â€”"}
                                   </div>
                                 </div>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <p className="text-sm text-[var(--text-muted)]">No attendance sessions found for the selected scope.</p>
+                          <p className="text-sm text-[var(--text-muted)]">
+                            No attendance sessions found for the selected scope.
+                          </p>
                         )}
                       </div>
                     </div>
 
                     <div className="space-y-6">
                       <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-                        <h2 className="font-display text-2xl text-[var(--text-primary)]">Alert pipeline</h2>
+                        <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                          Alert pipeline
+                        </h2>
                         <div className="mt-5 grid gap-3">
                           {data.alertBreakdown.byChannel.map((item) => (
-                            <div key={item.channel} className="rounded-xl bg-[var(--surface-disabled)] px-4 py-3">
+                            <div
+                              key={item.channel}
+                              className="rounded-xl bg-[var(--surface-disabled)] px-4 py-3"
+                            >
                               <div className="flex items-center justify-between gap-3">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-brand-green">{item.channel}</span>
-                                <span className="font-display text-xl text-[var(--text-primary)]">{item.total}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                                  {item.channel}
+                                </span>
+                                <span className="font-display text-xl text-[var(--text-primary)]">
+                                  {item.total}
+                                </span>
                               </div>
-                              <div className="mt-1 text-xs text-[var(--text-muted)]">Pending: {item.pending}</div>
+                              <div className="mt-1 text-xs text-[var(--text-muted)]">
+                                Pending: {item.pending}
+                              </div>
                             </div>
                           ))}
                         </div>
                         <div className="mt-5 grid grid-cols-2 gap-3">
                           {data.alertBreakdown.byStatus.map((item) => (
-                            <div key={item.status} className="rounded-xl border border-[var(--border-subtle)] px-4 py-3">
-                              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{item.status}</div>
-                              <div className="mt-1 font-display text-2xl text-[var(--text-primary)]">{item.total}</div>
+                            <div
+                              key={item.status}
+                              className="rounded-xl border border-[var(--border-subtle)] px-4 py-3"
+                            >
+                              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                {item.status}
+                              </div>
+                              <div className="mt-1 font-display text-2xl text-[var(--text-primary)]">
+                                {item.total}
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -387,29 +466,49 @@ export default function AdminAttendanceAnalyticsPage() {
                       <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
                         <div className="flex items-center justify-between gap-3">
                           <div>
-                            <h2 className="font-display text-2xl text-[var(--text-primary)]">Correction queue</h2>
-                            <p className="mt-1 text-sm text-[var(--text-secondary)]">Most recent correction requests.</p>
+                            <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                              Correction queue
+                            </h2>
+                            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                              Most recent correction requests.
+                            </p>
                           </div>
-                          <Link href="/admin/attendance-corrections" className="text-sm font-bold text-brand-green hover:underline">
+                          <Link
+                            href="/admin/attendance-corrections"
+                            className="text-sm font-bold text-brand-green hover:underline"
+                          >
                             Open queue
                           </Link>
                         </div>
                         <div className="mt-5 space-y-3">
                           {data.recentCorrections.length ? (
                             data.recentCorrections.map((item) => (
-                              <div key={item.id} className="rounded-xl bg-[var(--surface-disabled)] px-4 py-3">
+                              <div
+                                key={item.id}
+                                className="rounded-xl bg-[var(--surface-disabled)] px-4 py-3"
+                              >
                                 <div className="flex items-center justify-between gap-3">
-                                  <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${item.status === "PENDING" ? "bg-brand-orange/15 text-brand-orange" : item.status === "APPROVED" ? "bg-brand-green/15 text-brand-green" : "bg-red-500/15 text-red-500"}`}>
+                                  <span
+                                    className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${item.status === "PENDING" ? "bg-brand-orange/15 text-brand-orange" : item.status === "APPROVED" ? "bg-brand-green/15 text-brand-green" : "bg-red-500/15 text-red-500"}`}
+                                  >
                                     {item.status}
                                   </span>
-                                  <span className="text-[10px] text-[var(--text-muted)]">{new Date(item.createdAt).toLocaleDateString()}</span>
+                                  <span className="text-[10px] text-[var(--text-muted)]">
+                                    {new Date(item.createdAt).toLocaleDateString()}
+                                  </span>
                                 </div>
-                                <div className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{item.className} Â· {item.teacherName}</div>
-                                <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">{item.reason}</p>
+                                <div className="mt-2 text-sm font-semibold text-[var(--text-primary)]">
+                                  {item.className} Â· {item.teacherName}
+                                </div>
+                                <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">
+                                  {item.reason}
+                                </p>
                               </div>
                             ))
                           ) : (
-                            <p className="text-sm text-[var(--text-muted)]">No correction requests recorded yet.</p>
+                            <p className="text-sm text-[var(--text-muted)]">
+                              No correction requests recorded yet.
+                            </p>
                           )}
                         </div>
                       </div>
@@ -420,20 +519,33 @@ export default function AdminAttendanceAnalyticsPage() {
                     <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
                       <div className="flex items-center gap-3">
                         <AlertTriangle className="text-brand-orange" size={18} />
-                        <h2 className="font-display text-2xl text-[var(--text-primary)]">Students needing attention</h2>
+                        <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                          Students needing attention
+                        </h2>
                       </div>
                       <div className="mt-5 space-y-3">
                         {data.studentsOfConcern.length ? (
                           data.studentsOfConcern.map((item) => (
-                            <div key={item.studentId} className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-disabled)] px-4 py-3">
+                            <div
+                              key={item.studentId}
+                              className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-disabled)] px-4 py-3"
+                            >
                               <div className="flex items-center justify-between gap-3">
                                 <div>
-                                  <div className="font-semibold text-[var(--text-primary)]">{item.displayName}</div>
-                                  <div className="text-[10px] text-[var(--text-muted)]">{item.studentId}</div>
+                                  <div className="font-semibold text-[var(--text-primary)]">
+                                    {item.displayName}
+                                  </div>
+                                  <div className="text-[10px] text-[var(--text-muted)]">
+                                    {item.studentId}
+                                  </div>
                                 </div>
                                 <div className="text-right">
-                                  <div className="font-display text-xl text-brand-orange">{item.concernScore}</div>
-                                  <div className="text-[10px] text-[var(--text-muted)]">concern score</div>
+                                  <div className="font-display text-xl text-brand-orange">
+                                    {item.concernScore}
+                                  </div>
+                                  <div className="text-[10px] text-[var(--text-muted)]">
+                                    concern score
+                                  </div>
                                 </div>
                               </div>
                               <div className="mt-3 grid grid-cols-3 gap-3 text-xs">
@@ -447,13 +559,17 @@ export default function AdminAttendanceAnalyticsPage() {
                                 </div>
                                 <div>
                                   <div className="text-[var(--text-muted)]">Attendance</div>
-                                  <div className="font-semibold text-brand-green">{item.attendanceRate}%</div>
+                                  <div className="font-semibold text-brand-green">
+                                    {item.attendanceRate}%
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <p className="text-sm text-[var(--text-muted)]">No absence/late concentration detected for the selected scope.</p>
+                          <p className="text-sm text-[var(--text-muted)]">
+                            No absence/late concentration detected for the selected scope.
+                          </p>
                         )}
                       </div>
                     </div>
@@ -461,29 +577,48 @@ export default function AdminAttendanceAnalyticsPage() {
                     <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
                       <div className="flex items-center gap-3">
                         <Activity className="text-brand-green" size={18} />
-                        <h2 className="font-display text-2xl text-[var(--text-primary)]">Daily trend</h2>
+                        <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                          Daily trend
+                        </h2>
                       </div>
                       <div className="mt-5 space-y-3">
                         {data.dailyTrend.length ? (
                           data.dailyTrend.map((item) => (
-                            <div key={item.date} className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-disabled)] px-4 py-3">
+                            <div
+                              key={item.date}
+                              className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-disabled)] px-4 py-3"
+                            >
                               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                                 <div>
-                                  <div className="font-semibold text-[var(--text-primary)]">{new Date(`${item.date}T12:00:00.000Z`).toLocaleDateString()}</div>
-                                  <div className="text-[10px] text-[var(--text-muted)]">{item.sessions} session{item.sessions === 1 ? "" : "s"} Â· {item.total} marks</div>
+                                  <div className="font-semibold text-[var(--text-primary)]">
+                                    {new Date(`${item.date}T12:00:00.000Z`).toLocaleDateString()}
+                                  </div>
+                                  <div className="text-[10px] text-[var(--text-muted)]">
+                                    {item.sessions} session{item.sessions === 1 ? "" : "s"} Â·{" "}
+                                    {item.total} marks
+                                  </div>
                                 </div>
                                 <div className="text-right">
-                                  <div className="font-display text-2xl text-brand-green">{item.attendanceRate}%</div>
-                                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">attendance</div>
+                                  <div className="font-display text-2xl text-brand-green">
+                                    {item.attendanceRate}%
+                                  </div>
+                                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                    attendance
+                                  </div>
                                 </div>
                               </div>
                               <div className="mt-3 h-3 overflow-hidden rounded-full bg-white">
-                                <div className="h-full rounded-full bg-gradient-to-r from-brand-green to-brand-green-light" style={{ width: `${item.attendanceRate}%` }} />
+                                <div
+                                  className="h-full rounded-full bg-gradient-to-r from-brand-green to-brand-green-light"
+                                  style={{ width: `${item.attendanceRate}%` }}
+                                />
                               </div>
                               <div className="mt-3 grid grid-cols-3 gap-3 text-xs">
                                 <div>
                                   <div className="text-[var(--text-muted)]">Present</div>
-                                  <div className="font-semibold text-brand-green">{item.present}</div>
+                                  <div className="font-semibold text-brand-green">
+                                    {item.present}
+                                  </div>
                                 </div>
                                 <div>
                                   <div className="text-[var(--text-muted)]">Absent</div>
@@ -497,7 +632,9 @@ export default function AdminAttendanceAnalyticsPage() {
                             </div>
                           ))
                         ) : (
-                          <p className="text-sm text-[var(--text-muted)]">No daily trend data for the selected month.</p>
+                          <p className="text-sm text-[var(--text-muted)]">
+                            No daily trend data for the selected month.
+                          </p>
                         )}
                       </div>
                     </div>
@@ -506,30 +643,51 @@ export default function AdminAttendanceAnalyticsPage() {
                   <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <h2 className="font-display text-2xl text-[var(--text-primary)]">Recent submitted sessions</h2>
-                        <p className="mt-1 text-sm text-[var(--text-secondary)]">Latest registers across the current scope.</p>
+                        <h2 className="font-display text-2xl text-[var(--text-primary)]">
+                          Recent submitted sessions
+                        </h2>
+                        <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                          Latest registers across the current scope.
+                        </p>
                       </div>
                     </div>
                     <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                       {data.recentSessions.length ? (
                         data.recentSessions.map((item) => (
-                          <div key={item.id} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-disabled)] p-4">
+                          <div
+                            key={item.id}
+                            className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-disabled)] p-4"
+                          >
                             <div className="flex items-center justify-between gap-3">
-                              <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${item.isLocked ? "bg-brand-green/15 text-brand-green" : "bg-brand-orange/15 text-brand-orange"}`}>
+                              <span
+                                className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${item.isLocked ? "bg-brand-green/15 text-brand-green" : "bg-brand-orange/15 text-brand-orange"}`}
+                              >
                                 {item.isLocked ? "Locked" : "Draft"}
                               </span>
-                              <span className="text-[10px] text-[var(--text-muted)]">{new Date(item.date).toLocaleDateString()}</span>
+                              <span className="text-[10px] text-[var(--text-muted)]">
+                                {new Date(item.date).toLocaleDateString()}
+                              </span>
                             </div>
-                            <div className="mt-3 font-display text-xl text-[var(--text-primary)]">{item.className}</div>
-                            <div className="mt-1 text-xs text-[var(--text-muted)]">{item.teacherName} Â· {item.periodKey}</div>
+                            <div className="mt-3 font-display text-xl text-[var(--text-primary)]">
+                              {item.className}
+                            </div>
+                            <div className="mt-1 text-xs text-[var(--text-muted)]">
+                              {item.teacherName} Â· {item.periodKey}
+                            </div>
                             <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
                               <div>
                                 <div className="text-[var(--text-muted)]">Attendance rate</div>
-                                <div className="font-semibold text-brand-green">{item.attendanceRate}%</div>
+                                <div className="font-semibold text-brand-green">
+                                  {item.attendanceRate}%
+                                </div>
                               </div>
                               <div>
                                 <div className="text-[var(--text-muted)]">Submitted</div>
-                                <div className="font-semibold text-[var(--text-primary)]">{item.submittedAt ? new Date(item.submittedAt).toLocaleTimeString() : "â€”"}</div>
+                                <div className="font-semibold text-[var(--text-primary)]">
+                                  {item.submittedAt
+                                    ? new Date(item.submittedAt).toLocaleTimeString()
+                                    : "â€”"}
+                                </div>
                               </div>
                               <div>
                                 <div className="text-[var(--text-muted)]">Absent</div>
@@ -543,7 +701,9 @@ export default function AdminAttendanceAnalyticsPage() {
                           </div>
                         ))
                       ) : (
-                        <p className="text-sm text-[var(--text-muted)]">No recent sessions found for the selected scope.</p>
+                        <p className="text-sm text-[var(--text-muted)]">
+                          No recent sessions found for the selected scope.
+                        </p>
                       )}
                     </div>
                   </div>

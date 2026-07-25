@@ -21,7 +21,14 @@ type Post = {
   createdAt: string;
 };
 
-const CATEGORIES = ["News", "Events", "Achievements", "IT Education", "Admissions", "Announcements"];
+const CATEGORIES = [
+  "News",
+  "Events",
+  "Achievements",
+  "IT Education",
+  "Admissions",
+  "Announcements",
+];
 
 export default function AdminNewsPage() {
   const { toast } = useToast();
@@ -116,7 +123,11 @@ export default function AdminNewsPage() {
             <AdminSidebar />
 
             <div className="min-w-0 flex-1 space-y-6">
-              {error ? <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">{error}</div> : null}
+              {error ? (
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                  {error}
+                </div>
+              ) : null}
 
               <button
                 onClick={() => setShowForm(!showForm)}
@@ -174,7 +185,12 @@ export default function AdminNewsPage() {
                       disabled={busy}
                       className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg disabled:opacity-50"
                     >
-                      {busy ? <LoaderCircle size={14} className="animate-spin" /> : <Send size={14} />} Publish Now
+                      {busy ? (
+                        <LoaderCircle size={14} className="animate-spin" />
+                      ) : (
+                        <Send size={14} />
+                      )}{" "}
+                      Publish Now
                     </button>
                     <button
                       onClick={() => void createPost(false)}
@@ -190,7 +206,8 @@ export default function AdminNewsPage() {
               {loading ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading posts...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    posts...
                   </div>
                 </div>
               ) : null}
@@ -198,17 +215,28 @@ export default function AdminNewsPage() {
               {!loading ? (
                 <div className="space-y-3">
                   {posts.map((post) => (
-                    <div key={post.id} className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                    <div
+                      key={post.id}
+                      className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]"
+                    >
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-display text-xl text-[var(--text-primary)]">{post.title}</h3>
-                            <span className="rounded-full bg-brand-green/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-green">{post.category}</span>
-                            <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest ${post.isPublished ? "bg-brand-green/10 text-brand-green" : "bg-brand-orange/10 text-brand-orange"}`}>
+                            <h3 className="font-display text-xl text-[var(--text-primary)]">
+                              {post.title}
+                            </h3>
+                            <span className="rounded-full bg-brand-green/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-green">
+                              {post.category}
+                            </span>
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest ${post.isPublished ? "bg-brand-green/10 text-brand-green" : "bg-brand-orange/10 text-brand-orange"}`}
+                            >
                               {post.isPublished ? "Published" : "Draft"}
                             </span>
                           </div>
-                          <p className="mt-2 line-clamp-2 text-sm text-[var(--text-secondary)]">{post.excerpt}</p>
+                          <p className="mt-2 line-clamp-2 text-sm text-[var(--text-secondary)]">
+                            {post.excerpt}
+                          </p>
                           <div className="mt-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                             By {post.authorName} · {new Date(post.createdAt).toLocaleDateString()}
                           </div>
@@ -245,7 +273,9 @@ export default function AdminNewsPage() {
                   {!posts.length ? (
                     <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 text-center shadow-[var(--card-shadow)]">
                       <Megaphone className="mx-auto mb-3 text-[var(--text-muted)]" size={30} />
-                      <p className="text-sm text-[var(--text-muted)]">No posts yet. Write your first news post above.</p>
+                      <p className="text-sm text-[var(--text-muted)]">
+                        No posts yet. Write your first news post above.
+                      </p>
                     </div>
                   ) : null}
                 </div>

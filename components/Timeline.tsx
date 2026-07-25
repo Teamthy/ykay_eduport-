@@ -3,12 +3,36 @@
 import { motion } from "framer-motion";
 
 const MILESTONES = [
-  { year: "2012", title: "School Founded", desc: "Ykay College opened with 48 students and 7 teaching staff." },
-  { year: "2015", title: "First WAEC Batch", desc: "85% pass rate — our first graduating class exceeded all expectations." },
-  { year: "2018", title: "STEM Lab Opened", desc: "Fully-equipped science and computer labs, funded by community partnership." },
-  { year: "2020", title: "Digital Transformation", desc: "Introduced online learning during COVID-19, reaching 100% student engagement." },
-  { year: "2023", title: "Leadership Academy Launched", desc: "Added dedicated leadership development curriculum to distinguish our graduates." },
-  { year: "2025", title: "EduPortal Launched", desc: "Full digital school management platform for students, parents, teachers, and admin." },
+  {
+    year: "2012",
+    title: "School Founded",
+    desc: "Ykay College opened with 48 students and 7 teaching staff.",
+  },
+  {
+    year: "2015",
+    title: "First WAEC Batch",
+    desc: "85% pass rate — our first graduating class exceeded all expectations.",
+  },
+  {
+    year: "2018",
+    title: "STEM Lab Opened",
+    desc: "Fully-equipped science and computer labs, funded by community partnership.",
+  },
+  {
+    year: "2020",
+    title: "Digital Transformation",
+    desc: "Introduced online learning during COVID-19, reaching 100% student engagement.",
+  },
+  {
+    year: "2023",
+    title: "Leadership Academy Launched",
+    desc: "Added dedicated leadership development curriculum to distinguish our graduates.",
+  },
+  {
+    year: "2025",
+    title: "EduPortal Launched",
+    desc: "Full digital school management platform for students, parents, teachers, and admin.",
+  },
 ];
 
 export default function Timeline() {
@@ -26,7 +50,10 @@ export default function Timeline() {
             className={`relative flex items-start gap-6 md:gap-12 ${i % 2 === 1 ? "md:flex-row-reverse" : ""}`}
           >
             <div className="absolute left-8 md:left-1/2 w-4 h-4 rounded-full bg-brand-green border-4 border-[var(--bg-primary)] md:-translate-x-1/2 mt-2" />
-            <div className="pl-20 md:pl-0 md:w-1/2 md:pr-12 md:text-right" style={{ display: i % 2 === 0 ? "block" : "none" }}>
+            <div
+              className="pl-20 md:pl-0 md:w-1/2 md:pr-12 md:text-right"
+              style={{ display: i % 2 === 0 ? "block" : "none" }}
+            >
               {i % 2 === 0 && (
                 <>
                   <div className="font-display text-4xl text-brand-green mb-2">{m.year}</div>
@@ -35,7 +62,10 @@ export default function Timeline() {
                 </>
               )}
             </div>
-            <div className="pl-20 md:pl-12 md:w-1/2" style={{ display: i % 2 === 1 ? "block" : "none" }}>
+            <div
+              className="pl-20 md:pl-12 md:w-1/2"
+              style={{ display: i % 2 === 1 ? "block" : "none" }}
+            >
               {i % 2 === 1 && (
                 <>
                   <div className="font-display text-4xl text-brand-green mb-2">{m.year}</div>

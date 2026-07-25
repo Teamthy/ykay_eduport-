@@ -58,12 +58,18 @@ export default function PaystackModal({
           >
             <div className="relative bg-[#0ea5e9] p-6 text-white">
               {!busy && !leaving && (
-                <button onClick={onClose} className="absolute right-4 top-4 text-white/80 hover:text-white" aria-label="Close">
+                <button
+                  onClick={onClose}
+                  className="absolute right-4 top-4 text-white/80 hover:text-white"
+                  aria-label="Close"
+                >
                   <X size={20} />
                 </button>
               )}
               <div className="mb-2 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white font-bold text-[#0ea5e9]">P</div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white font-bold text-[#0ea5e9]">
+                  P
+                </div>
                 <span className="text-lg font-bold">Paystack Checkout</span>
               </div>
               <div className="text-xs text-white/70">{email}</div>
@@ -77,8 +83,8 @@ export default function PaystackModal({
               <div className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-sm">
                 <ShieldCheck className="mt-0.5 shrink-0 text-brand-green" size={18} />
                 <p>
-                  Card details are entered only on Paystack&apos;s secure page. Ykay College never stores or processes raw
-                  card numbers.
+                  Card details are entered only on Paystack&apos;s secure page. Ykay College never
+                  stores or processes raw card numbers.
                 </p>
               </div>
 
@@ -87,7 +93,11 @@ export default function PaystackModal({
                 disabled={!authorizationUrl || busy || leaving}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#0ea5e9] py-4 font-bold text-white transition-all hover:bg-[#0284c7] disabled:opacity-50"
               >
-                {busy || leaving ? <LoaderCircle className="animate-spin" size={18} /> : <ExternalLink size={18} />}
+                {busy || leaving ? (
+                  <LoaderCircle className="animate-spin" size={18} />
+                ) : (
+                  <ExternalLink size={18} />
+                )}
                 {authorizationUrl ? "Continue to Paystack" : "Preparing checkout…"}
               </button>
 

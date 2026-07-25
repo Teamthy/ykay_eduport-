@@ -21,7 +21,14 @@ export async function GET() {
         students: {
           where: { isActive: true },
           orderBy: { displayName: "asc" },
-          select: { id: true, studentId: true, displayName: true, gender: true, guardianName: true, guardianPhone: true },
+          select: {
+            id: true,
+            studentId: true,
+            displayName: true,
+            gender: true,
+            guardianName: true,
+            guardianPhone: true,
+          },
         },
         teacherAssignments: {
           where: { isActive: true, role: TeacherAssignmentRole.FORM_TEACHER },
@@ -100,13 +107,20 @@ export async function PATCH(request: NextRequest) {
     }
     const [schoolClass, teacher] = await Promise.all([
       prisma.schoolClass.findFirst({ where: { id: payload.classId, schoolId: user.schoolId } }),
-      prisma.teacherProfile.findFirst({ where: { id: payload.teacherProfileId, schoolId: user.schoolId, isActive: true } }),
+      prisma.teacherProfile.findFirst({
+        where: { id: payload.teacherProfileId, schoolId: user.schoolId, isActive: true },
+      }),
     ]);
-    if (!schoolClass || !teacher) return NextResponse.json({ error: "Class or teacher not found." }, { status: 404 });
+    if (!schoolClass || !teacher)
+      return NextResponse.json({ error: "Class or teacher not found." }, { status: 404 });
 
     await prisma.$transaction(async (tx) => {
       await tx.teacherClassAssignment.updateMany({
-        where: { classId: schoolClass.id, role: TeacherAssignmentRole.FORM_TEACHER, isActive: true },
+        where: {
+          classId: schoolClass.id,
+          role: TeacherAssignmentRole.FORM_TEACHER,
+          isActive: true,
+        },
         data: { isActive: false },
       });
       await tx.teacherClassAssignment.upsert({
@@ -130,7 +144,10 @@ export async function PATCH(request: NextRequest) {
       className: schoolClass.displayName,
       teacherName: teacher.displayName,
     });
-    return NextResponse.json({ ok: true, message: `${teacher.displayName} is now the form teacher of ${schoolClass.displayName}.` });
+    return NextResponse.json({
+      ok: true,
+      message: `${teacher.displayName} is now the form teacher of ${schoolClass.displayName}.`,
+    });
   }
 
   if (!payload.studentProfileId) {
@@ -144,26 +161,39 @@ export async function PATCH(request: NextRequest) {
   if (payload.action === "ARCHIVE_STUDENT") {
     await prisma.studentProfile.update({ where: { id: student.id }, data: { isActive: false } });
     await audit("STUDENT_ARCHIVED", "StudentProfile", student.id, { studentId: student.studentId });
-    return NextResponse.json({ ok: true, message: `${student.displayName} archived. Records are preserved and can be restored.` });
+    return NextResponse.json({
+      ok: true,
+      message: `${student.displayName} archived. Records are preserved and can be restored.`,
+    });
   }
 
   if (payload.action === "RESTORE_STUDENT") {
     await prisma.studentProfile.update({ where: { id: student.id }, data: { isActive: true } });
     await audit("STUDENT_RESTORED", "StudentProfile", student.id, { studentId: student.studentId });
-    return NextResponse.json({ ok: true, message: `${student.displayName} restored to ${"active roll"}.` });
+    return NextResponse.json({
+      ok: true,
+      message: `${student.displayName} restored to ${"active roll"}.`,
+    });
   }
 
   // MOVE_STUDENT
-  if (!payload.targetClassId) return NextResponse.json({ error: "Target class is required." }, { status: 400 });
+  if (!payload.targetClassId)
+    return NextResponse.json({ error: "Target class is required." }, { status: 400 });
   const targetClass = await prisma.schoolClass.findFirst({
     where: { id: payload.targetClassId, schoolId: user.schoolId, isActive: true },
   });
   if (!targetClass) return NextResponse.json({ error: "Target class not found." }, { status: 404 });
 
-  await prisma.studentProfile.update({ where: { id: student.id }, data: { currentClassId: targetClass.id } });
+  await prisma.studentProfile.update({
+    where: { id: student.id },
+    data: { currentClassId: targetClass.id },
+  });
   await audit("STUDENT_MOVED", "StudentProfile", student.id, {
     studentId: student.studentId,
     toClass: targetClass.displayName,
   });
-  return NextResponse.json({ ok: true, message: `${student.displayName} moved to ${targetClass.displayName}.` });
+  return NextResponse.json({
+    ok: true,
+    message: `${student.displayName} moved to ${targetClass.displayName}.`,
+  });
 }

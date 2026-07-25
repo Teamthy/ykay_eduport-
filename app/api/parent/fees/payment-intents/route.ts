@@ -59,11 +59,19 @@ export async function POST(request: NextRequest) {
       where: { reference: input.transferReference },
     });
     if (duplicate) {
-      return jsonNoStore({ error: "This bank transfer reference has already been submitted." }, { status: 409 });
+      return jsonNoStore(
+        { error: "This bank transfer reference has already been submitted." },
+        { status: 409 },
+      );
     }
-    const paidDup = await prisma.feePayment.findUnique({ where: { reference: input.transferReference } });
+    const paidDup = await prisma.feePayment.findUnique({
+      where: { reference: input.transferReference },
+    });
     if (paidDup) {
-      return jsonNoStore({ error: "This reference was already recorded as a completed payment." }, { status: 409 });
+      return jsonNoStore(
+        { error: "This reference was already recorded as a completed payment." },
+        { status: 409 },
+      );
     }
 
     const attempt = await prisma.feePaymentAttempt.create({
@@ -90,7 +98,11 @@ export async function POST(request: NextRequest) {
         entityType: "FeePaymentAttempt",
         entityId: attempt.id,
         ipAddress: getClientIp(request),
-        metadata: { invoiceNumber: invoice.invoiceNumber, amount, reference: input.transferReference },
+        metadata: {
+          invoiceNumber: invoice.invoiceNumber,
+          amount,
+          reference: input.transferReference,
+        },
       },
     });
 
@@ -100,7 +112,7 @@ export async function POST(request: NextRequest) {
         message: "Transfer submitted. The bursar will verify it before your invoice is updated.",
         attemptId: attempt.id,
       },
-      { status: 201 }
+      { status: 201 },
     );
   }
 
@@ -132,7 +144,11 @@ export async function POST(request: NextRequest) {
         schoolId: context.user.schoolId,
       },
     });
-    return jsonNoStore({ reference, authorizationUrl: checkout.authorization_url, attemptId: attempt.id });
+    return jsonNoStore({
+      reference,
+      authorizationUrl: checkout.authorization_url,
+      attemptId: attempt.id,
+    });
   } catch (error) {
     await prisma.feePaymentAttempt.update({
       where: { id: attempt.id },
@@ -140,7 +156,7 @@ export async function POST(request: NextRequest) {
     });
     return jsonNoStore(
       { error: error instanceof Error ? error.message : "Unable to initialize payment." },
-      { status: 502 }
+      { status: 502 },
     );
   }
 }

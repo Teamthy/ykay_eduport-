@@ -15,7 +15,10 @@ const REQUEST_SCHEMA = z.object({
 export async function POST(request: NextRequest) {
   const context = await getTeacherAttendanceContext();
   if (!context) {
-    return jsonNoStore({ error: "Teacher attendance correction access is not available for this account." }, { status: 403 });
+    return jsonNoStore(
+      { error: "Teacher attendance correction access is not available for this account." },
+      { status: 403 },
+    );
   }
 
   try {
@@ -37,7 +40,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (!session.isLocked) {
-      return jsonNoStore({ error: "Only locked attendance sessions need correction requests." }, { status: 422 });
+      return jsonNoStore(
+        { error: "Only locked attendance sessions need correction requests." },
+        { status: 422 },
+      );
     }
 
     const existingPending = await prisma.attendanceCorrectionRequest.findFirst({
@@ -49,7 +55,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingPending) {
-      return jsonNoStore({ error: "A correction request is already pending for this attendance session." }, { status: 409 });
+      return jsonNoStore(
+        { error: "A correction request is already pending for this attendance session." },
+        { status: 409 },
+      );
     }
 
     const ipAddress = getClientIp(request);
@@ -97,7 +106,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to request an attendance correction right now.";
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unable to request an attendance correction right now.";
     return jsonNoStore({ error: message }, { status: 400 });
   }
 }

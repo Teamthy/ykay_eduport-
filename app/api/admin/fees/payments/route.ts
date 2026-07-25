@@ -64,7 +64,10 @@ export async function POST(request: NextRequest) {
       });
       if (!invoice) return NextResponse.json({ error: "Invoice not found." }, { status: 404 });
       if (input.amount > invoice.balanceDue) {
-        return NextResponse.json({ error: "Cash amount exceeds outstanding balance." }, { status: 409 });
+        return NextResponse.json(
+          { error: "Cash amount exceeds outstanding balance." },
+          { status: 409 },
+        );
       }
 
       const reference = input.reference || generatePaymentReference();
@@ -105,7 +108,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!attempt || attempt.status !== PaymentStatus.PENDING) {
-      return NextResponse.json({ error: "Transfer is no longer awaiting review." }, { status: 409 });
+      return NextResponse.json(
+        { error: "Transfer is no longer awaiting review." },
+        { status: 409 },
+      );
     }
 
     if (input.action === "REJECT_TRANSFER") {
@@ -115,7 +121,10 @@ export async function POST(request: NextRequest) {
           status: PaymentStatus.FAILED,
           reviewedByUserId: context.user.id,
           reviewedAt: new Date(),
-          transferNarration: [attempt.transferNarration, input.note ? `Review: ${input.note}` : null]
+          transferNarration: [
+            attempt.transferNarration,
+            input.note ? `Review: ${input.note}` : null,
+          ]
             .filter(Boolean)
             .join("\n"),
         },
@@ -173,7 +182,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to process payment." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 }

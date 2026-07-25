@@ -5,7 +5,20 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import LiveReportCardPreview from "@/components/LiveReportCardPreview";
-import { CalendarDays, Eye, FileText, GraduationCap, LayoutDashboard, Bell, ClipboardCheck, Calendar, User, LoaderCircle, Award, Download } from "lucide-react";
+import {
+  CalendarDays,
+  Eye,
+  FileText,
+  GraduationCap,
+  LayoutDashboard,
+  Bell,
+  ClipboardCheck,
+  Calendar,
+  User,
+  LoaderCircle,
+  Award,
+  Download,
+} from "lucide-react";
 
 const SIDEBAR_ITEMS = [
   { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
@@ -89,7 +102,8 @@ export default function StudentReportCardsPage() {
     };
   }, []);
 
-  const selected = data?.reports.find((report) => report.id === selectedReportId) || data?.reports[0] || null;
+  const selected =
+    data?.reports.find((report) => report.id === selectedReportId) || data?.reports[0] || null;
 
   return (
     <>
@@ -97,8 +111,12 @@ export default function StudentReportCardsPage() {
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="px-6 pb-10 pt-24">
           <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl md:p-12">
-            <h1 className="font-display text-[42px] tracking-[3px] text-white md:text-[64px]">MY <span className="text-brand-green">REPORT CARD</span></h1>
-            <p className="mt-3 max-w-2xl text-base text-white/60">View, review, and print your live term report cards.</p>
+            <h1 className="font-display text-[42px] tracking-[3px] text-white md:text-[64px]">
+              MY <span className="text-brand-green">REPORT CARD</span>
+            </h1>
+            <p className="mt-3 max-w-2xl text-base text-white/60">
+              View, review, and print your live term report cards.
+            </p>
           </div>
         </section>
 
@@ -107,19 +125,37 @@ export default function StudentReportCardsPage() {
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 space-y-6">
-              {loading ? <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]"><div className="flex items-center gap-3 text-[var(--text-secondary)]"><LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading report cards...</div></div> : null}
-              {!loading && error ? <div className="rounded-[2rem] border border-brand-orange/30 bg-brand-orange/10 p-6 text-sm text-[var(--text-secondary)] shadow-[var(--card-shadow)]">{error}</div> : null}
+              {loading ? (
+                <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
+                  <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    report cards...
+                  </div>
+                </div>
+              ) : null}
+              {!loading && error ? (
+                <div className="rounded-[2rem] border border-brand-orange/30 bg-brand-orange/10 p-6 text-sm text-[var(--text-secondary)] shadow-[var(--card-shadow)]">
+                  {error}
+                </div>
+              ) : null}
 
               {!loading && data ? (
                 <>
                   <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
                     <div className="mb-6 flex items-center justify-between gap-4">
                       <div>
-                        <h2 className="font-display text-xl text-[var(--text-primary)]">My Report Cards</h2>
-                        <p className="mt-1 text-sm text-[var(--text-muted)]">{data.student.displayName} Â· {data.student.className}</p>
+                        <h2 className="font-display text-xl text-[var(--text-primary)]">
+                          My Report Cards
+                        </h2>
+                        <p className="mt-1 text-sm text-[var(--text-muted)]">
+                          {data.student.displayName} Â· {data.student.className}
+                        </p>
                       </div>
                       {selected ? (
-                        <button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-full bg-brand-green px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark">
+                        <button
+                          onClick={() => window.print()}
+                          className="inline-flex items-center gap-2 rounded-full bg-brand-green px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark"
+                        >
                           <Download size={14} /> Print / Save PDF
                         </button>
                       ) : null}
@@ -129,24 +165,45 @@ export default function StudentReportCardsPage() {
                       <table className="w-full text-sm">
                         <thead className="border-b border-[var(--border-subtle)]">
                           <tr>
-                            {["Report No.", "Term", "Status", "Overall", "Actions"].map((heading) => (
-                              <th key={heading} className="px-4 py-3 text-left font-display text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{heading}</th>
-                            ))}
+                            {["Report No.", "Term", "Status", "Overall", "Actions"].map(
+                              (heading) => (
+                                <th
+                                  key={heading}
+                                  className="px-4 py-3 text-left font-display text-[10px] uppercase tracking-wider text-[var(--text-muted)]"
+                                >
+                                  {heading}
+                                </th>
+                              ),
+                            )}
                           </tr>
                         </thead>
                         <tbody>
                           {data.reports.map((report) => (
-                            <tr key={report.id} className="border-b border-[var(--border-subtle)] transition-colors hover:bg-[var(--surface-disabled)]">
-                              <td className="px-4 py-4 text-xs font-bold text-brand-green">{report.reportNumber}</td>
-                              <td className="px-4 py-4 text-xs text-[var(--text-muted)]">{report.termLabel} Â· {report.sessionLabel}</td>
+                            <tr
+                              key={report.id}
+                              className="border-b border-[var(--border-subtle)] transition-colors hover:bg-[var(--surface-disabled)]"
+                            >
+                              <td className="px-4 py-4 text-xs font-bold text-brand-green">
+                                {report.reportNumber}
+                              </td>
+                              <td className="px-4 py-4 text-xs text-[var(--text-muted)]">
+                                {report.termLabel} Â· {report.sessionLabel}
+                              </td>
                               <td className="px-4 py-4">
-                                <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${report.status === "RELEASED" ? "bg-brand-green/10 text-brand-green" : "bg-brand-orange/10 text-brand-orange"}`}>
+                                <span
+                                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${report.status === "RELEASED" ? "bg-brand-green/10 text-brand-green" : "bg-brand-orange/10 text-brand-orange"}`}
+                                >
                                   <Award size={9} /> {report.statusLabel}
                                 </span>
                               </td>
-                              <td className="px-4 py-4 font-display text-base font-bold text-brand-green">{report.overallAverage}% Â· {report.overallGrade}</td>
+                              <td className="px-4 py-4 font-display text-base font-bold text-brand-green">
+                                {report.overallAverage}% Â· {report.overallGrade}
+                              </td>
                               <td className="px-4 py-4">
-                                <button onClick={() => setSelectedReportId(report.id)} className="inline-flex items-center gap-1 rounded-full bg-brand-green/10 px-3 py-1.5 text-[10px] font-bold text-brand-green transition-all hover:bg-brand-green hover:text-white">
+                                <button
+                                  onClick={() => setSelectedReportId(report.id)}
+                                  className="inline-flex items-center gap-1 rounded-full bg-brand-green/10 px-3 py-1.5 text-[10px] font-bold text-brand-green transition-all hover:bg-brand-green hover:text-white"
+                                >
                                   <Eye size={10} /> View
                                 </button>
                               </td>

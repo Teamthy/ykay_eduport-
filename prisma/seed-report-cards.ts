@@ -14,7 +14,16 @@ function gradeFromScore(score: number) {
   return "F9";
 }
 
-function buildSubjects(template: Array<{ subject: string; ca1: number; ca2: number; midterm: number; assignment: number; exam: number }>) {
+function buildSubjects(
+  template: Array<{
+    subject: string;
+    ca1: number;
+    ca2: number;
+    midterm: number;
+    assignment: number;
+    exam: number;
+  }>,
+) {
   return template.map((item, index) => {
     const total = item.ca1 + item.ca2 + item.midterm + item.assignment + item.exam;
     return {
@@ -62,7 +71,17 @@ async function upsertReportCard(input: {
   directorRemark: string;
   nextResumption: string;
   feeBalance: number;
-  subjects: Array<{ subject: string; ca1: number; ca2: number; midterm: number; assignment: number; exam: number; total: number; grade: string; sortOrder: number }>;
+  subjects: Array<{
+    subject: string;
+    ca1: number;
+    ca2: number;
+    midterm: number;
+    assignment: number;
+    exam: number;
+    total: number;
+    grade: string;
+    sortOrder: number;
+  }>;
 }) {
   const reportCard = await prisma.reportCard.upsert({
     where: { reportNumber: input.reportNumber },
@@ -235,7 +254,7 @@ async function main() {
       student: template.student.displayName,
       status: template.status,
       class: template.student.currentClass.displayName,
-    }))
+    })),
   );
   console.log("Student, parent, and admin report-card pages now have live seeded data.");
 }

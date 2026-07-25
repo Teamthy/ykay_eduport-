@@ -12,16 +12,22 @@ export default function LiveClock() {
   const [date, setDate] = useState("");
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const isPortal = PORTAL_PREFIXES.some(p => pathname.startsWith(p));
+  const isPortal = PORTAL_PREFIXES.some((p) => pathname.startsWith(p));
 
   useEffect(() => {
     if (!isPortal) return;
     const update = () => {
       const now = new Date();
-      setTime(now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }));
-      setDate(now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }));
+      setTime(
+        now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }),
+      );
+      setDate(
+        now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+      );
     };
     update();
     const interval = setInterval(update, 1000);

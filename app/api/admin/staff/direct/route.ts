@@ -77,6 +77,6 @@ export async function POST(request: NextRequest) {
       temporaryPassword: tempPassword,
       mustChangePassword: true,
     },
-    { status: 201 }
+    { status: 201 },
   );
 }

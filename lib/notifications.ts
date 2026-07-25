@@ -10,8 +10,7 @@ import { prisma } from "@/lib/prisma";
    ------------------------------------------------------------------ */
 
 export type DeliveryResult =
-  | { ok: true; providerId?: string }
-  | { ok: false; error: string; permanent?: boolean };
+  { ok: true; providerId?: string } | { ok: false; error: string; permanent?: boolean };
 
 export interface ChannelAdapter {
   channel: AlertChannel;
@@ -59,7 +58,10 @@ const emailAdapter: ChannelAdapter = {
       if (error) return { ok: false, error: error.message || "Email provider error." };
       return { ok: true };
     } catch (sendError) {
-      return { ok: false, error: sendError instanceof Error ? sendError.message : "Email send failed." };
+      return {
+        ok: false,
+        error: sendError instanceof Error ? sendError.message : "Email send failed.",
+      };
     }
   },
 };
@@ -82,7 +84,11 @@ const adapters: Record<AlertChannel, ChannelAdapter> = {
 };
 
 function escapeHtml(value: string) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function kindLabelFromSubject(subject: string) {
@@ -108,7 +114,9 @@ export type QueueJobInput = {
 
 export async function queueNotificationJob(input: QueueJobInput) {
   if (input.dedupeKey) {
-    const existing = await prisma.notificationJob.findUnique({ where: { dedupeKey: input.dedupeKey } });
+    const existing = await prisma.notificationJob.findUnique({
+      where: { dedupeKey: input.dedupeKey },
+    });
     if (existing) return existing;
   }
   return prisma.notificationJob.create({

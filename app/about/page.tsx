@@ -16,7 +16,8 @@ export default function AboutPage() {
               OUR STORY
             </h1>
             <p className="font-body text-base md:text-xl text-[var(--text-secondary)] max-w-2xl leading-relaxed">
-              Founded with a vision to raise leaders through excellence in education, Ykay College has grown into one of the most respected secondary schools in Ogun State.
+              Founded with a vision to raise leaders through excellence in education, Ykay College
+              has grown into one of the most respected secondary schools in Ogun State.
             </p>
           </div>
         </section>
@@ -31,13 +32,22 @@ export default function AboutPage() {
                 </h2>
                 <div className="space-y-5 text-[var(--text-secondary)] font-body text-base leading-relaxed">
                   <p>
-                    Ykay College &amp; Leadership Academy was established on the conviction that education, when combined with moral formation and leadership training, creates students who will transform their communities.
+                    Ykay College &amp; Leadership Academy was established on the conviction that
+                    education, when combined with moral formation and leadership training, creates
+                    students who will transform their communities.
                   </p>
                   <p>
-                    Located in Sango Ota — a vibrant educational corridor along the Lagos-Abeokuta Expressway — the school serves families across Ogun State and beyond. Our campus is designed to support both rigorous academic work and holistic personal development.
+                    Located in Sango Ota — a vibrant educational corridor along the Lagos-Abeokuta
+                    Expressway — the school serves families across Ogun State and beyond. Our campus
+                    is designed to support both rigorous academic work and holistic personal
+                    development.
                   </p>
                   <p>
-                    Every student at Ykay College is seen not just as a learner, but as a future leader. Our teachers are selected for both their subject mastery and their commitment to mentoring young people. Our curriculum is aligned with the Nigerian Educational Research and Development Council (NERDC) and prepares students for WAEC, NECO, BECE, and university entrance examinations.
+                    Every student at Ykay College is seen not just as a learner, but as a future
+                    leader. Our teachers are selected for both their subject mastery and their
+                    commitment to mentoring young people. Our curriculum is aligned with the
+                    Nigerian Educational Research and Development Council (NERDC) and prepares
+                    students for WAEC, NECO, BECE, and university entrance examinations.
                   </p>
                 </div>
               </div>

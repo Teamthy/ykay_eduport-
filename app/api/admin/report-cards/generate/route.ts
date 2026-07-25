@@ -1,7 +1,12 @@
 import { AttendanceStatus, GradebookStatus, ReportCardStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { GRADEBOOK_ADMIN_ROLES, currentSessionLabel, currentTermLabel, waecGrade } from "@/lib/gradebook";
+import {
+  GRADEBOOK_ADMIN_ROLES,
+  currentSessionLabel,
+  currentTermLabel,
+  waecGrade,
+} from "@/lib/gradebook";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
 import { requireRole } from "@/lib/session";
@@ -57,14 +62,17 @@ export async function GET(request: NextRequest) {
     sessionLabel,
     termLabel,
     classes: classes.map((schoolClass) => {
-      const lockedCount = schoolClass.gradebooks.filter((g) => g.status === GradebookStatus.LOCKED).length;
+      const lockedCount = schoolClass.gradebooks.filter(
+        (g) => g.status === GradebookStatus.LOCKED,
+      ).length;
       return {
         id: schoolClass.id,
         displayName: schoolClass.displayName,
         studentCount: schoolClass.students.length,
         gradebookCount: schoolClass.gradebooks.length,
         lockedGradebookCount: lockedCount,
-        readyToGenerate: schoolClass.gradebooks.length > 0 && lockedCount === schoolClass.gradebooks.length,
+        readyToGenerate:
+          schoolClass.gradebooks.length > 0 && lockedCount === schoolClass.gradebooks.length,
         subjects: schoolClass.gradebooks.map((g) => ({
           subjectName: g.subjectName,
           status: g.status,
@@ -102,7 +110,10 @@ export async function POST(request: NextRequest) {
   });
 
   if (!gradebooks.length) {
-    return NextResponse.json({ error: "No gradebooks exist for this class and term yet." }, { status: 409 });
+    return NextResponse.json(
+      { error: "No gradebooks exist for this class and term yet." },
+      { status: 409 },
+    );
   }
 
   const unlocked = gradebooks.filter((gradebook) => gradebook.status !== GradebookStatus.LOCKED);
@@ -113,7 +124,7 @@ export async function POST(request: NextRequest) {
           .map((gradebook) => gradebook.subjectName)
           .join(", ")}.`,
       },
-      { status: 409 }
+      { status: 409 },
     );
   }
 
@@ -197,7 +208,9 @@ export async function POST(request: NextRequest) {
       where: { studentProfileId: student.id },
       select: { status: true },
     });
-    const attendancePresent = attendanceEntries.filter((entry) => entry.status === AttendanceStatus.PRESENT).length;
+    const attendancePresent = attendanceEntries.filter(
+      (entry) => entry.status === AttendanceStatus.PRESENT,
+    ).length;
     const attendanceTotal = attendanceEntries.length || 1;
 
     const openInvoices = await prisma.feeInvoice.aggregate({
@@ -209,7 +222,10 @@ export async function POST(request: NextRequest) {
     const reportNumber = `RC/${termYearSuffix}/${termLabel.split(" ")[0].toUpperCase()}/${student.studentId.replace(/\//g, "-")}`;
 
     await prisma.$transaction(async (tx) => {
-      const existing = await tx.reportCard.findUnique({ where: { reportNumber }, select: { id: true, status: true } });
+      const existing = await tx.reportCard.findUnique({
+        where: { reportNumber },
+        select: { id: true, status: true },
+      });
       if (existing?.status === ReportCardStatus.RELEASED) return;
 
       if (existing) {

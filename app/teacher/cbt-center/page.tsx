@@ -120,7 +120,10 @@ export default function TeacherCbtCenterPage() {
       const body = (await response.json()) as ExamsResponse & { error?: string };
       if (!response.ok) throw new Error(body.error || "Unable to load exams.");
       setData(body);
-      setForm((previous) => ({ ...previous, assignmentId: previous.assignmentId || body.assignments[0]?.id || "" }));
+      setForm((previous) => ({
+        ...previous,
+        assignmentId: previous.assignmentId || body.assignments[0]?.id || "",
+      }));
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Unable to load exams.");
     } finally {
@@ -193,7 +196,10 @@ export default function TeacherCbtCenterPage() {
       if (!response.ok) throw new Error(body.error || "Unable to load results.");
       setResults(body);
     } catch (resultsError) {
-      toast(resultsError instanceof Error ? resultsError.message : "Unable to load results.", "error");
+      toast(
+        resultsError instanceof Error ? resultsError.message : "Unable to load results.",
+        "error",
+      );
     } finally {
       setResultsLoading(false);
     }
@@ -231,8 +237,8 @@ export default function TeacherCbtCenterPage() {
               EXAM <span className="text-brand-green">MANAGEMENT</span>
             </h1>
             <p className="mt-3 max-w-2xl font-body text-sm text-white/60">
-              Create computer-based tests, add questions in bulk, publish to your class, grade essays, release
-              results, and grant retakes.
+              Create computer-based tests, add questions in bulk, publish to your class, grade
+              essays, release results, and grant retakes.
             </p>
           </div>
         </section>
@@ -242,12 +248,17 @@ export default function TeacherCbtCenterPage() {
             <TeacherSidebar />
 
             <div className="min-w-0 flex-1 space-y-6">
-              {error ? <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">{error}</div> : null}
+              {error ? (
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                  {error}
+                </div>
+              ) : null}
 
               {loading ? (
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
                   <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading CBT center...
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading CBT
+                    center...
                   </div>
                 </div>
               ) : null}
@@ -269,7 +280,9 @@ export default function TeacherCbtCenterPage() {
                           Subject · Class
                           <select
                             value={form.assignmentId}
-                            onChange={(event) => setForm({ ...form, assignmentId: event.target.value })}
+                            onChange={(event) =>
+                              setForm({ ...form, assignmentId: event.target.value })
+                            }
                             className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)]"
                           >
                             {data.assignments.map((assignment) => (
@@ -292,7 +305,12 @@ export default function TeacherCbtCenterPage() {
                           Type
                           <select
                             value={form.examType}
-                            onChange={(event) => setForm({ ...form, examType: event.target.value as typeof form.examType })}
+                            onChange={(event) =>
+                              setForm({
+                                ...form,
+                                examType: event.target.value as typeof form.examType,
+                              })
+                            }
                             className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)]"
                           >
                             <option value="CA">CA Test</option>
@@ -309,7 +327,9 @@ export default function TeacherCbtCenterPage() {
                               min={5}
                               max={240}
                               value={form.durationMinutes}
-                              onChange={(event) => setForm({ ...form, durationMinutes: Number(event.target.value) })}
+                              onChange={(event) =>
+                                setForm({ ...form, durationMinutes: Number(event.target.value) })
+                              }
                               className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)]"
                             />
                           </label>
@@ -320,7 +340,9 @@ export default function TeacherCbtCenterPage() {
                               min={0}
                               max={100}
                               value={form.passMark}
-                              onChange={(event) => setForm({ ...form, passMark: Number(event.target.value) })}
+                              onChange={(event) =>
+                                setForm({ ...form, passMark: Number(event.target.value) })
+                              }
                               className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)]"
                             />
                           </label>
@@ -330,7 +352,9 @@ export default function TeacherCbtCenterPage() {
                         Instructions (optional)
                         <textarea
                           value={form.instructions}
-                          onChange={(event) => setForm({ ...form, instructions: event.target.value })}
+                          onChange={(event) =>
+                            setForm({ ...form, instructions: event.target.value })
+                          }
                           rows={2}
                           placeholder="e.g. Answer ALL questions. No calculators."
                           className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)]"
@@ -340,7 +364,9 @@ export default function TeacherCbtCenterPage() {
                         Questions (bulk paste — blank line between questions)
                         <textarea
                           value={form.bulkQuestions}
-                          onChange={(event) => setForm({ ...form, bulkQuestions: event.target.value })}
+                          onChange={(event) =>
+                            setForm({ ...form, bulkQuestions: event.target.value })
+                          }
                           rows={10}
                           placeholder={FORMAT_HELP}
                           className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 font-mono text-xs text-[var(--input-text)]"
@@ -351,7 +377,12 @@ export default function TeacherCbtCenterPage() {
                         disabled={busy}
                         className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
                       >
-                        {busy ? <LoaderCircle size={14} className="animate-spin" /> : <FilePlus2 size={14} />} Create Exam
+                        {busy ? (
+                          <LoaderCircle size={14} className="animate-spin" />
+                        ) : (
+                          <FilePlus2 size={14} />
+                        )}{" "}
+                        Create Exam
                       </button>
                     </div>
                   ) : null}
@@ -359,11 +390,16 @@ export default function TeacherCbtCenterPage() {
                   {/* Exams list */}
                   <div className="space-y-3">
                     {data.exams.map((exam) => (
-                      <div key={exam.id} className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+                      <div
+                        key={exam.id}
+                        className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]"
+                      >
                         <div className="flex flex-wrap items-start justify-between gap-4">
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="font-display text-xl text-[var(--text-primary)]">{exam.title}</h3>
+                              <h3 className="font-display text-xl text-[var(--text-primary)]">
+                                {exam.title}
+                              </h3>
                               <span
                                 className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest ${
                                   exam.status === "PUBLISHED"
@@ -382,31 +418,58 @@ export default function TeacherCbtCenterPage() {
                               ) : null}
                             </div>
                             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                              <span className="inline-flex items-center gap-1"><BookOpen size={11} /> {exam.subjectName} · {exam.className}</span>
-                              <span className="inline-flex items-center gap-1"><Clock size={11} /> {exam.durationMinutes} min</span>
-                              <span>{exam.questionCount} questions · {exam.totalMarks} marks</span>
-                              <span className="inline-flex items-center gap-1"><Users size={11} /> {exam.submittedCount}/{exam.attemptCount} submitted</span>
+                              <span className="inline-flex items-center gap-1">
+                                <BookOpen size={11} /> {exam.subjectName} · {exam.className}
+                              </span>
+                              <span className="inline-flex items-center gap-1">
+                                <Clock size={11} /> {exam.durationMinutes} min
+                              </span>
+                              <span>
+                                {exam.questionCount} questions · {exam.totalMarks} marks
+                              </span>
+                              <span className="inline-flex items-center gap-1">
+                                <Users size={11} /> {exam.submittedCount}/{exam.attemptCount}{" "}
+                                submitted
+                              </span>
                             </div>
                           </div>
                           <div className="flex flex-wrap gap-2">
                             {exam.status === "DRAFT" ? (
-                              <button onClick={() => void act(exam, "PUBLISH")} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-brand-green-dark disabled:opacity-50">
+                              <button
+                                onClick={() => void act(exam, "PUBLISH")}
+                                disabled={busy}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-brand-green-dark disabled:opacity-50"
+                              >
                                 <Send size={12} /> Publish
                               </button>
                             ) : null}
                             {exam.status === "PUBLISHED" ? (
-                              <button onClick={() => void act(exam, "CLOSE")} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-disabled)] px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-red-500 hover:text-white disabled:opacity-50">
+                              <button
+                                onClick={() => void act(exam, "CLOSE")}
+                                disabled={busy}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-disabled)] px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-red-500 hover:text-white disabled:opacity-50"
+                              >
                                 <Lock size={12} /> Close
                               </button>
                             ) : null}
                             <button
-                              onClick={() => void act(exam, exam.resultsReleased ? "UNRELEASE_RESULTS" : "RELEASE_RESULTS")}
+                              onClick={() =>
+                                void act(
+                                  exam,
+                                  exam.resultsReleased ? "UNRELEASE_RESULTS" : "RELEASE_RESULTS",
+                                )
+                              }
                               disabled={busy}
                               className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-orange hover:bg-brand-orange hover:text-white disabled:opacity-50"
                             >
-                              <CheckCircle2 size={12} /> {exam.resultsReleased ? "Hide Results" : "Release Results"}
+                              <CheckCircle2 size={12} />{" "}
+                              {exam.resultsReleased ? "Hide Results" : "Release Results"}
                             </button>
-                            <button onClick={() => void openResults(exam.id)} disabled={resultsLoading} className="inline-flex items-center gap-1.5 rounded-full bg-brand-green/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-green hover:bg-brand-green hover:text-white disabled:opacity-50">
+                            <button
+                              onClick={() => void openResults(exam.id)}
+                              disabled={resultsLoading}
+                              className="inline-flex items-center gap-1.5 rounded-full bg-brand-green/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-green hover:bg-brand-green hover:text-white disabled:opacity-50"
+                            >
                               <Eye size={12} /> Results
                             </button>
                           </div>
@@ -415,8 +478,13 @@ export default function TeacherCbtCenterPage() {
                     ))}
                     {!data.exams.length ? (
                       <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 text-center shadow-[var(--card-shadow)]">
-                        <ClipboardCheck className="mx-auto mb-3 text-[var(--text-muted)]" size={30} />
-                        <p className="text-sm text-[var(--text-muted)]">No exams yet. Create your first CBT above.</p>
+                        <ClipboardCheck
+                          className="mx-auto mb-3 text-[var(--text-muted)]"
+                          size={30}
+                        />
+                        <p className="text-sm text-[var(--text-muted)]">
+                          No exams yet. Create your first CBT above.
+                        </p>
                       </div>
                     ) : null}
                   </div>
@@ -428,25 +496,40 @@ export default function TeacherCbtCenterPage() {
                         Results — {results.exam.title}
                       </h2>
                       <p className="mt-1 text-xs text-[var(--text-muted)]">
-                        {results.exam.subjectName} · {results.exam.className} · {results.exam.totalMarks} marks · pass {results.exam.passMark}%
+                        {results.exam.subjectName} · {results.exam.className} ·{" "}
+                        {results.exam.totalMarks} marks · pass {results.exam.passMark}%
                       </p>
                       <div className="mt-6 space-y-4">
                         {results.attempts.map((attempt) => (
-                          <div key={attempt.id} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card-bg-subtle)] p-5">
+                          <div
+                            key={attempt.id}
+                            className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--card-bg-subtle)] p-5"
+                          >
                             <div className="flex flex-wrap items-center justify-between gap-3">
                               <div>
-                                <div className="font-bold text-[var(--text-primary)]">{attempt.student.displayName}</div>
+                                <div className="font-bold text-[var(--text-primary)]">
+                                  {attempt.student.displayName}
+                                </div>
                                 <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                                  {attempt.student.studentId} · Attempt {attempt.attemptNumber} · {attempt.status}
-                                  {attempt.tabSwitches > 0 ? ` · ⚠ ${attempt.tabSwitches} tab switch(es)` : ""}
+                                  {attempt.student.studentId} · Attempt {attempt.attemptNumber} ·{" "}
+                                  {attempt.status}
+                                  {attempt.tabSwitches > 0
+                                    ? ` · ⚠ ${attempt.tabSwitches} tab switch(es)`
+                                    : ""}
                                 </div>
                               </div>
                               <div className="flex items-center gap-3">
-                                <span className={`font-display text-2xl ${attempt.passed ? "text-brand-green" : "text-red-500"}`}>
+                                <span
+                                  className={`font-display text-2xl ${attempt.passed ? "text-brand-green" : "text-red-500"}`}
+                                >
                                   {attempt.totalScore}/{results.exam.totalMarks}
                                 </span>
                                 <button
-                                  onClick={() => void act({ id: results.exam.id } as ExamRow, "GRANT_RETAKE", { studentProfileId: attempt.student.id })}
+                                  onClick={() =>
+                                    void act({ id: results.exam.id } as ExamRow, "GRANT_RETAKE", {
+                                      studentProfileId: attempt.student.id,
+                                    })
+                                  }
                                   disabled={busy}
                                   className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-disabled)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-brand-orange hover:text-white disabled:opacity-50"
                                 >
@@ -457,9 +540,19 @@ export default function TeacherCbtCenterPage() {
                             {attempt.essayAnswers.length ? (
                               <div className="mt-4 space-y-3 border-t border-[var(--border-subtle)] pt-4">
                                 {attempt.essayAnswers.map((essay) => (
-                                  <div key={essay.answerId} className="rounded-xl bg-[var(--surface-disabled)] p-4">
-                                    <div className="text-xs font-bold text-[var(--text-primary)]">{essay.questionText} <span className="text-[var(--text-muted)]">({essay.maxMarks} marks)</span></div>
-                                    <p className="mt-2 whitespace-pre-line text-sm text-[var(--text-secondary)]">{essay.response || "— no answer —"}</p>
+                                  <div
+                                    key={essay.answerId}
+                                    className="rounded-xl bg-[var(--surface-disabled)] p-4"
+                                  >
+                                    <div className="text-xs font-bold text-[var(--text-primary)]">
+                                      {essay.questionText}{" "}
+                                      <span className="text-[var(--text-muted)]">
+                                        ({essay.maxMarks} marks)
+                                      </span>
+                                    </div>
+                                    <p className="mt-2 whitespace-pre-line text-sm text-[var(--text-secondary)]">
+                                      {essay.response || "— no answer —"}
+                                    </p>
                                     <div className="mt-3 flex items-center gap-2">
                                       <input
                                         type="number"
@@ -471,8 +564,14 @@ export default function TeacherCbtCenterPage() {
                                       />
                                       <button
                                         onClick={() => {
-                                          const input = document.getElementById(`essay-${essay.answerId}`) as HTMLInputElement | null;
-                                          void gradeEssay(results.exam.id, essay.answerId, Number(input?.value) || 0);
+                                          const input = document.getElementById(
+                                            `essay-${essay.answerId}`,
+                                          ) as HTMLInputElement | null;
+                                          void gradeEssay(
+                                            results.exam.id,
+                                            essay.answerId,
+                                            Number(input?.value) || 0,
+                                          );
                                         }}
                                         disabled={busy}
                                         className="rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-brand-green-dark disabled:opacity-50"
@@ -480,9 +579,13 @@ export default function TeacherCbtCenterPage() {
                                         Save Score
                                       </button>
                                       {essay.awardedMarks !== null ? (
-                                        <span className="text-xs font-bold text-brand-green">Scored: {essay.awardedMarks}/{essay.maxMarks}</span>
+                                        <span className="text-xs font-bold text-brand-green">
+                                          Scored: {essay.awardedMarks}/{essay.maxMarks}
+                                        </span>
                                       ) : (
-                                        <span className="text-xs text-brand-orange">Awaiting grading</span>
+                                        <span className="text-xs text-brand-orange">
+                                          Awaiting grading
+                                        </span>
                                       )}
                                     </div>
                                   </div>
@@ -492,7 +595,9 @@ export default function TeacherCbtCenterPage() {
                           </div>
                         ))}
                         {!results.attempts.length ? (
-                          <p className="text-sm text-[var(--text-muted)]">No attempts yet for this exam.</p>
+                          <p className="text-sm text-[var(--text-muted)]">
+                            No attempts yet for this exam.
+                          </p>
                         ) : null}
                       </div>
                     </div>

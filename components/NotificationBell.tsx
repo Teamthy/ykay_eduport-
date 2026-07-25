@@ -3,8 +3,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import {
-  Bell, CheckCircle2, CreditCard, FileText, Clock,
-  MessageSquare, Megaphone, LoaderCircle,
+  Bell,
+  CheckCircle2,
+  CreditCard,
+  FileText,
+  Clock,
+  MessageSquare,
+  Megaphone,
+  LoaderCircle,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 
@@ -59,7 +65,10 @@ export default function NotificationBell() {
     try {
       const response = await fetch("/api/notifications", { cache: "no-store" });
       if (!response.ok) return;
-      const body = (await response.json()) as { unreadCount: number; notifications: NotificationItem[] };
+      const body = (await response.json()) as {
+        unreadCount: number;
+        notifications: NotificationItem[];
+      };
       setItems(body.notifications);
       setUnreadCount(body.unreadCount);
     } catch {
@@ -98,7 +107,9 @@ export default function NotificationBell() {
 
   const openItem = async (item: NotificationItem) => {
     if (!item.read) {
-      setItems((previous) => previous.map((entry) => (entry.id === item.id ? { ...entry, read: true } : entry)));
+      setItems((previous) =>
+        previous.map((entry) => (entry.id === item.id ? { ...entry, read: true } : entry)),
+      );
       setUnreadCount((count) => Math.max(0, count - 1));
       await fetch("/api/notifications", {
         method: "PATCH",
@@ -137,11 +148,16 @@ export default function NotificationBell() {
               <Bell size={16} className="text-brand-green" />
               <span className="font-display text-sm text-white tracking-widest">NOTIFICATIONS</span>
               {unreadCount > 0 && (
-                <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-500 text-white font-bold">{unreadCount} new</span>
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-500 text-white font-bold">
+                  {unreadCount} new
+                </span>
               )}
             </div>
             {unreadCount > 0 && (
-              <button onClick={() => void markAllRead()} className="text-[10px] text-brand-green font-bold uppercase tracking-widest hover:underline">
+              <button
+                onClick={() => void markAllRead()}
+                className="text-[10px] text-brand-green font-bold uppercase tracking-widest hover:underline"
+              >
                 Mark all read
               </button>
             )}
@@ -164,13 +180,21 @@ export default function NotificationBell() {
                     item.read ? "opacity-60 hover:opacity-80" : "hover:bg-white/5"
                   }`}
                 >
-                  <div className={`w-9 h-9 rounded-xl ${config.bg} ${config.color} flex items-center justify-center shrink-0`}>
+                  <div
+                    className={`w-9 h-9 rounded-xl ${config.bg} ${config.color} flex items-center justify-center shrink-0`}
+                  >
                     <Icon size={16} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <div className={`text-sm ${item.read ? "text-white/70" : "text-white font-bold"}`}>{item.title}</div>
-                      {!item.read && <div className="w-2 h-2 rounded-full bg-brand-green shrink-0 mt-1.5" />}
+                      <div
+                        className={`text-sm ${item.read ? "text-white/70" : "text-white font-bold"}`}
+                      >
+                        {item.title}
+                      </div>
+                      {!item.read && (
+                        <div className="w-2 h-2 rounded-full bg-brand-green shrink-0 mt-1.5" />
+                      )}
                     </div>
                     <div className="text-xs text-white/50 mt-0.5 line-clamp-2">{item.body}</div>
                     <div className="text-[10px] text-white/30 mt-1 flex items-center gap-1">

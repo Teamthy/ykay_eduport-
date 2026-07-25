@@ -22,7 +22,13 @@ type MeResponse = {
     checkOutAt: string | null;
     isLate: boolean;
     lateMinutes: number;
-    events: Array<{ id: string; eventType: string; scannedAt: string; isLate: boolean; lateMinutes: number }>;
+    events: Array<{
+      id: string;
+      eventType: string;
+      scannedAt: string;
+      isLate: boolean;
+      lateMinutes: number;
+    }>;
   };
 };
 
@@ -66,7 +72,7 @@ export default function StaffSelfAttendancePage() {
       if (!r.ok) throw new Error(j.error || "Action failed.");
       toast(
         `${action === "CHECK_IN" ? "Checked in" : "Checked out"}${j.event?.isLate ? ` · late +${j.event.lateMinutes}m` : ""}`,
-        j.event?.isLate ? "info" : "success"
+        j.event?.isLate ? "info" : "success",
       );
       await load();
     } catch (e) {
@@ -81,12 +87,15 @@ export default function StaffSelfAttendancePage() {
       <PortalTopbar title="My attendance" />
       <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
-          <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Staff self-service</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+            Staff self-service
+          </p>
           <h1 className="mt-2 font-display text-4xl tracking-widest">
             MY <span className="text-brand-green">ATTENDANCE</span>
           </h1>
           <p className="mt-3 text-sm text-white/65">
-            Check in / out here, or present your badge QR at the admin scanner. Late after {data?.lateCutoff || "08:00"}.
+            Check in / out here, or present your badge QR at the admin scanner. Late after{" "}
+            {data?.lateCutoff || "08:00"}.
           </p>
         </div>
 
@@ -103,8 +112,12 @@ export default function StaffSelfAttendancePage() {
             <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">Today · {data.date}</div>
-                  <h2 className="mt-1 font-display text-3xl tracking-widest">{data.staff?.displayName}</h2>
+                  <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
+                    Today · {data.date}
+                  </div>
+                  <h2 className="mt-1 font-display text-3xl tracking-widest">
+                    {data.staff?.displayName}
+                  </h2>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <span
                       className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${
@@ -126,11 +139,19 @@ export default function StaffSelfAttendancePage() {
                   <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
                     <div>
                       Check-in:{" "}
-                      <b>{data.today?.checkInAt ? new Date(data.today.checkInAt).toLocaleTimeString() : "—"}</b>
+                      <b>
+                        {data.today?.checkInAt
+                          ? new Date(data.today.checkInAt).toLocaleTimeString()
+                          : "—"}
+                      </b>
                     </div>
                     <div>
                       Check-out:{" "}
-                      <b>{data.today?.checkOutAt ? new Date(data.today.checkOutAt).toLocaleTimeString() : "—"}</b>
+                      <b>
+                        {data.today?.checkOutAt
+                          ? new Date(data.today.checkOutAt).toLocaleTimeString()
+                          : "—"}
+                      </b>
                     </div>
                   </div>
                 </div>
@@ -142,7 +163,9 @@ export default function StaffSelfAttendancePage() {
                       alt="Staff badge QR"
                       className="mx-auto h-40 w-40 rounded-xl border border-[var(--border-subtle)] bg-white p-2"
                     />
-                    <div className="mt-2 font-mono text-xs text-[var(--text-muted)]">{data.staff.badgeCode}</div>
+                    <div className="mt-2 font-mono text-xs text-[var(--text-muted)]">
+                      {data.staff.badgeCode}
+                    </div>
                   </div>
                 )}
               </div>

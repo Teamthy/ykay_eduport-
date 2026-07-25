@@ -7,7 +7,10 @@ export const runtime = "nodejs";
 export async function GET(request: NextRequest) {
   const context = await getParentReportCardContext();
   if (!context) {
-    return jsonNoStore({ error: "No live parent report-card profile is linked to this account yet." }, { status: 404 });
+    return jsonNoStore(
+      { error: "No live parent report-card profile is linked to this account yet." },
+      { status: 404 },
+    );
   }
 
   const children = context.parentProfile.studentLinks.map((link) => ({

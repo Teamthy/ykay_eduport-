@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import type { UserRole } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 export const SESSION_COOKIE = "ykay_session";
 const encoder = new TextEncoder();
@@ -11,10 +12,32 @@ function secret() {
   return encoder.encode(value);
 }
 
-export type SessionUser = { id: string; schoolId: string; role: UserRole; name: string; email: string; mustChangePassword?: boolean };
+export type SessionUser = {
+  id: string;
+  schoolId: string;
+  role: UserRole;
+  name: string;
+  email: string;
+  mustChangePassword?: boolean;
+  tokenVersion?: number;
+};
 
-export async function signSession(user: SessionUser) {
-  return new SignJWT({ schoolId: user.schoolId, role: user.role, name: user.name, email: user.email, mustChangePassword: Boolean(user.mustChangePassword) })
+export async function signSession(
+  user: SessionUser & { impersonatedBy?: string; tokenVersion?: number },
+) {
+  const claims: Record<string, unknown> = {
+    schoolId: user.schoolId,
+    role: user.role,
+    name: user.name,
+    email: user.email,
+    mustChangePassword: Boolean(user.mustChangePassword),
+    tokenVersion: user.tokenVersion ?? 0,
+  };
+  if (user.impersonatedBy) {
+    claims.impersonatedBy = user.impersonatedBy;
+  }
+
+  return new SignJWT(claims)
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
     .setIssuedAt()
@@ -25,9 +48,26 @@ export async function signSession(user: SessionUser) {
 export async function verifySession(token: string): Promise<SessionUser | null> {
   try {
     const { payload } = await jwtVerify(token, secret());
-    if (!payload.sub || typeof payload.schoolId !== "string" || typeof payload.role !== "string" || typeof payload.name !== "string" || typeof payload.email !== "string") return null;
-    return { id: payload.sub, schoolId: payload.schoolId, role: payload.role as UserRole, name: payload.name, email: payload.email, mustChangePassword: payload.mustChangePassword === true };
-  } catch { return null; }
+    if (
+      !payload.sub ||
+      typeof payload.schoolId !== "string" ||
+      typeof payload.role !== "string" ||
+      typeof payload.name !== "string" ||
+      typeof payload.email !== "string"
+    )
+      return null;
+    return {
+      id: payload.sub,
+      schoolId: payload.schoolId,
+      role: payload.role as UserRole,
+      name: payload.name,
+      email: payload.email,
+      mustChangePassword: payload.mustChangePassword === true,
+      tokenVersion: typeof payload.tokenVersion === "number" ? payload.tokenVersion : 0,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function getSession() {
@@ -36,11 +76,55 @@ export async function getSession() {
 }
 
 export function sessionCookie(token: string) {
-  return { name: SESSION_COOKIE, value: token, options: { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax" as const, path: "/", maxAge: 60 * 60 * 8 } };
+  return {
+    name: SESSION_COOKIE,
+    value: token,
+    options: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+      path: "/",
+      maxAge: 60 * 60 * 8,
+    },
+  };
 }
 
+/**
+ * Validates the session and checks tokenVersion against the database.
+ * If the user's tokenVersion in the DB is higher than the one in the JWT,
+ * the session has been revoked (e.g. user was suspended or password was reset).
+ *
+ * This check is lightweight — a single indexed lookup by primary key.
+ */
 export async function requireRole(allowed: UserRole[]) {
   const user = await getSession();
   if (!user || !allowed.includes(user.role)) return null;
+
+  // Check tokenVersion against DB to catch revocations
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { tokenVersion: true, isActive: true, isSuspended: true },
+    });
+
+    if (!dbUser) return null;
+    if (!dbUser.isActive || dbUser.isSuspended) return null;
+    if (dbUser.tokenVersion > (user.tokenVersion ?? 0)) return null; // Session revoked
+  } catch {
+    // If DB check fails, allow the request (fail-open for availability)
+    // The JWT signature is still valid; this is an extra safety check
+  }
+
   return user;
+}
+
+/**
+ * Increment a user's tokenVersion, invalidating all their existing sessions.
+ * Call this on: suspend, password reset, role change, manual "sign out everywhere".
+ */
+export async function revokeAllSessions(userId: string): Promise<void> {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { tokenVersion: { increment: 1 } },
+  });
 }

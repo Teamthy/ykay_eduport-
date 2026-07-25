@@ -8,7 +8,12 @@ import { motion, AnimatePresence } from "framer-motion";
 const SEARCHABLE = [
   { title: "Homepage", desc: "Ykay College main page", url: "/", type: "Page" },
   { title: "About Us", desc: "School history and vision", url: "/about", type: "Page" },
-  { title: "Director's Message", desc: "From Mr. Adeyinka Oladimeji", url: "/director", type: "Page" },
+  {
+    title: "Director's Message",
+    desc: "From Mr. Adeyinka Oladimeji",
+    url: "/director",
+    type: "Page",
+  },
   { title: "Academics", desc: "JSS and SS programmes", url: "/academics", type: "Page" },
   { title: "Admissions", desc: "Apply online", url: "/admissions", type: "Page" },
   { title: "Campus Life", desc: "Clubs and activities", url: "/campus-life", type: "Page" },
@@ -38,7 +43,7 @@ export default function CommandSearch() {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setOpen(o => !o);
+        setOpen((o) => !o);
       }
       if (e.key === "Escape") setOpen(false);
     };
@@ -53,13 +58,16 @@ export default function CommandSearch() {
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
   const filtered = query
-    ? SEARCHABLE.filter(item =>
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.desc.toLowerCase().includes(query.toLowerCase())
+    ? SEARCHABLE.filter(
+        (item) =>
+          item.title.toLowerCase().includes(query.toLowerCase()) ||
+          item.desc.toLowerCase().includes(query.toLowerCase()),
       )
     : SEARCHABLE.slice(0, 6);
 
@@ -71,7 +79,11 @@ export default function CommandSearch() {
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="p-2 rounded-full text-[var(--nav-text)] hover:bg-[var(--surface-card-hover)] hover:text-brand-green transition-all" title="Search (Cmd+K)">
+      <button
+        onClick={() => setOpen(true)}
+        className="p-2 rounded-full text-[var(--nav-text)] hover:bg-[var(--surface-card-hover)] hover:text-brand-green transition-all"
+        title="Search (Cmd+K)"
+      >
         <Search size={18} />
       </button>
 
@@ -93,7 +105,7 @@ export default function CommandSearch() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: -20 }}
               className="relative w-full max-w-2xl bg-brand-navy border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               style={{ zIndex: 10000 }}
             >
               {/* Search Input */}
@@ -102,7 +114,7 @@ export default function CommandSearch() {
                 <input
                   autoFocus
                   value={query}
-                  onChange={e => setQuery(e.target.value)}
+                  onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search pages, portals, features..."
                   className="flex-1 bg-transparent outline-none text-white placeholder:text-white/40 text-base"
                 />
@@ -117,7 +129,7 @@ export default function CommandSearch() {
               {/* Results — SOLID background */}
               <div className="max-h-[400px] overflow-y-auto bg-brand-navy p-2">
                 {filtered.length > 0 ? (
-                  filtered.map(item => (
+                  filtered.map((item) => (
                     <button
                       key={item.url}
                       onClick={() => handleSelect(item.url)}

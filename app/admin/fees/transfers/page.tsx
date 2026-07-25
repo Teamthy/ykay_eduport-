@@ -51,7 +51,12 @@ export default function FeeTransfersPage() {
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || "Action failed.");
-      toast(action === "APPROVE_TRANSFER" ? "Transfer approved and invoice updated." : "Transfer rejected.", "success");
+      toast(
+        action === "APPROVE_TRANSFER"
+          ? "Transfer approved and invoice updated."
+          : "Transfer rejected.",
+        "success",
+      );
       await load();
     } catch (e) {
       toast(e instanceof Error ? e.message : "Action failed.", "error");
@@ -72,8 +77,8 @@ export default function FeeTransfersPage() {
               TRANSFER <span className="text-brand-green">REVIEW</span>
             </h1>
             <p className="mt-3 text-sm text-white/65">
-              Approve or reject parent bank-transfer claims. Approval posts an idempotent fee payment and reduces the
-              invoice balance atomically.
+              Approve or reject parent bank-transfer claims. Approval posts an idempotent fee
+              payment and reduces the invoice balance atomically.
             </p>
           </div>
 
@@ -104,13 +109,17 @@ export default function FeeTransfersPage() {
                       </td>
                       <td className="p-4">
                         {t.invoice.invoiceNumber}
-                        <span className="mt-1 block text-xs text-[var(--text-muted)]">{t.invoice.title}</span>
+                        <span className="mt-1 block text-xs text-[var(--text-muted)]">
+                          {t.invoice.title}
+                        </span>
                       </td>
                       <td className="p-4 font-semibold">₦{t.amount.toLocaleString()}</td>
                       <td className="p-4">
                         <span className="font-mono text-xs">{t.reference}</span>
                         {t.transferNarration && (
-                          <span className="mt-1 block text-xs text-[var(--text-muted)]">{t.transferNarration}</span>
+                          <span className="mt-1 block text-xs text-[var(--text-muted)]">
+                            {t.transferNarration}
+                          </span>
                         )}
                       </td>
                       <td className="p-4">
@@ -120,7 +129,11 @@ export default function FeeTransfersPage() {
                             onClick={() => void act(t.id, "APPROVE_TRANSFER")}
                             className="inline-flex items-center gap-1 rounded-full bg-brand-green px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
                           >
-                            {busyId === t.id ? <LoaderCircle className="animate-spin" size={12} /> : <CheckCircle2 size={12} />}
+                            {busyId === t.id ? (
+                              <LoaderCircle className="animate-spin" size={12} />
+                            ) : (
+                              <CheckCircle2 size={12} />
+                            )}
                             Approve
                           </button>
                           <button
@@ -137,7 +150,9 @@ export default function FeeTransfersPage() {
                 </tbody>
               </table>
             ) : (
-              <p className="p-10 text-center text-sm text-[var(--text-muted)]">No pending bank transfers.</p>
+              <p className="p-10 text-center text-sm text-[var(--text-muted)]">
+                No pending bank transfers.
+              </p>
             )}
           </div>
         </section>

@@ -36,8 +36,7 @@ export default function Receipt({
           <div
             className="absolute top-0 left-0 w-full h-full opacity-[0.07]"
             style={{
-              backgroundImage:
-                "radial-gradient(circle at 50% 50%, #4EC54D 1px, transparent 1px)",
+              backgroundImage: "radial-gradient(circle at 50% 50%, #4EC54D 1px, transparent 1px)",
               backgroundSize: "24px 24px",
             }}
           />
@@ -60,17 +59,13 @@ export default function Receipt({
             <div className="font-display text-xs tracking-[0.2em] text-neutral-500 uppercase mb-1">
               Receipt No.
             </div>
-            <div className="font-display text-xl tracking-[2px] text-brand-green">
-              {receiptNo}
-            </div>
+            <div className="font-display text-xl tracking-[2px] text-brand-green">{receiptNo}</div>
           </div>
           <div>
             <div className="font-display text-xs tracking-[0.2em] text-neutral-500 uppercase mb-1">
               Date
             </div>
-            <div className="font-display text-xl tracking-[2px] text-brand-navy">
-              {date}
-            </div>
+            <div className="font-display text-xl tracking-[2px] text-brand-navy">{date}</div>
           </div>
           <button
             onClick={() => window.print()}
@@ -86,9 +81,7 @@ export default function Receipt({
             <h3 className="font-display text-[10px] tracking-[0.2em] text-neutral-500 uppercase mb-3">
               Student
             </h3>
-            <div className="font-body text-sm font-bold text-brand-navy">
-              {studentName}
-            </div>
+            <div className="font-body text-sm font-bold text-brand-navy">{studentName}</div>
             <div className="font-body text-xs text-neutral-600">Class: {studentClass}</div>
             <div className="font-body text-xs text-neutral-500">ID: {studentId}</div>
           </div>
@@ -96,9 +89,7 @@ export default function Receipt({
             <h3 className="font-display text-[10px] tracking-[0.2em] text-neutral-500 uppercase mb-3">
               Parent / Guardian
             </h3>
-            <div className="font-body text-sm font-bold text-brand-navy">
-              {parentName}
-            </div>
+            <div className="font-body text-sm font-bold text-brand-navy">{parentName}</div>
             <div className="font-body text-xs text-neutral-600">Phone: {parentPhone}</div>
           </div>
         </div>
@@ -155,9 +146,7 @@ export default function Receipt({
               <h4 className="font-display text-[10px] tracking-[0.2em] text-neutral-500 uppercase mb-1">
                 Payment Method
               </h4>
-              <div className="font-body text-sm font-bold text-brand-navy">
-                {paymentMethod}
-              </div>
+              <div className="font-body text-sm font-bold text-brand-navy">{paymentMethod}</div>
             </div>
             <div>
               <h4 className="font-display text-[10px] tracking-[0.2em] text-neutral-500 uppercase mb-1">
@@ -181,7 +170,8 @@ export default function Receipt({
         {/* Footer */}
         <div className="bg-neutral-50 px-8 md:px-12 py-6 border-t border-neutral-200 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="font-body text-[11px] text-neutral-500 text-center md:text-left">
-            Ykay College &amp; Leadership Academy &middot; Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State
+            Ykay College &amp; Leadership Academy &middot; Km 38, Lagos-Abeokuta Expressway, Sango
+            Ota, Ogun State
           </div>
           <div className="font-body text-[10px] text-neutral-500 tracking-[0.1em]">
             RECEIPT GENERATED AUTOMATICALLY &middot; {receiptNo}

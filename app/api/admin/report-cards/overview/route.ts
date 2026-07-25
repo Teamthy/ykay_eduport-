@@ -28,10 +28,13 @@ export async function GET() {
   return NextResponse.json({
     summary: {
       totalReports: reports.length,
-      releasedReports: reports.filter((report) => report.status === ReportCardStatus.RELEASED).length,
+      releasedReports: reports.filter((report) => report.status === ReportCardStatus.RELEASED)
+        .length,
       draftReports: reports.filter((report) => report.status === ReportCardStatus.DRAFT).length,
       averageScore: reports.length
-        ? Math.round(reports.reduce((sum, report) => sum + report.overallAverage, 0) / reports.length)
+        ? Math.round(
+            reports.reduce((sum, report) => sum + report.overallAverage, 0) / reports.length,
+          )
         : 0,
     },
     reports: reports.map((report) => ({
@@ -87,7 +90,10 @@ export async function PATCH(request: NextRequest) {
         data: {
           schoolId: user.schoolId,
           actorUserId: user.id,
-          action: payload.status === ReportCardStatus.RELEASED ? "REPORT_CARD_RELEASED" : "REPORT_CARD_REVERTED_TO_DRAFT",
+          action:
+            payload.status === ReportCardStatus.RELEASED
+              ? "REPORT_CARD_RELEASED"
+              : "REPORT_CARD_REVERTED_TO_DRAFT",
           entityType: "ReportCard",
           entityId: report.id,
           ipAddress,

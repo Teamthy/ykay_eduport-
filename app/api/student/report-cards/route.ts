@@ -6,7 +6,10 @@ export const runtime = "nodejs";
 export async function GET() {
   const context = await getStudentReportCardContext();
   if (!context) {
-    return jsonNoStore({ error: "No live student report-card profile is linked to this account yet." }, { status: 404 });
+    return jsonNoStore(
+      { error: "No live student report-card profile is linked to this account yet." },
+      { status: 404 },
+    );
   }
 
   const reports = context.studentProfile.reportCards.map((report) => ({

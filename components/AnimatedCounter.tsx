@@ -2,7 +2,15 @@
 
 import { useEffect, useState, useRef } from "react";
 
-export default function AnimatedCounter({ end, duration = 2000, suffix = "" }: { end: number; duration?: number; suffix?: string }) {
+export default function AnimatedCounter({
+  end,
+  duration = 2000,
+  suffix = "",
+}: {
+  end: number;
+  duration?: number;
+  suffix?: string;
+}) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const [started, setStarted] = useState(false);
@@ -24,5 +32,10 @@ export default function AnimatedCounter({ end, duration = 2000, suffix = "" }: {
     return () => obs.disconnect();
   }, [end, duration, started]);
 
-  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+  return (
+    <span ref={ref}>
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
 }

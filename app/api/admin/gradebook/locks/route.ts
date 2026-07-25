@@ -47,7 +47,10 @@ export async function GET() {
       lockedAt: gradebook.lockedAt?.toISOString() || null,
       studentCount: gradebook.entries.length,
       classAverage: gradebook.entries.length
-        ? Math.round(gradebook.entries.reduce((sum, entry) => sum + entry.total, 0) / gradebook.entries.length)
+        ? Math.round(
+            gradebook.entries.reduce((sum, entry) => sum + entry.total, 0) /
+              gradebook.entries.length,
+          )
         : 0,
     })),
   });
@@ -82,7 +85,12 @@ export async function PATCH(request: NextRequest) {
       data:
         payload.action === "LOCK"
           ? { status: GradebookStatus.LOCKED, lockedAt: new Date(), lockedByUserId: user.id }
-          : { status: GradebookStatus.OPEN, lockedAt: null, lockedByUserId: null, submittedAt: null },
+          : {
+              status: GradebookStatus.OPEN,
+              lockedAt: null,
+              lockedByUserId: null,
+              submittedAt: null,
+            },
     });
 
     await tx.auditLog.create({

@@ -5,31 +5,39 @@ import { getApplicationForStatus } from "@/lib/admission-service";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceAdmissionRateLimit } from "@/lib/rate-limit";
 
-const statusContent: Record<ApplicationStatus, { label: string; message: string; tone: "info" | "warning" | "success" | "error" }> = {
+const statusContent: Record<
+  ApplicationStatus,
+  { label: string; message: string; tone: "info" | "warning" | "success" | "error" }
+> = {
   DRAFT: { label: "Draft", message: "This application has not been submitted yet.", tone: "info" },
   PENDING_REVIEW: {
     label: "Pending review",
-    message: "Your application is with our admissions team. We will contact you using your registered email and phone number within 3–5 business days.",
+    message:
+      "Your application is with our admissions team. We will contact you using your registered email and phone number within 3–5 business days.",
     tone: "info",
   },
   DOCUMENTS_REQUESTED: {
     label: "Documents requested",
-    message: "Our admissions team needs additional information before a decision can be made. Please check your registered email or contact the admissions office.",
+    message:
+      "Our admissions team needs additional information before a decision can be made. Please check your registered email or contact the admissions office.",
     tone: "warning",
   },
   APPROVED: {
     label: "Approved",
-    message: "Congratulations. Your application has been approved. Please check your registered email and phone for the next enrolment steps.",
+    message:
+      "Congratulations. Your application has been approved. Please check your registered email and phone for the next enrolment steps.",
     tone: "success",
   },
   DECLINED: {
     label: "Decision completed",
-    message: "A decision has been made on this application. Please contact the admissions office if you need further guidance.",
+    message:
+      "A decision has been made on this application. Please contact the admissions office if you need further guidance.",
     tone: "error",
   },
   WAITLISTED: {
     label: "Waitlisted",
-    message: "Your application is on our waitlist. We will contact you if a place becomes available.",
+    message:
+      "Your application is on our waitlist. We will contact you if a place becomes available.",
     tone: "warning",
   },
 };
@@ -38,7 +46,10 @@ export async function GET(request: NextRequest) {
   const ipAddress = getClientIp(request);
   const limit = await enforceAdmissionRateLimit("status", ipAddress);
   if (!limit.success) {
-    return jsonNoStore({ error: "Please wait before trying again." }, { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } });
+    return jsonNoStore(
+      { error: "Please wait before trying again." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
   }
 
   const parsed = applicationStatusSchema.safeParse({
@@ -52,7 +63,13 @@ export async function GET(request: NextRequest) {
   try {
     const application = await getApplicationForStatus(parsed.data.applicationId);
     if (!application) {
-      return jsonNoStore({ error: "We could not find a submitted application with that ID. Check the ID and try again." }, { status: 404 });
+      return jsonNoStore(
+        {
+          error:
+            "We could not find a submitted application with that ID. Check the ID and try again.",
+        },
+        { status: 404 },
+      );
     }
 
     const content = statusContent[application.status];
@@ -68,6 +85,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Admission status lookup failed", error);
-    return jsonNoStore({ error: "We could not check the application status right now. Please try again shortly." }, { status: 500 });
+    return jsonNoStore(
+      { error: "We could not check the application status right now. Please try again shortly." },
+      { status: 500 },
+    );
   }
 }

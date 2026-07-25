@@ -2,12 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  CreditCard,
-  LoaderCircle,
-  Receipt as ReceiptIcon,
-  Building2,
-} from "lucide-react";
+import { CreditCard, LoaderCircle, Receipt as ReceiptIcon, Building2 } from "lucide-react";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
 import PaystackModal from "@/components/PaystackModal";
@@ -227,13 +222,15 @@ export default function ParentFeesPage() {
         <PortalSidebar portalName="Parent Portal" portalType="parent" items={NAV} />
         <section className="min-w-0 flex-1 space-y-6">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Secure payments</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Secure payments
+            </p>
             <h1 className="mt-2 font-display text-4xl tracking-widest">
               FEE <span className="text-brand-green">CENTRE</span>
             </h1>
             <p className="mt-3 text-sm text-white/65">
-              Live invoices with Paystack hosted checkout or bank-transfer claims reviewed by the bursar. Payments are
-              verified server-side and never double-posted.
+              Live invoices with Paystack hosted checkout or bank-transfer claims reviewed by the
+              bursar. Payments are verified server-side and never double-posted.
             </p>
           </div>
 
@@ -242,7 +239,9 @@ export default function ParentFeesPage() {
               <LoaderCircle className="animate-spin" size={16} /> Confirming Paystack payment…
             </div>
           )}
-          {error && <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-600">{error}</div>}
+          {error && (
+            <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-600">{error}</div>
+          )}
 
           {loading || !data ? (
             <div className="flex items-center gap-2 p-10 text-[var(--text-muted)]">
@@ -256,9 +255,16 @@ export default function ParentFeesPage() {
                   ["Paid", summary?.totalPaid || 0],
                   ["Outstanding", summary?.totalOutstanding || 0],
                 ].map(([label, value]) => (
-                  <div key={String(label)} className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">{label}</div>
-                    <div className="mt-1 font-display text-2xl">₦{Number(value).toLocaleString()}</div>
+                  <div
+                    key={String(label)}
+                    className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4"
+                  >
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                      {label}
+                    </div>
+                    <div className="mt-1 font-display text-2xl">
+                      ₦{Number(value).toLocaleString()}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -314,7 +320,9 @@ export default function ParentFeesPage() {
                           <span>
                             {item.label}
                             {!item.mandatory && (
-                              <span className="ml-2 text-[10px] uppercase text-[var(--text-muted)]">Optional</span>
+                              <span className="ml-2 text-[10px] uppercase text-[var(--text-muted)]">
+                                Optional
+                              </span>
                             )}
                           </span>
                           <span className="font-semibold">₦{item.amount.toLocaleString()}</span>
@@ -327,7 +335,9 @@ export default function ParentFeesPage() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Paid</span>
-                      <b className="text-brand-green">₦{data.selectedInvoice.amountPaid.toLocaleString()}</b>
+                      <b className="text-brand-green">
+                        ₦{data.selectedInvoice.amountPaid.toLocaleString()}
+                      </b>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Balance</span>
@@ -340,7 +350,11 @@ export default function ParentFeesPage() {
                         disabled={initBusy}
                         className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
                       >
-                        {initBusy ? <LoaderCircle className="animate-spin" size={16} /> : <CreditCard size={16} />}
+                        {initBusy ? (
+                          <LoaderCircle className="animate-spin" size={16} />
+                        ) : (
+                          <CreditCard size={16} />
+                        )}
                         Pay ₦{remaining.toLocaleString()} with Paystack
                       </button>
                     )}
@@ -354,8 +368,8 @@ export default function ParentFeesPage() {
                           <h3 className="font-display text-xl">BANK TRANSFER</h3>
                         </div>
                         <p className="mb-4 text-xs text-[var(--text-muted)]">
-                          Pay into the school account, then submit the bank reference. The bursar must approve before your
-                          balance updates.
+                          Pay into the school account, then submit the bank reference. The bursar
+                          must approve before your balance updates.
                         </p>
                         <label className="block text-xs font-bold uppercase tracking-wider">
                           Transfer reference
@@ -393,10 +407,15 @@ export default function ParentFeesPage() {
                       {data.payments.length ? (
                         <ul className="space-y-3">
                           {data.payments.map((p) => (
-                            <li key={p.id} className="rounded-2xl bg-[var(--surface-disabled)] p-3 text-sm">
+                            <li
+                              key={p.id}
+                              className="rounded-2xl bg-[var(--surface-disabled)] p-3 text-sm"
+                            >
                               <div className="flex justify-between gap-2">
                                 <b>₦{p.amount.toLocaleString()}</b>
-                                <span className="text-[10px] font-bold uppercase text-brand-green">{formatMethod(p.method)}</span>
+                                <span className="text-[10px] font-bold uppercase text-brand-green">
+                                  {formatMethod(p.method)}
+                                </span>
                               </div>
                               <div className="mt-1 text-xs text-[var(--text-muted)]">
                                 {new Date(p.paidAt).toLocaleDateString()} · {p.receiptNumber}
@@ -405,7 +424,9 @@ export default function ParentFeesPage() {
                           ))}
                         </ul>
                       ) : (
-                        <p className="text-sm text-[var(--text-muted)]">No completed payments on this invoice yet.</p>
+                        <p className="text-sm text-[var(--text-muted)]">
+                          No completed payments on this invoice yet.
+                        </p>
                       )}
                     </div>
                   </div>

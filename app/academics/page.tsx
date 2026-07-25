@@ -53,13 +53,15 @@ export default function AcademicsPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-primary)] via-[var(--bg-primary)]/90 to-[var(--bg-primary)]" />
           </div>
           <div className="relative mx-auto max-w-7xl px-6">
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-brand-green">Programmes</p>
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-brand-green">
+              Programmes
+            </p>
             <h1 className="mt-4 font-display text-5xl tracking-widest text-[var(--text-primary)] md:text-7xl">
               ACADEMICS
             </h1>
             <p className="mt-4 max-w-2xl text-base text-[var(--text-secondary)] md:text-lg">
-              A rigorous, NERDC-aligned curriculum spanning Junior Secondary (JSS1–JSS3) and Senior Secondary (SS1–SS3) —
-              with Science, Arts, Commercial, and flagship IT pathways.
+              A rigorous, NERDC-aligned curriculum spanning Junior Secondary (JSS1–JSS3) and Senior
+              Secondary (SS1–SS3) — with Science, Arts, Commercial, and flagship IT pathways.
             </p>
           </div>
         </section>
@@ -74,10 +76,18 @@ export default function AcademicsPage() {
                 <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-green/10 text-brand-green">
                   <item.icon size={22} />
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-brand-orange">{item.subtitle}</p>
-                <h2 className="mt-2 font-display text-2xl tracking-wide text-[var(--text-primary)]">{item.title}</h2>
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">{item.desc}</p>
-                <div className="mt-4 text-[10px] font-bold uppercase tracking-widest text-brand-green">{item.extra}</div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-brand-orange">
+                  {item.subtitle}
+                </p>
+                <h2 className="mt-2 font-display text-2xl tracking-wide text-[var(--text-primary)]">
+                  {item.title}
+                </h2>
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">
+                  {item.desc}
+                </p>
+                <div className="mt-4 text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                  {item.extra}
+                </div>
                 <Link
                   href={item.href}
                   className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--text-primary)] hover:text-brand-green"
@@ -104,20 +114,33 @@ export default function AcademicsPage() {
           </div>
 
           <div className="mt-16 rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 md:p-10">
-            <h2 className="font-display text-3xl tracking-widest text-[var(--text-primary)]">CURRICULUM FOCUS</h2>
+            <h2 className="font-display text-3xl tracking-widest text-[var(--text-primary)]">
+              CURRICULUM FOCUS
+            </h2>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
-              All academic content is aligned with the Nigerian Educational Research and Development Council (NERDC)
-              curriculum. Students receive continuous assessment, leadership formation, and digital skills as part of a
-              complete secondary education.
+              All academic content is aligned with the Nigerian Educational Research and Development
+              Council (NERDC) curriculum. Students receive continuous assessment, leadership
+              formation, and digital skills as part of a complete secondary education.
             </p>
             <div className="mt-8 grid gap-4 md:grid-cols-3">
               {[
-                { label: "Assessment", text: "CA components + terminal exams feeding live gradebooks." },
-                { label: "Report cards", text: "Branded PDF release with QR verification for authenticity." },
-                { label: "IT pathway", text: "Optional certification tracks via the Ykay IT Hub portal." },
+                {
+                  label: "Assessment",
+                  text: "CA components + terminal exams feeding live gradebooks.",
+                },
+                {
+                  label: "Report cards",
+                  text: "Branded PDF release with QR verification for authenticity.",
+                },
+                {
+                  label: "IT pathway",
+                  text: "Optional certification tracks via the Ykay IT Hub portal.",
+                },
               ].map((item) => (
                 <div key={item.label} className="rounded-2xl bg-[var(--surface-disabled)] p-5">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-brand-green">{item.label}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                    {item.label}
+                  </div>
                   <p className="mt-2 text-sm text-[var(--text-secondary)]">{item.text}</p>
                 </div>
               ))}

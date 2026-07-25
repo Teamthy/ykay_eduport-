@@ -1,6 +1,6 @@
 /* ============================================================
    YKAY COLLEGE — GLOBAL STYLES
-   Production build. Tailwind v4. Light + Dark mode.
+   Production build. Tailwind v4. Dark mode (default & only theme).
    ============================================================ */
 
 @import "tailwindcss";
@@ -72,166 +72,10 @@
 
 
 /* ============================================================
-   LIGHT MODE — DEFAULT
-   All semantic tokens live here (not in @theme)
+   DARK MODE — DEFAULT
+   All semantic tokens. Dark is the only theme.
    ============================================================ */
-:root,
-[data-theme="light"] {
-  color-scheme: light;
-
-  /* Backgrounds */
-  --bg-primary: #FFFFFF;
-  --bg-secondary: #F8FAFC;
-  --bg-tertiary: #F1F5F9;
-  --bg-elevated: #FFFFFF;
-  --bg-overlay: rgba(12, 24, 36, 0.6);
-
-  /* Surfaces */
-  --surface-card: #FFFFFF;
-  --surface-card-hover: #F8FAFC;
-  --surface-input: #FFFFFF;
-  --surface-disabled: #F1F5F9;
-
-  /* Borders */
-  --border-subtle: #E5E7EB;
-  --border-default: #CBD5E1;
-  --border-strong: #94A3B8;
-  --border-focus: #4EC54D;
-  --border-error: #EF4444;
-
-  /* Text */
-  --text-primary: #0C1824;
-  --text-secondary: #475569;
-  --text-muted: #64748B;
-  --text-inverse: #FFFFFF;
-  --text-disabled: #94A3B8;
-  --text-link: #3AA93A;
-  --text-link-hover: #2F8A2F;
-
-  /* Accents */
-  --accent-primary: #4EC54D;
-  --accent-secondary: #FF6E00;
-  --accent-navy: #0C1824;
-
-  /* Buttons */
-  --btn-primary-bg: #4EC54D;
-  --btn-primary-bg-hover: #3AA93A;
-  --btn-primary-bg-active: #2F8A2F;
-  --btn-primary-text: #FFFFFF;
-  --btn-primary-shadow: 0 4px 14px rgba(78, 197, 77, 0.25);
-
-  --btn-secondary-bg: #FF6E00;
-  --btn-secondary-bg-hover: #E65F00;
-  --btn-secondary-bg-active: #BF4F00;
-  --btn-secondary-text: #FFFFFF;
-  --btn-secondary-shadow: 0 4px 14px rgba(255, 110, 0, 0.25);
-
-  --btn-outline-border: #0C1824;
-  --btn-outline-text: #0C1824;
-  --btn-outline-bg-hover: #0C1824;
-  --btn-outline-text-hover: #FFFFFF;
-
-  --btn-ghost-text: #0C1824;
-  --btn-ghost-bg-hover: #F1F5F9;
-
-  /* Navigation */
-  --nav-bg: #FFFFFF;
-  --nav-bg-scrolled: rgba(255, 255, 255, 0.85);
-  --nav-border: #E5E7EB;
-  --nav-text: #0C1824;
-  --nav-text-active: #4EC54D;
-  --nav-text-hover: #FF6E00;
-  --nav-mobile-bg: #FFFFFF;
-
-  /* Footer */
-  --footer-bg: #0C1824;
-  --footer-text-heading: #FFFFFF;
-  --footer-text-body: #CBD5E1;
-  --footer-text-link: #CBD5E1;
-  --footer-text-hover: #62D35E;
-  --footer-border: rgba(255, 255, 255, 0.1);
-
-  /* Hero */
-  --hero-overlay: linear-gradient(180deg, rgba(12, 24, 36, 0.75) 0%, rgba(12, 24, 36, 0.35) 100%);
-  --hero-text: #FFFFFF;
-  --hero-label: #4EC54D;
-
-  /* Cards — meaningful contrast on white */
-  --card-bg: #FFFFFF;
-  --card-bg-subtle: #F8FAFC;
-  --card-bg-hover: #F1F5F9;
-  --card-border: #E5E7EB;
-  --card-border-hover: #4EC54D;
-  --card-shadow: 0 1px 3px rgba(12, 24, 36, 0.06), 0 1px 2px rgba(12, 24, 36, 0.04);
-  --card-shadow-hover: 0 12px 32px rgba(12, 24, 36, 0.1), 0 4px 12px rgba(12, 24, 36, 0.06);
-
-  /* Inputs */
-  --input-bg: #FFFFFF;
-  --input-bg-disabled: #F1F5F9;
-  --input-border: #CBD5E1;
-  --input-border-focus: #4EC54D;
-  --input-border-error: #EF4444;
-  --input-text: #0C1824;
-  --input-placeholder: #94A3B8;
-  --input-label: #0C1824;
-  --input-hint: #64748B;
-  --input-error: #EF4444;
-
-  /* Loading screen */
-  --loading-bg: #FFFFFF;
-  --loading-ring: #0C1824;
-  --loading-icon: #4EC54D;
-  --loading-reveal-text: #0C1824;
-
-  /* Sections */
-  --section-bg-alt: #F8FAFC;
-  --section-divider: #E5E7EB;
-
-  /* Selection */
-  --selection-bg: rgba(78, 197, 77, 0.22);
-  --selection-text: #0C1824;
-
-  /* Scrollbar */
-  --scrollbar-track: #F1F5F9;
-  --scrollbar-thumb: #CBD5E1;
-  --scrollbar-thumb-hover: #94A3B8;
-
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #4EC54D, #3AA93A);
-  --gradient-accent: linear-gradient(135deg, #4EC54D, #FF6E00);
-  --gradient-banner: linear-gradient(135deg, #0C1824 0%, #184B18 55%, #4EC54D 100%);
-  --gradient-cta: linear-gradient(135deg, #FF6E00, #E65F00);
-  --gradient-hero: linear-gradient(180deg, rgba(12, 24, 36, 0.75) 0%, rgba(12, 24, 36, 0.35) 100%);
-
-  /* Status */
-  --status-success-bg: rgba(34, 197, 94, 0.1);
-  --status-success-text: #166534;
-  --status-success-border: #22C55E;
-
-  --status-warning-bg: rgba(245, 158, 11, 0.1);
-  --status-warning-text: #92400E;
-  --status-warning-border: #F59E0B;
-
-  --status-error-bg: rgba(239, 68, 68, 0.1);
-  --status-error-text: #991B1B;
-  --status-error-border: #EF4444;
-
-  --status-info-bg: rgba(59, 130, 246, 0.1);
-  --status-info-text: #1E40AF;
-  --status-info-border: #3B82F6;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(12, 24, 36, 0.05);
-  --shadow-md: 0 4px 6px rgba(12, 24, 36, 0.07), 0 2px 4px rgba(12, 24, 36, 0.04);
-  --shadow-lg: 0 10px 15px rgba(12, 24, 36, 0.08), 0 4px 6px rgba(12, 24, 36, 0.05);
-  --shadow-xl: 0 20px 25px rgba(12, 24, 36, 0.1), 0 8px 10px rgba(12, 24, 36, 0.06);
-  --shadow-2xl: 0 25px 50px rgba(12, 24, 36, 0.15);
-}
-
-/* ============================================================
-   DARK MODE
-   ============================================================ */
-[data-theme="dark"] {
+:root {
   color-scheme: dark;
 
   /* Backgrounds */
@@ -268,7 +112,7 @@
   --accent-secondary: #FF9133;
   --accent-navy: #F1F5F9;
 
-  /* Buttons — brand colors stay the same, only shadows adjust */
+  /* Buttons */
   --btn-primary-bg: #4EC54D;
   --btn-primary-bg-hover: #62D35E;
   --btn-primary-bg-active: #87DD84;
@@ -751,17 +595,11 @@ svg {
     padding-right: 2.5rem;
   }
 
-  /* Native dropdown list: force light readable chrome in all browsers that support it */
+  /* Native dropdown list */
   select option,
   select optgroup {
-    background-color: #ffffff !important;
-    color: #0C1824 !important;
-  }
-
-  [data-theme="dark"] select option,
-  [data-theme="dark"] select optgroup {
-    background-color: #ffffff !important;
-    color: #0C1824 !important;
+    background-color: #0C1824 !important;
+    color: #F1F5F9 !important;
   }
 
   /* High-contrast CTAs on dark panels */
@@ -769,14 +607,17 @@ svg {
     background-color: #ffffff;
     color: #0C1824;
   }
+
   .cta-on-dark:hover {
     background-color: #F1F5F9;
     color: #0C1824;
   }
+
   .cta-on-dark-primary {
     background-color: #4EC54D;
     color: #ffffff;
   }
+
   .cta-on-dark-primary:hover {
     background-color: #3AA93A;
     color: #ffffff;
@@ -786,6 +627,7 @@ svg {
   .home-section {
     padding-block: 4rem;
   }
+
   @media (min-width: 768px) {
     .home-section {
       padding-block: 5.5rem;
@@ -856,14 +698,9 @@ svg {
 
   /* Glass morphism */
   .glass {
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(12, 24, 36, 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-
-  [data-theme="dark"] .glass {
-    background-color: rgba(12, 24, 36, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
