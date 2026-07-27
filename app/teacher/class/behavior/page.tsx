@@ -10,8 +10,20 @@ import { Plus, Heart, Award, AlertTriangle, FileText, X, Check, School, Bell } f
 
 export default function BehaviorRecordsPage() {
   const { toast } = useToast();
-  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
-  const teacher = data?.teacher || ({} as any);
+  const { data } = useApi<{
+    teacher: { displayName: string };
+    classes: { id: string; className: string }[];
+    students: { id: string; studentId: string; displayName: string }[];
+  }>("/api/teacher/students");
+  const teacher: any = {
+    ...(data?.teacher ?? {}),
+    formClass: data?.classes?.[0]?.className ?? "",
+  };
+  const students = (data?.students ?? []).map((s) => ({
+    id: s.id,
+    studentId: s.studentId,
+    name: s.displayName,
+  }));
   const [records, setRecords] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [newRecord, setNewRecord] = useState({
@@ -27,7 +39,7 @@ export default function BehaviorRecordsPage() {
       toast("Please fill required fields", "warning");
       return;
     }
-    const student = [].find((s: any) => s.name === newRecord.studentName);
+    const student = students.find((s) => s.name === newRecord.studentName);
     const record = {
       id: String(records.length + 1),
       studentName: newRecord.studentName,
@@ -133,7 +145,7 @@ export default function BehaviorRecordsPage() {
               {/* Records */}
               <div className="space-y-3">
                 {records.map((r: any) => {
-                  const config = typeConfig[r.type];
+                  const config = typeConfig[r.type as keyof typeof typeConfig] ?? typeConfig.Note;
                   return (
                     <div
                       key={r.id}
@@ -219,7 +231,7 @@ export default function BehaviorRecordsPage() {
                   className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-brand-orange"
                 >
                   <option value="">Select student...</option>
-                  {[].map((s) => (
+                  {students.map((s) => (
                     <option key={s.id} value={s.name}>
                       {s.name}
                     </option>

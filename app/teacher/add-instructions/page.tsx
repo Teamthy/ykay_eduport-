@@ -36,8 +36,10 @@ export default function AddInstructionsPage() {
     { id: "1", fromQ: "", toQ: "", text: "" },
   ]);
 
-  const allClasses = [...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes))];
-  const availableSubjects = (teacher.subjectAssignments || [])
+  const allClasses = [
+    ...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes)),
+  ];
+  const availableSubjects: string[] = (teacher.subjectAssignments || [])
     .filter((sa: any) => sa.classes.includes(selectedClass))
     .map((sa: any) => sa.subject);
 

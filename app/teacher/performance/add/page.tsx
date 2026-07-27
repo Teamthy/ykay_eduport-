@@ -10,8 +10,16 @@ import { Users, BookOpen, Save, Calculator, ChevronDown, Award } from "lucide-re
 
 export default function AddPerformancePage() {
   const { toast } = useToast();
-  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
-  const teacher = data?.teacher || ({} as any);
+  const { data } = useApi<{
+    teacher: { displayName: string };
+    classes: { id: string; className: string }[];
+    students: { id: string; displayName: string }[];
+  }>("/api/teacher/students");
+  const teacher: any = {
+    ...(data?.teacher ?? {}),
+    formClass: data?.classes?.[0]?.className ?? "",
+  };
+  const students = (data?.students ?? []).map((s) => ({ id: s.id, name: s.displayName }));
   const [subject, setSubject] = useState("");
   const [className, setClassName] = useState("");
   const [student, setStudent] = useState("");
@@ -138,7 +146,7 @@ export default function AddPerformancePage() {
                     className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <option value="">Select student...</option>
-                    {[].map((s) => (
+                    {students.map((s) => (
                       <option key={s.id} value={s.name}>
                         {s.name}
                       </option>

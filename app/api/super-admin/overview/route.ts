@@ -45,7 +45,7 @@ export async function GET() {
     prisma.itEnrollment.count(),
     prisma.examAttempt.count(),
     prisma.reportCard.count(),
-    prisma.notificationJob.findMany({ take: 200,
+    prisma.notificationJob.findMany({
       where: { status: AlertDeliveryStatus.FAILED },
       orderBy: { updatedAt: "desc" },
       take: 5,
@@ -58,7 +58,7 @@ export async function GET() {
         updatedAt: true,
       },
     }),
-    prisma.auditLog.findMany({ take: 200,
+    prisma.auditLog.findMany({
       where: { action: "USER_SIGNED_IN" },
       orderBy: { createdAt: "desc" },
       take: 8,
@@ -72,7 +72,7 @@ export async function GET() {
       select: { totalAmount: true, amountPaid: true, balanceDue: true, status: true },
     }),
     prisma.expense.findMany({ take: 200, select: { amount: true } }).catch(() => []),
-    prisma.feePayment.findMany({ take: 200,
+    prisma.feePayment.findMany({
       where: { status: FeePaymentStatus.COMPLETED },
       orderBy: { paidAt: "desc" },
       take: 12,
@@ -80,7 +80,7 @@ export async function GET() {
         studentProfile: { select: { displayName: true, studentId: true } },
       },
     }),
-    prisma.auditLog.findMany({ take: 200,
+    prisma.auditLog.findMany({
       orderBy: { createdAt: "desc" },
       take: 25,
       include: { actor: { select: { name: true, email: true, role: true } } },

@@ -72,7 +72,7 @@ export default function ReportCard({
   const attendanceRate = Math.round((attendancePresent / attendanceTotal) * 100);
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] p-4 md:p-8 font-body print:bg-white print:p-0">
+    <div className="report-card-sheet min-h-screen bg-[#F5F7FA] p-4 md:p-8 font-body print:bg-white print:p-0">
       <div className="mx-auto max-w-[900px] bg-white rounded-[2rem] shadow-2xl shadow-ykay-green/10 border border-ykay-navy-03 overflow-hidden print:shadow-none print:rounded-none print:border-none">
         {/* Header Banner */}
         <div className="relative bg-gradient-to-br from-[#0F1F2E] via-[#1A3148] to-[#0F1F2E] px-8 md:px-14 py-12 md:py-16 overflow-hidden">

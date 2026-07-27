@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
-import { UserRole, ExamQuestionType } from "@prisma/client";
+import { UserRole, ExamQuestionType, Prisma } from "@prisma/client";
 import type { ParsedQuestion } from "@/lib/question-parser";
 
 export const dynamic = "force-dynamic";
@@ -99,11 +99,12 @@ export async function POST(request: NextRequest) {
     ESSAY: ExamQuestionType.ESSAY,
   };
 
-  const questionData = input.questions.map((q: ParsedQuestion, idx: number) => ({
+  const questionData = input.questions.map(
+    (q, idx): Prisma.ExamQuestionUncheckedCreateInput => ({
     examId: input.examId,
     type: typeMap[q.type],
     questionText: q.questionText,
-    options: q.options ? (q.options as object) : undefined,
+    options: q.options ? (q.options as Prisma.InputJsonValue) : Prisma.JsonNull,
     correctKey: q.correctKey ?? null,
     correctText: q.correctText ?? null,
     marks: q.marks,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
@@ -39,23 +39,18 @@ interface Recipient {
   status?: "pending" | "sent" | "delivered" | "failed";
 }
 
-const INITIAL_RECIPIENTS: Recipient[] = [].map((s, i) => ({
-  studentId: s.studentId,
-  studentName: s.name,
-  parentName: i % 2 === 0 ? `Mrs. ${s.name.split(" ")[1]}` : `Mr. ${s.name.split(" ")[1]}`,
-  parentPhone: s.parentContact,
-  parentEmail: `parent.${s.name.toLowerCase().split(" ")[0]}@email.com`,
-  score: 60 + Math.floor(Math.random() * 35),
-  grade: ["A1", "B2", "B3", "C4", "C5"][Math.floor(Math.random() * 5)],
-  selected: false,
-}));
+const INITIAL_RECIPIENTS: Recipient[] = [];
 
 type Step = 1 | 2 | 3 | 4;
 type Channel = "sms" | "whatsapp" | "email";
 
 export default function SendResultsPage() {
   const { toast } = useToast();
-  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
+  const { data } = useApi<{
+    teacher: { displayName: string };
+    classes: { id: string; className: string }[];
+    students: { id: string; studentId: string; displayName: string }[];
+  }>("/api/teacher/students");
   const teacher = data?.teacher || ({} as any);
   const [step, setStep] = useState<Step>(1);
 
@@ -66,6 +61,23 @@ export default function SendResultsPage() {
 
   // Step 2
   const [recipients, setRecipients] = useState<Recipient[]>(INITIAL_RECIPIENTS);
+
+  useEffect(() => {
+    if (data?.students) {
+      setRecipients(
+        data.students.map((s) => ({
+          studentId: s.studentId,
+          studentName: s.displayName,
+          parentName: "—",
+          parentPhone: "—",
+          parentEmail: "",
+          score: 0,
+          grade: "—",
+          selected: false,
+        })),
+      );
+    }
+  }, [data]);
   const [search, setSearch] = useState("");
   const [filterGrade, setFilterGrade] = useState<string>("all");
 
@@ -97,7 +109,9 @@ export default function SendResultsPage() {
     const allSelected = filtered.every((r) => r.selected);
     const idsToToggle = filtered.map((f) => f.studentId);
     setRecipients((prev) =>
-      prev.map((r: any) => (idsToToggle.includes(r.studentId) ? { ...r, selected: !allSelected } : r)),
+      prev.map((r: any) =>
+        idsToToggle.includes(r.studentId) ? { ...r, selected: !allSelected } : r,
+      ),
     );
   };
 
@@ -235,8 +249,9 @@ export default function SendResultsPage() {
                       >
                         <option value="">Select class...</option>
                         {(
-                          (teacher.subjectAssignments || []).find((sa: any) => sa.subject === subject)
-                            ?.classes || []
+                          (teacher.subjectAssignments || []).find(
+                            (sa: any) => sa.subject === subject,
+                          )?.classes || []
                         ).map((c: any) => (
                           <option key={String(c)} value={String(c)}>
                             {c}

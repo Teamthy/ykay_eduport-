@@ -36,12 +36,14 @@
     "@prisma/client": "^6.15.0",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-slot": "^1.2.0",
+    "@sentry/nextjs": "^10.68.0",
     "@types/qrcode": "^1.5.6",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.2.4",
     "clsx": "^2.1.1",
+    "fflate": "^0.8.3",
     "framer-motion": "^12.0.0",
     "jose": "^5.10.0",
     "jspdf": "^4.2.1",
@@ -52,9 +54,9 @@
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "read-excel-file": "^9.3.4",
     "resend": "^4.8.0",
     "tailwind-merge": "^2.6.0",
-    "xlsx": "^0.18.5",
     "zod": "^3.24.0"
   },
   "devDependencies": {
@@ -70,7 +72,7 @@
     "eslint": "^9.20.0",
     "eslint-config-next": "15.0.0",
     "jsdom": "^29.1.1",
-    "postcss": "^8.5.6",
+    "postcss": "^8.5.18",
     "prettier": "^3.9.6",
     "prisma": "^6.15.0",
     "tailwindcss": "^4.0.0",
@@ -86,5 +88,9 @@
     "esbuild@0.28.1": true,
     "unrs-resolver@1.12.2": true,
     "core-js@3.49.0": true
+  },
+  "overrides": {
+    "sharp": "^0.35.3",
+    "postcss": "^8.5.18"
   }
 }

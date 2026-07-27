@@ -40,9 +40,9 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // ── TypeScript — ignore build errors (types checked separately via tsc) ──
+  // ── TypeScript — build now fails on type errors (no longer suppressed) ──
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   // ── Power the X-Powered-By header ──────────────────────────

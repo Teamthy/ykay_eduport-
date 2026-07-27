@@ -28,6 +28,25 @@ const SIDEBAR_ITEMS = [
 ];
 
 export default function TeachersDirectoryPage() {
+  const { data, loading } = useApi<{
+    className: string | null;
+    teachers: {
+      id: string;
+      name: string;
+      role: string;
+      subject: string;
+      photoUrl: string | null;
+    }[];
+  }>("/api/student/teachers");
+  const teachers = (data?.teachers ?? []).map((t) => ({
+    id: t.id,
+    name: t.name,
+    role: t.role,
+    subjects: t.subject ? [t.subject] : [],
+    classes: t.subject ? [t.subject] : [],
+    email: "",
+  }));
+
   return (
     <>
       <Header />
@@ -48,44 +67,58 @@ export default function TeachersDirectoryPage() {
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 grid md:grid-cols-2 gap-4">
-              {[].map((teacher) => (
-                <div
-                  key={teacher.id}
-                  className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/30 hover:-translate-y-0.5 transition-all"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-green to-brand-green-dark flex items-center justify-center text-white font-display text-lg shrink-0">
-                      {teacher.name
-                        .split(" ")
-                        .map((n: any) => n[0])
-                        .join("")
-                        .slice(0, 2)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-[var(--text-primary)] mb-1">{teacher.name}</h3>
-                      <div className="text-xs text-brand-green font-bold mb-2">{teacher.role}</div>
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        {teacher.subjects.map((s) => (
-                          <span
-                            key={s}
-                            className="text-[9px] px-2 py-0.5 rounded bg-brand-green/10 text-brand-green font-bold"
-                          >
-                            {s}
-                          </span>
-                        ))}
+              {loading ? (
+                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm col-span-full">
+                  Loading teachers…
+                </div>
+              ) : teachers.length === 0 ? (
+                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm col-span-full">
+                  No teachers assigned yet.
+                </div>
+              ) : (
+                teachers.map((teacher) => (
+                  <div
+                    key={teacher.id}
+                    className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/30 hover:-translate-y-0.5 transition-all"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-green to-brand-green-dark flex items-center justify-center text-white font-display text-lg shrink-0">
+                        {teacher.name
+                          .split(" ")
+                          .map((n: any) => n[0])
+                          .join("")
+                          .slice(0, 2)}
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
-                        <span className="flex items-center gap-1">
-                          <BookOpen size={11} /> {teacher.classes} classes
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Mail size={11} /> {teacher.email}
-                        </span>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-[var(--text-primary)] mb-1">
+                          {teacher.name}
+                        </h3>
+                        <div className="text-xs text-brand-green font-bold mb-2">
+                          {teacher.role}
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          {teacher.subjects.map((s) => (
+                            <span
+                              key={s}
+                              className="text-[9px] px-2 py-0.5 rounded bg-brand-green/10 text-brand-green font-bold"
+                            >
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
+                          <span className="flex items-center gap-1">
+                            <BookOpen size={11} /> {teacher.classes} classes
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Mail size={11} /> {teacher.email}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </section>

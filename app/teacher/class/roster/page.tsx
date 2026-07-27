@@ -17,12 +17,33 @@ import {
 } from "lucide-react";
 
 export default function ClassRosterPage() {
-  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
-  const teacher = data?.teacher || ({} as any);
+  const { data, loading } = useApi<{
+    teacher: { displayName: string };
+    classes: { id: string; className: string }[];
+    students: { id: string; studentId: string; displayName: string; className: string }[];
+  }>("/api/teacher/students");
+  const teacher: any = {
+    ...(data?.teacher ?? {}),
+    formClass: data?.classes?.[0]?.className ?? "",
+    formClassStudentCount: data?.students?.length ?? 0,
+  };
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "excellent" | "good" | "attention">("all");
 
-  const filtered = [].filter((s: any) => {
+  const students = (data?.students ?? []).map((s) => ({
+    id: s.id,
+    studentId: s.studentId,
+    name: s.displayName,
+    gender: "—",
+    status: "Good",
+    overallGrade: "—",
+    attendanceRate: 0,
+    behaviorScore: "—",
+    parentContact: "—",
+    photoUrl: "",
+  }));
+
+  const filtered = students.filter((s) => {
     const matchSearch = s.name.toLowerCase().includes(search.toLowerCase());
     const matchFilter =
       filter === "all" ||
@@ -32,9 +53,9 @@ export default function ClassRosterPage() {
     return matchSearch && matchFilter;
   });
 
-  const excellent = [].filter((s: any) => s.status === "Excellent").length;
-  const good = [].filter((s: any) => s.status === "Good").length;
-  const attention = [].filter((s: any) => s.status === "Needs Attention").length;
+  const excellent = students.filter((s) => s.status === "Excellent").length;
+  const good = students.filter((s) => s.status === "Good").length;
+  const attention = students.filter((s) => s.status === "Needs Attention").length;
 
   return (
     <>

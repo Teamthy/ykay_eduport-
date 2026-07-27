@@ -190,7 +190,7 @@ export async function GET(request: NextRequest) {
 
   const [total, payments] = await Promise.all([
     prisma.feePayment.count({ where }),
-    prisma.feePayment.findMany({ take: 50,
+    prisma.feePayment.findMany({
       where,
       orderBy: { paidAt: "desc" },
       skip: (page - 1) * pageSize,
