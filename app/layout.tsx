@@ -55,21 +55,38 @@ export const metadata: Metadata = {
 };
 
 import { headers } from "next/headers";
+import { getSession } from "@/lib/session";
 import { resolveTenantFromHost } from "@/lib/tenant";
 import { getTenantBranding, DEFAULT_BRANDING } from "@/lib/branding";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // ── EDUos: resolve the tenant's branding (per-school palette, logo) ──
+  // ── EDUos: resolve branding ──
+  // For AUTHENTICATED users, use THEIR school's branding (from the session's
+  // schoolId — so a new school's colours show immediately after signup, even
+  // on localhost where host resolution falls back to the default school).
+  // For PUBLIC pages (no session), resolve from hostname.
   const host = (await headers()).get("host");
-  const tenant = await resolveTenantFromHost(host);
-  const branding = tenant ? await getTenantBranding(tenant.id) : null;
+  const session = await getSession();
+
+  let schoolId: string | null = null;
+  let fallbackName = "EduPortal";
+
+  if (session) {
+    schoolId = session.schoolId;
+  } else {
+    const { tenant } = await resolveTenantFromHost(host);
+    schoolId = tenant?.id ?? null;
+    fallbackName = tenant?.name ?? "EduPortal";
+  }
+
+  const branding = schoolId ? await getTenantBranding(schoolId) : null;
 
   const primary = branding?.primaryColor ?? DEFAULT_BRANDING.primaryColor;
   const secondary = branding?.secondaryColor ?? DEFAULT_BRANDING.secondaryColor;
   const accent = branding?.accentColor ?? DEFAULT_BRANDING.accentColor;
   const logoUrl = branding?.logoUrl ?? "/ykay-logo.png";
   const faviconUrl = branding?.faviconUrl ?? "/ykay-logo.png";
-  const displayName = branding?.displayName ?? tenant?.name ?? "EduPortal";
+  const displayName = branding?.displayName ?? fallbackName;
 
   return (
     <html
