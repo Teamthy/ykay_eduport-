@@ -7,9 +7,14 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 async function authorize(request: NextRequest) {
-  const secret = process.env.JOBS_SECRET;
   const header = request.headers.get("authorization") || "";
-  if (secret && secret.length >= 16 && header === `Bearer ${secret}`) return true;
+  // Accept either the app's JOBS_SECRET or Vercel Cron's CRON_SECRET. Vercel Cron
+  // sends `Authorization: Bearer ${CRON_SECRET}` on each invocation, so on Vercel
+  // set JOBS_SECRET = CRON_SECRET (or just set CRON_SECRET).
+  const accepted = [process.env.JOBS_SECRET, process.env.CRON_SECRET].filter(
+    (s): s is string => typeof s === "string" && s.length >= 16,
+  );
+  if (accepted.some((s) => header === `Bearer ${s}`)) return true;
   const user = await requireRole([UserRole.ADMIN, UserRole.DIRECTOR, UserRole.SUPER_ADMIN]);
   return Boolean(user);
 }

@@ -1168,3 +1168,13 @@ model SecurityEvent {
   @@index([userEmail, createdAt])
   @@index([createdAt])
 }
+
+/// Platform-wide flags (singleton row, id = "singleton"). Persisted in the DB so
+/// maintenance mode works on serverless (read-only filesystem) deployments.
+model SystemFlags {
+  id                 String   @id @default("singleton")
+  maintenanceMode    Boolean  @default(false)
+  maintenanceMessage String   @default("Ykay EduPortal is undergoing scheduled maintenance. Please try again shortly.")
+  updatedAt          DateTime @updatedAt
+  updatedByUserId    String?
+}
