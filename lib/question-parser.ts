@@ -17,7 +17,6 @@
  */
 
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
 
 export type QuestionType = "MCQ" | "TRUE_FALSE" | "FILL_BLANK" | "ESSAY";
 
@@ -85,39 +84,6 @@ export function parseJSON(content: string): ParseResult {
 
   return validateRows(
     data.map((row) => {
-      const r: Record<string, string> = {};
-      for (const [k, v] of Object.entries(row)) {
-        r[
-          k
-            .trim()
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, "_")
-        ] = String(v ?? "");
-      }
-      return r;
-    }),
-    [],
-  );
-}
-
-// ── XLSX/Excel Parser ─────────────────────────────────────────────
-export function parseXLSX(buffer: ArrayBuffer): ParseResult {
-  const workbook = XLSX.read(buffer, { type: "array" });
-  const sheetName = workbook.SheetNames[0];
-  if (!sheetName) {
-    return {
-      questions: [],
-      errors: [{ row: 0, message: "Excel file has no sheets." }],
-      warnings: [],
-      stats: { total: 0, valid: 0, mcq: 0, trueFalse: 0, fillBlank: 0, essay: 0 },
-    };
-  }
-
-  const sheet = workbook.Sheets[sheetName];
-  const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: "" });
-
-  return validateRows(
-    rows.map((row) => {
       const r: Record<string, string> = {};
       for (const [k, v] of Object.entries(row)) {
         r[

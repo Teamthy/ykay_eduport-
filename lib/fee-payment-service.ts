@@ -6,7 +6,7 @@ import {
   Prisma,
 } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { computeInvoiceStatus, generateReceiptNumber } from "@/lib/finance";
+import { computeInvoiceStatus, generateUniqueReceiptNumber } from "@/lib/finance";
 
 /**
  * Atomically post a completed school-fee payment.
@@ -71,7 +71,7 @@ export async function postCompletedFeePayment(input: {
         method: input.method,
         status: FeePaymentStatus.COMPLETED,
         reference: input.reference,
-        receiptNumber: generateReceiptNumber(),
+        receiptNumber: await generateUniqueReceiptNumber(),
         providerData: input.providerData,
       },
     });

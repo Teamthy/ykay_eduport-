@@ -2,6 +2,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import type { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
 export const SESSION_COOKIE = "ykay_session";
 const encoder = new TextEncoder();
@@ -20,6 +21,7 @@ export type SessionUser = {
   email: string;
   mustChangePassword?: boolean;
   tokenVersion?: number;
+  impersonatedBy?: string;
 };
 
 export async function signSession(
@@ -64,6 +66,8 @@ export async function verifySession(token: string): Promise<SessionUser | null> 
       email: payload.email,
       mustChangePassword: payload.mustChangePassword === true,
       tokenVersion: typeof payload.tokenVersion === "number" ? payload.tokenVersion : 0,
+      impersonatedBy:
+        typeof payload.impersonatedBy === "string" ? payload.impersonatedBy : undefined,
     };
   } catch {
     return null;
@@ -127,4 +131,20 @@ export async function revokeAllSessions(userId: string): Promise<void> {
     where: { id: userId },
     data: { tokenVersion: { increment: 1 } },
   });
+}
+
+/**
+ * Impersonation write-guard. Super-admin impersonation is READ-ONLY by design.
+ * Call this at the top of any mutating (POST/PUT/PATCH/DELETE) handler to block
+ * writes performed while impersonating another user. Returns a 403 response when
+ * the session is impersonating, otherwise null.
+ */
+export function assertNotImpersonating(user: { impersonatedBy?: string }) {
+  if (user.impersonatedBy) {
+    return NextResponse.json(
+      { error: "Writes are not permitted while impersonating. End impersonation first." },
+      { status: 403 },
+    );
+  }
+  return null;
 }

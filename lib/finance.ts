@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import { FeeInvoiceStatus, FeePaymentMethod, FeePaymentStatus, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
@@ -20,16 +21,39 @@ export function computeInvoiceStatus(
   return FeeInvoiceStatus.UNPAID;
 }
 
+/**
+ * Receipt number — CSPRNG-based (not Math.random) to avoid birthday collisions on
+ * the UNIQUE `receiptNumber` column. Format: YKC-RCP-YYYY-XXXXXXXX (8 hex chars).
+ */
 export function generateReceiptNumber() {
   const year = new Date().getFullYear();
-  const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
+  const suffix = randomBytes(4).toString("hex").toUpperCase();
   return `YKC-RCP-${year}-${suffix}`;
 }
 
+/**
+ * Payment reference — CSPRNG-based. Format: YKC-PAY-YYYY-XXXXXXXXXXXX (12 hex chars).
+ */
 export function generatePaymentReference() {
   const year = new Date().getFullYear();
-  const suffix = Math.random().toString(36).slice(2, 10).toUpperCase();
+  const suffix = randomBytes(6).toString("hex").toUpperCase();
   return `YKC-PAY-${year}-${suffix}`;
+}
+
+/**
+ * Generate a receipt number guaranteed unique against the DB (defence-in-depth on
+ * top of the UNIQUE constraint). Retries with fresh entropy until free, then throws.
+ */
+export async function generateUniqueReceiptNumber(maxRetries = 5): Promise<string> {
+  for (let attempt = 0; attempt < maxRetries; attempt += 1) {
+    const candidate = generateReceiptNumber();
+    const existing = await prisma.feePayment.findUnique({
+      where: { receiptNumber: candidate },
+      select: { id: true },
+    });
+    if (!existing) return candidate;
+  }
+  throw new Error("Failed to generate unique receipt number after retries");
 }
 
 export async function getParentFinanceContext() {

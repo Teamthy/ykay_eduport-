@@ -22,7 +22,6 @@ export async function GET() {
               level: true,
               certification: true,
               durationWeeks: true,
-              moduleCount: true,
             },
           },
           progress: { select: { id: true } },

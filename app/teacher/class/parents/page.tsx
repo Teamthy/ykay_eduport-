@@ -10,14 +10,36 @@ import { Search, Phone, MessageSquare, School, User, Send, X } from "lucide-reac
 
 export default function ParentCommunicationsPage() {
   const { toast } = useToast();
-  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
-  const teacher = data?.teacher || ({} as any);
+  const { data, loading } = useApi<{
+    className: string | null;
+    parents: {
+      id: string;
+      parentName: string;
+      phone: string | null;
+      relationship: string | null;
+      isPrimary: boolean;
+      studentName: string;
+      studentId: string;
+    }[];
+  }>("/api/teacher/class/parents");
+  const teacher = { formClass: data?.className ?? "" };
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any | null>(null);
   const [message, setMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
 
-  const filtered = [].filter((s: any) => s.name.toLowerCase().includes(search.toLowerCase()));
+  const parents = (data?.parents ?? []).map((p) => ({
+    id: p.id,
+    name: p.parentName,
+    phone: p.phone || "—",
+    relationship: p.relationship || "Guardian",
+    studentName: p.studentName,
+    studentId: p.studentId,
+    isPrimary: p.isPrimary,
+    photoUrl: "",
+    parentContact: p.phone || "—",
+  }));
+  const filtered = parents.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()));
 
   const handleSend = () => {
     if (!message.trim()) {

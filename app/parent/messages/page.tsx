@@ -27,6 +27,23 @@ const SIDEBAR_ITEMS = [
 export default function ParentMessagesPage() {
   const [selectedMsg, setSelectedMsg] = useState<any>(null);
   const [reply, setReply] = useState("");
+  const { data, loading } = useApi<{
+    messages: { id: string; subject: string; body: string; read: boolean; at: string }[];
+  }>("/api/parent/messages");
+  const messages = (data?.messages ?? []).map((m) => ({
+    id: m.id,
+    avatar: (m.subject?.[0] ?? "?").toUpperCase(),
+    from: "School",
+    unread: !m.read,
+    subject: m.subject,
+    time: new Date(m.at).toLocaleString("en", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    body: m.body,
+  }));
 
   return (
     <>
@@ -54,39 +71,45 @@ export default function ParentMessagesPage() {
                   INBOX
                 </h3>
                 <div className="space-y-2">
-                  {[].map((msg) => (
-                    <button
-                      key={msg.id}
-                      onClick={() => setSelectedMsg(msg)}
-                      className={`w-full text-left p-3 rounded-xl transition-all ${
-                        selectedMsg?.id === msg.id
-                          ? "bg-brand-green/10 border border-brand-green/30"
-                          : "hover:bg-[var(--surface-disabled)] border border-transparent"
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-brand-navy text-white flex items-center justify-center font-bold text-xs shrink-0">
-                          {msg.avatar}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <div className="text-sm font-bold text-[var(--text-primary)] truncate">
-                              {msg.from}
+                  {loading ? (
+                    <div className="p-3 text-[var(--text-muted)] text-xs">Loading messages…</div>
+                  ) : messages.length === 0 ? (
+                    <div className="p-3 text-[var(--text-muted)] text-xs">No messages.</div>
+                  ) : (
+                    messages.map((msg) => (
+                      <button
+                        key={msg.id}
+                        onClick={() => setSelectedMsg(msg)}
+                        className={`w-full text-left p-3 rounded-xl transition-all ${
+                          selectedMsg?.id === msg.id
+                            ? "bg-brand-green/10 border border-brand-green/30"
+                            : "hover:bg-[var(--surface-disabled)] border border-transparent"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-full bg-brand-navy text-white flex items-center justify-center font-bold text-xs shrink-0">
+                            {msg.avatar}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <div className="text-sm font-bold text-[var(--text-primary)] truncate">
+                                {msg.from}
+                              </div>
+                              {msg.unread && (
+                                <div className="w-2 h-2 rounded-full bg-brand-green shrink-0" />
+                              )}
                             </div>
-                            {msg.unread && (
-                              <div className="w-2 h-2 rounded-full bg-brand-green shrink-0" />
-                            )}
-                          </div>
-                          <div className="text-xs text-[var(--text-secondary)] truncate">
-                            {msg.subject}
-                          </div>
-                          <div className="text-[10px] text-[var(--text-muted)] mt-1">
-                            {msg.time}
+                            <div className="text-xs text-[var(--text-secondary)] truncate">
+                              {msg.subject}
+                            </div>
+                            <div className="text-[10px] text-[var(--text-muted)] mt-1">
+                              {msg.time}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -98,7 +121,9 @@ export default function ParentMessagesPage() {
                       {selectedMsg?.avatar}
                     </div>
                     <div>
-                      <div className="font-bold text-[var(--text-primary)]">{selectedMsg?.from}</div>
+                      <div className="font-bold text-[var(--text-primary)]">
+                        {selectedMsg?.from}
+                      </div>
                       <div className="text-xs text-brand-green">{selectedMsg?.role}</div>
                     </div>
                   </div>

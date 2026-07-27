@@ -3,6 +3,7 @@ import { PaymentProvider, PaymentStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getParentFinanceContext } from "@/lib/finance";
+import { assertNotImpersonating } from "@/lib/session";
 import { initializePaystackTransaction } from "@/lib/paystack";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { randomBytes } from "crypto";
@@ -25,6 +26,8 @@ function feeReference(invoiceNumber: string) {
 export async function POST(request: NextRequest) {
   const context = await getParentFinanceContext();
   if (!context) return jsonNoStore({ error: "Parent finance profile not found." }, { status: 403 });
+  const impersonating = assertNotImpersonating(context.user);
+  if (impersonating) return impersonating;
 
   let input: z.infer<typeof schema>;
   try {

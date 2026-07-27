@@ -27,10 +27,11 @@ import {
   X,
 } from "lucide-react";
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
+import readXlsxFile from "read-excel-file/browser";
+import { unzipSync, strFromU8 } from "fflate";
 
 type QuestionType = "MCQ" | "TRUE_FALSE" | "FILL_BLANK" | "ESSAY";
-type FileFormat = "csv" | "json" | "xlsx";
+type FileFormat = "csv" | "json" | "xlsx" | "docx";
 
 interface ParsedQuestion {
   type: QuestionType;
@@ -147,9 +148,12 @@ export default function UploadQuestionsPage() {
         } else if (format === "json") {
           const text = await f.text();
           result = parseJSONContent(text);
+        } else if (format === "docx") {
+          const buffer = await f.arrayBuffer();
+          result = parseDocxContent(buffer);
         } else {
           const buffer = await f.arrayBuffer();
-          result = parseXLSXContent(buffer);
+          result = await parseXLSXContent(buffer);
         }
 
         setParseResult(result);
@@ -219,35 +223,128 @@ export default function UploadQuestionsPage() {
     );
   }
 
-  // ── XLSX parser ─────────────────────────────────────────────
-  function parseXLSXContent(buffer: ArrayBuffer): ParseResult {
-    const wb = XLSX.read(buffer, { type: "array" });
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    if (!sheet)
+  // ── XLSX parser (read-excel-file — replaces vulnerable SheetJS) ──
+  async function parseXLSXContent(buffer: ArrayBuffer): Promise<ParseResult> {
+    const emptyStats = { total: 0, valid: 0, mcq: 0, trueFalse: 0, fillBlank: 0, essay: 0 };
+    try {
+      const sheets = await readXlsxFile(buffer);
+      const data = sheets[0]?.data ?? [];
+      if (!data.length) {
+        return {
+          questions: [],
+          errors: [{ row: 0, message: "No sheet found." }],
+          warnings: [],
+          stats: emptyStats,
+        };
+      }
+      const headers = (data[0] ?? []).map((h) => String(h ?? ""));
+      const dataRows: Record<string, string>[] = [];
+      for (let i = 1; i < data.length; i += 1) {
+        const row = data[i] ?? [];
+        const obj: Record<string, string> = {};
+        headers.forEach((h, idx) => {
+          if (h) {
+            obj[
+              h
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, "_")
+            ] = String(row[idx] ?? "");
+          }
+        });
+        dataRows.push(obj);
+      }
+      return validateRows(dataRows, []);
+    } catch {
       return {
         questions: [],
-        errors: [{ row: 0, message: "No sheet found." }],
+        errors: [{ row: 0, message: "Could not read this Excel file." }],
         warnings: [],
-        stats: { total: 0, valid: 0, mcq: 0, trueFalse: 0, fillBlank: 0, essay: 0 },
+        stats: emptyStats,
       };
-    const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: "" });
-    return validateRows(
-      rows.map((row) => {
-        const r: Record<string, string> = {};
-        for (const [k, v] of Object.entries(row))
-          r[
-            k
-              .trim()
-              .toLowerCase()
-              .replace(/[^a-z0-9]/g, "_")
-          ] = String(v ?? "");
-        return r;
-      }),
-      [],
-    );
+    }
   }
 
-  // ── Shared validation ───────────────────────────────────────
+  // ── Word .docx parser (extracts the first table; same columns as the CSV template) ──
+  function parseDocxContent(buffer: ArrayBuffer): ParseResult {
+    const emptyStats = { total: 0, valid: 0, mcq: 0, trueFalse: 0, fillBlank: 0, essay: 0 };
+    const needTable =
+      "Put questions in a Word table with header columns: type, question, option_a..option_d, correct, marks, topic, difficulty, explanation.";
+    try {
+      const files = unzipSync(new Uint8Array(buffer));
+      const xmlBytes = files["word/document.xml"];
+      if (!xmlBytes) {
+        return {
+          questions: [],
+          errors: [{ row: 0, message: "Not a valid .docx file." }],
+          warnings: [],
+          stats: emptyStats,
+        };
+      }
+      const doc = new DOMParser().parseFromString(strFromU8(xmlBytes), "application/xml");
+      const table = doc.getElementsByTagName("w:tbl")[0];
+      if (!table) {
+        return {
+          questions: [],
+          errors: [{ row: 0, message: needTable }],
+          warnings: [],
+          stats: emptyStats,
+        };
+      }
+      const rows: string[][] = [];
+      const trs = table.getElementsByTagName("w:tr");
+      for (let i = 0; i < trs.length; i += 1) {
+        const cells = trs[i].getElementsByTagName("w:tc");
+        const row: string[] = [];
+        for (let c = 0; c < cells.length; c += 1) {
+          const texts = cells[c].getElementsByTagName("w:t");
+          let cellText = "";
+          for (let t = 0; t < texts.length; t += 1) cellText += texts[t].textContent ?? "";
+          row.push(cellText);
+        }
+        rows.push(row);
+      }
+      if (rows.length < 2) {
+        return {
+          questions: [],
+          errors: [{ row: 0, message: needTable }],
+          warnings: [],
+          stats: emptyStats,
+        };
+      }
+      const headers = (rows[0] ?? []).map((h) => h.trim());
+      const dataRows: Record<string, string>[] = [];
+      for (let i = 1; i < rows.length; i += 1) {
+        const row = rows[i] ?? [];
+        const obj: Record<string, string> = {};
+        headers.forEach((h, idx) => {
+          if (h)
+            obj[
+              h
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, "_")
+            ] = String(row[idx] ?? "");
+        });
+        dataRows.push(obj);
+      }
+      return validateRows(dataRows, []);
+    } catch {
+      return {
+        questions: [],
+        errors: [
+          {
+            row: 0,
+            message:
+              "Could not read this Word document. For legacy .doc, please re-save as .docx (File → Save As → Word Document (.docx)).",
+          },
+        ],
+        warnings: [],
+        stats: emptyStats,
+      };
+    }
+  }
+
   function validateRows(
     rows: Record<string, string>[],
     csvErrors: { row: number; message: string }[],
@@ -423,9 +520,8 @@ export default function UploadQuestionsPage() {
       const blob = new Blob([JSON_TEMPLATE], { type: "application/json" });
       downloadBlob(blob, "ykay-question-template.json");
     } else {
-      // Generate XLSX template
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.aoa_to_sheet([
+      // Generate CSV template (opens in Excel/Word; read-excel-file cannot write .xlsx)
+      const templateRows = [
         [
           "type",
           "question",
@@ -447,7 +543,7 @@ export default function UploadQuestionsPage() {
           "Kano",
           "Port Harcourt",
           "B",
-          2,
+          "2",
           "Geography",
           "Easy",
           "Abuja became the capital in 1991",
@@ -460,7 +556,7 @@ export default function UploadQuestionsPage() {
           "",
           "",
           "TRUE",
-          1,
+          "1",
           "Science",
           "Easy",
           "",
@@ -473,15 +569,20 @@ export default function UploadQuestionsPage() {
           "",
           "",
           "chloroplast",
-          2,
+          "2",
           "Biology",
           "Medium",
           "",
         ],
-        ["ESSAY", "Explain the water cycle", "", "", "", "", "", 10, "Science", "Hard", ""],
-      ]);
-      XLSX.utils.book_append_sheet(wb, ws, "Questions");
-      XLSX.writeFile(wb, "ykay-question-template.xlsx");
+        ["ESSAY", "Explain the water cycle", "", "", "", "", "", "10", "Science", "Hard", ""],
+      ];
+      const csv = templateRows
+        .map((r) => r.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+        .join("\n");
+      downloadBlob(
+        new Blob([csv], { type: "text/csv;charset=utf-8" }),
+        "ykay-question-template.csv",
+      );
     }
   }
 
@@ -505,6 +606,7 @@ export default function UploadQuestionsPage() {
       if (ext === "csv") setFileFormat("csv");
       else if (ext === "json") setFileFormat("json");
       else if (ext === "xlsx" || ext === "xls") setFileFormat("xlsx");
+      else if (ext === "docx") setFileFormat("docx");
       void parseFile(f, ext === "json" ? "json" : ext === "csv" ? "csv" : "xlsx");
     }
   }
@@ -587,7 +689,7 @@ export default function UploadQuestionsPage() {
               Download Template
             </h2>
             <div className="grid gap-3 sm:grid-cols-3">
-              {(["csv", "json", "xlsx"] as FileFormat[]).map((fmt) => (
+              {(["csv", "json", "xlsx", "docx"] as FileFormat[]).map((fmt) => (
                 <button
                   key={fmt}
                   onClick={() => downloadTemplate(fmt)}
@@ -637,7 +739,7 @@ export default function UploadQuestionsPage() {
 
             {/* Format selector */}
             <div className="mb-4 flex gap-2">
-              {(["csv", "json", "xlsx"] as FileFormat[]).map((fmt) => (
+              {(["csv", "json", "xlsx", "docx"] as FileFormat[]).map((fmt) => (
                 <button
                   key={fmt}
                   onClick={() => setFileFormat(fmt)}
@@ -671,7 +773,13 @@ export default function UploadQuestionsPage() {
                 ref={fileInputRef}
                 type="file"
                 accept={
-                  fileFormat === "csv" ? ".csv" : fileFormat === "json" ? ".json" : ".xlsx,.xls"
+                  fileFormat === "csv"
+                    ? ".csv"
+                    : fileFormat === "json"
+                      ? ".json"
+                      : fileFormat === "docx"
+                        ? ".docx"
+                        : ".xlsx,.xls"
                 }
                 onChange={handleFileChange}
                 className="hidden"

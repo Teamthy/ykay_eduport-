@@ -4,6 +4,7 @@ import { UserRole } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { getClientIp } from "@/lib/requests";
 import { revokeAllSessions } from "@/lib/session";
 import { requireRole } from "@/lib/session";
 
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     ? (roleParam as UserRole)
     : null;
 
-  const users = await prisma.user.findMany({ take: 100,
+  const users = await prisma.user.findMany({
     where: {
       ...(search
         ? {

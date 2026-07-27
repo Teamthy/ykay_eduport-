@@ -31,6 +31,25 @@ const typeConfig = {
 };
 
 export default function StudentAnnouncementsPage() {
+  const { data, loading } = useApi<{
+    announcements: {
+      id: string;
+      title: string;
+      body: string;
+      kind: string;
+      read: boolean;
+      at: string;
+    }[];
+  }>("/api/student/announcements");
+  const announcements = (data?.announcements ?? []).map((a) => ({
+    id: a.id,
+    type: "info" as const,
+    title: a.title,
+    time: new Date(a.at).toLocaleString("en", { month: "short", day: "numeric" }),
+    desc: a.body,
+    audience: "Students",
+  }));
+
   return (
     <>
       <Header />
@@ -49,37 +68,47 @@ export default function StudentAnnouncementsPage() {
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 space-y-4">
-              {[].map((a) => {
-                const config = typeConfig[a.type as keyof typeof typeConfig];
-                return (
-                  <div
-                    key={a.id}
-                    className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/30 transition-all"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div
-                        className={`w-11 h-11 rounded-xl ${config.bg} ${config.color} flex items-center justify-center shrink-0`}
-                      >
-                        <config.icon size={20} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4 mb-2">
-                          <h3 className="font-display text-lg text-[var(--text-primary)]">
-                            {a.title}
-                          </h3>
-                          <span className="text-[10px] text-[var(--text-muted)] shrink-0 uppercase tracking-widest">
-                            {a.time}
+              {loading ? (
+                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm">
+                  Loading announcements…
+                </div>
+              ) : announcements.length === 0 ? (
+                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm">
+                  No announcements.
+                </div>
+              ) : (
+                announcements.map((a) => {
+                  const config = typeConfig[a.type as keyof typeof typeConfig];
+                  return (
+                    <div
+                      key={a.id}
+                      className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/30 transition-all"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div
+                          className={`w-11 h-11 rounded-xl ${config.bg} ${config.color} flex items-center justify-center shrink-0`}
+                        >
+                          <config.icon size={20} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <h3 className="font-display text-lg text-[var(--text-primary)]">
+                              {a.title}
+                            </h3>
+                            <span className="text-[10px] text-[var(--text-muted)] shrink-0 uppercase tracking-widest">
+                              {a.time}
+                            </span>
+                          </div>
+                          <p className="text-sm text-[var(--text-secondary)] mb-3">{a.desc}</p>
+                          <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-[var(--surface-disabled)] text-[var(--text-muted)] font-bold uppercase tracking-widest">
+                            {a.audience}
                           </span>
                         </div>
-                        <p className="text-sm text-[var(--text-secondary)] mb-3">{a.desc}</p>
-                        <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-[var(--surface-disabled)] text-[var(--text-muted)] font-bold uppercase tracking-widest">
-                          {a.audience}
-                        </span>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
         </section>
