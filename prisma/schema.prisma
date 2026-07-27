@@ -157,9 +157,12 @@ model School {
   address   String
   phone     String
   email     String?
-  motto     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  motto        String?
+  subdomain    String?      @unique
+  customDomain String?      @unique
+  status       SchoolStatus @default(ACTIVE)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   users                   User[]
   applications            AdmissionApplication[]
@@ -187,6 +190,8 @@ model School {
   expenses                Expense[]
   budgets                 Budget[]
   staffAttendanceEvents  StaffAttendanceEvent[]
+  subscription           Subscription?
+  branding               TenantBranding?
 }
 
 model User {
@@ -1177,4 +1182,72 @@ model SystemFlags {
   maintenanceMessage String   @default("Ykay EduPortal is undergoing scheduled maintenance. Please try again shortly.")
   updatedAt          DateTime @updatedAt
   updatedByUserId    String?
+}
+
+// ── EDUos multi-tenancy ────────────────────────────────────────────
+enum SchoolStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum PlanTier {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+/// A sellable plan tier. `studentLimit` null = unlimited.
+model Plan {
+  id           String   @id @default(cuid())
+  tier         PlanTier @unique
+  name         String
+  priceKobo    Int      @default(0)
+  studentLimit Int?
+  features     Json?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  subscriptions Subscription[]
+}
+
+/// A school's subscription to a plan. One per school.
+model Subscription {
+  id                       String             @id @default(cuid())
+  schoolId                 String             @unique
+  planId                   String
+  status                   SubscriptionStatus @default(TRIALING)
+  currentPeriodEnd         DateTime?
+  paystackSubscriptionCode String?
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Restrict)
+}
+
+/// Per-tenant branding (logo, palette, fonts, hero image). One row per school.
+model TenantBranding {
+  schoolId       String   @id
+  logoUrl        String?
+  faviconUrl     String?
+  primaryColor   String?
+  secondaryColor String?
+  accentColor    String?
+  fontDisplay    String?
+  fontBody       String?
+  heroImageUrl   String?
+  displayName    String?
+  tagline        String?
+  updatedAt      DateTime @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 }
