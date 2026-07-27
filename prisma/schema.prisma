@@ -161,6 +161,7 @@ model School {
   subdomain    String?      @unique
   customDomain String?      @unique
   status       SchoolStatus @default(ACTIVE)
+  modules      Json?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -197,7 +198,7 @@ model School {
 model User {
   id                 String    @id @default(cuid())
   schoolId           String
-  email              String    @unique
+  email              String
   name               String
   role               UserRole
   passwordHash       String
@@ -223,6 +224,7 @@ model User {
   newsPosts                   NewsPost[]
 
   @@index([schoolId, role])
+  @@unique([schoolId, email])
 }
 
 model TeacherProfile {

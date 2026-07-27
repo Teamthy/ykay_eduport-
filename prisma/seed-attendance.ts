@@ -42,7 +42,7 @@ function generatedPassword(prefix: string) {
 }
 
 async function upsertPortalUser(config: SeedUserConfig, schoolId: string): Promise<SeedUserResult> {
-  const existing = await prisma.user.findUnique({ where: { email: config.email } });
+  const existing = await prisma.user.findFirst({ where: { email: config.email, schoolId } });
   const providedPassword = config.passwordEnv ? optionalEnv(config.passwordEnv) : null;
   const shouldSetPassword = Boolean(providedPassword) || !existing;
   const issuedPassword = shouldSetPassword

@@ -1,4 +1,4 @@
-﻿import { Anton, DM_Sans } from "next/font/google";
+import { Anton, DM_Sans } from "next/font/google";
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -54,7 +54,23 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+import { headers } from "next/headers";
+import { resolveTenantFromHost } from "@/lib/tenant";
+import { getTenantBranding, DEFAULT_BRANDING } from "@/lib/branding";
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // ── EDUos: resolve the tenant's branding (per-school palette, logo) ──
+  const host = (await headers()).get("host");
+  const tenant = await resolveTenantFromHost(host);
+  const branding = tenant ? await getTenantBranding(tenant.id) : null;
+
+  const primary = branding?.primaryColor ?? DEFAULT_BRANDING.primaryColor;
+  const secondary = branding?.secondaryColor ?? DEFAULT_BRANDING.secondaryColor;
+  const accent = branding?.accentColor ?? DEFAULT_BRANDING.accentColor;
+  const logoUrl = branding?.logoUrl ?? "/ykay-logo.png";
+  const faviconUrl = branding?.faviconUrl ?? "/ykay-logo.png";
+  const displayName = branding?.displayName ?? tenant?.name ?? "EduPortal";
+
   return (
     <html
       lang="en"
@@ -63,8 +79,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        <link rel="icon" href="/ykay-logo.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/ykay-logo.png" />
+        <link rel="icon" href={faviconUrl} type="image/png" />
+        <link rel="apple-touch-icon" href={faviconUrl} />
+        {/* EDUos: inject per-tenant brand palette as CSS variable overrides */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `:root{--color-brand-navy:${primary};--color-brand-navy-light:${secondary};--color-brand-green:${accent};--color-brand-green-dark:${accent};--color-brand-green-light:${accent};}`,
+          }}
+        />
         {/* ANTI-FLASH: force dark mode as default before hydration */}
         <script
           dangerouslySetInnerHTML={{

@@ -31,7 +31,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  const existing = await prisma.user.findUnique({ where: { email: payload.email } });
+  const school = await getSchool();
+  const existing = await prisma.user.findFirst({
+    where: { email: payload.email, schoolId: school.id },
+  });
   if (existing) {
     return NextResponse.json(
       { error: "An account with this email already exists. Please sign in instead." },
@@ -39,7 +42,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const school = await getSchool();
   const passwordHash = await bcrypt.hash(payload.password, 12);
 
   const user = await prisma.user.create({

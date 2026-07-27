@@ -93,7 +93,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
     const email = payload.email.trim().toLowerCase();
-    if (await prisma.user.findUnique({ where: { email } })) {
+    if (await prisma.user.findFirst({ where: { email, schoolId: superAdmin.schoolId } })) {
       return NextResponse.json({ error: "An account already uses this email." }, { status: 409 });
     }
     const role = (payload.role as UserRole) || UserRole.ADMIN;

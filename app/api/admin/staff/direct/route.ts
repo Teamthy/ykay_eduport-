@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid staff details." }, { status: 400 });
   }
 
-  if (await prisma.user.findUnique({ where: { email: input.email } })) {
+  if (await prisma.user.findFirst({ where: { email: input.email, schoolId: user.schoolId } })) {
     return NextResponse.json({ error: "An account already uses this email." }, { status: 409 });
   }
 
