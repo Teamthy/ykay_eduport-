@@ -61,7 +61,7 @@ import { getTenantBranding, DEFAULT_BRANDING } from "@/lib/branding";
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // ── EDUos: resolve the tenant's branding (per-school palette, logo) ──
   const host = (await headers()).get("host");
-  const tenant = await resolveTenantFromHost(host);
+  const { tenant } = await resolveTenantFromHost(host);
   const branding = tenant ? await getTenantBranding(tenant.id) : null;
 
   const primary = branding?.primaryColor ?? DEFAULT_BRANDING.primaryColor;

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     const host = request.headers.get("host");
-    const tenant = await resolveTenantFromHost(host);
+    const { tenant } = await resolveTenantFromHost(host);
     const user = tenant
       ? await prisma.user.findFirst({ where: { email, schoolId: tenant.id } })
       : null;

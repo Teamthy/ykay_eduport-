@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const tenant = await resolveTenantFromHost(request.headers.get("host"));
+    const { tenant } = await resolveTenantFromHost(request.headers.get("host"));
     if (!tenant)
       return NextResponse.json({ error: "Sign-in is temporarily unavailable." }, { status: 503 });
     const user = await prisma.user.findFirst({ where: { email, schoolId: tenant.id } });
