@@ -58,6 +58,37 @@ function logDenial(
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const method = request.method;
+
+  // ── Read-only super-admin impersonation ──
+  // Block every mutating API request while impersonating (except the endpoints
+  // that manage the impersonation/session themselves). This is the single,
+  // global enforcement point — no route needs to remember to check.
+  if (
+    pathname.startsWith("/api/") &&
+    method !== "GET" &&
+    method !== "HEAD" &&
+    method !== "OPTIONS" &&
+    pathname !== "/api/super-admin/impersonate" &&
+    pathname !== "/api/auth/logout"
+  ) {
+    const impToken = request.cookies.get("ykay_session")?.value;
+    const impSecret = process.env.AUTH_SECRET;
+    if (impToken && impSecret && impSecret.length >= 32) {
+      try {
+        const { payload } = await jwtVerify(impToken, encoder.encode(impSecret));
+        if (payload.impersonatedBy) {
+          return NextResponse.json(
+            { error: "Writes are not permitted while impersonating. End impersonation first." },
+            { status: 403 },
+          );
+        }
+      } catch {
+        // invalid/expired token — let the route's own auth reject it
+      }
+    }
+  }
+
   if (publicItPaths.some((path) => pathname.startsWith(path))) return NextResponse.next();
   if (!protectedPrefixes.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next();
 
@@ -131,6 +162,7 @@ function redirectToLogin(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/api/:path*",
     "/admin/:path*",
     "/admin-admissions/:path*",
     "/teacher/:path*",

@@ -26,10 +26,12 @@ export async function GET() {
 
   const [budgets, expenses] = await Promise.all([
     prisma.budget.findMany({
+      take: 500,
       where: { schoolId: context.user.schoolId, sessionLabel },
       orderBy: [{ termLabel: "asc" }, { category: "asc" }],
     }),
     prisma.expense.findMany({
+      take: 500,
       where: { schoolId: context.user.schoolId },
       select: { category: true, amount: true, spentAt: true },
     }),

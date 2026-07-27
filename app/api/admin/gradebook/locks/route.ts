@@ -18,6 +18,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const gradebooks = await prisma.subjectGradebook.findMany({
+    take: 500,
     where: { schoolId: user.schoolId },
     orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
     include: {

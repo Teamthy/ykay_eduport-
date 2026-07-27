@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
 
   const [events, teachers] = await Promise.all([
     prisma.staffAttendanceEvent.findMany({
+      take: 500,
       where: { schoolId: user.schoolId, workDate },
       orderBy: { scannedAt: "asc" },
       include: {
@@ -45,6 +46,7 @@ export async function GET(request: NextRequest) {
       },
     }),
     prisma.teacherProfile.findMany({
+      take: 500,
       where: { schoolId: user.schoolId, isActive: true },
       orderBy: { displayName: "asc" },
       select: {
@@ -69,6 +71,7 @@ export async function GET(request: NextRequest) {
   }
 
   const refreshed = await prisma.teacherProfile.findMany({
+    take: 500,
     where: { schoolId: user.schoolId, isActive: true },
     orderBy: { displayName: "asc" },
     select: {

@@ -15,6 +15,7 @@ export async function GET() {
 
   const [classes, teachers] = await Promise.all([
     prisma.schoolClass.findMany({
+      take: 500,
       where: { schoolId: user.schoolId, isActive: true },
       orderBy: { displayName: "asc" },
       include: {
@@ -37,6 +38,7 @@ export async function GET() {
       },
     }),
     prisma.teacherProfile.findMany({
+      take: 500,
       where: { schoolId: user.schoolId, isActive: true },
       orderBy: { displayName: "asc" },
       select: { id: true, displayName: true, roleLabel: true },

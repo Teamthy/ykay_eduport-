@@ -4,10 +4,10 @@
  * In development, hot-reload would create a new client on every save,
  * exhausting the connection pool. This singleton prevents that.
  *
- * For 1K DAU readiness:
- * - Connection pooling via ?connection_limit=20 on DATABASE_URL
- * - Prisma Accelerate (optional) for edge caching
- * - Prepared statements for frequently executed queries
+ * Note: a global findMany cap via $extends was tried but Prisma's extended
+ * client types are heavy enough to OOM `tsc`/`next build` on large codebases,
+ * so query bounding is done per-route instead (and aggregation endpoints should
+ * use SQL aggregation — groupBy/_count — rather than findMany).
  */
 
 import { PrismaClient } from "@prisma/client";
@@ -17,7 +17,6 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createPrismaClient() {
-  // Log slow queries in development
   const logLevel =
     process.env.NODE_ENV === "development"
       ? (["query", "error", "warn"] as const)
@@ -35,7 +34,6 @@ export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 if (process.env.NODE_ENV === "development") {
   globalForPrisma.prisma = prisma;
 
-  // Log slow queries (>500ms) in development
   prisma.$on(
     "query" as never,
     ((e: { query: string; duration: number }) => {

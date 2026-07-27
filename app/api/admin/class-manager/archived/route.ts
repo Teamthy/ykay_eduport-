@@ -15,6 +15,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const students = await prisma.studentProfile.findMany({
+    take: 500,
     where: { schoolId: user.schoolId, isActive: false },
     orderBy: { updatedAt: "desc" },
     include: { currentClass: { select: { displayName: true } } },

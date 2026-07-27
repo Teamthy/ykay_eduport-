@@ -14,6 +14,7 @@ export async function GET() {
   const user = await requireRole(PEOPLE_ADMIN_ROLES);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const staff = await prisma.user.findMany({
+    take: 500,
     where: { schoolId: user.schoolId, role: { in: [...STAFF_ROLES] } },
     select: {
       id: true,
@@ -28,6 +29,7 @@ export async function GET() {
     orderBy: { name: "asc" },
   });
   const invites = await prisma.staffInvite.findMany({
+    take: 500,
     where: {
       schoolId: user.schoolId,
       acceptedAt: null,

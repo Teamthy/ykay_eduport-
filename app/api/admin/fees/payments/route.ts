@@ -28,6 +28,7 @@ export async function GET() {
   if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const transfers = await prisma.feePaymentAttempt.findMany({
+    take: 500,
     where: {
       schoolId: context.user.schoolId,
       provider: "BANK_TRANSFER",

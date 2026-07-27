@@ -31,5 +31,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "_backups"]
+  "exclude": ["node_modules", "_backups", ".history", ".next", "*.patch"]
 }

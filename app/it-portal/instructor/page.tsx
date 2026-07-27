@@ -163,7 +163,7 @@ export default function InstructorDashboard() {
           <div className="ml-auto flex items-center gap-3">
             <Link
               href="/it-portal/dashboard"
-              className="rounded-full border border-gray-300 px-4 py-2 text-xs font-bold text-[var(--text-primary)] transition hover:bg-[var(--surface-disabled)]"
+              className="rounded-full border border-[var(--border-default)] px-4 py-2 text-xs font-bold text-[var(--text-primary)] transition hover:bg-[var(--surface-disabled)]"
             >
               Learner View
             </Link>
@@ -347,7 +347,7 @@ export default function InstructorDashboard() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="text-lg font-bold text-[var(--text-primary)]">{course.title}</h3>
-                      <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[9px] font-bold uppercase text-[var(--text-secondary)]">
+                      <span className="rounded-full bg-[var(--surface-disabled)] px-2 py-0.5 text-[9px] font-bold uppercase text-[var(--text-secondary)]">
                         {course.level}
                       </span>
                     </div>
@@ -388,7 +388,7 @@ export default function InstructorDashboard() {
                     <span className="text-[var(--text-muted)]">Average progress</span>
                     <span className="font-bold text-[var(--text-primary)]">{course.avgProgress}%</span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-gray-100">
+                  <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-disabled)]">
                     <div
                       className="h-full rounded-full bg-[#4EC54D]"
                       style={{ width: `${course.avgProgress}%` }}
@@ -474,7 +474,7 @@ export default function InstructorDashboard() {
                       className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase ${
                         exam.status === "PUBLISHED"
                           ? "bg-[#4EC54D]/10 text-[#4EC54D]"
-                          : "bg-gray-100 text-[var(--text-muted)]"
+                          : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
                       }`}
                     >
                       {exam.status}

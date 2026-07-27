@@ -424,7 +424,7 @@ export default function ProfilePage() {
                                     : level <= 3
                                       ? "bg-yellow-400"
                                       : "bg-[#4EC54D]"
-                                : "bg-gray-200"
+                                : "bg-[var(--border-subtle)]"
                             }`}
                           />
                         ))}

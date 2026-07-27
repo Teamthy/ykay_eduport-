@@ -24,7 +24,7 @@ export async function GET() {
   ]);
 
   return NextResponse.json({
-    flags: readSystemFlags(),
+    flags: await readSystemFlags(),
     config: readPublicSystemConfig(),
     school: school
       ? {
@@ -57,7 +57,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (payload.action === "SET_MAINTENANCE") {
-    const flags = writeSystemFlags(
+    const flags = await writeSystemFlags(
       {
         maintenanceMode: Boolean(payload.maintenanceMode),
         ...(payload.maintenanceMessage ? { maintenanceMessage: payload.maintenanceMessage } : {}),

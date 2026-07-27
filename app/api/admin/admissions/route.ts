@@ -21,6 +21,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const applications = await prisma.admissionApplication.findMany({
+    take: 500,
     where: { schoolId: user.schoolId, status: { not: "DRAFT" } },
     orderBy: { submittedAt: "desc" },
     include: {

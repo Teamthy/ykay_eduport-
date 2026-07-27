@@ -1,5 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { join } from "path";
+import { prisma } from "@/lib/prisma";
 
 export type SystemFlags = {
   maintenanceMode: boolean;
@@ -16,46 +15,55 @@ const DEFAULT_FLAGS: SystemFlags = {
   updatedByUserId: null,
 };
 
-function flagsPath() {
-  return join(process.cwd(), ".data", "system-flags.json");
-}
+const SINGLETON_ID = "singleton";
 
-export function readSystemFlags(): SystemFlags {
+/**
+ * Read platform flags from the DB (singleton row). Returns defaults if the row
+ * does not yet exist or the DB is unreachable. Persisting in the DB — instead of
+ * the local filesystem — keeps maintenance mode working on serverless deploys
+ * (Vercel's filesystem is read-only outside /tmp) and consistent across instances.
+ */
+export async function readSystemFlags(): Promise<SystemFlags> {
   try {
-    const path = flagsPath();
-    if (!existsSync(path)) return { ...DEFAULT_FLAGS };
-    const parsed = JSON.parse(readFileSync(path, "utf8")) as Partial<SystemFlags>;
+    const row = await prisma.systemFlags.findUnique({ where: { id: SINGLETON_ID } });
+    if (!row) return { ...DEFAULT_FLAGS };
     return {
-      maintenanceMode: Boolean(parsed.maintenanceMode),
-      maintenanceMessage:
-        typeof parsed.maintenanceMessage === "string" && parsed.maintenanceMessage.trim()
-          ? parsed.maintenanceMessage
-          : DEFAULT_FLAGS.maintenanceMessage,
-      updatedAt: parsed.updatedAt || null,
-      updatedByUserId: parsed.updatedByUserId || null,
+      maintenanceMode: row.maintenanceMode,
+      maintenanceMessage: row.maintenanceMessage,
+      updatedAt: row.updatedAt.toISOString(),
+      updatedByUserId: row.updatedByUserId,
     };
   } catch {
     return { ...DEFAULT_FLAGS };
   }
 }
 
-export function writeSystemFlags(
+export async function writeSystemFlags(
   next: Partial<SystemFlags>,
   actorUserId?: string | null,
-): SystemFlags {
-  const current = readSystemFlags();
-  const merged: SystemFlags = {
-    ...current,
-    ...next,
-    maintenanceMode: next.maintenanceMode ?? current.maintenanceMode,
-    maintenanceMessage: next.maintenanceMessage ?? current.maintenanceMessage,
-    updatedAt: new Date().toISOString(),
-    updatedByUserId: actorUserId ?? current.updatedByUserId,
+): Promise<SystemFlags> {
+  const row = await prisma.systemFlags.upsert({
+    where: { id: SINGLETON_ID },
+    update: {
+      ...(next.maintenanceMode !== undefined ? { maintenanceMode: next.maintenanceMode } : {}),
+      ...(next.maintenanceMessage !== undefined
+        ? { maintenanceMessage: next.maintenanceMessage }
+        : {}),
+      updatedByUserId: actorUserId ?? null,
+    },
+    create: {
+      id: SINGLETON_ID,
+      maintenanceMode: next.maintenanceMode ?? DEFAULT_FLAGS.maintenanceMode,
+      maintenanceMessage: next.maintenanceMessage ?? DEFAULT_FLAGS.maintenanceMessage,
+      updatedByUserId: actorUserId ?? null,
+    },
+  });
+  return {
+    maintenanceMode: row.maintenanceMode,
+    maintenanceMessage: row.maintenanceMessage,
+    updatedAt: row.updatedAt.toISOString(),
+    updatedByUserId: row.updatedByUserId,
   };
-  const dir = join(process.cwd(), ".data");
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-  writeFileSync(flagsPath(), JSON.stringify(merged, null, 2), "utf8");
-  return merged;
 }
 
 /** Env + runtime flags for super-admin system panel (never exposes secret values). */

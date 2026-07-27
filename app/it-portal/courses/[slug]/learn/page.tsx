@@ -147,7 +147,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="rounded-lg p-2 text-white/60 hover:bg-white/10 hover:text-white lg:hidden"
+            className="rounded-lg p-2 text-white/60 hover:bg-[var(--surface-card)]/10 hover:text-white lg:hidden"
           >
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -163,7 +163,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
         <div className="flex items-center gap-4">
           {/* Progress bar */}
           <div className="hidden items-center gap-2 md:flex">
-            <div className="h-2 w-32 overflow-hidden rounded-full bg-white/10">
+            <div className="h-2 w-32 overflow-hidden rounded-full bg-[var(--surface-card)]/10">
               <div
                 className="h-full rounded-full bg-brand-green transition-all duration-500"
                 style={{ width: `${course.progressPercent}%` }}
@@ -203,12 +203,12 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
             </div>
 
             {/* Overall progress */}
-            <div className="mb-4 rounded-xl bg-white/5 p-3">
+            <div className="mb-4 rounded-xl bg-[var(--surface-card)]/5 p-3">
               <div className="mb-2 flex items-center justify-between text-xs">
                 <span className="text-white/60">Progress</span>
                 <span className="font-bold text-brand-green">{course.progressPercent}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-white/10">
+              <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-card)]/10">
                 <div
                   className="h-full rounded-full bg-brand-green transition-all"
                   style={{ width: `${course.progressPercent}%` }}
@@ -228,7 +228,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
                   className={`flex w-full items-start gap-3 rounded-xl p-3 text-left transition ${
                     activeModuleId === mod.id
                       ? "bg-brand-green/10 border border-brand-green/30"
-                      : "hover:bg-white/5 border border-transparent"
+                      : "hover:bg-[var(--surface-card)]/5 border border-transparent"
                   }`}
                 >
                   <div className="mt-0.5 flex-shrink-0">
@@ -292,7 +292,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
               </div>
 
               {/* Lesson content */}
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-8">
+              <div className="rounded-2xl border border-white/10 bg-[var(--surface-card)]/5 p-8">
                 <div
                   className="prose prose-invert prose-sm max-w-none prose-headings:text-white prose-p:text-white/70 prose-strong:text-white prose-a:text-brand-green prose-li:text-white/70"
                   dangerouslySetInnerHTML={{
