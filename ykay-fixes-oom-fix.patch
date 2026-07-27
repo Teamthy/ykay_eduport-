@@ -1,0 +1,263 @@
+diff --git a/app/api/admin/admissions/route.ts b/app/api/admin/admissions/route.ts
+index 45cc663..d321132 100644
+--- a/app/api/admin/admissions/route.ts
++++ b/app/api/admin/admissions/route.ts
+@@ -21,6 +21,7 @@ export async function GET() {
+   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ 
+   const applications = await prisma.admissionApplication.findMany({
++    take: 500,
+     where: { schoolId: user.schoolId, status: { not: "DRAFT" } },
+     orderBy: { submittedAt: "desc" },
+     include: {
+diff --git a/app/api/admin/attendance/corrections/route.ts b/app/api/admin/attendance/corrections/route.ts
+index f5895e7..a52bbf0 100644
+--- a/app/api/admin/attendance/corrections/route.ts
++++ b/app/api/admin/attendance/corrections/route.ts
+@@ -17,6 +17,7 @@ export async function GET() {
+   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ 
+   const requests = await prisma.attendanceCorrectionRequest.findMany({
++    take: 500,
+     where: {
+       schoolId: user.schoolId,
+     },
+diff --git a/app/api/admin/budgets/route.ts b/app/api/admin/budgets/route.ts
+index db677f5..d5b9636 100644
+--- a/app/api/admin/budgets/route.ts
++++ b/app/api/admin/budgets/route.ts
+@@ -26,10 +26,12 @@ export async function GET() {
+ 
+   const [budgets, expenses] = await Promise.all([
+     prisma.budget.findMany({
++      take: 500,
+       where: { schoolId: context.user.schoolId, sessionLabel },
+       orderBy: [{ termLabel: "asc" }, { category: "asc" }],
+     }),
+     prisma.expense.findMany({
++      take: 500,
+       where: { schoolId: context.user.schoolId },
+       select: { category: true, amount: true, spentAt: true },
+     }),
+diff --git a/app/api/admin/class-manager/archived/route.ts b/app/api/admin/class-manager/archived/route.ts
+index 49d252d..fd183a0 100644
+--- a/app/api/admin/class-manager/archived/route.ts
++++ b/app/api/admin/class-manager/archived/route.ts
+@@ -15,6 +15,7 @@ export async function GET() {
+   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ 
+   const students = await prisma.studentProfile.findMany({
++    take: 500,
+     where: { schoolId: user.schoolId, isActive: false },
+     orderBy: { updatedAt: "desc" },
+     include: { currentClass: { select: { displayName: true } } },
+diff --git a/app/api/admin/class-manager/route.ts b/app/api/admin/class-manager/route.ts
+index 4a8e66d..490b01a 100644
+--- a/app/api/admin/class-manager/route.ts
++++ b/app/api/admin/class-manager/route.ts
+@@ -15,6 +15,7 @@ export async function GET() {
+ 
+   const [classes, teachers] = await Promise.all([
+     prisma.schoolClass.findMany({
++      take: 500,
+       where: { schoolId: user.schoolId, isActive: true },
+       orderBy: { displayName: "asc" },
+       include: {
+@@ -37,6 +38,7 @@ export async function GET() {
+       },
+     }),
+     prisma.teacherProfile.findMany({
++      take: 500,
+       where: { schoolId: user.schoolId, isActive: true },
+       orderBy: { displayName: "asc" },
+       select: { id: true, displayName: true, roleLabel: true },
+diff --git a/app/api/admin/fees/payments/route.ts b/app/api/admin/fees/payments/route.ts
+index ce646e7..eda8493 100644
+--- a/app/api/admin/fees/payments/route.ts
++++ b/app/api/admin/fees/payments/route.ts
+@@ -28,6 +28,7 @@ export async function GET() {
+   if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ 
+   const transfers = await prisma.feePaymentAttempt.findMany({
++    take: 500,
+     where: {
+       schoolId: context.user.schoolId,
+       provider: "BANK_TRANSFER",
+diff --git a/app/api/admin/gradebook/locks/route.ts b/app/api/admin/gradebook/locks/route.ts
+index 1f53d69..543235b 100644
+--- a/app/api/admin/gradebook/locks/route.ts
++++ b/app/api/admin/gradebook/locks/route.ts
+@@ -18,6 +18,7 @@ export async function GET() {
+   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ 
+   const gradebooks = await prisma.subjectGradebook.findMany({
++    take: 500,
+     where: { schoolId: user.schoolId },
+     orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+     include: {
+diff --git a/app/api/admin/news/route.ts b/app/api/admin/news/route.ts
+index 7635194..8d6b4cb 100644
+--- a/app/api/admin/news/route.ts
++++ b/app/api/admin/news/route.ts
+@@ -22,6 +22,7 @@ export async function GET() {
+   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ 
+   const posts = await prisma.newsPost.findMany({
++    take: 500,
+     where: { schoolId: user.schoolId },
+     orderBy: { createdAt: "desc" },
+     include: { author: { select: { name: true } } },
+diff --git a/app/api/admin/staff-attendance/badges/route.ts b/app/api/admin/staff-attendance/badges/route.ts
+index 7886a64..d6f838d 100644
+--- a/app/api/admin/staff-attendance/badges/route.ts
++++ b/app/api/admin/staff-attendance/badges/route.ts
+@@ -11,6 +11,7 @@ export async function GET() {
+   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ 
+   const teachers = await prisma.teacherProfile.findMany({
++    take: 500,
+     where: { schoolId: user.schoolId, isActive: true },
+     orderBy: { displayName: "asc" },
+     select: {
+diff --git a/app/api/admin/staff-attendance/route.ts b/app/api/admin/staff-attendance/route.ts
+index 45d36dc..f1d1554 100644
+--- a/app/api/admin/staff-attendance/route.ts
++++ b/app/api/admin/staff-attendance/route.ts
+@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
+ 
+   const [events, teachers] = await Promise.all([
+     prisma.staffAttendanceEvent.findMany({
++      take: 500,
+       where: { schoolId: user.schoolId, workDate },
+       orderBy: { scannedAt: "asc" },
+       include: {
+@@ -45,6 +46,7 @@ export async function GET(request: NextRequest) {
+       },
+     }),
+     prisma.teacherProfile.findMany({
++      take: 500,
+       where: { schoolId: user.schoolId, isActive: true },
+       orderBy: { displayName: "asc" },
+       select: {
+@@ -69,6 +71,7 @@ export async function GET(request: NextRequest) {
+   }
+ 
+   const refreshed = await prisma.teacherProfile.findMany({
++    take: 500,
+     where: { schoolId: user.schoolId, isActive: true },
+     orderBy: { displayName: "asc" },
+     select: {
+diff --git a/app/api/admin/staff/invites/route.ts b/app/api/admin/staff/invites/route.ts
+index a0bd6b3..c51c519 100644
+--- a/app/api/admin/staff/invites/route.ts
++++ b/app/api/admin/staff/invites/route.ts
+@@ -14,6 +14,7 @@ export async function GET() {
+   const user = await requireRole(PEOPLE_ADMIN_ROLES);
+   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+   const staff = await prisma.user.findMany({
++    take: 500,
+     where: { schoolId: user.schoolId, role: { in: [...STAFF_ROLES] } },
+     select: {
+       id: true,
+@@ -28,6 +29,7 @@ export async function GET() {
+     orderBy: { name: "asc" },
+   });
+   const invites = await prisma.staffInvite.findMany({
++    take: 500,
+     where: {
+       schoolId: user.schoolId,
+       acceptedAt: null,
+diff --git a/lib/prisma.ts b/lib/prisma.ts
+index 6a433fd..7accb96 100644
+--- a/lib/prisma.ts
++++ b/lib/prisma.ts
+@@ -4,63 +4,42 @@
+  * In development, hot-reload would create a new client on every save,
+  * exhausting the connection pool. This singleton prevents that.
+  *
+- * For 1K DAU readiness:
+- * - Connection pooling via ?connection_limit=20 on DATABASE_URL
+- * - Prisma Accelerate (optional) for edge caching
+- * - Prepared statements for frequently executed queries
+- * - Global findMany safety cap (see below) so a missing `take` can never load a
+- *   whole table. Routes that need a specific limit already pass `take`.
++ * Note: a global findMany cap via $extends was tried but Prisma's extended
++ * client types are heavy enough to OOM `tsc`/`next build` on large codebases,
++ * so query bounding is done per-route instead (and aggregation endpoints should
++ * use SQL aggregation — groupBy/_count — rather than findMany).
+  */
+ 
+ import { PrismaClient } from "@prisma/client";
+ 
+-/** Hard ceiling applied to any findMany that does not specify its own `take`. */
+-const DEFAULT_FIND_MANY_TAKE = 1000;
+-
+ const globalForPrisma = globalThis as unknown as {
+-  prisma: ReturnType<typeof createPrismaClient> | undefined;
++  prisma: PrismaClient | undefined;
+ };
+ 
+ function createPrismaClient() {
+-  // Log slow queries in development
+   const logLevel =
+     process.env.NODE_ENV === "development"
+       ? (["query", "error", "warn"] as const)
+       : (["error"] as const);
+ 
+-  const base = new PrismaClient({
++  return new PrismaClient({
+     log: logLevel.map((level) =>
+       level === "query" ? { emit: "event", level: "query" } : { emit: "stdout", level },
+     ),
+   });
+-
+-  if (process.env.NODE_ENV === "development") {
+-    base.$on(
+-      "query" as never,
+-      ((e: { query: string; duration: number }) => {
+-        if (e.duration > 500) {
+-          console.warn(`[prisma] Slow query (${e.duration}ms): ${e.query.slice(0, 200)}`);
+-        }
+-      }) as never,
+-    );
+-  }
+-
+-  // Safety net: cap any unbounded findMany. Aggregation endpoints that need the
+-  // full set should use SQL aggregation (groupBy/_count/etc.), not findMany.
+-  return base.$extends({
+-    query: {
+-      $allOperations: async ({ args, query, operation }) => {
+-        if (operation === "findMany" && (args as { take?: number }).take === undefined) {
+-          (args as { take?: number }).take = DEFAULT_FIND_MANY_TAKE;
+-        }
+-        return query(args);
+-      },
+-    },
+-  });
+ }
+ 
+ export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+ 
+ if (process.env.NODE_ENV === "development") {
+   globalForPrisma.prisma = prisma;
++
++  prisma.$on(
++    "query" as never,
++    ((e: { query: string; duration: number }) => {
++      if (e.duration > 500) {
++        console.warn(`[prisma] Slow query (${e.duration}ms): ${e.query.slice(0, 200)}`);
++      }
++    }) as never,
++  );
+ }
+diff --git a/tsconfig.json b/tsconfig.json
+index a852d30..ec6a23e 100644
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -31,5 +31,5 @@
+     ".next/types/**/*.ts",
+     ".next/dev/types/**/*.ts"
+   ],
+-  "exclude": ["node_modules", "_backups"]
++  "exclude": ["node_modules", "_backups", ".history", ".next", "*.patch"]
+ }

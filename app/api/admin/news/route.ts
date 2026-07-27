@@ -22,6 +22,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const posts = await prisma.newsPost.findMany({
+    take: 500,
     where: { schoolId: user.schoolId },
     orderBy: { createdAt: "desc" },
     include: { author: { select: { name: true } } },

@@ -17,6 +17,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const requests = await prisma.attendanceCorrectionRequest.findMany({
+    take: 500,
     where: {
       schoolId: user.schoolId,
     },
