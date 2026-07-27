@@ -14,7 +14,7 @@ async function main() {
   const school = await getSchool();
   const passwordHash = await bcrypt.hash(password, 12);
   await prisma.user.upsert({
-    where: { email },
+    where: { schoolId_email: { schoolId: school.id, email } },
     update: {
       name,
       role: UserRole.ADMIN,

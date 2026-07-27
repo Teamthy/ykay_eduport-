@@ -5,6 +5,7 @@ import { sendPasswordResetEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { resolveTenantFromHost } from "@/lib/tenant";
 
 const schema = z.object({ email: z.string().trim().toLowerCase().email() });
 const generic = { message: "If this email is registered, you will receive a reset link shortly." };
@@ -31,7 +32,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(generic);
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const host = request.headers.get("host");
+    const tenant = await resolveTenantFromHost(host);
+    const user = tenant
+      ? await prisma.user.findFirst({ where: { email, schoolId: tenant.id } })
+      : null;
     if (user && user.isActive && !user.isSuspended) {
       const token = randomBytes(32).toString("base64url");
       await prisma.passwordResetToken.create({

@@ -30,7 +30,9 @@ export async function POST(request: NextRequest) {
       { error: "This activation link is invalid or expired." },
       { status: 410 },
     );
-  const exists = await prisma.user.findUnique({ where: { email: invite.email } });
+  const exists = await prisma.user.findFirst({
+    where: { email: invite.email, schoolId: invite.schoolId },
+  });
   if (exists)
     return NextResponse.json(
       { error: "An account already exists for this email." },

@@ -11,9 +11,9 @@ async function main() {
   const password = provided || `Dev-${crypto.randomBytes(9).toString("base64url")}`;
   const passwordHash = await bcrypt.hash(password, 12);
 
-  const existing = await prisma.user.findUnique({ where: { email } });
+  const existing = await prisma.user.findFirst({ where: { email, schoolId: school.id } });
   await prisma.user.upsert({
-    where: { email },
+    where: { schoolId_email: { schoolId: school.id, email } },
     update: {
       role: UserRole.SUPER_ADMIN,
       isActive: true,

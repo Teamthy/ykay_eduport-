@@ -197,7 +197,7 @@ async function main() {
 
   for (const userDef of USERS) {
     const user = await prisma.user.upsert({
-      where: { email: userDef.email },
+      where: { schoolId_email: { schoolId: school.id, email: userDef.email } },
       update: {
         name: userDef.name,
         role: userDef.role,
@@ -372,7 +372,7 @@ async function main() {
       parentId = userId;
     } else {
       const parentUser = await prisma.user.upsert({
-        where: { email: parentEmail },
+        where: { schoolId_email: { schoolId: school.id, email: parentEmail } },
         update: {
           name: parentDef.parentName,
           role: UserRole.PARENT,

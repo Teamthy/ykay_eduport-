@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
     );
   if (schoolClass.capacity !== null && schoolClass._count.students >= schoolClass.capacity)
     return NextResponse.json({ error: "This class is at capacity." }, { status: 409 });
-  const existingParent = await prisma.user.findUnique({
-    where: { email: application.parentEmail },
+  const existingParent = await prisma.user.findFirst({
+    where: { email: application.parentEmail, schoolId: user.schoolId },
   });
   const number = await uniqueStudentNumber(user.schoolId);
   const displayName = [application.firstName, application.middleName, application.lastName]

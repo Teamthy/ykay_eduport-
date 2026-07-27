@@ -197,7 +197,7 @@ model School {
 model User {
   id                 String    @id @default(cuid())
   schoolId           String
-  email              String    @unique
+  email              String
   name               String
   role               UserRole
   passwordHash       String
@@ -223,6 +223,7 @@ model User {
   newsPosts                   NewsPost[]
 
   @@index([schoolId, role])
+  @@unique([schoolId, email])
 }
 
 model TeacherProfile {
