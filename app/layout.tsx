@@ -7,6 +7,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import CookieConsent from "@/components/CookieConsent";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import DemoIndicator from "@/components/DemoIndicator";
+import OfflineIndicator from "@/components/OfflineIndicator";
 
 const anton = Anton({
   subsets: ["latin"],
@@ -130,6 +131,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <CookieConsent />
               <WhatsAppFloat />
               <DemoIndicator />
+              <OfflineIndicator />
             </ToastProvider>
           </AuthProvider>
         </ThemeProvider>
