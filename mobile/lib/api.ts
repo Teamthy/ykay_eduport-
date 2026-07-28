@@ -198,3 +198,9 @@ export const parentApi = {
       body: JSON.stringify({ invoiceId, method, ...opts }),
     }),
 };
+
+// ── Admin API ─────────────────────────────────────────────
+
+export const adminApi = {
+  dashboard: () => api("/api/admin/dashboard"),
+};

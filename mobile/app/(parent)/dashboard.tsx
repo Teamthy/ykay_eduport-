@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-
 import { parentApi } from "@/lib/api";
 import { useRouter } from "expo-router";
 import { CreditCard, Calendar, TrendingUp, Bell, ChevronRight, Users, GraduationCap, FileText, Megaphone, Mail } from "lucide-react-native";
+import { YkayLogo } from "@/components/YkayLogo";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 
@@ -37,6 +38,8 @@ export default function ParentDashboard() {
       contentContainerStyle={{ padding: 20, paddingTop: 60 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#2840E8" />}
     >
+      <YkayLogo size={32} textSize={15} />
+
       <Text style={{ color: "#ffffff60", fontSize: 14 }}>{greeting},</Text>
       <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold", marginTop: 2, marginBottom: 24 }}>
         {data?.parent?.displayName || "Parent"}

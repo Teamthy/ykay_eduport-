@@ -1,4 +1,4 @@
-import { Stack, Redirect } from "expo-router";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View, Text } from "react-native";
@@ -31,11 +31,13 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: theme.colors.bgPrimary },
         }}
       >
-        <Stack.Screen name="index" redirect={!!user} />
+        <Stack.Screen name="index" />
+        <Stack.Screen name="landing" redirect={!!user} />
         <Stack.Screen name="login" redirect={!!user} />
         <Stack.Screen name="(student)" />
         <Stack.Screen name="(teacher)" />
         <Stack.Screen name="(parent)" />
+        <Stack.Screen name="(admin)" />
         <Stack.Screen name="exam-runner" />
         <Stack.Screen name="announcements" />
         <Stack.Screen name="pay" />

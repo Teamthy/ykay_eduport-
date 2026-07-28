@@ -16,7 +16,7 @@ import { theme } from "@/lib/theme";
 import { Mail, Lock, ArrowRight, GraduationCap, ShieldCheck } from "lucide-react-native";
 
 /** Only school members get a mobile experience. Platform operators use the web. */
-const ALLOWED_ROLES = ["STUDENT", "IT_STUDENT", "PARENT", "TEACHER", "HOD"];
+const ALLOWED_ROLES = ["STUDENT", "IT_STUDENT", "PARENT", "TEACHER", "HOD", "ADMIN"];
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -47,6 +47,8 @@ export default function LoginScreen() {
         router.replace("/(teacher)/dashboard");
       } else if (user.role === "PARENT") {
         router.replace("/(parent)/dashboard");
+      } else if (user.role === "ADMIN") {
+        router.replace("/(admin)/dashboard");
       } else {
         router.replace("/(student)/dashboard");
       }

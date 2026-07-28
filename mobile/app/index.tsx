@@ -2,6 +2,7 @@ import { Redirect } from "expo-router";
 import { getMe, type SessionUser } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
+import { theme } from "@/lib/theme";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -16,13 +17,13 @@ export default function Home() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#00072D" }}>
-        <ActivityIndicator size="large" color="#123499" />
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.colors.bgPrimary }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
-  if (!user) return <Redirect href="/login" />;
+  if (!user) return <Redirect href="/landing" />;
 
   const role = user.role;
   const href =
@@ -30,7 +31,9 @@ export default function Home() {
       ? "/(teacher)/dashboard"
       : role === "PARENT"
         ? "/(parent)/dashboard"
-        : "/(student)/dashboard";
+        : role === "ADMIN"
+          ? "/(admin)/dashboard"
+          : "/(student)/dashboard";
 
   return <Redirect href={href} />;
 }

@@ -14,6 +14,7 @@ import {
   Users,
   CreditCard,
 } from "lucide-react-native";
+import { YkayLogo } from "@/components/YkayLogo";
 
 export default function StudentDashboard() {
   const router = useRouter();
@@ -45,6 +46,8 @@ export default function StudentDashboard() {
       contentContainerStyle={{ padding: 20, paddingTop: 60 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#2840E8" />}
     >
+      <YkayLogo size={32} textSize={15} />
+
       {/* Greeting + bell */}
       <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
         <View style={{ flex: 1 }}>
