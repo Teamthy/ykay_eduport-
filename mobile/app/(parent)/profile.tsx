@@ -1,64 +1,62 @@
 import { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { logout, getMe } from "@/lib/api";
-import { theme } from "@/lib/theme";
-import { YkayLogo } from "@/components/YkayLogo";
+import { useTheme } from "@/src/theme";
+import { Card } from "@/src/components/cards";
+import { H2, Body, Caption, Label } from "@/src/components/typography";
+import { Column } from "@/src/components/layout";
+import { AppHeader } from "@/src/components/navigation";
+import { Button } from "@/src/components/buttons";
 import { Mail, User, Users, LogOut } from "lucide-react-native";
 
 export default function ParentProfile() {
   const router = useRouter();
+  const { colors, spacing } = useTheme();
   const [user, setUser] = useState<any>(null);
 
-  useEffect(() => {
-    getMe().then((res) => setUser(res?.user));
-  }, []);
+  useEffect(() => { getMe().then((res) => setUser(res?.user)); }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.bgPrimary, padding: theme.spacing.lg, paddingTop: 56 }}>
-      <YkayLogo size={32} textSize={15} />
-      <Text style={{ color: theme.colors.textPrimary, fontSize: 24, fontWeight: "bold", marginTop: theme.spacing.xxl, marginBottom: theme.spacing.xxl }}>Profile</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }}>
+      <AppHeader />
+      <H2 style={{ marginTop: spacing.lg, marginBottom: spacing.xxl }}>Profile</H2>
 
-      <View style={{ alignItems: "center", marginBottom: theme.spacing.xxl }}>
-        <View style={{ width: 80, height: 80, borderRadius: theme.radius.xl, backgroundColor: theme.colors.primary, justifyContent: "center", alignItems: "center" }}>
-          <Text style={{ color: theme.colors.textPrimary, fontSize: 32, fontWeight: "bold" }}>{user?.name?.charAt(0)?.toUpperCase() || "P"}</Text>
+      <View style={{ alignItems: "center", marginBottom: spacing.xxl }}>
+        <View style={{ width: 80, height: 80, borderRadius: 22, backgroundColor: colors.brand.green, justifyContent: "center", alignItems: "center" }}>
+          <H2 style={{ color: colors.text.inverse, fontSize: 32 }}>{user?.name?.charAt(0)?.toUpperCase() || "P"}</H2>
         </View>
-        <Text style={{ color: theme.colors.textPrimary, fontSize: 20, fontWeight: "bold", marginTop: theme.spacing.sm }}>{user?.name}</Text>
-        <Text style={{ color: theme.colors.textFaint, fontSize: 13 }}>Parent / Guardian</Text>
+        <H2 style={{ fontSize: 20, marginTop: spacing.sm }}>{user?.name}</H2>
+        <Caption>Parent / Guardian</Caption>
       </View>
 
-      <View style={{ gap: theme.spacing.sm, marginBottom: theme.spacing.xxl }}>
-        <InfoRow icon={<Mail size={18} color={theme.colors.accent} />} label="Email" value={user?.email || ""} />
-        <InfoRow icon={<User size={18} color={theme.colors.accent} />} label="Role" value="Parent" />
-        <InfoRow icon={<Users size={18} color={theme.colors.accent} />} label="Account" value={user?.id?.slice(0, 12) + "…" || ""} />
-      </View>
+      <Column gap={spacing.sm} style={{ marginBottom: spacing.xxl }}>
+        <InfoRow icon={<Mail size={18} color={colors.brand.greenLight} />} label="Email" value={user?.email || ""} />
+        <InfoRow icon={<User size={18} color={colors.brand.greenLight} />} label="Role" value="Parent" />
+      </Column>
 
-      <Text style={{ color: theme.colors.textFaint, fontSize: 12, fontWeight: "700", marginBottom: theme.spacing.xs + 2, letterSpacing: 1 }}>LINKED WARDS</Text>
-      <View style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radius.sm + 2, padding: theme.spacing.sm + 2, marginBottom: theme.spacing.xxl }}>
-        <Text style={{ color: theme.colors.textSecondary, fontSize: 13 }}>Your linked children appear on the Home screen. Contact the school to add or update a ward.</Text>
-      </View>
+      <Label style={{ marginBottom: spacing.xs + 2 }}>Linked Wards</Label>
+      <Card variant="default" padding={spacing.sm + 2} style={{ marginBottom: spacing.xxl }}>
+        <Body>Your linked children appear on the Home screen. Contact the school to add or update a ward.</Body>
+      </Card>
 
-      <TouchableOpacity
-        onPress={async () => { await logout(); router.replace("/login"); }}
-        style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: theme.spacing.xs, padding: theme.spacing.md, backgroundColor: `${theme.colors.danger}15`, borderRadius: theme.radius.md }}
-      >
-        <LogOut size={18} color={theme.colors.danger} />
-        <Text style={{ color: theme.colors.danger, fontWeight: "700", fontSize: 15 }}>Sign Out</Text>
-      </TouchableOpacity>
-
-      <Text style={{ color: theme.colors.borderStrong, fontSize: 11, textAlign: "center", marginTop: theme.spacing.xxl }}>Ykay College · Parent Portal</Text>
-    </View>
+      <Button variant="ghost" fullWidth leftIcon={<LogOut size={18} color={colors.danger} />} onPress={async () => { await logout(); router.replace("/login"); }} style={{ backgroundColor: colors.status.errorBg }}>
+        <Body tone="primary" style={{ color: colors.danger }}>Sign Out</Body>
+      </Button>
+      <Caption style={{ textAlign: "center", marginTop: spacing.xxl }}>Ykay College · Parent Portal</Caption>
+    </ScrollView>
   );
 }
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  const { spacing } = useTheme();
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.sm, backgroundColor: theme.colors.surface, borderRadius: theme.radius.sm + 2, padding: theme.spacing.sm + 2 }}>
+    <Card variant="default" padding={spacing.sm + 2} style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
       {icon}
-      <View>
-        <Text style={{ color: theme.colors.textFaint, fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>{label}</Text>
-        <Text style={{ color: theme.colors.textPrimary, fontSize: 14, fontWeight: "500" }}>{value}</Text>
-      </View>
-    </View>
+      <Column>
+        <Caption>{label}</Caption>
+        <Body tone="primary" style={{ fontFamily: "DM Sans Medium" }}>{value}</Body>
+      </Column>
+    </Card>
   );
 }

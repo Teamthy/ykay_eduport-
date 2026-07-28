@@ -2,39 +2,18 @@
  * Ykay College — mobile API client.
  *
  * Single-tenant client for the Ykay College portal. Talks to the SAME backend
- * as the web app. Uses expo-secure-store for the JWT session cookie
- * (equivalent to the browser's httpOnly cookie).
+ * as the web app. Offline-aware: reads go through a network-first cache
+ * (cachedGet) and offline-safe writes are queued (apiQueued → queuedWrite).
  *
- * Offline-aware: reads go through a network-first cache (cachedGet) and
- * offline-safe writes are queued (apiQueued → queuedWrite).
+ * Shared HTTP primitives live in lib/http (imported here and by the offline
+ * cache) to avoid a require cycle.
  */
-import * as SecureStore from "expo-secure-store";
+import { API_BASE, getToken, setToken, clearToken, authHeaders, type SessionUser } from "@/lib/http";
 import { cachedGet, queuedWrite } from "@/lib/offline/cache";
 
-/** Point this at the deployed Ykay College backend (or localhost:3000 for dev). */
-export const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-
-const SESSION_KEY = "ykay_session";
-
-export async function getToken(): Promise<string | null> {
-  return SecureStore.getItemAsync(SESSION_KEY);
-}
-
-export async function setToken(token: string): Promise<void> {
-  await SecureStore.setItemAsync(SESSION_KEY, token);
-}
-
-export async function clearToken(): Promise<void> {
-  await SecureStore.deleteItemAsync(SESSION_KEY);
-}
-
-export interface SessionUser {
-  id: string;
-  schoolId: string;
-  role: string;
-  name: string;
-  email: string;
-}
+// Re-export so existing `import { API_BASE, getToken, ... } from "@/lib/api"` keeps working.
+export { API_BASE, getToken, setToken, clearToken };
+export type { SessionUser };
 
 export async function api<T = unknown>(
   path: string,
@@ -82,7 +61,6 @@ export async function login(
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Login failed");
 
-  // Extract the session token from Set-Cookie header
   const setCookie = res.headers.get("set-cookie") || "";
   const tokenMatch = setCookie.match(/ykay_session=([^;]+)/);
   const token = tokenMatch?.[1] || "";
@@ -122,15 +100,9 @@ export const studentApi = {
   announcements: () => api("/api/student/announcements"),
   teachers: () => api("/api/student/teachers"),
 
-  /** Start (or resume) an exam attempt — returns attempt + questions (online only). */
-  startExam: (examId: string) =>
-    api(`/api/student/exams/${examId}/attempt`, { method: "POST" }),
-
-  /** Autosave answers — queued if offline. */
+  startExam: (examId: string) => api(`/api/student/exams/${examId}/attempt`, { method: "POST" }),
   saveExam: (examId: string, attemptId: string, answers: ExamAnswer[]) =>
     apiQueued(`/api/student/exams/${examId}/attempt`, "PATCH", { attemptId, action: "SAVE", answers }),
-
-  /** Submit the attempt — queued if offline, replayed on reconnect. */
   submitExam: (examId: string, attemptId: string, answers: ExamAnswer[]) =>
     apiQueued(`/api/student/exams/${examId}/attempt`, "PATCH", { attemptId, action: "SUBMIT", answers }),
 };
@@ -146,7 +118,6 @@ export const teacherApi = {
   announcements: () => api("/api/teacher/announcements"),
   messages: () => api("/api/teacher/messages"),
 
-  // ── Attendance register ──
   attendance: (classId?: string, date?: string) => {
     const p = new URLSearchParams();
     if (classId) p.set("classId", classId);
@@ -163,7 +134,6 @@ export const teacherApi = {
     entries: { studentProfileId: string; status: string; note?: string | null }[];
   }) => apiQueued("/api/teacher/attendance/register", "POST", data),
 
-  // ── Gradebook ──
   gradebook: (assignmentId?: string) =>
     api("/api/teacher/gradebook" + (assignmentId ? `?assignmentId=${assignmentId}` : "")),
   saveGradebook: (assignmentId: string, action: "SAVE" | "SUBMIT", scores: any[]) =>
@@ -187,7 +157,6 @@ export const parentApi = {
   },
   events: () => api("/api/parent/events"),
   messages: () => api("/api/parent/messages"),
-  /** Create a Paystack checkout or bank-transfer intent. */
   pay: (
     invoiceId: string,
     method: "PAYSTACK" | "BANK_TRANSFER",

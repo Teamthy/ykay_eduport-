@@ -1,120 +1,99 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
+import { View, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import { parentApi } from "@/lib/api";
-import { theme } from "@/lib/theme";
-import { Award, FileText } from "lucide-react-native";
+import { useTheme } from "@/src/theme";
+import { Card } from "@/src/components/cards";
+import { H2, H3, Body, Caption, Label } from "@/src/components/typography";
+import { Column } from "@/src/components/layout";
+import { EmptyState } from "@/src/components/feedback";
+import { bodyFont } from "@/src/theme/typography";
+import { FileText, Award } from "lucide-react-native";
 
 export default function ParentReportCards() {
+  const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [childId, setChildId] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [termId, setTermId] = useState("");
 
   async function load(id?: string) {
-    try {
-      const res = await parentApi.reportCards(id || undefined);
-      setData(res);
-      if (!id) setChildId(res?.selectedChild?.id || "");
-      setTermId(res?.reports?.[0]?.id || "");
-    } catch {
-    } finally {
-      setRefreshing(false);
-    }
+    try { const res = await parentApi.reportCards(id || undefined); setData(res); if (!id) setChildId(res?.selectedChild?.id || ""); setTermId(res?.reports?.[0]?.id || ""); } catch {} finally { setRefreshing(false); }
   }
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  function selectChild(id: string) {
-    setChildId(id);
-    load(id);
-  }
+  useEffect(() => { load(); }, []);
+  function selectChild(id: string) { setChildId(id); load(id); }
 
   const children = data?.children || [];
   const reports = data?.reports || [];
   const selected = reports.find((r: any) => r.id === termId) || reports[0];
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }}
-      contentContainerStyle={{ padding: theme.spacing.lg, paddingTop: 56 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(childId); }} tintColor={theme.colors.accent} />}
-    >
-      <Text style={{ color: theme.colors.textPrimary, fontSize: 24, fontWeight: "bold", marginBottom: theme.spacing.md }}>Report Cards</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(childId); }} tintColor={colors.brand.greenLight} />}>
+      <H2 style={{ marginBottom: spacing.md }}>Report Cards</H2>
 
       {children.length > 1 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: theme.spacing.sm + 2 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.sm + 2 }}>
           {children.map((c: any) => (
-            <TouchableOpacity key={c.id} onPress={() => selectChild(c.id)} style={{ backgroundColor: childId === c.id ? theme.colors.primary : theme.colors.surface, borderRadius: 20, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.xs + 2, marginRight: theme.spacing.xs }}>
-              <Text style={{ color: theme.colors.textPrimary, fontSize: 13, fontWeight: "600" }}>{c.displayName}</Text>
+            <TouchableOpacity key={c.id} onPress={() => selectChild(c.id)} style={{ backgroundColor: childId === c.id ? colors.brand.green : colors.background.elevated, borderRadius: 20, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, marginRight: spacing.sm }}>
+              <Body tone={childId === c.id ? "inverse" : "primary"} style={{ fontFamily: bodyFont("semibold") }}>{c.displayName}</Body>
             </TouchableOpacity>
           ))}
         </ScrollView>
       )}
 
       {reports.length > 1 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: theme.spacing.md }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.md }}>
           {reports.map((r: any) => (
-            <TouchableOpacity key={r.id} onPress={() => setTermId(r.id)} style={{ backgroundColor: termId === r.id ? theme.colors.primary : theme.colors.surface, borderRadius: 20, paddingHorizontal: theme.spacing.sm + 2, paddingVertical: theme.spacing.xs + 1, marginRight: theme.spacing.xs }}>
-              <Text style={{ color: theme.colors.textPrimary, fontSize: 12, fontWeight: "600" }}>{r.termLabel} {r.sessionLabel}</Text>
+            <TouchableOpacity key={r.id} onPress={() => setTermId(r.id)} style={{ backgroundColor: termId === r.id ? colors.brand.green : colors.background.elevated, borderRadius: 20, paddingHorizontal: spacing.sm + 2, paddingVertical: spacing.xs + 2, marginRight: spacing.sm }}>
+              <Body tone={termId === r.id ? "inverse" : "primary"} style={{ fontFamily: bodyFont("semibold") }}>{r.termLabel} {r.sessionLabel}</Body>
             </TouchableOpacity>
           ))}
         </ScrollView>
       )}
 
       {selected ? (
-        <View>
-          <View style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radius.lg, padding: theme.spacing.md + 2, marginBottom: theme.spacing.md + 2 }}>
+        <Column gap={spacing.md}>
+          <Card variant="bordered">
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
               <Mini label="Total" value={String(selected.overallTotal ?? "—")} />
               <Mini label="Average" value={String(selected.overallAverage ?? "—")} />
-              <Mini label="Grade" value={selected.overallGrade || "—"} color={theme.colors.accent} />
+              <Mini label="Grade" value={selected.overallGrade || "—"} color={colors.brand.greenLight} />
             </View>
             {selected.classPosition ? (
-              <View style={{ flexDirection: "row", gap: theme.spacing.xs, alignItems: "center", marginTop: theme.spacing.sm + 2 }}>
-                <Award size={16} color={theme.colors.accent} />
-                <Text style={{ color: theme.colors.textSecondary, fontSize: 13 }}>Position: {selected.classPosition}</Text>
+              <View style={{ flexDirection: "row", gap: spacing.xs, alignItems: "center", marginTop: spacing.sm + 2 }}>
+                <Award size={16} color={colors.brand.greenLight} />
+                <Body>Position: {selected.classPosition}</Body>
               </View>
             ) : null}
-          </View>
+          </Card>
 
-          <Text style={{ color: theme.colors.textFaint, fontSize: 12, fontWeight: "700", marginBottom: theme.spacing.xs + 2, letterSpacing: 1 }}>SUBJECTS</Text>
-          {selected.subjects?.map((s: any, i: number) => (
-            <View key={i} style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radius.sm + 2, padding: theme.spacing.sm + 2, marginBottom: theme.spacing.xs, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: theme.colors.textPrimary, fontSize: 14, fontWeight: "600" }}>{s.subject}</Text>
-                <Text style={{ color: theme.colors.textGhost, fontSize: 11, marginTop: 2 }}>CA: {s.ca1 + s.ca2} · Exam: {s.exam}</Text>
-              </View>
-              <View style={{ alignItems: "flex-end" }}>
-                <Text style={{ color: theme.colors.textPrimary, fontSize: 18, fontWeight: "bold" }}>{s.total}</Text>
-                <Text style={{ color: theme.colors.accent, fontSize: 12, fontWeight: "600" }}>{s.grade}</Text>
-              </View>
-            </View>
-          ))}
+          <Column gap={spacing.xs}>
+            <Label>Subjects</Label>
+            {selected.subjects?.map((s: any, i: number) => (
+              <Card key={i} variant="default" padding={14} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                <Column style={{ flex: 1 }}>
+                  <Body tone="primary" style={{ fontFamily: bodyFont("semibold") }}>{s.subject}</Body>
+                  <Caption style={{ marginTop: 2 }}>CA: {s.ca1 + s.ca2} · Exam: {s.exam}</Caption>
+                </Column>
+                <Column style={{ alignItems: "flex-end" }}>
+                  <H3 style={{ fontSize: 18 }}>{s.total}</H3>
+                  <Caption style={{ color: colors.brand.greenLight }}>{s.grade}</Caption>
+                </Column>
+              </Card>
+            ))}
+          </Column>
 
           {selected.classTeacherRemark ? (
-            <View style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radius.sm + 2, padding: theme.spacing.sm + 2, marginTop: theme.spacing.sm }}>
-              <Text style={{ color: theme.colors.textFaint, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Teacher's Remark</Text>
-              <Text style={{ color: theme.colors.textSecondary, fontSize: 13 }}>{selected.classTeacherRemark}</Text>
-            </View>
+            <Card variant="default" padding={14}><Label>Teacher's Remark</Label><Body style={{ marginTop: 6 }}>{selected.classTeacherRemark}</Body></Card>
           ) : null}
-        </View>
+        </Column>
       ) : (
-        <View style={{ alignItems: "center", paddingVertical: 60 }}>
-          <FileText size={48} color={theme.colors.borderStrong} />
-          <Text style={{ color: theme.colors.textGhost, marginTop: theme.spacing.sm }}>No report cards available</Text>
-        </View>
+        <EmptyState icon={<FileText size={48} color={colors.border.strong} />} title="No report cards available" />
       )}
     </ScrollView>
   );
 }
 
-function Mini({ label, value, color = "#fff" }: { label: string; value: string; color?: string }) {
-  return (
-    <View>
-      <Text style={{ color: theme.colors.textGhost, fontSize: 10, textTransform: "uppercase", letterSpacing: 1 }}>{label}</Text>
-      <Text style={{ color, fontSize: 26, fontWeight: "bold", marginTop: 2 }}>{value}</Text>
-    </View>
-  );
+function Mini({ label, value, color }: { label: string; value: string; color?: string }) {
+  const { colors } = useTheme();
+  return (<View><Caption>{label}</Caption><H2 style={{ color: color ?? colors.text.primary, fontSize: 26, marginTop: 2 }}>{value}</H2></View>);
 }

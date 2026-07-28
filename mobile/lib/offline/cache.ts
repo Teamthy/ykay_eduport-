@@ -1,13 +1,8 @@
 /**
  * Offline read-cache + write-queue + sync, with an inferred online flag.
- *
- * - Reads try the network first; on network failure they fall back to the
- *   cached response (so screens render saved data with no connection).
- * - Offline-safe writes are queued and replayed (FIFO) when connectivity
- *   returns. The "online" state is inferred from request outcomes, so this
- *   needs no extra network-detection dependency.
+ * Imports shared primitives from lib/http (NOT lib/api) to avoid a cycle.
  */
-import { API_BASE, getToken } from "@/lib/api";
+import { API_BASE, authHeaders } from "@/lib/http";
 import { addQueue, getCache, getQueue, removeQueue, setCache, queueCount } from "./db";
 
 // ── Online state (inferred) ──────────────────────────────────────────────
@@ -41,20 +36,12 @@ async function refreshPending() {
   emit();
 }
 
-async function authHeaders(): Promise<Record<string, string>> {
-  const token = await getToken();
-  const h: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) h["Cookie"] = `ykay_session=${token}`;
-  return h;
-}
-
 // ── Read-through cache ────────────────────────────────────────────────────
 export async function cachedGet<T = unknown>(path: string): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${API_BASE}${path}`, { headers: await authHeaders() });
   } catch {
-    // network failure → offline; serve cache if we have it
     setOnline(false);
     const cached = await getCache<T>(path);
     if (cached) return cached;
@@ -84,7 +71,6 @@ export async function queuedWrite<T = unknown>(
       body: JSON.stringify(body ?? {}),
     });
   } catch {
-    // offline → queue and report success
     setOnline(false);
     await addQueue(method, path, body);
     await refreshPending();
@@ -114,14 +100,14 @@ export async function flushQueue(): Promise<void> {
           body: item.body || undefined,
         });
         if (res.ok || res.status === 409) {
-          await removeQueue(item.id); // succeeded (or already done server-side)
+          await removeQueue(item.id);
         } else if (res.status >= 400 && res.status < 500) {
-          await removeQueue(item.id); // bad request — drop to avoid retry storm
+          await removeQueue(item.id);
         } else {
-          break; // 5xx → server troubled; stop and retry later
+          break;
         }
       } catch {
-        break; // went offline again
+        break;
       }
     }
     await refreshPending();
