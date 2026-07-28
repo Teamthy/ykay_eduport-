@@ -4,8 +4,12 @@
  * Single-tenant client for the Ykay College portal. Talks to the SAME backend
  * as the web app. Uses expo-secure-store for the JWT session cookie
  * (equivalent to the browser's httpOnly cookie).
+ *
+ * Offline-aware: reads go through a network-first cache (cachedGet) and
+ * offline-safe writes are queued (apiQueued → queuedWrite).
  */
 import * as SecureStore from "expo-secure-store";
+import { cachedGet, queuedWrite } from "@/lib/offline/cache";
 
 /** Point this at the deployed Ykay College backend (or localhost:3000 for dev). */
 export const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
@@ -36,6 +40,11 @@ export async function api<T = unknown>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
+  // Reads go through the offline read-cache (network-first, cache fallback).
+  if (!options.method || options.method === "GET") {
+    return cachedGet<T>(path);
+  }
+  // Mutations (payments, login, exam start) are sent directly — never queued.
   const token = await getToken();
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
@@ -48,6 +57,15 @@ export async function api<T = unknown>(
   const data = await res.json();
   if (!res.ok) throw new Error((data as { error?: string }).error || "Request failed");
   return data as T;
+}
+
+/** Offline-safe write: queued and replayed automatically when back online. */
+export async function apiQueued<T = unknown>(
+  path: string,
+  method: string,
+  body: unknown,
+): Promise<T> {
+  return queuedWrite<T>(path, method, body);
 }
 
 // ── Auth ──────────────────────────────────────────────────
@@ -104,23 +122,17 @@ export const studentApi = {
   announcements: () => api("/api/student/announcements"),
   teachers: () => api("/api/student/teachers"),
 
-  /** Start (or resume) an exam attempt — returns attempt + questions. */
+  /** Start (or resume) an exam attempt — returns attempt + questions (online only). */
   startExam: (examId: string) =>
     api(`/api/student/exams/${examId}/attempt`, { method: "POST" }),
 
-  /** Autosave answers without submitting. */
+  /** Autosave answers — queued if offline. */
   saveExam: (examId: string, attemptId: string, answers: ExamAnswer[]) =>
-    api(`/api/student/exams/${examId}/attempt`, {
-      method: "PATCH",
-      body: JSON.stringify({ attemptId, action: "SAVE", answers }),
-    }),
+    apiQueued(`/api/student/exams/${examId}/attempt`, "PATCH", { attemptId, action: "SAVE", answers }),
 
-  /** Submit the attempt for grading. */
+  /** Submit the attempt — queued if offline, replayed on reconnect. */
   submitExam: (examId: string, attemptId: string, answers: ExamAnswer[]) =>
-    api(`/api/student/exams/${examId}/attempt`, {
-      method: "PATCH",
-      body: JSON.stringify({ attemptId, action: "SUBMIT", answers }),
-    }),
+    apiQueued(`/api/student/exams/${examId}/attempt`, "PATCH", { attemptId, action: "SUBMIT", answers }),
 };
 
 // ── Teacher API ───────────────────────────────────────────
@@ -149,13 +161,13 @@ export const teacherApi = {
     notes?: string | null;
     finalize?: boolean;
     entries: { studentProfileId: string; status: string; note?: string | null }[];
-  }) => api("/api/teacher/attendance/register", { method: "POST", body: JSON.stringify(data) }),
+  }) => apiQueued("/api/teacher/attendance/register", "POST", data),
 
   // ── Gradebook ──
   gradebook: (assignmentId?: string) =>
     api("/api/teacher/gradebook" + (assignmentId ? `?assignmentId=${assignmentId}` : "")),
   saveGradebook: (assignmentId: string, action: "SAVE" | "SUBMIT", scores: any[]) =>
-    api("/api/teacher/gradebook", { method: "POST", body: JSON.stringify({ assignmentId, action, scores }) }),
+    apiQueued("/api/teacher/gradebook", "POST", { assignmentId, action, scores }),
 };
 
 // ── Parent API ────────────────────────────────────────────

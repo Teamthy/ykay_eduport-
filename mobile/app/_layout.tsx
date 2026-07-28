@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, View, Text } from "react-native";
 import { getMe, type SessionUser } from "@/lib/api";
 import { theme } from "@/lib/theme";
+import OfflineIndicator from "@/components/OfflineIndicator";
 
 export default function RootLayout() {
   const [user, setUser] = useState<SessionUser | null | undefined>(undefined);
@@ -22,7 +23,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <View style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }}>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -46,6 +47,7 @@ export default function RootLayout() {
         <Stack.Screen name="parent-messages" />
         <Stack.Screen name="teacher-analytics" />
       </Stack>
-    </>
+      <OfflineIndicator />
+    </View>
   );
 }

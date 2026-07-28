@@ -145,6 +145,14 @@ export default function ExamRunner() {
         response,
       }));
       const res: any = await studentApi.submitExam(examIdRef.current, attemptIdRef.current, payload);
+      if (res?.queued) {
+        setResult({
+          message:
+            "You're offline — your answers are saved and will be submitted automatically when you reconnect.",
+        });
+        setPhase("done");
+        return;
+      }
       setResult(res);
       setPhase("done");
     } catch (e: any) {
