@@ -95,6 +95,11 @@ const redisLimiters: Record<string, Ratelimit | null> = redis
         limiter: Ratelimit.slidingWindow(5, "1 h"),
         prefix: "ykay:auth:pw-change",
       }),
+      signup: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(5, "1 h"),
+        prefix: "ykay:signup",
+      }),
     }
   : {};
 
