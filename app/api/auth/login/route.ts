@@ -87,10 +87,7 @@ export async function POST(request: NextRequest) {
         userAgent: ua,
         reason: "Account is suspended.",
       });
-      return NextResponse.json(
-        { error: "Your account has been suspended. Please contact the school administration." },
-        { status: 403 },
-      );
+      return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
     }
 
     // ── Account inactive ──────────────────────────────────────

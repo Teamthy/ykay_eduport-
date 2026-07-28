@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
       schoolId: user.schoolId,
       studentProfile: { currentClassId: classId },
     },
+    take: 500,
     orderBy: [{ generatedAt: "desc" }],
     include: {
       studentProfile: { select: { id: true, studentId: true, displayName: true } },

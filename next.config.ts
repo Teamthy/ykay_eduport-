@@ -48,6 +48,9 @@ const nextConfig: NextConfig = {
   // ── Power the X-Powered-By header ──────────────────────────
   poweredByHeader: false,
 
+  // ── Standalone output for Docker (traced minimal production image) ──
+  output: "standalone",
+
   // ── Performance optimizations for 1K DAU ──────────────────
   compress: true,
 
