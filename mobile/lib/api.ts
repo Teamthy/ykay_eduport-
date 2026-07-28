@@ -127,7 +127,34 @@ export const studentApi = {
 export const teacherApi = {
   dashboard: () => api("/api/teacher/dashboard"),
   students: () => api("/api/teacher/students"),
+  roster: () => api("/api/teacher/class/roster"),
   profile: () => api("/api/teacher/profile"),
+  analytics: () => api("/api/teacher/analytics"),
+  announcements: () => api("/api/teacher/announcements"),
+  messages: () => api("/api/teacher/messages"),
+
+  // ── Attendance register ──
+  attendance: (classId?: string, date?: string) => {
+    const p = new URLSearchParams();
+    if (classId) p.set("classId", classId);
+    if (date) p.set("date", date);
+    const q = p.toString();
+    return api("/api/teacher/attendance/register" + (q ? `?${q}` : ""));
+  },
+  saveAttendance: (data: {
+    classId: string;
+    sessionDate: string;
+    periodKey?: string;
+    notes?: string | null;
+    finalize?: boolean;
+    entries: { studentProfileId: string; status: string; note?: string | null }[];
+  }) => api("/api/teacher/attendance/register", { method: "POST", body: JSON.stringify(data) }),
+
+  // ── Gradebook ──
+  gradebook: (assignmentId?: string) =>
+    api("/api/teacher/gradebook" + (assignmentId ? `?assignmentId=${assignmentId}` : "")),
+  saveGradebook: (assignmentId: string, action: "SAVE" | "SUBMIT", scores: any[]) =>
+    api("/api/teacher/gradebook", { method: "POST", body: JSON.stringify({ assignmentId, action, scores }) }),
 };
 
 // ── Parent API ────────────────────────────────────────────

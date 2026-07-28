@@ -38,6 +38,8 @@ export default function RootLayout() {
         <Stack.Screen name="exam-runner" />
         <Stack.Screen name="announcements" />
         <Stack.Screen name="pay" />
+        <Stack.Screen name="teacher-announcements" />
+        <Stack.Screen name="teacher-messages" />
       </Stack>
     </>
   );
