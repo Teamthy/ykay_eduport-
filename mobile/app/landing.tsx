@@ -1,83 +1,110 @@
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { useState } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { YkayLogo } from "@/components/YkayLogo";
 import { theme } from "@/lib/theme";
-import {
-  FileText,
-  CreditCard,
-  ClipboardCheck,
-  Calendar,
-  Bell,
-  ArrowRight,
-  ShieldCheck,
-} from "lucide-react-native";
+import { FileText, CreditCard, ClipboardCheck, ArrowRight } from "lucide-react-native";
+
+const SLIDES = [
+  {
+    icon: FileText,
+    title: "Results at your fingertips",
+    desc: "Termly report cards, grades, class positions and teacher remarks — anywhere, anytime.",
+  },
+  {
+    icon: CreditCard,
+    title: "Pay fees securely",
+    desc: "Settle school fees by card via Paystack, straight from your phone — no queues.",
+  },
+  {
+    icon: ClipboardCheck,
+    title: "Exams & attendance",
+    desc: "Take computer-based tests and track attendance. It even works offline.",
+  },
+];
 
 export default function LandingScreen() {
   const router = useRouter();
-
-  const features = [
-    { icon: FileText, title: "Results & Report Cards", desc: "Termly grades, positions and remarks." },
-    { icon: CreditCard, title: "Pay School Fees", desc: "Secure card payments via Paystack." },
-    { icon: ClipboardCheck, title: "Take Exams", desc: "Computer-based tests, right on your phone." },
-    { icon: Calendar, title: "Attendance", desc: "Track presence and get alerts." },
-    { icon: Bell, title: "Announcements", desc: "School news, events and messages." },
-  ];
+  const [i, setI] = useState(0);
+  const slide = SLIDES[i];
+  const Icon = slide.icon;
+  const last = i === SLIDES.length - 1;
 
   return (
     <LinearGradient colors={[...theme.gradient]} style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 24, paddingTop: 64, paddingBottom: 40 }}>
-        {/* Brand */}
-        <View style={{ alignItems: "center", marginBottom: 36 }}>
-          <YkayLogo size={64} textSize={26} />
-          <Text style={{ color: theme.colors.textMuted, fontSize: 13, marginTop: 14, letterSpacing: 1, textAlign: "center" }}>
-            Your school, in your pocket.
+      <View style={{ flex: 1, padding: 24, paddingTop: 60 }}>
+        {/* Brand + skip */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <YkayLogo size={36} textSize={16} />
+          <TouchableOpacity onPress={() => router.push("/login")}>
+            <Text style={{ color: theme.colors.textGhost, fontSize: 13, fontWeight: "600" }}>Skip</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Slide */}
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <View
+            style={{
+              width: 100,
+              height: 100,
+              borderRadius: 30,
+              backgroundColor: theme.colors.primary,
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 34,
+              shadowColor: theme.colors.accent,
+              shadowOpacity: 0.3,
+              shadowRadius: 20,
+              shadowOffset: { width: 0, height: 8 },
+              elevation: 10,
+            }}
+          >
+            <Icon size={48} color={theme.colors.textPrimary} />
+          </View>
+          <Text style={{ color: theme.colors.textPrimary, fontSize: 27, fontWeight: "800", textAlign: "center", lineHeight: 35 }}>
+            {slide.title}
+          </Text>
+          <Text style={{ color: theme.colors.textSecondary, fontSize: 15, textAlign: "center", marginTop: 14, lineHeight: 23, paddingHorizontal: 8 }}>
+            {slide.desc}
           </Text>
         </View>
 
-        {/* Hero card */}
-        <View style={{ backgroundColor: "rgba(10,36,114,0.55)", borderRadius: theme.radius.lg, padding: 22, borderWidth: 1, borderColor: theme.colors.border, marginBottom: 28 }}>
-          <Text style={{ color: theme.colors.textPrimary, fontSize: 22, fontWeight: "800", lineHeight: 30 }}>
-            One app for every member of the Ykay family.
-          </Text>
-          <Text style={{ color: theme.colors.textSecondary, fontSize: 14, marginTop: 10, lineHeight: 22 }}>
-            Students, parents and staff — manage results, fees, exams and attendance anywhere, even offline.
-          </Text>
-        </View>
-
-        {/* Features */}
-        <View style={{ gap: 12, marginBottom: 32 }}>
-          {features.map((f) => {
-            const Icon = f.icon;
-            return (
-              <View key={f.title} style={{ flexDirection: "row", alignItems: "center", gap: 14, backgroundColor: "rgba(5,22,80,0.6)", borderRadius: theme.radius.md, padding: 14 }}>
-                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: theme.colors.primary, justifyContent: "center", alignItems: "center" }}>
-                  <Icon size={20} color="#fff" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: theme.colors.textPrimary, fontSize: 15, fontWeight: "700" }}>{f.title}</Text>
-                  <Text style={{ color: theme.colors.textGhost, fontSize: 12, marginTop: 2 }}>{f.desc}</Text>
-                </View>
-              </View>
-            );
-          })}
+        {/* Dots */}
+        <View style={{ flexDirection: "row", justifyContent: "center", gap: 8, marginBottom: 26 }}>
+          {SLIDES.map((_, idx) => (
+            <View
+              key={idx}
+              style={{
+                width: idx === i ? 26 : 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: idx === i ? theme.colors.accent : theme.colors.borderStrong,
+              }}
+            />
+          ))}
         </View>
 
         {/* CTA */}
         <TouchableOpacity
-          onPress={() => router.push("/login")}
+          onPress={() => (last ? router.push("/login") : setI(i + 1))}
           activeOpacity={0.85}
-          style={{ backgroundColor: theme.colors.primary, borderRadius: theme.radius.md, paddingVertical: 17, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8 }}
+          style={{
+            backgroundColor: theme.colors.primary,
+            borderRadius: theme.radius.md,
+            paddingVertical: 17,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 8,
+          }}
         >
-          <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>Get Started</Text>
-          <ArrowRight size={18} color="#fff" />
+          <Text style={{ color: theme.colors.textPrimary, fontWeight: "700", fontSize: 16 }}>
+            {last ? "Get Started" : "Next"}
+          </Text>
+          {!last && <ArrowRight size={18} color={theme.colors.textPrimary} />}
         </TouchableOpacity>
-
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 22 }}>
-          <ShieldCheck size={13} color={theme.colors.textGhost} />
-          <Text style={{ color: theme.colors.textGhost, fontSize: 11 }}>For students, parents &amp; staff</Text>
-        </View>
-      </ScrollView>
+      </View>
     </LinearGradient>
   );
 }
