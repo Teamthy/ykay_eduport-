@@ -40,6 +40,11 @@ export default function RootLayout() {
         <Stack.Screen name="pay" />
         <Stack.Screen name="teacher-announcements" />
         <Stack.Screen name="teacher-messages" />
+        <Stack.Screen name="student-teachers" />
+        <Stack.Screen name="id-card" />
+        <Stack.Screen name="parent-events" />
+        <Stack.Screen name="parent-messages" />
+        <Stack.Screen name="teacher-analytics" />
       </Stack>
     </>
   );

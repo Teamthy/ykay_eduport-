@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import { teacherApi } from "@/lib/api";
 import { useRouter } from "expo-router";
-import { ClipboardCheck, BookOpen, Users, Bell, ChevronRight, Megaphone, Mail } from "lucide-react-native";
+import { ClipboardCheck, BookOpen, Users, Bell, ChevronRight, Megaphone, Mail, BarChart3 } from "lucide-react-native";
 
 export default function TeacherDashboard() {
   const router = useRouter();
@@ -62,6 +62,7 @@ export default function TeacherDashboard() {
         <ActionRow icon={<Users size={20} color="#2840E8" />} label="Class Roster" onPress={() => router.push("/(teacher)/students")} />
         <ActionRow icon={<Megaphone size={20} color="#2840E8" />} label="Announcements" onPress={() => router.push("/teacher-announcements")} />
         <ActionRow icon={<Mail size={20} color="#2840E8" />} label="Messages" onPress={() => router.push("/teacher-messages")} />
+        <ActionRow icon={<BarChart3 size={20} color="#2840E8" />} label="Analytics" onPress={() => router.push("/teacher-analytics")} />
       </View>
 
       {/* Assignments */}

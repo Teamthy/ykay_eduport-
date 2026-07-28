@@ -11,6 +11,8 @@ import {
   ChevronRight,
   ClipboardCheck,
   Bell,
+  Users,
+  CreditCard,
 } from "lucide-react-native";
 
 export default function StudentDashboard() {
@@ -79,6 +81,8 @@ export default function StudentDashboard() {
         <ActionRow icon={<ClipboardCheck size={20} color="#2840E8" />} label="Take Exam" onPress={() => router.push("/(student)/exams")} />
         <ActionRow icon={<Calendar size={20} color="#2840E8" />} label="My Attendance" onPress={() => router.push("/(student)/attendance")} />
         <ActionRow icon={<Bell size={20} color="#2840E8" />} label="Announcements" onPress={() => router.push("/announcements")} />
+        <ActionRow icon={<Users size={20} color="#2840E8" />} label="My Teachers" onPress={() => router.push("/student-teachers")} />
+        <ActionRow icon={<CreditCard size={20} color="#2840E8" />} label="ID Card" onPress={() => router.push("/id-card")} />
       </View>
 
       {/* Timetable preview */}

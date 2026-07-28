@@ -102,6 +102,7 @@ export const studentApi = {
   attendance: () => api("/api/student/attendance"),
   exams: () => api("/api/student/exams"),
   announcements: () => api("/api/student/announcements"),
+  teachers: () => api("/api/student/teachers"),
 
   /** Start (or resume) an exam attempt — returns attempt + questions. */
   startExam: (examId: string) =>

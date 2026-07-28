@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import { parentApi } from "@/lib/api";
 import { useRouter } from "expo-router";
-import { CreditCard, Calendar, TrendingUp, Bell, ChevronRight, Users, GraduationCap } from "lucide-react-native";
+import { CreditCard, Calendar, TrendingUp, Bell, ChevronRight, Users, GraduationCap, FileText, Megaphone, Mail } from "lucide-react-native";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 
@@ -117,6 +117,8 @@ export default function ParentDashboard() {
         <View style={{ gap: 8, marginBottom: 16 }}>
           <ActionRow icon={<FileText size={20} color="#2840E8" />} label="View Report Cards" onPress={() => router.push("/(parent)/report-cards")} />
           <ActionRow icon={<Calendar size={20} color="#2840E8" />} label="Attendance" onPress={() => router.push("/(parent)/attendance")} />
+          <ActionRow icon={<Megaphone size={20} color="#2840E8" />} label="Events" onPress={() => router.push("/parent-events")} />
+          <ActionRow icon={<Mail size={20} color="#2840E8" />} label="Messages" onPress={() => router.push("/parent-messages")} />
         </View>
       )}
 
