@@ -34,6 +34,8 @@ export default function RootLayout() {
         <Stack.Screen name="login" redirect={!!user} />
         <Stack.Screen name="(student)" />
         <Stack.Screen name="(teacher)" />
+        <Stack.Screen name="exam-runner" />
+        <Stack.Screen name="announcements" />
       </Stack>
     </>
   );

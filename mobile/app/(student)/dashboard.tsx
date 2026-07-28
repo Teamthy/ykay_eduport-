@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
-import { studentApi } from "@/lib/api";
-import { logout } from "@/lib/api";
+import { studentApi, logout } from "@/lib/api";
 import { useRouter } from "expo-router";
-import { Award, Calendar, TrendingUp, Clock, GraduationCap, ChevronRight } from "lucide-react-native";
+import {
+  Award,
+  Calendar,
+  TrendingUp,
+  Clock,
+  GraduationCap,
+  ChevronRight,
+  ClipboardCheck,
+  Bell,
+} from "lucide-react-native";
 
 export default function StudentDashboard() {
   const router = useRouter();
@@ -13,8 +21,7 @@ export default function StudentDashboard() {
 
   async function load() {
     try {
-      const res = await studentApi.dashboard();
-      setData(res);
+      setData(await studentApi.dashboard());
     } catch {
       // Offline or error — show cached/empty
     } finally {
@@ -23,7 +30,9 @@ export default function StudentDashboard() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
@@ -34,15 +43,23 @@ export default function StudentDashboard() {
       contentContainerStyle={{ padding: 20, paddingTop: 60 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#2840E8" />}
     >
-      {/* Greeting */}
-      <View style={{ marginBottom: 24 }}>
-        <Text style={{ color: "#ffffff60", fontSize: 14 }}>{greeting},</Text>
-        <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold", marginTop: 2 }}>
-          {data?.student?.displayName || "Student"}
-        </Text>
-        <Text style={{ color: "#ffffff40", fontSize: 13, marginTop: 4 }}>
-          {data?.student?.className || ""}
-        </Text>
+      {/* Greeting + bell */}
+      <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: "#ffffff60", fontSize: 14 }}>{greeting},</Text>
+          <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold", marginTop: 2 }}>
+            {data?.student?.displayName || "Student"}
+          </Text>
+          <Text style={{ color: "#ffffff40", fontSize: 13, marginTop: 4 }}>
+            {data?.student?.className || ""}
+          </Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => router.push("/announcements")}
+          style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: "#051650", justifyContent: "center", alignItems: "center" }}
+        >
+          <Bell size={20} color="#2840E8" />
+        </TouchableOpacity>
       </View>
 
       {/* Stats grid */}
@@ -59,8 +76,9 @@ export default function StudentDashboard() {
       </Text>
       <View style={{ gap: 8 }}>
         <ActionRow icon={<Award size={20} color="#2840E8" />} label="View Report Cards" onPress={() => router.push("/(student)/report-cards")} />
-        <ActionRow icon={<ClipboardCheckIcon />} label="Take Exam" onPress={() => router.push("/(student)/exams")} />
+        <ActionRow icon={<ClipboardCheck size={20} color="#2840E8" />} label="Take Exam" onPress={() => router.push("/(student)/exams")} />
         <ActionRow icon={<Calendar size={20} color="#2840E8" />} label="My Attendance" onPress={() => router.push("/(student)/attendance")} />
+        <ActionRow icon={<Bell size={20} color="#2840E8" />} label="Announcements" onPress={() => router.push("/announcements")} />
       </View>
 
       {/* Timetable preview */}
@@ -114,6 +132,3 @@ function ActionRow({ icon, label, onPress }: { icon: React.ReactNode; label: str
     </TouchableOpacity>
   );
 }
-
-// Avoid importing ClipboardCheck twice with different casing
-import { ClipboardCheck as ClipboardCheckIcon } from "lucide-react-native";

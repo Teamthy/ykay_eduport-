@@ -94,11 +94,32 @@ export async function getMe(): Promise<{ user: SessionUser } | null> {
 
 // ── Student API ───────────────────────────────────────────
 
+type ExamAnswer = { questionId: string; response: string | null };
+
 export const studentApi = {
   dashboard: () => api("/api/student/dashboard"),
   reportCards: () => api("/api/student/report-cards"),
   attendance: () => api("/api/student/attendance"),
   exams: () => api("/api/student/exams"),
+  announcements: () => api("/api/student/announcements"),
+
+  /** Start (or resume) an exam attempt — returns attempt + questions. */
+  startExam: (examId: string) =>
+    api(`/api/student/exams/${examId}/attempt`, { method: "POST" }),
+
+  /** Autosave answers without submitting. */
+  saveExam: (examId: string, attemptId: string, answers: ExamAnswer[]) =>
+    api(`/api/student/exams/${examId}/attempt`, {
+      method: "PATCH",
+      body: JSON.stringify({ attemptId, action: "SAVE", answers }),
+    }),
+
+  /** Submit the attempt for grading. */
+  submitExam: (examId: string, attemptId: string, answers: ExamAnswer[]) =>
+    api(`/api/student/exams/${examId}/attempt`, {
+      method: "PATCH",
+      body: JSON.stringify({ attemptId, action: "SUBMIT", answers }),
+    }),
 };
 
 // ── Teacher API ───────────────────────────────────────────
