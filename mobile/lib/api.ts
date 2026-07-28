@@ -134,7 +134,27 @@ export const teacherApi = {
 
 export const parentApi = {
   dashboard: () => api("/api/parent/dashboard"),
-  reportCards: () => api("/api/parent/report-cards"),
-  fees: () => api("/api/parent/fees"),
-  attendance: () => api("/api/parent/attendance"),
+  reportCards: (studentId?: string) =>
+    api("/api/parent/report-cards" + (studentId ? `?studentId=${studentId}` : "")),
+  fees: (studentId?: string) =>
+    api("/api/parent/fees" + (studentId ? `?studentId=${studentId}` : "")),
+  attendance: (studentId?: string, month?: string) => {
+    const p = new URLSearchParams();
+    if (studentId) p.set("studentId", studentId);
+    if (month) p.set("month", month);
+    const q = p.toString();
+    return api("/api/parent/attendance" + (q ? `?${q}` : ""));
+  },
+  events: () => api("/api/parent/events"),
+  messages: () => api("/api/parent/messages"),
+  /** Create a Paystack checkout or bank-transfer intent. */
+  pay: (
+    invoiceId: string,
+    method: "PAYSTACK" | "BANK_TRANSFER",
+    opts?: { amount?: number; transferReference?: string; transferDate?: string; narration?: string },
+  ) =>
+    api("/api/parent/fees/payment-intents", {
+      method: "POST",
+      body: JSON.stringify({ invoiceId, method, ...opts }),
+    }),
 };

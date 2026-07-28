@@ -1,15 +1,15 @@
 import { Redirect } from "expo-router";
-import { getMe } from "@/lib/api";
+import { getMe, type SessionUser } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<SessionUser | null>(null);
 
   useEffect(() => {
     getMe().then((res) => {
-      setIsLoggedIn(!!res?.user);
+      setUser(res?.user ?? null);
       setLoading(false);
     });
   }, []);
@@ -22,6 +22,15 @@ export default function Home() {
     );
   }
 
-  // Route to login or the appropriate portal based on role
-  return <Redirect href={isLoggedIn ? "/(student)/dashboard" : "/login"} />;
+  if (!user) return <Redirect href="/login" />;
+
+  const role = user.role;
+  const href =
+    role === "TEACHER" || role === "HOD"
+      ? "/(teacher)/dashboard"
+      : role === "PARENT"
+        ? "/(parent)/dashboard"
+        : "/(student)/dashboard";
+
+  return <Redirect href={href} />;
 }

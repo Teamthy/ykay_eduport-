@@ -30,7 +30,7 @@ export default function LoginScreen() {
       if (user.role === "TEACHER" || user.role === "HOD") {
         router.replace("/(teacher)/dashboard");
       } else if (user.role === "PARENT") {
-        router.replace("/(student)/dashboard"); // TODO: parent portal
+        router.replace("/(parent)/dashboard");
       } else {
         router.replace("/(student)/dashboard");
       }
