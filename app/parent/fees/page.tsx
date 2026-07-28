@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { cacheGet, cacheSet } from "@/lib/offline/db";
 import { useSearchParams } from "next/navigation";
 import { CreditCard, LoaderCircle, Receipt as ReceiptIcon, Building2 } from "lucide-react";
 import PortalTopbar from "@/components/PortalTopbar";
@@ -75,6 +76,7 @@ export default function ParentFeesPage() {
   const [data, setData] = useState<FeesResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isStale, setIsStale] = useState(false);
   const [studentId, setStudentId] = useState("");
   const [invoiceId, setInvoiceId] = useState("");
   const [showPaystack, setShowPaystack] = useState(false);

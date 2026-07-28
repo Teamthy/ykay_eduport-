@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cacheGet, cacheSet } from "@/lib/offline/db";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
@@ -94,14 +95,26 @@ export default function TeacherDashboard() {
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isStale, setIsStale] = useState(false);
 
   useEffect(() => {
+    const url = "/api/teacher/dashboard";
     (async () => {
+      const cached = await cacheGet(url);
+      if (cached) {
+        setData(cached.data as any);
+        setIsStale(true);
+        setLoading(false);
+      }
+      if (typeof navigator !== "undefined" && !navigator.onLine) return;
+      setLoading(!cached);
       try {
-        const response = await fetch("/api/teacher/dashboard", { cache: "no-store" });
+        const response = await fetch(url, { cache: "no-store" });
         const body = (await response.json()) as DashboardResponse & { error?: string };
         if (!response.ok) throw new Error(body.error || "Unable to load your dashboard.");
         setData(body);
+        setIsStale(false);
+        await cacheSet(url, body);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unable to load your dashboard.");
       } finally {

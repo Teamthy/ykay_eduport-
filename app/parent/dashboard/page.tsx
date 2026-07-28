@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cacheGet, cacheSet } from "@/lib/offline/db";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -81,27 +82,40 @@ export default function ParentDashboardPage() {
   const [data, setData] = useState<ParentDashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isStale, setIsStale] = useState(false);
 
   useEffect(() => {
     let active = true;
+    const url = "/api/parent/dashboard";
 
     async function loadDashboard() {
-      setLoading(true);
+      const cached = await cacheGet(url);
+      if (cached) {
+        setData(cached.data as any);
+        setIsStale(true);
+        setLoading(false);
+      }
+      if (typeof navigator !== "undefined" && !navigator.onLine) return;
+      if (!cached) setLoading(true);
       setError("");
       try {
-        const response = await fetch("/api/parent/dashboard", { cache: "no-store" });
+        const response = await fetch(url, { cache: "no-store" });
         const body = (await response.json()) as ParentDashboardResponse & { error?: string };
         if (!response.ok) throw new Error(body.error || "Unable to load the parent dashboard.");
         if (!active) return;
         setData(body);
+        setIsStale(false);
+        await cacheSet(url, body);
       } catch (dashboardError) {
         if (!active) return;
-        setData(null);
-        setError(
-          dashboardError instanceof Error
-            ? dashboardError.message
-            : "Unable to load the parent dashboard.",
-        );
+        if (!cached) {
+          setData(null);
+          setError(
+            dashboardError instanceof Error
+              ? dashboardError.message
+              : "Unable to load the parent dashboard.",
+          );
+        }
       } finally {
         if (active) setLoading(false);
       }
