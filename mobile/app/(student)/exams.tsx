@@ -1,122 +1,78 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert } from "react-native";
+import { View, ScrollView, TouchableOpacity, RefreshControl, Alert } from "react-native";
 import { studentApi } from "@/lib/api";
 import { useRouter } from "expo-router";
-import { theme } from "@/lib/theme";
+import { useTheme } from "@/src/theme";
+import { Card } from "@/src/components/cards";
+import { H2, Body, Caption } from "@/src/components/typography";
+import { Badge } from "@/src/components/badges";
+import { Button } from "@/src/components/buttons";
+import { Row } from "@/src/components/layout";
+import { EmptyState } from "@/src/components/feedback";
+import { bodyFont } from "@/src/theme/typography";
 import { ClipboardCheck, Clock, Play, Lock, CheckCircle2, RotateCcw } from "lucide-react-native";
 
 export default function StudentExams() {
   const router = useRouter();
+  const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  async function load() {
-    try {
-      setData(await studentApi.exams());
-    } catch {
-    } finally {
-      setRefreshing(false);
-    }
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
+  async function load() { try { setData(await studentApi.exams()); } catch {} finally { setRefreshing(false); } }
+  useEffect(() => { load(); }, []);
 
   const exams = data?.exams || [];
-
   function onStart(exam: any) {
-    if (exam.feeLocked) {
-      Alert.alert("Fees outstanding", "Clear your outstanding fees to access exams. Visit the bursar or web portal.");
-      return;
-    }
+    if (exam.feeLocked) { Alert.alert("Fees outstanding", "Clear your outstanding fees to access exams."); return; }
     router.push({ pathname: "/exam-runner", params: { examId: exam.id } });
   }
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }}
-      contentContainerStyle={{ padding: theme.spacing.lg, paddingTop: 56 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={theme.colors.accent} />}
-    >
-      <Text style={{ color: theme.colors.textPrimary, fontSize: 24, fontWeight: "bold", marginBottom: 4 }}>My Exams</Text>
-      <Text style={{ color: theme.colors.textGhost, fontSize: 13, marginBottom: theme.spacing.lg }}>Computer-based tests for your class</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
+      <H2 style={{ marginBottom: spacing.xs }}>My Exams</H2>
+      <Caption style={{ marginBottom: spacing.lg }}>Computer-based tests for your class</Caption>
 
       {exams.length > 0 ? (
         exams.map((exam: any) => {
           const done = exam.attempt && (exam.attempt.status === "GRADED" || exam.attempt.status === "SUBMITTED");
           const scored = exam.attempt?.scoreVisible;
           return (
-            <View key={exam.id} style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radius.lg, padding: theme.spacing.md, marginBottom: theme.spacing.sm + 2 }}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <View style={{ flex: 1, marginRight: theme.spacing.xs }}>
-                  <Text style={{ color: theme.colors.textPrimary, fontSize: 16, fontWeight: "bold" }}>{exam.title}</Text>
-                  <Text style={{ color: theme.colors.textFaint, fontSize: 13, marginTop: 4 }}>{exam.subjectName}</Text>
-                </View>
-                {exam.feeLocked ? (
-                  <Badge color={theme.colors.danger} icon={<Lock size={11} color={theme.colors.danger} />} label="FEES DUE" />
-                ) : scored ? (
-                  <Badge color={theme.colors.success} icon={<CheckCircle2 size={11} color={theme.colors.success} />} label={`${exam.attempt.percent}%`} />
-                ) : done ? (
-                  <Badge color={theme.colors.success} label="DONE" />
-                ) : exam.canResume ? (
-                  <Badge color={theme.colors.warning} label="IN PROGRESS" />
-                ) : exam.canStart ? (
-                  <Badge color={theme.colors.accent} label="OPEN" />
-                ) : (
-                  <Badge color={theme.colors.textGhost} icon={<Lock size={11} color={theme.colors.textGhost} />} label="LOCKED" />
-                )}
-              </View>
+            <Card key={exam.id} variant="default" padding={spacing.md} style={{ marginBottom: spacing.sm + 2 }}>
+              <Row align="flex-start" gap={spacing.xs}>
+                <Column style={{ flex: 1, marginRight: spacing.xs }}>
+                  <Body tone="primary" style={{ fontFamily: bodyFont("bold"), fontSize: 16 }}>{exam.title}</Body>
+                  <Caption style={{ marginTop: 4 }}>{exam.subjectName}</Caption>
+                </Column>
+                {exam.feeLocked ? <Badge tone="danger" icon={<Lock size={11} color={colors.danger} />}>FEES DUE</Badge>
+                  : scored ? <Badge tone="success" icon={<CheckCircle2 size={11} color={colors.success} />}>{`${exam.attempt.percent}%`}</Badge>
+                  : done ? <Badge tone="success">DONE</Badge>
+                  : exam.canResume ? <Badge tone="warning">IN PROGRESS</Badge>
+                  : exam.canStart ? <Badge tone="accent">OPEN</Badge>
+                  : <Badge tone="neutral" icon={<Lock size={11} color={colors.text.muted} />}>LOCKED</Badge>}
+              </Row>
 
-              <View style={{ flexDirection: "row", gap: theme.spacing.lg, marginTop: theme.spacing.sm + 2 }}>
-                <Meta icon={<Clock size={14} color={theme.colors.textFaint} />} text={`${exam.durationMinutes} min`} />
-                <Meta icon={<ClipboardCheck size={14} color={theme.colors.textFaint} />} text={`${exam.questionCount || "?"} questions`} />
-              </View>
+              <Row gap={spacing.lg} style={{ marginTop: spacing.sm + 2 }}>
+                <Row gap={4}><Clock size={14} color={colors.text.muted} /><Caption>{exam.durationMinutes} min</Caption></Row>
+                <Row gap={4}><ClipboardCheck size={14} color={colors.text.muted} /><Caption>{exam.questionCount || "?"} questions</Caption></Row>
+              </Row>
 
               {(exam.canStart || exam.canResume) && !exam.feeLocked && (
-                <TouchableOpacity
-                  onPress={() => onStart(exam)}
-                  style={{ marginTop: theme.spacing.sm + 2, backgroundColor: exam.canResume ? theme.colors.warning : theme.colors.primary, borderRadius: theme.radius.sm + 2, paddingVertical: 13, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: theme.spacing.xs }}
-                >
-                  {exam.canResume ? <RotateCcw size={16} color={theme.colors.textPrimary} /> : <Play size={16} color={theme.colors.textPrimary} fill={theme.colors.textPrimary} />}
-                  <Text style={{ color: theme.colors.textPrimary, fontWeight: "700", fontSize: 14 }}>{exam.canResume ? "Resume Exam" : "Start Exam"}</Text>
-                </TouchableOpacity>
+                <Button fullWidth style={{ marginTop: spacing.sm + 4 }} leftIcon={exam.canResume ? <RotateCcw size={16} color={colors.brand.white} /> : <Play size={16} color={colors.brand.white} fill={colors.brand.white} />} variant={exam.canResume ? "secondary" : "primary"} onPress={() => onStart(exam)}>
+                  {exam.canResume ? "Resume Exam" : "Start Exam"}
+                </Button>
               )}
 
               {scored && (
-                <View style={{ marginTop: theme.spacing.sm + 2, padding: theme.spacing.sm + 2, backgroundColor: `${theme.colors.success}10`, borderRadius: theme.radius.sm }}>
-                  <Text style={{ color: theme.colors.success, fontSize: 13, fontWeight: "600" }}>
-                    Score: {exam.attempt.totalScore} / {exam.totalMarks} ({exam.attempt.percent}%)
-                  </Text>
-                </View>
+                <Card variant="default" padding={spacing.sm + 2} style={{ marginTop: spacing.sm + 2, backgroundColor: colors.status.successBg, borderWidth: 0 }}>
+                  <Body style={{ color: colors.success, fontFamily: bodyFont("semibold") }}>Score: {exam.attempt.totalScore} / {exam.totalMarks} ({exam.attempt.percent}%)</Body>
+                </Card>
               )}
-            </View>
+            </Card>
           );
         })
       ) : (
-        <View style={{ alignItems: "center", paddingVertical: 60 }}>
-          <ClipboardCheck size={48} color={theme.colors.borderStrong} />
-          <Text style={{ color: theme.colors.textGhost, marginTop: theme.spacing.sm }}>No exams available</Text>
-        </View>
+        <EmptyState icon={<ClipboardCheck size={48} color={colors.border.strong} />} title="No exams available" />
       )}
     </ScrollView>
-  );
-}
-
-function Badge({ color, icon, label }: { color: string; icon?: React.ReactNode; label: string }) {
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: `${color}20`, borderRadius: theme.radius.xs, paddingHorizontal: theme.spacing.xs, paddingVertical: 4 }}>
-      {icon}
-      <Text style={{ color, fontSize: 10, fontWeight: "700" }}>{label}</Text>
-    </View>
-  );
-}
-
-function Meta({ icon, text }: { icon: React.ReactNode; text: string }) {
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-      {icon}
-      <Text style={{ color: theme.colors.textFaint, fontSize: 12 }}>{text}</Text>
-    </View>
   );
 }
