@@ -1,56 +1,49 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, RefreshControl } from "react-native";
+import { View, ScrollView, RefreshControl } from "react-native";
 import { studentApi } from "@/lib/api";
-import { theme } from "@/lib/theme";
+import { useTheme } from "@/src/theme";
+import { H2, Caption } from "@/src/components/typography";
+import { ListItem } from "@/src/components/lists";
+import { EmptyState } from "@/src/components/feedback";
 import { Bell, Megaphone, AlertCircle, Info } from "lucide-react-native";
 
 export default function Announcements() {
+  const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  async function load() {
-    try { setData(await studentApi.announcements()); } catch {} finally { setRefreshing(false); }
-  }
+  async function load() { try { setData(await studentApi.announcements()); } catch {} finally { setRefreshing(false); } }
   useEffect(() => { load(); }, []);
 
   const items = data?.announcements || [];
-  function iconFor(kind: string) {
-    if (kind === "ALERT") return <AlertCircle size={18} color={theme.colors.danger} />;
-    if (kind === "EXAM" || kind === "RESULT") return <Megaphone size={18} color={theme.colors.accent} />;
-    return <Info size={18} color={theme.colors.textMuted} />;
-  }
-  function timeAgo(iso: string) {
-    const diff = Date.now() - new Date(iso).getTime();
-    const mins = Math.floor(diff / 60000);
+  const toneFor = (k: string) => (k === "ALERT" ? colors.danger : k === "EXAM" || k === "RESULT" ? colors.brand.greenLight : colors.text.muted);
+  const iconFor = (k: string) => (k === "ALERT" ? <AlertCircle size={20} color={colors.danger} /> : k === "EXAM" || k === "RESULT" ? <Megaphone size={20} color={colors.brand.greenLight} /> : <Info size={20} color={colors.text.muted} />);
+  const timeAgo = (iso: string) => {
+    const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
     if (mins < 60) return `${mins}m ago`;
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs}h ago`;
     const days = Math.floor(hrs / 24);
     return days < 7 ? `${days}d ago` : new Date(iso).toLocaleDateString("en", { month: "short", day: "numeric" });
-  }
+  };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }} contentContainerStyle={{ padding: theme.spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={theme.colors.accent} />}>
-      <Text style={{ color: theme.colors.textPrimary, fontSize: 24, fontWeight: "bold", marginBottom: theme.spacing.lg }}>Announcements</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
+      <H2 style={{ marginBottom: spacing.lg }}>Announcements</H2>
       {items.length > 0 ? (
-        <View style={{ gap: theme.spacing.xs + 2 }}>
-          {items.map((n: any) => (
-            <View key={n.id} style={{ backgroundColor: n.read ? theme.colors.surface : theme.colors.bgCard, borderRadius: theme.radius.md, padding: theme.spacing.md, borderLeftWidth: 3, borderLeftColor: n.kind === "ALERT" ? theme.colors.danger : theme.colors.accent }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.xs, marginBottom: 6 }}>
-                {iconFor(n.kind)}
-                <Text style={{ color: theme.colors.textPrimary, fontSize: 15, fontWeight: "700", flex: 1 }}>{n.title}</Text>
-                {!n.read && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: theme.colors.accent }} />}
-              </View>
-              {n.body ? <Text style={{ color: theme.colors.textSecondary, fontSize: 13, lineHeight: 20 }}>{n.body}</Text> : null}
-              <Text style={{ color: theme.colors.textGhost, fontSize: 11, marginTop: theme.spacing.xs }}>{timeAgo(n.at)}</Text>
-            </View>
-          ))}
-        </View>
+        items.map((n: any) => (
+          <ListItem
+            key={n.id}
+            leftIcon={iconFor(n.kind)}
+            accentColor={toneFor(n.kind)}
+            title={n.title}
+            subtitle={n.body ? `${timeAgo(n.at)} · ${n.body}` : timeAgo(n.at)}
+            unread={!n.read}
+            right={!n.read ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.brand.greenLight }} /> : undefined}
+          />
+        ))
       ) : (
-        <View style={{ alignItems: "center", paddingVertical: 60 }}>
-          <Bell size={48} color={theme.colors.borderStrong} />
-          <Text style={{ color: theme.colors.textGhost, marginTop: theme.spacing.sm }}>No announcements yet</Text>
-        </View>
+        <EmptyState icon={<Bell size={48} color={colors.border.strong} />} title="No announcements yet" message="School updates will appear here." />
       )}
     </ScrollView>
   );
