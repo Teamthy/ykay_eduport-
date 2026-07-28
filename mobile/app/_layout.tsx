@@ -1,9 +1,9 @@
-import { Stack } from "expo-router";
+import { Stack, Redirect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View, Text } from "react-native";
 import { getMe, type SessionUser } from "@/lib/api";
-import { Redirect } from "expo-router";
+import { theme } from "@/lib/theme";
 
 export default function RootLayout() {
   const [user, setUser] = useState<SessionUser | null | undefined>(undefined);
@@ -14,9 +14,9 @@ export default function RootLayout() {
 
   if (user === undefined) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#00072D" }}>
-        <ActivityIndicator size="large" color="#123499" />
-        <Text style={{ color: "#fff", marginTop: 16 }}>Loading Ykay College...</Text>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.colors.bgPrimary }}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={{ color: theme.colors.textPrimary, marginTop: 16 }}>Loading Ykay College...</Text>
       </View>
     );
   }
@@ -27,7 +27,7 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: "#00072D" },
+          contentStyle: { backgroundColor: theme.colors.bgPrimary },
         }}
       >
         <Stack.Screen name="index" redirect={!!user} />
