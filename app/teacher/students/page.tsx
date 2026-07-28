@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { cacheGet, cacheSet } from "@/lib/offline/db";
 import { BookOpen, LoaderCircle, Search, UserPlus, Users, X } from "lucide-react";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
@@ -60,21 +61,37 @@ export default function TeacherStudentsPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isStale, setIsStale] = useState(false);
   const [open, setOpen] = useState(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    const url = "/api/teacher/students";
+    // Offline: show cached data instantly
+    const cached = await cacheGet(url);
+    if (cached) {
+      const j = cached.data as any;
+      setAssignments(j.assignments || []);
+      setStudents(j.students || []);
+      setSuggestions(j.suggestions || []);
+      setTeacher(j.teacher || { displayName: "", isFormTeacher: false, isSubjectTeacher: false });
+      setIsStale(true);
+      setLoading(false);
+    }
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+    setLoading(!cached);
     setError("");
     try {
-      const r = await fetch("/api/teacher/students", { cache: "no-store" });
+      const r = await fetch(url, { cache: "no-store" });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || "Unable to load students.");
       setAssignments(j.assignments || []);
       setStudents(j.students || []);
       setSuggestions(j.suggestions || []);
       setTeacher(j.teacher || { displayName: "", isFormTeacher: false, isSubjectTeacher: false });
+      setIsStale(false);
+      await cacheSet(url, j);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unable to load students.");
+      if (!cached) setError(e instanceof Error ? e.message : "Unable to load students.");
     } finally {
       setLoading(false);
     }
