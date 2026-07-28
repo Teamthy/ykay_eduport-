@@ -1,28 +1,23 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
+import { ScrollView, TouchableOpacity, RefreshControl, View } from "react-native";
 import { teacherApi } from "@/lib/api";
 import { useRouter } from "expo-router";
-import { theme } from "@/lib/theme";
-import { YkayLogo } from "@/components/YkayLogo";
-import { ClipboardCheck, BookOpen, Users, Bell, ChevronRight, Megaphone, Mail, BarChart3 } from "lucide-react-native";
+import { useTheme } from "@/src/theme";
+import { Card } from "@/src/components/cards";
+import { H2, H3, Body, Caption, Label } from "@/src/components/typography";
+import { Column } from "@/src/components/layout";
+import { AppHeader } from "@/src/components/navigation";
+import { bodyFont } from "@/src/theme/typography";
+import { ClipboardCheck, BookOpen, Users, ChevronRight, Megaphone, Mail, BarChart3 } from "lucide-react-native";
 
 export default function TeacherDashboard() {
   const router = useRouter();
+  const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  async function load() {
-    try {
-      setData(await teacherApi.dashboard());
-    } catch {
-    } finally {
-      setRefreshing(false);
-    }
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
+  async function load() { try { setData(await teacherApi.dashboard()); } catch {} finally { setRefreshing(false); } }
+  useEffect(() => { load(); }, []);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
@@ -30,67 +25,62 @@ export default function TeacherDashboard() {
   const totalStudents = assignments.reduce((sum: number, a: any) => sum + (a.studentCount || 0), 0);
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }}
-      contentContainerStyle={{ padding: theme.spacing.lg, paddingTop: 56 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={theme.colors.accent} />}
-    >
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: theme.spacing.xxl, marginTop: theme.spacing.lg }}>
-        <YkayLogo size={32} textSize={15} />
-        <TouchableOpacity onPress={() => router.push("/teacher-announcements")} style={{ width: 42, height: 42, borderRadius: theme.radius.md, backgroundColor: theme.colors.surface, justifyContent: "center", alignItems: "center" }}>
-          <Bell size={20} color={theme.colors.accent} />
-        </TouchableOpacity>
-      </View>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
+      <AppHeader onBellPress={() => router.push("/teacher-announcements")} />
 
-      <Text style={{ color: theme.colors.textFaint, fontSize: 14 }}>{greeting},</Text>
-      <Text style={{ color: theme.colors.textPrimary, fontSize: 24, fontWeight: "bold", marginTop: 2, marginBottom: theme.spacing.xxl }}>{data?.teacher?.displayName || "Teacher"}</Text>
+      <Caption>{greeting},</Caption>
+      <H2 style={{ marginTop: 2, marginBottom: spacing.lg }}>{data?.teacher?.displayName || "Teacher"}</H2>
 
-      <View style={{ flexDirection: "row", gap: theme.spacing.sm, marginBottom: theme.spacing.lg }}>
+      <View style={{ flexDirection: "row", gap: spacing.sm, marginBottom: spacing.lg }}>
         <Stat value={String(assignments.length)} label="Classes" />
         <Stat value={String(totalStudents)} label="Students" />
       </View>
 
-      <Text style={{ color: theme.colors.textFaint, fontSize: 12, fontWeight: "700", marginBottom: theme.spacing.sm, letterSpacing: 1 }}>QUICK ACTIONS</Text>
-      <View style={{ gap: theme.spacing.xs, marginBottom: theme.spacing.xxl }}>
-        <ActionRow icon={<ClipboardCheck size={20} color={theme.colors.accent} />} label="Take Attendance" onPress={() => router.push("/(teacher)/attendance")} />
-        <ActionRow icon={<BookOpen size={20} color={theme.colors.accent} />} label="Enter Grades" onPress={() => router.push("/(teacher)/gradebook")} />
-        <ActionRow icon={<Users size={20} color={theme.colors.accent} />} label="Class Roster" onPress={() => router.push("/(teacher)/students")} />
-        <ActionRow icon={<BarChart3 size={20} color={theme.colors.accent} />} label="Analytics" onPress={() => router.push("/teacher-analytics")} />
-        <ActionRow icon={<Megaphone size={20} color={theme.colors.accent} />} label="Announcements" onPress={() => router.push("/teacher-announcements")} />
-        <ActionRow icon={<Mail size={20} color={theme.colors.accent} />} label="Messages" onPress={() => router.push("/teacher-messages")} />
-      </View>
+      <Label style={{ marginBottom: spacing.sm }}>Quick Actions</Label>
+      <Column gap={spacing.sm} style={{ marginBottom: spacing.lg }}>
+        <ActionRow icon={<ClipboardCheck size={20} color={colors.brand.greenLight} />} label="Take Attendance" onPress={() => router.push("/(teacher)/attendance")} />
+        <ActionRow icon={<BookOpen size={20} color={colors.brand.greenLight} />} label="Enter Grades" onPress={() => router.push("/(teacher)/gradebook")} />
+        <ActionRow icon={<Users size={20} color={colors.brand.greenLight} />} label="Class Roster" onPress={() => router.push("/(teacher)/students")} />
+        <ActionRow icon={<BarChart3 size={20} color={colors.brand.greenLight} />} label="Analytics" onPress={() => router.push("/teacher-analytics")} />
+        <ActionRow icon={<Megaphone size={20} color={colors.brand.greenLight} />} label="Announcements" onPress={() => router.push("/teacher-announcements")} />
+        <ActionRow icon={<Mail size={20} color={colors.brand.greenLight} />} label="Messages" onPress={() => router.push("/teacher-messages")} />
+      </Column>
 
       {assignments.length > 0 && (
-        <View>
-          <Text style={{ color: theme.colors.textFaint, fontSize: 12, fontWeight: "700", marginBottom: theme.spacing.sm, letterSpacing: 1 }}>MY CLASSES</Text>
+        <Column gap={spacing.xs}>
+          <Label style={{ marginBottom: spacing.xs }}>My Classes</Label>
           {assignments.map((a: any, i: number) => (
-            <View key={i} style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, padding: theme.spacing.md, marginBottom: theme.spacing.xs }}>
-              <Text style={{ color: theme.colors.textPrimary, fontSize: 15, fontWeight: "600" }}>{a.className}</Text>
-              <Text style={{ color: theme.colors.textFaint, fontSize: 12, marginTop: 4 }}>{a.role}{a.subjectName ? ` · ${a.subjectName}` : ""}</Text>
-              <Text style={{ color: theme.colors.accent, fontSize: 12, marginTop: 4 }}>{a.studentCount} students</Text>
-            </View>
+            <Card key={i} variant="default" padding={spacing.md}>
+              <Body tone="primary" style={{ fontFamily: bodyFont("semibold") }}>{a.className}</Body>
+              <Caption style={{ marginTop: 4 }}>{a.role}{a.subjectName ? ` · ${a.subjectName}` : ""}</Caption>
+              <Caption style={{ color: colors.brand.greenLight, marginTop: 4 }}>{a.studentCount} students</Caption>
+            </Card>
           ))}
-        </View>
+        </Column>
       )}
     </ScrollView>
   );
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
+  const { spacing } = useTheme();
   return (
-    <View style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radius.lg, padding: theme.spacing.md, flex: 1 }}>
-      <Text style={{ color: theme.colors.textPrimary, fontSize: 26, fontWeight: "bold" }}>{value}</Text>
-      <Text style={{ color: theme.colors.textGhost, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginTop: 4 }}>{label}</Text>
-    </View>
+    <Card variant="default" padding={spacing.md} style={{ flex: 1 }}>
+      <H2 style={{ fontSize: 26 }}>{value}</H2>
+      <Caption style={{ marginTop: 4 }}>{label}</Caption>
+    </Card>
   );
 }
 
 function ActionRow({ icon, label, onPress }: { icon: React.ReactNode; label: string; onPress: () => void }) {
+  const { colors, spacing } = useTheme();
   return (
-    <TouchableOpacity onPress={onPress} style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.sm, backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, padding: theme.spacing.md }}>
-      {icon}
-      <Text style={{ flex: 1, color: theme.colors.textPrimary, fontSize: 15, fontWeight: "500" }}>{label}</Text>
-      <ChevronRight size={18} color={theme.colors.borderStrong} />
+    <TouchableOpacity onPress={onPress}>
+      <Card variant="default" padding={spacing.md} style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
+        {icon}
+        <Body tone="primary" style={{ flex: 1, fontFamily: bodyFont("medium") }}>{label}</Body>
+        <ChevronRight size={18} color={colors.border.strong} />
+      </Card>
     </TouchableOpacity>
   );
 }
