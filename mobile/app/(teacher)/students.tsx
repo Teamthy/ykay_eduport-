@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, RefreshControl, Linking } from "react-native";
 import { teacherApi } from "@/lib/api";
+import { theme } from "@/lib/theme";
 import { Phone, Users } from "lucide-react-native";
 
 export default function TeacherStudents() {
@@ -16,9 +17,7 @@ export default function TeacherStudents() {
     }
   }
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   const students = data?.students || [];
 
@@ -26,36 +25,36 @@ export default function TeacherStudents() {
     <FlatList
       data={students}
       keyExtractor={(item: any) => item.id}
-      style={{ flex: 1, backgroundColor: "#00072D" }}
-      contentContainerStyle={{ padding: 20, paddingTop: 60 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor="#2840E8" />}
+      style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }}
+      contentContainerStyle={{ padding: theme.spacing.lg, paddingTop: 56 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={theme.colors.accent} />}
       ListHeaderComponent={() => (
         <View>
-          <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold" }}>{data?.className || "My Class"}</Text>
-          <Text style={{ color: "#ffffff60", fontSize: 14, marginTop: 4, marginBottom: 20 }}>{students.length} students</Text>
+          <Text style={{ color: theme.colors.textPrimary, fontSize: 24, fontWeight: "bold" }}>{data?.className || "My Class"}</Text>
+          <Text style={{ color: theme.colors.textFaint, fontSize: 14, marginTop: 4, marginBottom: theme.spacing.lg }}>{students.length} students</Text>
         </View>
       )}
       renderItem={({ item }) => (
-        <View style={{ backgroundColor: "#051650", borderRadius: 12, padding: 14, marginBottom: 8 }}>
+        <View style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radius.sm + 2, padding: theme.spacing.sm + 2, marginBottom: theme.spacing.xs }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: "#123499", justifyContent: "center", alignItems: "center", marginRight: 12 }}>
-              <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>{item.displayName?.charAt(0)?.toUpperCase()}</Text>
+            <View style={{ width: 40, height: 40, borderRadius: theme.radius.xs + 2, backgroundColor: theme.colors.primary, justifyContent: "center", alignItems: "center", marginRight: theme.spacing.sm + 2 }}>
+              <Text style={{ color: theme.colors.textInverse, fontWeight: "bold", fontSize: 16 }}>{item.displayName?.charAt(0)?.toUpperCase()}</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ color: "#fff", fontSize: 14, fontWeight: "600" }}>{item.displayName}</Text>
-              <Text style={{ color: "#ffffff60", fontSize: 12 }}>{item.studentId}{item.gender ? ` · ${item.gender}` : ""}</Text>
+              <Text style={{ color: theme.colors.textPrimary, fontSize: 14, fontWeight: "600" }}>{item.displayName}</Text>
+              <Text style={{ color: theme.colors.textFaint, fontSize: 12 }}>{item.studentId}{item.gender ? ` · ${item.gender}` : ""}</Text>
             </View>
           </View>
           {(item.guardianName || item.guardianPhone) && (
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: "#ffffff08" }}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: theme.spacing.xs + 2, paddingTop: theme.spacing.xs + 2, borderTopWidth: 1, borderTopColor: theme.colors.border }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: "#ffffff40", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Guardian</Text>
-                <Text style={{ color: "#ffffff80", fontSize: 12 }}>{item.guardianName || "—"}</Text>
+                <Text style={{ color: theme.colors.textGhost, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Guardian</Text>
+                <Text style={{ color: theme.colors.textSecondary, fontSize: 12 }}>{item.guardianName || "—"}</Text>
               </View>
               {item.guardianPhone ? (
-                <TouchableOpacity onPress={() => Linking.openURL(`tel:${item.guardianPhone}`)} style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#2840E820", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8 }}>
-                  <Phone size={13} color="#2840E8" />
-                  <Text style={{ color: "#2840E8", fontSize: 12, fontWeight: "600" }}>Call</Text>
+                <TouchableOpacity onPress={() => Linking.openURL(`tel:${item.guardianPhone}`)} style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: `${theme.colors.accent}20`, borderRadius: theme.radius.xs + 2, paddingHorizontal: theme.spacing.sm + 2, paddingVertical: theme.spacing.xs + 2 }}>
+                  <Phone size={13} color={theme.colors.accent} />
+                  <Text style={{ color: theme.colors.accent, fontSize: 12, fontWeight: "600" }}>Call</Text>
                 </TouchableOpacity>
               ) : null}
             </View>
@@ -64,8 +63,8 @@ export default function TeacherStudents() {
       )}
       ListEmptyComponent={() => (
         <View style={{ alignItems: "center", paddingVertical: 60 }}>
-          <Users size={48} color="#ffffff20" />
-          <Text style={{ color: "#ffffff40", marginTop: 12 }}>No students found</Text>
+          <Users size={48} color={theme.colors.borderStrong} />
+          <Text style={{ color: theme.colors.textGhost, marginTop: theme.spacing.sm }}>No students found</Text>
         </View>
       )}
     />
