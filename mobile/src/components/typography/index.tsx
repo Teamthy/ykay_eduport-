@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, TextProps } from "react-native";
 import { useTheme } from "@/src/theme";
+import { bodyFont } from "@/src/theme/typography";
 
 type Tone = "primary" | "secondary" | "muted" | "accent" | "inverse";
 
@@ -16,30 +17,30 @@ function toneColor(tone: Tone, colors: ReturnType<typeof useTheme>["colors"]): s
 
 export function H1({ children, tone = "primary", style, ...rest }: { children: React.ReactNode; tone?: Tone } & TextProps) {
   const { typography, colors } = useTheme();
-  return <Text style={{ fontFamily: typography.display, fontSize: typography.fontSize.h1, color: toneColor(tone, colors), lineHeight: typography.fontSize.h1 * typography.lineHeight.tight, letterSpacing: typography.letterSpacing.tight, ...style }} {...rest}>{children}</Text>;
+  return <Text style={{ fontFamily: typography.fontFamily.display, fontSize: typography.fontSize.h1, color: toneColor(tone, colors), lineHeight: typography.fontSize.h1 * typography.lineHeight.tight, letterSpacing: typography.letterSpacing.tight, ...style }} {...rest}>{children}</Text>;
 }
 
 export function H2({ children, tone = "primary", style, ...rest }: { children: React.ReactNode; tone?: Tone } & TextProps) {
   const { typography, colors } = useTheme();
-  return <Text style={{ fontFamily: typography.display, fontSize: typography.fontSize.h2, color: toneColor(tone, colors), lineHeight: typography.fontSize.h2 * typography.lineHeight.tight, ...style }} {...rest}>{children}</Text>;
+  return <Text style={{ fontFamily: typography.fontFamily.display, fontSize: typography.fontSize.h2, color: toneColor(tone, colors), lineHeight: typography.fontSize.h2 * typography.lineHeight.tight, ...style }} {...rest}>{children}</Text>;
 }
 
 export function H3({ children, tone = "primary", style, ...rest }: { children: React.ReactNode; tone?: Tone } & TextProps) {
   const { typography, colors } = useTheme();
-  return <Text style={{ fontFamily: typography.body, fontSize: typography.fontSize.h3, fontWeight: typography.fontWeight.bold, color: toneColor(tone, colors), ...style }} {...rest}>{children}</Text>;
+  return <Text style={{ fontFamily: bodyFont("bold"), fontSize: typography.fontSize.h3, color: toneColor(tone, colors), ...style }} {...rest}>{children}</Text>;
 }
 
 export function Body({ children, tone = "secondary", style, ...rest }: { children: React.ReactNode; tone?: Tone } & TextProps) {
   const { typography, colors } = useTheme();
-  return <Text style={{ fontFamily: typography.body, fontSize: typography.fontSize.body, color: toneColor(tone, colors), lineHeight: typography.fontSize.body * typography.lineHeight.relaxed, ...style }} {...rest}>{children}</Text>;
+  return <Text style={{ fontFamily: typography.fontFamily.body, fontSize: typography.fontSize.body, color: toneColor(tone, colors), lineHeight: typography.fontSize.body * typography.lineHeight.relaxed, ...style }} {...rest}>{children}</Text>;
 }
 
 export function Caption({ children, tone = "muted", style, ...rest }: { children: React.ReactNode; tone?: Tone } & TextProps) {
   const { typography, colors } = useTheme();
-  return <Text style={{ fontFamily: typography.body, fontSize: typography.fontSize.caption, color: toneColor(tone, colors), ...style }} {...rest}>{children}</Text>;
+  return <Text style={{ fontFamily: typography.fontFamily.body, fontSize: typography.fontSize.caption, color: toneColor(tone, colors), ...style }} {...rest}>{children}</Text>;
 }
 
 export function Label({ children, tone = "muted", style, ...rest }: { children: React.ReactNode; tone?: Tone } & TextProps) {
   const { typography, colors } = useTheme();
-  return <Text style={{ fontFamily: typography.body, fontSize: typography.fontSize.label, fontWeight: typography.fontWeight.semibold, color: toneColor(tone, colors), textTransform: "uppercase", letterSpacing: typography.letterSpacing.wide, ...style }} {...rest}>{children}</Text>;
+  return <Text style={{ fontFamily: bodyFont("medium"), fontSize: typography.fontSize.label, color: toneColor(tone, colors), textTransform: "uppercase", letterSpacing: typography.letterSpacing.wide, ...style }} {...rest}>{children}</Text>;
 }

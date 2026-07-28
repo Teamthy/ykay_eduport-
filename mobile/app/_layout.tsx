@@ -2,6 +2,9 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View, Text } from "react-native";
+import { useFonts } from "expo-font";
+import { Anton_400Regular } from "@expo-google-fonts/anton";
+import { DM_Sans_400Regular, DM_Sans_500Medium, DM_Sans_700Bold } from "@expo-google-fonts/dm-sans";
 import { getMe, type SessionUser } from "@/lib/api";
 import { ThemeProvider } from "@/src/theme";
 import { Colors } from "@/src/theme/colors";
@@ -9,12 +12,19 @@ import OfflineIndicator from "@/components/OfflineIndicator";
 
 export default function RootLayout() {
   const [user, setUser] = useState<SessionUser | null | undefined>(undefined);
+  const [fontsLoaded] = useFonts({
+    Anton: Anton_400Regular,
+    "DM Sans": DM_Sans_400Regular,
+    "DM Sans Medium": DM_Sans_500Medium,
+    "DM Sans Bold": DM_Sans_700Bold,
+  });
 
   useEffect(() => {
     getMe().then((res) => setUser(res?.user ?? null));
   }, []);
 
-  if (user === undefined) {
+  // Gate on fonts + session resolution.
+  if (!fontsLoaded || user === undefined) {
     return (
       <ThemeProvider>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.background.primary }}>

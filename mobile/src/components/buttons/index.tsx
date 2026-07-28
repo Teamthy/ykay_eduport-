@@ -73,7 +73,7 @@ export function Button({
       ) : (
         <>
           {leftIcon}
-          <Text style={{ color: fg[variant], fontSize, fontWeight: typography.fontWeight.semibold, fontFamily: typography.body }}>
+          <Text style={{ color: fg[variant], fontSize, fontWeight: typography.fontWeight.semibold, fontFamily: typography.fontFamily.bodyBold }}>
             {children}
           </Text>
           {rightIcon}
