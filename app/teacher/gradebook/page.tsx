@@ -1,5 +1,6 @@
 "use client";
 
+import { cacheGet, cacheSet } from "@/lib/offline/db";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PortalTopbar from "@/components/PortalTopbar";
@@ -83,23 +84,39 @@ export default function TeacherGradebookPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [isStale, setIsStale] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
 
   const loadGradebook = useCallback(async (assignmentId: string, pushUrl = false) => {
-    setLoading(true);
+    const query = assignmentId ? `?assignmentId=${encodeURIComponent(assignmentId)}` : "";
+    const url = `/api/teacher/gradebook${query}`;
+    // Offline: show cached data instantly
+    const cached = await cacheGet<any>(url);
+    if (cached) {
+      const body = cached.data;
+      setData(body);
+      setRows(body?.gradebook?.entries || []);
+      setSelectedAssignmentId(body?.selectedAssignmentId || assignmentId || "");
+      setIsStale(true);
+      setLoading(false);
+    }
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+    setLoading(!cached);
     setError("");
     try {
-      const query = assignmentId ? `?assignmentId=${encodeURIComponent(assignmentId)}` : "";
-      const response = await fetch(`/api/teacher/gradebook${query}`, { cache: "no-store" });
+      const response = await fetch(url, { cache: "no-store" });
       const body = (await response.json()) as GradebookResponse & { error?: string };
       if (!response.ok) throw new Error(body.error || "Unable to load the gradebook.");
       setData(body);
       setRows(body.gradebook?.entries || []);
       setSelectedAssignmentId(body.selectedAssignmentId || "");
       setDirty(false);
+      setIsStale(false);
+      await cacheSet(url, body);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Unable to load the gradebook.");
+      if (!cached)
+        setError(loadError instanceof Error ? loadError.message : "Unable to load the gradebook.");
     } finally {
       setLoading(false);
     }
