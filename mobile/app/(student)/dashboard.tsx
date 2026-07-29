@@ -44,6 +44,7 @@ export default function StudentDashboard() {
       <Column gap={spacing.sm} style={{ marginBottom: spacing.lg }}>
         <ActionRow icon={<Award size={20} color={colors.brand.greenLight} />} label="View Report Cards" onPress={() => router.push("/(student)/report-cards")} />
         <ActionRow icon={<ClipboardCheck size={20} color={colors.brand.greenLight} />} label="Take Exam" onPress={() => router.push("/(student)/exams")} />
+        <ActionRow icon={<GraduationCap size={20} color={colors.brand.greenLight} />} label="Practice Tests" onPress={() => router.push("/practice")} />
         <ActionRow icon={<Calendar size={20} color={colors.brand.greenLight} />} label="My Attendance" onPress={() => router.push("/(student)/attendance")} />
         <ActionRow icon={<Bell size={20} color={colors.brand.greenLight} />} label="Announcements" onPress={() => router.push("/announcements")} />
         <ActionRow icon={<Users size={20} color={colors.brand.greenLight} />} label="My Teachers" onPress={() => router.push("/student-teachers")} />

@@ -2,7 +2,7 @@
  * Offline read-cache + write-queue + sync, with an inferred online flag.
  * Imports shared primitives from lib/http (NOT lib/api) to avoid a cycle.
  */
-import { API_BASE, authHeaders } from "@/lib/http";
+import { API_BASE, authHeaders, notifyAuthExpired } from "@/lib/http";
 import { addQueue, getCache, getQueue, removeQueue, setCache, queueCount } from "./db";
 
 // ── Online state (inferred) ──────────────────────────────────────────────
@@ -52,6 +52,7 @@ export async function cachedGet<T = unknown>(path: string): Promise<T> {
   void flushQueue();
 
   const data = await res.json().catch(() => null);
+  if (res.status === 401) void notifyAuthExpired();
   if (!res.ok) throw new Error((data as { error?: string } | null)?.error || "Request failed");
   await setCache(path, data);
   return data as T;

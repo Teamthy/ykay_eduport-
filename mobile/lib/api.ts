@@ -8,7 +8,7 @@
  * Shared HTTP primitives live in lib/http (imported here and by the offline
  * cache) to avoid a require cycle.
  */
-import { API_BASE, getToken, setToken, clearToken, authHeaders, type SessionUser } from "@/lib/http";
+import { API_BASE, getToken, setToken, clearToken, authHeaders, notifyAuthExpired, type SessionUser } from "@/lib/http";
 import { cachedGet, queuedWrite } from "@/lib/offline/cache";
 
 // Re-export so existing `import { API_BASE, getToken, ... } from "@/lib/api"` keeps working.
@@ -34,6 +34,7 @@ export async function api<T = unknown>(
     },
   });
   const data = await res.json();
+  if (res.status === 401) void notifyAuthExpired();
   if (!res.ok) throw new Error((data as { error?: string }).error || "Request failed");
   return data as T;
 }
