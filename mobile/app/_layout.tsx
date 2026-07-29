@@ -12,28 +12,39 @@ import OfflineIndicator from "@/components/OfflineIndicator";
 
 export default function RootLayout() {
   const [user, setUser] = useState<SessionUser | null | undefined>(undefined);
-  const [fontsLoaded] = useFonts({
+  // Fonts load in the BACKGROUND — we never block the app on them.
+  // If they're slow/fail, system fonts render and Anton/DM Sans swap in when ready.
+  useFonts({
     Anton: Anton_400Regular,
     "DM Sans": DM_Sans_400Regular,
     "DM Sans Medium": DM_Sans_500Medium,
     "DM Sans Bold": DM_Sans_700Bold,
   });
+  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
-    getMe().then((res) => setUser(res?.user ?? null));
+    let cancelled = false;
+    getMe()
+      .then((res) => { if (!cancelled) setUser(res?.user ?? null); })
+      .catch(() => { if (!cancelled) setUser(null); });
+    // Safety net: never hang forever on the session check.
+    const t = setTimeout(() => setTimedOut(true), 4000);
+    return () => { cancelled = true; clearTimeout(t); };
   }, []);
 
-  // Gate on fonts + session resolution.
-  if (!fontsLoaded || user === undefined) {
+  // Gate ONLY on the session check (+ timeout). Fonts are non-blocking.
+  if (user === undefined && !timedOut) {
     return (
       <ThemeProvider>
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.background.primary }}>
           <ActivityIndicator size="large" color={Colors.brand.greenLight} />
-          <Text style={{ color: Colors.text.primary, marginTop: 16, fontFamily: "DM Sans" }}>Loading Ykay College...</Text>
+          <Text style={{ color: Colors.text.primary, marginTop: 16 }}>Loading Ykay College...</Text>
         </View>
       </ThemeProvider>
     );
   }
+
+  const resolvedUser = user === undefined ? null : user;
 
   return (
     <ThemeProvider>
@@ -41,8 +52,8 @@ export default function RootLayout() {
         <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.background.primary } }}>
           <Stack.Screen name="index" />
-          <Stack.Screen name="landing" redirect={!!user} />
-          <Stack.Screen name="login" redirect={!!user} />
+          <Stack.Screen name="landing" redirect={!!resolvedUser} />
+          <Stack.Screen name="login" redirect={!!resolvedUser} />
           <Stack.Screen name="(student)" />
           <Stack.Screen name="(teacher)" />
           <Stack.Screen name="(parent)" />
