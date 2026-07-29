@@ -1,23 +1,34 @@
 import { useState } from "react";
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert } from "react-native";
+import { View, Text, ScrollView, KeyboardAvoidingView, Platform, Alert, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { login, logout } from "@/lib/api";
-import { useTheme, Gradients } from "@/src/theme";
-import { Button } from "@/src/components/buttons";
-import { Input } from "@/src/components/inputs";
+import { useTheme } from "@/src/theme";
 import { Card } from "@/src/components/cards";
-import { H3, Body, Label } from "@/src/components/typography";
+import { Input } from "@/src/components/inputs";
+import { Button } from "@/src/components/buttons";
+import { H3, Body } from "@/src/components/typography";
+import { BackgroundCarousel } from "@/src/components/carousel";
 import { YkayLogo } from "@/components/YkayLogo";
-import { Mail, Lock, ArrowRight, ShieldCheck } from "lucide-react-native";
+import { Mail, Lock, ArrowRight, ShieldCheck, Eye, EyeOff } from "lucide-react-native";
 
 const ALLOWED_ROLES = ["STUDENT", "IT_STUDENT", "PARENT", "TEACHER", "HOD", "ADMIN"];
+
+// 5-image carousel: students, parents, staff, admin, school life.
+const CAROUSEL_IMAGES = [
+  require("../assets/carousel/1-students.jpg"),
+  require("../assets/carousel/2-parents.jpg"),
+  require("../assets/carousel/3-staff.jpg"),
+  require("../assets/carousel/4-admin.jpg"),
+  require("../assets/carousel/5-school.jpg"),
+];
 
 export default function LoginScreen() {
   const router = useRouter();
   const { colors, spacing } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
@@ -45,12 +56,27 @@ export default function LoginScreen() {
   }
 
   return (
-    <LinearGradient colors={[...Gradients.hero]} style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+      {/* Carousel background */}
+      <View style={StyleSheet.absoluteFill}>
+        <BackgroundCarousel images={CAROUSEL_IMAGES} />
+      </View>
+
+      {/* Dark scrim for readability + subtle green brand tint */}
+      <LinearGradient
+        colors={["rgba(5,12,20,0.45)", "rgba(5,12,20,0.80)", "rgba(5,12,20,0.95)"]}
+        style={StyleSheet.absoluteFill}
+      />
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(78,197,77,0.08)" }]} />
+
+      {/* Content */}
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: spacing.lg, paddingTop: 80, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: spacing.lg, paddingTop: 84, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
           {/* Brand */}
           <View style={{ alignItems: "center", marginBottom: spacing.xl }}>
-            <YkayLogo size={64} textSize={26} />
+            <View style={{ backgroundColor: "rgba(5,12,20,0.55)", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 18 }}>
+              <YkayLogo size={60} textSize={24} />
+            </View>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: spacing.sm + 2 }}>
               <View style={{ height: 1, width: 28, backgroundColor: colors.brand.greenLight }} />
               <Text style={{ color: colors.text.muted, fontSize: 11, letterSpacing: 3, fontWeight: "600", fontFamily: "DM Sans" }}>STUDENT · PARENT · STAFF PORTAL</Text>
@@ -58,14 +84,26 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          {/* Form */}
-          <Card variant="bordered" style={{ padding: spacing.lg }}>
+          {/* Glass form card */}
+          <Card variant="glass" style={{ padding: spacing.lg }}>
             <H3>Welcome back</H3>
             <Body style={{ marginTop: 4, marginBottom: spacing.lg }}>Sign in with your school portal credentials</Body>
 
             <View style={{ gap: spacing.md }}>
               <Input label="Email" placeholder="you@ykaycollege.com" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} leftIcon={<Mail size={18} color={colors.text.muted} />} />
-              <Input label="Password" placeholder="••••••••" secureTextEntry value={password} onChangeText={setPassword} leftIcon={<Lock size={18} color={colors.text.muted} />} />
+              <Input
+                label="Password"
+                placeholder="••••••••"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                leftIcon={<Lock size={18} color={colors.text.muted} />}
+                rightIcon={
+                  <TouchableOpacity onPress={() => setShowPassword((s) => !s)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    {showPassword ? <EyeOff size={18} color={colors.brand.greenLight} /> : <Eye size={18} color={colors.text.muted} />}
+                  </TouchableOpacity>
+                }
+              />
             </View>
 
             <Button fullWidth size="lg" loading={loading} onPress={handleLogin} rightIcon={!loading ? <ArrowRight size={18} color={colors.brand.white} /> : undefined} style={{ marginTop: spacing.xl }}>
@@ -80,6 +118,6 @@ export default function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }
