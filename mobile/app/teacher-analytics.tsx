@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, RefreshControl } from "react-native";
+import { View, ScrollView, RefreshControl } from "react-native";
 import { teacherApi } from "@/lib/api";
-import { theme } from "@/lib/theme";
+import { useTheme } from "@/src/theme";
+import { Card } from "@/src/components/cards";
+import { H2, Body, Caption, Label } from "@/src/components/typography";
+import { Column } from "@/src/components/layout";
+import { EmptyState } from "@/src/components/feedback";
+import { bodyFont } from "@/src/theme/typography";
 import { TrendingUp, ClipboardCheck, BookOpen, BarChart3 } from "lucide-react-native";
 
 export default function TeacherAnalytics() {
+  const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -16,83 +22,80 @@ export default function TeacherAnalytics() {
   const gradebooks = data?.gradebooks || [];
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }} contentContainerStyle={{ padding: theme.spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={theme.colors.accent} />}>
-      <Text style={{ color: theme.colors.textPrimary, fontSize: 24, fontWeight: "bold", marginBottom: 4 }}>Analytics</Text>
-      <Text style={{ color: theme.colors.textGhost, fontSize: 13, marginBottom: theme.spacing.lg }}>Your teaching performance at a glance</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
+      <H2 style={{ marginBottom: spacing.xs }}>Analytics</H2>
+      <Caption style={{ marginBottom: spacing.lg }}>Your teaching performance at a glance</Caption>
 
-      <View style={{ flexDirection: "row", gap: theme.spacing.sm, marginBottom: theme.spacing.lg }}>
-        <BigStat icon={<TrendingUp size={18} color={theme.colors.accent} />} value={att?.overallRate != null ? `${att.overallRate}%` : "—"} label="Attendance Rate" />
-        <BigStat icon={<ClipboardCheck size={18} color={theme.colors.accent} />} value={String(att?.totalSessions || 0)} label="Sessions (30d)" />
+      <View style={{ flexDirection: "row", gap: spacing.sm, marginBottom: spacing.lg }}>
+        <Card variant="default" padding={spacing.md} style={{ flex: 1 }}>
+          <TrendingUp size={18} color={colors.brand.greenLight} />
+          <H2 style={{ fontSize: 24, marginTop: spacing.xs }}>{att?.overallRate != null ? `${att.overallRate}%` : "—"}</H2>
+          <Caption style={{ marginTop: 4 }}>Attendance Rate</Caption>
+        </Card>
+        <Card variant="default" padding={spacing.md} style={{ flex: 1 }}>
+          <ClipboardCheck size={18} color={colors.brand.greenLight} />
+          <H2 style={{ fontSize: 24, marginTop: spacing.xs }}>{att?.totalSessions || 0}</H2>
+          <Caption style={{ marginTop: 4 }}>Sessions (30d)</Caption>
+        </Card>
       </View>
 
       {att?.byClass?.length > 0 && (
-        <Section title="ATTENDANCE BY CLASS">
+        <Column gap={spacing.xs + 2} style={{ marginBottom: spacing.lg }}>
+          <Label>Attendance by Class</Label>
           {att.byClass.map((c: any, i: number) => <BarRow key={i} label={c.className} value={c.rate != null ? `${c.rate}%` : "—"} pct={c.rate} />)}
-        </Section>
+        </Column>
       )}
 
       {exams.length > 0 && (
-        <Section title="EXAM AVERAGES">
+        <Column gap={spacing.xs + 2} style={{ marginBottom: spacing.lg }}>
+          <Label>Exam Averages</Label>
           {exams.slice(0, 8).map((e: any, i: number) => (
-            <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.xs + 2, backgroundColor: theme.colors.surface, borderRadius: theme.radius.sm + 2, padding: theme.spacing.sm + 2, marginBottom: theme.spacing.xs }}>
-              <BookOpen size={15} color={theme.colors.accent} />
+            <Card key={i} variant="default" padding={spacing.sm + 2} style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm + 2 }}>
+              <BookOpen size={15} color={colors.brand.greenLight} />
               <View style={{ flex: 1 }}>
-                <Text style={{ color: theme.colors.textPrimary, fontSize: 13, fontWeight: "600" }} numberOfLines={1}>{e.title || e.className}</Text>
-                <Text style={{ color: theme.colors.textGhost, fontSize: 11 }}>{e.className} · {e.attempts || 0} attempts</Text>
+                <Body tone="primary" style={{ fontFamily: bodyFont("semibold") }} numberOfLines={1}>{e.title || e.className}</Body>
+                <Caption>{e.className} · {e.attempts || 0} attempts</Caption>
               </View>
-              <Text style={{ color: e.avgScore >= 50 ? theme.colors.success : theme.colors.warning, fontSize: 16, fontWeight: "bold" }}>{e.avgScore != null ? `${e.avgScore}%` : "—"}</Text>
-            </View>
+              <Body style={{ color: e.avgScore >= 50 ? colors.success : colors.warning, fontFamily: bodyFont("bold"), fontSize: 16 }}>{e.avgScore != null ? `${e.avgScore}%` : "—"}</Body>
+            </Card>
           ))}
-        </Section>
+        </Column>
       )}
 
       {gradebooks.length > 0 && (
-        <Section title="GRADEBOOK AVERAGES">
+        <Column gap={spacing.xs + 2}>
+          <Label>Gradebook Averages</Label>
           {gradebooks.map((g: any, i: number) => (
-            <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.xs + 2, backgroundColor: theme.colors.surface, borderRadius: theme.radius.sm + 2, padding: theme.spacing.sm + 2, marginBottom: theme.spacing.xs }}>
-              <BarChart3 size={15} color={theme.colors.accent} />
+            <Card key={i} variant="default" padding={spacing.sm + 2} style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm + 2 }}>
+              <BarChart3 size={15} color={colors.brand.greenLight} />
               <View style={{ flex: 1 }}>
-                <Text style={{ color: theme.colors.textPrimary, fontSize: 13, fontWeight: "600" }}>{g.subject}</Text>
-                <Text style={{ color: theme.colors.textGhost, fontSize: 11 }}>{g.className} · {g.entryCount} students</Text>
+                <Body tone="primary" style={{ fontFamily: bodyFont("semibold") }}>{g.subject}</Body>
+                <Caption>{g.className} · {g.entryCount} students</Caption>
               </View>
-              <Text style={{ color: theme.colors.accent, fontSize: 16, fontWeight: "bold" }}>{g.avgScore != null ? g.avgScore : "—"}</Text>
-            </View>
+              <Body style={{ color: colors.brand.greenLight, fontFamily: bodyFont("bold"), fontSize: 16 }}>{g.avgScore != null ? g.avgScore : "—"}</Body>
+            </Card>
           ))}
-        </Section>
+        </Column>
       )}
 
       {!att?.byClass?.length && !exams.length && !gradebooks.length && (
-        <View style={{ alignItems: "center", paddingVertical: 40 }}>
-          <BarChart3 size={48} color={theme.colors.borderStrong} />
-          <Text style={{ color: theme.colors.textGhost, marginTop: theme.spacing.sm }}>Not enough data yet</Text>
-        </View>
+        <EmptyState icon={<BarChart3 size={48} color={colors.border.strong} />} title="Not enough data yet" />
       )}
     </ScrollView>
   );
 }
 
-function BigStat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
-  return (
-    <View style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radius.lg, padding: theme.spacing.md, flex: 1, gap: theme.spacing.xs }}>
-      {icon}
-      <Text style={{ color: theme.colors.textPrimary, fontSize: 24, fontWeight: "bold" }}>{value}</Text>
-      <Text style={{ color: theme.colors.textGhost, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</Text>
-    </View>
-  );
-}
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (<View style={{ marginBottom: theme.spacing.lg }}><Text style={{ color: theme.colors.textFaint, fontSize: 12, fontWeight: "700", marginBottom: theme.spacing.xs + 2, letterSpacing: 1 }}>{title}</Text>{children}</View>);
-}
 function BarRow({ label, value, pct }: { label: string; value: string; pct: number | null }) {
+  const { colors, spacing } = useTheme();
   const p = Math.max(0, Math.min(100, pct || 0));
   return (
-    <View style={{ marginBottom: theme.spacing.xs + 2 }}>
+    <View style={{ marginBottom: spacing.xs + 2 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 5 }}>
-        <Text style={{ color: theme.colors.textPrimary, fontSize: 13, fontWeight: "500" }}>{label}</Text>
-        <Text style={{ color: p >= 75 ? theme.colors.success : theme.colors.warning, fontSize: 13, fontWeight: "700" }}>{value}</Text>
+        <Body tone="primary" style={{ fontFamily: "DM Sans Medium" }}>{label}</Body>
+        <Body style={{ color: p >= 75 ? colors.success : colors.warning, fontFamily: bodyFont("bold") }}>{value}</Body>
       </View>
-      <View style={{ height: 6, backgroundColor: theme.colors.border, borderRadius: 3, overflow: "hidden" }}>
-        <View style={{ height: "100%", width: `${p}%`, backgroundColor: p >= 75 ? theme.colors.success : theme.colors.warning, borderRadius: 3 }} />
+      <View style={{ height: 6, backgroundColor: colors.border.subtle, borderRadius: 3, overflow: "hidden" }}>
+        <View style={{ height: "100%", width: `${p}%`, backgroundColor: p >= 75 ? colors.success : colors.warning, borderRadius: 3 }} />
       </View>
     </View>
   );

@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, RefreshControl } from "react-native";
+import { View, ScrollView, RefreshControl } from "react-native";
 import { studentApi } from "@/lib/api";
-import { theme } from "@/lib/theme";
+import { useTheme } from "@/src/theme";
+import { Card } from "@/src/components/cards";
+import { H2, Body, Caption } from "@/src/components/typography";
+import { ListItem } from "@/src/components/lists";
+import { EmptyState } from "@/src/components/feedback";
 import { Users, BookOpen } from "lucide-react-native";
 
 export default function StudentTeachers() {
+  const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -14,35 +19,30 @@ export default function StudentTeachers() {
   const teachers = data?.teachers || [];
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }} contentContainerStyle={{ padding: theme.spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={theme.colors.accent} />}>
-      <Text style={{ color: theme.colors.textPrimary, fontSize: 24, fontWeight: "bold", marginBottom: 4 }}>My Teachers</Text>
-      {data?.className && <Text style={{ color: theme.colors.textGhost, fontSize: 13, marginBottom: theme.spacing.lg }}>{data.className}</Text>}
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
+      <H2 style={{ marginBottom: spacing.xs }}>My Teachers</H2>
+      {data?.className && <Caption style={{ marginBottom: spacing.lg }}>{data.className}</Caption>}
 
       {teachers.length > 0 ? (
-        <View style={{ gap: theme.spacing.xs + 2 }}>
-          {teachers.map((t: any) => (
-            <View key={t.id} style={{ flexDirection: "row", alignItems: "center", gap: theme.spacing.sm + 2, backgroundColor: theme.colors.surface, borderRadius: theme.radius.md, padding: theme.spacing.sm + 2 }}>
-              <View style={{ width: 46, height: 46, borderRadius: theme.radius.xs + 4, backgroundColor: theme.colors.primary, justifyContent: "center", alignItems: "center" }}>
-                <Text style={{ color: theme.colors.textInverse, fontWeight: "bold", fontSize: 18 }}>{t.name?.charAt(0)?.toUpperCase()}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: theme.colors.textPrimary, fontSize: 15, fontWeight: "600" }}>{t.name}</Text>
-                {t.subject ? (
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 3 }}>
-                    <BookOpen size={12} color={theme.colors.accent} />
-                    <Text style={{ color: theme.colors.accent, fontSize: 12, fontWeight: "600" }}>{t.subject}</Text>
-                  </View>
-                ) : null}
-                {t.role && t.role !== t.subject ? <Text style={{ color: theme.colors.textGhost, fontSize: 11, marginTop: 2 }}>{t.role}</Text> : null}
-              </View>
+        teachers.map((t: any) => (
+          <Card key={t.id} variant="default" padding={spacing.sm + 2} style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm + 2, marginBottom: spacing.xs + 2 }}>
+            <View style={{ width: 46, height: 46, borderRadius: 14, backgroundColor: colors.brand.green, justifyContent: "center", alignItems: "center" }}>
+              <Body tone="inverse" style={{ fontFamily: "DM Sans Bold", fontSize: 18 }}>{t.name?.charAt(0)?.toUpperCase()}</Body>
             </View>
-          ))}
-        </View>
+            <View style={{ flex: 1 }}>
+              <Body tone="primary" style={{ fontFamily: "DM Sans Medium" }}>{t.name}</Body>
+              {t.subject ? (
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 5, marginTop: 3 }}>
+                  <BookOpen size={12} color={colors.brand.greenLight} />
+                  <Caption style={{ color: colors.brand.greenLight }}>{t.subject}</Caption>
+                </View>
+              ) : null}
+              {t.role && t.role !== t.subject ? <Caption style={{ marginTop: 2 }}>{t.role}</Caption> : null}
+            </View>
+          </Card>
+        ))
       ) : (
-        <View style={{ alignItems: "center", paddingVertical: 60 }}>
-          <Users size={48} color={theme.colors.borderStrong} />
-          <Text style={{ color: theme.colors.textGhost, marginTop: theme.spacing.sm }}>No teachers assigned yet</Text>
-        </View>
+        <EmptyState icon={<Users size={48} color={colors.border.strong} />} title="No teachers assigned yet" />
       )}
     </ScrollView>
   );

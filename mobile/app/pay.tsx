@@ -1,13 +1,18 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, ScrollView, RefreshControl } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { WebView } from "react-native-webview";
-import { theme } from "@/lib/theme";
+import { useTheme } from "@/src/theme";
+import { Card } from "@/src/components/cards";
+import { H2, Body } from "@/src/components/typography";
+import { Button } from "@/src/components/buttons";
+import { ActivityIndicator } from "react-native";
 import { CheckCircle2, X } from "lucide-react-native";
 
 export default function PayScreen() {
   const { url, reference } = useLocalSearchParams<{ url: string; reference: string }>();
   const router = useRouter();
+  const { colors, spacing } = useTheme();
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -18,30 +23,28 @@ export default function PayScreen() {
 
   if (done) {
     return (
-      <View style={{ flex: 1, backgroundColor: theme.colors.bgPrimary, justifyContent: "center", alignItems: "center", padding: 30 }}>
-        <CheckCircle2 size={60} color={theme.colors.success} />
-        <Text style={{ color: theme.colors.textPrimary, fontSize: 22, fontWeight: "bold", marginTop: theme.spacing.md }}>Payment received</Text>
-        <Text style={{ color: theme.colors.textSecondary, textAlign: "center", marginTop: theme.spacing.xs }}>Your payment is being verified. Your invoice will update shortly.{"\n"}Ref: {reference}</Text>
-        <TouchableOpacity onPress={() => router.replace("/(parent)/fees")} style={{ marginTop: theme.spacing.xxl, backgroundColor: theme.colors.primary, paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.xl, borderRadius: theme.radius.md }}>
-          <Text style={{ color: theme.colors.textInverse, fontWeight: "700" }}>Back to Fees</Text>
-        </TouchableOpacity>
+      <View style={{ flex: 1, backgroundColor: colors.background.primary, justifyContent: "center", alignItems: "center", padding: spacing.lg }}>
+        <CheckCircle2 size={60} color={colors.success} />
+        <H2 style={{ marginTop: spacing.md }}>Payment received</H2>
+        <Body style={{ textAlign: "center", marginTop: spacing.xs }}>Your payment is being verified. Your invoice will update shortly.{"\n"}Ref: {reference}</Body>
+        <Button variant="primary" size="lg" style={{ marginTop: spacing.xxl }} onPress={() => router.replace("/(parent)/fees")}>Back to Fees</Button>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }}>
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: theme.spacing.md, paddingTop: 52, paddingBottom: theme.spacing.sm + 2, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
-        <Text style={{ color: theme.colors.textPrimary, fontWeight: "700" }}>Secure Payment</Text>
-        <TouchableOpacity onPress={() => router.back()}><X size={22} color={theme.colors.textMuted} /></TouchableOpacity>
+    <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: spacing.lg, paddingTop: 52, paddingBottom: spacing.sm + 2, borderBottomWidth: 1, borderBottomColor: colors.border.subtle }}>
+        <Body tone="primary" style={{ fontFamily: "DM Sans Bold" }}>Secure Payment</Body>
+        <X size={22} color={colors.text.muted} onPress={() => router.back()} />
       </View>
       {loading && (
         <View style={{ position: "absolute", top: "50%", left: 0, right: 0, alignItems: "center" }}>
-          <ActivityIndicator size="large" color={theme.colors.accent} />
-          <Text style={{ color: theme.colors.textMuted, marginTop: theme.spacing.sm + 2 }}>Loading secure checkout…</Text>
+          <ActivityIndicator size="large" color={colors.brand.greenLight} />
+          <Body style={{ marginTop: spacing.sm + 2 }}>Loading secure checkout…</Body>
         </View>
       )}
-      <WebView source={{ uri: url }} onNavigationStateChange={onNav} onLoadEnd={() => setLoading(false)} style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }} />
+      <WebView source={{ uri: url }} onNavigationStateChange={onNav} onLoadEnd={() => setLoading(false)} style={{ flex: 1, backgroundColor: colors.background.primary }} />
     </View>
   );
 }

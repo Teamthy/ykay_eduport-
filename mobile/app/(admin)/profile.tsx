@@ -1,66 +1,58 @@
 import { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { adminApi, logout, getMe } from "@/lib/api";
-import { YkayLogo } from "@/components/YkayLogo";
-import { theme } from "@/lib/theme";
+import { useTheme } from "@/src/theme";
+import { Card } from "@/src/components/cards";
+import { H2, Body, Caption } from "@/src/components/typography";
+import { Badge } from "@/src/components/badges";
+import { Column } from "@/src/components/layout";
+import { AppHeader } from "@/src/components/navigation";
+import { Button } from "@/src/components/buttons";
 import { Mail, Shield, LogOut } from "lucide-react-native";
 
 export default function AdminProfile() {
   const router = useRouter();
+  const { colors, spacing } = useTheme();
   const [user, setUser] = useState<any>(null);
 
-  useEffect(() => {
-    getMe().then((res) => setUser(res?.user));
-    adminApi.dashboard().then((r) => setUser((u) => ({ ...u, roleLabel: r?.admin?.role })));
-  }, []);
+  useEffect(() => { getMe().then((res) => setUser(res?.user)); adminApi.dashboard().then((r) => setUser((u) => ({ ...u, roleLabel: r?.admin?.role }))); }, []);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: theme.colors.bgPrimary }} contentContainerStyle={{ padding: 20, paddingTop: 56 }}>
-      <YkayLogo size={36} textSize={16} />
-      <Text style={{ color: theme.colors.textPrimary, fontSize: 24, fontWeight: "bold", marginTop: 28, marginBottom: 28 }}>Profile</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }}>
+      <AppHeader />
+      <H2 style={{ marginTop: spacing.lg, marginBottom: spacing.xxl }}>Profile</H2>
 
-      <View style={{ alignItems: "center", marginBottom: 28 }}>
-        <View style={{ width: 84, height: 84, borderRadius: 22, backgroundColor: theme.colors.primary, justifyContent: "center", alignItems: "center" }}>
-          <Text style={{ color: "#fff", fontSize: 32, fontWeight: "bold" }}>{user?.name?.charAt(0)?.toUpperCase() || "A"}</Text>
+      <View style={{ alignItems: "center", marginBottom: spacing.xxl }}>
+        <View style={{ width: 84, height: 84, borderRadius: 22, backgroundColor: colors.brand.green, justifyContent: "center", alignItems: "center" }}>
+          <H2 style={{ color: colors.text.inverse, fontSize: 32 }}>{user?.name?.charAt(0)?.toUpperCase() || "A"}</H2>
         </View>
-        <Text style={{ color: theme.colors.textPrimary, fontSize: 20, fontWeight: "bold", marginTop: 12 }}>{user?.name}</Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 8, backgroundColor: `${theme.colors.accent}20`, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 }}>
-          <Shield size={12} color={theme.colors.accent} />
-          <Text style={{ color: theme.colors.accent, fontSize: 11, fontWeight: "700" }}>{user?.roleLabel || user?.role || "Administrator"}</Text>
-        </View>
+        <H2 style={{ fontSize: 20, marginTop: spacing.sm }}>{user?.name}</H2>
+        <Badge tone="accent" style={{ marginTop: spacing.xs + 2 }} icon={<Shield size={12} color={colors.brand.greenLight} />}>{user?.roleLabel || user?.role || "Administrator"}</Badge>
       </View>
 
-      <View style={{ gap: 12, marginBottom: 28 }}>
-        <Row icon={<Mail size={18} color={theme.colors.accent} />} label="Email" value={user?.email || ""} />
-        <Row icon={<Shield size={18} color={theme.colors.accent} />} label="Access" value="School Administrator" />
-      </View>
+      <Column gap={spacing.sm} style={{ marginBottom: spacing.xxl }}>
+        <Row icon={<Mail size={18} color={colors.brand.greenLight} />} label="Email" value={user?.email || ""} />
+        <Row icon={<Shield size={18} color={colors.brand.greenLight} />} label="Access" value="School Administrator" />
+      </Column>
 
-      <View style={{ backgroundColor: theme.colors.surface, borderRadius: 12, padding: 14, marginBottom: 24 }}>
-        <Text style={{ color: theme.colors.textSecondary, fontSize: 12 }}>
-          This is the admin overview. Full school management (students, staff, fees, report cards) is available on the web portal.
-        </Text>
-      </View>
+      <Card variant="default" padding={spacing.sm + 2} style={{ marginBottom: spacing.xxl }}>
+        <Body>This is the admin overview. Full school management (students, staff, fees, report cards) is available on the web portal.</Body>
+      </Card>
 
-      <TouchableOpacity
-        onPress={async () => { await logout(); router.replace("/login"); }}
-        style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, padding: 16, backgroundColor: "#ff444415", borderRadius: theme.radius.md }}
-      >
-        <LogOut size={18} color="#ff4444" />
-        <Text style={{ color: "#ff4444", fontWeight: "700", fontSize: 15 }}>Sign Out</Text>
-      </TouchableOpacity>
+      <Button variant="ghost" fullWidth leftIcon={<LogOut size={18} color={colors.danger} />} onPress={async () => { await logout(); router.replace("/login"); }} style={{ backgroundColor: colors.status.errorBg }}>
+        <Body tone="primary" style={{ color: colors.danger }}>Sign Out</Body>
+      </Button>
     </ScrollView>
   );
 }
 
 function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  const { spacing } = useTheme();
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: theme.colors.surface, borderRadius: 12, padding: 14 }}>
+    <Card variant="default" padding={spacing.sm + 2} style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
       {icon}
-      <View>
-        <Text style={{ color: theme.colors.textFaint, fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>{label}</Text>
-        <Text style={{ color: theme.colors.textPrimary, fontSize: 14, fontWeight: "500" }}>{value}</Text>
-      </View>
-    </View>
+      <Column><Caption>{label}</Caption><Body tone="primary" style={{ fontFamily: "DM Sans Medium" }}>{value}</Body></Column>
+    </Card>
   );
 }
