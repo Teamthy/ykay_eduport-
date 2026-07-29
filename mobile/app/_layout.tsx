@@ -68,6 +68,15 @@ export default function RootLayout() {
           <Stack.Screen name="parent-events" />
           <Stack.Screen name="parent-messages" />
           <Stack.Screen name="teacher-analytics" />
+          <Stack.Screen name="admin-students" />
+          <Stack.Screen name="admin-staff" />
+          <Stack.Screen name="admin-finance" />
+          <Stack.Screen name="admin-fees" />
+          <Stack.Screen name="admin-admissions" />
+          <Stack.Screen name="admin-reports" />
+          <Stack.Screen name="admin-news" />
+          <Stack.Screen name="admin-notifications" />
+          <Stack.Screen name="admin-corrections" />
         </Stack>
         <OfflineIndicator />
       </View>

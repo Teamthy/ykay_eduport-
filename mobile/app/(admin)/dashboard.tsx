@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { ScrollView, RefreshControl, View } from "react-native";
+import { View, ScrollView, RefreshControl, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 import { adminApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
 import { Card } from "@/src/components/cards";
@@ -8,11 +9,12 @@ import { Badge } from "@/src/components/badges";
 import { Row, Column } from "@/src/components/layout";
 import { AppHeader } from "@/src/components/navigation";
 import { bodyFont } from "@/src/theme/typography";
-import { Users, GraduationCap, Layers, CreditCard, Calendar, AlertCircle, Activity } from "lucide-react-native";
+import { GraduationCap, Users, Layers, CreditCard, DollarSign, FileText, Megaphone, Bell, ClipboardCheck, Calendar, ChevronRight } from "lucide-react-native";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -21,16 +23,26 @@ export default function AdminDashboard() {
   useEffect(() => { load(); }, []);
 
   const s = data?.stats;
-  const activity = data?.activity || [];
+
+  const tiles = [
+    { icon: GraduationCap, label: "Students", desc: "Roster & enrolment", route: "/admin-students", count: s?.studentCount },
+    { icon: Users, label: "Staff", desc: "Teaching & non-teaching", route: "/admin-staff", count: s?.teacherCount },
+    { icon: DollarSign, label: "Finance", desc: "Revenue & expenses", route: "/admin-finance" },
+    { icon: CreditCard, label: "Fees", desc: "Outstanding & collections", route: "/admin-fees", count: s?.openInvoiceCount, alert: s?.outstandingFees > 0 },
+    { icon: FileText, label: "Admissions", desc: "Applications to review", route: "/admin-admissions", count: s?.pendingApplications, alert: s?.pendingApplications > 0 },
+    { icon: FileText, label: "Report Cards", desc: "Generate & release", route: "/admin-reports", count: s?.draftReports, alert: s?.draftReports > 0 },
+    { icon: Megaphone, label: "Announcements", desc: "Post school news", route: "/admin-news" },
+    { icon: Bell, label: "Notifications", desc: "Broadcast alerts", route: "/admin-notifications" },
+    { icon: ClipboardCheck, label: "Attendance", desc: "Correction requests", route: "/admin-corrections", count: s?.pendingCorrections, alert: s?.pendingCorrections > 0 },
+  ];
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
       <AppHeader />
-
-      <Caption>School Overview</Caption>
+      <Caption style={{ marginTop: spacing.lg }}>School Overview</Caption>
       <H2 style={{ marginTop: 2, marginBottom: spacing.lg }}>{data?.admin?.name || "Administrator"}</H2>
 
-      {/* People */}
+      {/* Key stats */}
       <Row gap={spacing.sm} justify="flex-start" style={{ flexWrap: "wrap", marginBottom: spacing.md }}>
         <Stat icon={<GraduationCap size={18} color={colors.brand.greenLight} />} value={s?.studentCount} label="Students" />
         <Stat icon={<Users size={18} color={colors.brand.greenLight} />} value={s?.teacherCount} label="Staff" />
@@ -38,47 +50,34 @@ export default function AdminDashboard() {
         <Stat icon={<Users size={18} color={colors.brand.greenLight} />} value={s?.parentCount} label="Parents" />
       </Row>
 
-      {/* Outstanding fees */}
-      <Card variant="bordered" style={{ marginBottom: spacing.md, borderColor: s?.outstandingFees > 0 ? colors.danger : colors.success }}>
-        <Row align="center" gap={spacing.xs}>
-          <CreditCard size={18} color={s?.outstandingFees > 0 ? colors.danger : colors.success} />
-          <Label>Outstanding Fees</Label>
-        </Row>
+      {/* Outstanding fees highlight */}
+      <Card variant="bordered" style={{ marginBottom: spacing.lg, borderColor: s?.outstandingFees > 0 ? colors.danger : colors.success }}>
+        <Row align="center" gap={spacing.xs}><CreditCard size={18} color={s?.outstandingFees > 0 ? colors.danger : colors.success} /><Label>Outstanding Fees</Label></Row>
         <H2 style={{ color: s?.outstandingFees > 0 ? colors.danger : colors.success, marginTop: spacing.xs }}>{naira(s?.outstandingFees)}</H2>
-        <Caption style={{ marginTop: 4 }}>{s?.openInvoiceCount || 0} open invoices</Caption>
+        <Caption style={{ marginTop: 4 }}>{s?.openInvoiceCount || 0} open invoices · {s?.attendanceRateToday != null ? `${s.attendanceRateToday}% present today` : ""}</Caption>
       </Card>
 
-      {/* Attendance today */}
-      <Row gap={spacing.sm} style={{ marginBottom: spacing.md }}>
-        <Stat icon={<Calendar size={18} color={colors.brand.greenLight} />} value={s?.attendanceRateToday != null ? `${s.attendanceRateToday}%` : "—"} label="Present Today" />
-        <Stat icon={<Calendar size={18} color={colors.brand.greenLight} />} value={`${s?.presentToday || 0}/${s?.attendanceMarkedToday || 0}`} label="Marked Today" />
-      </Row>
-
-      {/* Needs attention */}
-      {(s?.pendingApplications > 0 || s?.pendingCorrections > 0 || s?.draftReports > 0) && (
-        <Column gap={spacing.xs + 2} style={{ marginBottom: spacing.md }}>
-          <Label>Needs Attention</Label>
-          {s?.pendingApplications > 0 && <Pending text={`${s.pendingApplications} admission applications to review`} />}
-          {s?.pendingCorrections > 0 && <Pending text={`${s.pendingCorrections} attendance corrections pending`} />}
-          {s?.draftReports > 0 && <Pending text={`${s.draftReports} report cards in draft`} />}
-        </Column>
-      )}
-
-      {/* Activity */}
-      {activity.length > 0 && (
-        <Column gap={spacing.xs}>
-          <Label style={{ marginBottom: spacing.xs }}>Recent Activity</Label>
-          {activity.slice(0, 8).map((a: any, i: number) => (
-            <Card key={i} variant="default" padding={12} style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm + 2 }}>
-              <Activity size={15} color={colors.brand.greenLight} />
-              <Column style={{ flex: 1 }}>
-                <Body tone="primary" numberOfLines={1}>{a.action}</Body>
-                <Caption>{a.actorName}{a.actorRole ? ` · ${a.actorRole}` : ""}</Caption>
-              </Column>
-            </Card>
-          ))}
-        </Column>
-      )}
+      {/* Control center grid */}
+      <Label style={{ marginBottom: spacing.sm }}>Control Center</Label>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+        {tiles.map((t) => {
+          const Icon = t.icon;
+          return (
+            <TouchableOpacity key={t.label} onPress={() => router.push(t.route as any)} style={{ width: "47%" }}>
+              <Card variant="default" padding={spacing.md} style={{ height: 110 }}>
+                <Row align="center" justify="space-between">
+                  <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: `${colors.brand.green}20`, justifyContent: "center", alignItems: "center" }}>
+                    <Icon size={20} color={colors.brand.greenLight} />
+                  </View>
+                  {t.count != null && t.count > 0 && <Badge tone={t.alert ? "warning" : "neutral"}>{String(t.count)}</Badge>}
+                </Row>
+                <Body tone="primary" style={{ fontFamily: bodyFont("bold"), marginTop: spacing.sm + 2 }}>{t.label}</Body>
+                <Caption numberOfLines={1}>{t.desc}</Caption>
+              </Card>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </ScrollView>
   );
 }
@@ -86,20 +85,10 @@ export default function AdminDashboard() {
 function Stat({ icon, value, label }: { icon: React.ReactNode; value: any; label: string }) {
   const { spacing } = useTheme();
   return (
-    <Card variant="default" padding={spacing.md} style={{ width: "48%" }}>
+    <Card variant="default" padding={spacing.md} style={{ width: "47%" }}>
       {icon}
       <H2 style={{ marginTop: spacing.xs }}>{value ?? "—"}</H2>
       <Caption style={{ marginTop: 4 }}>{label}</Caption>
-    </Card>
-  );
-}
-
-function Pending({ text }: { text: string }) {
-  const { colors, spacing } = useTheme();
-  return (
-    <Card variant="default" padding={12} style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm + 2 }}>
-      <AlertCircle size={15} color={colors.warning} />
-      <Body style={{ flex: 1 }}>{text}</Body>
     </Card>
   );
 }

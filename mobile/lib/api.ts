@@ -172,4 +172,23 @@ export const parentApi = {
 
 export const adminApi = {
   dashboard: () => api("/api/admin/dashboard"),
+  createStaff: (data: { name: string; email: string; role: string; phone?: string }) =>
+    api("/api/admin/staff/direct", { method: "POST", body: JSON.stringify(data) }),
+  students: () => api("/api/admin/students"),
+  finances: () => api("/api/admin/finances/overview"),
+  fees: () => api("/api/admin/fees/overview"),
+  sendFeeReminders: () => api("/api/admin/fees/reminders", { method: "POST" }),
+  admissions: () => api("/api/admin/admissions"),
+  reportCards: () => api("/api/admin/report-cards/overview"),
+  generateReports: () => api("/api/admin/report-cards/generate", { method: "POST" }),
+  news: () => api("/api/admin/news"),
+  postNews: (data: { title: string; excerpt: string; content: string; category: string; isPublished: boolean }) =>
+    api("/api/admin/news", { method: "POST", body: JSON.stringify(data) }),
+  notifications: (status?: string) =>
+    api("/api/admin/notifications" + (status ? `?status=${status}` : "")),
+  broadcast: (data: { title: string; body: string; channels: string[]; audience: string }) =>
+    api("/api/admin/notifications", { method: "POST", body: JSON.stringify(data) }),
+  attendanceCorrections: () => api("/api/admin/attendance/corrections"),
+  attendanceAnalytics: () => api("/api/admin/attendance/analytics"),
+  classManager: () => api("/api/admin/class-manager"),
 };
