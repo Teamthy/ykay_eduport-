@@ -35,7 +35,6 @@ export default function PortalSidebar({ portalName, portalType, items }: PortalS
   };
 
   return (
-
     <aside className="lg:w-[280px] shrink-0">
       <div className="sticky top-24 space-y-4">
         <div className="rounded-2xl border border-white/10 bg-brand-navy p-4">
@@ -67,10 +66,11 @@ export default function PortalSidebar({ portalName, portalType, items }: PortalS
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${isActive
+                className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+                  isActive
                     ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
                     : "border-transparent text-[var(--text-muted)] hover:bg-[var(--surface-disabled)] hover:text-[var(--text-primary)]"
-                  }`}
+                }`}
               >
                 <item.icon size={16} />
                 <span className="flex-1 tracking-wide">{item.label}</span>
