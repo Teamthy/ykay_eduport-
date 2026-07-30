@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cacheGet, cacheSet } from "@/lib/offline/db";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -76,16 +77,31 @@ export default function StudentDashboardPage() {
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isStale, setIsStale] = useState(false);
 
   useEffect(() => {
+    const url = "/api/student/dashboard";
     (async () => {
+      const cached = await cacheGet<DashboardResponse>(url);
+      if (cached) {
+        setData(cached.data);
+        setIsStale(true);
+        setLoading(false);
+      }
+      if (typeof navigator !== "undefined" && !navigator.onLine) return;
+      setLoading(!cached);
       try {
-        const response = await fetch("/api/student/dashboard", { cache: "no-store" });
+        const response = await fetch(url, { cache: "no-store" });
         const body = (await response.json()) as DashboardResponse & { error?: string };
         if (!response.ok) throw new Error(body.error || "Unable to load your dashboard.");
         setData(body);
+        setIsStale(false);
+        await cacheSet(url, body);
       } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "Unable to load your dashboard.");
+        if (!cached)
+          setError(
+            loadError instanceof Error ? loadError.message : "Unable to load your dashboard.",
+          );
       } finally {
         setLoading(false);
       }

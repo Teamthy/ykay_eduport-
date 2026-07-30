@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cacheGet, cacheSet } from "@/lib/offline/db";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
@@ -74,24 +75,39 @@ export default function StudentReportCardsPage() {
   const [data, setData] = useState<Response | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isStale, setIsStale] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState("");
 
   useEffect(() => {
     let active = true;
     async function loadReports() {
-      setLoading(true);
+      const url = "/api/student/report-cards";
+      const cached = await cacheGet<Response>(url);
+      if (cached) {
+        if (!active) return;
+        setData(cached.data);
+        setSelectedReportId(cached.data.reports[0]?.id || "");
+        setIsStale(true);
+        setLoading(false);
+      }
+      if (typeof navigator !== "undefined" && !navigator.onLine) return;
+      setLoading(!cached);
       setError("");
       try {
-        const response = await fetch("/api/student/report-cards", { cache: "no-store" });
+        const response = await fetch(url, { cache: "no-store" });
         const body = (await response.json()) as Response & { error?: string };
         if (!response.ok) throw new Error(body.error || "Unable to load report cards.");
         if (!active) return;
         setData(body);
         setSelectedReportId(body.reports[0]?.id || "");
+        setIsStale(false);
+        await cacheSet(url, body);
       } catch (loadError) {
         if (!active) return;
-        setData(null);
-        setError(loadError instanceof Error ? loadError.message : "Unable to load report cards.");
+        if (!cached) {
+          setData(null);
+          setError(loadError instanceof Error ? loadError.message : "Unable to load report cards.");
+        }
       } finally {
         if (active) setLoading(false);
       }

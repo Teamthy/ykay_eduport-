@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cacheGet, cacheSet } from "@/lib/offline/db";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
@@ -86,26 +87,39 @@ export default function ParentReportCardsPage() {
   const [data, setData] = useState<Response | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isStale, setIsStale] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [selectedReportId, setSelectedReportId] = useState("");
 
   async function loadReports(studentId?: string) {
-    setLoading(true);
+    const params = new URLSearchParams();
+    if (studentId || selectedStudentId) params.set("studentId", studentId || selectedStudentId);
+    const url = `/api/parent/report-cards?${params.toString()}`;
+    const cached = await cacheGet<Response>(url);
+    if (cached) {
+      setData(cached.data);
+      if (cached.data.selectedChild?.id) setSelectedStudentId(cached.data.selectedChild.id);
+      setSelectedReportId(cached.data.reports[0]?.id || "");
+      setIsStale(true);
+      setLoading(false);
+    }
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+    setLoading(!cached);
     setError("");
     try {
-      const params = new URLSearchParams();
-      if (studentId || selectedStudentId) params.set("studentId", studentId || selectedStudentId);
-      const response = await fetch(`/api/parent/report-cards?${params.toString()}`, {
-        cache: "no-store",
-      });
+      const response = await fetch(url, { cache: "no-store" });
       const body = (await response.json()) as Response & { error?: string };
       if (!response.ok) throw new Error(body.error || "Unable to load report cards.");
       setData(body);
       if (body.selectedChild?.id) setSelectedStudentId(body.selectedChild.id);
       setSelectedReportId(body.reports[0]?.id || "");
+      setIsStale(false);
+      await cacheSet(url, body);
     } catch (loadError) {
-      setData(null);
-      setError(loadError instanceof Error ? loadError.message : "Unable to load report cards.");
+      if (!cached) {
+        setData(null);
+        setError(loadError instanceof Error ? loadError.message : "Unable to load report cards.");
+      }
     } finally {
       setLoading(false);
     }
