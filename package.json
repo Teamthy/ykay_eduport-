@@ -14,6 +14,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:migrate:dev": "prisma migrate dev",
+    "postinstall": "prisma generate",
     "prebuild": "prisma generate",
     "db:seed": "tsx prisma/seed-all.ts",
     "db:seed-plans": "tsx prisma/seed-plans.ts",
