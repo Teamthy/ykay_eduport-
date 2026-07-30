@@ -7,6 +7,7 @@ import { Anton_400Regular } from "@expo-google-fonts/anton";
 import { DM_Sans_400Regular, DM_Sans_500Medium, DM_Sans_700Bold } from "@expo-google-fonts/dm-sans";
 import { getMe, type SessionUser } from "@/lib/api";
 import { setAuthExpiredHandler } from "@/lib/http";
+import { configureNotifications, registerForPushNotifications } from "@/lib/notifications";
 import { ThemeProvider } from "@/src/theme";
 import { Colors } from "@/src/theme/colors";
 import OfflineIndicator from "@/components/OfflineIndicator";
@@ -24,11 +25,14 @@ export default function RootLayout() {
   const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
-    // Hardening: any 401 (expired/revoked session) → clear token + back to login.
+    configureNotifications();
     setAuthExpiredHandler(() => router.replace("/login"));
     let cancelled = false;
     getMe()
-      .then((res) => { if (!cancelled) setUser(res?.user ?? null); })
+      .then((res) => {
+        if (!cancelled) setUser(res?.user ?? null);
+        if (res?.user) void registerForPushNotifications();
+      })
       .catch(() => { if (!cancelled) setUser(null); });
     const t = setTimeout(() => setTimedOut(true), 4000);
     return () => { cancelled = true; clearTimeout(t); };

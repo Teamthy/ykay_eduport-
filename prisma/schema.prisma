@@ -1253,3 +1253,16 @@ model TenantBranding {
 
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 }
+
+/// Push-notification device tokens (Expo push tokens) for the mobile app.
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  schoolId  String
+  token     String
+  platform  String   @default("android")
+  createdAt DateTime @default(now())
+
+  @@unique([userId, token])
+  @@index([schoolId])
+}

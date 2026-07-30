@@ -6,6 +6,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
+import DownloadForOffline from "@/components/DownloadForOffline";
 import {
   LayoutDashboard,
   CalendarDays,
@@ -112,10 +113,10 @@ export default function StudentDashboardPage() {
   const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
   const initials = data
     ? data.student.displayName
-        .split(" ")
-        .map((part) => part[0])
-        .slice(0, 2)
-        .join("")
+      .split(" ")
+      .map((part) => part[0])
+      .slice(0, 2)
+      .join("")
     : "";
 
   const heroStats = [
@@ -150,6 +151,7 @@ export default function StudentDashboardPage() {
   return (
     <>
       <Header />
+      <div className="fixed right-4 top-20 z-50"><DownloadForOffline role="student" /></div>
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         {/* Hero */}
         <section className="pt-24 pb-10 bg-brand-navy px-6 relative overflow-hidden">
@@ -283,13 +285,12 @@ export default function StudentDashboardPage() {
                                 })}
                               </span>
                               <span
-                                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${
-                                  entry.status === "PRESENT"
-                                    ? "bg-brand-green/10 text-brand-green"
-                                    : entry.status === "LATE"
-                                      ? "bg-brand-orange/10 text-brand-orange"
-                                      : "bg-red-500/10 text-red-500"
-                                }`}
+                                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${entry.status === "PRESENT"
+                                  ? "bg-brand-green/10 text-brand-green"
+                                  : entry.status === "LATE"
+                                    ? "bg-brand-orange/10 text-brand-orange"
+                                    : "bg-red-500/10 text-red-500"
+                                  }`}
                               >
                                 {entry.status === "PRESENT" ? (
                                   <CheckCircle2 size={11} />
