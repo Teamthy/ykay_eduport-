@@ -5,8 +5,13 @@
  */
 import * as SecureStore from "expo-secure-store";
 
-/** Point this at the deployed Ykay College backend (or localhost:3000 for dev). */
-export const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+/**
+ * Point this at the deployed Ykay College backend.
+ * Default is the live Vercel backend so the app works even if the build-time
+ * EXPO_PUBLIC_API_URL env var isn't passed. Override locally with
+ * EXPO_PUBLIC_API_URL=http://<lan-ip>:3000 for dev against a local server.
+ */
+export const API_BASE = process.env.EXPO_PUBLIC_API_URL || "https://ykay-eduport2.vercel.app";
 
 const SESSION_KEY = "ykay_session";
 
