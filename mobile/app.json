@@ -24,9 +24,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-asset",
       "expo-font",
-      "expo-secure-store",
+      "expo-asset",
       "expo-sqlite"
     ],
     "experiments": {
