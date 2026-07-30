@@ -99,10 +99,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <link rel="icon" href={faviconUrl} type="image/png" />
         <link rel="apple-touch-icon" href={faviconUrl} />
-        {/* EDUos: inject per-tenant brand palette as CSS variable overrides */}
+        {/* EDUos: inject per-tenant brand palette as CSS variable overrides.
+            Only navy / navy-light / green are driven by tenant branding so the
+            nuanced green-dark/light + full orange shades in globals.css are
+            preserved (gives Ykay its proper depth, not flat blue). */}
         <style
           dangerouslySetInnerHTML={{
-            __html: `:root{--color-brand-navy:${primary};--color-brand-navy-light:${secondary};--color-brand-green:${accent};--color-brand-green-dark:${accent};--color-brand-green-light:${accent};}`,
+            __html: `:root{--color-brand-navy:${primary};--color-brand-navy-light:${secondary};--color-brand-green:${accent};}`,
           }}
         />
         {/* ANTI-FLASH: force dark mode as default before hydration */}
