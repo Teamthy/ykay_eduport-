@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { cacheGet, cacheSet } from "@/lib/offline/db";
 import Link from "next/link";
-import Header from "@/components/Header";
+import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import DownloadForOffline from "@/components/DownloadForOffline";
@@ -150,10 +150,14 @@ export default function StudentDashboardPage() {
 
   return (
     <>
+<<<<<<< ours
       <Header />
       <div className="fixed right-4 top-20 z-50">
         <DownloadForOffline role="student" />
       </div>
+=======
+      <PortalTopbar />
+>>>>>>> theirs
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         {/* Hero */}
         <section className="pt-24 pb-10 bg-brand-navy px-6 relative overflow-hidden">

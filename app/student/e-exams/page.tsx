@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import Header from "@/components/Header";
+import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import {
@@ -97,7 +97,7 @@ const EXAMS = [
 export default function EExamsPage() {
   return (
     <>
-      <Header />
+      <PortalTopbar />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6">
           <div className="mx-auto max-w-7xl">

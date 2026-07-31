@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
-import Header from "@/components/Header";
+import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import { ALL_QUESTIONS } from "@/lib/questionBank";
@@ -28,7 +28,7 @@ export default function AdminQuestionsPage() {
 
   return (
     <>
-      <Header />
+      <PortalTopbar />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6">
           <div className="mx-auto max-w-7xl">

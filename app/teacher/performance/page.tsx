@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Header from "@/components/Header";
+import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useApi } from "@/lib/useApi";
@@ -133,7 +133,7 @@ export default function PerformancePage() {
 
   return (
     <>
-      <Header />
+      <PortalTopbar />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6">
           <div className="mx-auto max-w-7xl">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Header from "@/components/Header";
+import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -121,7 +121,7 @@ export default function AdminClassManagerPage() {
 
   return (
     <>
-      <Header />
+      <PortalTopbar />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-6 pt-28 pb-14">
           <div className="mx-auto max-w-7xl">

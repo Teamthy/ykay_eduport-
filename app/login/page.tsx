@@ -78,7 +78,7 @@ function LoginForm() {
   };
 
   return (
-    <main className="min-h-screen bg-brand-navy px-6 py-16">
+    <main className="min-h-screen grid place-items-center bg-brand-navy p-6">
       <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl md:grid-cols-2">
         <section className="bg-brand-navy p-9 text-white md:p-12">
           <Link
@@ -105,55 +105,67 @@ function LoginForm() {
             to sign in or create a free account.
           </p>
         </section>
-        <section className="p-9 md:p-12">
-          <h2 className="font-display text-3xl tracking-widest text-brand-navy">
-            {context.heading}
-          </h2>
-          <p className="mt-2 text-sm text-slate-500">{context.sub}</p>
-          {error && (
-            <p
-              role="alert"
-              className="mt-5 flex gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-700"
+        <section className="relative overflow-hidden p-9 md:p-12">
+          {/* Portal-themed background on the form side (kept readable) */}
+          <div className="absolute inset-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1000&q=80"
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-white/92 backdrop-blur-[2px]" />
+          </div>
+          <div className="relative">
+            <h2 className="font-display text-3xl tracking-widest text-brand-navy">
+              {context.heading}
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">{context.sub}</p>
+            {error && (
+              <p
+                role="alert"
+                className="mt-5 flex gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-700"
+              >
+                <AlertCircle size={17} /> {error}
+              </p>
+            )}
+            <form onSubmit={submit} className="mt-7 space-y-5">
+              <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
+                Email
+                <input
+                  required
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+              </label>
+              <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
+                Password
+                <input
+                  required
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+              </label>
+              <button
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-4 text-sm font-bold uppercase tracking-widest text-white disabled:opacity-50"
+              >
+                <LockKeyhole size={16} /> {loading ? "Signing in" : "Sign in"}
+              </button>
+            </form>
+            <Link
+              href="/reset-password"
+              className="mt-6 block text-center text-sm font-semibold text-brand-green hover:underline"
             >
-              <AlertCircle size={17} /> {error}
-            </p>
-          )}
-          <form onSubmit={submit} className="mt-7 space-y-5">
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
-              Email
-              <input
-                required
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              />
-            </label>
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
-              Password
-              <input
-                required
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
-              />
-            </label>
-            <button
-              disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-4 text-sm font-bold uppercase tracking-widest text-white disabled:opacity-50"
-            >
-              <LockKeyhole size={16} /> {loading ? "Signing in" : "Sign in"}
-            </button>
-          </form>
-          <Link
-            href="/reset-password"
-            className="mt-6 block text-center text-sm font-semibold text-brand-green hover:underline"
-          >
-            Forgot password?
-          </Link>
+              Forgot password?
+            </Link>
+          </div>
         </section>
       </div>
     </main>

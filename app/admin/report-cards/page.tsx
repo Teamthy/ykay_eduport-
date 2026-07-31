@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Header from "@/components/Header";
+import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import LiveReportCardPreview from "@/components/LiveReportCardPreview";
@@ -113,7 +113,7 @@ export default function AdminReportCardsPage() {
 
   return (
     <>
-      <Header />
+      <PortalTopbar />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy pt-24 pb-14">
           <div className="mx-auto max-w-7xl px-6">

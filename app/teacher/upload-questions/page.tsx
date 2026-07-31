@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import Header from "@/components/Header";
+import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
-import PortalTopbar from "@/components/PortalTopbar";
 import { useApi } from "@/lib/useApi";
 import { useToast } from "@/components/Toast";
 import {

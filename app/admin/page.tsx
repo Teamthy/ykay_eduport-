@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Header from "@/components/Header";
+import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import {
@@ -117,7 +117,7 @@ export default function AdminDashboardPage() {
 
   return (
     <>
-      <Header />
+      <PortalTopbar />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         {/* Hero */}
         <section className="pt-24 pb-12 bg-brand-navy px-6 relative overflow-hidden">

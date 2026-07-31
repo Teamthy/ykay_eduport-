@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Header from "@/components/Header";
+import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import { ALL_QUESTIONS } from "@/lib/questionBank";
@@ -141,7 +141,7 @@ export default function WAECPracticePage() {
 
   return (
     <>
-      <Header />
+      <PortalTopbar />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-gradient-to-l from-brand-orange to-transparent" />

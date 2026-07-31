@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Header from "@/components/Header";
+import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import { FileSpreadsheet, LoaderCircle, Printer, TrendingUp } from "lucide-react";
@@ -65,7 +65,7 @@ export default function AdminBroadsheetPage() {
   return (
     <>
       <div className="no-print">
-        <Header />
+        <PortalTopbar />
       </div>
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-6 pt-28 pb-14 no-print">

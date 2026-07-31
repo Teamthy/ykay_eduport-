@@ -8,7 +8,9 @@ import { Download, Smartphone, QrCode } from "lucide-react";
  * client-side via api.qrserver.com — no extra dependency.
  */
 export default function MobileAppCTA() {
+  // Diawi (primary, short link + QR) and GitHub Release (fallback).
   const apkUrl = process.env.NEXT_PUBLIC_APK_URL;
+  const fallbackUrl = process.env.NEXT_PUBLIC_APK_FALLBACK_URL;
   const qr = apkUrl
     ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=${encodeURIComponent(
         apkUrl,
@@ -35,9 +37,9 @@ export default function MobileAppCTA() {
               <span className="text-brand-green">YOUR POCKET</span>
             </h2>
             <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-8 leading-relaxed">
-              Results, attendance, fees, timetables, CBT practice and push
-              notifications — all offline-ready. Download the Android app and
-              sign in with your full name and the shared student password.
+              Results, attendance, fees, timetables, CBT practice and push notifications — all
+              offline-ready. Download the Android app and sign in with your full name and the shared
+              student password.
             </p>
 
             <div className="flex flex-wrap items-center gap-5">
@@ -47,6 +49,16 @@ export default function MobileAppCTA() {
               >
                 <Download size={18} /> Download for Android
               </a>
+              {fallbackUrl && (
+                <a
+                  href={fallbackUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white"
+                >
+                  or download via GitHub ↗
+                </a>
+              )}
               <div className="flex items-center gap-2 text-white/60 font-body text-xs">
                 <Smartphone size={16} className="text-brand-green" />
                 Android 8+ · ~50 MB · No Play Store needed
@@ -56,8 +68,7 @@ export default function MobileAppCTA() {
             {!apkUrl && (
               <p className="mt-5 text-xs text-white/40">
                 The download link will appear here once{" "}
-                <code className="text-brand-green">NEXT_PUBLIC_APK_URL</code> is
-                set.
+                <code className="text-brand-green">NEXT_PUBLIC_APK_URL</code> is set.
               </p>
             )}
           </div>
@@ -88,8 +99,7 @@ export default function MobileAppCTA() {
                   )}
                 </div>
                 <p className="mt-4 max-w-[16rem] text-xs leading-relaxed text-white/55">
-                  Point your phone camera at the code, tap the notification, and
-                  install.
+                  Point your phone camera at the code, tap the notification, and install.
                 </p>
               </div>
             </div>

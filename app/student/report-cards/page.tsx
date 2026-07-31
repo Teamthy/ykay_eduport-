@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { cacheGet, cacheSet } from "@/lib/offline/db";
-import Header from "@/components/Header";
+import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import LiveReportCardPreview from "@/components/LiveReportCardPreview";
@@ -123,7 +123,7 @@ export default function StudentReportCardsPage() {
 
   return (
     <>
-      <Header />
+      <PortalTopbar />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="px-6 pb-10 pt-24">
           <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl md:p-12">
