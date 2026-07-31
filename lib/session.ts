@@ -1,5 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import type { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
@@ -75,8 +75,22 @@ export async function verifySession(token: string): Promise<SessionUser | null> 
 }
 
 export async function getSession() {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  return token ? verifySession(token) : null;
+  // 1) Web browser sessions — signed cookie
+  const cookieToken = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (cookieToken) {
+    const session = await verifySession(cookieToken);
+    if (session) return session;
+  }
+  // 2) Mobile / API clients — Authorization: Bearer (same JWT, different transport)
+  const authHeader = (await headers()).get("authorization") || "";
+  if (authHeader.toLowerCase().startsWith("bearer ")) {
+    const bearer = authHeader.slice(7).trim();
+    if (bearer) {
+      const session = await verifySession(bearer);
+      if (session) return session;
+    }
+  }
+  return null;
 }
 
 export function sessionCookie(token: string) {
