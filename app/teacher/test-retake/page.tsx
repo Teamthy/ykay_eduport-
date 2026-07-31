@@ -70,7 +70,9 @@ export default function TestRetakePage() {
   const toggleStudent = (cls: string, id: string) => {
     setStudents((prev) => ({
       ...prev,
-      [cls]: prev[cls].map((s: any) => (s.id === id ? { ...(s as any), selected: !s.selected } : s)),
+      [cls]: prev[cls].map((s: any) =>
+        s.id === id ? { ...(s as any), selected: !s.selected } : s,
+      ),
     }));
   };
 

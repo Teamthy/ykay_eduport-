@@ -46,7 +46,9 @@ describe("Finance — Collision-safe receipt/reference generation", () => {
   });
 
   it("generateUniqueReceiptNumber checks DB for collisions", async () => {
-    mockPrisma.feePayment.findUnique.mockResolvedValueOnce({ id: "existing" }).mockResolvedValueOnce(null);
+    mockPrisma.feePayment.findUnique
+      .mockResolvedValueOnce({ id: "existing" })
+      .mockResolvedValueOnce(null);
 
     const { generateUniqueReceiptNumber } = await import("@/lib/finance");
     const receipt = await generateUniqueReceiptNumber();

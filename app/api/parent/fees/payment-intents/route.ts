@@ -34,7 +34,10 @@ export async function POST(request: NextRequest) {
   //    /api/admin/students using the IdempotencyRecord table. ──
   const idemKey = request.headers.get("x-idempotency-key")?.trim();
   if (!idemKey || idemKey.length < 16) {
-    return jsonNoStore({ error: "An x-idempotency-key header (min. 16 chars) is required." }, { status: 400 });
+    return jsonNoStore(
+      { error: "An x-idempotency-key header (min. 16 chars) is required." },
+      { status: 400 },
+    );
   }
   const existingPayment = await prisma.idempotencyRecord.findUnique({
     where: {

@@ -12,7 +12,8 @@ export async function GET() {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   const [attendanceSessions, examStats, gradebooks] = await Promise.all([
-    prisma.attendanceSession.findMany({ take: 200,
+    prisma.attendanceSession.findMany({
+      take: 200,
       where: {
         teacherProfileId: ctx.profile.id,
         sessionDate: { gte: thirtyDaysAgo },
@@ -22,14 +23,16 @@ export async function GET() {
         entries: { select: { status: true } },
       },
     }),
-    prisma.exam.findMany({ take: 200,
+    prisma.exam.findMany({
+      take: 200,
       where: { teacherProfileId: ctx.profile.id },
       include: {
         classroom: { select: { displayName: true } },
         attempts: { select: { totalScore: true } },
       },
     }),
-    prisma.subjectGradebook.findMany({ take: 200,
+    prisma.subjectGradebook.findMany({
+      take: 200,
       where: { teacherProfileId: ctx.profile.id },
       include: {
         classroom: { select: { displayName: true } },
@@ -44,9 +47,7 @@ export async function GET() {
   const byClass: Record<string, { present: number; total: number }> = {};
 
   for (const session of attendanceSessions) {
-    const present = session.entries.filter(
-      (e) => e.status === AttendanceStatus.PRESENT,
-    ).length;
+    const present = session.entries.filter((e) => e.status === AttendanceStatus.PRESENT).length;
     const total = session.entries.length;
     totalPresent += present;
     totalEntries += total;
@@ -63,10 +64,8 @@ export async function GET() {
     const avgScore =
       e.attempts.length > 0
         ? Math.round(
-            e.attempts.reduce(
-              (sum, a) => sum + (a.totalScore / maxMarks) * 100,
-              0,
-            ) / e.attempts.length,
+            e.attempts.reduce((sum, a) => sum + (a.totalScore / maxMarks) * 100, 0) /
+              e.attempts.length,
           )
         : null;
 
@@ -84,15 +83,11 @@ export async function GET() {
       formClassName: ctx.formClassName,
     },
     attendance: {
-      overallRate:
-        totalEntries > 0 ? Math.round((totalPresent / totalEntries) * 100) : null,
+      overallRate: totalEntries > 0 ? Math.round((totalPresent / totalEntries) * 100) : null,
       totalSessions: attendanceSessions.length,
       byClass: Object.entries(byClass).map(([name, data]) => ({
         className: name,
-        rate:
-          data.total > 0
-            ? Math.round((data.present / data.total) * 100)
-            : null,
+        rate: data.total > 0 ? Math.round((data.present / data.total) * 100) : null,
         sessions: data.total,
       })),
     },
@@ -103,10 +98,7 @@ export async function GET() {
       entryCount: g.entries.length,
       avgScore:
         g.entries.length > 0
-          ? Math.round(
-              g.entries.reduce((sum, e) => sum + (e.total || 0), 0) /
-                g.entries.length,
-            )
+          ? Math.round(g.entries.reduce((sum, e) => sum + (e.total || 0), 0) / g.entries.length)
           : null,
     })),
   });

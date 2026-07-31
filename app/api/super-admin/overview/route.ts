@@ -64,11 +64,13 @@ export async function GET() {
       take: 8,
       include: { actor: { select: { name: true, email: true, role: true } } },
     }),
-    prisma.feePayment.findMany({ take: 200,
+    prisma.feePayment.findMany({
+      take: 200,
       where: { status: FeePaymentStatus.COMPLETED },
       select: { amount: true, paidAt: true },
     }),
-    prisma.feeInvoice.findMany({ take: 200,
+    prisma.feeInvoice.findMany({
+      take: 200,
       select: { totalAmount: true, amountPaid: true, balanceDue: true, status: true },
     }),
     prisma.expense.findMany({ take: 200, select: { amount: true } }).catch(() => []),

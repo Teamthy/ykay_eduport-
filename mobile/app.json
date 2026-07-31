@@ -24,9 +24,18 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font",
-      "expo-asset",
-      "expo-sqlite"
+      "expo-local-authentication",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true
+          },
+          "ios": {
+            "flipper": false
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

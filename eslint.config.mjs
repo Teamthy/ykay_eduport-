@@ -13,6 +13,7 @@ const eslintConfig = [
       "prisma/migrations/**",
       "scripts/**",
       "tests/**",
+      "mobile/**",
     ],
   },
   ...nextCoreWebVitals,

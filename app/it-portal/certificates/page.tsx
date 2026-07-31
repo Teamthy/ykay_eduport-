@@ -138,7 +138,9 @@ export default function CertificatesPage() {
               <GraduationCap size={22} className="text-[#4EC54D]" />
             </div>
             <div className="hidden sm:block">
-              <div className="text-[13px] font-extrabold tracking-wider text-[var(--text-primary)]">YKAY</div>
+              <div className="text-[13px] font-extrabold tracking-wider text-[var(--text-primary)]">
+                YKAY
+              </div>
               <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#4EC54D]">
                 IT Hub
               </div>
@@ -200,8 +202,12 @@ export default function CertificatesPage() {
                     <stat.icon size={20} style={{ color: stat.color }} />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-[var(--text-primary)]">{stat.value}</div>
-                    <div className="text-[11px] font-medium text-[var(--text-muted)]">{stat.label}</div>
+                    <div className="text-2xl font-bold text-[var(--text-primary)]">
+                      {stat.value}
+                    </div>
+                    <div className="text-[11px] font-medium text-[var(--text-muted)]">
+                      {stat.label}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -253,7 +259,9 @@ export default function CertificatesPage() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--text-muted)]">Level</span>
-                        <span className="font-bold text-[var(--text-primary)]">{cert.course.level}</span>
+                        <span className="font-bold text-[var(--text-primary)]">
+                          {cert.course.level}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-[var(--text-muted)]">Modules</span>

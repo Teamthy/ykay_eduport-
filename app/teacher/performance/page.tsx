@@ -187,7 +187,8 @@ export default function PerformancePage() {
               </div>
 
               {/* Class Groups */}
-              {(teacher.subjectAssignments || []).map((sa: any) => sa.classes.map((className: any) => {
+              {(teacher.subjectAssignments || []).map((sa: any) =>
+                sa.classes.map((className: any) => {
                   const key = `${className}-${sa.subject}`;
                   const scores = SAMPLE_SCORES[key] || [];
                   const isExpanded = expandedClass === className;

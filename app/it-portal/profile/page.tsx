@@ -160,7 +160,9 @@ export default function ProfilePage() {
               <GraduationCap size={22} className="text-[#4EC54D]" />
             </div>
             <div className="hidden sm:block">
-              <div className="text-[13px] font-extrabold tracking-wider text-[var(--text-primary)]">YKAY</div>
+              <div className="text-[13px] font-extrabold tracking-wider text-[var(--text-primary)]">
+                YKAY
+              </div>
               <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#4EC54D]">
                 IT Hub
               </div>
@@ -187,7 +189,9 @@ export default function ProfilePage() {
                 <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-[#0F1F2E] to-[#1A3148] text-3xl font-bold text-white shadow-lg">
                   {profile.name.charAt(0).toUpperCase()}
                 </div>
-                <h2 className="mt-3 text-lg font-bold text-[var(--text-primary)]">{profile.name}</h2>
+                <h2 className="mt-3 text-lg font-bold text-[var(--text-primary)]">
+                  {profile.name}
+                </h2>
                 <p className="text-sm text-[var(--text-muted)]">{profile.email}</p>
                 <span className="mt-2 rounded-full bg-[#4EC54D]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#4EC54D]">
                   {profile.role.replace("_", " ")}
@@ -287,7 +291,9 @@ export default function ProfilePage() {
             {/* Account Settings */}
             {activeSection === "profile" && (
               <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-                <h3 className="mb-6 text-lg font-bold text-[var(--text-primary)]">Account Settings</h3>
+                <h3 className="mb-6 text-lg font-bold text-[var(--text-primary)]">
+                  Account Settings
+                </h3>
                 <div className="space-y-5 max-w-lg">
                   <div>
                     <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
@@ -359,7 +365,9 @@ export default function ProfilePage() {
             {/* Change Password */}
             {activeSection === "password" && (
               <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-                <h3 className="mb-2 text-lg font-bold text-[var(--text-primary)]">Change Password</h3>
+                <h3 className="mb-2 text-lg font-bold text-[var(--text-primary)]">
+                  Change Password
+                </h3>
                 <p className="mb-6 text-sm text-[var(--text-muted)]">
                   Use at least 12 characters with a mix of letters, numbers, and symbols.
                 </p>
@@ -479,7 +487,9 @@ export default function ProfilePage() {
             {/* Recent Activity */}
             {activeSection === "activity" && (
               <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-                <h3 className="mb-6 text-lg font-bold text-[var(--text-primary)]">Recent Activity</h3>
+                <h3 className="mb-6 text-lg font-bold text-[var(--text-primary)]">
+                  Recent Activity
+                </h3>
                 {recentActivity.length > 0 ? (
                   <div className="space-y-4">
                     {recentActivity.map((activity, idx) => (

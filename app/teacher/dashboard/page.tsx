@@ -131,7 +131,9 @@ export default function TeacherDashboard() {
   return (
     <>
       <PortalTopbar title="Teacher dashboard" />
-      <div className="absolute right-4 top-4"><DownloadForOffline role="teacher" /></div>
+      <div className="absolute right-4 top-4">
+        <DownloadForOffline role="teacher" />
+      </div>
       <main className="mx-auto flex max-w-[1600px] gap-8 px-4 py-6 sm:px-6">
         <TeacherSidebar />
         <section className="min-w-0 flex-1 space-y-6">

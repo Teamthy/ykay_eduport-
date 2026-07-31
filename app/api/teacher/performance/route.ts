@@ -9,14 +9,16 @@ export async function GET() {
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const [gradebooks, exams, attendanceSessions] = await Promise.all([
-    prisma.subjectGradebook.findMany({ take: 100,
+    prisma.subjectGradebook.findMany({
+      take: 100,
       where: { teacherProfileId: ctx.profile.id },
       include: {
         classroom: { select: { displayName: true } },
         entries: { select: { total: true } },
       },
     }),
-    prisma.exam.findMany({ take: 100,
+    prisma.exam.findMany({
+      take: 100,
       where: { teacherProfileId: ctx.profile.id },
       include: {
         classroom: { select: { displayName: true } },
@@ -39,7 +41,9 @@ export async function GET() {
       average: avg,
       passRate:
         avg !== null
-          ? Math.round((scores.filter((s: any) => s >= 40).length / Math.max(1, scores.length)) * 100)
+          ? Math.round(
+              (scores.filter((s: any) => s >= 40).length / Math.max(1, scores.length)) * 100,
+            )
           : null,
     };
   });

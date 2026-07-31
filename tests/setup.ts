@@ -95,7 +95,7 @@ vi.mock("next/headers", () => ({
   cookies: vi.fn(() =>
     Promise.resolve({
       get: vi.fn(() => undefined),
-    })
+    }),
   ),
 }));
 

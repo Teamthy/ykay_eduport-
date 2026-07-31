@@ -131,7 +131,9 @@ export default function ParentDashboardPage() {
   return (
     <>
       <Header />
-      <div className="fixed right-4 top-20 z-50"><DownloadForOffline role="parent" /></div>
+      <div className="fixed right-4 top-20 z-50">
+        <DownloadForOffline role="parent" />
+      </div>
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="px-6 pb-10 pt-24 md:pt-32">
           <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl md:p-12">

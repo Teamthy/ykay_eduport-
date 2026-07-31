@@ -4,3 +4,4 @@ out
 prisma/migrations
 *.md
 package-lock.json
+mobile

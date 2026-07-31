@@ -39,7 +39,9 @@ export default function BulkAnnouncementPage() {
   const [schedule, setSchedule] = useState<"now" | "later">("now");
   const [scheduledDate, setScheduledDate] = useState("");
 
-  const allClasses = [...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes))];
+  const allClasses = [
+    ...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes)),
+  ];
   const totalRecipients =
     audience === "all-classes"
       ? teacher.totalStudentsTaught

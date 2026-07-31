@@ -134,8 +134,9 @@ export default function MyRecordsPage() {
                   },
                   {
                     label: "Messages Sent",
-                    value: RECORDS.filter((r: any) => r.type === "Message" || r.type === "Broadcast")
-                      .length,
+                    value: RECORDS.filter(
+                      (r: any) => r.type === "Message" || r.type === "Broadcast",
+                    ).length,
                     icon: Users,
                   },
                 ].map((s) => (

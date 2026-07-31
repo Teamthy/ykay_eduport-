@@ -121,7 +121,9 @@ export default function InstructorDashboard() {
       <div className="grid min-h-screen place-items-center bg-[var(--bg-primary)]">
         <div className="text-center">
           <GraduationCap size={48} className="mx-auto mb-4 text-[var(--text-muted)]" />
-          <h1 className="text-xl font-bold text-[var(--text-primary)]">Instructor access required</h1>
+          <h1 className="text-xl font-bold text-[var(--text-primary)]">
+            Instructor access required
+          </h1>
           <p className="mt-2 text-sm text-[var(--text-muted)]">
             You need a Teacher, HOD, or Admin role to access this page.
           </p>
@@ -154,7 +156,9 @@ export default function InstructorDashboard() {
               <GraduationCap size={22} className="text-[#4EC54D]" />
             </div>
             <div className="hidden sm:block">
-              <div className="text-[13px] font-extrabold tracking-wider text-[var(--text-primary)]">YKAY</div>
+              <div className="text-[13px] font-extrabold tracking-wider text-[var(--text-primary)]">
+                YKAY
+              </div>
               <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-[#EA902E]">
                 Instructor
               </div>
@@ -234,7 +238,9 @@ export default function InstructorDashboard() {
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-[var(--text-primary)]">{stat.value}</div>
-                  <div className="text-[11px] font-medium text-[var(--text-muted)]">{stat.label}</div>
+                  <div className="text-[11px] font-medium text-[var(--text-muted)]">
+                    {stat.label}
+                  </div>
                 </div>
               </div>
             </div>
@@ -248,7 +254,9 @@ export default function InstructorDashboard() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`relative flex items-center gap-2 px-5 py-3 text-sm font-bold transition ${
-                activeTab === tab.key ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                activeTab === tab.key
+                  ? "text-[var(--text-primary)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               }`}
             >
               <tab.icon size={16} /> {tab.label}
@@ -271,7 +279,9 @@ export default function InstructorDashboard() {
                 {data.courses.map((course) => (
                   <div key={course.id} className="flex items-center gap-4">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold text-[var(--text-primary)]">{course.title}</p>
+                      <p className="truncate text-sm font-bold text-[var(--text-primary)]">
+                        {course.title}
+                      </p>
                       <div className="mt-1 flex items-center gap-3 text-xs text-[var(--text-muted)]">
                         <span className="flex items-center gap-1">
                           <Users size={11} /> {course.totalEnrollments} enrolled
@@ -346,7 +356,9 @@ export default function InstructorDashboard() {
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-bold text-[var(--text-primary)]">{course.title}</h3>
+                      <h3 className="text-lg font-bold text-[var(--text-primary)]">
+                        {course.title}
+                      </h3>
                       <span className="rounded-full bg-[var(--surface-disabled)] px-2 py-0.5 text-[9px] font-bold uppercase text-[var(--text-secondary)]">
                         {course.level}
                       </span>
@@ -374,7 +386,9 @@ export default function InstructorDashboard() {
                     { label: "Certificates", value: course.certificatesIssued },
                   ].map((stat) => (
                     <div key={stat.label} className="text-center">
-                      <div className="text-xl font-bold text-[var(--text-primary)]">{stat.value}</div>
+                      <div className="text-xl font-bold text-[var(--text-primary)]">
+                        {stat.value}
+                      </div>
                       <div className="text-[10px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
                         {stat.label}
                       </div>
@@ -386,7 +400,9 @@ export default function InstructorDashboard() {
                 <div className="mt-4">
                   <div className="mb-1 flex justify-between text-xs">
                     <span className="text-[var(--text-muted)]">Average progress</span>
-                    <span className="font-bold text-[var(--text-primary)]">{course.avgProgress}%</span>
+                    <span className="font-bold text-[var(--text-primary)]">
+                      {course.avgProgress}%
+                    </span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-[var(--surface-disabled)]">
                     <div
@@ -440,7 +456,9 @@ export default function InstructorDashboard() {
                           {e.courseTitle}
                         </Link>
                       </td>
-                      <td className="px-6 py-4 text-[var(--text-muted)]">{timeAgo(e.enrolledAt)}</td>
+                      <td className="px-6 py-4 text-[var(--text-muted)]">
+                        {timeAgo(e.enrolledAt)}
+                      </td>
                       <td className="px-6 py-4">
                         <span className="rounded-full bg-[#4EC54D]/10 px-2.5 py-1 text-xs font-bold text-[#4EC54D]">
                           {e.modulesCompleted} modules
@@ -486,11 +504,15 @@ export default function InstructorDashboard() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-[var(--text-primary)]">{exam.questionCount}</div>
+                    <div className="text-lg font-bold text-[var(--text-primary)]">
+                      {exam.questionCount}
+                    </div>
                     <div className="text-[10px] text-[var(--text-muted)]">Questions</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-[var(--text-primary)]">{exam.attemptCount}</div>
+                    <div className="text-lg font-bold text-[var(--text-primary)]">
+                      {exam.attemptCount}
+                    </div>
                     <div className="text-[10px] text-[var(--text-muted)]">Attempts</div>
                   </div>
                   <div className="text-center">

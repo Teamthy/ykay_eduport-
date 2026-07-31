@@ -12,7 +12,8 @@ export async function GET() {
     return NextResponse.json({ className: null, parents: [] });
   }
 
-  const links = await prisma.parentStudentLink.findMany({ take: 100,
+  const links = await prisma.parentStudentLink.findMany({
+    take: 100,
     where: {
       studentProfile: { currentClassId: ctx.formClassId, isActive: true },
     },

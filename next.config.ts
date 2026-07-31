@@ -44,7 +44,10 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "Access-Control-Allow-Origin", value: process.env.NEXT_PUBLIC_SITE_URL || "*" },
           { key: "Access-Control-Allow-Methods", value: "GET,POST,PUT,PATCH,DELETE,OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "Content-Type,Authorization,x-idempotency-key" },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type,Authorization,x-idempotency-key",
+          },
           { key: "Access-Control-Max-Age", value: "86400" },
         ],
       },

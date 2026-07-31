@@ -12,7 +12,8 @@ export async function GET() {
     return NextResponse.json({ className: null, students: [] });
   }
 
-  const students = await prisma.studentProfile.findMany({ take: 100,
+  const students = await prisma.studentProfile.findMany({
+    take: 100,
     where: { currentClassId: ctx.formClassId, isActive: true },
     select: {
       id: true,

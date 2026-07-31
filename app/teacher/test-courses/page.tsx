@@ -66,7 +66,9 @@ export default function TestCoursesPage() {
     },
   });
 
-  const allClasses = [...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes))];
+  const allClasses = [
+    ...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes)),
+  ];
   const teacherSubjects = (teacher.subjectAssignments || []).map((sa: any) => sa.subject);
 
   const updateCourse = (subject: string, field: keyof TestCourse, value: any) => {

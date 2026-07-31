@@ -81,9 +81,18 @@ export async function POST(request: NextRequest) {
   //    If Resend isn't configured, the activation token is still returned below
   //    so the admin can share the link manually. ──
   try {
-    await sendStaffInviteEmail({ to: input.email, name: input.name, token, email: input.email, role: input.role });
+    await sendStaffInviteEmail({
+      to: input.email,
+      name: input.name,
+      token,
+      email: input.email,
+      role: input.role,
+    });
   } catch (e) {
-    console.warn("Staff invite email could not be sent — activation token still returned to admin.", e);
+    console.warn(
+      "Staff invite email could not be sent — activation token still returned to admin.",
+      e,
+    );
   }
 
   return NextResponse.json(

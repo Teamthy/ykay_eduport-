@@ -99,8 +99,7 @@ export async function POST(request: NextRequest) {
     ESSAY: ExamQuestionType.ESSAY,
   };
 
-  const questionData = input.questions.map(
-    (q, idx): Prisma.ExamQuestionUncheckedCreateInput => ({
+  const questionData = input.questions.map((q, idx): Prisma.ExamQuestionUncheckedCreateInput => ({
     examId: input.examId,
     type: typeMap[q.type],
     questionText: q.questionText,

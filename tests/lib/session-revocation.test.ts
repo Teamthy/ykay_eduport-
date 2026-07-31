@@ -35,10 +35,7 @@ describe("Session Revocation", () => {
     });
 
     const encoder = new TextEncoder();
-    const { payload } = await jwtVerify(
-      token,
-      encoder.encode(process.env.AUTH_SECRET!),
-    );
+    const { payload } = await jwtVerify(token, encoder.encode(process.env.AUTH_SECRET!));
 
     expect(payload.tokenVersion).toBe(5);
   });
