@@ -30,3 +30,21 @@ export async function sendAdmissionDecisionEmail(input: {
     html: `<p>Hello,</p><p>There is an admissions update for <strong>${input.studentName}</strong>: <strong>${input.status.replaceAll("_", " ")}</strong>.</p>${input.note ? `<p>${input.note}</p>` : ""}<p>Please log in to the admissions status page or contact Ykay College for guidance.</p>`,
   });
 }
+
+export async function sendStaffInviteEmail(input: {
+  to: string;
+  name: string;
+  token: string;
+  email: string;
+  role: string;
+}) {
+  const base = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+  const url = `${base}/staff/activate?token=${encodeURIComponent(input.token)}&email=${encodeURIComponent(input.email)}`;
+  const roleLabel = input.role.replaceAll("_", " ");
+  await client().emails.send({
+    from: from(),
+    to: input.to,
+    subject: `You're invited to join Ykay College EduPortal (${roleLabel})`,
+    html: `<p>Hello ${input.name},</p><p>You've been invited to join the Ykay College EduPortal as <strong>${roleLabel}</strong>.</p><p>Activate your account and set a password using the link below. The invitation expires in 7 days.</p><p><a href="${url}">Activate my account</a></p><p>If you weren't expecting this invitation, you can safely ignore this email.</p>`,
+  });
+}

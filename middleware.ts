@@ -60,6 +60,21 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const method = request.method;
 
+  // ── CORS preflight for API routes ──
+  // Native mobile ignores CORS; this serves browser cross-origin callers
+  // (e.g. a future custom-domain web app) and standards-compliant tooling.
+  if (pathname.startsWith("/api/") && method === "OPTIONS") {
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": process.env.NEXT_PUBLIC_SITE_URL || "*",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization,x-idempotency-key",
+        "Access-Control-Max-Age": "86400",
+      },
+    });
+  }
+
   // ── Read-only super-admin impersonation ──
   // Block every mutating API request while impersonating (except the endpoints
   // that manage the impersonation/session themselves). This is the single,

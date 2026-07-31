@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { STAFF_ROLES, PEOPLE_ADMIN_ROLES, hashValue, oneTimeSecret } from "@/lib/people";
 import { getClientIp } from "@/lib/requests";
 import { requireRole } from "@/lib/session";
+import { sendStaffInviteEmail } from "@/lib/email";
 const schema = z.object({
   name: z.string().trim().min(2).max(120),
   email: z.string().trim().toLowerCase().email(),
@@ -75,6 +76,16 @@ export async function POST(request: NextRequest) {
       metadata: { email: input.email, role: input.role },
     },
   });
+
+  // ── Send the activation email (best-effort — never block invite creation).
+  //    If Resend isn't configured, the activation token is still returned below
+  //    so the admin can share the link manually. ──
+  try {
+    await sendStaffInviteEmail({ to: input.email, name: input.name, token, email: input.email, role: input.role });
+  } catch (e) {
+    console.warn("Staff invite email could not be sent — activation token still returned to admin.", e);
+  }
+
   return NextResponse.json(
     {
       invite: { id: invite.id, email: invite.email, expiresAt: invite.expiresAt },
