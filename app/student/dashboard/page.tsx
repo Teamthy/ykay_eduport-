@@ -150,14 +150,7 @@ export default function StudentDashboardPage() {
 
   return (
     <>
-<<<<<<< ours
-      <Header />
-      <div className="fixed right-4 top-20 z-50">
-        <DownloadForOffline role="student" />
-      </div>
-=======
-      <PortalTopbar />
->>>>>>> theirs
+      <PortalTopbar />{" "}
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         {/* Hero */}
         <section className="pt-24 pb-10 bg-brand-navy px-6 relative overflow-hidden">
