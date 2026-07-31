@@ -29,7 +29,7 @@ export async function api<T = unknown>(
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Cookie: `ykay_session=${token}` } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
   });
@@ -165,6 +165,12 @@ export const parentApi = {
   ) =>
     api("/api/parent/fees/payment-intents", {
       method: "POST",
+      // Idempotency key — required by the backend to prevent double-charge on
+      // retry/double-tap. Self-contained (Hermes has no crypto.randomUUID).
+      headers: {
+        "x-idempotency-key":
+          Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2),
+      },
       body: JSON.stringify({ invoiceId, method, ...opts }),
     }),
 };

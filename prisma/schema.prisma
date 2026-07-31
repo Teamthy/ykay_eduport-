@@ -490,6 +490,7 @@ model FeeInvoice {
   paymentAttempts FeePaymentAttempt[]
 
   @@index([schoolId, status, dueDate])
+  @@index([studentProfileId, status])
   @@index([studentProfileId, issuedAt])
   @@index([parentProfileId, issuedAt])
 }

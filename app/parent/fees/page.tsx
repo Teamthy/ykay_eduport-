@@ -170,7 +170,7 @@ export default function ParentFeesPage() {
     try {
       const r = await fetch("/api/parent/fees/payment-intents", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-idempotency-key": crypto.randomUUID() },
         body: JSON.stringify({
           invoiceId: data.selectedInvoice.id,
           amount: remaining,
@@ -194,7 +194,7 @@ export default function ParentFeesPage() {
     try {
       const r = await fetch("/api/parent/fees/payment-intents", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-idempotency-key": crypto.randomUUID() },
         body: JSON.stringify({
           invoiceId: data.selectedInvoice.id,
           amount: remaining,

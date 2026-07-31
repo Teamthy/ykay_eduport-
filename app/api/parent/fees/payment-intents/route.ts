@@ -29,6 +29,29 @@ export async function POST(request: NextRequest) {
   const impersonating = assertNotImpersonating(context.user);
   if (impersonating) return impersonating;
 
+  // ── Idempotency: a double-click or network retry must NOT create a second
+  //    payment attempt (prevents double-charge). Mirrors the pattern in
+  //    /api/admin/students using the IdempotencyRecord table. ──
+  const idemKey = request.headers.get("x-idempotency-key")?.trim();
+  if (!idemKey || idemKey.length < 16) {
+    return jsonNoStore({ error: "An x-idempotency-key header (min. 16 chars) is required." }, { status: 400 });
+  }
+  const existingPayment = await prisma.idempotencyRecord.findUnique({
+    where: {
+      schoolId_scope_key: {
+        schoolId: context.user.schoolId,
+        scope: "FEE_PAYMENT",
+        key: idemKey,
+      },
+    },
+  });
+  if (existingPayment) {
+    return jsonNoStore(
+      { ...(existingPayment.response as object), idempotentReplay: true },
+      { status: existingPayment.statusCode },
+    );
+  }
+
   let input: z.infer<typeof schema>;
   try {
     input = schema.parse(await request.json());
@@ -109,14 +132,22 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return jsonNoStore(
-      {
-        status: "PENDING_REVIEW",
-        message: "Transfer submitted. The bursar will verify it before your invoice is updated.",
-        attemptId: attempt.id,
+    const transferResponse = {
+      status: "PENDING_REVIEW",
+      message: "Transfer submitted. The bursar will verify it before your invoice is updated.",
+      attemptId: attempt.id,
+    };
+    await prisma.idempotencyRecord.create({
+      data: {
+        schoolId: context.user.schoolId,
+        scope: "FEE_PAYMENT",
+        key: idemKey,
+        requestHash: "v1",
+        response: transferResponse,
+        statusCode: 201,
       },
-      { status: 201 },
-    );
+    });
+    return jsonNoStore(transferResponse, { status: 201 });
   }
 
   const reference = feeReference(invoice.invoiceNumber);
@@ -147,11 +178,22 @@ export async function POST(request: NextRequest) {
         schoolId: context.user.schoolId,
       },
     });
-    return jsonNoStore({
+    const paystackResponse = {
       reference,
       authorizationUrl: checkout.authorization_url,
       attemptId: attempt.id,
+    };
+    await prisma.idempotencyRecord.create({
+      data: {
+        schoolId: context.user.schoolId,
+        scope: "FEE_PAYMENT",
+        key: idemKey,
+        requestHash: "v1",
+        response: paystackResponse,
+        statusCode: 200,
+      },
     });
+    return jsonNoStore(paystackResponse);
   } catch (error) {
     await prisma.feePaymentAttempt.update({
       where: { id: attempt.id },
