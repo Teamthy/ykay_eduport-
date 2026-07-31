@@ -15,10 +15,7 @@ const ADMIN_ROLES = [UserRole.ADMIN, UserRole.DIRECTOR, UserRole.COORDINATOR, Us
  * they teach) and the school's active classes for the assignment UI.
  */
 export async function GET() {
-  const user = await requireRole(ADMIN_ROLES);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const [teachers, classes] = await Promise.all([
+  const [rows, classes] = await Promise.all([
     prisma.teacherProfile.findMany({
       where: { schoolId: user.schoolId, isActive: true },
       orderBy: { displayName: "asc" },
@@ -26,6 +23,7 @@ export async function GET() {
       select: {
         id: true,
         displayName: true,
+        user: { select: { email: true, role: true } },
         classAssignments: {
           where: { isActive: true, role: TeacherAssignmentRole.SUBJECT_TEACHER },
           select: {
@@ -33,7 +31,7 @@ export async function GET() {
             classId: true,
             subjectName: true,
             role: true,
-            classroom: { select: { id: true, displayName: true } },
+            classroom: { select: { displayName: true } },
           },
         },
       },
@@ -45,6 +43,20 @@ export async function GET() {
       select: { id: true, displayName: true, level: true, arm: true },
     }),
   ]);
+
+  const teachers = rows.map((t) => ({
+    id: t.id,
+    name: t.displayName,
+    email: t.user?.email ?? "",
+    role: t.user?.role ?? "TEACHER",
+    assignments: t.classAssignments.map((a) => ({
+      id: a.id,
+      role: a.role,
+      subjectName: a.subjectName,
+      classId: a.classId,
+      className: a.classroom.displayName,
+    })),
+  }));
 
   return NextResponse.json({ teachers, classes });
 }

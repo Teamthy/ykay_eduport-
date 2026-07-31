@@ -117,10 +117,10 @@ function LoginForm() {
             <div className="absolute inset-0 bg-white/92 backdrop-blur-[2px]" />
           </div>
           <div className="relative">
-            <h2 className="font-display text-3xl tracking-widest text-brand-navy">
+            <h2 className="font-display text-3xl tracking-widest text-brand-green">
               {context.heading}
             </h2>
-            <p className="mt-2 text-sm text-slate-500">{context.sub}</p>
+            <p className="mt-2 text-sm text-brand-green">{context.sub}</p>
             {error && (
               <p
                 role="alert"
@@ -130,7 +130,7 @@ function LoginForm() {
               </p>
             )}
             <form onSubmit={submit} className="mt-7 space-y-5">
-              <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
+              <label className="block text-xs font-bold uppercase tracking-widest text-brand-green">
                 Email
                 <input
                   required
@@ -141,7 +141,7 @@ function LoginForm() {
                   className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm"
                 />
               </label>
-              <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
+              <label className="block text-xs font-bold uppercase tracking-widest text-brand-green">
                 Password
                 <input
                   required

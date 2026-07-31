@@ -111,6 +111,28 @@ export default function AdminReportCardsPage() {
     }
   }
 
+  async function releaseAll() {
+    if (!confirm("Release ALL draft report cards now? Parents and students will be notified."))
+      return;
+    setSaving(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/admin/report-cards/release", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const body = (await response.json()) as { error?: string; message?: string };
+      if (!response.ok) throw new Error(body.error || "Batch release failed.");
+      setMessage(body.message || "Report cards released.");
+      await loadReports();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Batch release failed.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <>
       <PortalTopbar />
@@ -147,7 +169,23 @@ export default function AdminReportCardsPage() {
 
               {!loading && data ? (
                 <>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                  <div className="no-print flex flex-wrap gap-3">
+                    <button
+                      onClick={() => void releaseAll()}
+                      disabled={saving || !data.summary.draftReports}
+                      className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                    >
+                      <CheckCircle2 size={15} /> Release all drafts ({data.summary.draftReports})
+                    </button>
+                    <button
+                      onClick={() => window.print()}
+                      disabled={!selected}
+                      className="inline-flex items-center gap-2 rounded-full border border-[var(--input-border)] px-5 py-2.5 text-xs font-bold uppercase tracking-widest disabled:opacity-50"
+                    >
+                      <FileText size={15} /> Print selected card
+                    </button>
+                  </div>
+                  <div className="no-print grid grid-cols-1 gap-4 md:grid-cols-4">
                     {[
                       {
                         label: "Total Reports",
@@ -186,7 +224,7 @@ export default function AdminReportCardsPage() {
                     ))}
                   </div>
 
-                  <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
+                  <div className="no-print rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
                     <h2 className="mb-6 font-display text-2xl text-[var(--text-primary)]">
                       Report Card Registry
                     </h2>

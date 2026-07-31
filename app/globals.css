@@ -936,6 +936,7 @@ button:disabled {
   header,
   footer,
   nav,
+  aside,
   button,
   [role="button"] {
     display: none !important;

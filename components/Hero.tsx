@@ -97,12 +97,6 @@ export default function Hero() {
             >
               Student Portal
             </a>
-            <a
-              href="/admissions"
-              className="text-white/80 hover:text-white font-body text-sm font-bold tracking-[0.15em] uppercase transition-colors"
-            >
-              or Apply for Admission →
-            </a>
           </motion.div>
         </div>
       </div>
