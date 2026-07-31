@@ -4,8 +4,8 @@ import Hero from "@/components/Hero";
 import ServiceInfo from "@/components/ServiceInfo";
 import ITFlagshipSection from "@/components/ITFlagshipSection";
 import AdmissionsBanner from "@/components/AdmissionsBanner";
-import ITAwarenessCTA from "@/components/ITAwarenessCTA";
 import Services from "@/components/Services";
+import MobileAppCTA from "@/components/MobileAppCTA";
 import Groups from "@/components/Groups";
 import FindUs from "@/components/FindUs";
 import Footer from "@/components/Footer";
@@ -24,9 +24,9 @@ export default function SchoolHome() {
         <ServiceInfo />
         <ITFlagshipSection />
         <AdmissionsBanner />
-        <ITAwarenessCTA />
         <Services />
         <Groups />
+        <MobileAppCTA />
         <FindUs />
       </main>
       <Footer />

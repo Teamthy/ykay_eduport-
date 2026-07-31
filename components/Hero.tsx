@@ -85,16 +85,22 @@ export default function Hero() {
             className="flex flex-wrap gap-4 mt-10 md:mt-14"
           >
             <a
-              href="/admissions"
+              href={process.env.NEXT_PUBLIC_APK_URL || "#download-app"}
               className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-brand-orange text-white font-body text-sm font-bold tracking-[0.15em] uppercase hover:bg-brand-orange-dark transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] shadow-lg shadow-black/30"
             >
-              Apply for Admission
+              <Download size={18} /> Download Mobile App
             </a>
             <a
               href="/portal"
               className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white/15 border border-white/30 text-white border border-white/25 font-body text-sm font-bold tracking-[0.15em] uppercase hover:bg-white/20 hover:border-white/40 transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] backdrop-blur-sm"
             >
               Student Portal
+            </a>
+            <a
+              href="/admissions"
+              className="text-white/80 hover:text-white font-body text-sm font-bold tracking-[0.15em] uppercase transition-colors"
+            >
+              or Apply for Admission →
             </a>
           </motion.div>
         </div>
