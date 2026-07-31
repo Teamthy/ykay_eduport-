@@ -21,6 +21,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Audit dependencies (non-blocking)
+        # Surfaces high+ vulns in the run log. Non-blocking because the only
+        # fixes are dev-toolchain majors (eslint 10 / expo 57) that would break
+        # the build. Reviewed manually.
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
       - name: Generate Prisma client
         run: npx prisma generate
 
@@ -62,3 +69,28 @@ jobs:
           NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
           PAYSTACK_PUBLIC_KEY: "pk_test_ci"
           PAYSTACK_SECRET_KEY: "sk_test_ci"
+
+  mobile:
+    name: Mobile (Expo)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        # mobile/ has no committed lockfile yet. Commit mobile/package-lock.json
+        # to switch to `npm ci` + npm caching for speed and determinism.
+        run: npm install
+
+      - name: Validate Expo project (expo-doctor)
+        # Verifies Expo SDK / package compatibility + app.json config. Surfaced
+        # as info (non-blocking) until confirmed green; promote to a hard gate
+        # by removing continue-on-error.
+        run: npx --yes expo-doctor@latest
+        continue-on-error: true

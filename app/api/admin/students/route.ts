@@ -13,7 +13,12 @@ const schema = z.object({
   classId: z.string().min(1),
   guardianName: z.string().trim().min(2).max(160),
   guardianPhone: z.string().trim().min(7).max(30),
-  guardianEmail: z.string().trim().toLowerCase().email().optional(),
+  // Empty string (an untouched optional field) must be treated as "not provided".
+  // zod's .optional() only handles undefined, so "" would fail .email() and 400.
+  guardianEmail: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    z.string().trim().toLowerCase().email().optional(),
+  ),
 });
 export async function GET() {
   const user = await requireRole(PEOPLE_ADMIN_ROLES);
