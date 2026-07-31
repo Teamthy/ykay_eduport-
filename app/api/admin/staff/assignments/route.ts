@@ -15,6 +15,9 @@ const ADMIN_ROLES = [UserRole.ADMIN, UserRole.DIRECTOR, UserRole.COORDINATOR, Us
  * they teach) and the school's active classes for the assignment UI.
  */
 export async function GET() {
+  const user = await requireRole(ADMIN_ROLES);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const [rows, classes] = await Promise.all([
     prisma.teacherProfile.findMany({
       where: { schoolId: user.schoolId, isActive: true },
