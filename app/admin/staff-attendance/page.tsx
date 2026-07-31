@@ -11,9 +11,11 @@ import {
   RefreshCw,
   ScanLine,
   UserX,
+  Camera,
 } from "lucide-react";
 import AdminSidebar from "@/components/AdminSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
+import StaffQrScanner from "@/components/StaffQrScanner";
 import { useToast } from "@/components/Toast";
 
 type Row = {
@@ -68,6 +70,8 @@ export default function AdminStaffAttendancePage() {
   const [filter, setFilter] = useState<"ALL" | "IN" | "OUT" | "ABSENT" | "LATE">("ALL");
   const [showBadges, setShowBadges] = useState(false);
   const [lastResult, setLastResult] = useState<string>("");
+  const [cameraOn, setCameraOn] = useState(false);
+  const [online, setOnline] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -94,6 +98,49 @@ export default function AdminStaffAttendancePage() {
     return () => clearInterval(t);
   }, [load]);
 
+  const flushQueue = useCallback(async () => {
+    const q = JSON.parse(localStorage.getItem("staff-scan-queue") || "[]") as Array<{
+      badgeCode: string;
+      eventType: string;
+      ts: number;
+    }>;
+    if (!q.length) return;
+    let remaining = [...q];
+    for (const item of q) {
+      try {
+        const r = await fetch("/api/admin/staff-attendance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ badgeCode: item.badgeCode, eventType: item.eventType }),
+        });
+        if (r.ok) remaining = remaining.filter((x) => x.ts !== item.ts);
+      } catch {
+        /* leave in queue to retry later */
+      }
+    }
+    localStorage.setItem("staff-scan-queue", JSON.stringify(remaining));
+    if (remaining.length < q.length) {
+      toast(`Synced ${q.length - remaining.length} queued scan(s).`, "success");
+      await load();
+    }
+  }, [toast, load]);
+
+  useEffect(() => {
+    const goOnline = () => {
+      setOnline(true);
+      void flushQueue();
+    };
+    const goOffline = () => setOnline(false);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    setOnline(navigator.onLine);
+    void flushQueue(); // replay anything queued in a previous session
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+  }, [flushQueue]);
+
   const rows = useMemo(() => {
     if (!data) return [];
     return data.rows.filter((r) => {
@@ -103,15 +150,30 @@ export default function AdminStaffAttendancePage() {
     });
   }, [data, filter]);
 
-  async function submitScan(e?: FormEvent) {
+  async function submitScan(e?: FormEvent, code?: string) {
     e?.preventDefault();
-    if (!scanValue.trim()) return;
+    const badgeCode = (code ?? scanValue).trim();
+    if (!badgeCode) return;
+    // Offline: store locally and sync automatically when back online.
+    if (!navigator.onLine) {
+      const q = JSON.parse(localStorage.getItem("staff-scan-queue") || "[]") as Array<{
+        badgeCode: string;
+        eventType: string;
+        ts: number;
+      }>;
+      q.push({ badgeCode, eventType: mode, ts: Date.now() });
+      localStorage.setItem("staff-scan-queue", JSON.stringify(q));
+      setScanValue("");
+      setLastResult(`${badgeCode} · queued offline (will sync)`);
+      toast(`${badgeCode} queued offline — syncs when reconnected.`, "info");
+      return;
+    }
     setScanning(true);
     try {
       const r = await fetch("/api/admin/staff-attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ badgeCode: scanValue.trim(), eventType: mode }),
+        body: JSON.stringify({ badgeCode, eventType: mode }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || "Scan failed.");
@@ -199,6 +261,22 @@ export default function AdminStaffAttendancePage() {
               </p>
             )}
           </form>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setCameraOn((v) => !v)}
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--input-border)] px-4 py-2 text-xs font-bold uppercase tracking-widest"
+            >
+              <Camera size={14} /> {cameraOn ? "Hide camera" : "Use camera"}
+            </button>
+            {!online && (
+              <span className="text-xs font-bold uppercase tracking-widest text-brand-orange">
+                ● Offline — scans are queued locally
+              </span>
+            )}
+          </div>
+          <StaffQrScanner active={cameraOn} onScan={(code) => void submitScan(undefined, code)} />
 
           {loading || !data ? (
             <div className="flex items-center gap-2 p-10 text-[var(--text-muted)]">
