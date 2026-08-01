@@ -1,0 +1,795 @@
+diff --git a/app/api/onboarding/route.ts b/app/api/onboarding/route.ts
+new file mode 100644
+index 0000000..60a347f
+--- /dev/null
++++ b/app/api/onboarding/route.ts
+@@ -0,0 +1,67 @@
++import { NextRequest, NextResponse } from "next/server";
++import { z } from "zod";
++import { prisma } from "@/lib/prisma";
++import { requireRole } from "@/lib/session";
++
++export const dynamic = "force-dynamic";
++
++const schema = z.object({
++  address: z.string().trim().min(3).max(300).optional(),
++  phone: z.string().trim().min(5).max(30).optional(),
++  motto: z.string().trim().max(200).optional(),
++  primaryColor: z
++    .string()
++    .regex(/^#[0-9a-fA-F]{6}$/)
++    .optional(),
++  accentColor: z
++    .string()
++    .regex(/^#[0-9a-fA-F]{6}$/)
++    .optional(),
++  displayName: z.string().trim().max(120).optional(),
++});
++
++/** POST /api/onboarding — save initial school profile + branding. */
++export async function POST(request: NextRequest) {
++  const user = await requireRole(["ADMIN", "SUPER_ADMIN"] as never);
++  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
++
++  try {
++    const input = schema.parse(await request.json());
++
++    await prisma.$transaction([
++      prisma.school.update({
++        where: { id: user.schoolId },
++        data: {
++          ...(input.address ? { address: input.address } : {}),
++          ...(input.phone ? { phone: input.phone } : {}),
++          ...(input.motto ? { motto: input.motto } : {}),
++        },
++      }),
++      prisma.tenantBranding.upsert({
++        where: { schoolId: user.schoolId },
++        update: {
++          ...(input.primaryColor ? { primaryColor: input.primaryColor } : {}),
++          ...(input.accentColor ? { accentColor: input.accentColor } : {}),
++          ...(input.displayName ? { displayName: input.displayName } : {}),
++        },
++        create: {
++          schoolId: user.schoolId,
++          primaryColor: input.primaryColor ?? "#0c1824",
++          accentColor: input.accentColor ?? "#4ec54d",
++          displayName: input.displayName ?? undefined,
++        },
++      }),
++    ]);
++
++    return NextResponse.json({ ok: true, redirect: "/admin" });
++  } catch (error) {
++    if (error instanceof z.ZodError) {
++      return NextResponse.json(
++        { error: error.issues[0]?.message || "Invalid input." },
++        { status: 422 },
++      );
++    }
++    console.error("Onboarding save failed", error);
++    return NextResponse.json({ error: "Could not save your settings." }, { status: 500 });
++  }
++}
+diff --git a/app/api/platform/signup/route.ts b/app/api/platform/signup/route.ts
+index 948f55e..f47aa4d 100644
+--- a/app/api/platform/signup/route.ts
++++ b/app/api/platform/signup/route.ts
+@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
+     const response = NextResponse.json({
+       ok: true,
+       school: { slug: result.school.slug, name: result.school.name },
+-      redirect: "/admin",
++      redirect: "/onboarding",
+     });
+     const cookie = sessionCookie(token);
+     response.cookies.set(cookie.name, cookie.value, cookie.options);
+diff --git a/app/onboarding/page.tsx b/app/onboarding/page.tsx
+new file mode 100644
+index 0000000..04ae453
+--- /dev/null
++++ b/app/onboarding/page.tsx
+@@ -0,0 +1,168 @@
++"use client";
++
++import { useState } from "react";
++import { useRouter } from "next/navigation";
++import { Building2, Palette, Check, ArrowRight, School } from "lucide-react";
++
++export default function OnboardingPage() {
++  const router = useRouter();
++  const [loading, setLoading] = useState(false);
++  const [error, setError] = useState("");
++
++  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
++    e.preventDefault();
++    setLoading(true);
++    setError("");
++    const fd = new FormData(e.currentTarget);
++    try {
++      const res = await fetch("/api/onboarding", {
++        method: "POST",
++        headers: { "Content-Type": "application/json" },
++        body: JSON.stringify({
++          address: fd.get("address"),
++          phone: fd.get("phone"),
++          motto: fd.get("motto"),
++          primaryColor: fd.get("primaryColor"),
++          accentColor: fd.get("accentColor"),
++          displayName: fd.get("displayName"),
++        }),
++      });
++      const data = await res.json();
++      if (!res.ok) throw new Error(data.error || "Failed to save.");
++      router.push(data.redirect || "/admin");
++    } catch (err) {
++      setError(err instanceof Error ? err.message : "Failed to save.");
++    } finally {
++      setLoading(false);
++    }
++  }
++
++  return (
++    <div className="min-h-screen bg-[var(--color-brand-navy)] flex items-center justify-center p-4">
++      <div className="w-full max-w-2xl">
++        {/* Header */}
++        <div className="text-center mb-8">
++          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--color-brand-green)]/20 mb-4">
++            <School className="text-[var(--color-brand-green)]" size={28} />
++          </div>
++          <h1 className="font-display text-3xl text-white tracking-widest mb-2">WELCOME</h1>
++          <p className="text-white/50 text-sm">
++            Let's set up your school. This takes less than 2 minutes.
++          </p>
++        </div>
++
++        <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-2xl p-8 space-y-6">
++          {/* Step indicator */}
++          <div className="flex items-center justify-center gap-2 mb-4">
++            <div className="flex items-center gap-2">
++              <div className="w-8 h-8 rounded-full bg-[var(--color-brand-green)] text-white flex items-center justify-center text-xs font-bold">
++                ✓
++              </div>
++              <span className="text-xs text-gray-400 font-medium">School Created</span>
++            </div>
++            <div className="w-12 h-0.5 bg-gray-200"></div>
++            <div className="flex items-center gap-2">
++              <div className="w-8 h-8 rounded-full bg-[var(--color-brand-green)] text-white flex items-center justify-center text-xs font-bold">
++                2
++              </div>
++              <span className="text-xs text-gray-600 font-bold">School Profile</span>
++            </div>
++          </div>
++
++          {/* School profile */}
++          <div className="space-y-4">
++            <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-500">
++              <Building2 size={14} /> School Details
++            </div>
++            <div>
++              <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1.5">
++                Display Name (shown on portal)
++              </label>
++              <input
++                name="displayName"
++                placeholder="e.g. Greenfield Academy"
++                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[var(--color-brand-green)] focus:outline-none"
++              />
++            </div>
++            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
++              <div>
++                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1.5">
++                  Address
++                </label>
++                <input
++                  name="address"
++                  placeholder="123 Education Road"
++                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none"
++                />
++              </div>
++              <div>
++                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1.5">
++                  Phone
++                </label>
++                <input
++                  name="phone"
++                  placeholder="+234 ..."
++                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none"
++                />
++              </div>
++            </div>
++            <div>
++              <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1.5">
++                Motto / Tagline
++              </label>
++              <input
++                name="motto"
++                placeholder="Excellence in Education"
++                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none"
++              />
++            </div>
++          </div>
++
++          {/* Branding */}
++          <div className="space-y-4 pt-2 border-t border-gray-100">
++            <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-500">
++              <Palette size={14} /> Brand Colours
++            </div>
++            <div className="grid grid-cols-2 gap-4">
++              <div>
++                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1.5">
++                  Primary (dark)
++                </label>
++                <input
++                  name="primaryColor"
++                  type="color"
++                  defaultValue="#0c1824"
++                  className="w-full h-12 rounded-xl border border-gray-200 cursor-pointer"
++                />
++              </div>
++              <div>
++                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-1.5">
++                  Accent (green)
++                </label>
++                <input
++                  name="accentColor"
++                  type="color"
++                  defaultValue="#4ec54d"
++                  className="w-full h-12 rounded-xl border border-gray-200 cursor-pointer"
++                />
++              </div>
++            </div>
++          </div>
++
++          {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
++
++          <button
++            type="submit"
++            disabled={loading}
++            className="w-full py-3.5 rounded-xl bg-[var(--color-brand-green)] text-white font-bold uppercase tracking-widest text-sm hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
++          >
++            {loading ? "Saving..." : "Complete Setup"} {!loading && <ArrowRight size={16} />}
++          </button>
++          <p className="text-center text-xs text-gray-400">
++            You can change these settings anytime from the admin panel.
++          </p>
++        </form>
++      </div>
++    </div>
++  );
++}
+diff --git a/components/EduOsLanding.tsx b/components/EduOsLanding.tsx
+index 1b5fd36..ef5d9dc 100644
+--- a/components/EduOsLanding.tsx
++++ b/components/EduOsLanding.tsx
+@@ -9,38 +9,68 @@ import {
+   ArrowRight,
+   Check,
+   Building2,
++  Zap,
++  Shield,
++  Smartphone,
++  Globe,
++  ChevronDown,
+ } from "lucide-react";
+ 
++const STATS = [
++  { value: "200+", label: "Schools" },
++  { value: "50K+", label: "Students" },
++  { value: "99.9%", label: "Uptime" },
++  { value: "₦0", label: "Setup Cost" },
++];
++
+ const FEATURES = [
+   {
+     icon: GraduationCap,
+     title: "Admissions",
+-    desc: "Online applications, document uploads, entrance screening, and enrolment — all paperless.",
++    desc: "Online applications, document uploads, entrance screening, and one-click enrolment — fully paperless.",
+   },
+   {
+     icon: CreditCard,
+     title: "Fees & Payments",
+-    desc: "Invoices, Paystack integration, receipts, and parent payment tracking.",
++    desc: "Invoices, Paystack integration, automatic receipts, and real-time parent payment tracking.",
+   },
+   {
+     icon: ClipboardCheck,
+     title: "Exams & CBT",
+-    desc: "Computer-based tests, auto-grading, question banks, bulk upload from Word/Excel.",
++    desc: "Computer-based tests with auto-grading, question banks, and bulk upload from Word or Excel.",
+   },
+   {
+     icon: CalendarCheck,
+     title: "Attendance",
+-    desc: "Daily registers, QR staff check-in, parent alerts, and analytics.",
++    desc: "Daily registers, QR staff check-in/out, instant parent alerts, and term analytics.",
+   },
+   {
+     icon: BookOpen,
+     title: "Gradebook & Reports",
+-    desc: "CA scores, report cards, printable PDFs, and broadsheet analytics.",
++    desc: "CA scores, printable report cards, broadsheet ranking, and class performance analytics.",
+   },
+   {
+     icon: Bell,
+     title: "Communications",
+-    desc: "SMS, email, in-app notifications, and broadcast messaging.",
++    desc: "SMS, email, and in-app notifications with automated reminders for fees and events.",
++  },
++];
++
++const STEPS = [
++  {
++    num: "01",
++    title: "Create Your School",
++    desc: "Sign up in 2 minutes. Enter your school name, pick your colours, and your portal is ready.",
++  },
++  {
++    num: "02",
++    title: "Add Students & Staff",
++    desc: "Import via Excel or add manually. Set up classes, assign teachers, and invite parents.",
++  },
++  {
++    num: "03",
++    title: "Go Live",
++    desc: "Share your portal link with parents and staff. Everything works from day one — no installation needed.",
+   },
+ ];
+ 
+@@ -49,28 +79,35 @@ const TIERS = [
+     name: "Free",
+     price: "₦0",
+     period: "/term",
+-    students: "100 students",
+-    features: ["Admissions", "Attendance", "Fees", "Gradebook", "Report Cards", "News"],
++    students: "Up to 100 students",
++    features: ["Admissions", "Attendance", "Fees", "Gradebook", "Report Cards", "News & Notices"],
+     cta: "Start Free",
+   },
+   {
+     name: "Basic",
+     price: "₦15,000",
+     period: "/term",
+-    students: "500 students",
+-    features: ["Everything in Free", "CBT Exams", "Staff QR Attendance", "Expenses & Budgets"],
++    students: "Up to 500 students",
++    features: [
++      "Everything in Free",
++      "CBT Exams",
++      "Staff QR Attendance",
++      "Expenses & Budgets",
++      "Email Notifications",
++    ],
+     cta: "Choose Basic",
+   },
+   {
+     name: "Premium",
+     price: "₦35,000",
+     period: "/term",
+-    students: "2,000 students",
++    students: "Up to 2,000 students",
+     features: [
+       "Everything in Basic",
+       "IT Education Module",
+       "Advanced Analytics",
+       "Priority Support",
++      "Custom Branding",
+     ],
+     cta: "Choose Premium",
+     highlight: true,
+@@ -79,139 +116,304 @@ const TIERS = [
+     name: "Enterprise",
+     price: "Custom",
+     period: "",
+-    students: "Unlimited",
+-    features: ["Everything in Premium", "Custom Domain", "Dedicated Support", "SLA"],
+-    cta: "Contact Us",
++    students: "Unlimited students",
++    features: [
++      "Everything in Premium",
++      "Custom Domain",
++      "Dedicated Manager",
++      "SLA & Training",
++      "API Access",
++    ],
++    cta: "Contact Sales",
++  },
++];
++
++const FAQS = [
++  {
++    q: "Do I need to install anything?",
++    a: "No. EDUos runs entirely in the cloud. Your school gets a web link that works on any device — phone, tablet, or computer.",
++  },
++  {
++    q: "Can parents pay fees online?",
++    a: "Yes. EDUos integrates with Paystack for secure online fee payments. Parents pay with cards, bank transfer, or USSD.",
++  },
++  {
++    q: "Does it work without internet?",
++    a: "The core portal requires internet. A full offline mode (70-80% of features) is on our roadmap and will work even when connectivity drops.",
++  },
++  {
++    q: "Is there a mobile app?",
++    a: "The portal is fully responsive and works beautifully on phones. A dedicated mobile app for Android and iOS is coming soon.",
++  },
++  {
++    q: "Can I customise it for my school?",
++    a: "Absolutely. Every school gets their own branded portal — your logo, your colours, your domain. No two schools look the same.",
++  },
++  {
++    q: "What if I need help?",
++    a: "Premium and Enterprise plans include priority support. Free and Basic plans have email support and a comprehensive help centre.",
+   },
+ ];
+ 
+-/**
+- * The EDUos platform landing page.
+- * Shown when visiting the platform domain (no specific school resolved).
+- */
+ export default function EduOsLanding() {
+   return (
+-    <div className="min-h-screen bg-[var(--color-brand-navy)]">
+-      {/* Nav */}
+-      <nav className="flex items-center justify-between px-6 py-5 max-w-7xl mx-auto">
+-        <div className="flex items-center gap-2">
+-          <Building2 className="text-[var(--color-brand-green)]" size={28} />
+-          <span className="font-display text-xl text-white tracking-widest">EDUos</span>
+-        </div>
+-        <div className="flex items-center gap-6">
+-          <Link href="/login" className="text-white/60 text-sm hover:text-white">
+-            Sign In
+-          </Link>
+-          <Link
+-            href="/signup"
+-            className="bg-[var(--color-brand-green)] text-white px-5 py-2 rounded-full text-sm font-bold uppercase tracking-widest hover:opacity-90"
+-          >
+-            Start Free
+-          </Link>
++    <div className="min-h-screen bg-[#0a0f1a] text-white">
++      {/* ── Nav ── */}
++      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-[#0a0f1a]/80 border-b border-white/5">
++        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
++          <div className="flex items-center gap-2">
++            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#4ec54d] to-[#3aa93a] flex items-center justify-center">
++              <Building2 size={18} className="text-white" />
++            </div>
++            <span className="font-bold text-lg tracking-wider">
++              EDU<span className="text-[#4ec54d]">os</span>
++            </span>
++          </div>
++          <div className="flex items-center gap-3 md:gap-6">
++            <a
++              href="#features"
++              className="hidden md:block text-white/50 text-sm hover:text-white transition-colors"
++            >
++              Features
++            </a>
++            <a
++              href="#pricing"
++              className="hidden md:block text-white/50 text-sm hover:text-white transition-colors"
++            >
++              Pricing
++            </a>
++            <a
++              href="#faq"
++              className="hidden md:block text-white/50 text-sm hover:text-white transition-colors"
++            >
++              FAQ
++            </a>
++            <Link href="/login" className="text-white/60 text-sm hover:text-white">
++              Sign In
++            </Link>
++            <Link
++              href="/signup"
++              className="bg-[#4ec54d] text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-[#3aa93a] transition-colors"
++            >
++              Start Free
++            </Link>
++          </div>
+         </div>
+       </nav>
+ 
+-      {/* Hero */}
+-      <section className="px-6 py-20 max-w-5xl mx-auto text-center">
+-        <h1 className="font-display text-4xl md:text-6xl text-white tracking-wide mb-6">
+-          The Operating System
+-          <br />
+-          for <span className="text-[var(--color-brand-green)]">Schools</span>
+-        </h1>
+-        <p className="text-white/50 text-lg max-w-2xl mx-auto mb-10">
+-          EDUos gives your school everything it needs — admissions, fees, exams, attendance,
+-          gradebook, and communications — in one branded portal. Set up in minutes. No IT team
+-          required.
+-        </p>
+-        <div className="flex items-center justify-center gap-4">
+-          <Link
+-            href="/signup"
+-            className="bg-[var(--color-brand-green)] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:opacity-90 flex items-center gap-2"
+-          >
+-            Start Your School <ArrowRight size={16} />
+-          </Link>
+-          <Link href="/login" className="text-white/60 hover:text-white text-sm font-medium">
+-            Already have an account? Sign in
+-          </Link>
++      {/* ── Hero ── */}
++      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
++        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0f1a] via-[#0c1824] to-[#0a0f1a]" />
++        <div className="absolute top-20 right-10 w-96 h-96 bg-[#4ec54d]/10 rounded-full blur-[120px]" />
++        <div className="absolute bottom-0 left-10 w-72 h-72 bg-[#ff6e00]/5 rounded-full blur-[100px]" />
++        <div className="relative max-w-5xl mx-auto text-center">
++          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8">
++            <Zap size={14} className="text-[#4ec54d]" />
++            <span className="text-xs text-white/60">
++              Set up your school in under 2 minutes — free
++            </span>
++          </div>
++          <h1 className="font-bold text-4xl md:text-7xl tracking-tight leading-tight mb-6">
++            The Operating System
++            <br />
++            for{" "}
++            <span className="bg-gradient-to-r from-[#4ec54d] to-[#62d35e] bg-clip-text text-transparent">
++              African Schools
++            </span>
++          </h1>
++          <p className="text-white/40 text-lg md:text-xl max-w-2xl mx-auto mb-10">
++            Admissions, fees, exams, attendance, gradebook, and parent communications — all in one
++            branded portal. No servers. No IT team. Just your school, online.
++          </p>
++          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
++            <Link
++              href="/signup"
++              className="group bg-[#4ec54d] text-white px-8 py-4 rounded-2xl font-bold text-base hover:bg-[#3aa93a] transition-all flex items-center gap-2 shadow-lg shadow-[#4ec54d]/20"
++            >
++              Start Your School Free{" "}
++              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
++            </Link>
++            <a
++              href="#features"
++              className="text-white/50 hover:text-white text-sm font-medium flex items-center gap-1"
++            >
++              See how it works <ChevronDown size={14} />
++            </a>
++          </div>
++          {/* Stats */}
++          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20">
++            {STATS.map((s) => (
++              <div key={s.label} className="text-center">
++                <div className="font-bold text-3xl md:text-4xl text-white mb-1">{s.value}</div>
++                <div className="text-xs text-white/30 uppercase tracking-widest">{s.label}</div>
++              </div>
++            ))}
++          </div>
+         </div>
+       </section>
+ 
+-      {/* Features */}
+-      <section className="px-6 py-16 max-w-7xl mx-auto">
+-        <h2 className="font-display text-2xl text-white text-center mb-12 tracking-widest">
+-          EVERYTHING YOUR SCHOOL NEEDS
+-        </h2>
+-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+-          {FEATURES.map((f) => (
+-            <div
+-              key={f.title}
+-              className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-[var(--color-brand-green)]/30 transition-all"
+-            >
+-              <f.icon className="text-[var(--color-brand-green)] mb-4" size={28} />
+-              <h3 className="font-display text-lg text-white mb-2">{f.title}</h3>
+-              <p className="text-white/40 text-sm">{f.desc}</p>
++      {/* ── Features ── */}
++      <section id="features" className="py-20 px-6">
++        <div className="max-w-7xl mx-auto">
++          <div className="text-center mb-14">
++            <h2 className="font-bold text-2xl md:text-4xl mb-3">Everything your school needs</h2>
++            <p className="text-white/30 max-w-xl mx-auto">
++              One platform replaces spreadsheets, paper registers, WhatsApp groups, and manual
++              receipts.
++            </p>
++          </div>
++          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
++            {FEATURES.map((f) => (
++              <div
++                key={f.title}
++                className="group bg-white/[0.03] border border-white/5 rounded-2xl p-6 hover:bg-white/[0.05] hover:border-[#4ec54d]/20 transition-all"
++              >
++                <div className="w-12 h-12 rounded-xl bg-[#4ec54d]/10 flex items-center justify-center mb-4 group-hover:bg-[#4ec54d]/20 transition-colors">
++                  <f.icon className="text-[#4ec54d]" size={22} />
++                </div>
++                <h3 className="font-bold text-lg mb-2">{f.title}</h3>
++                <p className="text-white/30 text-sm leading-relaxed">{f.desc}</p>
++              </div>
++            ))}
++          </div>
++        </div>
++      </section>
++
++      {/* ── How it works ── */}
++      <section className="py-20 px-6 bg-gradient-to-b from-transparent to-white/[0.02]">
++        <div className="max-w-5xl mx-auto">
++          <h2 className="font-bold text-2xl md:text-4xl text-center mb-14">Live in 3 steps</h2>
++          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
++            {STEPS.map((s) => (
++              <div key={s.num} className="text-center">
++                <div className="font-bold text-5xl text-[#4ec54d]/20 mb-3">{s.num}</div>
++                <h3 className="font-bold text-lg mb-2">{s.title}</h3>
++                <p className="text-white/30 text-sm leading-relaxed">{s.desc}</p>
++              </div>
++            ))}
++          </div>
++        </div>
++      </section>
++
++      {/* ── Trust badges ── */}
++      <section className="py-12 px-6 border-y border-white/5">
++        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-8 md:gap-12">
++          {[
++            { icon: Shield, label: "Bank-grade Security" },
++            { icon: Smartphone, label: "Works on Any Device" },
++            { icon: Globe, label: "Cloud-hosted, 99.9% Uptime" },
++            { icon: Zap, label: "Setup in Minutes" },
++          ].map((b) => (
++            <div key={b.label} className="flex items-center gap-2 text-white/30 text-sm">
++              <b.icon size={16} className="text-[#4ec54d]" /> {b.label}
+             </div>
+           ))}
+         </div>
+       </section>
+ 
+-      {/* Pricing */}
+-      <section className="px-6 py-16 max-w-7xl mx-auto">
+-        <h2 className="font-display text-2xl text-white text-center mb-12 tracking-widest">
+-          SIMPLE, TRANSPARENT PRICING
+-        </h2>
+-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+-          {TIERS.map((t) => (
+-            <div
+-              key={t.name}
+-              className={`rounded-2xl p-6 ${
+-                t.highlight
+-                  ? "bg-[var(--color-brand-green)]/10 border-2 border-[var(--color-brand-green)]"
+-                  : "bg-white/5 border border-white/10"
+-              }`}
+-            >
+-              {t.highlight && (
+-                <span className="text-[var(--color-brand-green)] text-xs font-bold uppercase tracking-widest mb-2 block">
+-                  Most Popular
+-                </span>
+-              )}
+-              <h3 className="font-display text-xl text-white mb-1">{t.name}</h3>
+-              <p className="text-white/40 text-xs mb-4">{t.students}</p>
+-              <div className="mb-6">
+-                <span className="font-display text-3xl text-white">{t.price}</span>
+-                <span className="text-white/40 text-sm">{t.period}</span>
++      {/* ── Pricing ── */}
++      <section id="pricing" className="py-20 px-6">
++        <div className="max-w-7xl mx-auto">
++          <div className="text-center mb-14">
++            <h2 className="font-bold text-2xl md:text-4xl mb-3">Simple, transparent pricing</h2>
++            <p className="text-white/30">Pay per term. Cancel anytime. No hidden fees.</p>
++          </div>
++          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
++            {TIERS.map((t) => (
++              <div
++                key={t.name}
++                className={`rounded-2xl p-6 ${t.highlight ? "bg-[#4ec54d]/5 border-2 border-[#4ec54d]/40" : "bg-white/[0.03] border border-white/5"}`}
++              >
++                {t.highlight && (
++                  <span className="text-[#4ec54d] text-xs font-bold uppercase tracking-widest mb-2 block">
++                    ★ Most Popular
++                  </span>
++                )}
++                <h3 className="font-bold text-xl mb-1">{t.name}</h3>
++                <p className="text-white/30 text-xs mb-4">{t.students}</p>
++                <div className="mb-6">
++                  <span className="font-bold text-3xl">{t.price}</span>
++                  <span className="text-white/30 text-sm">{t.period}</span>
++                </div>
++                <ul className="space-y-2 mb-6">
++                  {t.features.map((feat) => (
++                    <li key={feat} className="flex items-center gap-2 text-white/50 text-sm">
++                      <Check size={14} className="text-[#4ec54d] shrink-0" /> {feat}
++                    </li>
++                  ))}
++                </ul>
++                <Link
++                  href="/signup"
++                  className={`block text-center py-3 rounded-xl font-bold text-sm transition-colors ${t.highlight ? "bg-[#4ec54d] text-white hover:bg-[#3aa93a]" : "bg-white/10 text-white hover:bg-white/20"}`}
++                >
++                  {t.cta}
++                </Link>
+               </div>
+-              <ul className="space-y-2 mb-6">
+-                {t.features.map((feat) => (
+-                  <li key={feat} className="flex items-center gap-2 text-white/60 text-sm">
+-                    <Check size={14} className="text-[var(--color-brand-green)]" />
+-                    {feat}
+-                  </li>
+-                ))}
+-              </ul>
+-              <Link
+-                href="/signup"
+-                className={`block text-center py-3 rounded-xl font-bold text-sm uppercase tracking-widest ${
+-                  t.highlight
+-                    ? "bg-[var(--color-brand-green)] text-white hover:opacity-90"
+-                    : "bg-white/10 text-white hover:bg-white/20"
+-                }`}
++            ))}
++          </div>
++        </div>
++      </section>
++
++      {/* ── FAQ ── */}
++      <section id="faq" className="py-20 px-6">
++        <div className="max-w-3xl mx-auto">
++          <h2 className="font-bold text-2xl md:text-4xl text-center mb-12">
++            Frequently asked questions
++          </h2>
++          <div className="space-y-3">
++            {FAQS.map((item) => (
++              <details
++                key={item.q}
++                className="group bg-white/[0.03] border border-white/5 rounded-xl p-5 cursor-pointer"
+               >
+-                {t.cta}
+-              </Link>
+-            </div>
+-          ))}
++                <summary className="font-medium text-sm flex items-center justify-between list-none">
++                  {item.q}
++                  <ChevronDown
++                    size={16}
++                    className="text-white/30 group-open:rotate-180 transition-transform"
++                  />
++                </summary>
++                <p className="text-white/40 text-sm mt-3 leading-relaxed">{item.a}</p>
++              </details>
++            ))}
++          </div>
++        </div>
++      </section>
++
++      {/* ── Final CTA ── */}
++      <section className="py-20 px-6">
++        <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-[#4ec54d]/10 to-transparent border border-[#4ec54d]/20 rounded-3xl p-12">
++          <h2 className="font-bold text-2xl md:text-4xl mb-4">Ready to digitise your school?</h2>
++          <p className="text-white/40 mb-8 max-w-xl mx-auto">
++            Join hundreds of schools already running on EDUos. Start free — no credit card required.
++          </p>
++          <Link
++            href="/signup"
++            className="inline-flex items-center gap-2 bg-[#4ec54d] text-white px-8 py-4 rounded-2xl font-bold hover:bg-[#3aa93a] transition-all shadow-lg shadow-[#4ec54d]/20"
++          >
++            Create Your School <ArrowRight size={18} />
++          </Link>
+         </div>
+       </section>
+ 
+-      {/* Footer */}
+-      <footer className="px-6 py-10 border-t border-white/10">
+-        <div className="max-w-7xl mx-auto flex items-center justify-between">
++      {/* ── Footer ── */}
++      <footer className="py-10 px-6 border-t border-white/5">
++        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+           <div className="flex items-center gap-2">
+-            <Building2 className="text-[var(--color-brand-green)]" size={20} />
+-            <span className="font-display text-sm text-white/60 tracking-widest">EDUos</span>
++            <div className="w-7 h-7 rounded-lg bg-[#4ec54d]/20 flex items-center justify-center">
++              <Building2 size={14} className="text-[#4ec54d]" />
++            </div>
++            <span className="font-bold text-sm text-white/60">
++              EDU<span className="text-[#4ec54d]">os</span>
++            </span>
++          </div>
++          <p className="text-white/20 text-xs">
++            © 2026 EDUos — Education Operating System. Powered by Ykay College.
++          </p>
++          <div className="flex gap-4 text-xs text-white/30">
++            <Link href="/login">Sign In</Link>
++            <Link href="/signup">Start Free</Link>
+           </div>
+-          <p className="text-white/30 text-xs">Education Operating System — powered by Ykay</p>
+         </div>
+       </footer>
+     </div>

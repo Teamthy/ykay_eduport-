@@ -1,0 +1,63 @@
+diff --git a/app/api/platform/signup/route.ts b/app/api/platform/signup/route.ts
+index 1847389..fb7c886 100644
+--- a/app/api/platform/signup/route.ts
++++ b/app/api/platform/signup/route.ts
+@@ -26,24 +26,25 @@ const schema = z.object({
+  * Creates a School + an ADMIN user (the school's super admin) + a FREE/trial
+  * Subscription. The admin is signed in immediately.
+  */
+-const ipLimit = await enforceRateLimit(
+-  "signup",
+-  request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown",
+-);
+-if (!ipLimit.success) {
+-  return NextResponse.json(
+-    {
+-      error: ipLimit.configurationError
+-        ? "Sign-up is temporarily unavailable."
+-        : "Too many sign-up attempts. Please try again later.",
+-    },
+-    {
+-      status: ipLimit.configurationError ? 503 : 429,
+-      headers: { "Retry-After": String(ipLimit.retryAfterSeconds) },
+-    },
+-  );
+-}
+ export async function POST(request: NextRequest) {
++  const ipLimit = await enforceRateLimit(
++    "signup",
++    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown",
++  );
++  if (!ipLimit.success) {
++    return NextResponse.json(
++      {
++        error: ipLimit.configurationError
++          ? "Sign-up is temporarily unavailable."
++          : "Too many sign-up attempts. Please try again later.",
++      },
++      {
++        status: ipLimit.configurationError ? 503 : 429,
++        headers: { "Retry-After": String(ipLimit.retryAfterSeconds) },
++      },
++    );
++  }
++
+   let input: z.infer<typeof schema>;
+   try {
+     input = schema.parse(await request.json());
+diff --git a/lib/rate-limit.ts b/lib/rate-limit.ts
+index dd4ae0e..f0cdad6 100644
+--- a/lib/rate-limit.ts
++++ b/lib/rate-limit.ts
+@@ -95,6 +95,11 @@ const redisLimiters: Record<string, Ratelimit | null> = redis
+         limiter: Ratelimit.slidingWindow(5, "1 h"),
+         prefix: "ykay:auth:pw-change",
+       }),
++      signup: new Ratelimit({
++        redis,
++        limiter: Ratelimit.slidingWindow(5, "1 h"),
++        prefix: "ykay:signup",
++      }),
+     }
+   : {};
+ 

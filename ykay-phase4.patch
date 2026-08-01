@@ -1,0 +1,222 @@
+diff --git a/lib/branding.ts b/lib/branding.ts
+index dc1207e..50540b6 100644
+--- a/lib/branding.ts
++++ b/lib/branding.ts
+@@ -1,15 +1,18 @@
+ import { prisma } from "@/lib/prisma";
++import { cached } from "@/lib/cache";
+ 
+ /**
+  * Default branding/palette used when a tenant hasn't configured their own.
+- * These mirror Ykay's identity so the platform looks correct out of the box.
++ * This is the Ykay College identity (green + orange on dark navy) — it must
++ * match the palette in app/globals.css so the theming injection is a visual
++ * no-op for the single-tenant Ykay deployment.
+  */
+ export const DEFAULT_BRANDING = {
+   logoUrl: null as string | null,
+   faviconUrl: null as string | null,
+-  primaryColor: "#00072D",
+-  secondaryColor: "#051650",
+-  accentColor: "#123499",
++  primaryColor: "#0c1824", // brand navy (was EDUos #00072D)
++  secondaryColor: "#1a2e4d", // brand navy-light (was EDUos #051650)
++  accentColor: "#4ec54d", // brand green (was EDUos #123499 — caused blue UI)
+   fontDisplay: null as string | null,
+   fontBody: null as string | null,
+   heroImageUrl: null as string | null,
+@@ -23,5 +26,7 @@ export const DEFAULT_BRANDING = {
+  * injects the palette as CSS variables at the root layout.
+  */
+ export async function getTenantBranding(schoolId: string) {
+-  return prisma.tenantBranding.findUnique({ where: { schoolId } });
++  return cached(`branding:${schoolId}`, 300, () =>
++    prisma.tenantBranding.findUnique({ where: { schoolId } }),
++  );
+ }
+diff --git a/lib/cache.ts b/lib/cache.ts
+index db884a8..59ddfe7 100644
+--- a/lib/cache.ts
++++ b/lib/cache.ts
+@@ -1,20 +1,30 @@
+ /**
+- * Simple in-memory LRU cache for expensive database queries.
++ * Two-tier cache for hot database reads.
+  *
+- * For 1K DAU, many requests hit the same read-heavy endpoints
+- * (school config, fee structure, class lists, etc.). This cache
+- * reduces database load by serving fresh-enough data from memory.
++ * Uses Upstash Redis when configured (shared across serverless instances) and
++ * falls back to an in-memory LRU otherwise. `cached()` memoises a query result
++ * for a TTL — including null/undefined results (wrapped internally), so a
++ * "no row" answer is cached just like any other and doesn't re-hit the DB.
+  *
+- * In production, consider upgrading to Upstash Redis or Vercel KV
+- * for shared caching across serverless instances.
++ *   const branding = await cached(`branding:${id}`, 300, () =>
++ *     prisma.tenantBranding.findUnique({ where: { schoolId: id } })
++ *   );
+  */
++import { Redis } from "@upstash/redis";
++
++interface CacheBackend {
++  get<T>(key: string): Promise<T | null>;
++  set<T>(key: string, value: T, ttlSeconds: number): Promise<void>;
++  delete(key: string): Promise<void>;
++}
+ 
++// ── In-memory LRU fallback ────────────────────────────────────────
+ interface CacheEntry<T> {
+   value: T;
+   expiresAt: number;
+ }
+ 
+-class MemoryCache {
++class MemoryCache implements CacheBackend {
+   private store = new Map<string, CacheEntry<unknown>>();
+   private maxSize: number;
+ 
+@@ -33,54 +43,60 @@ class MemoryCache {
+   }
+ 
+   async set<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
+-    // Evict oldest entries if at capacity
+     if (this.store.size >= this.maxSize) {
+       const firstKey = this.store.keys().next().value;
+       if (firstKey) this.store.delete(firstKey);
+     }
+-
+-    this.store.set(key, {
+-      value,
+-      expiresAt: Date.now() + ttlSeconds * 1000,
+-    });
++    this.store.set(key, { value, expiresAt: Date.now() + ttlSeconds * 1000 });
+   }
+ 
+   async delete(key: string): Promise<void> {
+     this.store.delete(key);
+   }
++}
+ 
+-  async deleteByPrefix(prefix: string): Promise<void> {
+-    for (const key of this.store.keys()) {
+-      if (key.startsWith(prefix)) {
+-        this.store.delete(key);
+-      }
+-    }
++// ── Redis backend (shared across serverless instances) ────────────
++class RedisCache implements CacheBackend {
++  private redis: Redis;
++
++  constructor(redis: Redis) {
++    this.redis = redis;
++  }
++
++  async get<T>(key: string): Promise<T | null> {
++    const value = await this.redis.get<T>(key);
++    return value ?? null;
+   }
+ 
+-  clear(): void {
+-    this.store.clear();
++  async set<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
++    await this.redis.set(key, value, { ex: ttlSeconds });
++  }
++
++  async delete(key: string): Promise<void> {
++    await this.redis.del(key);
+   }
+ }
+ 
+-export const cache = new MemoryCache();
++const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
++const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
++
++export const cache: CacheBackend =
++  redisUrl && redisToken
++    ? new RedisCache(new Redis({ url: redisUrl, token: redisToken }))
++    : new MemoryCache();
+ 
+ /**
+- * Helper to cache a database query result.
+- *
+- * Usage:
+- *   const data = await cached("school:config:abc", 300, () =>
+- *     prisma.school.findUnique({ where: { id: "abc" } })
+- *   );
++ * Memoise a database query for `ttlSeconds`. Null/undefined results are cached
++ * too (wrapped), so repeated "no row" lookups don't hit the DB.
+  */
+ export async function cached<T>(
+   key: string,
+   ttlSeconds: number,
+   fetcher: () => Promise<T>,
+ ): Promise<T> {
+-  const hit = await cache.get<T>(key);
+-  if (hit !== null) return hit;
+-
++  const wrapped = await cache.get<{ v: T }>(key);
++  if (wrapped !== null) return wrapped.v;
+   const value = await fetcher();
+-  await cache.set(key, value, ttlSeconds);
++  await cache.set(key, { v: value }, ttlSeconds);
+   return value;
+ }
+diff --git a/lib/modules.ts b/lib/modules.ts
+index c804fc8..656c6b5 100644
+--- a/lib/modules.ts
++++ b/lib/modules.ts
+@@ -1,4 +1,5 @@
+ import { prisma } from "@/lib/prisma";
++import { cached } from "@/lib/cache";
+ 
+ /**
+  * Per-tenant module / feature flags.
+@@ -36,10 +37,12 @@ export const DEFAULT_ENABLED: ModuleKey[] = MODULE_KEYS.filter((m) => m !== "it_
+  * Falls back to DEFAULT_ENABLED when no config exists.
+  */
+ export async function getEnabledModules(schoolId: string): Promise<Set<ModuleKey>> {
+-  const school = await prisma.school.findUnique({
+-    where: { id: schoolId },
+-    select: { modules: true },
+-  });
++  const school = await cached(`modules:${schoolId}`, 300, () =>
++    prisma.school.findUnique({
++      where: { id: schoolId },
++      select: { modules: true },
++    }),
++  );
+ 
+   if (!school?.modules) return new Set(DEFAULT_ENABLED);
+ 
+diff --git a/mobile/app.json b/mobile/app.json
+index 46351f7..379dfd6 100644
+--- a/mobile/app.json
++++ b/mobile/app.json
+@@ -7,14 +7,24 @@
+     "icon": "./assets/icon.png",
+     "scheme": "ykaycollege",
+     "userInterfaceStyle": "dark",
++    "splash": {
++      "image": "./assets/icon.png",
++      "backgroundColor": "#050C14",
++      "resizeMode": "contain"
++    },
+     "ios": {
+       "supportsTablet": true,
+-      "bundleIdentifier": "com.ykaycollege.app"
++      "bundleIdentifier": "com.ykaycollege.app",
++      "infoPlist": {
++        "NSFaceIDUsageDescription": "Ykay College uses Face ID to quickly and securely unlock your account."
++      }
+     },
+     "android": {
+       "adaptiveIcon": {
+-        "backgroundColor": "#00072D"
++        "foregroundImage": "./assets/icon.png",
++        "backgroundColor": "#050C14"
+       },
++      "permissions": ["USE_BIOMETRIC"],
+       "package": "com.ykaycollege.app"
+     },
+     "web": {

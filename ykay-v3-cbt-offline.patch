@@ -1,0 +1,151 @@
+diff --git a/app/student/exams/[id]/page.tsx b/app/student/exams/[id]/page.tsx
+index af5df8b..c52b334 100644
+--- a/app/student/exams/[id]/page.tsx
++++ b/app/student/exams/[id]/page.tsx
+@@ -1,6 +1,7 @@
+ "use client";
+ 
+ import { use, useCallback, useEffect, useRef, useState } from "react";
++import { cacheGet, cacheSet, queueWrite } from "@/lib/offline/db";
+ import { useRouter } from "next/navigation";
+ import { useToast } from "@/components/Toast";
+ import ConfirmDialog from "@/components/ConfirmDialog";
+@@ -51,14 +52,41 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
+   const [submitting, setSubmitting] = useState(false);
+   const [confirmSubmit, setConfirmSubmit] = useState(false);
+   const [error, setError] = useState("");
++  const [isOffline, setIsOffline] = useState(false);
+   const dirtyRef = useRef(false);
+   const answersRef = useRef<Record<string, string>>({});
+ 
+-  // Start / resume attempt
++  // Start / resume attempt (caches for offline use)
+   useEffect(() => {
++    const cacheKey = `/api/student/exams/${id}/attempt`;
+     (async () => {
++      // Offline: load from cache
++      const cached = await cacheGet<StartResponse>(cacheKey);
++      if (cached) {
++        setData(cached.data);
++        setSecondsLeft(cached.data.attempt.secondsLeft);
++        const restored: Record<string, string> = {};
++        for (const q of cached.data.questions) {
++          if (q.savedResponse !== null) restored[q.id] = q.savedResponse;
++        }
++        setAnswers(restored);
++        answersRef.current = restored;
++        setLoading(false);
++      }
++
++      // Offline: stop here
++      if (typeof navigator !== "undefined" && !navigator.onLine) {
++        setIsOffline(true);
++        if (!cached)
++          setError(
++            "This exam was not downloaded. Connect to the internet and open it once to enable offline mode.",
++          );
++        return;
++      }
++
++      // Online: start/resume + cache for offline
+       try {
+-        const response = await fetch(`/api/student/exams/${id}/attempt`, { method: "POST" });
++        const response = await fetch(cacheKey, { method: "POST" });
+         const body = (await response.json()) as StartResponse & { error?: string };
+         if (!response.ok) throw new Error(body.error || "Unable to start the exam.");
+         setData(body);
+@@ -69,8 +97,11 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
+         }
+         setAnswers(restored);
+         answersRef.current = restored;
++        // Cache for offline use
++        await cacheSet(cacheKey, body);
+       } catch (startError) {
+-        setError(startError instanceof Error ? startError.message : "Unable to start the exam.");
++        if (!cached)
++          setError(startError instanceof Error ? startError.message : "Unable to start the exam.");
+       } finally {
+         setLoading(false);
+       }
+@@ -80,6 +111,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
+   const persist = useCallback(
+     async (action: "SAVE" | "SUBMIT") => {
+       if (!data) return null;
++      const url = `/api/student/exams/${id}/attempt`;
+       const payload = {
+         attemptId: data.attempt.id,
+         action,
+@@ -88,17 +120,43 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
+           response: response || null,
+         })),
+       };
+-      const response = await fetch(`/api/student/exams/${id}/attempt`, {
+-        method: "PATCH",
+-        headers: { "Content-Type": "application/json" },
+-        body: JSON.stringify(payload),
+-      });
+-      return (await response.json()) as {
+-        ok?: boolean;
+-        submitted?: boolean;
+-        message?: string;
+-        error?: string;
+-      };
++
++      // Offline: queue the write (answers are safe in IndexedDB)
++      if (typeof navigator !== "undefined" && !navigator.onLine) {
++        await queueWrite({ url, method: "PATCH", body: payload });
++        return action === "SUBMIT"
++          ? {
++              ok: true,
++              submitted: true,
++              message: "Exam saved offline. Will submit when back online.",
++            }
++          : { ok: true };
++      }
++
++      // Online: PATCH normally
++      try {
++        const response = await fetch(url, {
++          method: "PATCH",
++          headers: { "Content-Type": "application/json" },
++          body: JSON.stringify(payload),
++        });
++        return (await response.json()) as {
++          ok?: boolean;
++          submitted?: boolean;
++          message?: string;
++          error?: string;
++        };
++      } catch {
++        // Network dropped mid-request — queue it
++        await queueWrite({ url, method: "PATCH", body: payload });
++        return action === "SUBMIT"
++          ? {
++              ok: true,
++              submitted: true,
++              message: "Connection lost. Exam saved and will submit when back online.",
++            }
++          : { ok: true };
++      }
+     },
+     [data, id],
+   );
+@@ -140,11 +198,13 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
+     if (!data) return;
+     const onVisibility = () => {
+       if (document.hidden) {
+-        void fetch(`/api/student/exams/${id}/attempt`, {
+-          method: "PATCH",
+-          headers: { "Content-Type": "application/json" },
+-          body: JSON.stringify({ attemptId: data.attempt.id, action: "TAB_SWITCH" }),
+-        });
++        if (typeof navigator !== "undefined" && navigator.onLine) {
++          void fetch(`/api/student/exams/${id}/attempt`, {
++            method: "PATCH",
++            headers: { "Content-Type": "application/json" },
++            body: JSON.stringify({ attemptId: data.attempt.id, action: "TAB_SWITCH" }),
++          });
++        }
+         toast("Tab switch recorded. Stay on the exam page.", "warning");
+       }
+     };

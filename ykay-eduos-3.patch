@@ -1,0 +1,137 @@
+diff --git a/app/layout.tsx b/app/layout.tsx
+index ffe207c..a7ce9fd 100644
+--- a/app/layout.tsx
++++ b/app/layout.tsx
+@@ -1,4 +1,4 @@
+-﻿import { Anton, DM_Sans } from "next/font/google";
++import { Anton, DM_Sans } from "next/font/google";
+ import type { Metadata } from "next";
+ import "./globals.css";
+ import { ThemeProvider } from "@/components/ThemeProvider";
+@@ -54,7 +54,23 @@ export const metadata: Metadata = {
+   manifest: "/manifest.json",
+ };
+ 
+-export default function RootLayout({ children }: { children: React.ReactNode }) {
++import { headers } from "next/headers";
++import { resolveTenantFromHost } from "@/lib/tenant";
++import { getTenantBranding, DEFAULT_BRANDING } from "@/lib/branding";
++
++export default async function RootLayout({ children }: { children: React.ReactNode }) {
++  // ── EDUos: resolve the tenant's branding (per-school palette, logo) ──
++  const host = (await headers()).get("host");
++  const tenant = await resolveTenantFromHost(host);
++  const branding = tenant ? await getTenantBranding(tenant.id) : null;
++
++  const primary = branding?.primaryColor ?? DEFAULT_BRANDING.primaryColor;
++  const secondary = branding?.secondaryColor ?? DEFAULT_BRANDING.secondaryColor;
++  const accent = branding?.accentColor ?? DEFAULT_BRANDING.accentColor;
++  const logoUrl = branding?.logoUrl ?? "/ykay-logo.png";
++  const faviconUrl = branding?.faviconUrl ?? "/ykay-logo.png";
++  const displayName = branding?.displayName ?? tenant?.name ?? "EduPortal";
++
+   return (
+     <html
+       lang="en"
+@@ -63,8 +79,14 @@ export default function RootLayout({ children }: { children: React.ReactNode })
+       suppressHydrationWarning
+     >
+       <head>
+-        <link rel="icon" href="/ykay-logo.png" type="image/png" />
+-        <link rel="apple-touch-icon" href="/ykay-logo.png" />
++        <link rel="icon" href={faviconUrl} type="image/png" />
++        <link rel="apple-touch-icon" href={faviconUrl} />
++        {/* EDUos: inject per-tenant brand palette as CSS variable overrides */}
++        <style
++          dangerouslySetInnerHTML={{
++            __html: `:root{--color-brand-navy:${primary};--color-brand-navy-light:${secondary};--color-brand-green:${accent};--color-brand-green-dark:${accent};--color-brand-green-light:${accent};}`,
++          }}
++        />
+         {/* ANTI-FLASH: force dark mode as default before hydration */}
+         <script
+           dangerouslySetInnerHTML={{
+diff --git a/lib/modules.ts b/lib/modules.ts
+new file mode 100644
+index 0000000..c804fc8
+--- /dev/null
++++ b/lib/modules.ts
+@@ -0,0 +1,59 @@
++import { prisma } from "@/lib/prisma";
++
++/**
++ * Per-tenant module / feature flags.
++ *
++ * Not all schools have IT education, CBT exams, or staff QR attendance.
++ * Each school's enabled modules are stored as a JSON map on School.modules:
++ *   { "admissions": true, "it_education": false, "exams": true, ... }
++ *
++ * When a module key is absent or true → enabled.
++ * When explicitly false → disabled.
++ */
++
++export const MODULE_KEYS = [
++  "admissions",
++  "attendance",
++  "fees",
++  "gradebook",
++  "exams",
++  "report_cards",
++  "news",
++  "staff_attendance",
++  "notifications",
++  "expenses",
++  "budgets",
++  "it_education",
++] as const;
++
++export type ModuleKey = (typeof MODULE_KEYS)[number];
++
++/** Modules enabled by default for a new tenant — everything EXCEPT it_education. */
++export const DEFAULT_ENABLED: ModuleKey[] = MODULE_KEYS.filter((m) => m !== "it_education");
++
++/**
++ * Resolve the set of enabled modules for a school.
++ * Falls back to DEFAULT_ENABLED when no config exists.
++ */
++export async function getEnabledModules(schoolId: string): Promise<Set<ModuleKey>> {
++  const school = await prisma.school.findUnique({
++    where: { id: schoolId },
++    select: { modules: true },
++  });
++
++  if (!school?.modules) return new Set(DEFAULT_ENABLED);
++
++  try {
++    const stored = school.modules as Record<string, boolean>;
++    const enabled = MODULE_KEYS.filter((k) => stored[k] !== false);
++    return new Set(enabled.length > 0 ? enabled : DEFAULT_ENABLED);
++  } catch {
++    return new Set(DEFAULT_ENABLED);
++  }
++}
++
++/** Check a single module without fetching the full set (single-record query). */
++export async function isModuleEnabled(schoolId: string, key: ModuleKey): Promise<boolean> {
++  const enabled = await getEnabledModules(schoolId);
++  return enabled.has(key);
++}
+diff --git a/prisma/migrations/20260726020000_eduos_modules/migration.sql b/prisma/migrations/20260726020000_eduos_modules/migration.sql
+new file mode 100644
+index 0000000..273c9d6
+--- /dev/null
++++ b/prisma/migrations/20260726020000_eduos_modules/migration.sql
+@@ -0,0 +1,2 @@
++-- EDUos: add modules JSONB column to School for per-tenant feature flags.
++ALTER TABLE "School" ADD COLUMN "modules" JSONB;
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index 696f45d..10460a0 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -161,6 +161,7 @@ model School {
+   subdomain    String?      @unique
+   customDomain String?      @unique
+   status       SchoolStatus @default(ACTIVE)
++  modules      Json?
+   createdAt    DateTime     @default(now())
+   updatedAt    DateTime     @updatedAt
+ 

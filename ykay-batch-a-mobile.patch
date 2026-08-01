@@ -1,0 +1,131 @@
+diff --git a/mobile/lib/api.ts b/mobile/lib/api.ts
+index 0d1b50d..2be6790 100644
+--- a/mobile/lib/api.ts
++++ b/mobile/lib/api.ts
+@@ -29,7 +29,7 @@ export async function api<T = unknown>(
+     ...options,
+     headers: {
+       "Content-Type": "application/json",
+-      ...(token ? { Cookie: `ykay_session=${token}` } : {}),
++      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+       ...(options.headers || {}),
+     },
+   });
+diff --git a/mobile/lib/http.ts b/mobile/lib/http.ts
+index 08016a3..ec6e119 100644
+--- a/mobile/lib/http.ts
++++ b/mobile/lib/http.ts
+@@ -5,8 +5,13 @@
+  */
+ import * as SecureStore from "expo-secure-store";
+ 
+-/** Point this at the deployed Ykay College backend (or localhost:3000 for dev). */
+-export const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
++/**
++ * Point this at the deployed Ykay College backend.
++ * Default is the live Vercel backend so the app works even if the build-time
++ * EXPO_PUBLIC_API_URL env var isn't passed. Override locally with
++ * EXPO_PUBLIC_API_URL=http://<lan-ip>:3000 for dev against a local server.
++ */
++export const API_BASE = process.env.EXPO_PUBLIC_API_URL || "https://ykay-eduport2.vercel.app";
+ 
+ const SESSION_KEY = "ykay_session";
+ 
+@@ -53,6 +58,8 @@ export async function notifyAuthExpired(): Promise<void> {
+ export async function authHeaders(): Promise<Record<string, string>> {
+   const token = await getToken();
+   const h: Record<string, string> = { "Content-Type": "application/json" };
+-  if (token) h["Cookie"] = `ykay_session=${token}`;
++  // Bearer token — the backend getSession() accepts Authorization: Bearer in
++  // addition to the web cookie. More reliable than Cookie headers in RN fetch.
++  if (token) h["Authorization"] = `Bearer ${token}`;
+   return h;
+ }
+diff --git a/mobile/src/components/animation/index.tsx b/mobile/src/components/animation/index.tsx
+index bd24a5c..177b64c 100644
+--- a/mobile/src/components/animation/index.tsx
++++ b/mobile/src/components/animation/index.tsx
+@@ -19,18 +19,20 @@ export function FadeIn({
+   distance?: number;
+   style?: ViewStyle;
+ }) {
+-  const opacity = useRef(new Animated.Value(0)).current;
+-  const translateY = useRef(new Animated.Value(distance)).current;
++  // Keep the ref object; read .current at use sites (avoids the
++  // react-hooks "reading .current during render" lint).
++  const opacityRef = useRef(new Animated.Value(0));
++  const translateYRef = useRef(new Animated.Value(distance));
+ 
+   useEffect(() => {
+     Animated.parallel([
+-      Animated.timing(opacity, { toValue: 1, duration, delay, useNativeDriver: true }),
+-      Animated.timing(translateY, { toValue: 0, duration, delay, useNativeDriver: true }),
++      Animated.timing(opacityRef.current, { toValue: 1, duration, delay, useNativeDriver: true }),
++      Animated.timing(translateYRef.current, { toValue: 0, duration, delay, useNativeDriver: true }),
+     ]).start();
+-  }, [opacity, translateY, delay, duration]);
++  }, [delay, duration]);
+ 
+   return (
+-    <Animated.View style={{ opacity, transform: [{ translateY }], ...style }}>
++    <Animated.View style={{ opacity: opacityRef.current, transform: [{ translateY: translateYRef.current }], ...style }}>
+       {children}
+     </Animated.View>
+   );
+diff --git a/mobile/src/components/carousel/index.tsx b/mobile/src/components/carousel/index.tsx
+index d6904a2..0342716 100644
+--- a/mobile/src/components/carousel/index.tsx
++++ b/mobile/src/components/carousel/index.tsx
+@@ -15,21 +15,21 @@ export function BackgroundCarousel({
+   style?: ViewStyle;
+ }) {
+   const [index, setIndex] = useState(0);
+-  const fade = useRef(new Animated.Value(1)).current;
++  const fadeRef = useRef(new Animated.Value(1));
+ 
+   useEffect(() => {
+     const id = setInterval(() => {
+-      Animated.timing(fade, { toValue: 0, duration: 700, useNativeDriver: true }).start(() => {
++      Animated.timing(fadeRef.current, { toValue: 0, duration: 700, useNativeDriver: true }).start(() => {
+         setIndex((i) => (i + 1) % images.length);
+-        Animated.timing(fade, { toValue: 1, duration: 700, useNativeDriver: true }).start();
++        Animated.timing(fadeRef.current, { toValue: 1, duration: 700, useNativeDriver: true }).start();
+       });
+     }, intervalMs);
+     return () => clearInterval(id);
+-  }, [images.length, intervalMs, fade]);
++  }, [images.length, intervalMs]);
+ 
+   return (
+     <View style={[{ flex: 1 }, style]}>
+-      <Animated.View style={{ flex: 1, opacity: fade }}>
++      <Animated.View style={{ flex: 1, opacity: fadeRef.current }}>
+         <Image source={images[index]} style={{ flex: 1, resizeMode: "cover" }} />
+       </Animated.View>
+     </View>
+diff --git a/mobile/src/components/feedback/index.tsx b/mobile/src/components/feedback/index.tsx
+index d2b92fd..a6d1a79 100644
+--- a/mobile/src/components/feedback/index.tsx
++++ b/mobile/src/components/feedback/index.tsx
+@@ -40,16 +40,16 @@ export function ErrorState({ title = "Something went wrong", message, onRetry }:
+ 
+ export function Skeleton({ width = "100%", height = 16, radius = 8, style }: { width?: number | string; height?: number; radius?: number; style?: ViewStyle }) {
+   const { colors } = useTheme();
+-  const opacity = useRef(new Animated.Value(0.3)).current;
++  const opacityRef = useRef(new Animated.Value(0.3));
+   useEffect(() => {
+     const loop = Animated.loop(
+       Animated.sequence([
+-        Animated.timing(opacity, { toValue: 0.6, duration: 800, useNativeDriver: true }),
+-        Animated.timing(opacity, { toValue: 0.3, duration: 800, useNativeDriver: true }),
++        Animated.timing(opacityRef.current, { toValue: 0.6, duration: 800, useNativeDriver: true }),
++        Animated.timing(opacityRef.current, { toValue: 0.3, duration: 800, useNativeDriver: true }),
+       ]),
+     );
+     loop.start();
+     return () => loop.stop();
+-  }, [opacity]);
+-  return <Animated.View style={{ width, height, borderRadius: radius, backgroundColor: colors.surface.disabled, opacity, ...style }} />;
++  }, []);
++  return <Animated.View style={{ width, height, borderRadius: radius, backgroundColor: colors.surface.disabled, opacity: opacityRef.current, ...style }} />;
+ }

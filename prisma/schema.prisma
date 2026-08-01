@@ -307,6 +307,7 @@ model StudentProfile {
   lastName               String
   otherNames             String?
   displayName            String
+  photoUrl               String?
   gender                 String?
   guardianName           String?
   guardianPhone          String?

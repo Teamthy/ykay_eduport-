@@ -1,0 +1,1346 @@
+diff --git a/app/admin/attendance-analytics/page.tsx b/app/admin/attendance-analytics/page.tsx
+index 0dfad32..a222b5e 100644
+--- a/app/admin/attendance-analytics/page.tsx
++++ b/app/admin/attendance-analytics/page.tsx
+@@ -2,7 +2,7 @@
+ 
+ import { useEffect, useMemo, useState } from "react";
+ import Link from "next/link";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import AdminSidebar from "@/components/AdminSidebar";
+ import {
+@@ -169,7 +169,7 @@ export default function AdminAttendanceAnalyticsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy px-6 pb-10 pt-24">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/admin/attendance-corrections/page.tsx b/app/admin/attendance-corrections/page.tsx
+index ac16a9c..23d348e 100644
+--- a/app/admin/attendance-corrections/page.tsx
++++ b/app/admin/attendance-corrections/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useEffect, useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import AdminSidebar from "@/components/AdminSidebar";
+ import { CheckCircle2, LoaderCircle, ShieldAlert, XCircle } from "lucide-react";
+@@ -87,7 +87,7 @@ export default function AdminAttendanceCorrectionsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy px-6 pb-10 pt-24">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/admin/broadsheet/page.tsx b/app/admin/broadsheet/page.tsx
+index d6ccc18..b94e9cc 100644
+--- a/app/admin/broadsheet/page.tsx
++++ b/app/admin/broadsheet/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useCallback, useEffect, useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import AdminSidebar from "@/components/AdminSidebar";
+ import { FileSpreadsheet, LoaderCircle, Printer, TrendingUp } from "lucide-react";
+@@ -65,7 +65,7 @@ export default function AdminBroadsheetPage() {
+   return (
+     <>
+       <div className="no-print">
+-        <Header />
++        <PortalTopbar />
+       </div>
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy px-6 pt-28 pb-14 no-print">
+diff --git a/app/admin/class-manager/page.tsx b/app/admin/class-manager/page.tsx
+index a560b0f..6150634 100644
+--- a/app/admin/class-manager/page.tsx
++++ b/app/admin/class-manager/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useCallback, useEffect, useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import AdminSidebar from "@/components/AdminSidebar";
+ import ConfirmDialog from "@/components/ConfirmDialog";
+@@ -121,7 +121,7 @@ export default function AdminClassManagerPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy px-6 pt-28 pb-14">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/admin/gradebook-lock/page.tsx b/app/admin/gradebook-lock/page.tsx
+index e7a1c9d..fba1bb2 100644
+--- a/app/admin/gradebook-lock/page.tsx
++++ b/app/admin/gradebook-lock/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useCallback, useEffect, useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import AdminSidebar from "@/components/AdminSidebar";
+ import ConfirmDialog from "@/components/ConfirmDialog";
+@@ -152,7 +152,7 @@ export default function AdminGradebookLockPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy px-6 pt-28 pb-14">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/admin/news/page.tsx b/app/admin/news/page.tsx
+index ed14347..be265a1 100644
+--- a/app/admin/news/page.tsx
++++ b/app/admin/news/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useCallback, useEffect, useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import AdminSidebar from "@/components/AdminSidebar";
+ import ConfirmDialog from "@/components/ConfirmDialog";
+@@ -102,7 +102,7 @@ export default function AdminNewsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy px-6 pt-28 pb-14">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/admin/notifications/page.tsx b/app/admin/notifications/page.tsx
+index e519d1c..14dd99a 100644
+--- a/app/admin/notifications/page.tsx
++++ b/app/admin/notifications/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useCallback, useEffect, useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import AdminSidebar from "@/components/AdminSidebar";
+ import { useToast } from "@/components/Toast";
+@@ -144,7 +144,7 @@ export default function AdminNotificationsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy px-6 pt-28 pb-14">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/admin/page.tsx b/app/admin/page.tsx
+index c9b9550..908e106 100644
+--- a/app/admin/page.tsx
++++ b/app/admin/page.tsx
+@@ -2,7 +2,7 @@
+ 
+ import { useEffect, useState } from "react";
+ import Link from "next/link";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import AdminSidebar from "@/components/AdminSidebar";
+ import {
+@@ -117,7 +117,7 @@ export default function AdminDashboardPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         {/* Hero */}
+         <section className="pt-24 pb-12 bg-brand-navy px-6 relative overflow-hidden">
+diff --git a/app/admin/questions/page.tsx b/app/admin/questions/page.tsx
+index d288bdb..d6e2540 100644
+--- a/app/admin/questions/page.tsx
++++ b/app/admin/questions/page.tsx
+@@ -1,7 +1,7 @@
+ ﻿"use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import AdminSidebar from "@/components/AdminSidebar";
+ import { ALL_QUESTIONS } from "@/lib/questionBank";
+@@ -28,7 +28,7 @@ export default function AdminQuestionsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/admin/report-cards/page.tsx b/app/admin/report-cards/page.tsx
+index 0fb80d5..2a64e95 100644
+--- a/app/admin/report-cards/page.tsx
++++ b/app/admin/report-cards/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useEffect, useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import AdminSidebar from "@/components/AdminSidebar";
+ import LiveReportCardPreview from "@/components/LiveReportCardPreview";
+@@ -113,7 +113,7 @@ export default function AdminReportCardsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy pt-24 pb-14">
+           <div className="mx-auto max-w-7xl px-6">
+diff --git a/app/login/page.tsx b/app/login/page.tsx
+index 2461fe7..fe5376d 100644
+--- a/app/login/page.tsx
++++ b/app/login/page.tsx
+@@ -78,7 +78,7 @@ function LoginForm() {
+   };
+ 
+   return (
+-    <main className="min-h-screen bg-brand-navy px-6 py-16">
++    <main className="min-h-screen grid place-items-center bg-brand-navy p-6">
+       <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl md:grid-cols-2">
+         <section className="bg-brand-navy p-9 text-white md:p-12">
+           <Link
+@@ -105,10 +105,21 @@ function LoginForm() {
+             to sign in or create a free account.
+           </p>
+         </section>
+-        <section className="p-9 md:p-12">
+-          <h2 className="font-display text-3xl tracking-widest text-brand-navy">
+-            {context.heading}
+-          </h2>
++        <section className="relative overflow-hidden p-9 md:p-12">
++          {/* Portal-themed background on the form side (kept readable) */}
++          <div className="absolute inset-0">
++            {/* eslint-disable-next-line @next/next/no-img-element */}
++            <img
++              src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1000&q=80"
++              alt=""
++              className="h-full w-full object-cover"
++            />
++            <div className="absolute inset-0 bg-white/92 backdrop-blur-[2px]" />
++          </div>
++          <div className="relative">
++            <h2 className="font-display text-3xl tracking-widest text-brand-navy">
++              {context.heading}
++            </h2>
+           <p className="mt-2 text-sm text-slate-500">{context.sub}</p>
+           {error && (
+             <p
+@@ -155,6 +166,7 @@ function LoginForm() {
+           >
+             Forgot password?
+           </Link>
++          </div>
+         </section>
+       </div>
+     </main>
+diff --git a/app/parent/attendance/page.tsx b/app/parent/attendance/page.tsx
+index 9363428..2615021 100644
+--- a/app/parent/attendance/page.tsx
++++ b/app/parent/attendance/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useEffect, useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import AttendanceCalendar, { type AttendanceDay } from "@/components/AttendanceCalendar";
+@@ -112,7 +112,7 @@ export default function ParentAttendancePage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="px-6 pb-10 pt-24">
+           <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/5 bg-brand-navy p-8 shadow-xl md:p-12">
+diff --git a/app/parent/dashboard/page.tsx b/app/parent/dashboard/page.tsx
+index f8db0ff..a08bdc9 100644
+--- a/app/parent/dashboard/page.tsx
++++ b/app/parent/dashboard/page.tsx
+@@ -3,7 +3,7 @@
+ import { useEffect, useState } from "react";
+ import { cacheGet, cacheSet } from "@/lib/offline/db";
+ import Link from "next/link";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import {
+@@ -129,7 +129,7 @@ export default function ParentDashboardPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="px-6 pb-10 pt-24 md:pt-32">
+           <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl md:p-12">
+diff --git a/app/parent/events/page.tsx b/app/parent/events/page.tsx
+index f54aada..a450e58 100644
+--- a/app/parent/events/page.tsx
++++ b/app/parent/events/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import {
+@@ -51,7 +51,7 @@ export default function ParentEventsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-32 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/parent/messages/page.tsx b/app/parent/messages/page.tsx
+index e6e49aa..6e52c3a 100644
+--- a/app/parent/messages/page.tsx
++++ b/app/parent/messages/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import {
+@@ -47,7 +47,7 @@ export default function ParentMessagesPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-32 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/parent/report-cards/page.tsx b/app/parent/report-cards/page.tsx
+index dbe7c34..4863ee7 100644
+--- a/app/parent/report-cards/page.tsx
++++ b/app/parent/report-cards/page.tsx
+@@ -2,7 +2,7 @@
+ 
+ import { useEffect, useState } from "react";
+ import { cacheGet, cacheSet } from "@/lib/offline/db";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import LiveReportCardPreview from "@/components/LiveReportCardPreview";
+@@ -135,7 +135,7 @@ export default function ParentReportCardsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy px-6 pb-10 pt-24">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/student/announcements/page.tsx b/app/student/announcements/page.tsx
+index 95a6ec8..e5f530a 100644
+--- a/app/student/announcements/page.tsx
++++ b/app/student/announcements/page.tsx
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import {
+@@ -52,7 +52,7 @@ export default function StudentAnnouncementsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-32 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/student/attendance/page.tsx b/app/student/attendance/page.tsx
+index ba3c034..1ba8d75 100644
+--- a/app/student/attendance/page.tsx
++++ b/app/student/attendance/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useEffect, useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import AttendanceCalendar, { type AttendanceDay } from "@/components/AttendanceCalendar";
+@@ -97,7 +97,7 @@ export default function StudentAttendancePage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="px-6 pb-10 pt-24">
+           <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl md:p-12">
+diff --git a/app/student/dashboard/page.tsx b/app/student/dashboard/page.tsx
+index 499b98a..4367700 100644
+--- a/app/student/dashboard/page.tsx
++++ b/app/student/dashboard/page.tsx
+@@ -3,7 +3,7 @@
+ import { useEffect, useState } from "react";
+ import { cacheGet, cacheSet } from "@/lib/offline/db";
+ import Link from "next/link";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import {
+@@ -149,7 +149,7 @@ export default function StudentDashboardPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         {/* Hero */}
+         <section className="pt-24 pb-10 bg-brand-navy px-6 relative overflow-hidden">
+diff --git a/app/student/e-exams/page.tsx b/app/student/e-exams/page.tsx
+index 397ae97..54037ae 100644
+--- a/app/student/e-exams/page.tsx
++++ b/app/student/e-exams/page.tsx
+@@ -1,7 +1,7 @@
+ ﻿"use client";
+ 
+ import Link from "next/link";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import {
+@@ -97,7 +97,7 @@ const EXAMS = [
+ export default function EExamsPage() {
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/student/id-card/page.tsx b/app/student/id-card/page.tsx
+index ddd4eee..3676fc1 100644
+--- a/app/student/id-card/page.tsx
++++ b/app/student/id-card/page.tsx
+@@ -1,7 +1,7 @@
+ ﻿"use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import { useToast } from "@/components/Toast";
+@@ -42,7 +42,7 @@ export default function IDCardPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/student/profile/page.tsx b/app/student/profile/page.tsx
+index 4972515..6068e93 100644
+--- a/app/student/profile/page.tsx
++++ b/app/student/profile/page.tsx
+@@ -1,6 +1,6 @@
+ ﻿"use client";
+ 
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import {
+@@ -33,7 +33,7 @@ const SIDEBAR_ITEMS = [
+ export default function StudentProfilePage() {
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/student/report-cards/page.tsx b/app/student/report-cards/page.tsx
+index d7c8aea..12df59d 100644
+--- a/app/student/report-cards/page.tsx
++++ b/app/student/report-cards/page.tsx
+@@ -2,7 +2,7 @@
+ 
+ import { useEffect, useState } from "react";
+ import { cacheGet, cacheSet } from "@/lib/offline/db";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import LiveReportCardPreview from "@/components/LiveReportCardPreview";
+@@ -123,7 +123,7 @@ export default function StudentReportCardsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="px-6 pb-10 pt-24">
+           <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl md:p-12">
+diff --git a/app/student/teachers/page.tsx b/app/student/teachers/page.tsx
+index 52fbbcb..e12de8d 100644
+--- a/app/student/teachers/page.tsx
++++ b/app/student/teachers/page.tsx
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -49,7 +49,7 @@ export default function TeachersDirectoryPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/student/waec-practice/page.tsx b/app/student/waec-practice/page.tsx
+index 0323ce1..ee5aa63 100644
+--- a/app/student/waec-practice/page.tsx
++++ b/app/student/waec-practice/page.tsx
+@@ -2,7 +2,7 @@
+ 
+ import { useState } from "react";
+ import Link from "next/link";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import PortalSidebar from "@/components/PortalSidebar";
+ import { ALL_QUESTIONS } from "@/lib/questionBank";
+@@ -141,7 +141,7 @@ export default function WAECPracticePage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6 relative overflow-hidden">
+           <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-gradient-to-l from-brand-orange to-transparent" />
+diff --git a/app/teacher/add-instructions/page.tsx b/app/teacher/add-instructions/page.tsx
+index 6c7f145..ca9599d 100644
+--- a/app/teacher/add-instructions/page.tsx
++++ b/app/teacher/add-instructions/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -66,7 +66,7 @@ export default function AddInstructionsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/analytics/page.tsx b/app/teacher/analytics/page.tsx
+index 24b23f4..713d783 100644
+--- a/app/teacher/analytics/page.tsx
++++ b/app/teacher/analytics/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -60,7 +60,7 @@ export default function TeacherAnalyticsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/announcements/page.tsx b/app/teacher/announcements/page.tsx
+index f11794c..c2a65fe 100644
+--- a/app/teacher/announcements/page.tsx
++++ b/app/teacher/announcements/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -39,7 +39,9 @@ export default function BulkAnnouncementPage() {
+   const [schedule, setSchedule] = useState<"now" | "later">("now");
+   const [scheduledDate, setScheduledDate] = useState("");
+ 
+-  const allClasses = [...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes))];
++  const allClasses = [
++    ...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes)),
++  ];
+   const totalRecipients =
+     audience === "all-classes"
+       ? teacher.totalStudentsTaught
+@@ -76,7 +78,7 @@ export default function BulkAnnouncementPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/class/announcements/page.tsx b/app/teacher/class/announcements/page.tsx
+index 01a4206..4e9b2c9 100644
+--- a/app/teacher/class/announcements/page.tsx
++++ b/app/teacher/class/announcements/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -60,7 +60,7 @@ export default function ClassAnnouncementsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/class/attendance-history/page.tsx b/app/teacher/class/attendance-history/page.tsx
+index 897ef79..a990519 100644
+--- a/app/teacher/class/attendance-history/page.tsx
++++ b/app/teacher/class/attendance-history/page.tsx
+@@ -2,7 +2,7 @@
+ 
+ import { useEffect, useState } from "react";
+ import Link from "next/link";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { BarChart3, Calendar, Check, Clock, FileWarning, LoaderCircle, X } from "lucide-react";
+@@ -86,7 +86,7 @@ export default function AttendanceHistoryPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy px-6 pb-10 pt-24">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/class/attendance/page.tsx b/app/teacher/class/attendance/page.tsx
+index 95bbe66..7dc0399 100644
+--- a/app/teacher/class/attendance/page.tsx
++++ b/app/teacher/class/attendance/page.tsx
+@@ -2,7 +2,7 @@
+ 
+ import { useEffect, useMemo, useState } from "react";
+ import { useSearchParams } from "next/navigation";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useToast } from "@/components/Toast";
+@@ -317,7 +317,7 @@ export default function ClassAttendancePage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy px-6 pb-10 pt-24">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/class/behavior/page.tsx b/app/teacher/class/behavior/page.tsx
+index 03fc12d..9fa9a29 100644
+--- a/app/teacher/class/behavior/page.tsx
++++ b/app/teacher/class/behavior/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -90,7 +90,7 @@ export default function BehaviorRecordsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/class/parents/page.tsx b/app/teacher/class/parents/page.tsx
+index f7017db..1c406fa 100644
+--- a/app/teacher/class/parents/page.tsx
++++ b/app/teacher/class/parents/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -53,7 +53,7 @@ export default function ParentCommunicationsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/class/report-cards/page.tsx b/app/teacher/class/report-cards/page.tsx
+index 75c4755..1ffef93 100644
+--- a/app/teacher/class/report-cards/page.tsx
++++ b/app/teacher/class/report-cards/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -43,7 +43,7 @@ export default function ClassReportCardsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/class/roster/page.tsx b/app/teacher/class/roster/page.tsx
+index a3d355d..d64887a 100644
+--- a/app/teacher/class/roster/page.tsx
++++ b/app/teacher/class/roster/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -59,7 +59,7 @@ export default function ClassRosterPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/class/timetable/page.tsx b/app/teacher/class/timetable/page.tsx
+index 0381db6..06eccf5 100644
+--- a/app/teacher/class/timetable/page.tsx
++++ b/app/teacher/class/timetable/page.tsx
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -76,7 +76,7 @@ export default function ClassTimetablePage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/evaluations/create/page.tsx b/app/teacher/evaluations/create/page.tsx
+index a042272..7fddc78 100644
+--- a/app/teacher/evaluations/create/page.tsx
++++ b/app/teacher/evaluations/create/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -38,7 +38,7 @@ export default function CreateEvaluationPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/evaluations/page.tsx b/app/teacher/evaluations/page.tsx
+index 676a846..d8f3392 100644
+--- a/app/teacher/evaluations/page.tsx
++++ b/app/teacher/evaluations/page.tsx
+@@ -1,7 +1,7 @@
+ ﻿"use client";
+ 
+ import Link from "next/link";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { FileText, Plus, Clock, Calendar, Users, Award, Edit3, BarChart3 } from "lucide-react";
+@@ -64,7 +64,7 @@ const EVALUATIONS = [
+ export default function ViewEvaluationsPage() {
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/grade-exams/page.tsx b/app/teacher/grade-exams/page.tsx
+index 614f423..e9b2630 100644
+--- a/app/teacher/grade-exams/page.tsx
++++ b/app/teacher/grade-exams/page.tsx
+@@ -1,7 +1,7 @@
+ ﻿"use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useToast } from "@/components/Toast";
+@@ -144,7 +144,7 @@ export default function GradeExamsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/messages/page.tsx b/app/teacher/messages/page.tsx
+index a27ef7d..fd877b6 100644
+--- a/app/teacher/messages/page.tsx
++++ b/app/teacher/messages/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -105,7 +105,7 @@ export default function TeacherMessagesPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/my-records/page.tsx b/app/teacher/my-records/page.tsx
+index 2c1b26e..8d573b8 100644
+--- a/app/teacher/my-records/page.tsx
++++ b/app/teacher/my-records/page.tsx
+@@ -1,6 +1,6 @@
+ "use client";
+ 
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -100,7 +100,7 @@ export default function MyRecordsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+@@ -134,8 +134,9 @@ export default function MyRecordsPage() {
+                   },
+                   {
+                     label: "Messages Sent",
+-                    value: RECORDS.filter((r: any) => r.type === "Message" || r.type === "Broadcast")
+-                      .length,
++                    value: RECORDS.filter(
++                      (r: any) => r.type === "Message" || r.type === "Broadcast",
++                    ).length,
+                     icon: Users,
+                   },
+                 ].map((s) => (
+diff --git a/app/teacher/performance/add/page.tsx b/app/teacher/performance/add/page.tsx
+index 67906f2..e3a751b 100644
+--- a/app/teacher/performance/add/page.tsx
++++ b/app/teacher/performance/add/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -54,7 +54,7 @@ export default function AddPerformancePage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/performance/page.tsx b/app/teacher/performance/page.tsx
+index a6607fd..02a0279 100644
+--- a/app/teacher/performance/page.tsx
++++ b/app/teacher/performance/page.tsx
+@@ -2,7 +2,7 @@
+ 
+ import { useState } from "react";
+ import Link from "next/link";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -133,7 +133,7 @@ export default function PerformancePage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+@@ -187,7 +187,8 @@ export default function PerformancePage() {
+               </div>
+ 
+               {/* Class Groups */}
+-              {(teacher.subjectAssignments || []).map((sa: any) => sa.classes.map((className: any) => {
++              {(teacher.subjectAssignments || []).map((sa: any) =>
++                sa.classes.map((className: any) => {
+                   const key = `${className}-${sa.subject}`;
+                   const scores = SAMPLE_SCORES[key] || [];
+                   const isExpanded = expandedClass === className;
+diff --git a/app/teacher/profile/page.tsx b/app/teacher/profile/page.tsx
+index e63afcf..ef59231 100644
+--- a/app/teacher/profile/page.tsx
++++ b/app/teacher/profile/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -48,7 +48,7 @@ export default function TeacherProfilePage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/question-bank/page.tsx b/app/teacher/question-bank/page.tsx
+index ab27ad1..0134da6 100644
+--- a/app/teacher/question-bank/page.tsx
++++ b/app/teacher/question-bank/page.tsx
+@@ -1,7 +1,7 @@
+ ﻿"use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import {
+@@ -95,7 +95,7 @@ export default function QuestionBankPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/send-results/page.tsx b/app/teacher/send-results/page.tsx
+index 229afa9..63267d7 100644
+--- a/app/teacher/send-results/page.tsx
++++ b/app/teacher/send-results/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState, useEffect } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -148,7 +148,7 @@ export default function SendResultsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/test-courses/page.tsx b/app/teacher/test-courses/page.tsx
+index 50cc1ae..850a9eb 100644
+--- a/app/teacher/test-courses/page.tsx
++++ b/app/teacher/test-courses/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -66,7 +66,9 @@ export default function TestCoursesPage() {
+     },
+   });
+ 
+-  const allClasses = [...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes))];
++  const allClasses = [
++    ...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes)),
++  ];
+   const teacherSubjects = (teacher.subjectAssignments || []).map((sa: any) => sa.subject);
+ 
+   const updateCourse = (subject: string, field: keyof TestCourse, value: any) => {
+@@ -82,7 +84,7 @@ export default function TestCoursesPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/test-results/page.tsx b/app/teacher/test-results/page.tsx
+index 5f22b65..d313c7e 100644
+--- a/app/teacher/test-results/page.tsx
++++ b/app/teacher/test-results/page.tsx
+@@ -1,7 +1,7 @@
+ ﻿"use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import {
+@@ -122,7 +122,7 @@ export default function TestResultsPage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/test-retake/page.tsx b/app/teacher/test-retake/page.tsx
+index e4763df..cc12f3c 100644
+--- a/app/teacher/test-retake/page.tsx
++++ b/app/teacher/test-retake/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useApi } from "@/lib/useApi";
+@@ -70,7 +70,9 @@ export default function TestRetakePage() {
+   const toggleStudent = (cls: string, id: string) => {
+     setStudents((prev) => ({
+       ...prev,
+-      [cls]: prev[cls].map((s: any) => (s.id === id ? { ...(s as any), selected: !s.selected } : s)),
++      [cls]: prev[cls].map((s: any) =>
++        s.id === id ? { ...(s as any), selected: !s.selected } : s,
++      ),
+     }));
+   };
+ 
+@@ -109,7 +111,7 @@ export default function TestRetakePage() {
+ 
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+         <section className="pt-24 pb-10 bg-brand-navy px-6">
+           <div className="mx-auto max-w-7xl">
+diff --git a/app/teacher/upload-questions/page.tsx b/app/teacher/upload-questions/page.tsx
+index 90a3401..0dd7cf7 100644
+--- a/app/teacher/upload-questions/page.tsx
++++ b/app/teacher/upload-questions/page.tsx
+@@ -1,10 +1,9 @@
+ "use client";
+ 
+ import { useState, useRef, useCallback } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+-import PortalTopbar from "@/components/PortalTopbar";
+ import { useApi } from "@/lib/useApi";
+ import { useToast } from "@/components/Toast";
+ import {
+diff --git a/components/AdmissionsBanner.tsx b/components/AdmissionsBanner.tsx
+index 06ff559..127b785 100644
+--- a/components/AdmissionsBanner.tsx
++++ b/components/AdmissionsBanner.tsx
+@@ -1,47 +1,111 @@
+ "use client";
+ 
+ import { motion } from "framer-motion";
+-import { ArrowRight } from "lucide-react";
++import { ArrowRight, FileCheck2, CreditCard, CalendarClock } from "lucide-react";
++
++const HIGHLIGHTS = [
++  { icon: FileCheck2, label: "Online application" },
++  { icon: CalendarClock, label: "JSS1 — SS3 · 2025/2026" },
++  { icon: CreditCard, label: "Secure Paystack fees" },
++];
+ 
+ export default function AdmissionsBanner() {
+   return (
+-    <section className="w-full bg-[var(--bg-primary)] pt-24 md:pt-32 pb-4 md:pb-8 theme-transition">
++    <section className="w-full bg-[var(--bg-primary)] pt-16 md:pt-24 pb-4 md:pb-8 theme-transition">
+       <div className="mx-auto max-w-7xl px-6">
+         <motion.div
+           initial={{ opacity: 0, y: 30 }}
+-          animate={{ opacity: 1, y: 0 }}
++          whileInView={{ opacity: 1, y: 0 }}
++          viewport={{ once: true }}
+           transition={{ duration: 0.7 }}
+-          className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-brand-navy via-green-900 to-brand-green p-10 md:p-16 lg:p-20"
++          className="relative overflow-hidden rounded-[2.5rem] min-h-[440px] flex items-center"
+         >
+-          {/* Decorative circles */}
+-          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
+-          <div className="absolute -bottom-16 -left-16 w-60 h-60 rounded-full bg-brand-orange/20 blur-3xl" />
++          {/* Background image */}
++          {/* eslint-disable-next-line @next/next/no-img-element */}
++          <img
++            src="https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&w=1600&q=80"
++            alt="Ykay College students"
++            className="absolute inset-0 h-full w-full object-cover"
++          />
++          {/* Navy gradient overlay for readability */}
++          <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-dark via-brand-navy-dark/90 to-brand-navy-dark/40" />
++          <div className="absolute inset-0 bg-gradient-to-t from-brand-navy-dark/80 via-transparent to-transparent" />
+ 
+-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
++          {/* Content */}
++          <div className="relative z-10 w-full p-9 md:p-14 lg:p-20">
+             <div className="max-w-2xl">
+-              <span className="inline-block mb-4 px-4 py-1.5 rounded-full bg-white/15 text-white font-body text-[10px] font-bold tracking-[0.2em] uppercase backdrop-blur-sm border border-white/20">
+-                2025 / 2026 Session — Now Open
+-              </span>
+-              <h2 className="font-display text-[36px] md:text-[56px] lg:text-[72px] leading-[0.9] tracking-[4px] md:tracking-[6px] text-white mb-4">
+-                ADMISSIONS
+-                <br />
+-                OPEN
+-              </h2>
+-              <div className="flex flex-wrap gap-6 text-white/90 font-body text-sm md:text-base">
+-                <span>JSS1 — SS3</span>
+-                <span className="hidden md:inline text-white/30">|</span>
+-                <span>Day Secondary School</span>
+-                <span className="hidden md:inline text-white/30">|</span>
+-                <span>Sango Ota, Ogun State</span>
+-              </div>
+-            </div>
++              <motion.span
++                initial={{ opacity: 0, y: 12 }}
++                whileInView={{ opacity: 1, y: 0 }}
++                viewport={{ once: true }}
++                transition={{ delay: 0.1 }}
++                className="inline-flex items-center gap-2 rounded-full bg-brand-green/20 px-4 py-1.5 font-body text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green ring-1 ring-brand-green/40 backdrop-blur-sm"
++              >
++                <span className="h-1.5 w-1.5 rounded-full bg-brand-green" /> Admissions Open · 2025 / 2026
++              </motion.span>
++
++              <motion.h2
++                initial={{ opacity: 0, y: 20 }}
++                whileInView={{ opacity: 1, y: 0 }}
++                viewport={{ once: true }}
++                transition={{ delay: 0.2 }}
++                className="mt-5 font-display text-4xl md:text-6xl lg:text-7xl leading-[0.9] tracking-[3px] md:tracking-[5px] text-white"
++              >
++                BEGIN THE <br />
++                <span className="text-brand-green">JOURNEY</span>
++              </motion.h2>
+ 
+-            <a
+-              href="/admissions"
+-              className="inline-flex items-center gap-3 self-start lg:self-end px-8 py-4 rounded-full bg-brand-orange text-white font-body text-sm font-bold tracking-[0.15em] uppercase hover:bg-brand-orange-dark transition-all duration-300 hover:scale-[1.05] active:scale-[0.97] shadow-lg shadow-black/30"
+-            >
+-              Apply Now <ArrowRight size={18} />
+-            </a>
++              <motion.p
++                initial={{ opacity: 0, y: 20 }}
++                whileInView={{ opacity: 1, y: 0 }}
++                viewport={{ once: true }}
++                transition={{ delay: 0.3 }}
++                className="mt-5 max-w-lg font-body text-sm md:text-base leading-relaxed text-white/75"
++              >
++                A premium day secondary school in Sango Ota raising role models
++                through rigorous academics, leadership and character formation.
++                Apply online and track your application in real time.
++              </motion.p>
++
++              <motion.div
++                initial={{ opacity: 0 }}
++                whileInView={{ opacity: 1 }}
++                viewport={{ once: true }}
++                transition={{ delay: 0.4 }}
++                className="mt-7 flex flex-wrap gap-x-6 gap-y-3"
++              >
++                {HIGHLIGHTS.map((h) => (
++                  <div
++                    key={h.label}
++                    className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/85"
++                  >
++                    <h.icon size={16} className="text-brand-green" />
++                    {h.label}
++                  </div>
++                ))}
++              </motion.div>
++
++              <motion.div
++                initial={{ opacity: 0, y: 16 }}
++                whileInView={{ opacity: 1, y: 0 }}
++                viewport={{ once: true }}
++                transition={{ delay: 0.5 }}
++                className="mt-9 flex flex-wrap items-center gap-4"
++              >
++                <a
++                  href="/admissions"
++                  className="inline-flex items-center gap-3 rounded-full bg-brand-orange px-8 py-4 font-body text-sm font-bold uppercase tracking-[0.15em] text-white shadow-lg shadow-black/30 transition-all duration-300 hover:scale-[1.04] hover:bg-brand-orange-dark active:scale-[0.97]"
++                >
++                  Apply Now <ArrowRight size={18} />
++                </a>
++                <a
++                  href="/admissions/status"
++                  className="font-body text-sm font-bold uppercase tracking-[0.15em] text-white/80 transition-colors hover:text-white"
++                >
++                  Check application status →
++                </a>
++              </motion.div>
++            </div>
+           </div>
+         </motion.div>
+       </div>
+diff --git a/components/MobileAppCTA.tsx b/components/MobileAppCTA.tsx
+index 5c9ce6d..7ae5493 100644
+--- a/components/MobileAppCTA.tsx
++++ b/components/MobileAppCTA.tsx
+@@ -8,7 +8,9 @@ import { Download, Smartphone, QrCode } from "lucide-react";
+  * client-side via api.qrserver.com — no extra dependency.
+  */
+ export default function MobileAppCTA() {
++  // Diawi (primary, short link + QR) and GitHub Release (fallback).
+   const apkUrl = process.env.NEXT_PUBLIC_APK_URL;
++  const fallbackUrl = process.env.NEXT_PUBLIC_APK_FALLBACK_URL;
+   const qr = apkUrl
+     ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=${encodeURIComponent(
+         apkUrl,
+@@ -47,6 +49,16 @@ export default function MobileAppCTA() {
+               >
+                 <Download size={18} /> Download for Android
+               </a>
++              {fallbackUrl && (
++                <a
++                  href={fallbackUrl}
++                  target="_blank"
++                  rel="noopener noreferrer"
++                  className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white"
++                >
++                  or download via GitHub ↗
++                </a>
++              )}
+               <div className="flex items-center gap-2 text-white/60 font-body text-xs">
+                 <Smartphone size={16} className="text-brand-green" />
+                 Android 8+ · ~50 MB · No Play Store needed

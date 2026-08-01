@@ -1,0 +1,2395 @@
+diff --git a/PHASE3B1_BOOTSTRAP_ATTENDANCE_NOTES.md b/PHASE3B1_BOOTSTRAP_ATTENDANCE_NOTES.md
+deleted file mode 100644
+index d611011..0000000
+--- a/PHASE3B1_BOOTSTRAP_ATTENDANCE_NOTES.md
++++ /dev/null
+@@ -1,88 +0,0 @@
+-# Phase 3B.1 â€” Bootstrap Seed for Attendance Portals
+-
+-## Purpose
+-This bootstrap seed creates the minimum live data needed for the Phase 3A + 3B attendance experience to work immediately after migration.
+-
+-It provisions:
+-- one teacher user
+-- one student user
+-- one parent user
+-- one teacher profile
+-- one parent profile
+-- one live class (`SS2A`)
+-- six student profiles
+-- teacher/class assignments
+-- parent/student links
+-- attendance history sessions for the current month
+-- queued attendance alert jobs
+-- one pending attendance correction request for admin review
+-
+----
+-
+-## Files added/updated
+-- `package.json`
+-- `.env.example`
+-- `prisma/seed-attendance.ts`
+-
+----
+-
+-## New npm script
+-```powershell
+-npm run db:bootstrap-attendance
+-```
+-
+----
+-
+-## Optional environment variables
+-If these are not set, the bootstrap script will:
+-- use sensible demo emails
+-- generate secure random passwords for new users
+-- preserve existing passwords for existing users unless you explicitly provide new ones
+-
+-Optional env vars:
+-- `BOOTSTRAP_TEACHER_EMAIL`
+-- `BOOTSTRAP_TEACHER_PASSWORD`
+-- `BOOTSTRAP_STUDENT_EMAIL`
+-- `BOOTSTRAP_STUDENT_PASSWORD`
+-- `BOOTSTRAP_PARENT_EMAIL`
+-- `BOOTSTRAP_PARENT_PASSWORD`
+-
+----
+-
+-## Recommended run order
+-After ingesting the Phase 3B bootstrap files:
+-
+-```powershell
+-npx prisma generate
+-npm run db:bootstrap-attendance
+-npm run build
+-```
+-
+-If you have not yet ingested Phase 3B itself, do that first and run its migration before running this seed.
+-
+----
+-
+-## What you can test after running the seed
+-### Teacher
+-- `/teacher/class/attendance`
+-- `/teacher/class/attendance-history`
+-
+-### Student
+-- `/student/attendance`
+-
+-### Parent
+-- `/parent/attendance`
+-- `/parent/dashboard`
+-
+-### Admin
+-- `/admin/attendance-corrections`
+-
+----
+-
+-## What the seed prints
+-It prints a small credential table in the terminal showing:
+-- Teacher email/password
+-- Student email/password
+-- Parent email/password
+-
+-If a password says `unchanged`, that means an existing user was preserved and no new password was generated.
+\ No newline at end of file
+diff --git a/PHASE3C_ADMIN_ATTENDANCE_ANALYTICS_NOTES.md b/PHASE3C_ADMIN_ATTENDANCE_ANALYTICS_NOTES.md
+deleted file mode 100644
+index d289935..0000000
+--- a/PHASE3C_ADMIN_ATTENDANCE_ANALYTICS_NOTES.md
++++ /dev/null
+@@ -1,59 +0,0 @@
+-# Phase 3C â€” Admin Attendance Analytics
+-
+-## What was added
+-Phase 3C introduces a live admin analytics surface for attendance operations.
+-
+-### New API route
+-- `GET /api/admin/attendance/analytics`
+-
+-### New page
+-- `app/admin/attendance-analytics/page.tsx`
+-
+-### Updated navigation
+-- `components/AdminSidebar.tsx`
+-  - adds a live link to Attendance Analytics
+-
+-## What the analytics page shows
+-- attendance sessions tracked for the selected month
+-- overall attendance rate
+-- absent and late counts
+-- queued alert pressure
+-- pending correction request count
+-- class-level attendance performance
+-- daily attendance trend
+-- students needing attention
+-- recent submitted sessions
+-- recent correction requests
+-- alert breakdown by channel and status
+-
+-## Filters
+-- month filter
+-- optional class scope filter
+-
+-## Data sources used
+-- `AttendanceSession`
+-- `AttendanceEntry`
+-- `AttendanceAlertJob`
+-- `AttendanceCorrectionRequest`
+-- `SchoolClass`
+-- `StudentProfile`
+-- `TeacherProfile`
+-
+-## Files changed
+-- `app/api/admin/attendance/analytics/route.ts`
+-- `app/admin/attendance-analytics/page.tsx`
+-- `components/AdminSidebar.tsx`
+-
+-## Migration status
+-No schema change was required for Phase 3C.
+-So after ingestion, you only need:
+-
+-```powershell
+-npx prisma generate
+-npm run build
+-```
+-
+-## Recommended Git branch name
+-```powershell
+-git checkout -b phase/3c-admin-attendance-analytics
+-```
+\ No newline at end of file
+diff --git a/PHASE3D_FINANCE_LIVE_DATA_NOTES.md b/PHASE3D_FINANCE_LIVE_DATA_NOTES.md
+deleted file mode 100644
+index 5276b64..0000000
+--- a/PHASE3D_FINANCE_LIVE_DATA_NOTES.md
++++ /dev/null
+@@ -1,71 +0,0 @@
+-# Phase 3D â€” Finance Live Data Conversion
+-
+-## What was implemented
+-Phase 3D converts fees and finance from static demo UI into database-backed workflows.
+-
+-### Schema additions
+-- `FeeInvoiceStatus`
+-- `FeePaymentMethod`
+-- `FeePaymentStatus`
+-- `FeeInvoice`
+-- `FeeInvoiceItem`
+-- `FeePayment`
+-
+-### New API routes
+-- `GET /api/parent/fees`
+-- `POST /api/parent/fees/payments`
+-- `GET /api/admin/fees/overview`
+-- `GET /api/admin/finances/overview`
+-
+-### Updated pages
+-- `app/parent/fees/page.tsx`
+-- `app/parent/dashboard/page.tsx`
+-- `app/admin/fees/page.tsx`
+-- `app/admin/finances/page.tsx`
+-
+-### New bootstrap script
+-- `prisma/seed-finance.ts`
+-- npm script: `npm run db:bootstrap-finance`
+-
+-## What the parent portal now supports
+-- live invoice lookup by linked child
+-- live payment history
+-- receipt generation from real fee records
+-- modal payment persistence into DB using the current paystack demo success flow
+-- parent dashboard now shows live fee balance and latest invoice snapshot
+-
+-## What the admin portal now supports
+-- live invoice registry
+-- billed / collected / outstanding summary cards
+-- recent payment history
+-- finance dashboard period summaries
+-- class collection performance
+-
+-## Bootstrap behavior
+-The finance bootstrap seeds:
+-- one partial invoice for the main linked child
+-- one partial invoice for the second linked child
+-- one fully paid invoice for admin visibility
+-- one overdue unpaid invoice
+-- multiple fee payments / receipts
+-
+-## Required commands after ingestion
+-```powershell
+-npx prisma generate
+-npx prisma migrate dev --name phase_3d_finance_live_data
+-npm run db:bootstrap-finance
+-npm run build
+-```
+-
+-If using committed migration deployment flow:
+-```powershell
+-npx prisma generate
+-npx prisma migrate deploy
+-npm run db:bootstrap-finance
+-npm run build
+-```
+-
+-## Recommended git branch
+-```powershell
+-git checkout -b phase/3d-finance-live-data
+-```
+\ No newline at end of file
+diff --git a/PHASE3E_REPORT_CARDS_LIVE_NOTES.md b/PHASE3E_REPORT_CARDS_LIVE_NOTES.md
+deleted file mode 100644
+index bbea50e..0000000
+--- a/PHASE3E_REPORT_CARDS_LIVE_NOTES.md
++++ /dev/null
+@@ -1,66 +0,0 @@
+-# Phase 3E â€” Results / Report Cards Live Conversion
+-
+-## What was implemented
+-Phase 3E converts report cards from static placeholders into live database-backed records for student, parent, and admin portals.
+-
+-### Schema additions
+-- `ReportCardStatus`
+-- `ReportCard`
+-- `ReportCardSubject`
+-
+-### New API routes
+-- `GET /api/student/report-cards`
+-- `GET /api/parent/report-cards`
+-- `GET /api/admin/report-cards/overview`
+-- `PATCH /api/admin/report-cards/overview`
+-
+-### New shared UI component
+-- `components/LiveReportCardPreview.tsx`
+-
+-### Updated pages
+-- `app/student/report-cards/page.tsx`
+-- `app/parent/report-cards/page.tsx`
+-- `app/admin/report-cards/page.tsx`
+-
+-### New bootstrap seed
+-- `prisma/seed-report-cards.ts`
+-- npm script: `npm run db:bootstrap-report-cards`
+-
+-## Admin workflow
+-Admin can now:
+-- view all report cards
+-- preview report card contents
+-- release a draft report card
+-- move a released report card back to draft
+-
+-## Student / Parent workflow
+-Student and parent portals now:
+-- load report cards from live data
+-- display report-card registry tables
+-- preview full report cards
+-- support browser print / save-to-PDF
+-
+-## Recommended command sequence after ingestion
+-```powershell
+-npx prisma generate
+-npx prisma migrate dev --name phase_3e_report_cards_live
+-npm run db:bootstrap-report-cards
+-npm run build
+-```
+-
+-If using committed migration deployment flow:
+-```powershell
+-npx prisma generate
+-npx prisma migrate deploy
+-npm run db:bootstrap-report-cards
+-npm run build
+-```
+-
+-## Recommended git branch
+-```powershell
+-git checkout -b phase/3e-results-report-cards-live
+-```
+-
+-## What remains after Phase 3E
+-- 3F â€” Student / parent dashboard polish
+-- 3G â€” Notification delivery integration / hardening
+\ No newline at end of file
+diff --git a/PHASE3F_DASHBOARDS_IT_PORTAL_NOTES.md b/PHASE3F_DASHBOARDS_IT_PORTAL_NOTES.md
+deleted file mode 100644
+index 979f206..0000000
+--- a/PHASE3F_DASHBOARDS_IT_PORTAL_NOTES.md
++++ /dev/null
+@@ -1,100 +0,0 @@
+-# Phase 3F — Live Dashboards, Production Portal Page & IT Education Portal
+-
+-This phase closes the dashboard/UX gap (userflow Flows 3.1, 4.1, 5.1) and elevates IT Education
+-from brochure pages into a real product portal (it-education-strategy.md, Phase 2 "Portal &
+-Enrollment Integration").
+-
+-## What was implemented
+-
+-### 1. Live dashboards (mock data removed)
+-- `GET /api/student/dashboard` — attendance rate, latest released report card, fee balance,
+-  recent attendance, personal activity feed (from AuditLog)
+-- `GET /api/teacher/dashboard` — class/student/subject counts, today's register status,
+-  pending corrections, assignments, recent submitted registers, activity feed
+-- `GET /api/admin/dashboard` — live school counts, outstanding fees, today's attendance rate,
+-  IT enrollments, "Needs Attention" queue (pending applications / corrections / draft reports /
+-  open invoices), school-wide activity feed
+-- Rebuilt pages: `app/student/dashboard`, `app/teacher/dashboard`, `app/admin` — all fetch live
+-  data, no more `lib/mockData` / `lib/teacherData` on these pages
+-
+-### 2. Production-clean /portal page
+-- Demo banners, "Demo Mode", and mock-data notices removed
+-- Four cards side by side: **Staff · Student · IT Education · Parent**, each with its own Sign In button
+-- Admin portal card removed — admins sign in through the Staff card and middleware routes them
+-  to `/admin` automatically by role
+-- Staff/Student/Parent buttons → `/login?portal=staff|student|parent` (login page shows portal context)
+-- IT Education button → `/it-portal/auth` (the only portal with Sign Up)
+-
+-### 3. IT Education portal (new product surface)
+-- Schema: `ItCourse`, `ItModule`, `ItEnrollment`, `ItModuleProgress`, `ItCertificate` + `IT_STUDENT` role
+-- Open self-signup at `/it-portal/auth` (bcrypt, auto session, audit-logged)
+-- `/it-portal/dashboard` — stats, my courses with progress bars, certificates, free-enrollment catalog
+-- `/it-portal/courses/[slug]` — module-by-module learning page with content, mark-complete,
+-  automatic certificate issuance (e.g. `YKIT/2026/PYTHON/XXXXXX`) when all modules complete
+-- APIs: `POST /api/it/signup`, `POST /api/it/enroll`, `POST /api/it/progress`,
+-  `GET /api/it/dashboard`, `GET /api/it/courses/[slug]`
+-- Middleware protects `/it-portal/*` (IT_STUDENT, STUDENT, ADMIN, DIRECTOR); `/it-portal/auth` is public
+-- Ykay students can use their existing student account in the IT portal (cross-link card on the
+-  student dashboard)
+-- Seed: `prisma/seed-it-courses.ts` — 8 courses, 41 modules with real lesson content
+-  (Digital Literacy, Word, PowerPoint, Excel, Excel Expert, Python, Cybersecurity, AI)
+-
+-### 4. Login page upgrade
+-- `?portal=` context headings (Staff / Student / Parent Sign In)
+-- IT_STUDENT role destination → `/it-portal/dashboard`
+-- Cross-link to the IT portal auth page
+-- Safe `next` redirect handling
+-
+-## Stepwise ingestion (run in PowerShell at the project root)
+-
+-```powershell
+-# STEP 0 — make sure you are on a clean main
+-cd C:\Users\USER\Desktop\PROJECTS\ykay_edu\envoys-site
+-git checkout main
+-git pull
+-git status        # must be clean
+-
+-# STEP 1 — create the phase branch
+-git checkout -b phase/3f-dashboards-it-portal
+-
+-# STEP 2 — run the ingestion script (from wherever you saved it)
+-.\phase-3f-dashboards-it-portal-ingest.ps1
+-
+-# STEP 3 — regenerate the client and create the migration
+-npx prisma generate
+-npx prisma migrate dev --name phase_3f_it_education
+-
+-# STEP 4 — seed the IT course catalog
+-npm run db:seed-it-courses
+-
+-# STEP 5 — verify the build
+-npm run build
+-
+-# STEP 6 — smoke test locally
+-npm run dev
+-#   /portal                -> 4 production cards, no demo banners
+-#   /it-portal/auth        -> sign up a test account -> lands on IT dashboard
+-#   /it-portal/dashboard   -> enroll in Python -> open course -> complete modules -> certificate
+-#   /login?portal=staff    -> admin credentials -> lands on /admin (live stats)
+-#   /student/dashboard     -> live attendance/report data (student login)
+-#   /teacher/dashboard     -> live assignments/registers (teacher login)
+-
+-# STEP 7 — commit and merge
+-git add -A
+-git commit -m "Phase 3F: live dashboards, production portal page, IT education portal"
+-git push -u origin phase/3f-dashboards-it-portal
+-# open a PR and merge to main when satisfied
+-```
+-
+-## Branch plan going forward
+-- `phase/3f-dashboards-it-portal` ← this phase
+-- `phase/3g-notification-delivery` ← next (notification jobs, dispatcher, retries, admin console)
+-- `phase/4-academics` ← ALL of Phase 4 (4A gradebook ingest + 4B CBT engine + 4C broadsheet/QR)
+-- `phase/5-operations` ← ALL of Phase 5 (class manager, ID cards, finance completion, comms)
+-- `phase/6-governance` ← HOD/Director dashboards, promotion engine, timetable, EMIS
+-
+-## Notes
+-- The old `/login/admin`, `/login/student`, `/login/parent`, `/login/teacher` pages still exist but
+-  are no longer linked; they can be deleted in Phase 3G cleanup.
+-- `lib/mockData.ts` and `lib/teacherData.ts` are still imported by sidebars/other prototype pages;
+-  they will be fully retired as those pages convert in later phases.
+diff --git a/PHASE3G_NOTIFICATION_DELIVERY_NOTES.md b/PHASE3G_NOTIFICATION_DELIVERY_NOTES.md
+deleted file mode 100644
+index 166cda9..0000000
+--- a/PHASE3G_NOTIFICATION_DELIVERY_NOTES.md
++++ /dev/null
+@@ -1,90 +0,0 @@
+-# Phase 3G — Notification Delivery Integration & Hardening
+-
+-Converts queued notifications from database rows that never move into a real delivery pipeline
+-with retries, failure tracking, admin visibility, and a live in-app notification bell
+-(userflow Flows 10.1–10.3).
+-
+-## What was implemented
+-
+-### Schema additions
+-- `NotificationKind` enum — ATTENDANCE_ALERT, FEE_REMINDER, REPORT_RELEASED, BROADCAST, ADMISSION_UPDATE, SYSTEM
+-- `NotificationJob` — outbound delivery queue: channel, recipient, subject/body, dedupe key,
+-  attempts/maxAttempts, nextAttemptAt (backoff), lastError, sentAt
+-- `UserNotification` — per-user in-app notifications feeding the NotificationBell
+-
+-### Delivery engine — `lib/notifications.ts`
+-- **Channel adapter interface** — EMAIL live via Resend (branded HTML template);
+-  SMS/WHATSAPP are stubs that mark jobs SKIPPED until a provider (Termii/Twilio) is wired in
+-- **queueNotificationJob()** with dedupe-key idempotency
+-- **dispatchDueNotifications()** — processes due PENDING jobs; retry with backoff (5m → 30m → 2h),
+-  FAILED after maxAttempts, permanent errors fail immediately
+-- **bridgeAttendanceAlerts()** — converts the attendance register's `AttendanceAlertJob` rows into
+-  NotificationJob deliveries + in-app notifications for linked parents
+-
+-### API routes
+-- `POST /api/jobs/dispatch-notifications` — cron-safe dispatcher.
+-  Auth: `Authorization: Bearer <JOBS_SECRET>` (set env var, min 16 chars) OR signed-in ADMIN/DIRECTOR
+-- `GET/PATCH /api/admin/notifications` — admin queue with status filter, per-channel stats,
+-  RETRY (re-queue failed/skipped) and CANCEL (pending) actions — audit-logged
+-- `GET/PATCH /api/notifications` — current user's in-app notifications, mark-read / mark-all-read
+-
+-### Event hooks
+-- **Report-card release** (`/api/admin/report-cards/overview` PATCH) now queues a guardian email
+-  (deduped per report) + in-app notifications for the linked parent and the student
+-
+-### UI
+-- `/admin/notifications` — delivery console: Pending/Sent/Failed/Skipped stat cards,
+-  **Dispatch Now** button, status tabs, per-job attempt counts + error messages, Retry/Cancel
+-- `components/NotificationBell.tsx` — now fully live: fetches `/api/notifications`, 60s polling,
+-  optimistic mark-read, unread badge; renders only for signed-in portal users
+-- AdminSidebar: "Notifications" link added (Live badge)
+-
+-### Cleanup
+-- Deleted orphaned `/login/admin`, `/login/student`, `/login/parent`, `/login/teacher` pages
+-  (single `/login?portal=` flow remains)
+-
+-## Environment
+-| Variable | Purpose |
+-|---|---|
+-| `RESEND_API_KEY` | already used for password reset — now powers notification email delivery |
+-| `EMAIL_FROM` | optional branded sender |
+-| `JOBS_SECRET` | NEW — bearer token for the cron dispatcher (16+ chars) |
+-
+-### Scheduling (production)
+-Vercel Cron (vercel.json):
+-```json
+-{ "crons": [{ "path": "/api/jobs/dispatch-notifications", "schedule": "*/10 * * * *" }] }
+-```
+-Vercel Cron sends no custom headers by default; either allow GET with the secret as a query
+-fallback, or use an external scheduler (GitHub Actions / cron-job.org) with:
+-`curl -X POST -H "Authorization: Bearer $JOBS_SECRET" https://yourdomain/api/jobs/dispatch-notifications`
+-For manual operation, the **Dispatch Now** button on /admin/notifications does the same as admin.
+-
+-## Stepwise ingestion
+-
+-```powershell
+-cd C:\Users\USER\Desktop\PROJECTS\ykay_edu\envoys-site
+-git checkout main; git pull; git status          # clean, after 3F PR merged
+-git checkout -b phase/3g-notification-delivery
+-
+-.\phase-3g-ingest-b64.ps1                        # expect 10 green "Updated" lines
+-
+-npx prisma generate
+-npx prisma migrate dev --name phase_3g_notifications
+-npm run build
+-
+-# Smoke test
+-npm run dev
+-#  1. Sign in as teacher -> submit attendance with an ABSENT student
+-#  2. Sign in as admin -> /admin/notifications -> "Dispatch Now"
+-#     -> attendance alerts bridged; EMAIL jobs sent (needs RESEND_API_KEY), SMS/WA skipped
+-#  3. Release a report card -> parent gets email job + bell notification
+-#  4. Sign in as parent -> bell shows unread notifications
+-
+-git add -A
+-git commit -m "Phase 3G: notification delivery pipeline, retries, admin console, live bell"
+-git push -u origin phase/3g-notification-delivery
+-```
+-
+-## Next phase
+-`phase/4-academics` — 4A gradebook ingest (already built) + 4B CBT exam engine + 4C broadsheet & QR verification.
+diff --git a/PHASE4_ACADEMICS_NOTES.md b/PHASE4_ACADEMICS_NOTES.md
+deleted file mode 100644
+index bb3de90..0000000
+--- a/PHASE4_ACADEMICS_NOTES.md
++++ /dev/null
+@@ -1,95 +0,0 @@
+-# Phase 4 — Academic Delivery & Results (4A + 4B + 4C)
+-
+-Branch: `phase/4-academics`. Converts the academic core from mock pages into database-backed,
+-authorized workflows (userflow Flows 4.3–4.5, 4.10, 5.2, 9.1).
+-
+-## 4A — Gradebook → Lock → Report Cards
+-- `GradebookStatus`, `SubjectGradebook`, `GradebookEntry` models (OPEN → SUBMITTED → LOCKED)
+-- `lib/gradebook.ts` — WAEC grading, score clamping, session/term resolution, auto-provisioning
+-- `GET/POST /api/teacher/gradebook` — live score sheets with server-side validation
+-- `GET/PATCH /api/admin/gradebook/locks` — admin lock/reopen console
+-- `GET/POST /api/admin/report-cards/generate` — refuses until every subject is LOCKED, then compiles
+-  DRAFT report cards with class positions, live attendance %, and open fee balances
+-- Rebuilt `/teacher/gradebook` and `/admin/gradebook-lock` pages
+-- Seed: `npm run db:bootstrap-gradebooks` (3 SUBMITTED gradebooks for SS2A)
+-
+-## 4B — CBT Exam Engine
+-- Models: `Exam`, `ExamQuestion` (MCQ / TRUE_FALSE / FILL_BLANK / ESSAY), `ExamAttempt`,
+-  `ExamAnswer`, `ExamRetake`
+-- `lib/exams.ts` — bulk question parser (documented text format), objective auto-grading,
+-  attempt finalization
+-- Teacher (`/teacher/cbt-center`, APIs `/api/teacher/exams*`):
+-  create exams per subject/class, bulk-paste questions, publish/close, view results,
+-  grade essays inline, release/hide results, grant per-student retakes
+-- Student (`/student/exams`, `/student/exams/[id]`, APIs `/api/student/exams*`):
+-  live exam list with scores after release; full-screen runner with countdown + auto-submit,
+-  15s autosave, deterministic question shuffle, flag-for-review navigator,
+-  tab-switch recording (anti-cheat, reported to the teacher)
+-- Retake flow: second attempts blocked unless the teacher grants a retake (single-use)
+-
+-### Bulk question format (paste into CBT Center)
+-```
+-Q: What is 2 + 3?
+-A: 4
+-B: 5
+-C: 6
+-D: 7
+-Correct: B
+-
+-Q: The sun rises in the east.
+-Correct: TRUE
+-
+-Q: The capital of Nigeria is ___
+-FILL: Abuja
+-
+-Q: Explain photosynthesis.
+-ESSAY
+-Marks: 5
+-```
+-Blank line between questions. Optional `Marks: n` per question.
+-
+-## 4C — Broadsheet & QR Verification
+-- `GET /api/admin/broadsheet?classId=` — latest report per student, subject columns,
+-  subject averages, class average, ranked
+-- `/admin/broadsheet` — print-ready one-page class broadsheet (uses existing print CSS)
+-- `/verify/report/[reportNumber]` — public QR verification page: AUTHENTIC (released reports
+-  only, shows student/term/overall) or NOT VERIFIED
+-- `LiveReportCardPreview` now renders a verification QR + link on every report card
+-- AdminSidebar: Broadsheet link added
+-
+-## Stepwise ingestion
+-
+-```powershell
+-cd C:\Users\USER\Desktop\PROJECTS\ykay_edu\envoys-site
+-git checkout main; git pull; git status            # clean, after 3G PR merged
+-git checkout -b phase/4-academics
+-
+-.\phase-4-ingest-b64.ps1                           # expect 19 green lines
+-
+-npx prisma generate
+-npx prisma migrate dev --name phase_4_academics
+-npm run db:bootstrap-gradebooks
+-
+-Remove-Item -Recurse -Force .next                  # avoid stale-cache type errors
+-npm run build
+-
+-# Smoke test (npm run dev)
+-#  A. teacher -> /teacher/gradebook: enter scores, Save, Submit Final
+-#     admin  -> /admin/gradebook-lock: lock all 3 subjects -> class shows Ready -> Generate Drafts
+-#     admin  -> /admin/report-cards: release one -> parent email queued + bell alert (3G)
+-#  B. teacher -> /teacher/cbt-center: create exam, paste questions, Publish
+-#     student -> /student/exams: Start -> answer -> Submit (try switching tabs: recorded)
+-#     teacher -> Results: grade essay, Release Results -> student sees score
+-#     teacher -> grant Retake -> student can retake once
+-#  C. admin  -> /admin/broadsheet: pick class, Print/Save PDF
+-#     scan QR on any released report card -> /verify/report/... shows AUTHENTIC
+-
+-git add -A
+-git commit -m "Phase 4: gradebook pipeline, CBT exam engine, broadsheet + QR verification"
+-git push -u origin phase/4-academics
+-# PR: https://github.com/Teamthy/ykay_eduport-/compare/main...phase/4-academics
+-```
+-
+-## Next phase
+-`phase/5-operations` — Teacher & Class Manager, student directory + archive, ID cards with QR,
+-staff QR check-in attendance, finance completion (expenses, fee-lock), Post & News CMS, messaging.
+diff --git a/PHASE5_OPERATIONS_NOTES.md b/PHASE5_OPERATIONS_NOTES.md
+deleted file mode 100644
+index 59b5d73..0000000
+--- a/PHASE5_OPERATIONS_NOTES.md
++++ /dev/null
+@@ -1,84 +0,0 @@
+-# Phase 5 — School Operations, Super Admin Console & UI Hardening
+-
+-Branch: `phase/5-operations`.
+-
+-## 1. SUPER ADMIN (developer) console — `/super-admin`
+-New `SUPER_ADMIN` role, route-guarded by middleware (only SUPER_ADMIN can enter; they can also
+-open `/admin/*` pages for support work).
+-
+-Three tabs:
+-- **Overview** — platform analytics: active users, logins today/7-days, audit events today,
+-  suspended accounts, applications, IT enrollments, exam attempts; users-by-role table;
+-  notification delivery health (failed/pending + recent failure details); latest sign-ins with IPs.
+-- **Audit Logs** — full searchable audit trail (filter by action, actor email; top-action quick
+-  chips; 50/page pagination).
+-- **User Control** — rescue tools for admin issues: search any account, **Suspend / Unsuspend**,
+-  **Reset Password** (issues a one-time temporary password shown once), **Promote to Admin /
+-  Demote to Teacher**. Every action is audit-logged as `SUPER_ADMIN_*`. Super-admin accounts
+-  cannot be modified by this panel; you cannot suspend/demote yourself.
+-
+-APIs: `GET /api/super-admin/overview`, `GET /api/super-admin/logs`, `GET/PATCH /api/super-admin/users`.
+-
+-Seed: `npm run db:seed-super-admin`
+-- env: `SUPER_ADMIN_EMAIL` (default developer@ykaycollege.com), `SUPER_ADMIN_PASSWORD` (optional —
+-  otherwise a strong password is generated and printed ONCE), `SUPER_ADMIN_NAME`.
+-- Sign in via `/login` → routed to `/super-admin`.
+-
+-## 2. Teacher & Class Manager — `/admin/class-manager`
+-Mirrors the reference screens: expandable class list with live rosters.
+-- **Change Form Teacher** per class (deactivates old assignment, activates new — audit-logged)
+-- **Move student** between class arms
+-- **Archive student** (soft delete — records preserved) and **Archived Students** panel with Restore
+-- Student search across all classes
+-APIs: `GET/PATCH /api/admin/class-manager`, `GET /api/admin/class-manager/archived`.
+-
+-## 3. Post & News CMS — `/admin/news`
+-`NewsPost` model. Write posts with category/excerpt/content, **Publish Now** or **Save Draft**,
+-unpublish, delete. Audit-logged. (Public news page wiring to live posts comes with the next
+-content pass.)
+-
+-## 4. Button / CSS hardening (globals.css)
+-Per report: some buttons' text became invisible on hover.
+-- `.btn-outline:hover` no longer inverts (background stays transparent; border highlights instead)
+-- `.btn-ghost:hover` keeps its text colour
+-- `.btn-primary` / `.btn-secondary` text is forced white in every state
+-- disabled buttons keep readable text
+-No layout changes — your design system, spacing, and colours are untouched.
+-
+-## Stepwise ingestion
+-
+-```powershell
+-cd C:\Users\USER\Desktop\PROJECTS\ykay_edu\envoys-site
+-git checkout main; git pull; git status              # after Phase 4 PR merged
+-git checkout -b phase/5-operations
+-
+-.\phase-5-ingest-b64.ps1                             # expect 16 green lines
+-
+-npx prisma generate
+-npx prisma migrate dev --name phase_5_operations
+-npm run db:seed-super-admin                          # note the printed password!
+-
+-Remove-Item -Recurse -Force .next
+-npm run build
+-
+-# Smoke test (npm run dev)
+-#  1. /login with the super-admin credentials -> /super-admin
+-#     - Overview shows live platform stats
+-#     - Audit Logs filters work
+-#     - User Control: reset a test user's password -> temporary password shown once
+-#  2. admin -> /admin/class-manager: change a form teacher, move a student, archive + restore
+-#  3. admin -> /admin/news: publish a post, unpublish, delete
+-#  4. Check buttons across portals: text visible in normal AND hover states
+-
+-git add -A
+-git commit -m "Phase 5: super admin console, class manager, news CMS, button CSS hardening"
+-git push -u origin phase/5-operations
+-# PR: https://github.com/Teamthy/ykay_eduport-/compare/main...phase/5-operations
+-```
+-
+-## Remaining Phase-5 backlog (next iteration on this branch or 5B)
+-- ID card generation with QR + PDF (student & staff)
+-- Staff QR check-in/check-out attendance with late tracking
+-- Finance completion: expense recording, budgets, fee-lock gating CBT access
+-- Public /news-events page fed from live NewsPost data
+-- Parent directory
+diff --git a/PHASE6A_PEOPLE_ENROLLMENT_NOTES.md b/PHASE6A_PEOPLE_ENROLLMENT_NOTES.md
+deleted file mode 100644
+index 7db64b2..0000000
+--- a/PHASE6A_PEOPLE_ENROLLMENT_NOTES.md
++++ /dev/null
+@@ -1,22 +0,0 @@
+-# Phase 6A — People, Placement & Access Control
+-
+-## Included
+-- Admin student-record workspace: manual enrolment, parent linking, class capacity enforcement, audit log and idempotency key.
+-- Admin staff workspace: invitation-only account provision; activation route creates staff user and teacher profile where appropriate.
+-- Admissions enrollment API: only verified-paid applications that passed entrance assessment can be converted to a student; class level/capacity enforced; operation is transactional and retry-safe.
+-- New `StudentProfile.admissionApplicationId` prevents duplicate admission handoff.
+-- `IdempotencyRecord` preserves safe retry response for enrollment commands.
+-- First two reworked portal pages use the compact authenticated `PortalTopbar` instead of public Header/Footer.
+-
+-## Deployment
+-1. Set all required production environment variables from `.env.example` (especially `DATABASE_URL`, `AUTH_SECRET`, Paystack and mail/storage keys).
+-2. Back up the production database.
+-3. Run `npx prisma migrate deploy`, then `npx prisma generate`.
+-4. Run `npm run build`.
+-5. Smoke test: create a staff invite; activate it; create manual student; replay the same API idempotency key; run the admissions enrollment endpoint twice with the same idempotency key.
+-
+-## Deliberate scope boundary
+-The legacy `/admin-admissions` review screen has not yet been replaced with the new placement wizard UI. Its API workflow is included in `POST /api/admin/admissions/enroll`; the next UI pass should invoke it from the review screen after entrance-test result capture.
+-
+-## Finance safety hold
+-The legacy parent-fee payment screen still has a simulated Paystack modal. Do **not** collect live school fees through it. Phase 6B replaces it with verified webhook-driven Paystack payments and reconciliation.
+diff --git a/PHASE6B_SECURE_OPS_NOTES.md b/PHASE6B_SECURE_OPS_NOTES.md
+deleted file mode 100644
+index a637c2e..0000000
+--- a/PHASE6B_SECURE_OPS_NOTES.md
++++ /dev/null
+@@ -1,43 +0,0 @@
+-# Phase 6B — Secure Fees, Placement UI, Portal Hygiene
+-
+-## What this phase ships
+-1. **Idempotent school-fee payments**
+-   - `FeePaymentAttempt` table
+-   - `lib/fee-payment-service.ts` atomic balance reservation + unique reference
+-   - Parent payment intents (Paystack hosted + bank transfer claims)
+-   - Parent payment confirm only after Paystack verify
+-   - Webhook handles both admissions fees and school fees
+-   - Bursar cash record + bank transfer approve/reject (`/admin/fees/transfers`)
+-
+-2. **Admissions → class placement**
+-   - Admin admissions queue UI: entrance score, pass/fail, class suggestion, enroll
+-   - Uses existing idempotent `POST /api/admin/admissions/enroll`
+-
+-3. **Teacher live students**
+-   - `GET/POST /api/teacher/students`
+-   - Form teachers enrol into their class; subject teachers get read-only roster
+-   - Entrance-pass suggestions for form class levels
+-
+-4. **Staff direct create**
+-   - `POST /api/admin/staff/direct` + UI on `/admin/staff`
+-   - Staff still cannot self-register
+-
+-5. **Portal hygiene**
+-   - Portal sidebars without cross-role switcher / demo badge
+-   - Admissions, teacher students, parent fees, id-cards, staff use `PortalTopbar` (no public Header)
+-
+-6. **Live news**
+-   - `/news-events` and `/news-events/[slug]` read `NewsPost`
+-
+-7. **ID cards**
+-   - Live students + QR + print/PDF
+-
+-## Apply
+-```powershell
+-cd C:\Users\USER\Desktop\PROJECTS\ykay_edu\envoys-site
+-.\phase-6b-secure-ops-ingest.ps1
+-```
+-
+-## Configure
+-- Paystack webhook URL must include `/api/payments/paystack/webhook`
+-- `PAYSTACK_SECRET_KEY`, `PAYSTACK_PUBLIC_KEY`, `AUTH_SECRET` set in `.env`
+diff --git a/PHASE6C_TEACHER_COMPLETENESS_NOTES.md b/PHASE6C_TEACHER_COMPLETENESS_NOTES.md
+deleted file mode 100644
+index 2e15cba..0000000
+--- a/PHASE6C_TEACHER_COMPLETENESS_NOTES.md
++++ /dev/null
+@@ -1,22 +0,0 @@
+-# Phase 6C — Teacher completeness + CBT fee lock
+-
+-## Ships
+-1. **Live TeacherSidebar** — roles from `/api/teacher/dashboard` (no mock `teacherData`, no portal switcher, no Demo badge).
+-2. **Teacher dashboard** — PortalTopbar shell; subject/form cards; deep-links to gradebook (`?assignmentId=`); open gradebooks + live exams.
+-3. **Dashboard API enrichment** — gradebooks, exams, classId, gradebookHref on assignments.
+-4. **Gradebook deep-link** — reads/writes `assignmentId` query param; PortalTopbar (no public Header).
+-5. **CBT center** — PortalTopbar only.
+-6. **Fee lock on CBT** — `lib/fee-lock.ts`; blocks **new** exam attempts with HTTP 402 when invoices outstanding; student exams list returns `feeLock` banner.
+-
+-## Apply
+-```powershell
+-cd C:\Users\USER\Desktop\PROJECTS\ykay_edu\envoys-site
+-.\phase-6c-teacher-completeness-ingest.ps1
+-```
+-
+-## Smoke
+-- Login as subject-only teacher → sidebar shows Subject teaching, not Form class.
+-- Login as form teacher → Form class + attendance links.
+-- Dashboard → click Scores on a subject → gradebook opens that assignment.
+-- Student with unpaid invoice → Start Exam returns fee lock message.
+-- Student with paid fees → exam starts normally.
+diff --git a/PHASE6D_FINANCE_OPS_NOTES.md b/PHASE6D_FINANCE_OPS_NOTES.md
+deleted file mode 100644
+index 14e7886..0000000
+--- a/PHASE6D_FINANCE_OPS_NOTES.md
++++ /dev/null
+@@ -1,13 +0,0 @@
+-# Phase 6D — Finance operations
+-
+-## Ships
+-- Expense + Budget models and migration
+-- APIs: expenses, budgets, fee reminders
+-- Finances overview uses live expenses
+-- Admin UI: expenses, budgets, fees (reminders + cash), finance dashboard
+-- Sidebar links
+-
+-## Apply
+-```powershell
+-.\phase-6d-finance-ops-ingest.ps1
+-```
+diff --git a/PHASE6E_STAFF_QR_ATTENDANCE_NOTES.md b/PHASE6E_STAFF_QR_ATTENDANCE_NOTES.md
+deleted file mode 100644
+index ccf0911..0000000
+--- a/PHASE6E_STAFF_QR_ATTENDANCE_NOTES.md
++++ /dev/null
+@@ -1,20 +0,0 @@
+-# Phase 6E — Staff QR attendance
+-
+-## Ships
+-- `StaffAttendanceEvent` + `TeacherProfile.badgeCode`
+-- Late cut-off via `STAFF_LATE_CUTOFF` (default 08:00) / `SCHOOL_TIMEZONE` (Africa/Lagos)
+-- Admin scanner: `/admin/staff-attendance` (AUTO in/out, force modes, printable badges)
+-- APIs: `/api/admin/staff-attendance`, `/badges`, `/api/staff/attendance/me`
+-- Staff self check-in: `/staff/attendance`
+-- Audit logs for check-in/out
+-
+-## Env (optional)
+-```
+-SCHOOL_TIMEZONE=Africa/Lagos
+-STAFF_LATE_CUTOFF=08:00
+-```
+-
+-## Apply
+-```powershell
+-.\phase-6e-staff-qr-attendance-ingest.ps1
+-```
+diff --git a/PHASE7_PROD_READY_NOTES.md b/PHASE7_PROD_READY_NOTES.md
+deleted file mode 100644
+index ae35856..0000000
+--- a/PHASE7_PROD_READY_NOTES.md
++++ /dev/null
+@@ -1,24 +0,0 @@
+-# Phase 7 — Production readiness, IT flagship, e2e smoke, cleanup
+-
+-## Ships
+-1. `docs/PRODUCTION_READINESS_AUDIT.md` — full leftover inventory after 6E
+-2. `PRODUCTION_CUTOVER.md` — go-live checklist for real `.env`
+-3. IT Education elevated:
+-   - top-level nav item
+-   - homepage `ITFlagshipSection`
+-   - optimized `/it-education` hub with live `/api/it/catalog`
+-4. `DemoIndicator` only if `NEXT_PUBLIC_SHOW_DEMO_BADGE=true`
+-5. E2E smoke: `npm run test:e2e` (fetch-based, pages + public APIs + auth guards)
+-6. Artifact cleanup: `npm run cleanup:artifacts`
+-7. `.gitignore` ignores inject scripts / deliverables / screens backups
+-
+-## Apply
+-```powershell
+-.\phase-7-prod-ready-ingest.ps1
+-npm run build
+-# with server:
+-npm run start
+-# other terminal:
+-npm run test:e2e -- --base-url=http://127.0.0.1:3000 --no-server
+-npm run cleanup:artifacts -- --dry-run
+-```
+diff --git a/PHASE8_UI_POLISH_NOTES.md b/PHASE8_UI_POLISH_NOTES.md
+deleted file mode 100644
+index aadd5f5..0000000
+--- a/PHASE8_UI_POLISH_NOTES.md
++++ /dev/null
+@@ -1,12 +0,0 @@
+-# Phase 8 — UI polish + super admin finance/create
+-
+-## Fixes
+-- Homepage section spacing/order (Hero → hours → IT flagship → admissions → IT hub → programmes → community → find us)
+-- Global readable `<select>` option menus (light background)
+-- High-contrast CTAs on dark panels (IT portal auth, IT hub, course tracks)
+-- Portal card copy cleaned
+-- Admissions hero Unsplash background; continue flow unchanged (handleNext)
+-- Academics 4 cards in one row + See more
+-- IT course tracks shared template: carousel hero, image hover cards, compact cert badge
+-- Super admin: income/transactions snapshot + create ADMIN/staff with one-time password
+-- Admin access doc for retrieving seed credentials from .env
+diff --git a/PRODUCTION_CUTOVER.md b/PRODUCTION_CUTOVER.md
+deleted file mode 100644
+index 0145c6a..0000000
+--- a/PRODUCTION_CUTOVER.md
++++ /dev/null
+@@ -1,38 +0,0 @@
+-# Production cutover checklist
+-
+-## 1. Secrets
+-1. Copy `.env.example` to host secret store (Vercel/Railway/VPS).
+-2. Fill **real** values — never commit them.
+-3. `NEXT_PUBLIC_SHOW_DEMO_BADGE=false` (or unset).
+-4. Paystack **live** keys only on production host.
+-5. Confirm `AUTH_SECRET` ≥ 32 random chars.
+-
+-## 2. Infrastructure
+-1. Neon DB created; `DATABASE_URL` is pooled + ssl.
+-2. `npx prisma migrate deploy`
+-3. Seed once: `npm run db:seed-admin`, `db:seed-super-admin`, `db:seed-it-courses` (+ optional finance/attendance bootstraps).
+-4. S3/R2 private bucket + CORS JSON from `docs/S3_ADMISSIONS_CORS.json`.
+-5. Resend domain authenticated.
+-6. Upstash Redis for rate limits.
+-7. Cron every 1–5 min → `POST /api/jobs/dispatch-notifications` with whatever auth you add/host allows.
+-8. Paystack dashboard webhook → `https://YOUR_DOMAIN/api/payments/paystack/webhook`.
+-
+-## 3. Verify
+-```bash
+-npm ci
+-npm run build
+-npm run start
+-# other terminal:
+-npm run test:e2e -- --base-url=http://127.0.0.1:3000 --no-server
+-```
+-Then manual smoke from `docs/PRODUCTION_READINESS_AUDIT.md` §8.
+-
+-## 4. Clean deploy tree
+-```bash
+-npm run cleanup:artifacts
+-```
+-
+-## 5. Go-live
+-1. DNS → host
+-2. Force HTTPS
+-3. Monitor first admissions payment + fee payment + staff QR morning peak
+diff --git a/TRANSFORMATION_PLAN.md b/TRANSFORMATION_PLAN.md
+deleted file mode 100644
+index 54e5a66..0000000
+--- a/TRANSFORMATION_PLAN.md
++++ /dev/null
+@@ -1,115 +0,0 @@
+-# Ykay College & Leadership Academy — Transformation Plan
+-
+-## Design System Preserved
+-- Dark theme: `#0D0D0D` background, `#FFFFFF` text
+-- Accent: crimson `#C2185B`, deep purple `#7B1FA2`
+-- Fonts: Anton (display), DM Sans (body)
+-- Cards: `rounded-[2rem]`, `bg-card-bg`, `border-white/5`
+-- Layout: `max-w-7xl`, responsive grids
+-- Animations: Framer Motion fade-in, loading ring, hover scale
+-- Header: sticky white backdrop-blur, mobile hamburger
+-- Footer: dark with navigation links
+-
+-## Pages & Components Mapping
+-
+-| Church (Current) | School (Target) | Action |
+-|---|---|---|
+-| Home (`/`) | Home (`/`) | Rewrite hero, service info, banners |
+-| `/contact` | `/contact` | Update with school info |
+-| `/sermons` | `/news-events` | Replace with news & events |
+-| `/giving` | `/admissions` | Replace with admissions |
+-| `/wraps` | `/gallery` | Replace with gallery |
+-| `/#about` | `/about` | Rewrite with school story |
+-| Services cards | Academics / Campus Life cards | Rename & replace content |
+-| Churches grid | Departments / Campuses (optional) | Replace or keep for campus info |
+-| Groups cards | Clubs & Societies / Campus Life | Replace with school groups |
+-| Sermons card | Featured News / Latest Event | Replace content |
+-| Find Us + Map | Find Us (same) | Update address, phone, email |
+-| Footer links | School footer links | Update links & branding |
+-
+-## New Page: Portal Login (`/portal`)
+-- 4 cards: Admin Portal, Teacher Portal, Student Portal, Parent Portal
+-- Each card links to the appropriate portal URL
+-- Keeps the same card styling as Services/Gallery
+-
+-## Branding Changes (All Pages)
+-- Title: "Ykay College & Leadership Academy — Excellence in Education"
+-- Logo text: "YKAY COLLEGE" (replaces "THE ENVOYS")
+-- Navigation: Home | About | Academics | Admissions | Campus Life | Gallery | News & Events | Contact | Portal Login
+-- Footer: Address: Km 38, Lagos-Abeokuta Expressway, No 1 Iwalewa street, Opposite Matrix filling Station, beside Alishiba Junction, Sango Ota. Phone: 0701 537 4411. Email: info@ykaycollege.com. Site: ykaycollege.com
+-- Loading screen text: "YKAY COLLEGE" (replaces "RCCG THE ENVOYS")
+-- All church text/images/icons replaced with school equivalents
+-
+-## Sections to Modify
+-
+-### Hero (`components/Hero.tsx`)
+-- Title: "Ykay College & Leadership Academy"
+-- Subtitle: "Excellence in Education · JSS1 to SS3 · Sango Ota, Ogun State"
+-- Service info: Day secondary school hours
+-- CTA: "Apply for Admission" and "Visit Our Campus"
+-
+-### ServiceInfo (`components/ServiceInfo.tsx`)
+-- Update to show school hours: Monday–Friday 7:30 AM – 2:30 PM
+-- Address: Sango Ota location
+-
+-### MercyConvention (`components/MercyConvention.tsx`)
+-- Replace with "Admissions Open" banner: 2025/2026 Session — Apply Now
+-- Purple/crimson gradient maintained
+-
+-### About (`components/About.tsx`)
+-- School history, vision, mission, values
+-- Director's message
+-- Staff photo section
+-- Quote block: education-focused
+-
+-### Services (`components/Services.tsx`)
+-- Rename cards to: Academics, Admissions, Campus Life, Portal Access, Student Wellbeing
+-- Keep 5-card grid layout
+-
+-### Churches (`components/Churches.tsx`)
+-- Replace with Campus/Departments info or keep as Departments
+-- Update links to `/campus`
+-
+-### Groups (`components/Groups.tsx`)
+-- Replace with Clubs & Societies: Science Club, Debate Society, Sports Club, Music & Arts, Leadership Council
+-
+-### FindUs (`components/FindUs.tsx`)
+-- Update address, phone, email
+-- Keep Google Map embed
+-- Replace sermon card with Featured News card
+-
+-### Footer (`components/Footer.tsx`)
+-- Update branding, links, copyright to Ykay College
+-
+-### Subpages
+-- `/contact`: Update form and reach info
+-- `/admissions` (new, replaces giving): Admission form, requirements, fee info
+-- `/news-events` (new, replaces sermons): News articles and event listings
+-- `/gallery` (new, replaces wraps): Photo/video gallery
+-- `/about` (new page or redirect to section)
+-- `/portal` (new): 4 portal entry cards
+-
+-## Implementation Sequence
+-1. Layout metadata + design tokens
+-2. Header + Footer branding
+-3. LoadingScreen branding
+-4. Hero rewrite
+-5. ServiceInfo update
+-6. Banner update
+-7. About rewrite
+-8. Services/Academics cards
+-9. Churches → Campus info
+-10. Groups → Clubs
+-11. FindUs + Sermon → FindUs + News
+-12. Gallery, News, Admissions, Portal pages
+-13. Subpage updates (contact, about, admissions, news, gallery, portal)
+-14. Final polish: images, icons, accessibility, responsive check
+-
+-## Files to Read Before Modifying
+-- `/home/user/envoys-site/app/globals.css` (design tokens)
+-- `/home/user/envoys-site/app/layout.tsx` (fonts, metadata)
+-- `/home/user/envoys-site/components/Header.tsx` (nav structure)
+-- `/home/user/envoys-site/components/Hero.tsx` (hero layout)
+-- `/home/user/envoys-site/components/About.tsx` (about layout)
+-- `/home/user/envoys-site/components/Services.tsx` (card grid layout)
+-- `/home/user/envoys-site/components/FindUs.tsx` (map + sermon card layout)
+diff --git a/TRANSFORMATION_REFERENCE.md b/TRANSFORMATION_REFERENCE.md
+deleted file mode 100644
+index 75c1319..0000000
+--- a/TRANSFORMATION_REFERENCE.md
++++ /dev/null
+@@ -1,455 +0,0 @@
+-# Ykay College — Church-to-School Transformation Reference
+-
+-This document maps every file, component, section, and design element from the original church website (`rccgtheenvoys.org`) to the new premium school website (`Ykay College & Leadership Academy`).
+-
+----
+-
+-## 1. Foundation / Design System
+-
+-| Element | Church Original | School Replacement | Status |
+-|---|---|---|---|
+-| Brand font (display) | Anton (same) | Anton (same) | ✅ Preserved |
+-| Brand font (body) | DM Sans (same) | DM Sans (same) | ✅ Preserved |
+-| Background | `#0D0D0D` | `#0D0D0D` | ✅ Preserved |
+-| Foreground | `#FFFFFF` | `#FFFFFF` | ✅ Preserved |
+-| Accent crimson | `#C2185B` | `#C2185B` | ✅ Preserved |
+-| Accent purple | `#7B1FA2` | `#7B1FA2` | ✅ Preserved |
+-| Card background | `rgba(255,255,255,0.03)` | `rgba(255,255,255,0.03)` | ✅ Preserved |
+-| Subtle border | `rgba(255,255,255,0.1)` | `rgba(255,255,255,0.1)` | ✅ Preserved |
+-| Loading animation | Rotating ring text | Rotating ring text (text changed) | ✅ Updated |
+-| Scrollbar style | Dark custom | Dark custom | ✅ Preserved |
+-| Tailwind config | v4 syntax | v4 syntax | ✅ Preserved |
+-| PostCSS config | Missing (caused build issue) | `postcss.config.mjs` added | ✅ Fixed |
+-| TypeScript | `5.9.3` (conflict) | `4.9.5` (compatible) | ✅ Fixed |
+-| Module resolution | `bundler` (TS4.9 unsupported) | `node16` | ✅ Fixed |
+-| Next.js version | `15.0.0` | `15.0.0` | ✅ Preserved |
+-
+----
+-
+-## 2. Global / Layout Files
+-
+-### `app/layout.tsx`
+-- **Title**: `RCCG The Envoys — We Are Sent To Nations` → `Ykay College & Leadership Academy — Excellence in Education`
+-- **Description**: Church mission → School mission (Sango Ota, JSS1–SS3, NERDC)
+-- **Keywords**: Church keywords → Education keywords (secondary school, Ogun State, admissions, WAEC, BECE)
+-- **OpenGraph**: `rccgtheenvoys.org` → `ykaycollege.com`
+-- **Image**: `/images/RCCG.png` → `/images/ykay-college-hero.jpg`
+-- **Fonts**: Same import (`Anton` + `DM Sans`)
+-
+-### `app/globals.css`
+-- **No changes** to design tokens — preserved exactly
+-- Body styles (`bg-background`, `text-foreground`, `font-family`) unchanged
+-- Selection color (`rgba(194, 24, 91, 0.3)`) unchanged
+-
+----
+-
+-## 3. Header Component (`components/Header.tsx`)
+-
+-### Before (Church)
+-- Logo text: `THE ENVOYS`
+-- Navigation links: Home, About, Sermons, Giving, Churches, Wraps, Contact Us
+-- CTA button: `Become A Member`
+-- Mobile menu links: Same church links
+-
+-### After (School)
+-- Logo text: `YKAY COLLEGE`
+-- Navigation links: Home, About, Academics, Admissions, Campus Life, Gallery, News, Contact, Portal
+-- CTA button: `Apply Now` → links to `/admissions`
+-- Mobile menu links: Same school links
+-- Tracking: `font-display text-2xl tracking-[3px]` adjusted for new branding
+-
+----
+-
+-## 4. Footer Component (`components/Footer.tsx`)
+-
+-### Before (Church)
+-- Brand: `RCCG THE ENVOYS`
+-- Description: Gospel mission text
+-- Links: Home, About (#about), Sermons, Giving, Churches (#churches), Wraps, Contact Us
+-- Address line: `6A Cocoa Industries Road, Ikeja, Lagos`
+-- Phone: `+2349062134890`
+-- Email: `hello@envoys.center`
+-- Copyright: `© {year} RCCG THE ENVOYS`
+-
+-### After (School)
+-- Brand: `YKAY COLLEGE` + subtitle `& LEADERSHIP ACADEMY`
+-- Description: School mission (Sango Ota, day school, JSS1–SS3)
+-- Links: Home, About, Academics, Admissions, Campus Life, Gallery, News, Contact, Portal
+-- Address block: `Km 38, Lagos-Abeokuta Expressway, No 1 Iwalewa Street, Opposite Matrix Filling Station, Beside Alishiba Junction, Sango Ota, Ogun State`
+-- Phone: `0701 537 4411`
+-- Email: `info@ykaycollege.com`
+-- Website: `ykaycollege.com`
+-- Hours: `Monday — Friday: 7:30 AM — 2:30 PM` + `Admissions: 9:00 AM — 4:00 PM` + `Portal Support: 24/7`
+-- Copyright: `© {year} YKAY COLLEGE & LEADERSHIP ACADEMY`
+-- Three-column footer: Location | Contact | Hours
+-
+----
+-
+-## 5. Loading Screen (`components/LoadingScreen.tsx`)
+-
+-### Before (Church)
+-- Rotating ring: `RCCG THE ENVOYS · RCCG THE ENVOYS · RCCG THE ENVOYS ·`
+-- Logo icon: Purple send/arrow icon
+-- Reveal text: `THE SENT ONES`
+-
+-### After (School)
+-- Rotating ring: `YKAY COLLEGE · EXCELLENCE · YKAY COLLEGE · EXCELLENCE ·`
+-- Logo icon: Graduation cap icon (`viewBox="0 0 24 24"` with cap paths)
+-- Reveal text: `EDUCATION EXCELLENCE`
+-- Fill color: `#CE93D8` (preserved purple accent)
+-
+----
+-
+-## 6. Hero Section (`components/Hero.tsx`)
+-
+-### Before (Church)
+-- Label: `RCCG THE ENVOYS`
+-- Title: `WE ARE SENT TO` / `SPREAD THE GOSPEL`
+-- Subtitle: Church mission text
+-- Service info: `Every Sunday · 1:00 PM · Upgrade Service` / `3:00 PM · Wisdom & Power Service`
+-- CTA: `Become A Member` (links to church member portal)
+-- Background image: Worship/concert image (`photo-1516450360452-9312f5e86fc7`)
+-
+-### After (School)
+-- Label: `YKAY COLLEGE & LEADERSHIP ACADEMY`
+-- Title: `EXCELLENCE IN` / `EDUCATION`
+-- Subtitle: School mission (Sango Ota, JSS1–SS3, premium education)
+-- Info cards: `Location: Sango Ota, Ogun State` | `Programmes: Junior & Senior Secondary` | `Session: 2024 / 2025`
+-- CTAs: `Apply Now` (links `/admissions`) + `Student Portal` (links `/portal`)
+-- Background image: Classroom/students (`photo-1522202176988-66273c2fd55f`)
+-- Gradient overlay: Same structure preserved
+-
+----
+-
+-## 7. ServiceInfo Banner (`components/ServiceInfo.tsx`)
+-
+-### Before (Church)
+-- Title: `Come worship with us`
+-- Subtitle: `Every Sunday at The Envoys Center`
+-- Hours: `1:00 PM · Upgrade` / `3:00 PM · Wisdom`
+-- Address link: `6A Cocoa Industries Road, Ikeja, Lagos`
+-
+-### After (School)
+-- Title: `School Hours & Location`
+-- Subtitle: `Ykay College & Leadership Academy — Sango Ota, Ogun State`
+-- Hours: `Monday — Friday` / `7:30 AM — 2:30 PM`
+-- Address link: `Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State`
+-- Icon preserved (`Clock`, `MapPin`)
+-- Card styling preserved (rounded-3xl, backdrop blur, dark bg)
+-
+----
+-
+-## 8. Banner Section (`components/AdmissionsBanner.tsx`) — NEW
+-
+-Replaced the `MercyConvention` component.
+-
+-- Title: `ADMISSIONS OPEN`
+-- Subtitle tag: `2025 / 2026 Session — Now Open`
+-- Details: `JSS1 — SS3` | `Day Secondary School` | `Sango Ota, Ogun State`
+-- CTA: `Apply Now` → `/admissions`
+-- Gradient: Purple (`#4A148C`) → Crimson (`#C2185B`) preserved
+-- Decorative blur circles preserved
+-
+----
+-
+-## 9. About Section (`components/About.tsx`)
+-
+-### Before (Church)
+-- Label: `ABOUT US`
+-- Title: `A COMMUNITY ORIENTED FAMILY CHURCH`
+-- Text: Church mission (supernatural army, prayer, faith)
+-- Images: Pastors (`photo-1529070538774-1843cb3265df`, `photo-1544005313-94ddf0286df2`)
+-- Caption: `Pastor Daniel & Dr. Nifemi Olawande` / `Senior Pastors — RCCG The Envoys`
+-- Quote: `"We are the heart that embraces all with love..."`
+-- CTA: `Become A Member`
+-
+-### After (School)
+-- Label: `ABOUT US`
+-- Title: `RAISING LEADERS THROUGH EXCELLENCE IN EDUCATION`
+-- Text: School mission (Sango Ota, JSS1–SS3, NERDC, leadership development)
+-- Tags: `NERDC Aligned`, `JSS1 — SS3`, `Day School`, `Digital Learning`, `Leadership Training`, `WAEC / BECE Ready`
+-- Images: Modern classroom (`photo-1497633762265-9d179a990aa6`) + Students (`photo-1503676260728-1c00da094a0b`)
+-- Caption: `Dr. Adeyemi Ogunlade` / `Director & Proprietor — Ykay College` / Quote: Education-focused
+-- Stats cards: Year Founded, Students Enrolled, WAEC Pass Rate, Programmes Offered
+-- Vision / Mission / Values cards: 3-column grid preserved
+-
+----
+-
+-## 10. Services / Card Grid (`components/Services.tsx`)
+-
+-### Before (Church)
+-- Section label: `OUR SERVICES`
+-- Title: `WHAT WE DO`
+-- 5 cards: Upgrade Service, Wisdom & Power, Envoys' Families, Giving, Become A Member
+-
+-### After (School)
+-- Section label: `PROGRAMMES & SERVICES`
+-- Title: `WHAT WE OFFER`
+-- 5 cards: Academics (`/academics`), Admissions (`/admissions`), Campus Life (`/campus-life`), Portal Access (`/portal`), Student Wellbeing (`/contact`)
+-- Card structure preserved (title, subtitle, description, Learn More arrow, hover glow)
+-- Link in header: `Get In Touch` → `/contact`
+-
+----
+-
+-## 11. Churches / Department Grid (`components/Churches.tsx` → renamed conceptually)
+-
+-### Before (Church)
+-- Label: `ENVOYS' CHURCHES`
+-- Title: `A FAMILY ACROSS THE WORLD`
+-- 12 cards: Church branches across Lagos, Ogun, South Africa, USA, Virtual
+-
+-### After (School) — Component file same, content changed
+-- Label: `DEPARTMENTS & PROGRAMMES`
+-- Title: `A COMPLETE EDUCATIONAL ECOSYSTEM`
+-- 9 cards: JSS (JSS1–JSS3), SS Science, SS Arts, SS Commercial, STEM & Digital Learning, Sports & PE, Library & E-Resources, Science Labs, Leadership & Character
+-- All links point to `/academics` or `/campus-life`
+-- ArrowUpRight icon preserved
+-- Grid layout preserved (`sm:grid-cols-2 lg:grid-cols-3`)
+-
+----
+-
+-## 12. Groups / Clubs (`components/Groups.tsx`)
+-
+-### Before (Church)
+-- Label: `NATURAL GROUPS`
+-- Title: `FELLOWSHIP GROUPS`
+-- 5 group cards with images: Solid Rock, Royal Diadem, Envoys Nest Hub, Mega Stars, The Haven
+-
+-### After (School)
+-- Label: `CLUBS & SOCIETIES`
+-- Title: `CAMPUS LIFE`
+-- 5 club cards with images: Science & Technology Club, Debate & Public Speaking, Sports & Athletics, Music & Creative Arts, Leadership Council
+-- Subtitles: STEM Leadership, Communication, Physical Excellence, Arts & Expression, Student Governance
+-- Images updated to education/students/workshop photos (`photo-1509062522246-3755977927d7`, etc.)
+-- All links point to `/campus-life`
+-- Card layout preserved (image left, content right, hover translate)
+-
+----
+-
+-## 13. Find Us & Sermon (`components/FindUs.tsx` → `FindUsAndNews` concept)
+-
+-### Before (Church)
+-- Find Us: `RCCG THE ENVOYS`, address `6A Cocoa Industries`, map embed
+-- Sermon card: `LATEST SERMON` / `LIVING IN THE NEW` / `Watch Now` (YouTube link)
+-- Sermon image: `photo-1504052434569-70ad5836ab65`
+-
+-### After (School)
+-- Find Us: `YKAY COLLEGE`, address `Km 38, Lagos-Abeokuta Expressway, Sango Ota`, updated map embed, updated contact card info
+-- Featured News: `LATEST FROM THE SCHOOL` / `Ykay College Opens 2025 / 2026 Admissions` / `Read More` (`/news-events`)
+-- News image: `photo-1524178232363-1fb2b075b655` (students/collaboration)
+-- Play icon preserved on video-style thumbnail
+-- Address card preserved with new school info
+-- Link: `View All News` → `/news-events`
+-
+----
+-
+-## 14. Contact Page (`app/contact/page.tsx`)
+-
+-### Before (Church)
+-- Email: `hello@envoys.center`
+-- Phone: `+2349062134890`
+-- WhatsApp: `+2349062134890`
+-- Address: `6a cocoa industries road, ikeja, lagos`
+-- Form labels: generic
+-
+-### After (School)
+-- Email: `info@ykaycollege.com`
+-- Phone: `0701 537 4411`
+-- WhatsApp: `0701 537 4411`
+-- Address: `Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State`
+-- Header branding preserved (`GET IN TOUCH` / `CONTACT US`)
+-- Form fields preserved (First/Last Name, Email, Phone, Message)
+-- Reach Us cards preserved (Mail, Phone, WhatsApp, Address icons)
+-- Client directive: `"use client"` preserved (form interaction)
+-
+----
+-
+-## 15. Subpages — Old (Still Exist, Unlinked from Header)
+-
+-These pages remain in the file tree but are no longer linked from the main navigation. They can be removed or redirected later.
+-
+-| Old Path | Content | Status |
+-|---|---|---|
+-| `/sermons` | Sermon archive | Unlinked |
+-| `/giving` | Giving/donation form | Unlinked |
+-| `/wraps` | Wraps overview | Unlinked |
+-| `/churches/[church]` | Church branch detail | Unlinked |
+-| `/groups/[group]` | Group/fellowship detail | Unlinked |
+-
+----
+-
+-## 16. New Pages Created
+-
+-| Path | Purpose | Design Pattern Used |
+-|---|---|---|
+-| `/about` | School story, vision, mission, stats | Two-column grid + quote banner (same as original About) |
+-| `/academics` | Programmes (JSS/SS tracks, curriculum) | Card grid + feature banner |
+-| `/admissions` | Admission process + requirements | Two-column (steps + info card) |
+-| `/campus-life` | Clubs, facilities, sports | Card grid + full-width photo banner |
+-| `/gallery` | Photo gallery grid | 3-column image grid with hover overlay |
+-| `/news-events` | School news list | Card list with category tags |
+-| `/contact` | Updated with school info | Original form preserved |
+-| `/portal` | 4 portal entry cards | Card grid with gradient hover effects |
+-
+----
+-
+-## 17. Component Reuse Summary
+-
+-Every reusable component was preserved. Only text, links, and branding were changed:
+-
+-| Component | Reused? | What Changed |
+-|---|---|---|
+-| `Header` | ✅ Yes | Logo, nav links, CTA |
+-| `Footer` | ✅ Yes | Brand, links, address, hours |
+-| `Hero` | ✅ Yes | Title, subtitle, info cards, CTAs, background image |
+-| `ServiceInfo` | ✅ Yes | Title, subtitle, hours, address |
+-| `About` | ✅ Yes | All text, images, quote, stats |
+-| `Services` | ✅ Yes | Card titles, descriptions, links |
+-| `Churches` → `Departments` concept | ✅ Yes | Card content, links, labels |
+-| `Groups` → `Clubs` | ✅ Yes | Card titles, images, descriptions |
+-| `FindUs` + `Sermons` | ✅ Yes | Find Us info + Featured News card |
+-| `LoadingScreen` | ✅ Yes | Ring text, reveal text, icon |
+-| `Footer` links structure | ✅ Yes | All link labels updated |
+-
+----
+-
+-## 18. Design System Integrity Check
+-
+-- ✅ Typography hierarchy preserved (`font-display` for headings, `font-body` for body)
+-- ✅ Tracking and letter-spacing preserved (`tracking-[4px]` on display, `tracking-[0.15em]` on uppercase labels)
+-- ✅ Color tokens unchanged (no redesign required)
+-- ✅ Card styling identical (`rounded-[2rem]`, `bg-card-bg`, `border-white/5`)
+-- ✅ Animation timing preserved (0.5s–0.8s durations, ease-in-out easing)
+-- ✅ Responsive breakpoints preserved (`md:`, `lg:` prefixes same)
+-- ✅ Sticky header preserved with scroll state (`scrolled` boolean + transition)
+-- ✅ Mobile hamburger menu preserved with `AnimatePresence`
+-- ✅ Hover effects preserved (`hover:-translate-y-1`, `hover:scale-105`, `group-hover:text-white/90`)
+-- ✅ Gradient banner preserved (`from-[#4A148C] via-[#7B1FA2] to-[#C2185B]`)
+-
+----
+-
+-## 19. Image Assets
+-
+-| Component | Old Source | New Source | Theme |
+-|---|---|---|---|
+-| Hero background | Worship/concert (`photo-1516450360452-9312f5e86fc7`) | Modern classroom (`photo-1522202176988-66273c2fd55f`) | Education |
+-| About — image 1 | Pastor (`photo-1529070538774-1843cb3265df`) | Modern study (`photo-1497633762265-9d179a990aa6`) | Education |
+-| About — image 2 | Pastor (`photo-1544005313-94ddf0286df2`) | Student collaboration (`photo-1503676260728-1c00da094a0b`) | Education |
+-| Services cards — no image | N/A | N/A (text-only cards) | N/A |
+-| Churches → Departments — no image (icon only) | N/A | N/A | N/A |
+-| Groups → Clubs — image 1 | Brotherhood (`photo-1522202176988-66273c2fd55f`) | STEM club (`photo-1509062522246-3755977927d7`) | Education |
+-| Groups → Clubs — image 2 | Sisterhood (`photo-1517457373958-b7bdd4587205`) | Debate (`photo-1516321318423-f06f85e504b3`) | Education |
+-| Groups → Clubs — image 3 | Teens (`photo-1529156069898-49953e39b3ac`) | Sports (`photo-1517649763962-0c623066013b`) | Education |
+-| Groups → Clubs — image 4 | Children (`photo-1503676260728-1c00da094a0b`) | Arts (`photo-1511671782779-c97d3d27a1d4`) | Education |
+-| Groups → Clubs — image 5 | Marriage (`photo-1516589178581-6cd7833ae3b2`) | Leadership (`photo-1524178232363-1fb2b075b655`) | Education |
+-| Find Us — map | Ikeja, Lagos | Sango Ota, Ogun State | School location |
+-| Find Us — news image | Sermon (`photo-1504052434569-70ad5836ab65`) | School event (`photo-1524178232363-1fb2b075b655`) | Education |
+-
+----
+-
+-## 20. Final Checklist (Per Page)
+-
+-### ✅ Layout (`layout.tsx`)
+-- [x] Title, description, keywords, OG, Twitter updated
+-- [x] Font variables preserved
+-
+-### ✅ Header (`components/Header.tsx`)
+-- [x] Brand: `YKAY COLLEGE`
+-- [x] Nav links: 9 items (Home → Portal)
+-- [x] CTA: `Apply Now`
+-- [x] Mobile menu links updated
+-- [x] Scroll state preserved
+-
+-### ✅ Footer (`components/Footer.tsx`)
+-- [x] School branding
+-- [x] Address block (Sango Ota)
+-- [x] Contact (phone, email, WhatsApp, map)
+-- [x] Hours (school + admissions + portal)
+-- [x] Navigation links (9 items)
+-- [x] Back to top preserved
+-
+-### ✅ Loading Screen (`components/LoadingScreen.tsx`)
+-- [x] Ring text: `YKAY COLLEGE · EXCELLENCE`
+-- [x] Icon: Graduation cap
+-- [x] Reveal: `EDUCATION EXCELLENCE`
+-- [x] Animation timing preserved
+-
+-### ✅ Hero (`components/Hero.tsx`)
+-- [x] School branding
+-- [x] Background image: education
+-- [x] Info cards: location, programmes, session
+-- [x] Two CTAs: Apply Now + Student Portal
+-
+-### ✅ ServiceInfo (`components/ServiceInfo.tsx`)
+-- [x] Title: School Hours & Location
+-- [x] Hours: Monday — Friday 7:30 AM — 2:30 PM
+-- [x] Address: Sango Ota
+-
+-### ✅ Admissions Banner (`components/AdmissionsBanner.tsx`)
+-- [x] Title: ADMISSIONS OPEN
+-- [x] Subtitle: 2025 / 2026 Session
+-- [x] Details: JSS1 — SS3 / Day School / Sango Ota
+-- [x] CTA: Apply Now → `/admissions`
+-- [x] Gradient preserved
+-
+-### ✅ About (`components/About.tsx`)
+-- [x] School mission, vision, values
+-- [x] Director quote
+-- [x] Stats cards
+-- [x] Education-appropriate images
+-- [x] Tags: NERDC, JSS, SS, Day School, Digital Learning, WAEC
+-
+-### ✅ Services (`components/Services.tsx`)
+-- [x] 5 cards: Academics, Admissions, Campus Life, Portal Access, Student Wellbeing
+-- [x] Links point to `/academics`, `/admissions`, `/campus-life`, `/portal`, `/contact`
+-- [x] Card design preserved
+-
+-### ✅ Departments (`components/Churches.tsx`)
+-- [x] 9 department/programme cards
+-- [x] Links to `/academics` or `/campus-life`
+-- [x] Grid layout preserved
+-
+-### ✅ Clubs (`components/Groups.tsx`)
+-- [x] 5 clubs: STEM, Debate, Sports, Arts, Leadership
+-- [x] Education images
+-- [x] Links to `/campus-life`
+-
+-### ✅ FindUs (`components/FindUs.tsx`)
+-- [x] School branding
+-- [x] Address: Sango Ota
+-- [x] Featured news card (not sermon)
+-- [x] Map embed preserved
+-
+-### ✅ New Pages Created
+-- [x] `/about` — School story + vision/mission + stats
+-- [x] `/academics` — Programmes + curriculum info
+-- [x] `/admissions` — Multi-step admission info + fee structure
+-- [x] `/campus-life` — Clubs, sports, facilities, photo banner
+-- [x] `/gallery` — 6-image grid
+-- [x] `/news-events` — 4 news articles
+-- [x] `/contact` — Updated info
+-- [x] `/portal` — 4 portal cards with descriptions
+-
+----
+-
+-## 21. What Was NOT Done (Per PRD Boundaries)
+-- ❌ No boarding/hostel module
+-- ❌ No transport/bus/GPS tracking
+-- ❌ No canteen module
+-- ❌ No nursery/primary modules
+-- ❌ No full general ledger accounting
+-- ❌ No WAEC/NECO official body API integration
+-- ❌ No biometric attendance hardware
+-- ❌ No barcode/QR ID printing system
+-- ❌ No iOS mobile app (Android Phase 1 only mentioned)
+-- ❌ No SSO (Google/Microsoft)
+-- ❌ No QuickBooks/Sage integration
+-- ❌ No websocket real-time notifications
+-- ❌ No full document/evidence upload for audit attachments
+-- ❌ No multi-language (English + Yoruba)
+-
+-These are explicitly out of scope per the PRD and were not added.
+-
+----
+-
+-This reference document confirms every design token, component, page, branding change, and content replacement completed for the transformation from `rccgtheenvoys.org` to `Ykay College & Leadership Academy`. The site maintains the premium dark aesthetic, motion design, responsive grid, and component architecture of the original — rebuilt entirely as an educational institution website.
+diff --git a/docs/CURRENT_IMPLEMENTATION_GAPS.md b/docs/CURRENT_IMPLEMENTATION_GAPS.md
+deleted file mode 100644
+index 5ca1366..0000000
+--- a/docs/CURRENT_IMPLEMENTATION_GAPS.md
++++ /dev/null
+@@ -1,35 +0,0 @@
+-# Current Implementation Gaps
+-
+-This document summarizes the major gaps that still exist after reviewing the current project structure and implementation state.
+-
+-## What is already implemented
+-- The project now has a working Next.js App Router application with real API routes, Prisma-backed persistence, login/session handling, role-based middleware, admissions flows, portal dashboards, and IT education content.
+-- The codebase already includes major domain modules for admissions, attendance, finance, report cards, IT education, notifications, gradebooks, exams, and audit logging.
+-
+-## What is still missing or incomplete
+-### 1. School Setup and Configuration
+-- No first-time school setup wizard for school profile, academic session, term, grading scale, and CA settings.
+-- School configuration is not yet a guided admin workflow.
+-
+-### 2. Admissions Operations
+-- The admissions flow is functional at the API level, but the full operational review workflow is still incomplete.
+-- Approval, decline, waitlist, document request, and student enrolment handoff still need stronger end-to-end implementation.
+-
+-### 3. Student, Parent, and Staff Lifecycle
+-- Student and parent onboarding is not fully implemented as a complete operational workflow.
+-- Staff invitation, account activation, and role-based provisioning need more maturity.
+-
+-### 4. Finance and Receipts
+-- Fee invoices, payment reconciliation, receipt lifecycle handling, and deeper financial reporting are not fully production-hardening complete.
+-- Financial audit depth and retention policies still need stronger implementation.
+-
+-### 5. Notifications and Communications
+-- Notification infrastructure exists, but delivery automation, retries, preference management, and real operational scheduling are still incomplete.
+-
+-### 6. CBT and Academic Delivery
+-- The CBT structure exists in the codebase, but full exam moderation, analytics, result delivery, and learner experience completion still need work.
+-
+-### 7. Production Readiness
+-- Backup/restore, archival policy, monitoring, and deployment-hardening procedures are not fully documented or implemented.
+-- Some portal modules still contain placeholder or demo-like data and should be replaced with fully live-backed records.
+-- Several user journeys still need stronger validation, error handling, and completion states before the product can be considered fully production-ready.
+diff --git a/docs/PHASE_1_ADMISSIONS_SETUP.md b/docs/PHASE_1_ADMISSIONS_SETUP.md
+deleted file mode 100644
+index 45d2832..0000000
+--- a/docs/PHASE_1_ADMISSIONS_SETUP.md
++++ /dev/null
+@@ -1,63 +0,0 @@
+-# Phase 1 — Production Admissions Setup
+-
+-This phase implements the public admissions journey: secure draft creation, private document uploads, Paystack application-fee verification, submission confirmation, and privacy-conscious status lookup.
+-
+-## Required managed services
+-
+-1. **Neon PostgreSQL** — create a database and add its pooled connection string as `DATABASE_URL` in Vercel.
+-2. **Upstash Redis** — create a Redis database and add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. Public admission endpoints intentionally return `503` in Production if rate limiting is not configured.
+-3. **Private S3-compatible object storage** — AWS S3 or Cloudflare R2. The bucket must not allow public reads or writes.
+-4. **Paystack** — add test keys to Preview/Development and live keys only to Vercel Production.
+-
+-## Private bucket configuration
+-
+-- Enable default server-side encryption.
+-- Block every public ACL and public-policy access path.
+-- Apply lifecycle expiry to abandoned draft uploads (for example, delete `admissions/` drafts after 30 days).
+-- Grant the Vercel service credentials only `s3:PutObject`, `s3:HeadObject`, and later (for admin review) `s3:GetObject` for this bucket/prefix.
+-
+-For direct browser uploads, configure CORS on the bucket. Replace the domains before applying:
+-
+-```json
+-[
+-  {
+-    "AllowedHeaders": ["content-type"],
+-    "AllowedMethods": ["PUT"],
+-    "AllowedOrigins": ["http://localhost:3000", "https://ykaycollege.edu.ng"],
+-    "ExposeHeaders": ["ETag"],
+-    "MaxAgeSeconds": 3000
+-  }
+-]
+-```
+-
+-## Database deployment
+-
+-Copy `.env.example` to `.env.local` locally and set real values. Then run:
+-
+-```powershell
+-npm install
+-npm run prisma:migrate:deploy
+-npm run build
+-```
+-
+-On Vercel, set the same environment variables and use this build command:
+-
+-```text
+-npm run prisma:migrate:deploy && npm run build
+-```
+-
+-## Paystack webhook
+-
+-In Paystack, configure this webhook URL:
+-
+-```text
+-https://ykaycollege.edu.ng/api/payments/paystack/webhook
+-```
+-
+-The webhook signature is validated with `PAYSTACK_SECRET_KEY`. Do not expose that key to the browser.
+-
+-## Safety notes
+-
+-- The old `.data` file-based admission API must be removed; serverless filesystems are not durable and cannot safely hold applicant PII.
+-- This phase never collects card details. Paystack’s hosted inline checkout handles payment data.
+-- Admission documents are uploaded only to a private bucket. They are not stored in `public/`, the repository, or browser local storage.
+diff --git a/docs/PRODUCTION_READINESS_AUDIT.md b/docs/PRODUCTION_READINESS_AUDIT.md
+deleted file mode 100644
+index b788e28..0000000
+--- a/docs/PRODUCTION_READINESS_AUDIT.md
++++ /dev/null
+@@ -1,164 +0,0 @@
+-# Ykay EduPortal — Production Readiness Audit
+-**Branch:** `phase/5b-operations` @ Phase 6E  
+-**Date:** 2026-07-23
+-
+-## 1. Executive summary
+-
+-The platform has moved from brochure + demo shells to a **real multi-portal school system** with Prisma/Neon, auth sessions, admissions, attendance, finance, CBT, IT education, notifications, and staff QR attendance.
+-
+-**Production-ready for a controlled pilot** once:
+-1. real `.env` secrets are set,
+-2. Paystack webhook + S3 + Resend/Upstash are verified,
+-3. e2e smoke passes against staging,
+-4. inject/script artifacts are cleaned from the deploy tree,
+-5. remaining mock portal pages are hidden or clearly labeled.
+-
+-Not every userflow in `userflow.md` is complete (virtual class, canteen, library, EMIS, HOD deep workflows). Those are **P2/P3**, not launch blockers for core school ops.
+-
+----
+-
+-## 2. What is DONE (shipped through Phase 6E)
+-
+-| Domain | Status | Notes |
+-|---|---|---|
+-| Public brochure site | Strong | Header, Hero, About, Academics, Admissions, Campus, Contact |
+-| Auth / sessions | Live | JWT httpOnly, bcrypt, role middleware, password reset, mustChangePassword |
+-| Admissions | Live | Draft, S3 upload, Paystack fee, status, admin review + enroll + entrance |
+-| People | Live | Staff invite/activate/direct-create; student enroll; parent link; idempotency |
+-| Attendance (students) | Live | Teacher register, history, corrections, admin analytics |
+-| Staff QR attendance | Live | Check-in/out, late tracking, badges, self-service |
+-| Finance | Live | Invoices, Paystack fee payments, bank review, cash, expenses, budgets, reminders |
+-| Academics | Live | Gradebook, locks, broadsheet, report cards + QR verify |
+-| CBT | Live | Teacher create, student attempt, fee-lock gate |
+-| Notifications | Live | Jobs, dispatch, admin console, in-app bell |
+-| Super-admin | Live | Overview, audit, user rescue |
+-| News CMS | Live | Admin CMS + public `/news-events` |
+-| IT education | Partial→stronger in Phase 7 | Hub, courses, portal, APIs; Phase 7 elevates nav + live catalog + UX |
+-| ID cards | Live | Admin generator from live students |
+-
+----
+-
+-## 3. What is STILL LEFT (prioritized)
+-
+-### P0 — Before real parents/money (this week)
+-- [ ] Configure **production** `.env` (see `.env.example` + section 6)
+-- [ ] Paystack **live** keys + webhook `POST /api/payments/paystack/webhook`
+-- [ ] Private S3/R2 bucket + CORS for admissions uploads
+-- [ ] Resend domain verified; test fee reminder + admission emails
+-- [ ] Upstash Redis for rate limits (or accept degraded limits only in non-prod)
+-- [ ] Run `npm run test:e2e` against staging base URL
+-- [ ] Remove/disable `DemoIndicator` in production (Phase 7)
+-- [ ] `git prune` / stop committing `*.ps1` injectors to deploy branch long-term
+-
+-### P1 — Pilot polish (next sprint)
+-- [ ] Replace remaining **mock teacher/student/parent pages** (timetable, messages, behavior, etc.) with live or “coming soon”
+-- [ ] Strip public `<Header/>` from portal pages still using brochure chrome
+-- [ ] School setup wizard (session/term/grading) — still missing as guided UX
+-- [ ] Stronger admissions document preview (signed GET URLs in admin review)
+-- [ ] CBT anti-cheat UX polish + analytics dashboard for teachers
+-- [ ] IT certification transcript PDF + public verify page
+-- [ ] Cron for `/api/jobs/dispatch-notifications` (Vercel cron / external)
+-
+-### P2 — Product expansion
+-- [ ] Assignments / learning hub storage
+-- [ ] Virtual classroom (Jitsi)
+-- [ ] Parent multi-child switcher UX completion
+-- [ ] HOD/Director executive dashboards beyond super-admin
+-- [ ] Promotion engine, EMIS export
+-- [ ] Canteen, library, health records, alumni ops
+-
+-### P3 — Hardening
+-- [ ] Backup/restore runbook for Neon
+-- [ ] Observability (Sentry), uptime checks
+-- [ ] Load test fee webhook + attendance peaks
+-- [ ] Accessibility pass (keyboard, contrast)
+-- [ ] Data retention / archival policy
+-
+----
+-
+-## 4. Mock / demo debt (inventory)
+-
+-Still referencing mock/demo patterns (non-exhaustive):
+-- `components/DemoIndicator.tsx` mounted in root layout
+-- Several `/teacher/*` secondary pages (performance, evaluations shell, class behavior, messages…)
+-- Some `/student/*` and `/parent/messages|events` shells
+-- Homepage still has legacy component names (`Churches`, `Groups`) from earlier brand transform — cosmetic debt
+-
+-**Core money/identity paths are NOT mock:** admissions pay, school fees, staff invite, gradebook, exams, staff QR.
+-
+----
+-
+-## 5. IT Education — strategy vs code
+-
+-Strategy wants IT as a **flagship brand pillar**. Code already has hub + 8 course pages + portal + APIs.
+-
+-Phase 7 upgrades:
+-- Top-level **IT Education** nav (not buried under Academics only)
+-- Homepage flagship IT band
+-- Live course catalog API for hub
+-- Stronger CTAs into `/it-portal/auth`
+-- E2E coverage of IT public + API routes
+-
+-Still later: full certification PDF verify, admin IT analytics, curriculum CMS.
+-
+----
+-
+-## 6. Production `.env` checklist
+-
+-Copy `.env.example` → `.env.production` / host secrets UI. Required:
+-
+-| Variable | Purpose |
+-|---|---|
+-| `DATABASE_URL` | Neon pooled URL |
+-| `AUTH_SECRET` | ≥32 chars |
+-| `NEXT_PUBLIC_SITE_URL` | Canonical https URL |
+-| `PAYSTACK_PUBLIC_KEY` / `PAYSTACK_SECRET_KEY` | Live keys when going live |
+-| `RESEND_API_KEY` / `EMAIL_FROM` | Transactional email |
+-| `S3_*` | Private admissions docs |
+-| `UPSTASH_REDIS_REST_URL` / `TOKEN` | Rate limits |
+-| `SCHOOL_*` | Profile bootstrap |
+-| `INITIAL_ADMIN_*` / `SUPER_ADMIN_*` | First operators |
+-| `SCHOOL_TIMEZONE` / `STAFF_LATE_CUTOFF` | Staff QR late rules |
+-
+-**Never commit real secrets.** Rotate any key that ever appeared in chat or git history.
+-
+----
+-
+-## 7. Deploy sequence (recommended)
+-
+-1. `npm ci`
+-2. `npx prisma migrate deploy`
+-3. `npm run db:seed-admin` / `db:seed-super-admin` / `db:seed-it-courses` (once)
+-4. `npm run build && npm start` (or host build command)
+-5. Configure Paystack webhook + cron for notification dispatch
+-6. `npm run test:e2e -- --base-url=https://staging...`
+-7. Smoke critical journeys manually (section 8)
+-8. `npm run cleanup:artifacts` on deploy clones if inject scripts were copied in
+-
+----
+-
+-## 8. Manual smoke (launch day)
+-
+-1. Public home → IT Education → course → IT portal signup  
+-2. Admissions apply → pay (test key) → admin approve/enroll  
+-3. Parent fee pay + bank transfer review  
+-4. Teacher attendance + gradebook  
+-5. Student CBT (fee lock when outstanding)  
+-6. Staff QR check-in late after cutoff  
+-7. Super-admin audit log visible  
+-
+----
+-
+-## 9. Definition of “production ready” for Ykay pilot
+-
+-- [x] `next build` green  
+-- [ ] Staging e2e smoke green  
+-- [ ] Live secrets only in host env  
+-- [ ] Webhook + email + storage verified  
+-- [ ] No DemoIndicator for real users  
+-- [ ] Operators trained on admin admissions, fees, staff QR  
+-- [ ] Rollback plan: previous deployment + `prisma migrate` status known  
+-
+----
+-
+-*This audit supersedes older “everything is mock” language in early gap docs for domains listed in section 2.*
+diff --git a/docs/USER_FLOW_GAP_AUDIT.md b/docs/USER_FLOW_GAP_AUDIT.md
+deleted file mode 100644
+index 1faf28b..0000000
+--- a/docs/USER_FLOW_GAP_AUDIT.md
++++ /dev/null
+@@ -1,78 +0,0 @@
+-# Ykay EduPortal — User-Flow Implementation Audit
+-
+-Audit basis: `userflow.md` compared with the existing Next.js source on 22 July 2026.
+-
+-## Status language
+-
+-- **Implemented UI** — a user can see and navigate the screen.
+-- **Prototype only** — interactions exist, but use mock data, browser state, alerts, or simulated payments.
+-- **Production workflow** — persisted data, authorization, validation, auditability, and external integrations exist.
+-
+-## What existed before Phase 1
+-
+-| Flow area | Existing state | Important gap |
+-|---|---|---|
+-| Public website discovery (1.1) | Implemented UI | Strong brochure pages, but no real enquiry delivery, event RSVP, virtual tour, homepage stats, or complete navigation/content architecture from the flow document. |
+-| Admissions application (1.2) | Prototype only | A six-step UI existed, but it skipped step validation, did not upload documents, used an alert in place of Paystack, generated a fake success on API failure, and wrote PII to a server-local JSON file. |
+-| Application status (1.3) | Prototype only | Lookup redirected the parent to a raw API JSON response. |
+-| First-time school setup (2.1) | Missing | No configuration wizard or persisted school/session setup. |
+-| Login, role redirect, 2FA (2.2–2.4) | Demo only | Login uses role buttons and `localStorage`; API compares plaintext passwords in a JSON file and returns a mock token. No route protection, sessions, 2FA, first-login password change, or parent child switcher. |
+-| Password reset (2.5) | Placeholder | API responses exist, but no token storage, email, reset page, password update, or session invalidation. |
+-| Admin overview (3.1) | Implemented UI / mock data | Dashboard is visually rich but not backed by school records. |
+-| Student enrolment (3.2) | Missing | No enrolment route, data workflow, or generated student/parent accounts. |
+-| Application processing (3.3) | Prototype only | `admin-admissions` is a hard-coded two-row table with no protected review or decision workflow. |
+-| Fees and financial reports (3.4–3.5) | Prototype only | Fee and parent-payment screens use hard-coded data; the Paystack modal simulates card entry and must not be used in production. |
+-| Classes, timetable, staff, promotion, EMIS (3.6–3.11) | Mostly missing | A few related screens exist, but no database workflows or required generation/reporting logic. |
+-| Teacher dashboard, attendance, gradebook, CBT, questions (4.1–4.11) | UI prototypes | Numerous screens exist, but actions are local/mock; no persistence, parent alerts, approval, anti-cheat enforcement, assignment workflow, virtual class, or learning-hub storage. |
+-| Student dashboard, exams, learning, report cards, wellbeing (5.1–5.7) | UI prototypes | Dashboard, attendance, report-card and exam interfaces exist, but no secured student identity, real exam attempts, results release, learning materials, or wellbeing workflow. |
+-| Parent dashboard, fees, attendance, messages, events (6.1–6.7) | UI prototypes | The screens use mock data and simulated payment/message actions; no child authorization, verified payments, real-time alerts, or RSVP persistence. |
+-| HOD and Director flows (7.1–8.2) | Missing | No role-specific dashboards or governed workflows. |
+-| Report-card release and QR verification (9.1) | Partial UI | Report-card display/PDF concepts exist, but no prerequisite checks, immutable release workflow, delivery jobs, or verification route. |
+-| Automated notifications (10.1–10.3) | Missing | Notification UI exists; no scheduler, provider adapter, delivery log, preferences, or retry behaviour. |
+-| Administration, health, library, alumni (11–13) | Missing / brochure only | Alumni public page exists; operational systems do not. |
+-
+-## Phase 1 — Admissions conversion journey (implemented in this phase)
+-
+-This phase replaces the unsafe admissions prototype with a production-grade foundation:
+-
+-- Validated six-step application UX matching Flow 1.2.
+-- Private S3-compatible document uploads using short-lived presigned URLs; documents never enter `public/`, Git, or browser storage.
+-- Neon/PostgreSQL persistence through a corrected, versioned Prisma schema and initial migration.
+-- Token-bound draft session for uploads, with a two-hour expiry.
+-- Paystack hosted checkout (no card fields in the app), server-side transaction verification, and signed webhook handling.
+-- Upstash-backed public endpoint rate limits; production requests fail closed if this protection is not configured.
+-- Privacy-conscious status lookup UI/API for Flow 1.3; it no longer exposes raw JSON or parent data.
+-- Audit records for draft creation and final submission.
+-
+-## Delivery order after Phase 1
+-
+-### Phase 2 — Secure identity and school administration foundation
+-
+-1. Replace demo/localStorage auth with password hashing, HTTP-only sessions, role guards, password-reset email, first-login password change, and account suspension.
+-2. Add school/session/term configuration and staff invitation workflows.
+-3. Build protected admin admissions queue: document viewing through temporary signed URLs, approve/decline/waitlist/document-request actions, class placement, notification records, and enrolment hand-off.
+-
+-### Phase 3 — Daily school operations
+-
+-1. Student/parent records, classes and arms, subject-teacher assignments.
+-2. Teacher attendance register, correction path, parent absence alerts, attendance dashboards.
+-3. Fee structures, invoices, verified Paystack fee payments, receipts, and bursar reports.
+-
+-### Phase 4 — Academic delivery and results
+-
+-1. Gradebook, score windows, gradebook lock, result calculations, report-card generation/release, and QR verification.
+-2. Question-bank approval, CBT exam creation/attempts/results, assignments, and learning-material uploads.
+-3. Student and parent dashboards backed by authorized records.
+-
+-### Phase 5 — Communication, governance, and advanced workflows
+-
+-1. Broadcast delivery service, notification preferences, scheduled reminders, delivery/retry logs.
+-2. HOD, coordinator, director, and executive analytics.
+-3. Timetable generation, promotion engine, EMIS exports, health records, inventory/library, canteen, and alumni workflows.
+-
+-## Non-negotiable production rules
+-
+-- Remove the previous `.data` JSON API, demo sign-in, and simulated Paystack card modal before public launch.
+-- Never put applicant documents in Vercel Blob/public storage. Use a private S3-compatible bucket.
+-- Do not expose `PAYSTACK_SECRET_KEY`, database URLs, S3 credentials, or Upstash tokens to the browser.
+-- Deploy Prisma migrations before the application build, configure the Paystack webhook, and test with Paystack test keys before moving live.
+diff --git a/docs/milestone-based-execution-plan.md b/docs/milestone-based-execution-plan.md
+deleted file mode 100644
+index 166615b..0000000
+--- a/docs/milestone-based-execution-plan.md
++++ /dev/null
+@@ -1,146 +0,0 @@
+-# Milestone-Based Execution Plan
+-
+-## 1. Objective
+-
+-This document breaks the implementation roadmap into practical milestones so the team can build the Ykay College EduPortal in manageable phases with clear delivery points.
+-
+----
+-
+-## 2. Milestone Structure (Updated 2026-07-23)
+-
+-## Milestone 1 — Foundation and Product Alignment
+-
+-### Status
+-- Mostly complete for the public-facing product experience.
+-- The site now has a strong visual foundation, public pages, portal shells, and supporting docs.
+-
+-### Remaining work
+-- Tighten the content architecture and ensure every page reflects the current product direction.
+-
+----
+-
+-## Milestone 2 — Secure Authentication Layer
+-
+-### Status
+-- Implemented at a functional level.
+-- Login, session cookies, middleware-based route protection, logout, and password reset APIs are present.
+-
+-### Remaining work
+-- Add stronger account lifecycle controls, first-login password change enforcement, invitation-driven onboarding, and tighter permission audits.
+-
+----
+-
+-## Milestone 3 — Admissions System MVP
+-
+-### Status
+-- Substantially implemented.
+-- The project now has a database-backed admissions workflow with draft sessions, document upload support, Paystack payment handling, status lookup, and submission audit logs.
+-
+-### Remaining work
+-- Complete the full admissions operations workflow for review, approval, waitlist, document requests, and student record handoff.
+-
+----
+-
+-## Milestone 4 — Student and Parent Records
+-
+-### Status
+-- Partially implemented.
+-- Student, parent, and teacher dashboards and related APIs exist, but some record management and enrollment handoff flows are still incomplete.
+-
+-### Remaining work
+-- Build the full student and parent lifecycle, including enrollment onboarding, account linking, record maintenance, and richer portal data.
+-
+----
+-
+-## Milestone 5 — Core School Operations
+-
+-### Status
+-- Partially implemented.
+-- Attendance, finance, report-card, gradebook, and school admin APIs exist, but the end-to-end production workflow is still being completed.
+-
+-### Remaining work
+-- Finalize class management, attendance operations, fee invoicing/payment reconciliation, and reporting workflows.
+-
+----
+-
+-## Milestone 6 — Teacher and Academic Workflow Support
+-
+-### Status
+-- Partially implemented.
+-- Teacher dashboards, class attendance, exams, gradebooks, and question-bank areas are present.
+-
+-### Remaining work
+-- Complete teacher assignment workflow, classroom communications, exam moderation, and result-release operations.
+-
+----
+-
+-## Milestone 7 — Production Hardening
+-
+-### Status
+-- Not yet complete.
+-- The codebase now has a strong foundation, but deployment hardening, monitoring, retention policies, and disaster recovery still need formal implementation.
+-
+-### Remaining work
+-- Add monitoring, backups, restore procedures, audit retention, performance checks, and production environment validation.
+-
+----
+-
+-## 3. Delivery Rhythm
+-
+-Each milestone should follow this simple rhythm:
+-1. Define the scope clearly.
+-2. Build the core flow end to end.
+-3. Test the experience with realistic data.
+-4. Fix gaps and edge cases.
+-5. Move to the next milestone.
+-
+----
+-
+-## 4. Recommended Execution Order
+-
+-1. Authentication
+-2. Admissions
+-3. Student and parent records
+-4. Admin operations
+-5. Teacher workflows
+-6. Hardening and launch
+-
+----
+-
+-## 5. Team Focus by Milestone
+-
+-### Product / Design
+-- Validate user journeys
+-- Refine content and screens
+-- Ensure usability
+-
+-### Frontend
+-- Implement and refine UI flows
+-- Connect screens to real data
+-- Improve responsiveness and interaction quality
+-
+-### Backend
+-- Build APIs and database logic
+-- Implement role-based access
+-- Support persistence and business rules
+-
+-### QA / Validation
+-- Test each milestone end to end
+-- Check edge cases and data integrity
+-- Confirm the experience works beyond mock UI
+-
+----
+-
+-## 6. Definition of Done
+-
+-A milestone is complete when:
+-- the flow works end to end,
+-- the feature is connected to real data or real actions,
+-- permissions and validation are handled,
+-- and the experience is stable enough to be demonstrated or used by a real user.
+-
+----
+-
+-## 7. Final Note
+-
+-The project should not try to complete every feature at once. The best path is to ship the most valuable journeys first: public website, admissions, authentication, and core portal access. Once that foundation works, the rest of the school platform can expand around it.
+diff --git a/docs/prioritized-implementation-backlog.md b/docs/prioritized-implementation-backlog.md
+deleted file mode 100644
+index 5785c55..0000000
+--- a/docs/prioritized-implementation-backlog.md
++++ /dev/null
+@@ -1,135 +0,0 @@
+-# Prioritized Implementation Backlog
+-
+-This backlog converts the current project gaps into a practical delivery plan for the next implementation cycle. It is organized by priority, with separate workstreams for backend, frontend, and QA.
+-
+-## Priority Legend
+-- P0: Must ship first for a usable and secure MVP
+-- P1: High-value operational features
+-- P2: Important product expansion and reliability work
+-- P3: Hardening, scale, and long-term readiness
+-
+----
+-
+-## P0 — Secure Foundation and Admissions Readiness
+-
+-### Objective
+-Stabilize the platform around authentication, admissions, and safe production behavior.
+-
+-### Backend Tasks
+-- Implement or finalize a first-time school setup API and database-backed configuration flow.
+-- Harden authentication lifecycle: account activation, password-change enforcement, role assignment, and suspension handling.
+-- Complete admissions review APIs: approve, decline, waitlist, document-request, and enrolment handoff.
+-- Ensure audit logging is written for login, admissions review, role changes, and sensitive operations.
+-- Validate and harden input schemas, server-side validation, and permission checks for all protected routes.
+-- Confirm environment validation for database, auth, Paystack, storage, and notification services.
+-
+-### Frontend Tasks
+-- Build the admin-facing school setup wizard and configuration screens.
+-- Finalize the login and password-reset experience with strong error and loading states.
+-- Deliver the admissions review UI for admin operations and application status feedback for parents.
+-- Improve portal navigation and permission-aware routing so users only see what they are allowed to access.
+-- Replace remaining placeholder or demo-like screens with live data states and clear empty states.
+-
+-### QA Tasks
+-- Test authentication flows end to end: login, logout, access denial, role redirects, password reset, and session expiry.
+-- Test admissions lifecycle end to end: draft creation, document upload, payment flow, submission, admin review, and status updates.
+-- Perform security checks for route protection, role escalation, and unauthorized access.
+-- Verify form validation, error handling, and consistent API response behavior.
+-
+----
+-
+-## P1 — Student, Parent, and Staff Operations
+-
+-### Objective
+-Turn the portal into a usable school operations system for core user groups.
+-
+-### Backend Tasks
+-- Build full student profile and enrollment workflows with parent linkage and account creation.
+-- Add staff onboarding and role provisioning flows for admin, teacher, bursar, and coordinator accounts.
+-- Implement class and subject management APIs with teacher assignment support.
+-- Expand attendance APIs to support complete session recording, correction workflows, and parent-alert generation.
+-- Create fee invoice and payment reconciliation workflows with stronger financial state handling.
+-- Add report-card generation and release workflows tied to gradebook and attendance data.
+-
+-### Frontend Tasks
+-- Build student and parent profile and enrollment management screens.
+-- Create staff management screens and assignment views for admins and coordinators.
+-- Deliver attendance and class-management interfaces for teachers and admins.
+-- Implement fee overview and payment history screens for parents and bursars.
+-- Improve report-card and dashboard views so they are backed by live data rather than static or placeholder content.
+-
+-### QA Tasks
+-- Validate student and parent record creation, editing, and linkage.
+-- Test attendance entry, correction requests, and alert delivery scenarios.
+-- Test fee invoice generation, payment status updates, and receipt visibility.
+-- Verify the correct display of academic and finance data for student, parent, and admin roles.
+-
+----
+-
+-## P2 — Academic Delivery and Communication
+-
+-### Objective
+-Make the platform useful for everyday teaching, learning, and school communication.
+-
+-### Backend Tasks
+-- Complete gradebook entry, submission, and locking workflows.
+-- Implement exam creation, question management, attempt handling, and result calculations.
+-- Add notification dispatch services for attendance, fees, exams, and admissions updates.
+-- Build job-based or scheduled notification delivery with status tracking and retries.
+-- Create a retention-aware record model for academic and financial history.
+-
+-### Frontend Tasks
+-- Build or refine teacher gradebook and exam management screens.
+-- Implement student exam-taking and result-review experiences.
+-- Add student and parent notification centers with real message states.
+-- Improve IT portal personalization so students can see courses, progress, and certification-related information.
+-
+-### QA Tasks
+-- Test full gradebook and exam workflows from draft to published to results release.
+-- Validate notification creation, delivery, and status updates.
+-- Verify accessibility, responsive behavior, and empty/error states for academic modules.
+-- Test cross-role access to exams, grades, and results.
+-
+----
+-
+-## P3 — Reliability, Scale, and Production Hardening
+-
+-### Objective
+-Prepare the system for real deployment, long-term records, and stable operations.
+-
+-### Backend Tasks
+-- Implement backup and restore procedures and document disaster-recovery expectations.
+-- Add archival and retention policies for historical student records, payments, and report cards.
+-- Introduce monitoring, logging, and alerting for critical failures and suspicious activity.
+-- Complete performance tuning for heavy queries and high-traffic routes.
+-- Review and harden third-party integrations for storage, email, SMS, and payments.
+-
+-### Frontend Tasks
+-- Optimize loading performance and reduce fragile UI states.
+-- Improve accessibility, keyboard navigation, and screen-reader support.
+-- Add stronger offline/error handling and resilience for slower networks.
+-- Polish the CBT and IT education experience for a more complete end-user journey.
+-
+-### QA Tasks
+-- Run regression suites for major user journeys after each release.
+-- Perform load, resilience, and recovery testing where possible.
+-- Validate backup/restore readiness and audit trail completeness.
+-- Review accessibility and performance against agreed acceptance criteria.
+-
+----
+-
+-## Suggested Sprint Order
+-
+-1. P0: auth, setup, and admissions completion
+-2. P1: student/parent/staff operations
+-3. P2: academic delivery and notifications
+-4. P3: production hardening and long-term readiness
+-
+----
+-
+-## Definition of Done for Each Priority
+-Each backlog item should only be considered complete when:
+-- the backend flow works end to end with real data and validation,
+-- the relevant frontend screens are connected to live data and handle success/error states,
+-- QA has tested the flow and confirmed core acceptance criteria,
+-- and the feature is documented for future maintenance.
+diff --git a/docs/product-ready-implementation-roadmap.md b/docs/product-ready-implementation-roadmap.md
+deleted file mode 100644
+index f29db73..0000000
+--- a/docs/product-ready-implementation-roadmap.md
++++ /dev/null
+@@ -1,203 +0,0 @@
+-# Product-Ready Implementation Roadmap
+-
+-## 1. Objective
+-
+-This roadmap translates the current frontend and backend progress into a realistic product plan for turning the Ykay College EduPortal into a fully usable, production-ready school platform.
+-
+-The focus is not just to complete screens, but to deliver a reliable end-to-end experience for:
+-- public visitors,
+-- prospective parents,
+-- admin users,
+-- teachers,
+-- students,
+-- and parents.
+-
+----
+-
+-## 2. Product Vision
+-
+-The long-term product should be a fully functional school ecosystem with:
+-- a polished public website,
+-- a working admissions flow,
+-- secure role-based portal access,
+-- student and parent-facing school services,
+-- admin and staff management tools,
+-- and a strong digital experience for academic operations.
+-
+-The current build is a strong demo foundation, but it needs backend integration, real workflows, and release readiness before it can be called product-ready.
+-
+----
+-
+-## 3. Delivery Principles
+-
+-The implementation should follow these principles:
+-- Build the most important user journeys first.
+-- Prefer real data over mock data as early as possible.
+-- Secure every authenticated flow from the start.
+-- Keep the public-facing experience polished while the internal systems are being completed.
+-- Treat the portal as a real operational platform, not just a showcase UI.
+-
+----
+-
+-## 4. Roadmap Phases
+-
+-## Phase 1 — Stabilize the Current Product Foundation
+-
+-### Goal
+-Make the existing experience consistent, reliable, and presentation-ready.
+-
+-### Deliverables
+-- Finalize the public pages and navigation experience.
+-- Standardize the layout and design system across the site.
+-- Ensure all primary routes render properly.
+-- Improve content quality for about, admissions, campus life, and contact pages.
+-- Fix broken or incomplete UI elements.
+-
+-### Outcome
+-A polished and dependable front-facing experience that can be demonstrated confidently.
+-
+----
+-
+-## Phase 2 — Implement Real Authentication and Authorization
+-
+-### Goal
+-Replace demo login behavior with a secure and role-based authentication system.
+-
+-### Deliverables
+-- Implement real sign-in flow for admin, teacher, student, and parent accounts.
+-- Add password hashing and secure session handling.
+-- Introduce role-based access control.
+-- Protect routes based on user role and permissions.
+-- Create a proper logout and session expiry flow.
+-
+-### Outcome
+-Users can safely access the right portal based on their real identity and permissions.
+-
+----
+-
+-## Phase 3 — Connect the Admissions Flow End to End
+-
+-### Goal
+-Turn the admissions experience into a real operational flow.
+-
+-### Deliverables
+-- Connect the admissions form to a real database-backed service.
+-- Store applications with complete status tracking.
+-- Add admin review and decision-making workflow.
+-- Send notifications to parents on application submission and status changes.
+-- Support payment confirmation and application status updates.
+-
+-### Outcome
+-The admissions system becomes a real product feature rather than a mock form experience.
+-
+----
+-
+-## Phase 4 — Build the Core School Operations Modules
+-
+-### Goal
+-Deliver the minimum set of school-management features needed for everyday use.
+-
+-### Deliverables
+-- Student profile and enrollment management.
+-- Staff management and role assignment.
+-- Class and subject management.
+-- Attendance management.
+-- Fee invoice and payment tracking.
+-- Basic parent communication tools.
+-
+-### Outcome
+-The platform becomes useful for the core school administration workflow.
+-
+----
+-
+-## Phase 5 — Deliver the Essential Portal Experiences
+-
+-### Goal
+-Make the portal experience truly functional for each role.
+-
+-### Deliverables
+-- Admin dashboard with real metrics and actions.
+-- Teacher dashboard with class and assessment support.
+-- Student dashboard with academic and attendance access.
+-- Parent dashboard with child performance, fees, and announcements.
+-- Notifications and message center.
+-
+-### Outcome
+-Each portal becomes a working experience for its target user.
+-
+----
+-
+-## Phase 6 — Hardening, Security, and Launch Readiness
+-
+-### Goal
+-Prepare the platform for real deployment and daily use.
+-
+-### Deliverables
+-- Error handling and validation across all forms.
+-- Audit logging and activity tracking.
+-- Analytics and reporting basics.
+-- Performance optimization and image/media optimization.
+-- Mobile responsiveness and accessibility improvements.
+-- Production deployment configuration.
+-
+-### Outcome
+-The system becomes stable, secure, and ready for real school operations.
+-
+----
+-
+-## 5. Priority Order
+-
+-### Highest Priority
+-1. Authentication and access control
+-2. Admissions flow completion
+-3. Student and parent data handling
+-4. Admin workflow foundation
+-
+-### Medium Priority
+-5. Teacher workflow tools
+-6. Fee and payment management
+-7. Notifications and announcements
+-
+-### Lower Priority
+-8. Advanced reporting
+-9. Extra portal modules
+-10. Advanced analytics and integrations
+-
+----
+-
+-## 6. Recommended Release Strategy
+-
+-### Release 1 — Demo-Ready Public Platform
+-- Public website
+-- Admissions form UI
+-- Portal entry experience
+-- Basic demo dashboards
+-
+-### Release 2 — Operational MVP
+-- Real authentication
+-- Real student and parent records
+-- Admin workflow for admissions and enrollment
+-- Fee tracking basics
+-
+-### Release 3 — Full School Platform
+-- Full teacher, student, and parent portal experience
+-- Messaging and communications
+-- Advanced reporting and operations tools
+-
+----
+-
+-## 7. Success Criteria
+-
+-The product can be considered ready when:
+-- users can securely log in to the correct portal,
+-- admissions can be submitted and reviewed end to end,
+-- records can be stored and retrieved reliably,
+-- admins can manage core school operations,
+-- parents and students can access relevant information,
+-- and the platform works without relying heavily on mock data.
+-
+----
+-
+-## 8. Final Note
+-
+-The current build is already strong as a design and demo foundation. The roadmap should now focus on moving from visual proof of concept to full product execution through backend integration, secure access, and real operational workflows.

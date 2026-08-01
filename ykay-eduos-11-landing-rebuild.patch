@@ -1,0 +1,855 @@
+diff --git a/components/EduOsLanding.tsx b/components/EduOsLanding.tsx
+index 05f56cb..af565c3 100644
+--- a/components/EduOsLanding.tsx
++++ b/components/EduOsLanding.tsx
+@@ -8,185 +8,168 @@ import {
+   Bell,
+   ArrowRight,
+   Check,
+-  Building2,
+-  Zap,
++  MapPin,
++  Mail,
++  Phone,
++  ChevronRight,
++  Sparkles,
++  Target,
++  Eye,
++  AlertCircle,
++  Lightbulb,
++  Users,
+   Shield,
+-  Smartphone,
+-  Globe,
+-  ChevronDown,
++  Zap,
+ } from "lucide-react";
+ 
+-const STATS = [
+-  { value: "200+", label: "Schools" },
+-  { value: "50K+", label: "Students" },
+-  { value: "99.9%", label: "Uptime" },
+-  { value: "₦0", label: "Setup Cost" },
+-];
+-
+-const FEATURES = [
++/* ── DUMMY DATA ── */
++const SERVICES = [
+   {
+     icon: GraduationCap,
+     title: "Admissions",
+-    desc: "Online applications, document uploads, entrance screening, and one-click enrolment — fully paperless.",
++    desc: "Online applications, document uploads, entrance exams, and one-click enrolment.",
++    img: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=600&q=80",
+   },
+   {
+     icon: CreditCard,
+     title: "Fees & Payments",
+-    desc: "Invoices, Paystack integration, automatic receipts, and real-time parent payment tracking.",
++    desc: "Invoices, Paystack payments, receipts, and real-time parent tracking.",
++    img: "https://images.unsplash.com/photo-1565514020179-026b92b84bb6?auto=format&fit=crop&w=600&q=80",
+   },
+   {
+     icon: ClipboardCheck,
+     title: "Exams & CBT",
+-    desc: "Computer-based tests with auto-grading, question banks, and bulk upload from Word or Excel.",
++    desc: "Computer-based tests, auto-grading, question banks, bulk upload from Word/Excel.",
++    img: "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?auto=format&fit=crop&w=600&q=80",
+   },
+   {
+     icon: CalendarCheck,
+     title: "Attendance",
+-    desc: "Daily registers, QR staff check-in/out, instant parent alerts, and term analytics.",
++    desc: "Daily registers, QR staff check-in, parent alerts, term analytics.",
++    img: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=600&q=80",
+   },
+   {
+     icon: BookOpen,
+     title: "Gradebook & Reports",
+-    desc: "CA scores, printable report cards, broadsheet ranking, and class performance analytics.",
++    desc: "CA scores, printable report cards, broadsheet ranking, performance analytics.",
++    img: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80",
+   },
+   {
+     icon: Bell,
+     title: "Communications",
+-    desc: "SMS, email, and in-app notifications with automated reminders for fees and events.",
++    desc: "SMS, email, in-app notifications, automated fee and event reminders.",
++    img: "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&w=600&q=80",
+   },
+ ];
+ 
+-const STEPS = [
++const SCHOOLS = [
+   {
+-    num: "01",
+-    title: "Create Your School",
+-    desc: "Sign up in 2 minutes. Enter your school name, pick your colours, and your portal is ready.",
++    name: "Ykay College",
++    location: "Sango Ota, Ogun",
++    img: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=400&q=80",
+   },
+   {
+-    num: "02",
+-    title: "Add Students & Staff",
+-    desc: "Import via Excel or add manually. Set up classes, assign teachers, and invite parents.",
++    name: "Greenfield Academy",
++    location: "Lekki, Lagos",
++    img: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=400&q=80",
+   },
+   {
+-    num: "03",
+-    title: "Go Live",
+-    desc: "Share your portal link with parents and staff. Everything works from day one — no installation needed.",
+-  },
+-];
+-
+-const TIERS = [
+-  {
+-    name: "Free",
+-    price: "₦0",
+-    period: "/term",
+-    students: "Up to 100 students",
+-    features: ["Admissions", "Attendance", "Fees", "Gradebook", "Report Cards", "News & Notices"],
+-    cta: "Start Free",
++    name: "Faith Heights School",
++    location: "Ikeja, Lagos",
++    img: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=400&q=80",
+   },
+   {
+-    name: "Basic",
+-    price: "₦15,000",
+-    period: "/term",
+-    students: "Up to 500 students",
+-    features: [
+-      "Everything in Free",
+-      "CBT Exams",
+-      "Staff QR Attendance",
+-      "Expenses & Budgets",
+-      "Email Notifications",
+-    ],
+-    cta: "Choose Basic",
++    name: "Crestwood College",
++    location: "Abuja, FCT",
++    img: "https://images.unsplash.com/photo-1607237138185-eedd9c632b0b?auto=format&fit=crop&w=400&q=80",
+   },
+   {
+-    name: "Premium",
+-    price: "₦35,000",
+-    period: "/term",
+-    students: "Up to 2,000 students",
+-    features: [
+-      "Everything in Basic",
+-      "IT Education Module",
+-      "Advanced Analytics",
+-      "Priority Support",
+-      "Custom Branding",
+-    ],
+-    cta: "Choose Premium",
+-    highlight: true,
++    name: "Royal Crown School",
++    location: "Port Harcourt",
++    img: "https://images.unsplash.com/photo-1497486751825-1233686d5d80?auto=format&fit=crop&w=400&q=80",
+   },
+   {
+-    name: "Enterprise",
+-    price: "Custom",
+-    period: "",
+-    students: "Unlimited students",
+-    features: [
+-      "Everything in Premium",
+-      "Custom Domain",
+-      "Dedicated Manager",
+-      "SLA & Training",
+-      "API Access",
+-    ],
+-    cta: "Contact Sales",
++    name: "Bright Future Academy",
++    location: "Ibadan, Oyo",
++    img: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=400&q=80",
+   },
+ ];
+ 
+-const FAQS = [
+-  {
+-    q: "Do I need to install anything?",
+-    a: "No. EDUos runs entirely in the cloud. Your school gets a web link that works on any device — phone, tablet, or computer.",
+-  },
++const PILLARS = [
+   {
+-    q: "Can parents pay fees online?",
+-    a: "Yes. EDUos integrates with Paystack for secure online fee payments. Parents pay with cards, bank transfer, or USSD.",
++    icon: Eye,
++    title: "Our Vision",
++    desc: "Every African school — regardless of size or budget — running on a world-class digital platform that empowers administrators, teachers, parents, and students to achieve more.",
++    img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80",
+   },
+   {
+-    q: "Does it work without internet?",
+-    a: "The core portal requires internet. A full offline mode (70-80% of features) is on our roadmap and will work even when connectivity drops.",
++    icon: Target,
++    title: "Our Mission",
++    desc: "To eliminate paperwork, spreadsheets, and WhatsApp chaos from school management. One platform, every feature, every device — accessible to every school.",
++    img: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
+   },
+   {
+-    q: "Is there a mobile app?",
+-    a: "The portal is fully responsive and works beautifully on phones. A dedicated mobile app for Android and iOS is coming soon.",
++    icon: AlertCircle,
++    title: "The Problem",
++    desc: "Schools drown in manual processes — paper registers, hand-written receipts, exam scripts, WhatsApp groups for parent communication, and Excel sheets that crash. Information is scattered, errors are common, and parents are left in the dark.",
++    img: "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=800&q=80",
+   },
+   {
+-    q: "Can I customise it for my school?",
+-    a: "Absolutely. Every school gets their own branded portal — your logo, your colours, your domain. No two schools look the same.",
+-  },
+-  {
+-    q: "What if I need help?",
+-    a: "Premium and Enterprise plans include priority support. Free and Basic plans have email support and a comprehensive help centre.",
++    icon: Lightbulb,
++    title: "The Solution",
++    desc: "EDUos brings everything into one cloud platform — admissions, fees, exams, attendance, gradebook, and communications — branded for each school, accessible from any device, with zero installation.",
++    img: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80",
+   },
+ ];
+ 
++const STATS = [
++  { value: "200+", label: "Schools" },
++  { value: "50K+", label: "Students Managed" },
++  { value: "₦2B+", label: "Fees Processed" },
++  { value: "99.9%", label: "Uptime" },
++];
++
+ export default function EduOsLanding() {
+   return (
+     <div className="min-h-screen bg-[#00072D] text-white">
+-      {/* ── Nav ── */}
+-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-[#00072D]/80 border-b border-white/5">
++      {/* ── MARQUEE ── */}
++      <div className="overflow-hidden border-b border-white/5 py-3 bg-[#051650]">
++        <div className="flex gap-8 animate-[marquee_30s_linear_infinite] whitespace-nowrap">
++          {Array(8)
++            .fill("EDUos · THE OPERATING SYSTEM FOR SCHOOLS ·")
++            .map((t, i) => (
++              <span key={i} className="text-sm font-bold tracking-widest text-[#123499]">
++                {t}
++              </span>
++            ))}
++        </div>
++      </div>
++      <style>{`@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
++
++      {/* ── NAV ── */}
++      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-[#00072D]/80 border-b border-white/5">
+         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+-          <div className="flex items-center gap-2">
+-            <img src="/eduos-logo.jpg" alt="EDUos" className="w-9 h-9 rounded-xl" />
+-              <img src="/eduos-logo.jpg" alt="EDUos" className="w-7 h-7 rounded-lg object-cover" />
+-            </div>
++          <Link href="/" className="flex items-center gap-2">
++            <img src="/eduos-logo.jpg" alt="EDUos" className="w-8 h-8 rounded-lg object-cover" />
+             <span className="font-bold text-lg tracking-wider">
+               EDU<span className="text-[#123499]">os</span>
+             </span>
+-          </div>
+-          <div className="flex items-center gap-3 md:gap-6">
++          </Link>
++          <div className="hidden md:flex items-center gap-6">
+             <a
+-              href="#features"
+-              className="hidden md:block text-white/50 text-sm hover:text-white transition-colors"
++              href="#services"
++              className="text-white/50 text-sm hover:text-white transition-colors"
+             >
+-              Features
++              Services
+             </a>
+-            <a
+-              href="#pricing"
+-              className="hidden md:block text-white/50 text-sm hover:text-white transition-colors"
+-            >
+-              Pricing
++            <a href="#schools" className="text-white/50 text-sm hover:text-white transition-colors">
++              Schools
+             </a>
+-            <a
+-              href="#faq"
+-              className="hidden md:block text-white/50 text-sm hover:text-white transition-colors"
+-            >
+-              FAQ
++            <a href="#pillars" className="text-white/50 text-sm hover:text-white transition-colors">
++              About
++            </a>
++            <a href="#contact" className="text-white/50 text-sm hover:text-white transition-colors">
++              Contact
+             </a>
+             <Link href="/login" className="text-white/60 text-sm hover:text-white">
+               Sign In
+@@ -201,25 +184,27 @@ export default function EduOsLanding() {
+         </div>
+       </nav>
+ 
+-      {/* ── Hero ── */}
+-      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+-        <div className="absolute inset-0 bg-gradient-to-br from-[#00072D] via-[#051650] to-[#00072D]" />
+-        <div className="absolute top-20 right-10 w-96 h-96 bg-[#123499]/10 rounded-full blur-[120px]" />
+-        <div className="absolute bottom-0 left-10 w-72 h-72 bg-[#2840E8]/5 rounded-full blur-[100px]" />
+-        <div className="relative max-w-5xl mx-auto text-center">
++      {/* ── HERO ── */}
++      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
++        <div className="absolute inset-0 bg-gradient-to-br from-[#00072D] via-[#051650] to-[#0A2472]" />
++        <img
++          src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1920&q=80"
++          alt=""
++          className="absolute inset-0 w-full h-full object-cover opacity-20"
++        />
++        <div className="absolute inset-0 bg-gradient-to-t from-[#00072D] via-transparent to-[#00072D]/60" />
++        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#2840E8]/8 rounded-full blur-[150px]" />
++        <div className="relative z-10 text-center px-6 max-w-4xl">
+           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8">
+-            <Zap size={14} className="text-[#123499]" />
++            <Sparkles size={14} className="text-[#2840E8]" />
+             <span className="text-xs text-white/60">
+               Set up your school in under 2 minutes — free
+             </span>
+           </div>
+-          <h1 className="font-bold text-4xl md:text-7xl tracking-tight leading-tight mb-6">
++          <h1 className="font-bold text-4xl md:text-7xl tracking-tight leading-[1.1] mb-6">
+             The Operating System
+             <br />
+-            for{" "}
+-            <span className="bg-gradient-to-r from-[#123499] to-[#0A2472] bg-clip-text text-transparent">
+-              African Schools
+-            </span>
++            for <span className="text-[#2840E8]">African Schools</span>
+           </h1>
+           <p className="text-white/40 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+             Admissions, fees, exams, attendance, gradebook, and parent communications — all in one
+@@ -228,81 +213,214 @@ export default function EduOsLanding() {
+           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+             <Link
+               href="/signup"
+-              className="group bg-[#123499] text-white px-8 py-4 rounded-2xl font-bold text-base hover:bg-[#2840E8] transition-all flex items-center gap-2 shadow-lg shadow-[#123499]/20"
++              className="group bg-[#123499] text-white px-8 py-4 rounded-2xl font-bold hover:bg-[#2840E8] transition-all shadow-lg shadow-[#123499]/30 flex items-center gap-2"
+             >
+               Start Your School Free{" "}
+               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+             </Link>
+-            <a
+-              href="#features"
+-              className="text-white/50 hover:text-white text-sm font-medium flex items-center gap-1"
+-            >
+-              See how it works <ChevronDown size={14} />
++            <a href="#services" className="text-white/50 hover:text-white text-sm font-medium">
++              See what's included →
+             </a>
+           </div>
+-          {/* Stats */}
+-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20">
+-            {STATS.map((s) => (
+-              <div key={s.label} className="text-center">
+-                <div className="font-bold text-3xl md:text-4xl text-white mb-1">{s.value}</div>
+-                <div className="text-xs text-white/30 uppercase tracking-widest">{s.label}</div>
++        </div>
++      </section>
++
++      {/* ── STATS BAR ── */}
++      <section className="border-y border-white/5 bg-[#051650]">
++        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 px-6 py-12">
++          {STATS.map((s) => (
++            <div key={s.label} className="text-center">
++              <div className="font-bold text-3xl md:text-5xl text-white mb-1">{s.value}</div>
++              <div className="text-xs text-white/30 uppercase tracking-widest">{s.label}</div>
++            </div>
++          ))}
++        </div>
++      </section>
++
++      {/* ── ABOUT ── */}
++      <section className="py-24 px-6">
++        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
++          <div>
++            <div className="text-xs font-bold uppercase tracking-widest text-[#123499] mb-4">
++              About EDUos
++            </div>
++            <h2 className="font-bold text-3xl md:text-5xl mb-6 leading-tight">
++              One platform that runs your <span className="text-[#2840E8]">entire school</span>
++            </h2>
++            <p className="text-white/40 text-lg leading-relaxed mb-6">
++              EDUos is a cloud-based school management operating system built for African schools.
++              It replaces paper registers, manual receipts, WhatsApp groups, and Excel sheets with a
++              single, branded portal that works on any device — phone, tablet, or computer.
++            </p>
++            <p className="text-white/40 text-lg leading-relaxed mb-8">
++              From admissions to graduation, from fee collection to exam results, every process is
++              digitised, automated, and secure. No installation. No IT team. Just your school,
++              running smoothly.
++            </p>
++            <Link
++              href="/signup"
++              className="inline-flex items-center gap-2 text-[#2840E8] font-bold hover:gap-3 transition-all"
++            >
++              Get Started <ArrowRight size={16} />
++            </Link>
++          </div>
++          <div className="relative">
++            <img
++              src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80"
++              alt="Classroom"
++              className="rounded-3xl w-full h-[500px] object-cover"
++            />
++            <div className="absolute -bottom-6 -left-6 bg-[#123499] rounded-2xl p-6 max-w-[200px]">
++              <div className="text-3xl font-bold mb-1">10 min</div>
++              <div className="text-xs text-white/60">Average setup time for a new school</div>
++            </div>
++          </div>
++        </div>
++      </section>
++
++      {/* ── OUR SERVICES ── */}
++      <section id="services" className="py-24 px-6 bg-[#051650]">
++        <div className="max-w-7xl mx-auto">
++          <div className="text-center mb-16">
++            <div className="text-xs font-bold uppercase tracking-widest text-[#123499] mb-4">
++              What We Offer
++            </div>
++            <h2 className="font-bold text-3xl md:text-5xl mb-4">Our Services</h2>
++            <p className="text-white/30 max-w-xl mx-auto">
++              Everything your school needs, in one platform. No add-ons. No hidden costs.
++            </p>
++          </div>
++          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
++            {SERVICES.map((s) => (
++              <div
++                key={s.title}
++                className="group relative overflow-hidden rounded-2xl bg-[#0A2472] border border-white/5 hover:border-[#123499]/40 transition-all"
++              >
++                <div className="relative h-48 overflow-hidden">
++                  <img
++                    src={s.img}
++                    alt={s.title}
++                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
++                  />
++                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A2472] to-transparent" />
++                  <div className="absolute bottom-4 left-4 w-12 h-12 rounded-xl bg-[#123499] flex items-center justify-center">
++                    <s.icon className="text-white" size={22} />
++                  </div>
++                </div>
++                <div className="p-6">
++                  <h3 className="font-bold text-lg mb-2">{s.title}</h3>
++                  <p className="text-white/40 text-sm leading-relaxed">{s.desc}</p>
++                </div>
+               </div>
+             ))}
+           </div>
+         </div>
+       </section>
+ 
+-      {/* ── Features ── */}
+-      <section id="features" className="py-20 px-6">
++      {/* ── SCHOOLS USING EDUos ── */}
++      <section id="schools" className="py-24 px-6 overflow-hidden">
+         <div className="max-w-7xl mx-auto">
+-          <div className="text-center mb-14">
+-            <h2 className="font-bold text-2xl md:text-4xl mb-3">Everything your school needs</h2>
++          <div className="text-center mb-16">
++            <div className="text-xs font-bold uppercase tracking-widest text-[#123499] mb-4">
++              Our Community
++            </div>
++            <h2 className="font-bold text-3xl md:text-5xl mb-4">Schools Using EDUos</h2>
+             <p className="text-white/30 max-w-xl mx-auto">
+-              One platform replaces spreadsheets, paper registers, WhatsApp groups, and manual
+-              receipts.
++              Join hundreds of schools and colleges running on EDUos. Each one branded, customised,
++              and thriving.
+             </p>
+           </div>
+-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+-            {FEATURES.map((f) => (
++          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
++            {SCHOOLS.map((sch) => (
+               <div
+-                key={f.title}
+-                className="group bg-white/[0.03] border border-white/5 rounded-2xl p-6 hover:bg-white/[0.05] hover:border-[#123499]/20 transition-all"
++                key={sch.name}
++                className="group relative overflow-hidden rounded-2xl cursor-pointer"
+               >
+-                <div className="w-12 h-12 rounded-xl bg-[#123499]/10 flex items-center justify-center mb-4 group-hover:bg-[#123499]/20 transition-colors">
+-                  <f.icon className="text-[#123499]" size={22} />
++                <img
++                  src={sch.img}
++                  alt={sch.name}
++                  className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
++                />
++                <div className="absolute inset-0 bg-gradient-to-t from-[#00072D] via-[#00072D]/40 to-transparent" />
++                <div className="absolute bottom-0 left-0 right-0 p-6">
++                  <div className="text-xs text-[#123499] font-bold uppercase tracking-widest mb-1">
++                    EDUos School
++                  </div>
++                  <h3 className="font-bold text-xl mb-1">{sch.name}</h3>
++                  <p className="text-white/40 text-sm flex items-center gap-1">
++                    <MapPin size={12} /> {sch.location}
++                  </p>
+                 </div>
+-                <h3 className="font-bold text-lg mb-2">{f.title}</h3>
+-                <p className="text-white/30 text-sm leading-relaxed">{f.desc}</p>
+               </div>
+             ))}
+           </div>
+         </div>
+       </section>
+ 
+-      {/* ── How it works ── */}
+-      <section className="py-20 px-6 bg-gradient-to-b from-transparent to-white/[0.02]">
+-        <div className="max-w-5xl mx-auto">
+-          <h2 className="font-bold text-2xl md:text-4xl text-center mb-14">Live in 3 steps</h2>
+-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+-            {STEPS.map((s) => (
+-              <div key={s.num} className="text-center">
+-                <div className="font-bold text-5xl text-[#123499]/20 mb-3">{s.num}</div>
+-                <h3 className="font-bold text-lg mb-2">{s.title}</h3>
+-                <p className="text-white/30 text-sm leading-relaxed">{s.desc}</p>
++      {/* ── VISION / MISSION / PROBLEM / SOLUTION ── */}
++      <section id="pillars" className="py-24 px-6 bg-[#051650]">
++        <div className="max-w-7xl mx-auto">
++          <div className="text-center mb-16">
++            <div className="text-xs font-bold uppercase tracking-widest text-[#123499] mb-4">
++              Why EDUos Exists
++            </div>
++            <h2 className="font-bold text-3xl md:text-5xl">Our Foundation</h2>
++          </div>
++          <div className="space-y-6">
++            {PILLARS.map((p, i) => (
++              <div
++                key={p.title}
++                className={`grid grid-cols-1 md:grid-cols-2 gap-8 items-center ${i % 2 === 1 ? "md:flex-row-reverse" : ""}`}
++              >
++                {i % 2 === 0 ? (
++                  <>
++                    <div className="relative">
++                      <img
++                        src={p.img}
++                        alt={p.title}
++                        className="rounded-3xl w-full h-80 object-cover"
++                      />
++                      <div className="absolute -top-4 -left-4 w-14 h-14 rounded-2xl bg-[#123499] flex items-center justify-center">
++                        <p.icon className="text-white" size={24} />
++                      </div>
++                    </div>
++                    <div>
++                      <h3 className="font-bold text-2xl md:text-3xl mb-4">{p.title}</h3>
++                      <p className="text-white/40 text-lg leading-relaxed">{p.desc}</p>
++                    </div>
++                  </>
++                ) : (
++                  <>
++                    <div className="md:order-2 relative">
++                      <img
++                        src={p.img}
++                        alt={p.title}
++                        className="rounded-3xl w-full h-80 object-cover"
++                      />
++                      <div className="absolute -top-4 -right-4 w-14 h-14 rounded-2xl bg-[#2840E8] flex items-center justify-center">
++                        <p.icon className="text-white" size={24} />
++                      </div>
++                    </div>
++                    <div className="md:order-1">
++                      <h3 className="font-bold text-2xl md:text-3xl mb-4">{p.title}</h3>
++                      <p className="text-white/40 text-lg leading-relaxed">{p.desc}</p>
++                    </div>
++                  </>
++                )}
+               </div>
+             ))}
+           </div>
+         </div>
+       </section>
+ 
+-      {/* ── Trust badges ── */}
++      {/* ── TRUST BADGES ── */}
+       <section className="py-12 px-6 border-y border-white/5">
+         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-8 md:gap-12">
+           {[
+             { icon: Shield, label: "Bank-grade Security" },
+-            { icon: Smartphone, label: "Works on Any Device" },
+-            { icon: Globe, label: "Cloud-hosted, 99.9% Uptime" },
++            { icon: Users, label: "200+ Schools Onboarded" },
+             { icon: Zap, label: "Setup in Minutes" },
++            { icon: Check, label: "No Installation Required" },
+           ].map((b) => (
+             <div key={b.label} className="flex items-center gap-2 text-white/30 text-sm">
+               <b.icon size={16} className="text-[#123499]" /> {b.label}
+@@ -311,108 +429,183 @@ export default function EduOsLanding() {
+         </div>
+       </section>
+ 
+-      {/* ── Pricing ── */}
+-      <section id="pricing" className="py-20 px-6">
+-        <div className="max-w-7xl mx-auto">
+-          <div className="text-center mb-14">
+-            <h2 className="font-bold text-2xl md:text-4xl mb-3">Simple, transparent pricing</h2>
+-            <p className="text-white/30">Pay per term. Cancel anytime. No hidden fees.</p>
++      {/* ── CONTACT ── */}
++      <section id="contact" className="py-24 px-6">
++        <div className="max-w-4xl mx-auto text-center">
++          <div className="text-xs font-bold uppercase tracking-widest text-[#123499] mb-4">
++            Get In Touch
+           </div>
+-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+-            {TIERS.map((t) => (
+-              <div
+-                key={t.name}
+-                className={`rounded-2xl p-6 ${t.highlight ? "bg-[#123499]/5 border-2 border-[#123499]/40" : "bg-white/[0.03] border border-white/5"}`}
+-              >
+-                {t.highlight && (
+-                  <span className="text-[#123499] text-xs font-bold uppercase tracking-widest mb-2 block">
+-                    ★ Most Popular
+-                  </span>
+-                )}
+-                <h3 className="font-bold text-xl mb-1">{t.name}</h3>
+-                <p className="text-white/30 text-xs mb-4">{t.students}</p>
+-                <div className="mb-6">
+-                  <span className="font-bold text-3xl">{t.price}</span>
+-                  <span className="text-white/30 text-sm">{t.period}</span>
+-                </div>
+-                <ul className="space-y-2 mb-6">
+-                  {t.features.map((feat) => (
+-                    <li key={feat} className="flex items-center gap-2 text-white/50 text-sm">
+-                      <Check size={14} className="text-[#123499] shrink-0" /> {feat}
+-                    </li>
+-                  ))}
+-                </ul>
+-                <Link
+-                  href="/signup"
+-                  className={`block text-center py-3 rounded-xl font-bold text-sm transition-colors ${t.highlight ? "bg-[#123499] text-white hover:bg-[#2840E8]" : "bg-white/10 text-white hover:bg-white/20"}`}
+-                >
+-                  {t.cta}
+-                </Link>
+-              </div>
+-            ))}
+-          </div>
+-        </div>
+-      </section>
+-
+-      {/* ── FAQ ── */}
+-      <section id="faq" className="py-20 px-6">
+-        <div className="max-w-3xl mx-auto">
+-          <h2 className="font-bold text-2xl md:text-4xl text-center mb-12">
+-            Frequently asked questions
+-          </h2>
+-          <div className="space-y-3">
+-            {FAQS.map((item) => (
+-              <details
+-                key={item.q}
+-                className="group bg-white/[0.03] border border-white/5 rounded-xl p-5 cursor-pointer"
+-              >
+-                <summary className="font-medium text-sm flex items-center justify-between list-none">
+-                  {item.q}
+-                  <ChevronDown
+-                    size={16}
+-                    className="text-white/30 group-open:rotate-180 transition-transform"
+-                  />
+-                </summary>
+-                <p className="text-white/40 text-sm mt-3 leading-relaxed">{item.a}</p>
+-              </details>
+-            ))}
+-          </div>
+-        </div>
+-      </section>
+-
+-      {/* ── Final CTA ── */}
+-      <section className="py-20 px-6">
+-        <div className="max-w-4xl mx-auto text-center bg-gradient-to-br from-[#123499]/10 to-transparent border border-[#123499]/20 rounded-3xl p-12">
+-          <h2 className="font-bold text-2xl md:text-4xl mb-4">Ready to digitise your school?</h2>
+-          <p className="text-white/40 mb-8 max-w-xl mx-auto">
++          <h2 className="font-bold text-3xl md:text-5xl mb-6">Ready to digitise your school?</h2>
++          <p className="text-white/40 text-lg mb-12 max-w-xl mx-auto">
+             Join hundreds of schools already running on EDUos. Start free — no credit card required.
+           </p>
++          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
++            <div className="bg-[#0A2472] rounded-2xl p-6 text-center">
++              <Mail className="mx-auto mb-3 text-[#123499]" size={24} />
++              <div className="text-sm text-white/40 mb-1">Email Us</div>
++              <div className="text-white font-medium">hello@eduos.app</div>
++            </div>
++            <div className="bg-[#0A2472] rounded-2xl p-6 text-center">
++              <Phone className="mx-auto mb-3 text-[#123499]" size={24} />
++              <div className="text-sm text-white/40 mb-1">Call Us</div>
++              <div className="text-white font-medium">+234 800 EDUos</div>
++            </div>
++            <div className="bg-[#0A2472] rounded-2xl p-6 text-center">
++              <MapPin className="mx-auto mb-3 text-[#123499]" size={24} />
++              <div className="text-sm text-white/40 mb-1">Visit Us</div>
++              <div className="text-white font-medium">Lagos, Nigeria</div>
++            </div>
++          </div>
+           <Link
+             href="/signup"
+-            className="inline-flex items-center gap-2 bg-[#123499] text-white px-8 py-4 rounded-2xl font-bold hover:bg-[#2840E8] transition-all shadow-lg shadow-[#123499]/20"
++            className="inline-flex items-center gap-2 bg-[#123499] text-white px-8 py-4 rounded-2xl font-bold hover:bg-[#2840E8] transition-all shadow-lg shadow-[#123499]/30"
+           >
+             Create Your School <ArrowRight size={18} />
+           </Link>
+         </div>
+       </section>
+ 
+-      {/* ── Footer ── */}
+-      <footer className="py-10 px-6 border-t border-white/5">
+-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+-          <div className="flex items-center gap-2">
+-            <div className="w-7 h-7 rounded-lg bg-[#123499]/20 flex items-center justify-center">
+-              <img src="/eduos-logo.jpg" alt="EDUos" className="w-5 h-5 rounded object-cover" />
++      {/* ── FOOTER ── */}
++      <footer className="bg-[#00072D] border-t border-white/5">
++        <div className="max-w-7xl mx-auto px-6 py-16">
++          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
++            {/* Brand */}
++            <div className="col-span-2 md:col-span-1">
++              <Link href="/" className="flex items-center gap-2 mb-4">
++                <img src="/eduos-logo.jpg" alt="EDUos" className="w-8 h-8 rounded-lg" />
++                <span className="font-bold text-lg">
++                  EDU<span className="text-[#123499]">os</span>
++                </span>
++              </Link>
++              <p className="text-white/30 text-sm leading-relaxed max-w-xs">
++                The Education Operating System for African schools. Admissions, fees, exams,
++                attendance, and communications — all in one branded portal.
++              </p>
++            </div>
++            {/* Platform */}
++            <div>
++              <h4 className="font-bold text-sm mb-4 text-white/60">Platform</h4>
++              <ul className="space-y-3">
++                <li>
++                  <Link
++                    href="/signup"
++                    className="text-white/30 text-sm hover:text-white transition-colors"
++                  >
++                    Get Started
++                  </Link>
++                </li>
++                <li>
++                  <Link
++                    href="/login"
++                    className="text-white/30 text-sm hover:text-white transition-colors"
++                  >
++                    Sign In
++                  </Link>
++                </li>
++                <li>
++                  <a
++                    href="#services"
++                    className="text-white/30 text-sm hover:text-white transition-colors"
++                  >
++                    Features
++                  </a>
++                </li>
++                <li>
++                  <a
++                    href="#schools"
++                    className="text-white/30 text-sm hover:text-white transition-colors"
++                  >
++                    Schools
++                  </a>
++                </li>
++                <li>
++                  <a
++                    href="#pillars"
++                    className="text-white/30 text-sm hover:text-white transition-colors"
++                  >
++                    About Us
++                  </a>
++                </li>
++              </ul>
++            </div>
++            {/* Solutions */}
++            <div>
++              <h4 className="font-bold text-sm mb-4 text-white/60">Solutions</h4>
++              <ul className="space-y-3">
++                <li>
++                  <a
++                    href="#services"
++                    className="text-white/30 text-sm hover:text-white transition-colors"
++                  >
++                    Admissions
++                  </a>
++                </li>
++                <li>
++                  <a
++                    href="#services"
++                    className="text-white/30 text-sm hover:text-white transition-colors"
++                  >
++                    Fees & Payments
++                  </a>
++                </li>
++                <li>
++                  <a
++                    href="#services"
++                    className="text-white/30 text-sm hover:text-white transition-colors"
++                  >
++                    Exams & CBT
++                  </a>
++                </li>
++                <li>
++                  <a
++                    href="#services"
++                    className="text-white/30 text-sm hover:text-white transition-colors"
++                  >
++                    Attendance
++                  </a>
++                </li>
++                <li>
++                  <a
++                    href="#services"
++                    className="text-white/30 text-sm hover:text-white transition-colors"
++                  >
++                    Gradebook
++                  </a>
++                </li>
++              </ul>
++            </div>
++            {/* Contact */}
++            <div>
++              <h4 className="font-bold text-sm mb-4 text-white/60">Contact</h4>
++              <ul className="space-y-3">
++                <li className="flex items-center gap-2 text-white/30 text-sm">
++                  <Mail size={14} /> hello@eduos.app
++                </li>
++                <li className="flex items-center gap-2 text-white/30 text-sm">
++                  <Phone size={14} /> +234 800 EDUos
++                </li>
++                <li className="flex items-center gap-2 text-white/30 text-sm">
++                  <MapPin size={14} /> Lagos, Nigeria
++                </li>
++              </ul>
+             </div>
+-            <span className="font-bold text-sm text-white/60">
+-              EDU<span className="text-[#123499]">os</span>
+-            </span>
+           </div>
+-          <p className="text-white/20 text-xs">
+-            © 2026 EDUos — Education Operating System. Powered by Ykay College.
+-          </p>
+-          <div className="flex gap-4 text-xs text-white/30">
+-            <Link href="/login">Sign In</Link>
+-            <Link href="/signup">Start Free</Link>
++          {/* Bottom bar */}
++          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
++            <p className="text-white/20 text-xs">
++              © 2026 EDUos — Education Operating System. All rights reserved.
++            </p>
++            <div className="flex gap-6 text-xs text-white/20">
++              <a href="#" className="hover:text-white/40 transition-colors">
++                Privacy Policy
++              </a>
++              <a href="#" className="hover:text-white/40 transition-colors">
++                Terms of Service
++              </a>
++              <a href="#" className="hover:text-white/40 transition-colors">
++                Cookie Policy
++              </a>
++            </div>
+           </div>
+         </div>
+       </footer>

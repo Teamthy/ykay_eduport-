@@ -1,0 +1,103 @@
+diff --git a/app/api/admin/staff/invites/route.ts b/app/api/admin/staff/invites/route.ts
+index 7459821..2c4d582 100644
+--- a/app/api/admin/staff/invites/route.ts
++++ b/app/api/admin/staff/invites/route.ts
+@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
+ import { STAFF_ROLES, PEOPLE_ADMIN_ROLES, hashValue, oneTimeSecret } from "@/lib/people";
+ import { getClientIp } from "@/lib/requests";
+ import { requireRole } from "@/lib/session";
++import { sendStaffInviteEmail } from "@/lib/email";
+ const schema = z.object({
+   name: z.string().trim().min(2).max(120),
+   email: z.string().trim().toLowerCase().email(),
+@@ -75,6 +76,16 @@ export async function POST(request: NextRequest) {
+       metadata: { email: input.email, role: input.role },
+     },
+   });
++
++  // ── Send the activation email (best-effort — never block invite creation).
++  //    If Resend isn't configured, the activation token is still returned below
++  //    so the admin can share the link manually. ──
++  try {
++    await sendStaffInviteEmail({ to: input.email, name: input.name, token, email: input.email, role: input.role });
++  } catch (e) {
++    console.warn("Staff invite email could not be sent — activation token still returned to admin.", e);
++  }
++
+   return NextResponse.json(
+     {
+       invite: { id: invite.id, email: invite.email, expiresAt: invite.expiresAt },
+diff --git a/lib/email.ts b/lib/email.ts
+index 86515cb..1b8cc61 100644
+--- a/lib/email.ts
++++ b/lib/email.ts
+@@ -30,3 +30,21 @@ export async function sendAdmissionDecisionEmail(input: {
+     html: `<p>Hello,</p><p>There is an admissions update for <strong>${input.studentName}</strong>: <strong>${input.status.replaceAll("_", " ")}</strong>.</p>${input.note ? `<p>${input.note}</p>` : ""}<p>Please log in to the admissions status page or contact Ykay College for guidance.</p>`,
+   });
+ }
++
++export async function sendStaffInviteEmail(input: {
++  to: string;
++  name: string;
++  token: string;
++  email: string;
++  role: string;
++}) {
++  const base = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
++  const url = `${base}/staff/activate?token=${encodeURIComponent(input.token)}&email=${encodeURIComponent(input.email)}`;
++  const roleLabel = input.role.replaceAll("_", " ");
++  await client().emails.send({
++    from: from(),
++    to: input.to,
++    subject: `You're invited to join Ykay College EduPortal (${roleLabel})`,
++    html: `<p>Hello ${input.name},</p><p>You've been invited to join the Ykay College EduPortal as <strong>${roleLabel}</strong>.</p><p>Activate your account and set a password using the link below. The invitation expires in 7 days.</p><p><a href="${url}">Activate my account</a></p><p>If you weren't expecting this invitation, you can safely ignore this email.</p>`,
++  });
++}
+diff --git a/middleware.ts b/middleware.ts
+index 1bb5cfc..afd11fc 100644
+--- a/middleware.ts
++++ b/middleware.ts
+@@ -60,6 +60,21 @@ export async function middleware(request: NextRequest) {
+   const pathname = request.nextUrl.pathname;
+   const method = request.method;
+ 
++  // ── CORS preflight for API routes ──
++  // Native mobile ignores CORS; this serves browser cross-origin callers
++  // (e.g. a future custom-domain web app) and standards-compliant tooling.
++  if (pathname.startsWith("/api/") && method === "OPTIONS") {
++    return new NextResponse(null, {
++      status: 204,
++      headers: {
++        "Access-Control-Allow-Origin": process.env.NEXT_PUBLIC_SITE_URL || "*",
++        "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
++        "Access-Control-Allow-Headers": "Content-Type,Authorization,x-idempotency-key",
++        "Access-Control-Max-Age": "86400",
++      },
++    });
++  }
++
+   // ── Read-only super-admin impersonation ──
+   // Block every mutating API request while impersonating (except the endpoints
+   // that manage the impersonation/session themselves). This is the single,
+diff --git a/next.config.ts b/next.config.ts
+index cb6f502..d41abe5 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -37,6 +37,17 @@ const nextConfig: NextConfig = {
+           },
+         ],
+       },
++      {
++        // CORS for API — native mobile ignores this; serves browser
++        // cross-origin callers. Origin pinned to the site URL (or * in dev).
++        source: "/api/:path*",
++        headers: [
++          { key: "Access-Control-Allow-Origin", value: process.env.NEXT_PUBLIC_SITE_URL || "*" },
++          { key: "Access-Control-Allow-Methods", value: "GET,POST,PUT,PATCH,DELETE,OPTIONS" },
++          { key: "Access-Control-Allow-Headers", value: "Content-Type,Authorization,x-idempotency-key" },
++          { key: "Access-Control-Max-Age", value: "86400" },
++        ],
++      },
+     ];
+   },
+ 

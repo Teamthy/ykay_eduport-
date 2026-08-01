@@ -1,0 +1,236 @@
+diff --git a/.env.example b/.env.example
+index eb2f046..cd56ca9 100644
+--- a/.env.example
++++ b/.env.example
+@@ -15,6 +15,8 @@ SCHOOL_ADDRESS="Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State, Nigeria
+ SCHOOL_PHONE="+2347015374411"
+ SCHOOL_EMAIL="info@ykaycollege.com"
+ SCHOOL_MOTTO="Excellence in Education"
++# Set to Ykay's deployment domain so tenant resolution finds this school directly.
++SCHOOL_CUSTOM_DOMAIN=""
+ 
+ # Initial admin bootstrap
+ INITIAL_ADMIN_EMAIL="admin@ykaycollege.com"
+diff --git a/lib/billing.ts b/lib/billing.ts
+new file mode 100644
+index 0000000..b279d95
+--- /dev/null
++++ b/lib/billing.ts
+@@ -0,0 +1,81 @@
++import { PlanTier, SubscriptionStatus } from "@prisma/client";
++import { prisma } from "@/lib/prisma";
++import { MODULE_KEYS, type ModuleKey } from "@/lib/modules";
++
++/**
++ * EDUos billing / plan-gating service.
++ *
++ * Each school has a Subscription linked to a Plan. The plan determines:
++ * - studentLimit: maximum active students
++ * - features.modules: which modules are included
++ *
++ * For the default/legacy school (Ykay) with no subscription, all features are
++ * available (backward-compatible single-tenant behaviour).
++ */
++
++export async function getSubscription(schoolId: string) {
++  return prisma.subscription.findUnique({
++    where: { schoolId },
++    include: { plan: true },
++  });
++}
++
++/**
++ * The active plan for a school, or null if no subscription / canceled.
++ * Returns the FREE plan as fallback for schools without a subscription
++ * (so they default to limited features in a strict SaaS context).
++ */
++export async function getActivePlan(schoolId: string) {
++  const sub = await getSubscription(schoolId);
++  if (!sub || sub.status === SubscriptionStatus.CANCELED) {
++    // No subscription → free tier (or null for legacy single-tenant)
++    return prisma.plan.findUnique({ where: { tier: PlanTier.FREE } });
++  }
++  return sub.plan;
++}
++
++/**
++ * Check whether a school can enrol more students given its plan limit.
++ * Returns { allowed, current, limit }.
++ */
++export async function checkStudentLimit(schoolId: string) {
++  const plan = await getActivePlan(schoolId);
++  const current = await prisma.studentProfile.count({
++    where: { schoolId, isActive: true },
++  });
++  const limit = plan?.studentLimit ?? null; // null = unlimited
++  return {
++    allowed: limit === null || current < limit,
++    current,
++    limit,
++  };
++}
++
++/**
++ * Check whether a specific module is available on the school's current plan.
++ * Schools without a subscription (legacy/single-tenant) get all modules.
++ */
++export async function isModuleAvailable(schoolId: string, module: ModuleKey): Promise<boolean> {
++  const sub = await getSubscription(schoolId);
++
++  // No subscription → legacy mode → all modules available
++  if (!sub) return true;
++
++  const plan = sub.plan;
++  if (!plan?.features) return true;
++
++  const features = plan.features as Record<string, unknown>;
++  if (features.modules === "all") return true;
++  const modules = Array.isArray(features.modules) ? (features.modules as string[]) : [];
++  return modules.includes(module);
++}
++
++/**
++ * Check whether a school can use a custom domain (Enterprise only).
++ */
++export async function canUseCustomDomain(schoolId: string): Promise<boolean> {
++  const plan = await getActivePlan(schoolId);
++  if (!plan?.features) return false;
++  const features = plan.features as Record<string, unknown>;
++  return Boolean(features.customDomain);
++}
+diff --git a/lib/school.ts b/lib/school.ts
+index eb790d7..ea8aad5 100644
+--- a/lib/school.ts
++++ b/lib/school.ts
+@@ -2,12 +2,26 @@ import { prisma } from "@/lib/prisma";
+ 
+ const schoolSlug = process.env.SCHOOL_SLUG || "ykay-college";
+ 
++/**
++ * Returns (and auto-creates/updates) the default school for single-tenant
++ * deployments. For EDUos multi-tenant, each school is created via onboarding.
++ *
++ * When SCHOOL_CUSTOM_DOMAIN is set (e.g. "portal.ykaycollege.edu.ng"), the
++ * school's customDomain is kept in sync so that resolveTenantFromHost finds
++ * this school directly — even before EDUos has a platform domain.
++ */
+ export async function getSchool() {
++  const customDomain = process.env.SCHOOL_CUSTOM_DOMAIN?.trim() || undefined;
++
+   return prisma.school.upsert({
+     where: { slug: schoolSlug },
+-    update: {},
++    update: {
++      ...(customDomain ? { customDomain } : {}),
++    },
+     create: {
+       slug: schoolSlug,
++      subdomain: schoolSlug,
++      customDomain,
+       name: process.env.SCHOOL_NAME || "Ykay College & Leadership Academy",
+       address: process.env.SCHOOL_ADDRESS || "Sango Ota, Ogun State, Nigeria",
+       phone: process.env.SCHOOL_PHONE || "+2347015374411",
+diff --git a/package.json b/package.json
+index 61f45e7..ce987b6 100644
+--- a/package.json
++++ b/package.json
+@@ -16,6 +16,7 @@
+     "prisma:migrate:dev": "prisma migrate dev",
+     "prebuild": "prisma generate",
+     "db:seed": "tsx prisma/seed-all.ts",
++    "db:seed-plans": "tsx prisma/seed-plans.ts",
+     "db:seed-admin": "tsx prisma/seed.ts",
+     "db:bootstrap-attendance": "tsx prisma/seed-attendance.ts",
+     "db:bootstrap-finance": "tsx prisma/seed-finance.ts",
+diff --git a/prisma/seed-plans.ts b/prisma/seed-plans.ts
+new file mode 100644
+index 0000000..644910c
+--- /dev/null
++++ b/prisma/seed-plans.ts
+@@ -0,0 +1,86 @@
++import { PlanTier } from "@prisma/client";
++import { prisma } from "../lib/prisma";
++
++/**
++ * Seed the EDUos plan tiers. Run with: npm run db:seed-plans
++ * Idempotent (upsert by tier).
++ */
++const PLANS: {
++  tier: PlanTier;
++  name: string;
++  priceKobo: number;
++  studentLimit: number | null;
++  features: Record<string, unknown>;
++}[] = [
++  {
++    tier: PlanTier.FREE,
++    name: "Free",
++    priceKobo: 0,
++    studentLimit: 100,
++    features: {
++      modules: [
++        "admissions",
++        "attendance",
++        "fees",
++        "gradebook",
++        "report_cards",
++        "news",
++        "notifications",
++      ],
++    },
++  },
++  {
++    tier: PlanTier.BASIC,
++    name: "Basic",
++    priceKobo: 1_500_000, // ₦15,000 / term
++    studentLimit: 500,
++    features: {
++      modules: [
++        "admissions",
++        "attendance",
++        "fees",
++        "gradebook",
++        "exams",
++        "report_cards",
++        "news",
++        "staff_attendance",
++        "notifications",
++        "expenses",
++        "budgets",
++      ],
++    },
++  },
++  {
++    tier: PlanTier.PREMIUM,
++    name: "Premium",
++    priceKobo: 3_500_000, // ₦35,000 / term
++    studentLimit: 2000,
++    features: { modules: "all" },
++  },
++  {
++    tier: PlanTier.ENTERPRISE,
++    name: "Enterprise",
++    priceKobo: 0, // custom pricing
++    studentLimit: null, // unlimited
++    features: { modules: "all", customDomain: true },
++  },
++];
++
++async function main() {
++  for (const plan of PLANS) {
++    await prisma.plan.upsert({
++      where: { tier: plan.tier },
++      update: plan,
++      create: plan,
++    });
++    console.log(`  ✓ ${plan.name} (${plan.tier}) — ${plan.studentLimit ?? "∞"} students`);
++  }
++  console.log("Plans seeded.");
++}
++
++main()
++  .catch((e) => {
++    console.error(e);
++    process.exit(1);
++  })
++  .finally(() => prisma.$disconnect());

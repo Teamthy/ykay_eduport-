@@ -1,0 +1,178 @@
+diff --git a/app/teacher/class/attendance/page.tsx b/app/teacher/class/attendance/page.tsx
+index 5ddb255..95bbe66 100644
+--- a/app/teacher/class/attendance/page.tsx
++++ b/app/teacher/class/attendance/page.tsx
+@@ -6,6 +6,7 @@ import Header from "@/components/Header";
+ import Footer from "@/components/Footer";
+ import TeacherSidebar from "@/components/TeacherSidebar";
+ import { useToast } from "@/components/Toast";
++import { cacheGet, cacheSet, queueWrite, getQueueCount } from "@/lib/offline/db";
+ import {
+   BellRing,
+   Calendar,
+@@ -108,7 +109,9 @@ export default function ClassAttendancePage() {
+   const [rows, setRows] = useState<AttendanceRow[]>([]);
+   const [notes, setNotes] = useState("");
+   const [loading, setLoading] = useState(true);
+-  const [savingMode, setSavingMode] = useState<null | "draft" | "submit">(null);
++  const [savingMode, setSavingMode] = useState<"draft" | "submit" | null>(null);
++  const [isStale, setIsStale] = useState(false);
++  const [pendingSync, setPendingSync] = useState(0);
+   const [error, setError] = useState("");
+   const [correctionReason, setCorrectionReason] = useState("");
+   const [requestingCorrection, setRequestingCorrection] = useState(false);
+@@ -119,13 +122,31 @@ export default function ClassAttendancePage() {
+   const notificationPreview = stats.absent + stats.late;
+ 
+   async function loadRegister(params?: { classId?: string; date?: string }) {
+-    setLoading(true);
++    const query = new URLSearchParams({ date: params?.date || selectedDate });
++    if (params?.classId || selectedClassId)
++      query.set("classId", params?.classId || selectedClassId);
++    const cacheKey = `/api/teacher/attendance/register?${query.toString()}`;
++
++    // ── Offline: show cached data instantly ──
++    const cached = await cacheGet<RegisterResponse>(cacheKey);
++    if (cached) {
++      setRegister(cached.data);
++      setRows(cached.data.roster);
++      setNotes(cached.data.session?.notes || "");
++      setIsStale(true);
++      setLoading(false);
++    }
++
++    // ── Online: fetch fresh data ──
++    if (typeof navigator !== "undefined" && !navigator.onLine) {
++      setPendingSync(await getQueueCount());
++      return;
++    }
++
++    setLoading(!cached);
+     setError("");
+     try {
+-      const query = new URLSearchParams({ date: params?.date || selectedDate });
+-      if (params?.classId || selectedClassId)
+-        query.set("classId", params?.classId || selectedClassId);
+-      const response = await fetch(`/api/teacher/attendance/register?${query.toString()}`, {
++      const response = await fetch(cacheKey, {
+         cache: "no-store",
+       });
+       const body = (await response.json()) as RegisterResponse & { error?: string };
+@@ -135,16 +156,22 @@ export default function ClassAttendancePage() {
+       setRows(body.roster);
+       setNotes(body.session?.notes || "");
+       setCorrectionReason("");
++      setIsStale(false);
++      await cacheSet(cacheKey, body);
+ 
+       if ((!selectedClassId || params?.classId) && body.selectedClass?.id) {
+         setSelectedClassId(body.selectedClass.id);
+       }
+     } catch (loadError) {
+-      setRegister(null);
+-      setRows([]);
+-      setError(
+-        loadError instanceof Error ? loadError.message : "Unable to load the attendance register.",
+-      );
++      if (!cached) {
++        setRegister(null);
++        setRows([]);
++        setError(
++          loadError instanceof Error
++            ? loadError.message
++            : "Unable to load the attendance register.",
++        );
++      }
+     } finally {
+       setLoading(false);
+     }
+@@ -188,22 +215,38 @@ export default function ClassAttendancePage() {
+ 
+     setSavingMode(finalize ? "submit" : "draft");
+     setError("");
++
++    const payload = {
++      classId: register.selectedClass.id,
++      sessionDate: selectedDate,
++      periodKey: register.session?.periodKey || "DAILY_REGISTER",
++      notes,
++      finalize,
++      entries: rows.map((row) => ({
++        studentProfileId: row.studentProfileId,
++        status: row.status,
++        note: row.note || null,
++      })),
++    };
++
++    // ── Offline: queue the write ──
++    if (typeof navigator !== "undefined" && !navigator.onLine) {
++      await queueWrite({ url: "/api/teacher/attendance/register", method: "POST", body: payload });
++      setPendingSync(await getQueueCount());
++      toast(
++        finalize ? "Attendance saved offline. Will sync when back online." : "Draft saved offline.",
++        "success",
++      );
++      setSavingMode(null);
++      return;
++    }
++
++    // ── Online: POST immediately ──
+     try {
+       const response = await fetch("/api/teacher/attendance/register", {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+-        body: JSON.stringify({
+-          classId: register.selectedClass.id,
+-          sessionDate: selectedDate,
+-          periodKey: register.session?.periodKey || "DAILY_REGISTER",
+-          notes,
+-          finalize,
+-          entries: rows.map((row) => ({
+-            studentProfileId: row.studentProfileId,
+-            status: row.status,
+-            note: row.note || null,
+-          })),
+-        }),
++        body: JSON.stringify(payload),
+       });
+ 
+       const body = (await response.json()) as {
+@@ -225,8 +268,19 @@ export default function ClassAttendancePage() {
+ 
+       await loadRegister({ classId: register.selectedClass.id, date: selectedDate });
+     } catch (saveError) {
+-      setError(saveError instanceof Error ? saveError.message : "Unable to save attendance.");
+-      toast("Attendance could not be saved.", "error");
++      // Network dropped mid-request — queue it
++      if (saveError instanceof TypeError && saveError.message.includes("fetch")) {
++        await queueWrite({
++          url: "/api/teacher/attendance/register",
++          method: "POST",
++          body: payload,
++        });
++        setPendingSync(await getQueueCount());
++        toast("Connection lost. Attendance saved offline and will sync automatically.", "success");
++      } else {
++        setError(saveError instanceof Error ? saveError.message : "Unable to save attendance.");
++        toast("Attendance could not be saved.", "error");
++      }
+     } finally {
+       setSavingMode(null);
+     }
+@@ -335,6 +389,16 @@ export default function ClassAttendancePage() {
+                   >
+                     <Lock size={12} /> {isLocked ? "Locked" : "Editable"}
+                   </div>
++                  {isStale && (
++                    <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-orange-500/10 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-orange-500">
++                      <Clock size={12} /> Cached (offline)
++                    </div>
++                  )}
++                  {pendingSync > 0 && (
++                    <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-500">
++                      <Clock size={12} /> {pendingSync} queued
++                    </div>
++                  )}
+                 </div>
+               </div>
+ 

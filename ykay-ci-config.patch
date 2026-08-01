@@ -1,0 +1,21 @@
+diff --git a/.prettierignore b/.prettierignore
+index 1b44c06..e6296dc 100644
+--- a/.prettierignore
++++ b/.prettierignore
+@@ -4,3 +4,4 @@ out
+ prisma/migrations
+ *.md
+ package-lock.json
++mobile
+diff --git a/eslint.config.mjs b/eslint.config.mjs
+index 9819261..f1f0310 100644
+--- a/eslint.config.mjs
++++ b/eslint.config.mjs
+@@ -13,6 +13,7 @@ const eslintConfig = [
+       "prisma/migrations/**",
+       "scripts/**",
+       "tests/**",
++      "mobile/**",
+     ],
+   },
+   ...nextCoreWebVitals,

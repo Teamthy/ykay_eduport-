@@ -1,0 +1,228 @@
+diff --git a/app/admin/report-cards/page.tsx b/app/admin/report-cards/page.tsx
+index 0fb80d5..deb1097 100644
+--- a/app/admin/report-cards/page.tsx
++++ b/app/admin/report-cards/page.tsx
+@@ -1,7 +1,7 @@
+ "use client";
+ 
+ import { useEffect, useState } from "react";
+-import Header from "@/components/Header";
++import PortalTopbar from "@/components/PortalTopbar";
+ import Footer from "@/components/Footer";
+ import AdminSidebar from "@/components/AdminSidebar";
+ import LiveReportCardPreview from "@/components/LiveReportCardPreview";
+@@ -111,9 +111,30 @@ export default function AdminReportCardsPage() {
+     }
+   }
+ 
++  async function releaseAll() {
++    if (!confirm("Release ALL draft report cards now? Parents and students will be notified.")) return;
++    setSaving(true);
++    setMessage("");
++    try {
++      const response = await fetch("/api/admin/report-cards/release", {
++        method: "POST",
++        headers: { "Content-Type": "application/json" },
++        body: JSON.stringify({}),
++      });
++      const body = (await response.json()) as { error?: string; message?: string };
++      if (!response.ok) throw new Error(body.error || "Batch release failed.");
++      setMessage(body.message || "Report cards released.");
++      await loadReports();
++    } catch (error) {
++      setMessage(error instanceof Error ? error.message : "Batch release failed.");
++    } finally {
++      setSaving(false);
++    }
++  }
++
+   return (
+     <>
+-      <Header />
++      <PortalTopbar />
+       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+         <section className="bg-brand-navy pt-24 pb-14">
+           <div className="mx-auto max-w-7xl px-6">
+@@ -147,7 +168,23 @@ export default function AdminReportCardsPage() {
+ 
+               {!loading && data ? (
+                 <>
+-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
++                  <div className="no-print flex flex-wrap gap-3">
++                    <button
++                      onClick={() => void releaseAll()}
++                      disabled={saving || !data.summary.draftReports}
++                      className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
++                    >
++                      <CheckCircle2 size={15} /> Release all drafts ({data.summary.draftReports})
++                    </button>
++                    <button
++                      onClick={() => window.print()}
++                      disabled={!selected}
++                      className="inline-flex items-center gap-2 rounded-full border border-[var(--input-border)] px-5 py-2.5 text-xs font-bold uppercase tracking-widest disabled:opacity-50"
++                    >
++                      <FileText size={15} /> Print selected card
++                    </button>
++                  </div>
++                  <div className="no-print grid grid-cols-1 gap-4 md:grid-cols-4">
+                     {[
+                       {
+                         label: "Total Reports",
+@@ -186,7 +223,7 @@ export default function AdminReportCardsPage() {
+                     ))}
+                   </div>
+ 
+-                  <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
++                  <div className="no-print rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
+                     <h2 className="mb-6 font-display text-2xl text-[var(--text-primary)]">
+                       Report Card Registry
+                     </h2>
+diff --git a/app/api/admin/report-cards/release/route.ts b/app/api/admin/report-cards/release/route.ts
+new file mode 100644
+index 0000000..f8c5d61
+--- /dev/null
++++ b/app/api/admin/report-cards/release/route.ts
+@@ -0,0 +1,131 @@
++import { AlertChannel, NotificationKind, ReportCardStatus, UserRole } from "@prisma/client";
++import { NextRequest, NextResponse } from "next/server";
++import { z } from "zod";
++import { prisma } from "@/lib/prisma";
++import { getClientIp } from "@/lib/requests";
++import { requireRole } from "@/lib/session";
++import { createInAppNotification, queueNotificationJob } from "@/lib/notifications";
++
++export const dynamic = "force-dynamic";
++
++const allowedRoles = [UserRole.ADMIN, UserRole.DIRECTOR, UserRole.COORDINATOR];
++const schema = z.object({ classId: z.string().trim().min(1).optional() });
++
++/**
++ * POST /api/admin/report-cards/release
++ * Release every DRAFT report card at once (optionally scoped to one class).
++ * Each released card notifies its parent (email + in-app) and the student.
++ */
++export async function POST(request: NextRequest) {
++  const user = await requireRole(allowedRoles);
++  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
++
++  let payload: z.infer<typeof schema>;
++  try {
++    payload = schema.parse(await request.json());
++  } catch {
++    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
++  }
++
++  const where = {
++    schoolId: user.schoolId,
++    status: ReportCardStatus.DRAFT,
++    ...(payload.classId ? { studentProfile: { currentClassId: payload.classId } } : {}),
++  };
++
++  // Fetch card + student details first (needed for per-card notifications).
++  const drafts = await prisma.reportCard.findMany({
++    where,
++    select: {
++      id: true,
++      reportNumber: true,
++      termLabel: true,
++      sessionLabel: true,
++      overallAverage: true,
++      overallGrade: true,
++      studentProfile: {
++        select: {
++          displayName: true,
++          guardianName: true,
++          guardianEmail: true,
++          userId: true,
++          parentLinks: {
++            where: { isPrimary: true },
++            take: 1,
++            select: { parentProfile: { select: { userId: true, displayName: true } } },
++          },
++        },
++      },
++    },
++  });
++
++  if (!drafts.length) {
++    return NextResponse.json({ released: 0, message: "No draft report cards to release." });
++  }
++
++  const result = await prisma.reportCard.updateMany({
++    where: { id: { in: drafts.map((d) => d.id) } },
++    data: { status: ReportCardStatus.RELEASED, releasedAt: new Date() },
++  });
++
++  // Per-card notifications + one batch audit entry (best-effort — never block the release).
++  try {
++    for (const d of drafts) {
++      const msg = `The ${d.termLabel} (${d.sessionLabel}) report card for ${
++        d.studentProfile.displayName || "your child"
++      } has been released. Overall: ${d.overallAverage}% (${d.overallGrade}).`;
++      if (d.studentProfile.guardianEmail) {
++        await queueNotificationJob({
++          schoolId: user.schoolId,
++          kind: NotificationKind.REPORT_RELEASED,
++          channel: AlertChannel.EMAIL,
++          subject: "Report card released — Ykay College",
++          body: msg,
++          recipientName: d.studentProfile.guardianName,
++          recipientEmail: d.studentProfile.guardianEmail,
++          dedupeKey: `report:${d.id}:email`,
++          metadata: { reportCardId: d.id, reportNumber: d.reportNumber },
++        });
++      }
++      const parentUserId = d.studentProfile.parentLinks[0]?.parentProfile?.userId;
++      if (parentUserId) {
++        await createInAppNotification({
++          schoolId: user.schoolId,
++          userId: parentUserId,
++          kind: NotificationKind.REPORT_RELEASED,
++          title: "Report Card Released",
++          body: msg,
++          link: "/parent/report-cards",
++        });
++      }
++      if (d.studentProfile.userId) {
++        await createInAppNotification({
++          schoolId: user.schoolId,
++          userId: d.studentProfile.userId,
++          kind: NotificationKind.REPORT_RELEASED,
++          title: "Your Report Card Is Ready",
++          body: `Your ${d.termLabel} report card has been released. Overall: ${d.overallAverage}% (${d.overallGrade}).`,
++          link: "/student/report-cards",
++        });
++      }
++    }
++    await prisma.auditLog.create({
++      data: {
++        schoolId: user.schoolId,
++        actorUserId: user.id,
++        action: "REPORT_CARDS_BATCH_RELEASED",
++        entityType: "ReportCard",
++        entityId: payload.classId || "all",
++        ipAddress: getClientIp(request),
++        metadata: { count: result.count, classId: payload.classId || null } as never,
++      },
++    });
++  } catch (e) {
++    console.warn("Batch release notifications/audit failed", e);
++  }
++
++  return NextResponse.json({
++    released: result.count,
++    message: `${result.count} report card(s) released. Parents and students have been notified.`,
++  });
++}
+diff --git a/app/globals.css b/app/globals.css
+index 5c74866..822abcf 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -936,6 +936,7 @@ button:disabled {
+   header,
+   footer,
+   nav,
++  aside,
+   button,
+   [role="button"] {
+     display: none !important;

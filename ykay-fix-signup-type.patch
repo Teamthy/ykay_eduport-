@@ -1,0 +1,12 @@
+diff --git a/lib/rate-limit.ts b/lib/rate-limit.ts
+index f0cdad6..05b749e 100644
+--- a/lib/rate-limit.ts
++++ b/lib/rate-limit.ts
+@@ -51,6 +51,7 @@ const limiterConfig = {
+   loginStrict: { maxRequests: 3, windowMs: 900_000, prefix: "ykay:auth:login-strict" }, // 3 failures per 15 min (per email)
+   passwordReset: { maxRequests: 3, windowMs: 3_600_000, prefix: "ykay:auth:pw-reset" }, // 3 resets per hour
+   changePassword: { maxRequests: 5, windowMs: 3_600_000, prefix: "ykay:auth:pw-change" }, // 5 changes per hour
++  signup: { maxRequests: 5, windowMs: 3_600_000, prefix: "ykay:signup" }, // 5 signups per hour
+ } as const;
+ 
+ const redisLimiters: Record<string, Ratelimit | null> = redis

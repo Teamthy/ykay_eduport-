@@ -1,0 +1,136 @@
+diff --git a/lib/prisma.ts b/lib/prisma.ts
+index fa7bfb1..6a433fd 100644
+--- a/lib/prisma.ts
++++ b/lib/prisma.ts
+@@ -8,12 +8,17 @@
+  * - Connection pooling via ?connection_limit=20 on DATABASE_URL
+  * - Prisma Accelerate (optional) for edge caching
+  * - Prepared statements for frequently executed queries
++ * - Global findMany safety cap (see below) so a missing `take` can never load a
++ *   whole table. Routes that need a specific limit already pass `take`.
+  */
+ 
+ import { PrismaClient } from "@prisma/client";
+ 
++/** Hard ceiling applied to any findMany that does not specify its own `take`. */
++const DEFAULT_FIND_MANY_TAKE = 1000;
++
+ const globalForPrisma = globalThis as unknown as {
+-  prisma: PrismaClient | undefined;
++  prisma: ReturnType<typeof createPrismaClient> | undefined;
+ };
+ 
+ function createPrismaClient() {
+@@ -23,25 +28,39 @@ function createPrismaClient() {
+       ? (["query", "error", "warn"] as const)
+       : (["error"] as const);
+ 
+-  return new PrismaClient({
++  const base = new PrismaClient({
+     log: logLevel.map((level) =>
+       level === "query" ? { emit: "event", level: "query" } : { emit: "stdout", level },
+     ),
+   });
++
++  if (process.env.NODE_ENV === "development") {
++    base.$on(
++      "query" as never,
++      ((e: { query: string; duration: number }) => {
++        if (e.duration > 500) {
++          console.warn(`[prisma] Slow query (${e.duration}ms): ${e.query.slice(0, 200)}`);
++        }
++      }) as never,
++    );
++  }
++
++  // Safety net: cap any unbounded findMany. Aggregation endpoints that need the
++  // full set should use SQL aggregation (groupBy/_count/etc.), not findMany.
++  return base.$extends({
++    query: {
++      $allOperations: async ({ args, query, operation }) => {
++        if (operation === "findMany" && (args as { take?: number }).take === undefined) {
++          (args as { take?: number }).take = DEFAULT_FIND_MANY_TAKE;
++        }
++        return query(args);
++      },
++    },
++  });
+ }
+ 
+ export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+ 
+ if (process.env.NODE_ENV === "development") {
+   globalForPrisma.prisma = prisma;
+-
+-  // Log slow queries (>500ms) in development
+-  prisma.$on(
+-    "query" as never,
+-    ((e: { query: string; duration: number }) => {
+-      if (e.duration > 500) {
+-        console.warn(`[prisma] Slow query (${e.duration}ms): ${e.query.slice(0, 200)}`);
+-      }
+-    }) as never,
+-  );
+ }
+diff --git a/middleware.ts b/middleware.ts
+index 1a85872..1bb5cfc 100644
+--- a/middleware.ts
++++ b/middleware.ts
+@@ -58,6 +58,37 @@ function logDenial(
+ 
+ export async function middleware(request: NextRequest) {
+   const pathname = request.nextUrl.pathname;
++  const method = request.method;
++
++  // ── Read-only super-admin impersonation ──
++  // Block every mutating API request while impersonating (except the endpoints
++  // that manage the impersonation/session themselves). This is the single,
++  // global enforcement point — no route needs to remember to check.
++  if (
++    pathname.startsWith("/api/") &&
++    method !== "GET" &&
++    method !== "HEAD" &&
++    method !== "OPTIONS" &&
++    pathname !== "/api/super-admin/impersonate" &&
++    pathname !== "/api/auth/logout"
++  ) {
++    const impToken = request.cookies.get("ykay_session")?.value;
++    const impSecret = process.env.AUTH_SECRET;
++    if (impToken && impSecret && impSecret.length >= 32) {
++      try {
++        const { payload } = await jwtVerify(impToken, encoder.encode(impSecret));
++        if (payload.impersonatedBy) {
++          return NextResponse.json(
++            { error: "Writes are not permitted while impersonating. End impersonation first." },
++            { status: 403 },
++          );
++        }
++      } catch {
++        // invalid/expired token — let the route's own auth reject it
++      }
++    }
++  }
++
+   if (publicItPaths.some((path) => pathname.startsWith(path))) return NextResponse.next();
+   if (!protectedPrefixes.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next();
+ 
+@@ -131,6 +162,7 @@ function redirectToLogin(request: NextRequest) {
+ 
+ export const config = {
+   matcher: [
++    "/api/:path*",
+     "/admin/:path*",
+     "/admin-admissions/:path*",
+     "/teacher/:path*",
+diff --git a/vitest.config.ts b/vitest.config.ts
+index 7a4197f..8f9642c 100644
+--- a/vitest.config.ts
++++ b/vitest.config.ts
+@@ -5,6 +5,7 @@ export default defineConfig({
+   test: {
+     environment: "node",
+     globals: true,
++    pool: "threads",
+     setupFiles: ["./tests/setup.ts"],
+     include: ["tests/**/*.test.ts"],
+     coverage: {
