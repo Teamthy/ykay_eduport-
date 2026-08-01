@@ -1,9 +1,6 @@
 "use client";
 
-<<<<<<< ours
-=======
 import { useCallback, useEffect, useRef, useState } from "react";
->>>>>>> theirs
 import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
@@ -29,7 +26,6 @@ type Profile = {
   guardianName: string | null; guardianPhone: string | null; guardianEmail: string | null;
 };
 
-/** Resize an image file to a small JPEG data URL (keeps the DB payload tiny). */
 function fileToResizedDataUrl(file: File, max = 256): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -97,69 +93,47 @@ export default function StudentProfilePage() {
     }
   }
 
-  const initials = (profile?.displayName || "?")
-    .split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+  const initials = (profile?.displayName || "?").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
   return (
     <>
-<<<<<<< ours
-      <PortalTopbar />
-=======
       <PortalTopbar title="My profile" />
->>>>>>> theirs
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6">
           <div className="mx-auto max-w-7xl">
-            <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
-              MY <span className="text-brand-green">PROFILE</span>
-            </h1>
+            <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">MY <span className="text-brand-green">PROFILE</span></h1>
             <p className="text-white/60 text-sm">View your information and manage your profile photo.</p>
           </div>
         </section>
-
         <section className="py-10 px-6">
           <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
-
             <div className="flex-1 min-w-0 space-y-6">
               {msg && <div className="rounded-2xl border border-brand-green/30 bg-brand-green/10 p-4 text-sm">{msg}</div>}
-
               <div className="rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] overflow-hidden shadow-[var(--card-shadow)]">
                 <div className="h-28 bg-gradient-to-br from-brand-navy to-brand-navy-light" />
                 <div className="px-8 pb-8 -mt-16">
                   <div className="flex items-end gap-6 mb-6">
-                    {/* Photo / initials + upload */}
                     <div className="relative">
                       <div className="w-28 h-28 rounded-3xl overflow-hidden bg-gradient-to-br from-brand-green to-brand-green-dark flex items-center justify-center text-white font-display text-3xl border-4 border-[var(--bg-primary)] shadow-2xl">
                         {profile?.photoUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={profile.photoUrl} alt={profile.displayName} className="h-full w-full object-cover" />
-                        ) : (
-                          <span>{loading ? "" : initials}</span>
-                        )}
+                        ) : (<span>{loading ? "" : initials}</span>)}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => fileRef.current?.click()}
-                        disabled={uploading || loading}
-                        className="absolute -bottom-1 -right-1 grid h-9 w-9 place-items-center rounded-full bg-brand-orange text-white shadow-lg disabled:opacity-50"
-                        aria-label="Change photo"
-                      >
+                      <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading || loading} className="absolute -bottom-1 -right-1 grid h-9 w-9 place-items-center rounded-full bg-brand-orange text-white shadow-lg disabled:opacity-50" aria-label="Change photo">
                         {uploading ? <LoaderCircle className="animate-spin" size={15} /> : <Camera size={15} />}
                       </button>
                       <input ref={fileRef} type="file" accept="image/*" onChange={onPhoto} className="hidden" />
                     </div>
                     <div className="pb-2">
-                      <h2 className="font-display text-3xl text-[var(--text-primary)]">
-                        {(profile?.displayName || "STUDENT").toUpperCase()}
-                      </h2>
+                      <h2 className="font-display text-3xl text-[var(--text-primary)]">{(profile?.displayName || "STUDENT").toUpperCase()}</h2>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green font-bold uppercase tracking-widest">Student</span>
                         {profile?.className && <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green text-white font-bold uppercase tracking-widest">{profile.className}</span>}
                       </div>
                     </div>
                   </div>
-
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <h3 className="text-xs font-bold uppercase tracking-widest text-brand-green">Personal Info</h3>
@@ -178,7 +152,6 @@ export default function StudentProfilePage() {
                         </div>
                       ))}
                     </div>
-
                     <div className="space-y-4">
                       <h3 className="text-xs font-bold uppercase tracking-widest text-brand-orange">Parent / Guardian</h3>
                       {[
@@ -194,9 +167,7 @@ export default function StudentProfilePage() {
                           </div>
                         </div>
                       ))}
-                      {!profile?.guardianName && !profile?.guardianPhone && (
-                        <p className="text-xs text-[var(--text-muted)]">No guardian details linked.</p>
-                      )}
+                      {!profile?.guardianName && !profile?.guardianPhone && (<p className="text-xs text-[var(--text-muted)]">No guardian details linked.</p>)}
                     </div>
                   </div>
                 </div>

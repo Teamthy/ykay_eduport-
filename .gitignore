@@ -60,3 +60,7 @@ prisma/*.db-journal
 
 !mobile/
 !mobile/**
+
+*.patch
+*.zip
+public/Screenshot *.png
