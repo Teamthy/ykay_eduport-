@@ -1,54 +1,23 @@
 "use client";
 
+<<<<<<< ours
 import { useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
+=======
+import { useCallback, useEffect, useState } from "react";
+>>>>>>> theirs
 import TeacherSidebar from "@/components/TeacherSidebar";
-import { useApi } from "@/lib/useApi";
+import PortalTopbar from "@/components/PortalTopbar";
 import { useToast } from "@/components/Toast";
-import {
-  RotateCcw,
-  Users,
-  ChevronDown,
-  ChevronUp,
-  Check,
-  X,
-  School,
-  BookOpen,
-  AlertCircle,
-  Save,
-} from "lucide-react";
+import { LoaderCircle, RotateCcw, CheckCircle2 } from "lucide-react";
 
-interface Student {
-  id: string;
-  name: string;
-  class: string;
-  selected: boolean;
-}
-
-const STUDENTS_BY_CLASS: Record<string, Student[]> = {
-  "SS 3": Array.from({ length: 9 }, (_, i) => ({
-    id: `s3-${i}`,
-    name: `Student ${i + 1}`,
-    class: "SS 3",
-    selected: false,
-  })),
-  "SSS 1": Array.from({ length: 32 }, (_, i) => ({
-    id: `ss1-${i}`,
-    name: `Student SSS1-${i + 1}`,
-    class: "SSS 1",
-    selected: false,
-  })),
-  "SSS 2": Array.from({ length: 34 }, (_, i) => ({
-    id: `ss2-${i}`,
-    name: `Student SSS2-${i + 1}`,
-    class: "SSS 2",
-    selected: false,
-  })),
-};
+type Exam = { id: string; title: string; subjectName: string; className: string };
+type Row = { id: string; studentId: string; displayName: string; hasRetake: boolean; retakeUsed: boolean };
 
 export default function TestRetakePage() {
   const { toast } = useToast();
+<<<<<<< ours
   const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
   const teacher = data?.teacher || ({} as any);
   const [selectedCourse, setSelectedCourse] = useState("chemistry (SSS 1)");
@@ -82,35 +51,79 @@ export default function TestRetakePage() {
       Object.entries(prev).forEach(([cls, arr]) => {
         next[cls] = arr.map((s) => ({ ...(s as any), selected: true }));
       });
+=======
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [examId, setExamId] = useState("");
+  const [rows, setRows] = useState<Row[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [loadingExams, setLoadingExams] = useState(true);
+  const [loadingRows, setLoadingRows] = useState(false);
+  const [granting, setGranting] = useState(false);
+
+  // load the teacher's exams
+  const loadExams = useCallback(async () => {
+    setLoadingExams(true);
+    try {
+      const r = await fetch("/api/teacher/exams", { cache: "no-store" });
+      const j = await r.json();
+      if (r.ok) setExams(j.exams || []);
+    } catch { /* ignore */ }
+    finally { setLoadingExams(false); }
+  }, []);
+  useEffect(() => { void loadExams(); }, [loadExams]);
+
+  // load students + retake status for the selected exam
+  const loadRows = useCallback(async (id: string) => {
+    if (!id) { setRows([]); return; }
+    setLoadingRows(true);
+    setSelected(new Set());
+    try {
+      const r = await fetch(`/api/teacher/exams/${id}/retake`, { cache: "no-store" });
+      const j = await r.json();
+      if (r.ok) setRows(j.students || []);
+      else toast(j.error || "Unable to load students.", "error");
+    } catch { toast("Unable to load students.", "error"); }
+    finally { setLoadingRows(false); }
+  }, [toast]);
+
+  useEffect(() => { if (examId) void loadRows(examId); }, [examId, loadRows]);
+
+  function toggle(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+>>>>>>> theirs
       return next;
     });
-  };
+  }
+  function toggleAll() {
+    setSelected((prev) => (prev.size === rows.length ? new Set() : new Set(rows.map((r) => r.id))));
+  }
 
-  const unmarkAll = () => {
-    setStudents((prev) => {
-      const next: Record<string, Student[]> = {};
-      Object.entries(prev).forEach(([cls, arr]) => {
-        next[cls] = arr.map((s) => ({ ...(s as any), selected: false }));
+  async function grant() {
+    if (!examId || !selected.size) { toast("Select an exam and at least one student.", "warning"); return; }
+    setGranting(true);
+    try {
+      const r = await fetch(`/api/teacher/exams/${examId}/retake`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentProfileIds: [...selected] }),
       });
-      return next;
-    });
-  };
-
-  const handleSave = () => {
-    if (totalSelected === 0) {
-      toast("Select at least one student", "warning");
-      return;
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "Grant failed.");
+      toast(j.message || "Retake enabled.", "success");
+      setSelected(new Set());
+      await loadRows(examId);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Grant failed.", "error");
+    } finally {
+      setGranting(false);
     }
-    toast(
-      `Retake ${allowRetake ? "enabled" : "disabled"} for ${totalSelected} students`,
-      "success",
-    );
-  };
-
-  const courses = ["chemistry (SSS 1)", "physics (SSS 2)", "mathematics (SS 3)"];
+  }
 
   return (
     <>
+<<<<<<< ours
       <PortalTopbar />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6">
@@ -123,156 +136,88 @@ export default function TestRetakePage() {
             </h1>
             <p className="text-white/60 text-sm text-center">
               Grant test retake permissions to selected students
+=======
+      <PortalTopbar title="Test retake" />
+      <main className="mx-auto flex max-w-[1600px] gap-8 px-4 py-6 sm:px-6">
+        <TeacherSidebar />
+        <section className="min-w-0 flex-1 space-y-6">
+          <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Second chances</p>
+            <h1 className="mt-2 font-display text-4xl tracking-widest">TEST <span className="text-brand-green">RETAKE</span></h1>
+            <p className="mt-3 max-w-2xl text-sm text-white/65">
+              Grant a retake to one student or the whole class. The student can then start a fresh attempt from their exams page.
+>>>>>>> theirs
             </p>
           </div>
-        </section>
 
-        <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
-            <TeacherSidebar />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <label className="flex-1 text-xs font-bold uppercase tracking-widest">
+              Select exam
+              <select
+                value={examId}
+                onChange={(e) => setExamId(e.target.value)}
+                className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm normal-case"
+              >
+                <option value="">— choose an exam —</option>
+                {exams.map((e) => (
+                  <option key={e.id} value={e.id}>{e.title} · {e.subjectName} · {e.className}</option>
+                ))}
+              </select>
+            </label>
+            {examId && (
+              <button
+                onClick={grant}
+                disabled={granting || !selected.size}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+              >
+                {granting ? <LoaderCircle className="animate-spin" size={15} /> : <RotateCcw size={15} />}
+                Grant retake ({selected.size})
+              </button>
+            )}
+          </div>
 
-            <div className="flex-1 min-w-0 space-y-6">
-              {/* Course Selector */}
-              <div className="rounded-2xl bg-[var(--surface-card)] border border-brand-green/40 p-6 shadow-[var(--card-shadow)]">
-                <div className="flex items-center gap-2 mb-3">
-                  <BookOpen className="text-brand-green" size={18} />
-                  <span className="font-bold text-[var(--text-primary)]">Select Course</span>
-                </div>
-                <select
-                  value={selectedCourse}
-                  onChange={(e) => setSelectedCourse(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-brand-green/40 text-[var(--input-text)] focus:outline-none focus:border-brand-green"
-                >
-                  {courses.map((c: any) => (
-                    <option key={String(c)}>{String(c)}</option>
-                  ))}
-                </select>
-                <div className="flex items-center gap-2 mt-2 text-xs text-brand-orange">
-                  <AlertCircle size={12} /> Please select a course
-                </div>
-              </div>
-
-              {/* Student Selector */}
-              <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                  <div className="flex items-center gap-3">
-                    <Users className="text-brand-green" size={18} />
-                    <span className="font-bold text-[var(--text-primary)]">Select Students</span>
-                    <span className="px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green text-xs font-bold">
-                      {totalSelected} selected
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={markAll}
-                      className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-brand-green/10 text-brand-green text-xs font-bold hover:bg-brand-green hover:text-white transition-all"
-                    >
-                      <Check size={12} /> Mark All
-                    </button>
-                    <button
-                      onClick={unmarkAll}
-                      className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-red-500/10 text-red-500 text-xs font-bold hover:bg-red-500 hover:text-white transition-all"
-                    >
-                      <X size={12} /> Unmark All
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {Object.entries(students).map(([cls, arr]) => {
-                    const isExpanded = expandedClasses.includes(cls);
-                    const selectedInClass = arr.filter((s: any) => s.selected).length;
-
-                    return (
-                      <div
-                        key={cls}
-                        className="rounded-xl border border-[var(--border-subtle)] overflow-hidden"
-                      >
-                        <button
-                          onClick={() => toggleClass(cls)}
-                          className="w-full p-4 flex items-center justify-between hover:bg-[var(--surface-disabled)] transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-lg bg-brand-green/10 text-brand-green flex items-center justify-center">
-                              <School size={16} />
-                            </div>
-                            <span className="font-bold text-[var(--text-primary)]">{cls}</span>
-                            {selectedInClass > 0 && (
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green text-white font-bold">
-                                {selectedInClass} selected
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm text-[var(--text-muted)]">
-                              {arr.length} students
-                            </span>
-                            {isExpanded ? (
-                              <ChevronUp size={16} className="text-[var(--text-muted)]" />
-                            ) : (
-                              <ChevronDown size={16} className="text-[var(--text-muted)]" />
-                            )}
-                          </div>
-                        </button>
-
-                        {isExpanded && (
-                          <div className="p-3 border-t border-[var(--border-subtle)] bg-[var(--surface-disabled)]/30 max-h-64 overflow-y-auto">
-                            <div className="grid md:grid-cols-2 gap-2">
-                              {arr.map((s) => (
-                                <label
-                                  key={s.id}
-                                  className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${s.selected ? "bg-brand-green/10" : "hover:bg-[var(--surface-card)]"}`}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={s.selected}
-                                    onChange={() => toggleStudent(cls, s.id)}
-                                    className="w-4 h-4 accent-brand-green"
-                                  />
-                                  <span className="text-sm text-[var(--text-primary)]">
-                                    {s.name}
-                                  </span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Toggle & Save */}
-              <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)] flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={allowRetake}
-                    onChange={(e) => setAllowRetake(e.target.checked)}
-                    className="w-5 h-5 accent-brand-green"
-                  />
-                  <RotateCcw
-                    className={allowRetake ? "text-brand-green" : "text-[var(--text-muted)]"}
-                    size={16}
-                  />
-                  <span className="font-bold text-[var(--text-primary)]">
-                    Allow Retake for Selected Students
-                  </span>
-                </label>
-
-                <button
-                  onClick={handleSave}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-green text-white text-sm font-bold hover:bg-brand-green-dark transition-all shadow-lg"
-                >
-                  <Save size={14} /> Save Changes
+          {!examId ? (
+            <p className="p-10 text-center text-sm text-[var(--text-muted)]">Pick an exam to see its class students.</p>
+          ) : loadingRows ? (
+            <div className="flex items-center gap-2 p-10 text-[var(--text-muted)]"><LoaderCircle className="animate-spin" size={18} /> Loading students…</div>
+          ) : (
+            <div className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+              <div className="flex items-center justify-between border-b border-[var(--border-subtle)] p-4">
+                <span className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{rows.length} students</span>
+                <button onClick={toggleAll} className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                  {selected.size === rows.length && rows.length ? "Clear all" : "Select all"}
                 </button>
               </div>
+              <table className="w-full text-left text-sm">
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.id} className="border-t border-[var(--border-subtle)]">
+                      <td className="w-10 p-4">
+                        <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggle(r.id)} className="h-4 w-4 accent-brand-green" />
+                      </td>
+                      <td className="p-4">
+                        <b>{r.displayName}</b>
+                        <span className="mt-1 block font-mono text-xs text-[var(--text-muted)]">{r.studentId}</span>
+                      </td>
+                      <td className="p-4 text-right">
+                        {r.hasRetake && !r.retakeUsed && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-brand-green/15 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                            <CheckCircle2 size={11} /> Retake ready
+                          </span>
+                        )}
+                        {r.retakeUsed && (
+                          <span className="rounded-full bg-[var(--surface-disabled)] px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Used</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!rows.length && <p className="p-10 text-center text-sm text-[var(--text-muted)]">No active students in this class.</p>}
             </div>
-          </div>
+          )}
         </section>
       </main>
-      <Footer />
     </>
   );
 }
