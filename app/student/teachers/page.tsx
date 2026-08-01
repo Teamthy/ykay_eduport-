@@ -57,11 +57,7 @@ export default function TeachersDirectoryPage() {
 
   return (
     <>
-<<<<<<< ours
-      <PortalTopbar />
-=======
       <PortalTopbar title="My teachers" />
->>>>>>> theirs
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6">
           <div className="mx-auto max-w-7xl">

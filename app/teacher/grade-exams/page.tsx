@@ -1,357 +1,129 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
-import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import TeacherSidebar from "@/components/TeacherSidebar";
-import { useToast } from "@/components/Toast";
-import {
-  ClipboardCheck,
-  BookOpen,
-  Save,
-  ChevronDown,
-  ChevronUp,
-  CheckCircle2,
-  Clock,
-  AlertTriangle,
-  Star,
-  Eye,
-  MessageSquare,
-} from "lucide-react";
+import PortalTopbar from "@/components/PortalTopbar";
+import { LoaderCircle, FileCheck2, ClipboardCheck } from "lucide-react";
 
-interface PendingGrade {
+type Exam = {
   id: string;
-  studentName: string;
-  studentId: string;
-  exam: string;
-  subject: string;
-  question: string;
-  questionType: string;
-  maxMarks: number;
-  studentAnswer: string;
-  teacherScore: number | null;
-  feedback: string;
-  submittedAt: string;
-}
-
-const PENDING_GRADES: PendingGrade[] = [
-  {
-    id: "pg-001",
-    studentName: "Emmanuel Adebayo",
-    studentId: "YKC/2025/002",
-    exam: "Mathematics CA1",
-    subject: "Mathematics",
-    question:
-      "A trader bought 100 oranges for ₦2,000 and sold them at ₦30 each. Calculate: (a) The total selling price (b) The profit made (c) The percentage profit.",
-    questionType: "essay",
-    maxMarks: 5,
-    studentAnswer:
-      "Total selling price = 100 x 30 = N3000\nProfit = 3000 - 2000 = N1000\nPercentage profit = 1000/2000 x 100 = 50%\n\nThe trader made a 50% profit on the oranges.",
-    teacherScore: null,
-    feedback: "",
-    submittedAt: "Jul 21, 2025 · 9:28 AM",
-  },
-  {
-    id: "pg-002",
-    studentName: "Fatima Yusuf",
-    studentId: "YKC/2025/018",
-    exam: "Mathematics CA1",
-    subject: "Mathematics",
-    question:
-      "A trader bought 100 oranges for ₦2,000 and sold them at ₦30 each. Calculate: (a) The total selling price (b) The profit made (c) The percentage profit.",
-    questionType: "essay",
-    maxMarks: 5,
-    studentAnswer:
-      "a) TSP = 100 × ₦30 = ₦3,000\nb) Profit = ₦3,000 − ₦2,000 = ₦1,000\nc) % Profit = (Profit/CP) × 100 = (1000/2000) × 100 = 50%",
-    teacherScore: null,
-    feedback: "",
-    submittedAt: "Jul 21, 2025 · 9:35 AM",
-  },
-  {
-    id: "pg-003",
-    studentName: "David Okoye",
-    studentId: "YKC/2025/024",
-    exam: "English Language CA1",
-    subject: "English Language",
-    question: "Write an essay of about 250 words on 'The Role of Technology in Modern Education'.",
-    questionType: "essay",
-    maxMarks: 10,
-    studentAnswer:
-      "Technology has become an important part of modern education. In today's world, students use computers, tablets, and smartphones to learn new things.\n\nOne of the main benefits is that technology makes learning more interesting. Students can watch videos, play educational games, and use interactive apps. This helps them understand difficult concepts better.\n\nAnother advantage is that technology gives students access to a lot of information. With the internet, students can research any topic from anywhere in the world. They don't have to rely only on textbooks.\n\nHowever, there are some challenges. Not all students have access to technology, especially in rural areas. Also, some students may get distracted by social media and games when they should be studying.\n\nIn conclusion, technology is very useful in education but it should be used wisely. Schools and parents should guide students on how to use technology for learning.",
-    teacherScore: null,
-    feedback: "",
-    submittedAt: "Jul 21, 2025 · 10:05 AM",
-  },
-  {
-    id: "pg-004",
-    studentName: "Chinedu Okoro",
-    studentId: "YKC/2025/012",
-    exam: "English Language CA1",
-    subject: "English Language",
-    question: "Write an essay of about 250 words on 'The Role of Technology in Modern Education'.",
-    questionType: "essay",
-    maxMarks: 10,
-    studentAnswer:
-      "Technology is good for education because it helps students learn. Computers and phones are used in schools.",
-    teacherScore: null,
-    feedback: "",
-    submittedAt: "Jul 21, 2025 · 10:12 AM",
-  },
-];
+  title: string;
+  subjectName: string;
+  className: string;
+  totalMarks: number;
+  questionCount: number;
+  status: string;
+  statusLabel: string;
+  submittedCount: number;
+};
 
 export default function GradeExamsPage() {
-  const { toast } = useToast();
-  const [grades, setGrades] = useState(PENDING_GRADES);
-  const [expanded, setExpanded] = useState<string | null>(grades[0]?.id || null);
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const graded = grades.filter((g) => g.teacherScore !== null).length;
-  const pending = grades.filter((g) => g.teacherScore === null).length;
-
-  const updateScore = (id: string, score: number) => {
-    const grade = grades.find((g) => g.id === id);
-    if (!grade) return;
-    if (score > grade.maxMarks) {
-      toast(`Score cannot exceed ${grade.maxMarks}`, "error");
-      return;
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const r = await fetch("/api/teacher/exams", { cache: "no-store" });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "Unable to load exams.");
+      setExams(j.exams || []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to load exams.");
+    } finally {
+      setLoading(false);
     }
-    setGrades((prev) => prev.map((g) => (g.id === id ? { ...g, teacherScore: score } : g)));
-  };
+  }, []);
 
-  const updateFeedback = (id: string, feedback: string) => {
-    setGrades((prev) => prev.map((g) => (g.id === id ? { ...g, feedback } : g)));
-  };
+  useEffect(() => { void load(); }, [load]);
 
-  const handleSave = (id: string) => {
-    const grade = grades.find((g) => g.id === id);
-    if (!grade || grade.teacherScore === null) {
-      toast("Please enter a score before saving", "warning");
-      return;
-    }
-    toast(
-      `Score saved for ${grade.studentName}: ${grade.teacherScore}/${grade.maxMarks}`,
-      "success",
-    );
-  };
-
-  const handleSaveAll = () => {
-    const unsaved = grades.filter((g) => g.teacherScore === null);
-    if (unsaved.length > 0) {
-      toast(`${unsaved.length} submissions still need grading`, "warning");
-      return;
-    }
-    toast(`All ${grades.length} submissions graded and saved`, "success");
-  };
+  // Exams with submissions awaiting review/grading.
+  const toGrade = exams.filter((e) => e.submittedCount > 0);
 
   return (
     <>
-      <PortalTopbar />
-      <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        <section className="pt-24 pb-10 bg-brand-navy px-6">
-          <div className="mx-auto max-w-7xl">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-orange/20 border border-brand-orange/40 text-brand-orange text-[10px] font-bold uppercase tracking-widest mb-3">
-              <ClipboardCheck size={11} /> Manual Grading
-            </span>
-            <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
-              GRADE <span className="text-brand-green">ESSAYS</span>
+      <PortalTopbar title="Grade exams" />
+      <main className="mx-auto flex max-w-[1600px] gap-8 px-4 py-6 sm:px-6">
+        <TeacherSidebar />
+        <section className="min-w-0 flex-1 space-y-6">
+          <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Marking &amp; review</p>
+            <h1 className="mt-2 font-display text-4xl tracking-widest">
+              GRADE <span className="text-brand-green">EXAMS</span>
             </h1>
-            <p className="text-white/60 text-sm">
-              Review and score essay/theory submissions that require manual grading.
+            <p className="mt-3 max-w-2xl text-sm text-white/65">
+              Exams with submitted attempts awaiting your review. Open an exam to grade essays / fill-ins and release objective scores.
             </p>
           </div>
-        </section>
 
-        <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
-            <TeacherSidebar />
+          {error && <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">{error}</div>}
 
-            <div className="flex-1 min-w-0 space-y-6">
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="p-5 rounded-2xl bg-brand-orange/10 border border-brand-orange/30">
-                  <Clock className="text-brand-orange mb-2" size={20} />
-                  <div className="font-display text-3xl text-brand-orange">{pending}</div>
-                  <div className="text-xs uppercase tracking-widest text-brand-orange">Pending</div>
-                </div>
-                <div className="p-5 rounded-2xl bg-brand-green/10 border border-brand-green/30">
-                  <CheckCircle2 className="text-brand-green mb-2" size={20} />
-                  <div className="font-display text-3xl text-brand-green">{graded}</div>
-                  <div className="text-xs uppercase tracking-widest text-brand-green">Graded</div>
-                </div>
-                <div className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
-                  <BookOpen className="text-[var(--text-muted)] mb-2" size={20} />
-                  <div className="font-display text-3xl text-[var(--text-primary)]">
-                    {grades.length}
-                  </div>
-                  <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
-                    Total
-                  </div>
-                </div>
-              </div>
-
-              {/* Save All */}
-              <button
-                onClick={handleSaveAll}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-brand-green to-brand-green-dark text-white font-bold uppercase tracking-widest text-sm hover:opacity-90 transition-all shadow-lg flex items-center justify-center gap-2"
-              >
-                <Save size={16} /> Save All Grades ({graded}/{grades.length} completed)
-              </button>
-
-              {/* Submissions */}
-              <div className="space-y-4">
-                {grades.map((g) => {
-                  const isExpanded = expanded === g.id;
-                  const wordCount = g.studentAnswer.split(/\s+/).filter(Boolean).length;
-
-                  return (
-                    <div
-                      key={g.id}
-                      className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] overflow-hidden"
-                    >
-                      {/* Header */}
-                      <button
-                        onClick={() => setExpanded(isExpanded ? null : g.id)}
-                        className="w-full p-5 flex items-center justify-between hover:bg-[var(--surface-disabled)] transition-colors"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-green to-brand-green-dark flex items-center justify-center text-white font-bold text-sm">
-                            {g.studentName
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </div>
-                          <div className="text-left">
-                            <div className="font-bold text-[var(--text-primary)]">
-                              {g.studentName}
-                            </div>
-                            <div className="text-xs text-[var(--text-muted)]">
-                              {g.studentId} · {g.exam} · {g.subject}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          {g.teacherScore !== null ? (
-                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-brand-green/20 text-brand-green text-xs font-bold">
-                              <CheckCircle2 size={12} /> {g.teacherScore}/{g.maxMarks}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-brand-orange/20 text-brand-orange text-xs font-bold">
-                              <Clock size={12} /> Pending
-                            </span>
-                          )}
-                          {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                        </div>
-                      </button>
-
-                      {/* Expanded content */}
-                      {isExpanded && (
-                        <div className="p-6 border-t border-[var(--border-subtle)] space-y-5">
-                          {/* Question */}
-                          <div className="p-4 rounded-xl bg-brand-green/5 border border-brand-green/20">
-                            <div className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 flex items-center gap-1">
-                              <BookOpen size={11} /> Question ({g.maxMarks} marks)
-                            </div>
-                            <p className="text-sm text-[var(--text-primary)] font-medium">
-                              {g.question}
-                            </p>
-                          </div>
-
-                          {/* Student Answer */}
-                          <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] flex items-center gap-1">
-                                <MessageSquare size={11} /> Student's Answer
-                              </div>
-                              <span className="text-[10px] text-[var(--text-muted)]">
-                                {wordCount} words · {g.submittedAt}
-                              </span>
-                            </div>
-                            <div className="p-4 rounded-xl bg-[var(--surface-disabled)] border border-[var(--border-subtle)]">
-                              <p className="text-sm text-[var(--text-primary)] whitespace-pre-line leading-relaxed">
-                                {g.studentAnswer}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Grading Section */}
-                          <div className="grid md:grid-cols-2 gap-4">
-                            {/* Score Input */}
-                            <div>
-                              <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 flex items-center gap-1">
-                                <Star size={11} /> Score (out of {g.maxMarks}) *
-                              </label>
-                              <div className="flex items-center gap-3">
-                                <input
-                                  type="number"
-                                  value={g.teacherScore ?? ""}
-                                  onChange={(e) => updateScore(g.id, Number(e.target.value))}
-                                  min="0"
-                                  max={g.maxMarks}
-                                  step="0.5"
-                                  placeholder="0"
-                                  className="w-24 p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] text-2xl font-display text-center focus:outline-none focus:border-brand-green"
-                                />
-                                <span className="text-2xl text-[var(--text-muted)]">
-                                  / {g.maxMarks}
-                                </span>
-                              </div>
-
-                              {/* Quick score buttons */}
-                              <div className="flex gap-2 mt-3">
-                                {[
-                                  0,
-                                  Math.round(g.maxMarks * 0.25),
-                                  Math.round(g.maxMarks * 0.5),
-                                  Math.round(g.maxMarks * 0.75),
-                                  g.maxMarks,
-                                ].map((s) => (
-                                  <button
-                                    key={s}
-                                    onClick={() => updateScore(g.id, s)}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                      g.teacherScore === s
-                                        ? "bg-brand-green text-white"
-                                        : "bg-[var(--surface-disabled)] text-[var(--text-muted)] hover:bg-brand-green/10"
-                                    }`}
-                                  >
-                                    {s}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Feedback */}
-                            <div>
-                              <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 flex items-center gap-1">
-                                <MessageSquare size={11} /> Teacher Feedback (optional)
-                              </label>
-                              <textarea
-                                value={g.feedback}
-                                onChange={(e) => updateFeedback(g.id, e.target.value)}
-                                rows={4}
-                                placeholder="e.g., Well structured answer but missing the formula..."
-                                className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] text-sm focus:outline-none focus:border-brand-green resize-none"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Save Button */}
-                          <button
-                            onClick={() => handleSave(g.id)}
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-green text-white text-sm font-bold hover:bg-brand-green-dark transition-all shadow-lg"
-                          >
-                            <Save size={14} /> Save Grade for {g.studentName.split(" ")[0]}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
+              <ClipboardCheck className="mb-2 text-brand-green" size={18} />
+              <div className="font-display text-2xl">{toGrade.length}</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Awaiting grading</div>
             </div>
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
+              <FileCheck2 className="mb-2 text-brand-orange" size={18} />
+              <div className="font-display text-2xl">{toGrade.reduce((s, e) => s + e.submittedCount, 0)}</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Submissions</div>
+            </div>
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
+              <LoaderCircle className="mb-2 text-blue-500" size={18} />
+              <div className="font-display text-2xl">{exams.length}</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Total exams</div>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+            {loading ? (
+              <div className="flex items-center justify-center gap-2 p-12 text-sm text-[var(--text-muted)]">
+                <LoaderCircle className="animate-spin" size={18} /> Loading exams…
+              </div>
+            ) : (
+              <table className="w-full text-left text-sm">
+                <thead className="bg-[var(--surface-disabled)] text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                  <tr>
+                    <th className="p-4">Exam</th>
+                    <th className="p-4">Subject · Class</th>
+                    <th className="p-4">Questions</th>
+                    <th className="p-4">Submissions</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {exams.map((e) => (
+                    <tr key={e.id} className="border-t border-[var(--border-subtle)]">
+                      <td className="p-4"><b>{e.title}</b></td>
+                      <td className="p-4 text-xs text-[var(--text-muted)]">{e.subjectName} · {e.className}</td>
+                      <td className="p-4">{e.questionCount}</td>
+                      <td className="p-4 font-display text-base text-brand-green">{e.submittedCount}</td>
+                      <td className="p-4 text-xs">{e.statusLabel || e.status}</td>
+                      <td className="p-4 text-right">
+                        {e.submittedCount > 0 ? (
+                          <Link href={`/teacher/test-results?exam=${e.id}`} className="rounded-full bg-brand-green px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                            Review {e.submittedCount}
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-[var(--text-muted)]">No submissions</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {!loading && !exams.length && (
+              <p className="p-10 text-center text-sm text-[var(--text-muted)]">No exams yet. Create one from the CBT center.</p>
+            )}
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

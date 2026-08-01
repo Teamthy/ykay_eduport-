@@ -167,7 +167,9 @@ export default function StudentProfilePage() {
                           </div>
                         </div>
                       ))}
-                      {!profile?.guardianName && !profile?.guardianPhone && (<p className="text-xs text-[var(--text-muted)]">No guardian details linked.</p>)}
+                      {!profile?.guardianName && !profile?.guardianPhone && !profile?.guardianEmail && (
+                        <p className="text-xs text-[var(--text-muted)]">No guardian details linked.</p>
+                      )}
                     </div>
                   </div>
                 </div>

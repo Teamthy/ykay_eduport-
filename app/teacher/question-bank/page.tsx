@@ -1,311 +1,156 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
-import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import TeacherSidebar from "@/components/TeacherSidebar";
-import {
-  Eye,
-  School,
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-  Search,
-  HelpCircle,
-  Award,
-  Plus,
-  FileText,
-  AlertCircle,
-} from "lucide-react";
+import PortalTopbar from "@/components/PortalTopbar";
+import { BookOpen, FileText, LoaderCircle, PlusCircle, ClipboardList, CheckCircle2 } from "lucide-react";
 
-interface ClassQuestions {
+type Exam = {
+  id: string;
+  title: string;
+  subjectName: string;
   className: string;
-  subjects: {
-    name: string;
-    questionCount: number;
-    totalMarks: number;
-    courses?: {
-      title: string;
-      questions: number;
-      marks: number;
-      status: "active" | "draft";
-    }[];
-  }[];
-}
-
-const QUESTION_BANK: ClassQuestions[] = [
-  {
-    className: "SS 3",
-    subjects: [{ name: "No Courses", questionCount: 0, totalMarks: 0 }],
-  },
-  {
-    className: "SSS 1",
-    subjects: [
-      {
-        name: "Mathematics",
-        questionCount: 45,
-        totalMarks: 90,
-        courses: [
-          { title: "Algebra & Equations", questions: 25, marks: 50, status: "active" },
-          { title: "Trigonometry", questions: 20, marks: 40, status: "active" },
-        ],
-      },
-      {
-        name: "Physics",
-        questionCount: 30,
-        totalMarks: 60,
-        courses: [{ title: "Mechanics", questions: 30, marks: 60, status: "active" }],
-      },
-    ],
-  },
-  {
-    className: "SSS 2",
-    subjects: [
-      {
-        name: "Mathematics",
-        questionCount: 60,
-        totalMarks: 120,
-        courses: [
-          { title: "Advanced Algebra", questions: 30, marks: 60, status: "active" },
-          { title: "Calculus Basics", questions: 30, marks: 60, status: "draft" },
-        ],
-      },
-    ],
-  },
-];
+  totalMarks: number;
+  questionCount: number;
+  status: string;
+  statusLabel: string;
+  submittedCount: number;
+};
 
 export default function QuestionBankPage() {
-  const [expanded, setExpanded] = useState<string[]>(["SSS 1"]);
-  const [search, setSearch] = useState("");
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const toggle = (className: string) => {
-    setExpanded((prev) =>
-      prev.includes(className) ? prev.filter((c) => c !== className) : [...prev, className],
-    );
-  };
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const r = await fetch("/api/teacher/exams", { cache: "no-store" });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "Unable to load exams.");
+      setExams(j.exams || []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to load exams.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const totalQuestions = QUESTION_BANK.reduce(
-    (sum, cls) => sum + cls.subjects.reduce((s, sub) => s + sub.questionCount, 0),
-    0,
-  );
-  const totalMarks = QUESTION_BANK.reduce(
-    (sum, cls) => sum + cls.subjects.reduce((s, sub) => s + sub.totalMarks, 0),
-    0,
-  );
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const totalQuestions = exams.reduce((sum, e) => sum + e.questionCount, 0);
+  const drafts = exams.filter((e) => e.status === "DRAFT").length;
 
   return (
     <>
-      <PortalTopbar />
-      <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        <section className="pt-24 pb-10 bg-brand-navy px-6">
-          <div className="mx-auto max-w-7xl">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-green/20 border border-brand-green/40 text-brand-green text-[10px] font-bold uppercase tracking-widest mb-3">
-              <Eye size={11} /> Question Bank
-            </span>
-            <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
-              VIEW UPLOADED <span className="text-brand-green">QUESTIONS</span>
+      <PortalTopbar title="Question bank" />
+      <main className="mx-auto flex max-w-[1600px] gap-8 px-4 py-6 sm:px-6">
+        <TeacherSidebar />
+        <section className="min-w-0 flex-1 space-y-6">
+          <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Assessments &amp; items
+            </p>
+            <h1 className="mt-2 font-display text-4xl tracking-widest">
+              QUESTION <span className="text-brand-green">BANK</span>
             </h1>
-            <p className="text-white/60 text-sm">
-              Browse question bank grouped by class and subject.
+            <p className="mt-3 max-w-2xl text-sm text-white/65">
+              Every test and exam you own, with live question counts. Upload items from CSV/Excel/Word/JSON, preview, then publish.
             </p>
           </div>
-        </section>
 
-        <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
-            <TeacherSidebar />
+          {error && (
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">{error}</div>
+          )}
 
-            <div className="flex-1 min-w-0 space-y-6">
-              {/* Header banner */}
-              <div className="p-10 rounded-[2rem] bg-gradient-to-br from-brand-green to-brand-green-dark text-white text-center">
-                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
-                  <Eye size={28} />
-                </div>
-                <h2 className="font-display text-3xl mb-2">View Uploaded Questions</h2>
-                <p className="text-white/80 text-sm">Browse and manage your question bank</p>
-              </div>
-
-              {/* Stats + Search */}
-              <div className="grid md:grid-cols-4 gap-4">
-                <div className="p-4 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
-                  <HelpCircle className="text-brand-green mb-2" size={18} />
-                  <div className="font-display text-2xl text-[var(--text-primary)]">
-                    {totalQuestions}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                    Total Questions
-                  </div>
-                </div>
-                <div className="p-4 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
-                  <Award className="text-brand-orange mb-2" size={18} />
-                  <div className="font-display text-2xl text-[var(--text-primary)]">
-                    {totalMarks}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                    Total Marks
-                  </div>
-                </div>
-                <div className="p-4 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
-                  <School className="text-blue-500 mb-2" size={18} />
-                  <div className="font-display text-2xl text-[var(--text-primary)]">
-                    {QUESTION_BANK.length}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                    Classes
-                  </div>
-                </div>
-                <div className="p-4 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
-                  <BookOpen className="text-purple-500 mb-2" size={18} />
-                  <div className="font-display text-2xl text-[var(--text-primary)]">
-                    {QUESTION_BANK.reduce(
-                      (s, c) => s + c.subjects.filter((sub) => sub.name !== "No Courses").length,
-                      0,
-                    )}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                    Subjects
-                  </div>
-                </div>
-              </div>
-
-              {/* Search */}
-              <div className="relative">
-                <Search
-                  size={16}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
-                />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search classes or subjects..."
-                  className="w-full pl-11 pr-5 py-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
-                />
-              </div>
-
-              {/* Class Groups */}
-              <div className="space-y-4">
-                {QUESTION_BANK.filter((c) =>
-                  c.className.toLowerCase().includes(search.toLowerCase()),
-                ).map((cls) => {
-                  const isExpanded = expanded.includes(cls.className);
-                  const validSubjects = cls.subjects.filter((s) => s.name !== "No Courses");
-                  const hasContent = validSubjects.length > 0;
-
-                  return (
-                    <div
-                      key={cls.className}
-                      className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] overflow-hidden"
-                    >
-                      <button
-                        onClick={() => toggle(cls.className)}
-                        className="w-full p-5 flex items-center justify-between hover:bg-[var(--surface-disabled)] transition-colors"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-11 h-11 rounded-xl bg-brand-green/10 text-brand-green flex items-center justify-center">
-                            <School size={20} />
-                          </div>
-                          <div className="text-left">
-                            <div className="font-display text-lg text-[var(--text-primary)]">
-                              {cls.className}
-                            </div>
-                            <span className="inline-block mt-1 text-[10px] px-2.5 py-0.5 rounded-full bg-brand-green text-white font-bold uppercase tracking-widest">
-                              {validSubjects.length || 1}{" "}
-                              {validSubjects.length === 1 ? "Subject" : "Subjects"}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="text-xs text-brand-green font-bold uppercase tracking-widest flex items-center gap-1">
-                          {isExpanded ? "Click to Collapse" : "Click to Expand"}
-                          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                        </div>
-                      </button>
-
-                      {isExpanded && (
-                        <div className="border-t border-[var(--border-subtle)] p-6 bg-[var(--surface-disabled)]/30 space-y-3">
-                          {hasContent ? (
-                            cls.subjects.map((subject) => (
-                              <div
-                                key={subject.name}
-                                className="rounded-xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-5"
-                              >
-                                <div className="flex items-center justify-between mb-3">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-lg bg-brand-green/10 text-brand-green flex items-center justify-center">
-                                      <BookOpen size={16} />
-                                    </div>
-                                    <div className="font-bold text-[var(--text-primary)]">
-                                      {subject.name}
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green font-bold flex items-center gap-1">
-                                      <HelpCircle size={9} /> {subject.questionCount} Questions
-                                    </span>
-                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange font-bold flex items-center gap-1">
-                                      <Award size={9} /> {subject.totalMarks} Marks
-                                    </span>
-                                  </div>
-                                </div>
-
-                                {subject.courses && (
-                                  <div className="pl-12 space-y-2">
-                                    {subject.courses.map((course) => (
-                                      <div
-                                        key={course.title}
-                                        className="flex items-center justify-between p-3 rounded-lg bg-[var(--surface-disabled)]"
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <FileText
-                                            size={12}
-                                            className="text-[var(--text-muted)]"
-                                          />
-                                          <span className="text-sm text-[var(--text-primary)]">
-                                            {course.title}
-                                          </span>
-                                          <span
-                                            className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${course.status === "active" ? "bg-brand-green/20 text-brand-green" : "bg-brand-orange/20 text-brand-orange"}`}
-                                          >
-                                            {course.status}
-                                          </span>
-                                        </div>
-                                        <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
-                                          <span>{course.questions} Qs</span>
-                                          <span>·</span>
-                                          <span>{course.marks} marks</span>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            ))
-                          ) : (
-                            <div className="p-8 text-center rounded-xl bg-[var(--surface-card)] border border-dashed border-[var(--border-subtle)]">
-                              <AlertCircle
-                                className="mx-auto text-[var(--text-muted)] mb-2"
-                                size={32}
-                              />
-                              <div className="text-sm text-[var(--text-muted)] mb-1">
-                                No Courses
-                              </div>
-                              <div className="flex items-center justify-center gap-2 text-xs text-[var(--text-muted)]">
-                                <HelpCircle size={11} /> 0 Questions
-                                <span>·</span>
-                                <Award size={11} /> 0 Marks
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
+              <FileText className="mb-2 text-brand-green" size={18} />
+              <div className="font-display text-2xl">{exams.length}</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Exams / tests</div>
             </div>
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
+              <BookOpen className="mb-2 text-brand-orange" size={18} />
+              <div className="font-display text-2xl">{totalQuestions}</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Questions</div>
+            </div>
+            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
+              <ClipboardList className="mb-2 text-blue-500" size={18} />
+              <div className="font-display text-2xl">{drafts}</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Drafts</div>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <Link
+              href="/teacher/upload-questions"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+            >
+              <PlusCircle size={15} /> Upload questions
+            </Link>
+          </div>
+
+          <div className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]">
+            {loading ? (
+              <div className="flex items-center justify-center gap-2 p-12 text-sm text-[var(--text-muted)]">
+                <LoaderCircle className="animate-spin" size={18} /> Loading exams…
+              </div>
+            ) : (
+              <table className="w-full text-left text-sm">
+                <thead className="bg-[var(--surface-disabled)] text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                  <tr>
+                    <th className="p-4">Exam / Test</th>
+                    <th className="p-4">Subject · Class</th>
+                    <th className="p-4">Questions</th>
+                    <th className="p-4">Marks</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4">Submitted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {exams.map((e) => (
+                    <tr key={e.id} className="border-t border-[var(--border-subtle)]">
+                      <td className="p-4">
+                        <b>{e.title}</b>
+                      </td>
+                      <td className="p-4 text-xs text-[var(--text-muted)]">
+                        {e.subjectName} · {e.className}
+                      </td>
+                      <td className="p-4 font-display text-base text-brand-green">{e.questionCount}</td>
+                      <td className="p-4">{e.totalMarks}</td>
+                      <td className="p-4">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                            e.status === "PUBLISHED"
+                              ? "bg-brand-green/15 text-brand-green"
+                              : "bg-brand-orange/15 text-brand-orange"
+                          }`}
+                        >
+                          {e.status === "PUBLISHED" && <CheckCircle2 size={11} />}
+                          {e.statusLabel || e.status}
+                        </span>
+                      </td>
+                      <td className="p-4 text-xs text-[var(--text-muted)]">{e.submittedCount}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {!loading && !exams.length && (
+              <div className="p-10 text-center">
+                <p className="text-sm text-[var(--text-muted)]">No exams yet.</p>
+                <Link href="/teacher/upload-questions" className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-brand-green">
+                  <PlusCircle size={15} /> Upload your first set of questions
+                </Link>
+              </div>
+            )}
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }
