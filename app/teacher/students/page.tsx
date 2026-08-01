@@ -58,6 +58,7 @@ export default function TeacherStudentsPage() {
   });
   const [search, setSearch] = useState("");
   const [classId, setClassId] = useState("All");
+  const [scope, setScope] = useState<"all" | "form" | "subject">("all");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
@@ -115,9 +116,11 @@ export default function TeacherStudentsPage() {
         s.studentId.toLowerCase().includes(q) ||
         (s.guardianPhone || "").includes(q);
       const matchC = classId === "All" || s.classId === classId;
-      return matchQ && matchC;
+      const matchScope =
+        scope === "all" || (scope === "form" ? s.canManage : !s.canManage);
+      return matchQ && matchC && matchScope;
     });
-  }, [students, search, classId]);
+  }, [students, search, classId, scope]);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -201,6 +204,23 @@ export default function TeacherStudentsPage() {
                 Entrance suggestions
               </div>
             </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {(["all", "form", "subject"] as const).map((sc) => (
+              <button
+                key={sc}
+                type="button"
+                onClick={() => setScope(sc)}
+                className={`rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-widest ${
+                  scope === sc
+                    ? "bg-brand-green text-white"
+                    : "border border-[var(--input-border)] text-[var(--text-muted)]"
+                }`}
+              >
+                {sc === "all" ? "All students" : sc === "form" ? "My form class" : "Subject students"}
+              </button>
+            ))}
           </div>
 
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
