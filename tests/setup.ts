@@ -73,10 +73,14 @@ const mockPrisma = {
   },
   examAttempt: {
     findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    create: vi.fn(),
     update: vi.fn(),
   },
   examAnswer: {
+    findMany: vi.fn(),
     update: vi.fn(),
+    upsert: vi.fn(),
   },
   schoolClass: {
     findFirst: vi.fn(),
@@ -103,6 +107,13 @@ const mockPrisma = {
   },
   exam: {
     findMany: vi.fn(),
+    findFirst: vi.fn(),
+    findUnique: vi.fn(),
+    create: vi.fn(),
+  },
+  examRetake: {
+    findUnique: vi.fn(),
+    update: vi.fn(),
   },
   teacherClassAssignment: {
     findMany: vi.fn(),
