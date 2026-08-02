@@ -43,6 +43,53 @@ jobs:
       - name: Run tests
         run: npx vitest run
 
+  schema-drift:
+    name: Schema Drift
+    runs-on: ubuntu-latest
+    # Builds a throwaway Postgres from the migration history and asserts it
+    # matches schema.prisma. Catches the class of bug where a model or column
+    # is declared and used in code but never migrated — which shipped twice
+    # (DeviceToken, StudentProfile.photoUrl) and only failed on environments
+    # built from scratch, never on a dev machine patched with `prisma db push`.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply migrations to a clean database
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+
+      - name: Assert no schema drift
+        run: npm run check:drift
+        env:
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+
+      - name: Verify RLS tenant isolation
+        run: npm run verify:rls
+        env:
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+
   build:
     name: Build
     runs-on: ubuntu-latest

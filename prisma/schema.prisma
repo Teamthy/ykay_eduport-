@@ -224,6 +224,13 @@ model User {
   newsPosts                   NewsPost[]
 
   @@index([schoolId, role])
+  // Present in the DB since 20260723220000_phase_9_1_security_forensics /
+  // 20260724000000_phase_9_2_session_revocation. Declared here so
+  // `prisma migrate dev` stops trying to DROP them (measured 7x slower
+  // login lookup without User_email_idx at 5k users).
+  @@index([email])
+  @@index([role])
+  @@index([tokenVersion])
   @@unique([schoolId, email])
 }
 
@@ -335,6 +342,7 @@ model StudentProfile {
   @@unique([schoolId, studentId])
   @@index([currentClassId, isActive])
   @@index([schoolId, displayName])
+  @@index([schoolId])
 }
 
 model ParentStudentLink {
@@ -534,6 +542,7 @@ model FeePayment {
   @@index([schoolId, paidAt])
   @@index([invoiceId, paidAt])
   @@index([parentProfileId, paidAt])
+  @@index([status])
 }
 
 model FeePaymentAttempt {
@@ -722,6 +731,7 @@ model NotificationJob {
   @@index([schoolId, status, nextAttemptAt])
   @@index([schoolId, kind, createdAt])
   @@index([schoolId, channel, status])
+  @@index([status, nextAttemptAt])
 }
 
 model UserNotification {
@@ -1040,6 +1050,9 @@ model AuditLog {
 
   @@index([schoolId, entityType, entityId])
   @@index([actorUserId, createdAt])
+  @@index([action])
+  @@index([createdAt])
+  @@index([schoolId, createdAt])
 }
 
 model StaffInvite {
