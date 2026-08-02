@@ -2,7 +2,16 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, ClipboardCheck, LoaderCircle, UserPlus, XCircle } from "lucide-react";
+import Link from "next/link";
+import {
+  Banknote,
+  CheckCircle2,
+  ClipboardCheck,
+  ClipboardList,
+  LoaderCircle,
+  UserPlus,
+  XCircle,
+} from "lucide-react";
 import AdminSidebar from "@/components/AdminSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
 import { useAuth } from "@/components/AuthProvider";
@@ -192,6 +201,12 @@ export default function AdminAdmissionsPage() {
               Review paid applications, record entrance results, and place successful applicants
               into the class they applied for — with one-time parent credentials.
             </p>
+            <Link
+              href="/admin-admissions/paper"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-bold text-white transition-all hover:opacity-90"
+            >
+              <ClipboardList size={15} /> Enter a paper application
+            </Link>
           </div>
 
           {msg && (

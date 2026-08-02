@@ -62,9 +62,6 @@ const mockPrisma = {
     create: vi.fn(),
     update: vi.fn(),
   },
-  paymentTransaction: {
-    updateMany: vi.fn(),
-  },
   gradebookEntry: {
     findMany: vi.fn(),
     createMany: vi.fn(),
@@ -87,13 +84,22 @@ const mockPrisma = {
   },
   admissionApplication: {
     findFirst: vi.fn(),
+    findUnique: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
+  paymentTransaction: {
+    create: vi.fn(),
+    update: vi.fn(),
+    updateMany: vi.fn(),
+  },
+  parentStudentLink: {
+    findMany: vi.fn(),
+    create: vi.fn(),
   },
   idempotencyRecord: {
     findUnique: vi.fn(),
     create: vi.fn(),
-  },
-  parentStudentLink: {
-    findMany: vi.fn(),
   },
   attendanceSession: {
     findMany: vi.fn(),

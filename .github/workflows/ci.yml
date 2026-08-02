@@ -90,6 +90,11 @@ jobs:
         env:
           DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
 
+      - name: Verify admissions operations loop
+        run: npm run verify:admissions
+        env:
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+
   build:
     name: Build
     runs-on: ubuntu-latest

@@ -31,6 +31,51 @@ export async function sendAdmissionDecisionEmail(input: {
   });
 }
 
+/**
+ * Sent when an applicant is enrolled and a parent portal account is created.
+ *
+ * Without this the temporary password appeared once in a toast on the admin
+ * screen and nowhere else — if the clerk closed the tab or looked away, the
+ * family had no way in short of a manual password reset. At term start, with
+ * dozens of enrolments a day, that is a guaranteed queue at the front desk.
+ *
+ * Deliberately fire-and-forget at the call site: a mail failure must never roll
+ * back a completed enrolment. The password is still returned in the API
+ * response so staff can read it out if the parent's email bounces.
+ */
+export async function sendParentWelcomeEmail(input: {
+  to: string;
+  parentName: string;
+  studentName: string;
+  studentId: string;
+  className: string;
+  temporaryPassword: string;
+}) {
+  const base = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+  const schoolName = process.env.SCHOOL_NAME || "Ykay College";
+  await client().emails.send({
+    from: from(),
+    to: input.to,
+    subject: `${input.studentName} has been enrolled at ${schoolName}`,
+    html: `
+      <p>Hello ${input.parentName},</p>
+      <p>
+        <strong>${input.studentName}</strong> has been enrolled at ${schoolName} in
+        <strong>${input.className}</strong>. The student ID is
+        <strong>${input.studentId}</strong>.
+      </p>
+      <p>You can now use the parent portal to follow attendance, results, fees and school notices.</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin:16px 0">
+        <tr><td><strong>Portal</strong></td><td><a href="${base}/login">${base}/login</a></td></tr>
+        <tr><td><strong>Email</strong></td><td>${input.to}</td></tr>
+        <tr><td><strong>Temporary password</strong></td><td><code>${input.temporaryPassword}</code></td></tr>
+      </table>
+      <p>You will be asked to choose your own password the first time you sign in. Please do not share this email.</p>
+      <p>If you did not expect this, contact the school office.</p>
+    `,
+  });
+}
+
 export async function sendStaffInviteEmail(input: {
   to: string;
   name: string;

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { PEOPLE_ADMIN_ROLES, oneTimeSecret, passwordHash, uniqueStudentNumber } from "@/lib/people";
 import { getClientIp } from "@/lib/requests";
+import { sendParentWelcomeEmail } from "@/lib/email";
 import { requireRole } from "@/lib/session";
 const schema = z.object({
   applicationId: z.string().min(1),
@@ -160,14 +161,38 @@ export async function POST(request: NextRequest) {
           },
         },
       });
-      return { student, parentCreated };
+      return { student, parentCreated, parentDisplayName: parent.displayName };
     });
+    // Email the parent their portal credentials.
+    //
+    // Fire-and-forget on purpose: the enrolment transaction has already
+    // committed, and a Resend outage must not fail the request or leave the
+    // clerk unsure whether the student was enrolled. The temporary password is
+    // still returned below so staff can read it out if the email bounces.
+    let welcomeEmailSent = false;
+    if (result.parentCreated) {
+      try {
+        await sendParentWelcomeEmail({
+          to: application.parentEmail,
+          parentName: result.parentDisplayName,
+          studentName: displayName,
+          studentId: number,
+          className: schoolClass.displayName,
+          temporaryPassword: tempPassword,
+        });
+        welcomeEmailSent = true;
+      } catch (emailError) {
+        console.error("Parent welcome email failed", emailError);
+      }
+    }
+
     const response = {
       student: { studentId: number, displayName, className: schoolClass.displayName },
       parentAccount: {
         email: application.parentEmail,
         temporaryPassword: result.parentCreated ? tempPassword : null,
         mustChangePassword: result.parentCreated,
+        welcomeEmailSent,
       },
     };
     await prisma.idempotencyRecord.create({
@@ -182,6 +207,7 @@ export async function POST(request: NextRequest) {
             email: response.parentAccount.email,
             temporaryPassword: null,
             mustChangePassword: response.parentAccount.mustChangePassword,
+            welcomeEmailSent: response.parentAccount.welcomeEmailSent,
           },
         },
         statusCode: 201,
