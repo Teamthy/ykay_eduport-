@@ -24,6 +24,7 @@ import crypto from "crypto";
 import { UserRole, TeacherAssignmentRole } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { getSchool } from "../lib/school";
+import { createSession, ensureEnrolments } from "../lib/academic-session";
 
 // ── Configuration ──────────────────────────────────────────────────
 
@@ -71,6 +72,11 @@ const TEACHERS = [
     subjects: ["Computer Science", "ICT"],
   },
 ];
+
+/// The session a fresh environment starts in. Bump when the school rolls over.
+const CURRENT_SESSION_LABEL = "2026/2027";
+const SESSION_STARTS_ON = new Date("2026-09-01");
+const SESSION_ENDS_ON = new Date("2027-07-31");
 
 const CLASS_LEVELS = ["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"] as const;
 const CLASS_ARMS = ["A", "B"] as const;
@@ -383,6 +389,18 @@ async function main() {
           mustChangePassword: false,
         },
       });
+      // StudentProfile.userId is UNIQUE. On a database that was seeded before
+      // this block existed, scripts/make-student-login.ts may already have
+      // linked this same user to a DIFFERENT profile (it picks one with an
+      // unordered findFirst). Blindly claiming the link then fails with P2002
+      // and aborts the whole seed.
+      //
+      // Release the user from any other profile first, so the seed is
+      // idempotent regardless of what linked it previously.
+      await prisma.studentProfile.updateMany({
+        where: { schoolId: school.id, userId: studentUser.id, id: { not: student.id } },
+        data: { userId: null },
+      });
       await prisma.studentProfile.update({
         where: { id: student.id },
         data: { userId: studentUser.id },
@@ -393,6 +411,36 @@ async function main() {
 
     console.log(`   ✅ ${displayName} (${studentId}) — ${className}`);
   }
+  console.log("");
+
+  // 5b. Academic session + terms, and an enrolment per student.
+  //
+  // Without this a fresh environment has no current term, so anything that
+  // stamps a report card or gradebook has nothing authoritative to read. The
+  // enrolment rows are what make class history survive an end-of-session
+  // promotion.
+  console.log("📌 Creating academic session and terms...");
+  const existingSession = await prisma.academicSession.findFirst({
+    where: { schoolId: school.id, label: CURRENT_SESSION_LABEL },
+    include: { terms: { orderBy: { index: "asc" } } },
+  });
+
+  const session =
+    existingSession ??
+    (await createSession({
+      schoolId: school.id,
+      label: CURRENT_SESSION_LABEL,
+      startsOn: SESSION_STARTS_ON,
+      endsOn: SESSION_ENDS_ON,
+      makeCurrent: true,
+    }));
+
+  for (const t of session.terms) {
+    console.log(`   ✅ ${t.label}${t.isCurrent ? "  ← current" : ""}`);
+  }
+
+  const { created: enrolled } = await ensureEnrolments(school.id, session.id);
+  console.log(`   ✅ ${enrolled} student enrolment(s) for ${session.label}`);
   console.log("");
 
   // 6. Parent Profiles + Links
@@ -496,6 +544,9 @@ async function main() {
   }
   console.log(
     "   └─────────────────────────────────────┴──────────────────────────────┴─────────────────┘",
+  );
+  console.log(
+    `\n   Session: ${session.label} · ${session.terms.find((t) => t.isCurrent)?.label ?? "—"}`,
   );
   console.log("\n   Portal URLs:");
   console.log("   • Super Admin:  /super-admin");

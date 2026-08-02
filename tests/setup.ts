@@ -36,6 +36,9 @@ const mockPrisma = {
   studentProfile: {
     findFirst: vi.fn(),
     findMany: vi.fn(),
+    update: vi.fn(),
+    updateMany: vi.fn(),
+    count: vi.fn(),
   },
   parentProfile: {
     findFirst: vi.fn(),
@@ -48,6 +51,30 @@ const mockPrisma = {
   deviceToken: {
     findMany: vi.fn(),
     upsert: vi.fn(),
+  },
+  academicSession: {
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    updateMany: vi.fn(),
+    deleteMany: vi.fn(),
+  },
+  term: {
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    updateMany: vi.fn(),
+  },
+  studentEnrolment: {
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    createMany: vi.fn(),
+    update: vi.fn(),
+    updateMany: vi.fn(),
+    count: vi.fn(),
   },
   behaviorRecord: {
     findFirst: vi.fn(),
@@ -122,6 +149,7 @@ const mockPrisma = {
   },
   schoolClass: {
     findFirst: vi.fn(),
+    findMany: vi.fn(),
   },
   admissionApplication: {
     findFirst: vi.fn(),

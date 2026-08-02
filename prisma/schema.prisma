@@ -196,6 +196,9 @@ model School {
   messageThreads          MessageThread[]
   messages                Message[]
   behaviorRecords         BehaviorRecord[]
+  academicSessions        AcademicSession[]
+  terms                   Term[]
+  studentEnrolments       StudentEnrolment[]
 }
 
 model User {
@@ -306,6 +309,7 @@ model SchoolClass {
   attendanceSessions AttendanceSession[]
   gradebooks         SubjectGradebook[]
   exams              Exam[]
+  enrolments         StudentEnrolment[]
 
   @@unique([schoolId, displayName])
   @@index([schoolId, level, arm])
@@ -347,6 +351,7 @@ model StudentProfile {
   admissionApplication AdmissionApplication? @relation("AdmissionEnrollment", fields: [admissionApplicationId], references: [id], onDelete: SetNull)
   messageThreads       MessageThread[]
   behaviorRecords      BehaviorRecord[]
+  enrolments           StudentEnrolment[]
 
   @@unique([schoolId, studentId])
   @@index([currentClassId, isActive])
@@ -1407,4 +1412,96 @@ model BehaviorRecord {
   @@index([schoolId, occurredAt])
   @@index([studentProfileId, occurredAt])
   @@index([teacherProfileId, occurredAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Academic sessions, terms and enrolment history
+//
+//  Before this, term and session existed only as free-text strings copied onto
+//  FeeInvoice, ReportCard, SubjectGradebook and Budget. Nothing defined "the
+//  current term", nothing stopped "1st Term" and "First Term" becoming two
+//  different terms, and StudentProfile held only currentClassId — so promoting
+//  a student OVERWROTE the record of where they had been. Last session's report
+//  card would then render against the student's new class.
+//
+//  StudentEnrolment fixes that: one row per student per session, so history
+//  survives promotion. StudentProfile.currentClassId stays as a cached pointer
+//  to the active enrolment — dropping it would touch dozens of queries for no
+//  benefit — but the enrolment table is the source of truth.
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum EnrolmentOutcome {
+  IN_PROGRESS
+  PROMOTED
+  REPEATED
+  GRADUATED
+  WITHDRAWN
+  TRANSFERRED
+}
+
+model AcademicSession {
+  id        String   @id @default(cuid())
+  schoolId  String
+  /// e.g. "2026/2027"
+  label     String
+  startsOn  DateTime
+  endsOn    DateTime
+  /// Exactly one session per school should carry this. Enforced in
+  /// lib/academic-session.ts rather than by a partial index, so the same
+  /// schema works on databases without them.
+  isCurrent Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school     School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  terms      Term[]
+  enrolments StudentEnrolment[]
+
+  @@unique([schoolId, label])
+  @@index([schoolId, isCurrent])
+}
+
+model Term {
+  id        String   @id @default(cuid())
+  schoolId  String
+  sessionId String
+  /// 1, 2 or 3. This is the SORT KEY — never parse `label` for ordering, or a
+  /// school writing "1st Term" instead of "First Term" reorders its own year.
+  index     Int
+  label     String
+  startsOn  DateTime
+  endsOn    DateTime
+  isCurrent Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school  School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  session AcademicSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, index])
+  @@index([schoolId, isCurrent])
+}
+
+/// One row per student per session — the record that makes history durable.
+model StudentEnrolment {
+  id               String           @id @default(cuid())
+  schoolId         String
+  studentProfileId String
+  classId          String
+  sessionId        String
+  outcome          EnrolmentOutcome @default(IN_PROGRESS)
+  /// Set when the session is closed out and an outcome is applied.
+  completedAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  school         School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentProfile StudentProfile  @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  classroom      SchoolClass     @relation(fields: [classId], references: [id], onDelete: Restrict)
+  session        AcademicSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  /// A student sits in exactly one class per session.
+  @@unique([studentProfileId, sessionId])
+  @@index([classId, sessionId])
+  @@index([schoolId, sessionId, outcome])
 }
