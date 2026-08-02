@@ -42,6 +42,20 @@ export async function POST(request: NextRequest) {
     })),
   });
 
+  // Deliver to mobile devices too. Fire-and-forget: the in-app rows are already
+  // committed and are the source of truth, so a gateway failure must not fail
+  // the broadcast.
+  void import("@/lib/push")
+    .then(({ pushUsers }) =>
+      pushUsers(
+        users.map((u) => u.id),
+        { title: input.title, body: input.body, data: { kind: "BROADCAST" } },
+      ),
+    )
+    .catch(() => {
+      /* ignore */
+    });
+
   await prisma.auditLog.create({
     data: {
       schoolId: user.schoolId,

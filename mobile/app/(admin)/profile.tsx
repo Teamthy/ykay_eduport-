@@ -16,7 +16,7 @@ export default function AdminProfile() {
   const { colors, spacing } = useTheme();
   const [user, setUser] = useState<any>(null);
 
-  useEffect(() => { getMe().then((res) => setUser(res?.user)); adminApi.dashboard().then((r) => setUser((u) => ({ ...u, roleLabel: r?.admin?.role }))); }, []);
+  useEffect(() => { getMe().then((res) => setUser(res?.user)); adminApi.dashboard().then((r) => setUser((u: any) => ({ ...u, roleLabel: r?.admin?.role }))); }, []);
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }}>

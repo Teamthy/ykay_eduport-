@@ -50,7 +50,7 @@ export default function ExamRunner() {
 
   useEffect(() => { if (phase !== "running") return; const t = setInterval(() => { setSecondsLeft((s) => { if (s <= 1) { clearInterval(t); doSubmit(true); return 0; } return s - 1; }); }, 1000); return () => clearInterval(t); }, [phase]);
   useEffect(() => { if (phase !== "running") return; const t = setInterval(() => doSave(), 20_000); return () => clearInterval(t); }, [phase]);
-  useEffect(() => { if (phase !== "running") return; const handler = () => { Alert.alert("Leave exam?", "Your progress is saved.", [{ text: "Stay", style: "cancel" }, { text: "Leave", style: "destructive", onPress: () => router.back() }]); return true; }; BackHandler.addEventListener("hardwareBackPress", handler); return () => BackHandler.removeEventListener("hardwareBackPress", handler); }, [phase]);
+  useEffect(() => { if (phase !== "running") return; const handler = () => { Alert.alert("Leave exam?", "Your progress is saved.", [{ text: "Stay", style: "cancel" }, { text: "Leave", style: "destructive", onPress: () => router.back() }]); return true; }; const sub = BackHandler.addEventListener("hardwareBackPress", handler); return () => sub.remove(); }, [phase]);
 
   function setAnswer(qId: string, value: string) { setAnswers((prev) => ({ ...prev, [qId]: value })); }
   async function doSave() { if (!attemptIdRef.current) return; setSaving(true); try { await studentApi.saveExam(examIdRef.current, attemptIdRef.current, Object.entries(answersRef.current).map(([questionId, response]) => ({ questionId, response }))); } catch {} finally { setSaving(false); } }

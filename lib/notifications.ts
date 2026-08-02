@@ -142,16 +142,57 @@ export type InAppNotificationInput = {
   title: string;
   body: string;
   link?: string | null;
+  /** Set false to suppress mobile push (in-app row is still written). */
+  push?: boolean;
 };
 
+/**
+ * Create an in-app notification AND deliver it to the user's mobile devices.
+ *
+ * Push was previously a dead end: the mobile app registered device tokens at
+ * /api/push/register and lib/push.ts could send to them, but nothing ever
+ * called it — sendPush() had zero callers. Tokens accumulated and no push was
+ * ever delivered, so the app was a portal you had to remember to open rather
+ * than something that tells you your child was marked absent.
+ *
+ * Hooking it here rather than at each call site means every existing and
+ * future in-app notification (fee reminders, report-card releases, attendance
+ * alerts, broadcasts) gains push delivery with no extra work, and the two can
+ * never drift apart.
+ *
+ * Push is fire-and-forget: the in-app row is the source of truth and is
+ * already committed, so a failure at Expo's gateway must not fail the caller.
+ */
 export async function createInAppNotification(input: InAppNotificationInput) {
-  return prisma.userNotification.create({
+  const notification = await prisma.userNotification.create({
     data: {
       schoolId: input.schoolId,
       userId: input.userId,
       kind: input.kind,
       title: input.title,
       body: input.body,
+      link: input.link || null,
+    },
+  });
+
+  if (input.push !== false) {
+    void deliverPush(input).catch(() => {
+      /* never surface a push failure to the caller */
+    });
+  }
+
+  return notification;
+}
+
+async function deliverPush(input: InAppNotificationInput) {
+  const { pushUser } = await import("@/lib/push");
+  await pushUser(input.userId, {
+    title: input.title,
+    body: input.body,
+    data: {
+      kind: input.kind,
+      // Deep-link target so tapping the notification opens the right screen
+      // instead of dumping the user on the dashboard.
       link: input.link || null,
     },
   });

@@ -7,7 +7,12 @@ import { Anton_400Regular } from "@expo-google-fonts/anton";
 import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold } from "@expo-google-fonts/dm-sans";
 import { getMe, type SessionUser } from "@/lib/api";
 import { setAuthExpiredHandler } from "@/lib/http";
-import { configureNotifications, registerForPushNotifications } from "@/lib/notifications";
+import {
+  addNotificationTapListener,
+  configureNotifications,
+  consumeInitialNotification,
+  registerForPushNotifications,
+} from "@/lib/notifications";
 import { ThemeProvider } from "@/src/theme";
 import { Colors } from "@/src/theme/colors";
 import OfflineIndicator from "@/components/OfflineIndicator";
@@ -34,10 +39,32 @@ export default function RootLayout() {
         if (!cancelled) setUser(res?.user ?? null);
         if (res?.user) void registerForPushNotifications();
       })
-      .catch(() => { if (!cancelled) setUser(null); });
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      });
     const t = setTimeout(() => setTimedOut(true), 4000);
-    return () => { cancelled = true; clearTimeout(t); };
-  }, []);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [router]);
+
+  // Tapping a push notification should open the thing it is about.
+  //
+  // Two paths, and both are needed: the listener covers taps while the app is
+  // running or backgrounded, and consumeInitialNotification covers a COLD
+  // start, where the tap happened before any listener existed. Without the
+  // second one, the most common real case — phone locked, notification
+  // arrives, user taps it — silently does nothing.
+  //
+  // Waits for `user` so routing is role-correct and we never navigate into a
+  // protected group before the session is known.
+  useEffect(() => {
+    if (!user) return;
+    const go = (path: string) => router.push(path as never);
+    void consumeInitialNotification(go, user.role);
+    return addNotificationTapListener(go, user.role);
+  }, [user, router]);
 
   if (user === undefined && !timedOut) {
     return (

@@ -42,6 +42,12 @@ const mockPrisma = {
   },
   userNotification: {
     findMany: vi.fn(),
+    create: vi.fn(),
+    createMany: vi.fn(),
+  },
+  deviceToken: {
+    findMany: vi.fn(),
+    upsert: vi.fn(),
   },
   feePayment: {
     findUnique: vi.fn(),

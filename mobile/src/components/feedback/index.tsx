@@ -1,5 +1,13 @@
 import React, { useEffect, useRef } from "react";
-import { View, Text, ActivityIndicator, TouchableOpacity, Animated, ViewStyle } from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  TouchableOpacity,
+  Animated,
+  ViewStyle,
+  DimensionValue,
+} from "react-native";
 import { useTheme } from "@/src/theme";
 
 export function EmptyState({ icon, title, message }: { icon?: React.ReactNode; title: string; message?: string }) {
@@ -38,7 +46,7 @@ export function ErrorState({ title = "Something went wrong", message, onRetry }:
   );
 }
 
-export function Skeleton({ width = "100%", height = 16, radius = 8, style }: { width?: number | string; height?: number; radius?: number; style?: ViewStyle }) {
+export function Skeleton({ width = "100%", height = 16, radius = 8, style }: { width?: DimensionValue; height?: number; radius?: number; style?: ViewStyle }) {
   const { colors } = useTheme();
   const opacity = useRef(new Animated.Value(0.3)).current;
   useEffect(() => {
@@ -51,5 +59,5 @@ export function Skeleton({ width = "100%", height = 16, radius = 8, style }: { w
     loop.start();
     return () => loop.stop();
   }, [opacity]);
-  return <Animated.View style={{ width, height, borderRadius: radius, backgroundColor: colors.surface.disabled, opacity, ...style }} />;
+  return <Animated.View style={[{ width, height, borderRadius: radius, backgroundColor: colors.surface.disabled, opacity }, style]} />;
 }

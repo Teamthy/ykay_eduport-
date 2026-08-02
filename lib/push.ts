@@ -40,6 +40,25 @@ export async function pushUser(userId: string, payload: PushPayload): Promise<vo
   await sendPush(tokens, payload);
 }
 
+/**
+ * Push to many users at once (e.g. a school-wide broadcast).
+ *
+ * One query for all tokens rather than N queries — a broadcast to 800 parents
+ * would otherwise be 800 round-trips before a single notification is sent.
+ */
+export async function pushUsers(userIds: string[], payload: PushPayload): Promise<void> {
+  if (!userIds.length) return;
+  const { prisma } = await import("@/lib/prisma");
+  const rows = await prisma.deviceToken.findMany({
+    where: { userId: { in: userIds } },
+    select: { token: true },
+  });
+  await sendPush(
+    rows.map((r) => r.token),
+    payload,
+  );
+}
+
 async function prismaTokensForUser(userId: string): Promise<string[]> {
   // Imported lazily to avoid loading Prisma in unrelated serverless paths.
   const { prisma } = await import("@/lib/prisma");

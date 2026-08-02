@@ -9,8 +9,10 @@ import { Platform } from "react-native";
 export async function biometricAvailable(): Promise<boolean> {
   if (Platform.OS === "web") return false;
   try {
-    const { available } = await LocalAuthentication.hasHardwareAsync();
-    return available;
+    // hasHardwareAsync() resolves to a boolean, not { available }. The old
+    // destructure yielded undefined, so this always returned false and
+    // biometric unlock never engaged on any device.
+    return await LocalAuthentication.hasHardwareAsync();
   } catch {
     return false;
   }
@@ -19,8 +21,8 @@ export async function biometricAvailable(): Promise<boolean> {
 export async function biometricEnrolled(): Promise<boolean> {
   if (Platform.OS === "web") return false;
   try {
-    const { enrolled } = await LocalAuthentication.isEnrolledAsync();
-    return enrolled;
+    // Same again: isEnrolledAsync() resolves to a boolean.
+    return await LocalAuthentication.isEnrolledAsync();
   } catch {
     return false;
   }

@@ -7,7 +7,7 @@ import { Card } from "@/src/components/cards";
 import { H2, Body, Caption } from "@/src/components/typography";
 import { Badge } from "@/src/components/badges";
 import { Button } from "@/src/components/buttons";
-import { Row } from "@/src/components/layout";
+import { Column, Row } from "@/src/components/layout";
 import { EmptyState } from "@/src/components/feedback";
 import { bodyFont } from "@/src/theme/typography";
 import { ClipboardCheck, Clock, Play, Lock, CheckCircle2, RotateCcw } from "lucide-react-native";

@@ -15,7 +15,18 @@ import { cachedGet, queuedWrite } from "@/lib/offline/cache";
 export { API_BASE, getToken, setToken, clearToken };
 export type { SessionUser };
 
-export async function api<T = unknown>(
+/**
+ * Typed API call.
+ *
+ * The default is `any`, not `unknown`, on purpose. Screens consume dynamic
+ * server shapes (`res?.reports?.[0]?.id`) and with `unknown` the compiler
+ * narrows the result to `{}`, producing "Property 'reports' does not exist on
+ * type '{}'" on eight screens. Callers that want safety pass an explicit
+ * generic — `api<DashboardResponse>("/api/student/dashboard")` — and get full
+ * checking; the rest stay ergonomic instead of littered with casts.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function api<T = any>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
