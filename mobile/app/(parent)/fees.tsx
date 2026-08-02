@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import { parentApi } from "@/lib/api";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/src/theme";
@@ -11,6 +19,7 @@ import { Row, Column } from "@/src/components/layout";
 import { EmptyState } from "@/src/components/feedback";
 import { bodyFont } from "@/src/theme/typography";
 import { CreditCard, CheckCircle2, Clock, AlertCircle } from "lucide-react-native";
+import { useToast } from "@/components/MobileToast";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 
@@ -21,40 +30,115 @@ export default function ParentFees() {
   const [childId, setChildId] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [paying, setPaying] = useState<string | null>(null);
+  const { toast } = useToast();
 
   async function load(id?: string) {
-    try { const res = await parentApi.fees(id || undefined); setData(res); if (!id) setChildId(res?.selectedChild?.id || ""); } catch {} finally { setRefreshing(false); }
+    try {
+      const res = await parentApi.fees(id || undefined);
+      setData(res);
+      if (!id) setChildId(res?.selectedChild?.id || "");
+    } catch {
+    } finally {
+      setRefreshing(false);
+    }
   }
-  useEffect(() => { load(); }, []);
-  function selectChild(id: string) { setChildId(id); load(id); }
+  useEffect(() => {
+    load();
+  }, []);
+  function selectChild(id: string) {
+    setChildId(id);
+    load(id);
+  }
 
   async function pay(invoice: any) {
     setPaying(invoice.id);
     try {
       const res: any = await parentApi.pay(invoice.id, "PAYSTACK");
-      if (res.authorizationUrl) router.push({ pathname: "/pay", params: { url: res.authorizationUrl, reference: res.reference } });
-      else Alert.alert("Payment", res.message || "Payment initiated.");
-    } catch (e: any) { Alert.alert("Payment failed", e.message || "Could not start payment."); } finally { setPaying(null); }
+      if (res.authorizationUrl)
+        router.push({
+          pathname: "/pay",
+          params: { url: res.authorizationUrl, reference: res.reference },
+        });
+      else toast(res.message || "Payment initiated.", "success");
+    } catch (e: any) {
+      toast(e.message || "Could not start payment.", "error");
+    } finally {
+      setPaying(null);
+    }
   }
 
   const children = data?.children || [];
   const invoices = data?.invoices || [];
   const summary = data?.summary;
   const meta = (status: string) =>
-    status === "PAID" ? { tone: "success" as const, icon: <CheckCircle2 size={12} color={colors.success} />, label: "PAID" }
-    : status === "PARTIALLY_PAID" ? { tone: "warning" as const, icon: <Clock size={12} color={colors.warning} />, label: "PARTIAL" }
-    : status === "OVERDUE" ? { tone: "danger" as const, icon: <AlertCircle size={12} color={colors.danger} />, label: "OVERDUE" }
-    : { tone: "neutral" as const, icon: <Clock size={12} color={colors.text.muted} />, label: status };
+    status === "PAID"
+      ? {
+          tone: "success" as const,
+          icon: <CheckCircle2 size={12} color={colors.success} />,
+          label: "PAID",
+        }
+      : status === "PARTIALLY_PAID"
+        ? {
+            tone: "warning" as const,
+            icon: <Clock size={12} color={colors.warning} />,
+            label: "PARTIAL",
+          }
+        : status === "OVERDUE"
+          ? {
+              tone: "danger" as const,
+              icon: <AlertCircle size={12} color={colors.danger} />,
+              label: "OVERDUE",
+            }
+          : {
+              tone: "neutral" as const,
+              icon: <Clock size={12} color={colors.text.muted} />,
+              label: status,
+            };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(childId); }} tintColor={colors.brand.greenLight} />}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background.primary }}
+      contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => {
+            setRefreshing(true);
+            load(childId);
+          }}
+          tintColor={colors.brand.greenLight}
+        />
+      }
+    >
       <H2 style={{ marginBottom: spacing.md }}>School Fees</H2>
 
       {children.length > 1 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.md }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginBottom: spacing.md }}
+        >
           {children.map((c: any) => (
-            <TouchableOpacity key={c.id} onPress={() => selectChild(c.id)} style={{ backgroundColor: childId === c.id ? colors.brand.green : colors.background.elevated, borderRadius: 20, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, marginRight: spacing.sm }}>
-              <Text style={{ color: childId === c.id ? colors.text.inverse : colors.text.primary, fontSize: 13, fontFamily: bodyFont("semibold") }}>{c.displayName}</Text>
+            <TouchableOpacity
+              key={c.id}
+              onPress={() => selectChild(c.id)}
+              style={{
+                backgroundColor: childId === c.id ? colors.brand.green : colors.background.elevated,
+                borderRadius: 20,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                marginRight: spacing.sm,
+              }}
+            >
+              <Text
+                style={{
+                  color: childId === c.id ? colors.text.inverse : colors.text.primary,
+                  fontSize: 13,
+                  fontFamily: bodyFont("semibold"),
+                }}
+              >
+                {c.displayName}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -64,7 +148,11 @@ export default function ParentFees() {
         <Row justify="space-between">
           <Col label="Total Billed" value={naira(summary?.totalBilled)} />
           <Col label="Paid" value={naira(summary?.totalPaid)} color={colors.success} />
-          <Col label="Outstanding" value={naira(summary?.totalOutstanding)} color={summary?.totalOutstanding > 0 ? colors.danger : colors.success} />
+          <Col
+            label="Outstanding"
+            value={naira(summary?.totalOutstanding)}
+            color={summary?.totalOutstanding > 0 ? colors.danger : colors.success}
+          />
         </Row>
       </Card>
 
@@ -73,22 +161,56 @@ export default function ParentFees() {
           const s = meta(inv.status);
           const due = inv.balanceDue > 0;
           return (
-            <Card key={inv.id} variant="default" padding={spacing.md} style={{ marginBottom: spacing.sm + 2 }}>
+            <Card
+              key={inv.id}
+              variant="default"
+              padding={spacing.md}
+              style={{ marginBottom: spacing.sm + 2 }}
+            >
               <Row align="flex-start" gap={spacing.xs}>
                 <Column style={{ flex: 1, marginRight: spacing.xs }}>
-                  <Body tone="primary" style={{ fontFamily: bodyFont("bold") }}>{inv.title}</Body>
-                  <Caption style={{ marginTop: 3 }}>{inv.invoiceNumber} · {inv.termLabel}</Caption>
+                  <Body tone="primary" style={{ fontFamily: bodyFont("bold") }}>
+                    {inv.title}
+                  </Body>
+                  <Caption style={{ marginTop: 3 }}>
+                    {inv.invoiceNumber} · {inv.termLabel}
+                  </Caption>
                 </Column>
-                <Badge tone={s.tone} icon={s.icon}>{s.label}</Badge>
+                <Badge tone={s.tone} icon={s.icon}>
+                  {s.label}
+                </Badge>
               </Row>
               <Row gap={spacing.lg} style={{ marginTop: spacing.sm + 2 }}>
                 <Pair label="Amount" value={naira(inv.totalAmount)} />
                 <Pair label="Paid" value={naira(inv.amountPaid)} color={colors.success} />
-                <Pair label="Balance" value={naira(inv.balanceDue)} color={due ? colors.danger : colors.text.primary} />
+                <Pair
+                  label="Balance"
+                  value={naira(inv.balanceDue)}
+                  color={due ? colors.danger : colors.text.primary}
+                />
               </Row>
-              {inv.dueDate && <Caption style={{ marginTop: spacing.xs + 2 }}>Due {new Date(inv.dueDate).toLocaleDateString("en", { day: "numeric", month: "short", year: "numeric" })}</Caption>}
+              {inv.dueDate && (
+                <Caption style={{ marginTop: spacing.xs + 2 }}>
+                  Due{" "}
+                  {new Date(inv.dueDate).toLocaleDateString("en", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </Caption>
+              )}
               {due && (
-                <Button fullWidth style={{ marginTop: spacing.sm + 4 }} loading={paying === inv.id} leftIcon={paying === inv.id ? undefined : <CreditCard size={16} color={colors.brand.white} />} onPress={() => pay(inv)}>
+                <Button
+                  fullWidth
+                  style={{ marginTop: spacing.sm + 4 }}
+                  loading={paying === inv.id}
+                  leftIcon={
+                    paying === inv.id ? undefined : (
+                      <CreditCard size={16} color={colors.brand.white} />
+                    )
+                  }
+                  onPress={() => pay(inv)}
+                >
                   {paying === inv.id ? "Starting…" : "Pay with Card"}
                 </Button>
               )}
@@ -96,7 +218,10 @@ export default function ParentFees() {
           );
         })
       ) : (
-        <EmptyState icon={<CreditCard size={48} color={colors.border.strong} />} title="No invoices yet" />
+        <EmptyState
+          icon={<CreditCard size={48} color={colors.border.strong} />}
+          title="No invoices yet"
+        />
       )}
     </ScrollView>
   );
@@ -104,9 +229,28 @@ export default function ParentFees() {
 
 function Col({ label, value, color }: { label: string; value: string; color?: string }) {
   const { colors } = useTheme();
-  return (<View><Caption>{label}</Caption><H3 style={{ color: color ?? colors.text.primary, fontSize: 16, marginTop: 3 }}>{value}</H3></View>);
+  return (
+    <View>
+      <Caption>{label}</Caption>
+      <H3 style={{ color: color ?? colors.text.primary, fontSize: 16, marginTop: 3 }}>{value}</H3>
+    </View>
+  );
 }
 function Pair({ label, value, color }: { label: string; value: string; color?: string }) {
   const { colors } = useTheme();
-  return (<View><Caption>{label}</Caption><Body tone="primary" style={{ color: color ?? colors.text.primary, fontFamily: bodyFont("semibold"), marginTop: 2 }}>{value}</Body></View>);
+  return (
+    <View>
+      <Caption>{label}</Caption>
+      <Body
+        tone="primary"
+        style={{
+          color: color ?? colors.text.primary,
+          fontFamily: bodyFont("semibold"),
+          marginTop: 2,
+        }}
+      >
+        {value}
+      </Body>
+    </View>
+  );
 }
