@@ -29,6 +29,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "tsx scripts/e2e-smoke.ts",
+    "test:e2e:full": "tsx scripts/e2e-full.ts",
+    "test:e2e:mobile": "tsx scripts/e2e-mobile.ts",
     "verify:rls": "tsx scripts/verify-rls.ts",
     "check:drift": "tsx scripts/check-schema-drift.ts",
     "verify:admissions": "tsx scripts/verify-admissions-loop.ts",

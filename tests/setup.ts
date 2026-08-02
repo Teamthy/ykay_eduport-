@@ -49,6 +49,24 @@ const mockPrisma = {
     findMany: vi.fn(),
     upsert: vi.fn(),
   },
+  messageThread: {
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+  },
+  messageParticipant: {
+    findMany: vi.fn(),
+    createMany: vi.fn(),
+    upsert: vi.fn(),
+    updateMany: vi.fn(),
+  },
+  message: {
+    findMany: vi.fn(),
+    count: vi.fn(),
+    create: vi.fn(),
+  },
   feePayment: {
     findUnique: vi.fn(),
     findMany: vi.fn(),

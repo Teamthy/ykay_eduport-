@@ -224,7 +224,7 @@ export default function TeacherDashboard() {
         <ActionRow
           icon={<Mail size={18} color={colors.brand.greenLight} />}
           label="Messages"
-          onPress={() => router.push("/teacher-messages")}
+          onPress={() => router.push("/messages")}
         />
       </View>
 

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { View, ScrollView, RefreshControl, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { adminApi } from "@/lib/api";
+import { getPref, setPref } from "@/lib/prefs";
 import { useTheme } from "@/src/theme";
 import { AppHeader } from "@/src/components/navigation";
 import {
@@ -15,6 +16,7 @@ import { Card } from "@/src/components/cards";
 import { Body, Caption } from "@/src/components/typography";
 import { Badge } from "@/src/components/badges";
 import { Skeleton } from "@/src/components/feedback";
+import { Dismissible } from "@/src/components/dismissible";
 import { bodyFont } from "@/src/theme/typography";
 import {
   GraduationCap,
@@ -26,6 +28,7 @@ import {
   Megaphone,
   Bell,
   ClipboardCheck,
+  Receipt,
 } from "lucide-react-native";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
@@ -37,6 +40,28 @@ export default function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // The outstanding-fees card is dismissible (swipe left or tap the X).
+  // Persisted per device; restorable from Settings.
+  const [hideOutstanding, setHideOutstanding] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    getPref("hideAdminOutstanding")
+      .then((v) => {
+        if (!cancelled) setHideOutstanding(v);
+      })
+      .catch(() => {
+        if (!cancelled) setHideOutstanding(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function dismissOutstanding() {
+    setHideOutstanding(true);
+    await setPref("hideAdminOutstanding", true);
+  }
 
   const load = useCallback(async () => {
     try {
@@ -73,7 +98,8 @@ export default function AdminDashboard() {
       route: "/admin-staff",
       count: s?.teacherCount,
     },
-    { icon: DollarSign, label: "Finance", desc: "Revenue & expenses", route: "/admin-finance" },
+    { icon: DollarSign, label: "Finance", desc: "Revenue & net position", route: "/admin-finance" },
+    { icon: Receipt, label: "Expenses", desc: "Record & review spend", route: "/admin-expenses" },
     {
       icon: CreditCard,
       label: "Fees",
@@ -146,6 +172,8 @@ export default function AdminDashboard() {
         </>
       ) : (
         <>
+          {!hideOutstanding ? (
+          <Dismissible onDismiss={dismissOutstanding} closeLabel="Hide outstanding fees card">
           <Card
             variant="bordered"
             padding={spacing.md}
@@ -192,6 +220,8 @@ export default function AdminDashboard() {
                 : ""}
             </Caption>
           </Card>
+          </Dismissible>
+          ) : null}
 
           <MetricGrid style={{ marginBottom: spacing.lg }}>
             <Metric

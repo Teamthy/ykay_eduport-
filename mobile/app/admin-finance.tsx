@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { ScrollView, RefreshControl } from "react-native";
 import { adminApi } from "@/lib/api";
+import { useRouter } from "expo-router";
 import { useTheme } from "@/src/theme";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption, Label } from "@/src/components/typography";
 import { Column } from "@/src/components/layout";
 import { bodyFont } from "@/src/theme/typography";
-import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight } from "lucide-react-native";
+import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Receipt } from "lucide-react-native";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 
 export default function AdminFinance() {
+  const router = useRouter();
   const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -24,6 +26,17 @@ export default function AdminFinance() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
       <H2 style={{ marginBottom: spacing.lg }}>Finance</H2>
+
+      <Card
+        variant="default"
+        padding={spacing.md}
+        onPress={() => router.push("/admin-expenses")}
+        style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm + 2, marginBottom: spacing.md }}
+      >
+        <Receipt size={18} color={colors.brand.greenLight} />
+        <Body tone="primary" style={{ flex: 1, fontFamily: bodyFont("medium") }}>Record an expense</Body>
+        <ArrowUpRight size={16} color={colors.text.muted} />
+      </Card>
 
       {/* Net position */}
       <Card variant="bordered" style={{ marginBottom: spacing.md }}>

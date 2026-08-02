@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, ScrollView, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { teacherApi, logout } from "@/lib/api";
+import { teacherApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
 import { Card } from "@/src/components/cards";
 import { H2, H3, Body, Caption, Label } from "@/src/components/typography";
@@ -61,7 +61,7 @@ export default function TeacherProfile() {
       >
         <Body tone="primary">Settings</Body>
       </Button>
-      <Button variant="ghost" fullWidth leftIcon={<LogOut size={18} color={colors.danger} />} onPress={async () => { await logout(); router.replace("/login"); }} style={{ backgroundColor: colors.status.errorBg }}>
+      <Button variant="ghost" fullWidth leftIcon={<LogOut size={18} color={colors.danger} />} onPress={() => router.push("/logout")} style={{ backgroundColor: colors.status.errorBg }}>
         <Body tone="primary" style={{ color: colors.danger }}>Sign Out</Body>
       </Button>
       <Caption style={{ textAlign: "center", marginTop: spacing.xxl }}>Ykay College · Staff Portal</Caption>

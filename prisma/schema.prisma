@@ -151,12 +151,12 @@ enum StaffAttendanceEventType {
 }
 
 model School {
-  id        String   @id @default(cuid())
-  slug      String   @unique
-  name      String
-  address   String
-  phone     String
-  email     String?
+  id           String       @id @default(cuid())
+  slug         String       @unique
+  name         String
+  address      String
+  phone        String
+  email        String?
   motto        String?
   subdomain    String?      @unique
   customDomain String?      @unique
@@ -190,9 +190,11 @@ model School {
   idempotencyRecords      IdempotencyRecord[]
   expenses                Expense[]
   budgets                 Budget[]
-  staffAttendanceEvents  StaffAttendanceEvent[]
-  subscription           Subscription?
-  branding               TenantBranding?
+  staffAttendanceEvents   StaffAttendanceEvent[]
+  subscription            Subscription?
+  branding                TenantBranding?
+  messageThreads          MessageThread[]
+  messages                Message[]
 }
 
 model User {
@@ -205,7 +207,7 @@ model User {
   isActive           Boolean   @default(true)
   isSuspended        Boolean   @default(false)
   lastLoginAt        DateTime?
-  tokenVersion       Int      @default(0)
+  tokenVersion       Int       @default(0)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   mustChangePassword Boolean   @default(false)
@@ -222,7 +224,10 @@ model User {
   itEnrollments               ItEnrollment[]
   userNotifications           UserNotification[]
   newsPosts                   NewsPost[]
+  messageParticipants         MessageParticipant[]
+  sentMessages                Message[]
 
+  @@unique([schoolId, email])
   @@index([schoolId, role])
   // Present in the DB since 20260723220000_phase_9_1_security_forensics /
   // 20260724000000_phase_9_2_session_revocation. Declared here so
@@ -231,7 +236,6 @@ model User {
   @@index([email])
   @@index([role])
   @@index([tokenVersion])
-  @@unique([schoolId, email])
 }
 
 model TeacherProfile {
@@ -243,17 +247,17 @@ model TeacherProfile {
   photoUrl    String?
   roleLabel   String?
   isActive    Boolean  @default(true)
-  badgeCode  String?  @unique
+  badgeCode   String?  @unique
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  school             School                        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  user               User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  classAssignments   TeacherClassAssignment[]
-  attendanceSessions AttendanceSession[]
-  correctionRequests AttendanceCorrectionRequest[]
-  gradebooks         SubjectGradebook[]
-  exams              Exam[]
+  school                School                        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user                  User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classAssignments      TeacherClassAssignment[]
+  attendanceSessions    AttendanceSession[]
+  correctionRequests    AttendanceCorrectionRequest[]
+  gradebooks            SubjectGradebook[]
+  exams                 Exam[]
   staffAttendanceEvents StaffAttendanceEvent[]
 
   @@index([schoolId, displayName])
@@ -338,6 +342,7 @@ model StudentProfile {
   examAttempts         ExamAttempt[]
   examRetakes          ExamRetake[]
   admissionApplication AdmissionApplication? @relation("AdmissionEnrollment", fields: [admissionApplicationId], references: [id], onDelete: SetNull)
+  messageThreads       MessageThread[]
 
   @@unique([schoolId, studentId])
   @@index([currentClassId, isActive])
@@ -1173,17 +1178,17 @@ enum SecurityEventType {
 }
 
 model SecurityEvent {
-  id          String              @id @default(cuid())
-  schoolId    String?
-  eventType   SecurityEventType
-  userEmail   String?
-  userId      String?
-  ipAddress   String?
-  userAgent   String?
-  targetPath  String?
-  reason      String?
-  metadata    Json?
-  createdAt   DateTime            @default(now())
+  id         String            @id @default(cuid())
+  schoolId   String?
+  eventType  SecurityEventType
+  userEmail  String?
+  userId     String?
+  ipAddress  String?
+  userAgent  String?
+  targetPath String?
+  reason     String?
+  metadata   Json?
+  createdAt  DateTime          @default(now())
 
   @@index([eventType, createdAt])
   @@index([schoolId, createdAt])
@@ -1280,4 +1285,78 @@ model DeviceToken {
 
   @@unique([userId, token])
   @@index([schoolId])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Parent ↔ teacher messaging
+//
+//  Threads are always anchored to a STUDENT. That is the thing both sides
+//  actually care about ("about Adeola"), it gives the permission rule a single
+//  clear source of truth, and it stops the inbox becoming a flat list of names
+//  with no context.
+//
+//  Who may participate is derived, never stored as a free-for-all:
+//    parent  → must have a ParentStudentLink to the thread's student
+//    teacher → must have a TeacherClassAssignment covering that student's class
+//  (see lib/messaging.ts → assertThreadAccess)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum MessageThreadStatus {
+  OPEN
+  CLOSED
+}
+
+model MessageThread {
+  id                 String              @id @default(cuid())
+  schoolId           String
+  studentProfileId   String
+  /// Denormalised so an inbox row renders without loading the student.
+  subject            String
+  status             MessageThreadStatus @default(OPEN)
+  /// Mirrors the newest message so the inbox can sort and preview without a join.
+  lastMessageAt      DateTime            @default(now())
+  lastMessagePreview String?
+  createdByUserId    String
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  school         School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentProfile StudentProfile       @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  messages       Message[]
+  participants   MessageParticipant[]
+
+  @@index([schoolId, lastMessageAt])
+  @@index([studentProfileId, lastMessageAt])
+}
+
+/// One row per user who can see a thread. Carries that user's own read cursor,
+/// so "unread" is per-participant rather than a single flag on the message.
+model MessageParticipant {
+  id         String    @id @default(cuid())
+  threadId   String
+  userId     String
+  lastReadAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  thread MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id           String   @id @default(cuid())
+  schoolId     String
+  threadId     String
+  senderUserId String
+  body         String
+  createdAt    DateTime @default(now())
+
+  school School        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  thread MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender User          @relation(fields: [senderUserId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+  @@index([schoolId, createdAt])
 }

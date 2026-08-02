@@ -274,7 +274,7 @@ export default function ParentDashboard() {
             <ActionRow
               icon={<Mail size={18} color={colors.brand.greenLight} />}
               label="Messages"
-              onPress={() => router.push("/parent-messages")}
+              onPress={() => router.push("/messages")}
             />
           </View>
         </>

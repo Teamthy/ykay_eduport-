@@ -11,6 +11,7 @@ import { Platform } from "react-native";
 
 export type PrefKey =
   | "seenOnboarding"
+  | "hideAdminOutstanding"
   | "biometricLock"
   | "notifyAnnouncements"
   | "notifyAttendance"
@@ -23,6 +24,8 @@ const PREFIX = "ykay_pref_";
 export const PREF_DEFAULTS: Record<PrefKey, boolean> = {
   // First launch: the welcome wizard has not been shown yet.
   seenOnboarding: false,
+  // Dismissible dashboard cards. Restorable from Settings.
+  hideAdminOutstanding: false,
   biometricLock: true,
   notifyAnnouncements: true,
   notifyAttendance: true,

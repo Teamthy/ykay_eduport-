@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { adminApi, logout, getMe } from "@/lib/api";
+import { adminApi, getMe } from "@/lib/api";
 import { useTheme } from "@/src/theme";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption } from "@/src/components/typography";
@@ -49,7 +49,7 @@ export default function AdminProfile() {
       >
         <Body tone="primary">Settings</Body>
       </Button>
-      <Button variant="ghost" fullWidth leftIcon={<LogOut size={18} color={colors.danger} />} onPress={async () => { await logout(); router.replace("/login"); }} style={{ backgroundColor: colors.status.errorBg }}>
+      <Button variant="ghost" fullWidth leftIcon={<LogOut size={18} color={colors.danger} />} onPress={() => router.push("/logout")} style={{ backgroundColor: colors.status.errorBg }}>
         <Body tone="primary" style={{ color: colors.danger }}>Sign Out</Body>
       </Button>
     </ScrollView>

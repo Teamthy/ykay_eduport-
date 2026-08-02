@@ -86,6 +86,12 @@ export default function RootLayout() {
       <Stack.Screen name="onboarding" redirect={!!resolvedUser} />
       <Stack.Screen name="forgot-password" redirect={!!resolvedUser} />
       <Stack.Screen name="settings" />
+      <Stack.Screen name="logout" />
+      <Stack.Screen name="admin-student-detail" />
+      <Stack.Screen name="admin-staff-detail" />
+      <Stack.Screen name="admin-expenses" />
+      <Stack.Screen name="messages" />
+      <Stack.Screen name="message-thread" />
       <Stack.Screen name="(student)" />
       <Stack.Screen name="(teacher)" />
       <Stack.Screen name="(parent)" />
@@ -94,11 +100,9 @@ export default function RootLayout() {
       <Stack.Screen name="announcements" />
       <Stack.Screen name="pay" />
       <Stack.Screen name="teacher-announcements" />
-      <Stack.Screen name="teacher-messages" />
       <Stack.Screen name="student-teachers" />
       <Stack.Screen name="id-card" />
       <Stack.Screen name="parent-events" />
-      <Stack.Screen name="parent-messages" />
       <Stack.Screen name="teacher-analytics" />
       <Stack.Screen name="practice" />
       <Stack.Screen name="practice-runner" />

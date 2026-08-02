@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { logout, getMe } from "@/lib/api";
+import { getMe } from "@/lib/api";
 import { useTheme } from "@/src/theme";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption, Label } from "@/src/components/typography";
@@ -49,7 +49,7 @@ export default function ParentProfile() {
       >
         <Body tone="primary">Settings</Body>
       </Button>
-      <Button variant="ghost" fullWidth leftIcon={<LogOut size={18} color={colors.danger} />} onPress={async () => { await logout(); router.replace("/login"); }} style={{ backgroundColor: colors.status.errorBg }}>
+      <Button variant="ghost" fullWidth leftIcon={<LogOut size={18} color={colors.danger} />} onPress={() => router.push("/logout")} style={{ backgroundColor: colors.status.errorBg }}>
         <Body tone="primary" style={{ color: colors.danger }}>Sign Out</Body>
       </Button>
       <Caption style={{ textAlign: "center", marginTop: spacing.xxl }}>Ykay College · Parent Portal</Caption>

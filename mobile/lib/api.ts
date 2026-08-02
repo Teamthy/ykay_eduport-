@@ -123,6 +123,17 @@ export async function getMe(): Promise<{ user: SessionUser } | null> {
   }
 }
 
+// ── Messaging (parent <-> teacher, shared) ────────────────
+
+export const messagingApi = {
+  inbox: () => api("/api/messages"),
+  thread: (id: string) => api(`/api/messages/${id}`),
+  reply: (id: string, body: string) =>
+    api(`/api/messages/${id}`, { method: "POST", body: JSON.stringify({ body }) }),
+  start: (data: { studentProfileId: string; subject: string; body: string }) =>
+    api("/api/messages", { method: "POST", body: JSON.stringify(data) }),
+};
+
 // ── Student API ───────────────────────────────────────────
 
 type ExamAnswer = { questionId: string; response: string | null };
@@ -217,7 +228,24 @@ export const adminApi = {
   createStaff: (data: { name: string; email: string; role: string; phone?: string }) =>
     api("/api/admin/staff/direct", { method: "POST", body: JSON.stringify(data) }),
   students: () => api("/api/admin/students"),
+  student: (id: string) => api(`/api/admin/students/${id}`),
+  staffList: () => api("/api/admin/staff/assignments"),
+  staffMember: (id: string) => api(`/api/admin/staff/${id}`),
   finances: () => api("/api/admin/finances/overview"),
+  expenses: (category?: string) =>
+    api("/api/admin/expenses" + (category ? `?category=${encodeURIComponent(category)}` : "")),
+  createExpense: (data: {
+    category: string;
+    title: string;
+    amount: number;
+    spentAt?: string;
+    vendor?: string;
+    paymentMethod?: "CASH" | "BANK_TRANSFER" | "CARD" | "OTHER";
+    reference?: string;
+    notes?: string;
+  }) => api("/api/admin/expenses", { method: "POST", body: JSON.stringify(data) }),
+  deleteExpense: (id: string) =>
+    api(`/api/admin/expenses?id=${encodeURIComponent(id)}`, { method: "DELETE" }),
   fees: () => api("/api/admin/fees/overview"),
   sendFeeReminders: () => api("/api/admin/fees/reminders", { method: "POST" }),
   admissions: () => api("/api/admin/admissions"),

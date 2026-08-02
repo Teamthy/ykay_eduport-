@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { View, ScrollView, Switch, TouchableOpacity, Alert, Linking, Platform } from "react-native";
+import { View, ScrollView, Switch, TouchableOpacity, Linking, Platform } from "react-native";
 import { useRouter } from "expo-router";
-import { logout } from "@/lib/api";
 import { getPrefs, setPref, type PrefKey } from "@/lib/prefs";
 import { biometricAvailable } from "@/lib/biometric";
 import { haptic } from "@/lib/haptics";
+import { useSession } from "@/lib/useSession";
 import { useTheme } from "@/src/theme";
-import { Card, H2, H3, Body, Caption, Label, Button, Divider } from "@/src/components";
-import { useToast } from "@/components/MobileToast";
+import { Card } from "@/src/components/cards";
+import { H2, Body, Caption, Label } from "@/src/components/typography";
+import { Button } from "@/src/components/buttons";
+import { Divider } from "@/src/components/layout";
+import { Avatar } from "@/src/components/avatar";
+import { Badge } from "@/src/components/badges";
 import {
   ArrowLeft,
   Fingerprint,
@@ -21,6 +25,13 @@ import {
   Shield,
   LogOut,
   ChevronRight,
+  Eye,
+  KeyRound,
+  IdCard,
+  Users,
+  ClipboardCheck,
+  BarChart3,
+  MessageSquare,
 } from "lucide-react-native";
 
 const SCHOOL_EMAIL = "info@ykaycollege.com";
@@ -29,7 +40,7 @@ const SCHOOL_PHONE = "+2347015374411";
 export default function SettingsScreen() {
   const router = useRouter();
   const { colors, spacing, radius } = useTheme();
-  const { toast } = useToast();
+  const { user, portal, roleLabel } = useSession();
 
   const [prefs, setPrefs] = useState<Record<string, boolean>>({});
   const [bioSupported, setBioSupported] = useState(false);
@@ -44,6 +55,7 @@ export default function SettingsScreen() {
         "notifyAttendance",
         "notifyFees",
         "notifyResults",
+        "hideAdminOutstanding",
       ];
       const [values, bio] = await Promise.all([getPrefs(keys), biometricAvailable()]);
       if (cancelled) return;
@@ -62,20 +74,68 @@ export default function SettingsScreen() {
     haptic("light");
   }
 
-  function confirmSignOut() {
-    Alert.alert("Sign out", "You'll need to sign in again to access your portal.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Sign Out",
-        style: "destructive",
-        onPress: async () => {
-          await logout();
-          toast("Signed out.", "info");
-          router.replace("/login");
-        },
-      },
-    ]);
+  /**
+   * Notification categories differ by portal — a teacher has no fee balance,
+   * and a student cannot act on an admissions alert. Showing every category to
+   * everyone was noise, and toggling one that never fires is worse than not
+   * offering it.
+   */
+  const notifyRows: { key: PrefKey; icon: React.ReactNode; title: string; subtitle: string }[] = [
+    {
+      key: "notifyAnnouncements",
+      icon: <Megaphone size={18} color={colors.brand.greenLight} />,
+      title: "Announcements",
+      subtitle: "School news and notices",
+    },
+  ];
+
+  if (portal === "student" || portal === "parent" || portal === "teacher") {
+    notifyRows.push({
+      key: "notifyAttendance",
+      icon: <CalendarCheck size={18} color={colors.brand.greenLight} />,
+      title: "Attendance",
+      subtitle:
+        portal === "teacher" ? "Register reminders" : "Daily attendance updates",
+    });
   }
+  if (portal === "parent" || portal === "admin") {
+    notifyRows.push({
+      key: "notifyFees",
+      icon: <Wallet size={18} color={colors.brand.greenLight} />,
+      title: "Fees",
+      subtitle: portal === "admin" ? "Collections and arrears" : "Invoices and receipts",
+    });
+  }
+  if (portal === "student" || portal === "parent" || portal === "teacher") {
+    notifyRows.push({
+      key: "notifyResults",
+      icon: <GraduationCap size={18} color={colors.brand.greenLight} />,
+      title: "Results",
+      subtitle: portal === "teacher" ? "Gradebook deadlines" : "Report cards and scores",
+    });
+  }
+
+  const portalLabel =
+    portal === "student"
+      ? "Student portal"
+      : portal === "teacher"
+        ? "Teacher portal"
+        : portal === "parent"
+          ? "Parent portal"
+          : portal === "admin"
+            ? "Admin portal"
+            : portal === "it"
+              ? "IT portal"
+              : "Portal";
+
+  const profileHref =
+    portal === "teacher"
+      ? "/(teacher)/profile"
+      : portal === "parent"
+        ? "/(parent)/profile"
+        : portal === "admin"
+          ? "/(admin)/profile"
+          : "/(student)/profile";
 
   return (
     <ScrollView
@@ -91,9 +151,34 @@ export default function SettingsScreen() {
         <Caption>Back</Caption>
       </TouchableOpacity>
 
-      <H2 style={{ marginBottom: spacing.xl }}>Settings</H2>
+      <H2 style={{ marginBottom: spacing.lg }}>Settings</H2>
 
-      {/* ── Security ─────────────────────────────── */}
+      {/* ── Who you are ── */}
+      <Card
+        variant="default"
+        padding={spacing.md}
+        onPress={() => router.push(profileHref as never)}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: spacing.md,
+          marginBottom: spacing.xl,
+        }}
+      >
+        <Avatar name={user?.name} size="lg" />
+        <View style={{ flex: 1 }}>
+          <Body tone="primary" style={{ fontFamily: "DM Sans Bold", fontSize: 16 }} numberOfLines={1}>
+            {user?.name || "—"}
+          </Body>
+          <Caption numberOfLines={1}>{user?.email || ""}</Caption>
+          <View style={{ flexDirection: "row", marginTop: 6 }}>
+            <Badge tone="accent">{roleLabel || portalLabel}</Badge>
+          </View>
+        </View>
+        <ChevronRight size={18} color={colors.text.muted} />
+      </Card>
+
+      {/* ── Security ── */}
       <Label style={{ marginBottom: spacing.sm }}>Security</Label>
       <Card variant="default" padding={0} style={{ marginBottom: spacing.xl }}>
         <SettingToggle
@@ -110,53 +195,124 @@ export default function SettingsScreen() {
         />
         <Divider />
         <SettingLink
+          icon={<KeyRound size={18} color={colors.brand.greenLight} />}
+          title="Change password"
+          onPress={() => router.push("/forgot-password")}
+        />
+        <Divider />
+        <SettingLink
           icon={<Shield size={18} color={colors.brand.greenLight} />}
           title="Privacy policy"
           onPress={() => Linking.openURL("https://ykaycollege.edu.ng/privacy-policy")}
         />
       </Card>
 
-      {/* ── Notifications ────────────────────────── */}
+      {/* ── Notifications (portal-specific) ── */}
       <Label style={{ marginBottom: spacing.sm }}>Notifications</Label>
       <Card variant="default" padding={0} style={{ marginBottom: spacing.xl }}>
-        <SettingToggle
-          icon={<Megaphone size={18} color={colors.brand.greenLight} />}
-          title="Announcements"
-          subtitle="School news and notices"
-          value={!!prefs.notifyAnnouncements}
-          disabled={!loaded}
-          onChange={(v) => toggle("notifyAnnouncements", v)}
-        />
-        <Divider />
-        <SettingToggle
-          icon={<CalendarCheck size={18} color={colors.brand.greenLight} />}
-          title="Attendance"
-          subtitle="Daily attendance updates"
-          value={!!prefs.notifyAttendance}
-          disabled={!loaded}
-          onChange={(v) => toggle("notifyAttendance", v)}
-        />
-        <Divider />
-        <SettingToggle
-          icon={<Wallet size={18} color={colors.brand.greenLight} />}
-          title="Fee reminders"
-          subtitle="Invoices and payment confirmations"
-          value={!!prefs.notifyFees}
-          disabled={!loaded}
-          onChange={(v) => toggle("notifyFees", v)}
-        />
-        <Divider />
-        <SettingToggle
-          icon={<GraduationCap size={18} color={colors.brand.greenLight} />}
-          title="Results"
-          subtitle="Report cards and exam scores"
-          value={!!prefs.notifyResults}
-          disabled={!loaded}
-          onChange={(v) => toggle("notifyResults", v)}
-        />
+        {notifyRows.map((row, i) => (
+          <View key={row.key}>
+            {i > 0 ? <Divider /> : null}
+            <SettingToggle
+              icon={row.icon}
+              title={row.title}
+              subtitle={row.subtitle}
+              value={!!prefs[row.key]}
+              disabled={!loaded}
+              onChange={(v) => toggle(row.key, v)}
+            />
+          </View>
+        ))}
       </Card>
 
-      {/* ── Support ──────────────────────────────── */}
+      {/* ── Portal-specific shortcuts ── */}
+      <Label style={{ marginBottom: spacing.sm }}>{portalLabel}</Label>
+      <Card variant="default" padding={0} style={{ marginBottom: spacing.xl }}>
+        {portal === "student" ? (
+          <>
+            <SettingLink
+              icon={<IdCard size={18} color={colors.brand.greenLight} />}
+              title="My ID card"
+              subtitle="Digital student identity"
+              onPress={() => router.push("/id-card")}
+            />
+            <Divider />
+            <SettingLink
+              icon={<Users size={18} color={colors.brand.greenLight} />}
+              title="My teachers"
+              onPress={() => router.push("/student-teachers")}
+            />
+          </>
+        ) : null}
+
+        {portal === "parent" ? (
+          <>
+            <SettingLink
+              icon={<Wallet size={18} color={colors.brand.greenLight} />}
+              title="Fees & payments"
+              subtitle="Invoices and receipts"
+              onPress={() => router.push("/(parent)/fees")}
+            />
+            <Divider />
+            <SettingLink
+              icon={<Megaphone size={18} color={colors.brand.greenLight} />}
+              title="School events"
+              onPress={() => router.push("/parent-events")}
+            />
+            <Divider />
+            <SettingLink
+              icon={<MessageSquare size={18} color={colors.brand.greenLight} />}
+              title="Messages"
+              subtitle="Talk to your child's teacher"
+              onPress={() => router.push("/messages")}
+            />
+          </>
+        ) : null}
+
+        {portal === "teacher" ? (
+          <>
+            <SettingLink
+              icon={<ClipboardCheck size={18} color={colors.brand.greenLight} />}
+              title="Attendance register"
+              onPress={() => router.push("/(teacher)/attendance")}
+            />
+            <Divider />
+            <SettingLink
+              icon={<BarChart3 size={18} color={colors.brand.greenLight} />}
+              title="Class analytics"
+              onPress={() => router.push("/teacher-analytics")}
+            />
+            <Divider />
+            <SettingLink
+              icon={<MessageSquare size={18} color={colors.brand.greenLight} />}
+              title="Messages"
+              subtitle="Talk to parents"
+              onPress={() => router.push("/messages")}
+            />
+          </>
+        ) : null}
+
+        {portal === "admin" ? (
+          <>
+            <SettingToggle
+              icon={<Eye size={18} color={colors.brand.greenLight} />}
+              title="Show outstanding fees card"
+              subtitle="Restore the dismissed dashboard card"
+              value={!prefs.hideAdminOutstanding}
+              disabled={!loaded}
+              onChange={(v) => toggle("hideAdminOutstanding", !v)}
+            />
+            <Divider />
+            <SettingLink
+              icon={<Users size={18} color={colors.brand.greenLight} />}
+              title="Students & staff"
+              onPress={() => router.push("/admin-students")}
+            />
+          </>
+        ) : null}
+      </Card>
+
+      {/* ── Support ── */}
       <Label style={{ marginBottom: spacing.sm }}>Help &amp; support</Label>
       <Card variant="default" padding={0} style={{ marginBottom: spacing.xl }}>
         <SettingLink
@@ -184,7 +340,7 @@ export default function SettingsScreen() {
         variant="ghost"
         fullWidth
         leftIcon={<LogOut size={18} color={colors.danger} />}
-        onPress={confirmSignOut}
+        onPress={() => router.push("/logout")}
         style={{ backgroundColor: colors.status.errorBg }}
       >
         <Body tone="primary" style={{ color: colors.danger }}>
