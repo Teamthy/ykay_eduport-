@@ -397,6 +397,21 @@ export default function SuperAdminPage() {
       if (!r.ok) throw new Error(j.error || "Impersonation failed.");
       setImpersonating(j.impersonating);
       toast(`Now viewing as ${j.impersonating.name} (read-only).`, "success");
+      // Route to the impersonated user's portal dashboard
+      const dest: Record<string, string> = {
+        STUDENT: "/student/dashboard",
+        PARENT: "/parent/dashboard",
+        TEACHER: "/teacher/dashboard",
+        HOD: "/teacher/dashboard",
+        ADMIN: "/admin",
+        DIRECTOR: "/admin",
+        COORDINATOR: "/admin-admissions",
+        BURSAR: "/admin/fees",
+        IT_STUDENT: "/it-portal/dashboard",
+      };
+      setTimeout(() => {
+        window.location.href = dest[j.impersonating.role] || "/super-admin";
+      }, 600);
     } catch (e) {
       toast(e instanceof Error ? e.message : "Impersonation failed.", "error");
     } finally {
@@ -493,7 +508,7 @@ export default function SuperAdminPage() {
             </div>
             <button
               onClick={() => void endImpersonation()}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-card)]/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wider hover:bg-[var(--surface-card)]/30"
+              className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wider hover:bg-white/30"
             >
               <LogOut size={13} /> End Session
             </button>
@@ -512,6 +527,12 @@ export default function SuperAdminPage() {
               Platform monitoring — usage analytics, security forensics, audit-log tracking, payment
               management, and account tools. All actions are logged with full attribution.
             </p>
+            <a
+              href="/super-admin/portals"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.03]"
+            >
+              Portal Hub — jump to any portal →
+            </a>
           </div>
         </section>
 
@@ -714,7 +735,7 @@ export default function SuperAdminPage() {
                         setLogFilter({ ...logFilter, action: e.target.value, page: 1 })
                       }
                       placeholder="e.g. SIGNED_IN"
-                      className="mt-2 block w-44 rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                      className="mt-2 block w-44 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                     />
                   </label>
                   <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
@@ -725,7 +746,7 @@ export default function SuperAdminPage() {
                         setLogFilter({ ...logFilter, actor: e.target.value, page: 1 })
                       }
                       placeholder="e.g. admin@"
-                      className="mt-2 block w-44 rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                      className="mt-2 block w-44 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                     />
                   </label>
                   <span className="ml-auto text-sm text-[var(--text-muted)]">
@@ -864,7 +885,7 @@ export default function SuperAdminPage() {
                           page: 1,
                         })
                       }
-                      className="mt-2 block w-52 rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                      className="mt-2 block w-52 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                     >
                       <option value="">All Events</option>
                       {Object.entries(EVENT_TYPE_LABELS).map(([key, val]) => (
@@ -882,7 +903,7 @@ export default function SuperAdminPage() {
                         setForensicsFilter({ ...forensicsFilter, email: e.target.value, page: 1 })
                       }
                       placeholder="Search by email"
-                      className="mt-2 block w-44 rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                      className="mt-2 block w-44 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                     />
                   </label>
                   <span className="ml-auto text-sm text-[var(--text-muted)]">
@@ -1062,7 +1083,7 @@ export default function SuperAdminPage() {
                         value={userSearch}
                         onChange={(e) => setUserSearch(e.target.value)}
                         placeholder="e.g. grace"
-                        className="mt-2 block w-64 rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] px-4 py-2.5 text-sm text-[var(--text-primary)]"
+                        className="mt-2 block w-64 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900"
                       />
                     </label>
                     <button
@@ -1088,7 +1109,7 @@ export default function SuperAdminPage() {
                         <input
                           value={createForm.name}
                           onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                          className="mt-2 w-full rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-2.5 text-sm text-[var(--text-primary)]"
+                          className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900"
                         />
                       </label>
                       <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
@@ -1097,7 +1118,7 @@ export default function SuperAdminPage() {
                           value={createForm.email}
                           onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
                           type="email"
-                          className="mt-2 w-full rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-2.5 text-sm text-[var(--text-primary)]"
+                          className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900"
                         />
                       </label>
                       <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
@@ -1105,7 +1126,7 @@ export default function SuperAdminPage() {
                         <select
                           value={createForm.role}
                           onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
-                          className="mt-2 w-full rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-2.5 text-sm text-[var(--text-primary)]"
+                          className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900"
                         >
                           {["ADMIN", "DIRECTOR", "BURSAR", "COORDINATOR", "HOD", "TEACHER"].map(
                             (role) => (
@@ -1251,7 +1272,7 @@ export default function SuperAdminPage() {
                       onChange={(e) =>
                         setPaymentFilter({ ...paymentFilter, status: e.target.value, page: 1 })
                       }
-                      className="mt-2 block w-40 rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                      className="mt-2 block w-40 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                     >
                       <option value="">All</option>
                       <option value="COMPLETED">Completed</option>
@@ -1268,7 +1289,7 @@ export default function SuperAdminPage() {
                         setPaymentFilter({ ...paymentFilter, q: e.target.value, page: 1 })
                       }
                       placeholder="Reference, receipt, student name"
-                      className="mt-2 block w-56 rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                      className="mt-2 block w-56 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                     />
                   </label>
                   <span className="ml-auto text-sm text-[var(--text-muted)]">
@@ -1443,7 +1464,7 @@ export default function SuperAdminPage() {
                 onChange={(e) => setVoidReason(e.target.value)}
                 rows={3}
                 placeholder="Explain why this payment is being voided/refunded..."
-                className="mt-2 w-full rounded-xl border border-[var(--border-default)] bg-[var(--surface-card)] p-3 text-sm text-[var(--text-primary)]"
+                className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900"
               />
             </label>
 
