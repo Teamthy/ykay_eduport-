@@ -14,13 +14,14 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useApi } from "@/lib/useApi";
+import { EmptyState, LoadingState } from "@/components/DataStates";
 
 const SIDEBAR_ITEMS = [
   { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
   { label: "Attendance", href: "/student/attendance", icon: CalendarDays },
   { label: "Timetable", href: "/student/timetable", icon: CalendarDays },
   { label: "Report Cards", href: "/student/report-cards", icon: FileText },
-  { label: "Announcements", href: "/student/announcements", icon: Bell, badge: "3" },
+  { label: "Announcements", href: "/student/announcements", icon: Bell },
   { label: "My Profile", href: "/student/dashboard", icon: User },
 ];
 
@@ -69,13 +70,13 @@ export default function StudentAnnouncementsPage() {
 
             <div className="flex-1 min-w-0 space-y-4">
               {loading ? (
-                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm">
-                  Loading announcements…
-                </div>
+                <LoadingState label="Loading announcements…" />
               ) : announcements.length === 0 ? (
-                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm">
-                  No announcements.
-                </div>
+                <EmptyState
+                  icon={<Bell size={28} />}
+                  title="No announcements yet"
+                  message="When your teachers or the school office post an announcement, it will appear here."
+                />
               ) : (
                 announcements.map((a) => {
                   const config = typeConfig[a.type as keyof typeof typeConfig];

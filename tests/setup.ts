@@ -56,6 +56,16 @@ const mockPrisma = {
     findMany: vi.fn(),
     update: vi.fn(),
     updateMany: vi.fn(),
+    aggregate: vi.fn(),
+    groupBy: vi.fn(),
+    count: vi.fn(),
+  },
+  reportCard: {
+    findMany: vi.fn(),
+    aggregate: vi.fn(),
+    groupBy: vi.fn(),
+    count: vi.fn(),
+    update: vi.fn(),
   },
   feePaymentAttempt: {
     findUnique: vi.fn(),

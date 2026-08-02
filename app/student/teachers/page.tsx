@@ -4,6 +4,7 @@ import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import { useApi } from "@/lib/useApi";
+import { EmptyState, LoadingState } from "@/components/DataStates";
 import {
   LayoutDashboard,
   CalendarDays,
@@ -107,13 +108,13 @@ export default function TeachersDirectoryPage() {
 
             <div className="flex-1 min-w-0 space-y-8">
               {loading ? (
-                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm">
-                  Loading teachers…
-                </div>
+                <LoadingState label="Loading your teachers…" />
               ) : all.length === 0 ? (
-                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm">
-                  No teachers assigned to your class yet.
-                </div>
+                <EmptyState
+                  icon={<School size={28} />}
+                  title="No teachers assigned yet"
+                  message="Once the school office assigns subject teachers to your class, they will be listed here with their subjects."
+                />
               ) : (
                 <>
                   {!!formTeachers.length && (

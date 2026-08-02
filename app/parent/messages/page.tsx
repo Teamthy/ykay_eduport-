@@ -20,7 +20,7 @@ const SIDEBAR_ITEMS = [
   { label: "Attendance", href: "/parent/attendance", icon: CalendarDays },
   { label: "Fees", href: "/parent/fees", icon: CreditCard },
   { label: "Report Cards", href: "/parent/report-cards", icon: FileText },
-  { label: "Messages", href: "/parent/messages", icon: MessageCircle, badge: "1" },
+  { label: "Messages", href: "/parent/messages", icon: MessageCircle },
   { label: "Events", href: "/parent/events", icon: Calendar },
 ];
 

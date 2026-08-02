@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
 import { requireRole } from "@/lib/session";
+import { PAGE_LIMITS, getPagination, paginatedResponse } from "@/lib/pagination";
 import { createInAppNotification, queueNotificationJob } from "@/lib/notifications";
 
 const allowedRoles = [UserRole.ADMIN, UserRole.DIRECTOR, UserRole.COORDINATOR];
@@ -12,31 +13,58 @@ const updateSchema = z.object({
   status: z.nativeEnum(ReportCardStatus),
 });
 
-export async function GET() {
+/**
+ * Report-card overview — summary plus a page of reports.
+ *
+ * This used to load every report card the school had ever generated, each with
+ * its student, class and full subject list, then compute the summary with JS
+ * filters and a reduce. A report card exists per student per term, so the cost
+ * grew every term and the payload was dominated by subject rows nobody had
+ * scrolled to yet.
+ *
+ * Totals now come from SQL aggregate/groupBy and the table is paged, matching
+ * the fees overview. Same numbers, bounded work.
+ */
+export async function GET(request: NextRequest) {
   const user = await requireRole(allowedRoles);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const reports = await prisma.reportCard.findMany({
-    where: { schoolId: user.schoolId },
-    orderBy: [{ generatedAt: "desc" }, { createdAt: "desc" }],
-    include: {
-      studentProfile: { include: { currentClass: true } },
-      subjects: { orderBy: { sortOrder: "asc" } },
-    },
-  });
+  const { page, pageSize, skip, take } = getPagination(request, PAGE_LIMITS.STANDARD);
+
+  const [byStatus, average, total, reports] = await Promise.all([
+    prisma.reportCard.groupBy({
+      by: ["status"],
+      where: { schoolId: user.schoolId },
+      _count: { _all: true },
+    }),
+    prisma.reportCard.aggregate({
+      where: { schoolId: user.schoolId },
+      _avg: { overallAverage: true },
+    }),
+    prisma.reportCard.count({ where: { schoolId: user.schoolId } }),
+    prisma.reportCard.findMany({
+      where: { schoolId: user.schoolId },
+      orderBy: [{ generatedAt: "desc" }, { createdAt: "desc" }],
+      skip,
+      take,
+      include: {
+        studentProfile: { include: { currentClass: true } },
+        subjects: { orderBy: { sortOrder: "asc" } },
+      },
+    }),
+  ]);
+
+  const countFor = (status: ReportCardStatus) =>
+    byStatus.find((row) => row.status === status)?._count._all ?? 0;
 
   return NextResponse.json({
     summary: {
-      totalReports: reports.length,
-      releasedReports: reports.filter((report) => report.status === ReportCardStatus.RELEASED)
-        .length,
-      draftReports: reports.filter((report) => report.status === ReportCardStatus.DRAFT).length,
-      averageScore: reports.length
-        ? Math.round(
-            reports.reduce((sum, report) => sum + report.overallAverage, 0) / reports.length,
-          )
-        : 0,
+      totalReports: total,
+      releasedReports: countFor(ReportCardStatus.RELEASED),
+      draftReports: countFor(ReportCardStatus.DRAFT),
+      averageScore: Math.round(average._avg.overallAverage ?? 0),
     },
+    pagination: paginatedResponse([], total, page, pageSize),
     reports: reports.map((report) => ({
       id: report.id,
       reportNumber: report.reportNumber,

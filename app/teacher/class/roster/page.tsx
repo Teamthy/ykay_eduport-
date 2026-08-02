@@ -5,6 +5,7 @@ import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useApi } from "@/lib/useApi";
+import { EmptyState, LoadingState } from "@/components/DataStates";
 import {
   Search,
   Users,
@@ -236,12 +237,15 @@ export default function ClassRosterPage() {
                 ))}
               </div>
 
-              {filtered.length === 0 && (
-                <div className="text-center py-16 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)]">
-                  <Users className="mx-auto text-[var(--text-muted)] mb-3" size={40} />
-                  <p className="text-[var(--text-muted)]">No students found.</p>
-                </div>
-              )}
+              {loading ? (
+                <LoadingState label="Loading your class roster…" />
+              ) : filtered.length === 0 ? (
+                <EmptyState
+                  icon={<Users size={28} />}
+                  title="No students to show"
+                  message="Either no students are enrolled in this class yet, or your search matched nothing. Clear the search to see the full roster."
+                />
+              ) : null}
             </div>
           </div>
         </section>
