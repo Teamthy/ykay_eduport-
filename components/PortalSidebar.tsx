@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import { LogOut } from "lucide-react";
 import { useAuth } from "./AuthProvider";
-import { useToast } from "./Toast";
 
 interface SidebarItem {
   label: string;
@@ -27,12 +26,10 @@ interface PortalSidebarProps {
 export default function PortalSidebar({ portalName, portalType, items }: PortalSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const { toast } = useToast();
 
-  const handleLogout = () => {
-    toast("Logged out successfully", "info");
-    logout();
-  };
+  // Confirmation is handled centrally in AuthProvider; announcing "logged out"
+  // here fired before the user had agreed to anything.
+  const handleLogout = logout;
 
   return (
     <aside className="lg:w-[280px] shrink-0">

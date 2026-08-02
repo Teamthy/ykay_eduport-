@@ -30,7 +30,7 @@ export default function PortalTopbar({ title = "Workspace" }: { title?: string }
             </span>
           </span>
           <button
-            onClick={() => logout()}
+            onClick={logout}
             className="rounded-full p-2 text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-500"
             aria-label="Sign out"
           >

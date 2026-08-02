@@ -20,7 +20,6 @@ import {
   Shield,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
-import { useToast } from "./Toast";
 import Image from "next/image";
 
 const ADMIN_NAV = [
@@ -50,7 +49,6 @@ const ADMIN_NAV = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const { toast } = useToast();
 
   return (
     <aside className="hidden w-[280px] shrink-0 lg:block">
@@ -107,10 +105,7 @@ export default function AdminSidebar() {
         </nav>
 
         <button
-          onClick={() => {
-            toast("Logged out", "info");
-            logout();
-          }}
+          onClick={logout}
           className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-xs text-[var(--text-muted)] hover:text-red-500"
         >
           <LogOut size={14} /> Sign out
