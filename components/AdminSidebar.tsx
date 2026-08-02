@@ -3,21 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  CreditCard,
-  FileText,
-  ClipboardCheck,
-  Users,
-  IdCard,
   BarChart3,
   BookOpen,
+  CalendarDays,
+  ClipboardCheck,
+  CreditCard,
+  FileText,
+  GraduationCap,
+  HelpCircle,
+  IdCard,
+  LayoutDashboard,
   Lock,
+  LogOut,
   School,
   Send,
-  UserPlus,
-  HelpCircle,
-  LogOut,
   Shield,
+  UserPlus,
+  Users,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import Image from "next/image";
@@ -29,6 +31,8 @@ const ADMIN_NAV = [
   { label: "Staff Accounts", href: "/admin/staff", icon: UserPlus },
   { label: "Staff QR Attendance", href: "/admin/staff-attendance", icon: ClipboardCheck },
   { label: "Class Manager", href: "/admin/class-manager", icon: School },
+  { label: "Sessions & Terms", href: "/admin/sessions", icon: CalendarDays },
+  { label: "Promotion", href: "/admin/promotion", icon: GraduationCap },
   { label: "Staff Assignments", href: "/admin/staff-assignments", icon: BookOpen },
   { label: "Fee Management", href: "/admin/fees", icon: CreditCard },
   { label: "Transfer Review", href: "/admin/fees/transfers", icon: CreditCard },
