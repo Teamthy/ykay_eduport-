@@ -78,9 +78,17 @@ export default function SuperAdminPortalsPage() {
           <p className="mt-3 max-w-2xl text-sm text-white/65">
             Jump straight into any portal&apos;s key pages. As super-admin you have read access across all schools and roles.
           </p>
-          <a href="/super-admin/schools" className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.03]">
-            Schools Overview — multi-tenant stats →
-          </a>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <a href="/super-admin/schools" className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.03]">
+              Schools Overview →
+            </a>
+            <a href="/super-admin/health" className="inline-flex items-center gap-2 rounded-full bg-blue-500 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.03]">
+              System Health →
+            </a>
+            <a href="/super-admin/broadcast" className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.03]">
+              Broadcast →
+            </a>
+          </div>
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
