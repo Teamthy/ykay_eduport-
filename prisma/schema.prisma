@@ -195,6 +195,7 @@ model School {
   branding                TenantBranding?
   messageThreads          MessageThread[]
   messages                Message[]
+  behaviorRecords         BehaviorRecord[]
 }
 
 model User {
@@ -259,6 +260,8 @@ model TeacherProfile {
   gradebooks            SubjectGradebook[]
   exams                 Exam[]
   staffAttendanceEvents StaffAttendanceEvent[]
+
+  behaviorRecords BehaviorRecord[]
 
   @@index([schoolId, displayName])
 }
@@ -343,6 +346,7 @@ model StudentProfile {
   examRetakes          ExamRetake[]
   admissionApplication AdmissionApplication? @relation("AdmissionEnrollment", fields: [admissionApplicationId], references: [id], onDelete: SetNull)
   messageThreads       MessageThread[]
+  behaviorRecords      BehaviorRecord[]
 
   @@unique([schoolId, studentId])
   @@index([currentClassId, isActive])
@@ -1359,4 +1363,48 @@ model Message {
 
   @@index([threadId, createdAt])
   @@index([schoolId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Behaviour records
+//
+//  app/teacher/class/behavior/page.tsx held records in useState and
+//  /api/teacher/class/behavior returned `records: []` with a comment naming a
+//  "future BehaviorRecord model". So every note a teacher typed was lost on
+//  refresh. This is that model.
+//
+//  Vocabulary (COMMENDATION / WARNING / NOTE) mirrors the labels the web page
+//  already shows, so nothing has to be re-learned by staff.
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum BehaviorRecordType {
+  COMMENDATION
+  WARNING
+  NOTE
+}
+
+model BehaviorRecord {
+  id               String             @id @default(cuid())
+  schoolId         String
+  studentProfileId String
+  /// Author. Kept as a teacher profile so the record survives a role change.
+  teacherProfileId String
+  type             BehaviorRecordType
+  /// Free-text bucket, e.g. "Punctuality", "Teamwork". Deliberately not an
+  /// enum — schools word these differently and it is display-only.
+  category         String?
+  description      String
+  occurredAt       DateTime           @default(now())
+  /// Set when a guardian has been told, so it is auditable later.
+  parentNotifiedAt DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  school         School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  teacherProfile TeacherProfile @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, occurredAt])
+  @@index([studentProfileId, occurredAt])
+  @@index([teacherProfileId, occurredAt])
 }

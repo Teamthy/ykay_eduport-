@@ -354,6 +354,43 @@ async function main() {
       },
     });
     studentMap.set(s.parentEmail + ":" + displayName, student.id);
+
+    // Give the FIRST student a real, loginable account.
+    //
+    // Without this the seed produced student PROFILES but zero users with
+    // role STUDENT and no profile linked to one — so a fresh environment
+    // could not sign in to the student portal at all, even though the
+    // summary below advertises /student/dashboard. This used to require
+    // running scripts/make-student-login.ts by hand afterwards.
+    if (i === 0) {
+      const studentEmail = "student1@ykaycollege.com";
+      const studentUser = await prisma.user.upsert({
+        where: { schoolId_email: { schoolId: school.id, email: studentEmail } },
+        update: {
+          name: displayName,
+          role: UserRole.STUDENT,
+          passwordHash,
+          isActive: true,
+          mustChangePassword: false,
+        },
+        create: {
+          schoolId: school.id,
+          email: studentEmail,
+          name: displayName,
+          role: UserRole.STUDENT,
+          passwordHash,
+          isActive: true,
+          mustChangePassword: false,
+        },
+      });
+      await prisma.studentProfile.update({
+        where: { id: student.id },
+        data: { userId: studentUser.id },
+      });
+      console.log(`   ✅ ${displayName} (${studentId}) — ${className}  [login: ${studentEmail}]`);
+      continue;
+    }
+
     console.log(`   ✅ ${displayName} (${studentId}) — ${className}`);
   }
   console.log("");
@@ -464,7 +501,7 @@ async function main() {
   console.log("   • Super Admin:  /super-admin");
   console.log("   • Admin:        /admin");
   console.log("   • Teacher:      /teacher/dashboard");
-  console.log("   • Student:      /student/dashboard");
+  console.log("   • Student:      /student/dashboard  (student1@ykaycollege.com)");
   console.log("   • Parent:       /parent/dashboard");
   console.log("   • IT Portal:    /it-portal/dashboard");
   console.log("   • Instructor:   /it-portal/instructor");

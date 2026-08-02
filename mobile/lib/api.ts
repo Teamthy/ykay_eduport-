@@ -180,6 +180,18 @@ export const teacherApi = {
     entries: { studentProfileId: string; status: string; note?: string | null }[];
   }) => apiQueued("/api/teacher/attendance/register", "POST", data),
 
+  behavior: (studentId?: string) =>
+    api("/api/teacher/class/behavior" + (studentId ? `?studentId=${studentId}` : "")),
+  createBehavior: (data: {
+    studentProfileId: string;
+    type: "COMMENDATION" | "WARNING" | "NOTE";
+    category?: string;
+    description: string;
+    notifyParent?: boolean;
+  }) => api("/api/teacher/class/behavior", { method: "POST", body: JSON.stringify(data) }),
+  deleteBehavior: (id: string) =>
+    api(`/api/teacher/class/behavior?id=${encodeURIComponent(id)}`, { method: "DELETE" }),
+
   gradebook: (assignmentId?: string) =>
     api("/api/teacher/gradebook" + (assignmentId ? `?assignmentId=${assignmentId}` : "")),
   saveGradebook: (assignmentId: string, action: "SAVE" | "SUBMIT", scores: any[]) =>

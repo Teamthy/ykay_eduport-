@@ -29,6 +29,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
+  Heart,
 } from "lucide-react-native";
 
 export default function TeacherDashboard() {
@@ -220,6 +221,12 @@ export default function TeacherDashboard() {
           icon={<Megaphone size={18} color={colors.brand.greenLight} />}
           label="Announcements"
           onPress={() => router.push("/teacher-announcements")}
+        />
+        <ActionRow
+          icon={<Heart size={18} color={colors.brand.greenLight} />}
+          label="Behaviour"
+          hint="Log praise or a concern"
+          onPress={() => router.push("/teacher-behavior")}
         />
         <ActionRow
           icon={<Mail size={18} color={colors.brand.greenLight} />}

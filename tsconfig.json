@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -18,9 +22,12 @@
         "name": "next"
       }
     ],
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     },
     "forceConsistentCasingInFileNames": true
   },
@@ -31,5 +38,13 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "_backups", ".history", ".next", "*.patch", "mobile", "scripts"]
+  "exclude": [
+    "node_modules",
+    "_backups",
+    ".history",
+    ".next",
+    "*.patch",
+    "mobile",
+    "scripts"
+  ]
 }

@@ -92,6 +92,7 @@ export default function RootLayout() {
       <Stack.Screen name="admin-expenses" />
       <Stack.Screen name="messages" />
       <Stack.Screen name="message-thread" />
+      <Stack.Screen name="teacher-behavior" />
       <Stack.Screen name="(student)" />
       <Stack.Screen name="(teacher)" />
       <Stack.Screen name="(parent)" />
