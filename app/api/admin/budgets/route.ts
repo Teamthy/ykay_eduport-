@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getAdminFinanceContext } from "@/lib/finance";
 import { assertNotImpersonating } from "@/lib/session";
-import { currentSessionLabel, currentTermLabel } from "@/lib/gradebook";
+import {
+  NoCurrentTermError,
+  requireCurrentLabels,
+  resolveCurrentLabels,
+} from "@/lib/academic-session";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
 
@@ -21,8 +25,7 @@ export async function GET() {
   const context = await getAdminFinanceContext();
   if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const sessionLabel = currentSessionLabel();
-  const termLabel = currentTermLabel();
+  const { sessionLabel, termLabel, source } = await resolveCurrentLabels(context.user.schoolId);
 
   const [budgets, expenses] = await Promise.all([
     prisma.budget.findMany({
@@ -49,6 +52,7 @@ export async function GET() {
   return NextResponse.json({
     sessionLabel,
     termLabel,
+    labelSource: source,
     budgets: budgets.map((b) => {
       const spent = spentByCategory.get(b.category.toLowerCase()) || 0;
       const remaining = b.amountLimit - spent;
@@ -83,8 +87,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid budget details." }, { status: 400 });
   }
 
-  const sessionLabel = input.sessionLabel || currentSessionLabel();
-  const termLabel = input.termLabel || currentTermLabel();
+  // A budget keys on (category, term, session) — a guessed term silently
+  // creates a second budget for the same real-world period.
+  let sessionLabel: string;
+  let termLabel: string;
+  try {
+    const current = await requireCurrentLabels(context.user.schoolId);
+    sessionLabel = input.sessionLabel || current.sessionLabel;
+    termLabel = input.termLabel || current.termLabel;
+  } catch (labelError) {
+    if (labelError instanceof NoCurrentTermError && !(input.sessionLabel && input.termLabel)) {
+      return NextResponse.json({ error: labelError.message }, { status: 409 });
+    }
+    if (!(labelError instanceof NoCurrentTermError)) throw labelError;
+    // Both labels supplied explicitly — the caller is not relying on a guess.
+    sessionLabel = input.sessionLabel as string;
+    termLabel = input.termLabel as string;
+  }
 
   const budget = await prisma.budget.upsert({
     where: {

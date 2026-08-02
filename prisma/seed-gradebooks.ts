@@ -1,4 +1,5 @@
 import { GradebookStatus, TeacherAssignmentRole } from "@prisma/client";
+import { resolveCurrentLabels } from "../lib/academic-session";
 import { prisma } from "../lib/prisma";
 import { getSchool } from "../lib/school";
 
@@ -14,19 +15,6 @@ function waecGrade(total: number) {
   return "F9";
 }
 
-function currentSessionLabel() {
-  const now = new Date();
-  const year = now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
-  return `${year}/${year + 1}`;
-}
-
-function currentTermLabel() {
-  const month = new Date().getMonth();
-  if (month >= 8 && month <= 11) return "First Term";
-  if (month >= 0 && month <= 3) return "Second Term";
-  return "Third Term";
-}
-
 function sampleScores(seedIndex: number, subjectIndex: number) {
   const base = 35 + ((seedIndex * 17 + subjectIndex * 11) % 55);
   const ca1 = Math.min(10, 4 + ((seedIndex + subjectIndex) % 7));
@@ -40,8 +28,7 @@ function sampleScores(seedIndex: number, subjectIndex: number) {
 
 async function main() {
   const school = await getSchool();
-  const sessionLabel = currentSessionLabel();
-  const termLabel = currentTermLabel();
+  const { sessionLabel, termLabel } = await resolveCurrentLabels(school.id);
 
   const schoolClass = await prisma.schoolClass.findFirst({
     where: { schoolId: school.id, displayName: "SS2A", isActive: true },

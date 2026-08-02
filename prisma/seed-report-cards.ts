@@ -1,4 +1,5 @@
 import { ReportCardStatus } from "@prisma/client";
+import { resolveCurrentLabels } from "../lib/academic-session";
 import { prisma } from "../lib/prisma";
 import { getSchool } from "../lib/school";
 
@@ -168,8 +169,10 @@ async function main() {
     throw new Error("No student profiles found. Run attendance/bootstrap seeds first.");
   }
 
-  const sessionLabel = `${new Date().getFullYear()}/${new Date().getFullYear() + 1}`;
-  const termLabel = `First Term ${sessionLabel}`;
+  // Read the term the school actually set. Previously this built
+  // `First Term 2026/2027` — the session baked into the term string — which no
+  // other table used, so seeded report cards matched no gradebook and no query.
+  const { sessionLabel, termLabel } = await resolveCurrentLabels(school.id);
 
   const templates = [
     {

@@ -35,6 +35,8 @@ export default function AdminBudgetsPage() {
   const [rows, setRows] = useState<BudgetRow[]>([]);
   const [sessionLabel, setSessionLabel] = useState("");
   const [termLabel, setTermLabel] = useState("");
+  // "CALENDAR" means no academic term is set, so the labels below are a guess.
+  const [labelSource, setLabelSource] = useState<"TERM" | "CALENDAR">("TERM");
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -48,6 +50,7 @@ export default function AdminBudgetsPage() {
       setRows(j.budgets || []);
       setSessionLabel(j.sessionLabel || "");
       setTermLabel(j.termLabel || "");
+      setLabelSource(j.labelSource || "TERM");
     } catch (e) {
       toast(e instanceof Error ? e.message : "Unable to load budgets.", "error");
     } finally {
@@ -99,6 +102,9 @@ export default function AdminBudgetsPage() {
               BUDGET <span className="text-brand-green">TRACKER</span>
             </h1>
             <p className="mt-3 text-sm text-white/65">
+              {labelSource === "CALENDAR"
+                ? "No academic term is set — the period below is guessed from today's date. Set one in Sessions & Terms before saving budgets."
+                : null}{" "}
               Set category limits for {sessionLabel} · {termLabel}. Spend is calculated from the
               expense ledger.
             </p>

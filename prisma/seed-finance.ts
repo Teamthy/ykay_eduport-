@@ -1,4 +1,5 @@
 import { FeeInvoiceStatus, FeePaymentMethod, FeePaymentStatus, Prisma } from "@prisma/client";
+import { resolveCurrentLabels } from "../lib/academic-session";
 import { prisma } from "../lib/prisma";
 import { getSchool } from "../lib/school";
 
@@ -143,7 +144,8 @@ async function main() {
   const [studentA, studentB, studentC, studentD] = students;
   const now = new Date();
   const currentYear = now.getFullYear();
-  const termLabel = `First Term ${currentYear}/${currentYear + 1}`;
+  // Same term string every other table uses — see seed-report-cards.
+  const { termLabel } = await resolveCurrentLabels(school.id);
   const dueSoon = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 14);
   const overdue = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 14);
 

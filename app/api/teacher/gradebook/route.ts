@@ -1,11 +1,10 @@
 import { GradebookStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { NoCurrentTermError, requireCurrentLabels } from "@/lib/academic-session";
 import {
   SCORE_LIMITS,
   computeEntryTotals,
-  currentSessionLabel,
-  currentTermLabel,
   ensureGradebook,
   getGradebookTeacherContext,
   gradebookStatusLabel,
@@ -68,8 +67,18 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const sessionLabel = currentSessionLabel();
-  const termLabel = currentTermLabel();
+  // A gradebook is created on first view, so even this GET is a write. It must
+  // carry the term the school set, not one inferred from today's date.
+  let labels: Awaited<ReturnType<typeof requireCurrentLabels>>;
+  try {
+    labels = await requireCurrentLabels(user.schoolId);
+  } catch (labelError) {
+    if (labelError instanceof NoCurrentTermError) {
+      return NextResponse.json({ error: labelError.message }, { status: 409 });
+    }
+    throw labelError;
+  }
+  const { sessionLabel, termLabel } = labels;
 
   const gradebook = await ensureGradebook({
     schoolId: user.schoolId,
@@ -151,13 +160,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  let saveLabels: Awaited<ReturnType<typeof requireCurrentLabels>>;
+  try {
+    saveLabels = await requireCurrentLabels(user.schoolId);
+  } catch (labelError) {
+    if (labelError instanceof NoCurrentTermError) {
+      return NextResponse.json({ error: labelError.message }, { status: 409 });
+    }
+    throw labelError;
+  }
+
   const gradebook = await ensureGradebook({
     schoolId: user.schoolId,
     classId: assignment.classroom.id,
     teacherProfileId: teacherProfile.id,
     subjectName: assignment.subjectName,
-    sessionLabel: currentSessionLabel(),
-    termLabel: currentTermLabel(),
+    sessionLabel: saveLabels.sessionLabel,
+    termLabel: saveLabels.termLabel,
   });
 
   if (gradebook.status !== GradebookStatus.OPEN) {

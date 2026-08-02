@@ -2,11 +2,11 @@ import { AttendanceStatus, GradebookStatus, ReportCardStatus } from "@prisma/cli
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import {
-  GRADEBOOK_ADMIN_ROLES,
-  currentSessionLabel,
-  currentTermLabel,
-  waecGrade,
-} from "@/lib/gradebook";
+  NoCurrentTermError,
+  requireCurrentLabels,
+  resolveCurrentLabels,
+} from "@/lib/academic-session";
+import { GRADEBOOK_ADMIN_ROLES, waecGrade } from "@/lib/gradebook";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
 import { requireRole } from "@/lib/session";
@@ -40,8 +40,9 @@ export async function GET(request: NextRequest) {
   const user = await requireRole(GRADEBOOK_ADMIN_ROLES);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const sessionLabel = currentSessionLabel();
-  const termLabel = currentTermLabel();
+  // Read path: fall back to the calendar so the screen still renders, but say
+  // so, because "ready to generate" means nothing if the term is a guess.
+  const { sessionLabel, termLabel, source } = await resolveCurrentLabels(user.schoolId);
   const requestedClassId = request.nextUrl.searchParams.get("classId");
 
   const classes = await prisma.schoolClass.findMany({
@@ -61,6 +62,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     sessionLabel,
     termLabel,
+    labelSource: source,
     classes: classes.map((schoolClass) => {
       const lockedCount = schoolClass.gradebooks.filter(
         (g) => g.status === GradebookStatus.LOCKED,
@@ -94,8 +96,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const sessionLabel = currentSessionLabel();
-  const termLabel = currentTermLabel();
+  // Write path: a report card is a permanent record. Refuse rather than stamp
+  // it with a guessed term.
+  let sessionLabel: string;
+  let termLabel: string;
+  try {
+    ({ sessionLabel, termLabel } = await requireCurrentLabels(user.schoolId));
+  } catch (labelError) {
+    if (labelError instanceof NoCurrentTermError) {
+      return NextResponse.json({ error: labelError.message }, { status: 409 });
+    }
+    throw labelError;
+  }
 
   const schoolClass = await prisma.schoolClass.findFirst({
     where: { id: payload.classId, schoolId: user.schoolId, isActive: true },

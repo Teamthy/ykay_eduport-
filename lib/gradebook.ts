@@ -1,4 +1,5 @@
 import { GradebookStatus, TeacherAssignmentRole, UserRole } from "@prisma/client";
+import { calendarLabels } from "@/lib/academic-session";
 import { prisma } from "@/lib/prisma";
 import { requireRole, type SessionUser } from "@/lib/session";
 
@@ -25,17 +26,23 @@ export const SCORE_LIMITS = {
 
 export type ScoreField = keyof typeof SCORE_LIMITS;
 
+/**
+ * @deprecated Guesses the session from the month. Use
+ * `resolveCurrentLabels(schoolId)` to read, or `requireCurrentLabels(schoolId)`
+ * to write — both in `lib/academic-session`, both backed by the term the school
+ * actually set.
+ *
+ * Retained as a thin delegate so there is exactly one calendar heuristic in the
+ * codebase. Two copies is how "First Term" and "Third Term" ended up naming the
+ * same week.
+ */
 export function currentSessionLabel() {
-  const now = new Date();
-  const year = now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
-  return `${year}/${year + 1}`;
+  return calendarLabels().sessionLabel;
 }
 
+/** @deprecated See {@link currentSessionLabel}. */
 export function currentTermLabel() {
-  const month = new Date().getMonth();
-  if (month >= 8 && month <= 11) return "First Term";
-  if (month >= 0 && month <= 3) return "Second Term";
-  return "Third Term";
+  return calendarLabels().termLabel;
 }
 
 export function waecGrade(total: number) {

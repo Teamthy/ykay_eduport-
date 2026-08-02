@@ -50,6 +50,8 @@ type GenerateClass = {
 type GenerateResponse = {
   sessionLabel: string;
   termLabel: string;
+  /** "CALENDAR" means no term is set and these labels are a month-based guess. */
+  labelSource?: "TERM" | "CALENDAR";
   classes: GenerateClass[];
 };
 
@@ -163,6 +165,11 @@ export default function AdminGradebookLockPage() {
               {generation ? (
                 <span className="text-xs text-white/45">
                   {generation.sessionLabel} · {generation.termLabel}
+                </span>
+              ) : null}
+              {generation?.labelSource === "CALENDAR" ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
+                  No term set — guessed from date
                 </span>
               ) : null}
             </div>

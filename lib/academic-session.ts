@@ -99,6 +99,119 @@ export async function getCurrentLabels(
   return { sessionLabel: term.session.label, termLabel: term.label };
 }
 
+// ── Label resolution ────────────────────────────────────────
+
+/**
+ * Where a pair of labels came from.
+ *
+ * "TERM"     — read from the AcademicSession/Term the school actually set.
+ * "CALENDAR" — nobody has set a term, so these are a month-based guess.
+ *
+ * The distinction is the whole point. A guess is fine for deciding what to show
+ * on a screen and never fine for deciding what to write into a record that
+ * outlives the guess.
+ */
+export type LabelSource = "TERM" | "CALENDAR";
+
+export type ResolvedLabels = {
+  sessionLabel: string;
+  termLabel: string;
+  source: LabelSource;
+  /** Null when the labels were guessed from the calendar. */
+  termId: string | null;
+  sessionId: string | null;
+  /** Term ordinal 1|2|3, or null when guessed. */
+  termIndex: number | null;
+};
+
+/**
+ * The calendar heuristic that predated AcademicSession.
+ *
+ * Kept only as a read-time fallback so a school with no session configured
+ * still sees a populated screen instead of an empty one. It is deliberately
+ * NOT allowed to feed a write — see `requireCurrentLabels`.
+ *
+ * Nigerian school year: September starts the session; Sep–Dec first term,
+ * Jan–Apr second, May–Aug third.
+ */
+export function calendarLabels(now = new Date()): {
+  sessionLabel: string;
+  termLabel: string;
+} {
+  const month = now.getMonth();
+  const year = month >= 8 ? now.getFullYear() : now.getFullYear() - 1;
+  const termLabel =
+    month >= 8
+      ? DEFAULT_TERM_LABELS[1]
+      : month <= 3
+        ? DEFAULT_TERM_LABELS[2]
+        : DEFAULT_TERM_LABELS[3];
+  return { sessionLabel: `${year}/${year + 1}`, termLabel };
+}
+
+/**
+ * Resolve "which term are we in" for reads.
+ *
+ * Always returns something usable, and always says which it is. Callers that
+ * are about to write must check `source` — or use `requireCurrentLabels`.
+ */
+export async function resolveCurrentLabels(schoolId: string): Promise<ResolvedLabels> {
+  const term = await getCurrentTerm(schoolId);
+  if (term) {
+    return {
+      sessionLabel: term.session.label,
+      termLabel: term.label,
+      source: "TERM",
+      termId: term.id,
+      sessionId: term.sessionId,
+      termIndex: term.index,
+    };
+  }
+  const fallback = calendarLabels();
+  return { ...fallback, source: "CALENDAR", termId: null, sessionId: null, termIndex: null };
+}
+
+/** Raised when a write needs a real term and the school has not set one. */
+export class NoCurrentTermError extends Error {
+  readonly code = "NO_CURRENT_TERM";
+  constructor() {
+    super(
+      "No academic term is currently set for this school. " +
+        "Open Admin → Sessions & Terms to create a session and mark a term as current.",
+    );
+    this.name = "NoCurrentTermError";
+  }
+}
+
+/**
+ * Labels for a write path. Throws rather than guessing.
+ *
+ * Every record stamped from a guess is a record that disagrees with the ones
+ * around it, and the disagreement only surfaces later — an admin generating
+ * report cards for "First Term" finds no gradebooks because the teacher's
+ * browser called it "Third Term" in August. Refusing here is loud, immediate
+ * and fixable in one screen; guessing is silent and expensive to unwind.
+ */
+export async function requireCurrentLabels(schoolId: string): Promise<{
+  sessionLabel: string;
+  termLabel: string;
+  termId: string;
+  sessionId: string;
+  termIndex: number;
+}> {
+  const resolved = await resolveCurrentLabels(schoolId);
+  if (resolved.source !== "TERM" || !resolved.termId || !resolved.sessionId) {
+    throw new NoCurrentTermError();
+  }
+  return {
+    sessionLabel: resolved.sessionLabel,
+    termLabel: resolved.termLabel,
+    termId: resolved.termId,
+    sessionId: resolved.sessionId,
+    termIndex: resolved.termIndex ?? 1,
+  };
+}
+
 // ── Writes ──────────────────────────────────────────────────
 
 /**
