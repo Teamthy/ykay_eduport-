@@ -8,7 +8,7 @@ import { H2, Body, Caption } from "@/src/components/typography";
 import { Column } from "@/src/components/layout";
 import { AppHeader } from "@/src/components/navigation";
 import { Button } from "@/src/components/buttons";
-import { User, Mail, GraduationCap, LogOut } from "lucide-react-native";
+import { User, Mail, GraduationCap, LogOut, Settings } from "lucide-react-native";
 
 export default function StudentProfile() {
   const router = useRouter();
@@ -36,6 +36,15 @@ export default function StudentProfile() {
         <InfoRow icon={<User size={18} color={colors.brand.greenLight} />} label="User ID" value={user?.id?.slice(0, 12) + "…" || ""} />
       </Column>
 
+      <Button
+        variant="ghost"
+        fullWidth
+        leftIcon={<Settings size={18} color={colors.brand.greenLight} />}
+        onPress={() => router.push("/settings")}
+        style={{ backgroundColor: colors.surface.card, marginBottom: spacing.sm }}
+      >
+        <Body tone="primary">Settings</Body>
+      </Button>
       <Button variant="ghost" fullWidth leftIcon={<LogOut size={18} color={colors.danger} />} onPress={async () => { await logout(); router.replace("/login"); }} style={{ backgroundColor: colors.status.errorBg }}>
         <Body tone="primary" style={{ color: colors.danger }}>Sign Out</Body>
       </Button>

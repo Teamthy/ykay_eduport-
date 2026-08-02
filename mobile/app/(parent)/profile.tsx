@@ -8,7 +8,7 @@ import { H2, Body, Caption, Label } from "@/src/components/typography";
 import { Column } from "@/src/components/layout";
 import { AppHeader } from "@/src/components/navigation";
 import { Button } from "@/src/components/buttons";
-import { Mail, User, Users, LogOut } from "lucide-react-native";
+import { Mail, User, Users, LogOut, Settings } from "lucide-react-native";
 
 export default function ParentProfile() {
   const router = useRouter();
@@ -40,6 +40,15 @@ export default function ParentProfile() {
         <Body>Your linked children appear on the Home screen. Contact the school to add or update a ward.</Body>
       </Card>
 
+      <Button
+        variant="ghost"
+        fullWidth
+        leftIcon={<Settings size={18} color={colors.brand.greenLight} />}
+        onPress={() => router.push("/settings")}
+        style={{ backgroundColor: colors.surface.card, marginBottom: spacing.sm }}
+      >
+        <Body tone="primary">Settings</Body>
+      </Button>
       <Button variant="ghost" fullWidth leftIcon={<LogOut size={18} color={colors.danger} />} onPress={async () => { await logout(); router.replace("/login"); }} style={{ backgroundColor: colors.status.errorBg }}>
         <Body tone="primary" style={{ color: colors.danger }}>Sign Out</Body>
       </Button>

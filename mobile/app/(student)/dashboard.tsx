@@ -1,97 +1,266 @@
-import { useEffect, useState } from "react";
-import { ScrollView, TouchableOpacity, RefreshControl, View } from "react-native";
-import { studentApi, logout } from "@/lib/api";
+import { useCallback, useEffect, useState } from "react";
+import { ScrollView, RefreshControl, View } from "react-native";
+import { studentApi } from "@/lib/api";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/src/theme";
-import { Card } from "@/src/components/cards";
-import { H2, Body, Caption, Label } from "@/src/components/typography";
-import { Row, Column } from "@/src/components/layout";
 import { AppHeader } from "@/src/components/navigation";
+import {
+  DashboardGreeting,
+  Metric,
+  MetricGrid,
+  ActionRow,
+  SectionHeading,
+  InlineError,
+} from "@/src/components/dashboard";
+import { Card } from "@/src/components/cards";
+import { Body, Caption } from "@/src/components/typography";
+import { Skeleton } from "@/src/components/feedback";
+import { ProgressRing } from "@/src/components/progress";
+import { Badge } from "@/src/components/badges";
 import { bodyFont } from "@/src/theme/typography";
-import { Award, Calendar, TrendingUp, Clock, GraduationCap, ChevronRight, ClipboardCheck, Bell, Users, CreditCard } from "lucide-react-native";
+import {
+  Award,
+  Calendar,
+  TrendingUp,
+  GraduationCap,
+  ClipboardCheck,
+  Bell,
+  Users,
+  CreditCard,
+  Wallet,
+} from "lucide-react-native";
+
+const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 
 export default function StudentDashboard() {
   const router = useRouter();
   const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  async function load() {
-    try { setData(await studentApi.dashboard()); } catch {} finally { setRefreshing(false); }
-  }
-  useEffect(() => { load(); }, []);
+  const load = useCallback(async () => {
+    try {
+      setError(null);
+      setData(await studentApi.dashboard());
+    } catch (err) {
+      // Previously `catch {}` — a failed fetch rendered an empty dashboard
+      // that looked identical to "you have no data".
+      setError(err instanceof Error ? err.message : "Couldn't load your dashboard.");
+    } finally {
+      setRefreshing(false);
+      setLoading(false);
+    }
+  }, []);
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const stats = data?.stats;
+  const report = data?.latestReport;
+  const attendanceRate = Number(stats?.attendanceRate ?? 0);
+  const feeBalance = Number(stats?.feeBalance ?? 0);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background.primary }}
+      contentContainerStyle={{ padding: spacing.lg, paddingTop: 56, paddingBottom: 40 }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => {
+            setRefreshing(true);
+            void load();
+          }}
+          tintColor={colors.brand.greenLight}
+        />
+      }
+    >
       <AppHeader onBellPress={() => router.push("/announcements")} />
 
-      <Caption>{greeting},</Caption>
-      <H2 style={{ marginTop: 2 }}>{data?.student?.displayName || "Student"}</H2>
-      <Caption style={{ marginTop: 4, marginBottom: spacing.lg }}>{data?.student?.className || ""}</Caption>
+      <DashboardGreeting
+        name={data?.student?.displayName || (loading ? "" : "Student")}
+        subtitle={
+          data?.student?.className
+            ? `${data.student.className} · ${data.student.studentId}`
+            : null
+        }
+        onAvatarPress={() => router.push("/(student)/profile")}
+      />
 
-      {/* Stats */}
-      <Row gap={spacing.sm} justify="flex-start" style={{ flexWrap: "wrap", marginBottom: spacing.lg }}>
-        <StatCard icon={<TrendingUp size={20} color={colors.brand.greenLight} />} value={data?.stats ? `${data.stats.attendanceRate}%` : "—"} label="Attendance" />
-        <StatCard icon={<Award size={20} color={colors.brand.greenLight} />} value={data?.stats ? `${data.stats.averageScore}` : "—"} label="Avg Score" />
-        <StatCard icon={<Clock size={20} color={colors.brand.greenLight} />} value={data?.stats?.classPosition || "—"} label="Position" />
-        <StatCard icon={<GraduationCap size={20} color={colors.brand.greenLight} />} value={data?.stats?.overallGrade || "—"} label="Grade" />
-      </Row>
+      {error ? <InlineError message={error} onRetry={() => void load()} /> : null}
 
-      <Label style={{ marginBottom: spacing.sm }}>Quick Actions</Label>
-      <Column gap={spacing.sm} style={{ marginBottom: spacing.lg }}>
-        <ActionRow icon={<Award size={20} color={colors.brand.greenLight} />} label="View Report Cards" onPress={() => router.push("/(student)/report-cards")} />
-        <ActionRow icon={<ClipboardCheck size={20} color={colors.brand.greenLight} />} label="Take Exam" onPress={() => router.push("/(student)/exams")} />
-        <ActionRow icon={<GraduationCap size={20} color={colors.brand.greenLight} />} label="Practice Tests" onPress={() => router.push("/practice")} />
-        <ActionRow icon={<Calendar size={20} color={colors.brand.greenLight} />} label="My Attendance" onPress={() => router.push("/(student)/attendance")} />
-        <ActionRow icon={<Bell size={20} color={colors.brand.greenLight} />} label="Announcements" onPress={() => router.push("/announcements")} />
-        <ActionRow icon={<Users size={20} color={colors.brand.greenLight} />} label="My Teachers" onPress={() => router.push("/student-teachers")} />
-        <ActionRow icon={<CreditCard size={20} color={colors.brand.greenLight} />} label="ID Card" onPress={() => router.push("/id-card")} />
-      </Column>
-
-      {data?.timetable?.length > 0 && (
-        <Column gap={spacing.sm} style={{ marginBottom: spacing.lg }}>
-          <Label>Today's Schedule</Label>
-          {data.timetable.slice(0, 5).map((item: any, i: number) => (
-            <Row key={i} gap={spacing.sm} align="center">
-              <View style={{ width: 4, height: 32, backgroundColor: colors.brand.green, borderRadius: 2 }} />
-              <Column>
-                <Body tone="primary" style={{ fontFamily: bodyFont("semibold") }}>{item.subject}</Body>
-                <Caption>{item.time} · {item.teacher}</Caption>
-              </Column>
-            </Row>
+      {loading ? (
+        <MetricGrid style={{ marginBottom: spacing.lg }}>
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} width="48%" height={104} radius={16} />
           ))}
-        </Column>
+        </MetricGrid>
+      ) : (
+        <>
+          {/* Attendance gets the hero treatment — it is the number a student
+              is asked about most often, and a ring reads faster than digits. */}
+          <Card
+            variant="default"
+            padding={spacing.md}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: spacing.lg,
+              marginBottom: spacing.sm + 2,
+            }}
+          >
+            <ProgressRing
+              value={attendanceRate}
+              size={86}
+              strokeWidth={8}
+              caption="present"
+              color={
+                attendanceRate >= 75
+                  ? colors.success
+                  : attendanceRate >= 50
+                    ? colors.warning
+                    : colors.danger
+              }
+            />
+            <View style={{ flex: 1 }}>
+              <Body tone="primary" style={{ fontFamily: bodyFont("bold"), fontSize: 16 }}>
+                Attendance
+              </Body>
+              <Caption style={{ marginTop: 3 }}>
+                {attendanceRate >= 75
+                  ? "You're in good standing this term."
+                  : "Below the 75% benchmark — speak to your form teacher."}
+              </Caption>
+              <Caption
+                style={{ marginTop: 8, color: colors.brand.greenLight, fontFamily: bodyFont("medium") }}
+                onPress={() => router.push("/(student)/attendance")}
+              >
+                View record →
+              </Caption>
+            </View>
+          </Card>
+
+          <MetricGrid style={{ marginBottom: spacing.lg }}>
+            <Metric
+              icon={<Award size={18} color={colors.brand.greenLight} />}
+              label="Average score"
+              value={stats?.averageScore != null ? `${stats.averageScore}` : "—"}
+              hint={report?.termLabel || undefined}
+              onPress={() => router.push("/(student)/report-cards")}
+            />
+            <Metric
+              icon={<TrendingUp size={18} color={colors.brand.greenLight} />}
+              label="Class position"
+              // classPosition lives on latestReport, not stats — reading
+              // stats.classPosition always rendered a dash.
+              value={report?.classPosition != null ? `${report.classPosition}` : "—"}
+              hint={report?.sessionLabel || undefined}
+              onPress={() => router.push("/(student)/report-cards")}
+            />
+            <Metric
+              icon={<GraduationCap size={18} color={colors.brand.greenLight} />}
+              label="Overall grade"
+              value={stats?.overallGrade || "—"}
+              onPress={() => router.push("/(student)/report-cards")}
+            />
+            <Metric
+              icon={
+                <Wallet
+                  size={18}
+                  color={feeBalance > 0 ? colors.danger : colors.brand.greenLight}
+                />
+              }
+              accent={feeBalance > 0 ? colors.danger : undefined}
+              label="Fee balance"
+              value={naira(feeBalance)}
+              compact
+              hint={feeBalance > 0 ? "Outstanding" : "Fully paid"}
+            />
+          </MetricGrid>
+        </>
       )}
 
-      <TouchableOpacity onPress={async () => { await logout(); router.replace("/login"); }} style={{ marginTop: spacing.lg, padding: spacing.md, alignItems: "center", backgroundColor: colors.status.errorBg, borderRadius: 14 }}>
-        <Body tone="primary" style={{ color: colors.danger, fontFamily: bodyFont("semibold") }}>Sign Out</Body>
-      </TouchableOpacity>
+      {/* Latest result — replaces a "Today's Schedule" block that read
+          data.timetable, a field the dashboard API never returns (and the
+          timetable endpoint itself still returns an empty schedule). */}
+      {report ? (
+        <>
+          <SectionHeading
+            title="Latest result"
+            actionLabel="All results"
+            onAction={() => router.push("/(student)/report-cards")}
+          />
+          <Card
+            variant="bordered"
+            padding={spacing.md}
+            onPress={() => router.push("/(student)/report-cards")}
+            style={{ marginBottom: spacing.lg }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+              <Body tone="primary" style={{ flex: 1, fontFamily: bodyFont("bold") }}>
+                {report.termLabel}
+              </Body>
+              {report.overallGrade ? (
+                <Badge tone="success">{report.overallGrade}</Badge>
+              ) : null}
+            </View>
+            <Caption style={{ marginTop: 4 }}>
+              {report.sessionLabel}
+              {report.overallAverage != null ? ` · ${report.overallAverage}% average` : ""}
+              {report.classPosition != null ? ` · position ${report.classPosition}` : ""}
+            </Caption>
+          </Card>
+        </>
+      ) : null}
+
+      <SectionHeading title="Quick actions" />
+      <View style={{ gap: spacing.sm }}>
+        <ActionRow
+          icon={<Award size={18} color={colors.brand.greenLight} />}
+          label="Report cards"
+          hint="Termly results and remarks"
+          onPress={() => router.push("/(student)/report-cards")}
+        />
+        <ActionRow
+          icon={<ClipboardCheck size={18} color={colors.brand.greenLight} />}
+          label="Exams"
+          hint="Sit a computer-based test"
+          onPress={() => router.push("/(student)/exams")}
+        />
+        <ActionRow
+          icon={<GraduationCap size={18} color={colors.brand.greenLight} />}
+          label="Practice tests"
+          hint="Past questions by subject"
+          onPress={() => router.push("/practice")}
+        />
+        <ActionRow
+          icon={<Calendar size={18} color={colors.brand.greenLight} />}
+          label="Attendance"
+          hint="Your day-by-day record"
+          onPress={() => router.push("/(student)/attendance")}
+        />
+        <ActionRow
+          icon={<Bell size={18} color={colors.brand.greenLight} />}
+          label="Announcements"
+          hint="School news and notices"
+          onPress={() => router.push("/announcements")}
+        />
+        <ActionRow
+          icon={<Users size={18} color={colors.brand.greenLight} />}
+          label="My teachers"
+          hint="Who teaches what"
+          onPress={() => router.push("/student-teachers")}
+        />
+        <ActionRow
+          icon={<CreditCard size={18} color={colors.brand.greenLight} />}
+          label="ID card"
+          hint="Your digital student ID"
+          onPress={() => router.push("/id-card")}
+        />
+      </View>
     </ScrollView>
-  );
-}
-
-function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
-  return (
-    <Card variant="default" padding={16} style={{ width: "48%" }}>
-      {icon}
-      <H2 style={{ marginTop: 8 }}>{value}</H2>
-      <Caption style={{ marginTop: 4 }}>{label}</Caption>
-    </Card>
-  );
-}
-
-function ActionRow({ icon, label, onPress }: { icon: React.ReactNode; label: string; onPress: () => void }) {
-  const { colors, spacing } = useTheme();
-  return (
-    <TouchableOpacity onPress={onPress}>
-      <Card variant="default" padding={16} style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
-        {icon}
-        <Body tone="primary" style={{ flex: 1, fontFamily: bodyFont("medium") }}>{label}</Body>
-        <ChevronRight size={18} color={colors.border.strong} />
-      </Card>
-    </TouchableOpacity>
   );
 }

@@ -1,10 +1,11 @@
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { jsonNoStore } from "@/lib/requests";
 import { getParentPortalProfile, getStudentAttendanceMonth } from "@/lib/attendance-portal";
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const context = await getParentPortalProfile();
   if (!context) {
     return jsonNoStore(
@@ -33,7 +34,14 @@ export async function GET() {
     });
   }
 
-  const selectedChild = children[0];
+  // Honour ?studentId= so a parent with several wards can switch between
+  // them. Previously this was hardcoded to children[0], so the child
+  // switcher in the mobile app was purely decorative — siblings 2..n were
+  // unreachable. Falls back to the first child for an absent/unknown id,
+  // and the .find() over the parent's OWN links is what keeps another
+  // family's student from being addressable by guessing an id.
+  const requestedStudentId = request.nextUrl.searchParams.get("studentId")?.trim();
+  const selectedChild = children.find((child) => child.id === requestedStudentId) || children[0];
   const attendance = await getStudentAttendanceMonth(selectedChild.id, null);
 
   const [recentAlerts, childInvoices] = await Promise.all([

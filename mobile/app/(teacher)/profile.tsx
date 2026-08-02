@@ -9,7 +9,7 @@ import { Badge } from "@/src/components/badges";
 import { Column } from "@/src/components/layout";
 import { AppHeader } from "@/src/components/navigation";
 import { Button } from "@/src/components/buttons";
-import { Mail, BookOpen, Layers, LogOut, Award } from "lucide-react-native";
+import { Mail, BookOpen, Layers, LogOut, Award, Settings } from "lucide-react-native";
 
 export default function TeacherProfile() {
   const router = useRouter();
@@ -52,6 +52,15 @@ export default function TeacherProfile() {
         {(t.classes || []).length === 0 && <Caption>No class assignments.</Caption>}
       </Column>
 
+      <Button
+        variant="ghost"
+        fullWidth
+        leftIcon={<Settings size={18} color={colors.brand.greenLight} />}
+        onPress={() => router.push("/settings")}
+        style={{ backgroundColor: colors.surface.card, marginBottom: spacing.sm }}
+      >
+        <Body tone="primary">Settings</Body>
+      </Button>
       <Button variant="ghost" fullWidth leftIcon={<LogOut size={18} color={colors.danger} />} onPress={async () => { await logout(); router.replace("/login"); }} style={{ backgroundColor: colors.status.errorBg }}>
         <Body tone="primary" style={{ color: colors.danger }}>Sign Out</Body>
       </Button>

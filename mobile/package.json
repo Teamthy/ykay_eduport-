@@ -6,7 +6,8 @@
     "dev": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "typecheck": "node -e \"require('fs').rmSync('.expo/types',{recursive:true,force:true})\" && tsc --noEmit"
   },
   "dependencies": {
     "@expo-google-fonts/anton": "^0.4.2",

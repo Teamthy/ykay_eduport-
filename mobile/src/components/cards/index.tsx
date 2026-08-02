@@ -1,5 +1,5 @@
 import React from "react";
-import { View, ViewStyle } from "react-native";
+import { View, TouchableOpacity, ViewStyle, StyleProp } from "react-native";
 import { useTheme } from "@/src/theme";
 
 type CardVariant = "default" | "elevated" | "interactive" | "glass" | "bordered";
@@ -8,7 +8,7 @@ export interface CardProps {
   children: React.ReactNode;
   variant?: CardVariant;
   padding?: number;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   onPress?: () => void;
 }
 
@@ -26,16 +26,21 @@ export function Card({ children, variant = "default", padding = 16, style, onPre
             ? { backgroundColor: colors.background.elevated, borderWidth: 1, borderColor: colors.border.subtle, ...shadows.card }
             : { backgroundColor: colors.background.elevated, borderWidth: 1, borderColor: colors.border.subtle };
 
-  return (
-    <View
-      style={{
-        borderRadius: radius.lg,
-        padding,
-        ...variantStyle,
-        ...style,
-      }}
-    >
-      {children}
-    </View>
-  );
+  const composed: StyleProp<ViewStyle> = [
+    { borderRadius: radius.lg, padding },
+    variantStyle,
+    style,
+  ];
+
+  // `onPress` was accepted but ignored, so "interactive" cards were dead
+  // to the touch. Render a touchable when a handler is supplied.
+  if (onPress) {
+    return (
+      <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={composed}>
+        {children}
+      </TouchableOpacity>
+    );
+  }
+
+  return <View style={composed}>{children}</View>;
 }

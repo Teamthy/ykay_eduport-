@@ -1,15 +1,35 @@
-import { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { View, ScrollView, RefreshControl } from "react-native";
 import { parentApi } from "@/lib/api";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/src/theme";
-import { Card } from "@/src/components/cards";
-import { H2, H3, Body, Caption, Label } from "@/src/components/typography";
-import { Badge } from "@/src/components/badges";
-import { Row, Column } from "@/src/components/layout";
 import { AppHeader } from "@/src/components/navigation";
+import {
+  DashboardGreeting,
+  Metric,
+  MetricGrid,
+  ActionRow,
+  SectionHeading,
+  ChildSwitcher,
+  InlineError,
+} from "@/src/components/dashboard";
+import { Card } from "@/src/components/cards";
+import { H3, Body, Caption } from "@/src/components/typography";
+import { Skeleton, EmptyState } from "@/src/components/feedback";
+import { ProgressRing } from "@/src/components/progress";
+import { Button } from "@/src/components/buttons";
 import { bodyFont } from "@/src/theme/typography";
-import { CreditCard, Calendar, TrendingUp, Bell, ChevronRight, Users, GraduationCap, FileText, Megaphone, Mail } from "lucide-react-native";
+import { haptic } from "@/lib/haptics";
+import {
+  CreditCard,
+  Calendar,
+  Bell,
+  GraduationCap,
+  FileText,
+  Megaphone,
+  Mail,
+  ArrowRight,
+} from "lucide-react-native";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 
@@ -18,115 +38,276 @@ export default function ParentDashboard() {
   const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [childId, setChildId] = useState<string | null>(null);
 
-  async function load() { try { setData(await parentApi.dashboard()); } catch {} finally { setRefreshing(false); } }
-  useEffect(() => { load(); }, []);
+  const load = useCallback(async (id?: string | null) => {
+    try {
+      setError(null);
+      const res = await parentApi.dashboard(id || undefined);
+      setData(res);
+      setChildId(res?.selectedChild?.id ?? null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't load your dashboard.");
+    } finally {
+      setRefreshing(false);
+      setLoading(false);
+    }
+  }, []);
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  function switchChild(id: string) {
+    if (id === childId) return;
+    haptic("light");
+    setChildId(id);
+    setLoading(true);
+    void load(id);
+  }
+
   const child = data?.selectedChild;
   const fin = data?.finance;
   const att = data?.attendance;
-  const outstanding = fin?.totalOutstanding > 0;
+  const outstanding = Number(fin?.totalOutstanding ?? 0);
+  const hasOutstanding = outstanding > 0;
+  const attendanceRate = Number(att?.attendanceRate ?? 0);
+  const firstName = child?.displayName?.split(" ")[0] || "your ward";
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
-      <AppHeader />
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background.primary }}
+      contentContainerStyle={{ padding: spacing.lg, paddingTop: 56, paddingBottom: 40 }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => {
+            setRefreshing(true);
+            void load(childId);
+          }}
+          tintColor={colors.brand.greenLight}
+        />
+      }
+    >
+      <AppHeader onBellPress={() => router.push("/parent-events")} />
 
-      <Caption>{greeting},</Caption>
-      <H2 style={{ marginTop: 2, marginBottom: spacing.lg }}>{data?.parent?.displayName || "Parent"}</H2>
+      <DashboardGreeting
+        name={data?.parent?.displayName || (loading ? "" : "Parent")}
+        subtitle={child ? `Viewing ${child.displayName}` : null}
+        onAvatarPress={() => router.push("/(parent)/profile")}
+      />
 
-      {data && data.children?.length === 0 && (
-        <Card variant="bordered" style={{ alignItems: "center", padding: spacing.xl }}>
-          <GraduationCap size={40} color={colors.border.strong} />
-          <H3 style={{ marginTop: spacing.sm }}>No children linked yet</H3>
-          <Body style={{ marginTop: 6, textAlign: "center" }}>The school will link your ward's profile to this account.</Body>
+      {error ? <InlineError message={error} onRetry={() => void load(childId)} /> : null}
+
+      {/* Now functional: tapping a ward refetches scoped to that student.
+          The API previously hardcoded children[0], so siblings were
+          unreachable and these chips did nothing. */}
+      {data?.children?.length > 1 ? (
+        <ChildSwitcher children={data.children} selectedId={childId} onSelect={switchChild} />
+      ) : null}
+
+      {!loading && data && data.children?.length === 0 ? (
+        <Card variant="bordered" padding={spacing.xl}>
+          <EmptyState
+            icon={<GraduationCap size={38} color={colors.border.strong} />}
+            title="No children linked yet"
+            message="The school will link your ward's profile to this account."
+          />
         </Card>
-      )}
+      ) : null}
 
-      {data?.children?.length > 0 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.md }}>
-          {data.children.map((c: any) => (
-            <Card key={c.id} variant={c.isPrimary ? "elevated" : "default"} padding={10} style={{ flexDirection: "row", alignItems: "center", gap: spacing.xs, marginRight: spacing.sm, backgroundColor: c.isPrimary ? colors.brand.green : colors.background.elevated }}>
-              <Users size={14} color={c.isPrimary ? colors.brand.white : colors.text.muted} />
-              <View>
-                <Text style={{ color: colors.text.primary, fontSize: 13, fontWeight: "600", fontFamily: bodyFont("semibold") }}>{c.displayName}</Text>
-                <Text style={{ color: c.isPrimary ? colors.brand.white : colors.text.muted, fontSize: 11 }}>{c.className}</Text>
-              </View>
-            </Card>
-          ))}
-        </ScrollView>
-      )}
-
-      {child && (
-        <TouchableOpacity onPress={() => router.push("/(parent)/fees")}>
-          <Card variant="bordered" style={{ marginBottom: spacing.md, borderColor: outstanding ? colors.danger : colors.success }}>
-            <Row align="center" gap={spacing.xs}>
-              <CreditCard size={18} color={outstanding ? colors.danger : colors.success} />
-              <Label>Outstanding Fees</Label>
-              <View style={{ flex: 1 }} />
-              <ChevronRight size={16} color={colors.border.strong} />
-            </Row>
-            <H2 tone={outstanding ? "inverse" : "inverse"} style={{ color: outstanding ? colors.danger : colors.success, marginTop: spacing.xs }}>{naira(fin?.totalOutstanding)}</H2>
-            <Caption style={{ marginTop: 4 }}>Paid {naira(fin?.totalPaid)} of {naira(fin?.totalBilled)}</Caption>
-            {outstanding && <Card variant="default" padding={10} style={{ marginTop: spacing.sm + 2, alignItems: "center", backgroundColor: colors.border.subtle }}><Text style={{ color: colors.text.primary, fontWeight: "700", fontFamily: bodyFont("bold") }}>Tap to pay →</Text></Card>}
-          </Card>
-        </TouchableOpacity>
-      )}
-
-      {child && (
+      {loading ? (
         <>
-          <Row gap={spacing.sm} style={{ marginBottom: spacing.md }}>
-            <StatCard icon={<TrendingUp size={18} color={colors.brand.greenLight} />} value={att ? `${att.attendanceRate}%` : "—"} label={`${child.displayName?.split(" ")[0]}'s Attendance`} />
-            <StatCard icon={<Calendar size={18} color={colors.brand.greenLight} />} value={child.className || "—"} label="Class" small />
-          </Row>
-          <Column gap={spacing.sm} style={{ marginBottom: spacing.md }}>
-            <ActionRow icon={<FileText size={20} color={colors.brand.greenLight} />} label="View Report Cards" onPress={() => router.push("/(parent)/report-cards")} />
-            <ActionRow icon={<Calendar size={20} color={colors.brand.greenLight} />} label="Attendance" onPress={() => router.push("/(parent)/attendance")} />
-            <ActionRow icon={<Megaphone size={20} color={colors.brand.greenLight} />} label="Events" onPress={() => router.push("/parent-events")} />
-            <ActionRow icon={<Mail size={20} color={colors.brand.greenLight} />} label="Messages" onPress={() => router.push("/parent-messages")} />
-          </Column>
+          <Skeleton width="100%" height={132} radius={16} style={{ marginBottom: 10 }} />
+          <MetricGrid>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} width="48%" height={104} radius={16} />
+            ))}
+          </MetricGrid>
         </>
-      )}
+      ) : child ? (
+        <>
+          {/* Fees lead the parent view — it is the action with a deadline. */}
+          <Card
+            variant="bordered"
+            padding={spacing.md}
+            onPress={() => router.push("/(parent)/fees")}
+            style={{
+              marginBottom: spacing.sm + 2,
+              borderColor: hasOutstanding ? colors.status.errorBorder : colors.status.successBorder,
+              backgroundColor: hasOutstanding ? colors.status.errorBg : colors.status.successBg,
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+              <CreditCard
+                size={17}
+                color={hasOutstanding ? colors.status.errorText : colors.status.successText}
+              />
+              <Caption
+                style={{
+                  flex: 1,
+                  color: hasOutstanding ? colors.status.errorText : colors.status.successText,
+                  fontFamily: bodyFont("bold"),
+                  letterSpacing: 0.6,
+                }}
+              >
+                {hasOutstanding ? "OUTSTANDING FEES" : "FEES SETTLED"}
+              </Caption>
+            </View>
 
-      {data?.recentAlerts?.length > 0 && (
-        <Column gap={spacing.xs + 2}>
-          <Label>Recent Alerts</Label>
-          {data.recentAlerts.slice(0, 4).map((a: any) => (
-            <Card key={a.id} variant="default" padding={12} style={{ flexDirection: "row", gap: spacing.sm + 2 }}>
-              <Bell size={16} color={colors.warning} />
-              <Column style={{ flex: 1 }}>
-                <Body tone="primary" numberOfLines={2}>{a.messagePreview}</Body>
-                <Caption style={{ marginTop: 2 }}>{new Date(a.createdAt).toLocaleDateString("en", { month: "short", day: "numeric" })}</Caption>
-              </Column>
-            </Card>
-          ))}
-        </Column>
-      )}
+            <Body
+              tone="primary"
+              style={{
+                fontFamily: "Anton",
+                fontSize: 30,
+                lineHeight: 36,
+                marginTop: spacing.xs,
+                color: hasOutstanding ? colors.status.errorText : colors.status.successText,
+              }}
+            >
+              {naira(outstanding)}
+            </Body>
+            <Caption style={{ marginTop: 2 }}>
+              Paid {naira(fin?.totalPaid)} of {naira(fin?.totalBilled)}
+            </Caption>
+
+            {hasOutstanding ? (
+              <Button
+                fullWidth
+                size="sm"
+                onPress={() => router.push("/(parent)/fees")}
+                rightIcon={<ArrowRight size={15} color={colors.brand.white} />}
+                style={{ marginTop: spacing.md }}
+              >
+                Pay now
+              </Button>
+            ) : null}
+          </Card>
+
+          <Card
+            variant="default"
+            padding={spacing.md}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: spacing.lg,
+              marginBottom: spacing.sm + 2,
+            }}
+          >
+            <ProgressRing
+              value={attendanceRate}
+              size={80}
+              strokeWidth={8}
+              caption="present"
+              color={
+                attendanceRate >= 75
+                  ? colors.success
+                  : attendanceRate >= 50
+                    ? colors.warning
+                    : colors.danger
+              }
+            />
+            <View style={{ flex: 1 }}>
+              <Body tone="primary" style={{ fontFamily: bodyFont("bold"), fontSize: 16 }}>
+                {firstName}&apos;s attendance
+              </Body>
+              <Caption style={{ marginTop: 3 }}>
+                {att?.present ?? 0} present · {att?.absent ?? 0} absent · {att?.late ?? 0} late
+              </Caption>
+              <Caption
+                style={{
+                  marginTop: 8,
+                  color: colors.brand.greenLight,
+                  fontFamily: bodyFont("medium"),
+                }}
+                onPress={() => router.push("/(parent)/attendance")}
+              >
+                View record →
+              </Caption>
+            </View>
+          </Card>
+
+          <MetricGrid style={{ marginBottom: spacing.lg }}>
+            <Metric
+              icon={<GraduationCap size={18} color={colors.brand.greenLight} />}
+              label="Class"
+              value={child.className || "—"}
+              compact
+            />
+            <Metric
+              icon={<FileText size={18} color={colors.brand.greenLight} />}
+              label="Latest invoice"
+              value={fin?.latestInvoice?.status || "—"}
+              compact
+              hint={fin?.latestInvoice?.termLabel || undefined}
+              onPress={() => router.push("/(parent)/fees")}
+            />
+          </MetricGrid>
+
+          <SectionHeading title="Quick actions" />
+          <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
+            <ActionRow
+              icon={<FileText size={18} color={colors.brand.greenLight} />}
+              label="Report cards"
+              hint={`${firstName}'s termly results`}
+              onPress={() => router.push("/(parent)/report-cards")}
+            />
+            <ActionRow
+              icon={<Calendar size={18} color={colors.brand.greenLight} />}
+              label="Attendance"
+              hint="Day-by-day record"
+              onPress={() => router.push("/(parent)/attendance")}
+            />
+            <ActionRow
+              icon={<CreditCard size={18} color={colors.brand.greenLight} />}
+              label="Fees & payments"
+              hint="Invoices and receipts"
+              onPress={() => router.push("/(parent)/fees")}
+            />
+            <ActionRow
+              icon={<Megaphone size={18} color={colors.brand.greenLight} />}
+              label="School events"
+              onPress={() => router.push("/parent-events")}
+            />
+            <ActionRow
+              icon={<Mail size={18} color={colors.brand.greenLight} />}
+              label="Messages"
+              onPress={() => router.push("/parent-messages")}
+            />
+          </View>
+        </>
+      ) : null}
+
+      {data?.recentAlerts?.length > 0 ? (
+        <>
+          <SectionHeading title="Recent alerts" />
+          <View style={{ gap: spacing.sm }}>
+            {data.recentAlerts.slice(0, 4).map((a: any) => (
+              <Card
+                key={a.id}
+                variant="default"
+                padding={spacing.sm + 4}
+                style={{ flexDirection: "row", gap: spacing.sm + 2 }}
+              >
+                <Bell size={16} color={colors.warning} style={{ marginTop: 2 }} />
+                <View style={{ flex: 1 }}>
+                  <Body tone="primary" numberOfLines={2} style={{ fontSize: 14 }}>
+                    {a.messagePreview}
+                  </Body>
+                  <Caption style={{ marginTop: 3, fontSize: 11 }}>
+                    {new Date(a.createdAt).toLocaleDateString("en", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </Caption>
+                </View>
+              </Card>
+            ))}
+          </View>
+        </>
+      ) : null}
     </ScrollView>
-  );
-}
-
-function StatCard({ icon, value, label, small }: { icon: React.ReactNode; value: string; label: string; small?: boolean }) {
-  const { spacing } = useTheme();
-  return (
-    <Card variant="default" padding={spacing.md} style={{ flex: 1 }}>
-      {icon}
-      <H3 style={{ marginTop: spacing.xs, fontSize: small ? 15 : 22 }}>{value}</H3>
-      <Caption style={{ marginTop: 4 }}>{label}</Caption>
-    </Card>
-  );
-}
-
-function ActionRow({ icon, label, onPress }: { icon: React.ReactNode; label: string; onPress: () => void }) {
-  const { colors, spacing } = useTheme();
-  return (
-    <TouchableOpacity onPress={onPress}>
-      <Card variant="default" padding={spacing.md} style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
-        {icon}
-        <Body tone="primary" style={{ flex: 1, fontFamily: bodyFont("medium") }}>{label}</Body>
-        <ChevronRight size={18} color={colors.border.strong} />
-      </Card>
-    </TouchableOpacity>
   );
 }

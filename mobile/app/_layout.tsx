@@ -1,7 +1,7 @@
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View, Text } from "react-native";
+import { View } from "react-native";
 import { useFonts } from "expo-font";
 import { Anton_400Regular } from "@expo-google-fonts/anton";
 import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold } from "@expo-google-fonts/dm-sans";
@@ -18,6 +18,7 @@ import { Colors } from "@/src/theme/colors";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { BiometricGate } from "@/components/BiometricGate";
 import { ToastProvider } from "@/components/MobileToast";
+import { SplashBrand } from "@/components/SplashBrand";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -66,13 +67,12 @@ export default function RootLayout() {
     return addNotificationTapListener(go, user.role);
   }, [user, router]);
 
-  if (user === undefined && !timedOut) {
+  // Hold the branded splash until BOTH the session has resolved and the brand
+  // fonts are ready — otherwise the first paint flashes in a fallback font.
+  if ((user === undefined && !timedOut) || !fontsLoaded) {
     return (
       <ThemeProvider>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.background.primary }}>
-          <ActivityIndicator size="large" color={Colors.brand.greenLight} />
-          <Text style={{ color: Colors.text.primary, marginTop: 16 }}>Loading Ykay College...</Text>
-        </View>
+        <SplashBrand />
       </ThemeProvider>
     );
   }
@@ -83,6 +83,9 @@ export default function RootLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="landing" redirect={!!resolvedUser} />
       <Stack.Screen name="login" redirect={!!resolvedUser} />
+      <Stack.Screen name="onboarding" redirect={!!resolvedUser} />
+      <Stack.Screen name="forgot-password" redirect={!!resolvedUser} />
+      <Stack.Screen name="settings" />
       <Stack.Screen name="(student)" />
       <Stack.Screen name="(teacher)" />
       <Stack.Screen name="(parent)" />

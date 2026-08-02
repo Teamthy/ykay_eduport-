@@ -81,6 +81,29 @@ export async function login(
   return { user: data.user, token };
 }
 
+/**
+ * Ask the backend to email a reset link.
+ *
+ * The API always answers with the same generic message so an attacker can't
+ * use this to discover which addresses are registered — so there is no
+ * "unknown email" error to surface, and we never reveal existence either.
+ */
+export async function requestPasswordReset(email: string): Promise<{ message: string }> {
+  const res = await fetch(`${API_BASE}/api/auth/password-reset/request`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 429) {
+    throw new Error(data.error || "Too many reset requests. Please try again later.");
+  }
+  return {
+    message:
+      data.message || "If this email is registered, you will receive a reset link shortly.",
+  };
+}
+
 export async function logout(): Promise<void> {
   try {
     await api("/api/auth/logout", { method: "POST" });
@@ -155,7 +178,8 @@ export const teacherApi = {
 // ── Parent API ────────────────────────────────────────────
 
 export const parentApi = {
-  dashboard: () => api("/api/parent/dashboard"),
+  dashboard: (studentId?: string) =>
+    api("/api/parent/dashboard" + (studentId ? `?studentId=${studentId}` : "")),
   reportCards: (studentId?: string) =>
     api("/api/parent/report-cards" + (studentId ? `?studentId=${studentId}` : "")),
   fees: (studentId?: string) =>
