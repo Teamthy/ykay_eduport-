@@ -53,6 +53,32 @@ export async function POST(request: NextRequest) {
   }
   if (await prisma.user.findFirst({ where: { email: input.email, schoolId: user.schoolId } }))
     return NextResponse.json({ error: "An account already uses this email." }, { status: 409 });
+
+  // Refuse a second live invitation for the same address. Without this, an
+  // admin re-inviting someone whose email had gone to spam created a second
+  // valid token — two working activation links for one person, and no way to
+  // tell which was in use. Reissue the existing invitation instead.
+  const pending = await prisma.staffInvite.findFirst({
+    where: {
+      schoolId: user.schoolId,
+      email: input.email,
+      acceptedAt: null,
+      revokedAt: null,
+      expiresAt: { gt: new Date() },
+    },
+    select: { id: true, expiresAt: true },
+  });
+  if (pending) {
+    return NextResponse.json(
+      {
+        error: "This person already has a pending invitation. Resend or revoke it instead.",
+        code: "INVITE_EXISTS",
+        inviteId: pending.id,
+        expiresAt: pending.expiresAt,
+      },
+      { status: 409 },
+    );
+  }
   const token = oneTimeSecret();
   const invite = await prisma.staffInvite.create({
     data: {

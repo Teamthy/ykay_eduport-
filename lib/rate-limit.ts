@@ -52,6 +52,10 @@ const limiterConfig = {
   passwordReset: { maxRequests: 3, windowMs: 3_600_000, prefix: "ykay:auth:pw-reset" }, // 3 resets per hour
   changePassword: { maxRequests: 5, windowMs: 3_600_000, prefix: "ykay:auth:pw-change" }, // 5 changes per hour
   signup: { maxRequests: 5, windowMs: 3_600_000, prefix: "ykay:signup" }, // 5 signups per hour
+  // Staff activation — the endpoint is unauthenticated by necessity (the
+  // account does not exist yet), so the invite token is the only secret
+  // protecting staff-account creation. Throttle guessing.
+  staffActivate: { maxRequests: 10, windowMs: 3_600_000, prefix: "ykay:staff:activate" },
 } as const;
 
 const redisLimiters: Record<string, Ratelimit | null> = redis
@@ -100,6 +104,11 @@ const redisLimiters: Record<string, Ratelimit | null> = redis
         redis,
         limiter: Ratelimit.slidingWindow(5, "1 h"),
         prefix: "ykay:signup",
+      }),
+      staffActivate: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(10, "1 h"),
+        prefix: "ykay:staff:activate",
       }),
     }
   : {};

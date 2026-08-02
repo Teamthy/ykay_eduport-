@@ -12,7 +12,18 @@ const protectedPrefixes = [
   "/change-password",
   "/staff",
 ];
-const publicItPaths = ["/it-portal/auth"];
+/**
+ * Pages inside a protected prefix that must stay reachable while signed OUT.
+ *
+ * /staff/activate is the one an invited teacher opens from their email. Their
+ * account does not exist yet — it is CREATED by activation — so bouncing them
+ * to /login was an unescapable loop: no account to log in with, and the only
+ * page that would create one sat behind the login. Staff onboarding could
+ * never complete.
+ *
+ * /it-portal/auth is the IT-student sign-in/registration page, same reasoning.
+ */
+const publicPaths = ["/it-portal/auth", "/staff/activate"];
 const encoder = new TextEncoder();
 
 function destinationFor(role: string) {
@@ -104,7 +115,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (publicItPaths.some((path) => pathname.startsWith(path))) return NextResponse.next();
+  if (publicPaths.some((path) => pathname.startsWith(path))) return NextResponse.next();
   if (!protectedPrefixes.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next();
 
   const token = request.cookies.get("ykay_session")?.value;

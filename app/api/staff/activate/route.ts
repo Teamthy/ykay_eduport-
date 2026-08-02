@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { hashValue, passwordHash } from "@/lib/people";
+import { enforceRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/requests";
 const schema = z.object({
   token: z.string().min(20),
   password: z
@@ -13,6 +15,18 @@ const schema = z.object({
     .regex(/[0-9]/, "Use a number."),
 });
 export async function POST(request: NextRequest) {
+  // Unauthenticated by necessity — the account is created BY this call — so the
+  // invite token is the only thing standing between a guesser and a staff
+  // account on the school's system. Throttle per IP.
+  const ip = getClientIp(request);
+  const limit = await enforceRateLimit("staffActivate", ip);
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Too many activation attempts. Please wait and try again." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
+  }
+
   let input: z.infer<typeof schema>;
   try {
     input = schema.parse(await request.json());

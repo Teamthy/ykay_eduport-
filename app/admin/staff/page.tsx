@@ -3,7 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
-import { KeyRound, Mail, UserPlus, Users, X } from "lucide-react";
+import { KeyRound, Mail, RotateCcw, Trash2, UserPlus, Users, X } from "lucide-react";
 
 type Staff = {
   id: string;
@@ -21,6 +21,7 @@ const roles = ["ADMIN", "DIRECTOR", "BURSAR", "COORDINATOR", "HOD", "TEACHER"];
 export default function StaffPage() {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
+  const [busyInvite, setBusyInvite] = useState<string | null>(null);
   const [mode, setMode] = useState<"invite" | "direct" | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -57,6 +58,47 @@ export default function StaffPage() {
       `Invitation created for ${j.invite.email}. Copy this one-time activation link now: ${activation}`,
     );
     await load();
+  }
+
+  /** Revoke a pending invitation — kills the activation token immediately. */
+  async function revokeInvite(id: string, email: string) {
+    if (!window.confirm(`Revoke the invitation for ${email}? Their activation link stops working.`))
+      return;
+    setError("");
+    setBusyInvite(id);
+    try {
+      const r = await fetch(`/api/admin/staff/invites/${id}`, { method: "DELETE" });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "Unable to revoke.");
+      setNotice(`Invitation for ${email} revoked.`);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to revoke.");
+    } finally {
+      setBusyInvite(null);
+    }
+  }
+
+  /** Reissue: new token, fresh 7-day expiry, email resent. Old link dies. */
+  async function resendInvite(id: string, email: string) {
+    setError("");
+    setBusyInvite(id);
+    try {
+      const r = await fetch(`/api/admin/staff/invites/${id}`, { method: "POST" });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "Unable to resend.");
+      const link = `${window.location.origin}/staff/activate?token=${j.activationToken}`;
+      setNotice(
+        j.emailSent
+          ? `New invitation emailed to ${email}. The previous link no longer works. Backup link: ${link}`
+          : `Email could not be sent. Share this new link with ${email}: ${link}`,
+      );
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to resend.");
+    } finally {
+      setBusyInvite(null);
+    }
   }
 
   async function submitDirect(e: FormEvent<HTMLFormElement>) {
@@ -157,6 +199,24 @@ export default function StaffPage() {
                   <small className="mt-1 block text-[var(--text-muted)]">
                     {i.email} · expires {new Date(i.expiresAt).toLocaleDateString()}
                   </small>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void resendInvite(i.id, i.email)}
+                      disabled={busyInvite === i.id}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-brand-navy px-3 py-1.5 text-[11px] font-bold text-white disabled:opacity-50"
+                    >
+                      <RotateCcw size={12} /> Resend
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void revokeInvite(i.id, i.email)}
+                      disabled={busyInvite === i.id}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 px-3 py-1.5 text-[11px] font-bold text-red-500 disabled:opacity-50"
+                    >
+                      <Trash2 size={12} /> Revoke
+                    </button>
+                  </div>
                 </div>
               ))}
               {!invites.length && (

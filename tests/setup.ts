@@ -97,6 +97,13 @@ const mockPrisma = {
     findMany: vi.fn(),
     create: vi.fn(),
   },
+  staffInvite: {
+    findFirst: vi.fn(),
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
   idempotencyRecord: {
     findUnique: vi.fn(),
     create: vi.fn(),
