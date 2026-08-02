@@ -47,10 +47,35 @@ const mockPrisma = {
     findUnique: vi.fn(),
     findMany: vi.fn(),
     count: vi.fn(),
+    create: vi.fn(),
     update: vi.fn(),
   },
   feeInvoice: {
     findUnique: vi.fn(),
+    findUniqueOrThrow: vi.fn(),
+    findMany: vi.fn(),
+    update: vi.fn(),
+    updateMany: vi.fn(),
+  },
+  feePaymentAttempt: {
+    findUnique: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
+  paymentTransaction: {
+    updateMany: vi.fn(),
+  },
+  gradebookEntry: {
+    findMany: vi.fn(),
+    createMany: vi.fn(),
+    update: vi.fn(),
+    upsert: vi.fn(),
+  },
+  examAttempt: {
+    findUnique: vi.fn(),
+    update: vi.fn(),
+  },
+  examAnswer: {
     update: vi.fn(),
   },
   schoolClass: {
@@ -72,6 +97,9 @@ const mockPrisma = {
   },
   subjectGradebook: {
     findMany: vi.fn(),
+    findUnique: vi.fn(),
+    upsert: vi.fn(),
+    update: vi.fn(),
   },
   exam: {
     findMany: vi.fn(),
@@ -91,10 +119,19 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 // Mock next/headers
+//
+// `getSession()` reads BOTH transports: the `ykay_session` cookie (web) and the
+// `Authorization: Bearer` header (mobile / API clients). Both must be mocked or
+// the header path throws "No 'headers' export is defined on the next/headers mock".
 vi.mock("next/headers", () => ({
   cookies: vi.fn(() =>
     Promise.resolve({
       get: vi.fn(() => undefined),
+    }),
+  ),
+  headers: vi.fn(() =>
+    Promise.resolve({
+      get: vi.fn(() => null),
     }),
   ),
 }));

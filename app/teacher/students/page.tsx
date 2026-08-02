@@ -116,8 +116,7 @@ export default function TeacherStudentsPage() {
         s.studentId.toLowerCase().includes(q) ||
         (s.guardianPhone || "").includes(q);
       const matchC = classId === "All" || s.classId === classId;
-      const matchScope =
-        scope === "all" || (scope === "form" ? s.canManage : !s.canManage);
+      const matchScope = scope === "all" || (scope === "form" ? s.canManage : !s.canManage);
       return matchQ && matchC && matchScope;
     });
   }, [students, search, classId, scope]);
@@ -218,7 +217,11 @@ export default function TeacherStudentsPage() {
                     : "border border-[var(--input-border)] text-[var(--text-muted)]"
                 }`}
               >
-                {sc === "all" ? "All students" : sc === "form" ? "My form class" : "Subject students"}
+                {sc === "all"
+                  ? "All students"
+                  : sc === "form"
+                    ? "My form class"
+                    : "Subject students"}
               </button>
             ))}
           </div>

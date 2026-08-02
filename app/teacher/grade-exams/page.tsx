@@ -38,7 +38,9 @@ export default function GradeExamsPage() {
     }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   // Exams with submissions awaiting review/grading.
   const toGrade = exams.filter((e) => e.submittedCount > 0);
@@ -50,32 +52,47 @@ export default function GradeExamsPage() {
         <TeacherSidebar />
         <section className="min-w-0 flex-1 space-y-6">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Marking &amp; review</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Marking &amp; review
+            </p>
             <h1 className="mt-2 font-display text-4xl tracking-widest">
               GRADE <span className="text-brand-green">EXAMS</span>
             </h1>
             <p className="mt-3 max-w-2xl text-sm text-white/65">
-              Exams with submitted attempts awaiting your review. Open an exam to grade essays / fill-ins and release objective scores.
+              Exams with submitted attempts awaiting your review. Open an exam to grade essays /
+              fill-ins and release objective scores.
             </p>
           </div>
 
-          {error && <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">{error}</div>}
+          {error && (
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">
+              {error}
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
               <ClipboardCheck className="mb-2 text-brand-green" size={18} />
               <div className="font-display text-2xl">{toGrade.length}</div>
-              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Awaiting grading</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                Awaiting grading
+              </div>
             </div>
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
               <FileCheck2 className="mb-2 text-brand-orange" size={18} />
-              <div className="font-display text-2xl">{toGrade.reduce((s, e) => s + e.submittedCount, 0)}</div>
-              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Submissions</div>
+              <div className="font-display text-2xl">
+                {toGrade.reduce((s, e) => s + e.submittedCount, 0)}
+              </div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                Submissions
+              </div>
             </div>
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
               <LoaderCircle className="mb-2 text-blue-500" size={18} />
               <div className="font-display text-2xl">{exams.length}</div>
-              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Total exams</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                Total exams
+              </div>
             </div>
           </div>
 
@@ -99,14 +116,23 @@ export default function GradeExamsPage() {
                 <tbody>
                   {exams.map((e) => (
                     <tr key={e.id} className="border-t border-[var(--border-subtle)]">
-                      <td className="p-4"><b>{e.title}</b></td>
-                      <td className="p-4 text-xs text-[var(--text-muted)]">{e.subjectName} · {e.className}</td>
+                      <td className="p-4">
+                        <b>{e.title}</b>
+                      </td>
+                      <td className="p-4 text-xs text-[var(--text-muted)]">
+                        {e.subjectName} · {e.className}
+                      </td>
                       <td className="p-4">{e.questionCount}</td>
-                      <td className="p-4 font-display text-base text-brand-green">{e.submittedCount}</td>
+                      <td className="p-4 font-display text-base text-brand-green">
+                        {e.submittedCount}
+                      </td>
                       <td className="p-4 text-xs">{e.statusLabel || e.status}</td>
                       <td className="p-4 text-right">
                         {e.submittedCount > 0 ? (
-                          <Link href={`/teacher/test-results?exam=${e.id}`} className="rounded-full bg-brand-green px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                          <Link
+                            href={`/teacher/test-results?exam=${e.id}`}
+                            className="rounded-full bg-brand-green px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white"
+                          >
                             Review {e.submittedCount}
                           </Link>
                         ) : (
@@ -119,7 +145,9 @@ export default function GradeExamsPage() {
               </table>
             )}
             {!loading && !exams.length && (
-              <p className="p-10 text-center text-sm text-[var(--text-muted)]">No exams yet. Create one from the CBT center.</p>
+              <p className="p-10 text-center text-sm text-[var(--text-muted)]">
+                No exams yet. Create one from the CBT center.
+              </p>
             )}
           </div>
         </section>

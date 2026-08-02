@@ -1,189 +1,193 @@
 # Backend Development Document
 
-## 1. Technical Specification Overview
+## 1. Overview
 
-This document defines the backend direction for the Ykay College digital education platform. The backend must support more than a school website; it must power a full school operations system, a role-based portal, an IT education offering, and a future-ready CBT and exam-preparation experience.
+The backend for Ykay College EduPortal is implemented as a Next.js App Router application with Prisma and PostgreSQL. It is no longer only a website backend; it now serves a multi-role school platform with admissions, authentication, portals, finance, attendance, report cards, IT learning, CBT workflows, notifications, and audit logging.
 
-The current backend has a strong architectural foundation, but it is still not yet fully production-ready. The work ahead is to turn the current structure into a durable, secure, and scalable platform for real school operations.
-
----
-
-## 2. Scope
-
-### In Scope
-- Public-facing website support through API endpoints
-- Admissions application submission and status tracking
-- Authentication and role-based portal access
-- Student, parent, teacher, staff, and class management
-- Fee invoice, payment, and receipt workflows
-- Attendance, report-card, and academic record handling
-- IT education content and course-related data support
-- CBT exam, question bank, attempt, and result management
-- Audit logging, notifications, and secure record access
-
-### Out of Scope for the Initial Production Release
-- Full mobile application support
-- Advanced analytics beyond core reporting
-- Complex enterprise integrations outside payments, email, and storage
-- Multi-campus administration beyond the core school setup
+The system currently has a solid architectural foundation and several modules are already wired to database-backed services. The main remaining work is hardening, completion of operational workflows, and production-grade reliability rather than introducing entirely new architecture.
 
 ---
 
-## 3. Requirements
+## 2. Core Backend Areas
 
-### Functional Requirements
-- Users must be able to sign in and access the correct portal based on role.
-- Prospective parents must be able to submit admissions applications and view status.
-- Administrators must be able to review applications and manage school records.
-- Teachers must be able to access class-related workflows and academic data.
-- Students and parents must be able to view academic, fee, and school communication data.
-- The system must support IT education-related content and course tracking.
-- The system must support CBT-style exam workflows, including question delivery, attempt recording, and result generation.
-- The backend must persist school data in a reliable and queryable manner.
-- Student academic records, results, transcripts, and payment receipts must remain accessible for at least 4–5 years after leaving the school.
-- Each student record must be retained for a minimum lifecycle of 7–10 years, including historical academic and financial data.
-- The system must support long-term archival and retrieval of student records without data loss or corruption.
-- Payment processing must be idempotent, meaning repeated submissions for the same payment request must not create duplicate charges or duplicate records.
-- Financial operations must follow ACID principles to preserve consistency, integrity, and recoverability.
+### A. Authentication and authorization
+The backend provides:
 
-### Non-Functional Requirements
-- Secure authentication and authorization
-- Consistent API response structure and validation
-- Reliable database access and transaction handling
-- Clear error handling and logging
-- Scalable architecture for future growth
-- Support for environment-based configuration and deployment
-- Durable storage with backup, restore, and disaster-recovery capability
-- Auditability for all academic, financial, and exam-related transactions
-- Retention policies that support long-term historical access and compliance expectations
+- login and logout endpoints,
+- password reset request/confirm flows,
+- session cookie issuance,
+- role-aware middleware enforcement,
+- and security-event recording for failed or denied access.
 
----
+The login route validates credentials against Prisma-stored user records, applies rate limiting, records audit events, and issues secure session cookies. Middleware enforces portal access by role and redirects users to the appropriate destination.
 
-## 4. Current State Assessment (Updated 2026-07-23)
+### B. Admissions workflow
+The admissions backend includes:
 
-### Verified in the repository
-- A full Next.js App Router application is present, with route-based API handlers under the app API layer for admissions, auth, parent, student, teacher, admin, super-admin, IT education, notifications, and finance workflows.
-- A Prisma-backed data model exists for school, users, admissions, payments, attendance, fees, report cards, IT enrollments, gradebooks, exams, notifications, audit logs, budgets, expenses, and staff invites.
-- Real authentication is implemented with password hashing, HTTP-only session cookies, role-aware middleware, and login/logout/me/password-reset endpoints.
-- Admissions workflows are implemented at the API level for draft creation, document upload URL handling, payment start/submit/webhook processing, application status lookup, and audit logging.
-- Portal-facing API surfaces exist for admin, teacher, student, parent, IT portal, and super-admin dashboards.
-- Public-facing experience pages and portal UI shells are present for admissions, academics, campus life, IT education, and role-based dashboards.
+- draft creation,
+- upload token creation and document confirmation,
+- payment initiation and verification,
+- application submission,
+- status lookup,
+- and audit logging.
 
-### Partially implemented / still needs hardening
-- Admissions review and approval flows exist structurally, but the complete operational workflow is not yet fully end-to-end for document review, approval/decline/waitlist actions, and automatic handoff into student records.
-- Role-based routing is enforced in middleware, but some portal areas still rely on shell screens or partially live-backed data rather than a fully complete operational experience.
-- Notification and audit infrastructure exists, but delivery automation, retry logic, preference management, and operational monitoring are still incomplete.
-- IT education content and portal scaffolding are strong, but certification progress tracking, enrollment-to-certification reporting, and portal personalization remain incomplete.
-- Finance routes exist for invoicing, payments, and fees, but receipt reconciliation, invoice lifecycle management, and report depth still need stronger production hardening.
+The implementation uses a dedicated admissions service layer plus Prisma models for applications, documents, and payment transactions. It also includes payment verification and idempotency-oriented enforcement patterns.
 
-### Missing or not yet production-ready
-- No first-time school setup wizard for school profile, academic session, term, grading scale, and CA configuration.
-- No complete student, parent, and staff onboarding workflow with account provisioning and role assignment.
-- No fully mature archival and retention automation for historical student, academic, and financial records.
-- No end-to-end backup/restore/disaster-recovery procedure documented and wired into operations.
-- No full CBT moderation, analytics, and report-delivery experience beyond the current exam/attempt/result structures.
-- Several flows still need stronger validation, logging, and production monitoring before deployment can be considered fully reliable.
+### C. School operations APIs
+The backend exposes portal APIs for:
 
----
+- admin dashboards and management routes,
+- teacher dashboards, attendance, gradebooks, exams, question banks, and class features,
+- student dashboards, attendance, grades, exams, profile, timetable, and announcements,
+- parent dashboards, fees, attendance, report cards, and messages,
+- super-admin oversight, impersonation, system monitoring, broadcast, and health routes.
 
-## 5. Technical Approach
+These APIs are backed by Prisma queries and are designed for role-restricted access through a shared session-based auth layer.
 
-### Architecture
-- Next.js App Router for API routes and server-side logic
-- Prisma ORM for data modeling and query access
-- PostgreSQL as the primary database platform
-- Role-based access control for admin, teacher, student, and parent users
-- Centralized validation, error handling, and response formatting
+### D. Finance and records
+The backend includes finance-related data models and API routes for:
 
-### Data Model Direction
-Core entities should include:
-- school
-- users
-- roles
-- students
-- parents
-- teachers
-- classes
-- subjects
-- admissions
-- payments
-- receipts
-- attendance
-- academic records
-- IT education programmes
-- CBT subjects, questions, exam attempts, and results
-- notifications and audit logs
+- fee invoices,
+- fee payments,
+- payment attempts,
+- report cards,
+- and notification jobs.
 
-### Security Direction
-- Password hashing and secure credential handling
-- Session or token-based authentication
-- Protected routes and permission checks at the backend layer
-- Logging of privileged actions for audit purposes
+The schema supports invoice lifecycle states, payment methods, receipts, and financial records tied to students and parents.
 
-### Data Durability and Financial Integrity
-- All student records, academic results, payment receipts, and exam attempts must be stored with durable persistence and backup strategy.
-- Payment workflows must use idempotency keys to prevent duplicate processing from network retries or user resubmission.
-- Database transactions must enforce ACID behavior for fee posting, invoice generation, receipts, and payment state changes.
-- The platform must preserve historical records in a way that supports future retrieval, audit, and dispute handling.
-- A formal retention and archival policy should be implemented for records spanning 7–10 years of student lifecycle history.
+### E. IT education and CBT
+The backend includes support for:
+
+- IT course catalog and course detail data,
+- learner enrollment and module progress,
+- course certificates,
+- exam creation, question storage, exam attempts, and retakes.
+
+These parts are implemented structurally and are already surfaced in the UI, although some operational workflows still need deeper completion.
 
 ---
 
-## 6. Risks
+## 3. Current Backend Architecture
 
-- Database integration may be delayed if environment setup is not completed early.
-- Authentication and authorization may become a major implementation bottleneck if not prioritized.
-- The current schema may evolve as new modules are added, creating migration overhead.
-- Demo-style persistence may make it harder to transition to production-ready behavior later.
-- Weak payment handling could create duplicate charges, inconsistent receipts, or audit issues if idempotency and ACID controls are not enforced.
-- Failure to implement retention policies may cause loss of historical records or poor long-term access for former students.
-- External service integration for payments, email, storage, and notifications may introduce operational complexity.
+### Framework and runtime
+- Next.js App Router
+- TypeScript
+- Node.js runtime for API routes
+- Prisma ORM for database access
 
----
+### Primary persistence model
+The Prisma schema includes entities for:
 
-## 7. Dependencies
+- School
+- User
+- TeacherProfile
+- ParentProfile
+- StudentProfile
+- SchoolClass
+- AttendanceSession and AttendanceEntry
+- FeeInvoice, FeePayment, FeePaymentAttempt
+- ReportCard and ReportCardSubject
+- ItCourse, ItModule, ItEnrollment, ItCertificate
+- Exam, ExamQuestion, ExamAttempt, ExamAnswer, ExamRetake
+- NotificationJob and UserNotification
+- AuditLog, StaffInvite, SecurityEvent, and system flags
 
-- PostgreSQL database service
-- Prisma client and migration tooling
-- Next.js runtime and environment configuration
-- Authentication library or custom session/token implementation
-- Payment provider integration for admissions and fees
-- Email and SMS delivery services for notifications
-- File storage for documents and student records
-- Deployment platform and CI/CD pipeline
+### Security model
+The backend uses:
 
----
+- bcrypt for password hashing,
+- signed session cookies via jose,
+- middleware-based route protection,
+- role checks in route handlers,
+- and security event logging for access failures and privilege events.
 
-## 8. Delivery Phases
+### Integration model
+The system is prepared for external integrations such as:
 
-### Phase 1 — Foundation
-- Configure the real database connection
-- Run Prisma migrations
-- Replace local file-based persistence with database-backed services
-
-### Phase 2 — Identity and Access
-- Implement secure login and logout
-- Add role-based authorization
-- Protect routes and actions by permission
-
-### Phase 3 — Core School and Finance Services
-- Complete admissions lifecycle management
-- Build student, parent, and staff management
-- Add fee and payment workflows
-- Support academic record and transcript workflows
-
-### Phase 4 — IT Education and CBT Services
-- Add content support for IT education programmes
-- Implement CBT subject, question, attempt, and result structures
-- Prepare student-facing exam and learning experiences
-
-### Phase 5 — Operational Readiness
-- Add validation, logging, monitoring, and backups
-- Implement audit trails and notifications
-- Harden APIs for production deployment
+- Paystack for payments,
+- Resend for email,
+- S3-compatible storage for documents,
+- Redis/Upstash for rate limiting and operational tooling.
 
 ---
 
-## 9. Executive Summary
+## 4. Current Backend Maturity
 
-The backend has a solid architectural foundation and a clear product direction. The next step is not to expand randomly, but to build the system in a way that supports the full school platform: admissions, portals, academic records, payments, IT education, and CBT. The most important engineering priorities are secure authentication, real database-backed persistence, durable record retention, and reliable financial processing. These foundations will make the platform usable, trustworthy, and scalable for real deployment.
+### Implemented and working
+- authentication and role-aware routing,
+- admissions submission and payment verification,
+- admin and student dashboard data endpoints,
+- teacher and parent portal APIs,
+- attendance and report-card data structures,
+- IT catalog, course, and enrollment schemas,
+- audit logging and security-event infrastructure.
+
+### Partially implemented
+- admissions approval/decline/waitlist workflow,
+- full onboarding and school-setup workflow,
+- notification delivery automation and retry logic,
+- finance reconciliation and invoice lifecycle management,
+- exam moderation and result delivery experience,
+- archival and retention automation.
+
+### Not yet production-ready
+- full disaster recovery and backup orchestration,
+- formal retention policy automation,
+- advanced monitoring and alerting,
+- comprehensive operational runbooks,
+- full workflow completion for all portal modules.
+
+---
+
+## 5. Backend Requirements and Standards
+
+### Functional requirements already covered
+- secure sign-in and portal routing,
+- admissions submission and status tracking,
+- dashboard data access by role,
+- academic and attendance record persistence,
+- fee and payment record support,
+- IT course and certificate support,
+- exam and report-card data management.
+
+### Non-functional requirements still needing stronger delivery
+- consistent validation and error handling across all modules,
+- stronger observability and monitoring,
+- better idempotency enforcement for finance flows,
+- formal backup and archive operations,
+- stricter audit compliance and data retention automation.
+
+---
+
+## 6. Key Risks and Gaps
+
+- Some flows are structurally implemented but not fully operational end to end.
+- The backend is feature-rich, but operational reliability still needs hardening.
+- Finance and admissions workflows need stronger safeguards around idempotency and auditability.
+- Notification and archival systems need more mature automation.
+- The platform would benefit from a formal onboarding and school-setup process before wider rollout.
+
+---
+
+## 7. Recommended Backend Priorities
+
+### Priority 1 — Harden the core platform
+Improve validation, error handling, logging, and resilience around authentication, admissions, and portal APIs.
+
+### Priority 2 — Complete the school operations loop
+Bring admissions review, enrollment handoff, parent/student account provisioning, and staff onboarding to full operational completion.
+
+### Priority 3 — Strengthen finance and retention
+Make fee, payment, receipt, and archival workflows more robust and auditable.
+
+### Priority 4 — Mature IT and CBT features
+Complete certificate flow, progress tracking, exam moderation, and result delivery experience.
+
+### Priority 5 — Prepare for deployment
+Document backup, restore, monitoring, and operational procedures so the platform can be run reliably in production.
+
+---
+
+## 8. Backend Summary
+
+The backend has moved beyond a simple website API layer and now forms the operational foundation of a school platform. The most important next step is not to add more features blindly, but to complete existing workflows, harden the system for real use, and make the data model and operations reliable enough for production deployment.

@@ -5,8 +5,19 @@ import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import {
-  LayoutDashboard, CalendarDays, FileText, User, Bell, ClipboardCheck,
-  GraduationCap, Mail, Phone, MapPin, Shield, Camera, LoaderCircle,
+  LayoutDashboard,
+  CalendarDays,
+  FileText,
+  User,
+  Bell,
+  ClipboardCheck,
+  GraduationCap,
+  Mail,
+  Phone,
+  MapPin,
+  Shield,
+  Camera,
+  LoaderCircle,
 } from "lucide-react";
 
 const SIDEBAR_ITEMS = [
@@ -21,9 +32,14 @@ const SIDEBAR_ITEMS = [
 ];
 
 type Profile = {
-  displayName: string; studentId: string; gender: string | null;
-  photoUrl: string | null; className: string | null;
-  guardianName: string | null; guardianPhone: string | null; guardianEmail: string | null;
+  displayName: string;
+  studentId: string;
+  gender: string | null;
+  photoUrl: string | null;
+  className: string | null;
+  guardianName: string | null;
+  guardianPhone: string | null;
+  guardianEmail: string | null;
 };
 
 function fileToResizedDataUrl(file: File, max = 256): Promise<string> {
@@ -34,9 +50,15 @@ function fileToResizedDataUrl(file: File, max = 256): Promise<string> {
       img.onload = () => {
         const canvas = document.createElement("canvas");
         let { width, height } = img;
-        if (width > height) { height = Math.round((height * max) / width); width = max; }
-        else { width = Math.round((width * max) / height); height = max; }
-        canvas.width = width; canvas.height = height;
+        if (width > height) {
+          height = Math.round((height * max) / width);
+          width = max;
+        } else {
+          width = Math.round((width * max) / height);
+          height = max;
+        }
+        canvas.width = width;
+        canvas.height = height;
         canvas.getContext("2d")?.drawImage(img, 0, 0, width, height);
         resolve(canvas.toDataURL("image/jpeg", 0.85));
       };
@@ -68,12 +90,15 @@ export default function StudentProfilePage() {
       setLoading(false);
     }
   }, []);
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   async function onPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true); setMsg("");
+    setUploading(true);
+    setMsg("");
     try {
       const dataUrl = await fileToResizedDataUrl(file);
       const r = await fetch("/api/student/profile", {
@@ -93,7 +118,12 @@ export default function StudentProfilePage() {
     }
   }
 
-  const initials = (profile?.displayName || "?").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+  const initials = (profile?.displayName || "?")
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <>
@@ -101,15 +131,23 @@ export default function StudentProfilePage() {
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6">
           <div className="mx-auto max-w-7xl">
-            <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">MY <span className="text-brand-green">PROFILE</span></h1>
-            <p className="text-white/60 text-sm">View your information and manage your profile photo.</p>
+            <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
+              MY <span className="text-brand-green">PROFILE</span>
+            </h1>
+            <p className="text-white/60 text-sm">
+              View your information and manage your profile photo.
+            </p>
           </div>
         </section>
         <section className="py-10 px-6">
           <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
             <div className="flex-1 min-w-0 space-y-6">
-              {msg && <div className="rounded-2xl border border-brand-green/30 bg-brand-green/10 p-4 text-sm">{msg}</div>}
+              {msg && (
+                <div className="rounded-2xl border border-brand-green/30 bg-brand-green/10 p-4 text-sm">
+                  {msg}
+                </div>
+              )}
               <div className="rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] overflow-hidden shadow-[var(--card-shadow)]">
                 <div className="h-28 bg-gradient-to-br from-brand-navy to-brand-navy-light" />
                 <div className="px-8 pb-8 -mt-16">
@@ -118,58 +156,110 @@ export default function StudentProfilePage() {
                       <div className="w-28 h-28 rounded-3xl overflow-hidden bg-gradient-to-br from-brand-green to-brand-green-dark flex items-center justify-center text-white font-display text-3xl border-4 border-[var(--bg-primary)] shadow-2xl">
                         {profile?.photoUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={profile.photoUrl} alt={profile.displayName} className="h-full w-full object-cover" />
-                        ) : (<span>{loading ? "" : initials}</span>)}
+                          <img
+                            src={profile.photoUrl}
+                            alt={profile.displayName}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span>{loading ? "" : initials}</span>
+                        )}
                       </div>
-                      <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading || loading} className="absolute -bottom-1 -right-1 grid h-9 w-9 place-items-center rounded-full bg-brand-orange text-white shadow-lg disabled:opacity-50" aria-label="Change photo">
-                        {uploading ? <LoaderCircle className="animate-spin" size={15} /> : <Camera size={15} />}
+                      <button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        disabled={uploading || loading}
+                        className="absolute -bottom-1 -right-1 grid h-9 w-9 place-items-center rounded-full bg-brand-orange text-white shadow-lg disabled:opacity-50"
+                        aria-label="Change photo"
+                      >
+                        {uploading ? (
+                          <LoaderCircle className="animate-spin" size={15} />
+                        ) : (
+                          <Camera size={15} />
+                        )}
                       </button>
-                      <input ref={fileRef} type="file" accept="image/*" onChange={onPhoto} className="hidden" />
+                      <input
+                        ref={fileRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={onPhoto}
+                        className="hidden"
+                      />
                     </div>
                     <div className="pb-2">
-                      <h2 className="font-display text-3xl text-[var(--text-primary)]">{(profile?.displayName || "STUDENT").toUpperCase()}</h2>
+                      <h2 className="font-display text-3xl text-[var(--text-primary)]">
+                        {(profile?.displayName || "STUDENT").toUpperCase()}
+                      </h2>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green font-bold uppercase tracking-widest">Student</span>
-                        {profile?.className && <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green text-white font-bold uppercase tracking-widest">{profile.className}</span>}
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green/10 text-brand-green font-bold uppercase tracking-widest">
+                          Student
+                        </span>
+                        {profile?.className && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green text-white font-bold uppercase tracking-widest">
+                            {profile.className}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-brand-green">Personal Info</h3>
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-brand-green">
+                        Personal Info
+                      </h3>
                       {[
                         { icon: User, label: "Full Name", value: profile?.displayName },
                         { icon: User, label: "Gender", value: profile?.gender },
                         { icon: Shield, label: "Student ID", value: profile?.studentId },
                         { icon: GraduationCap, label: "Class", value: profile?.className },
                       ].map((item) => (
-                        <div key={item.label} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]">
+                        <div
+                          key={item.label}
+                          className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]"
+                        >
                           <item.icon size={14} className="text-brand-green mt-0.5 shrink-0" />
                           <div>
-                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{item.label}</div>
-                            <div className="text-sm text-[var(--text-primary)] font-medium">{item.value || "—"}</div>
+                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                              {item.label}
+                            </div>
+                            <div className="text-sm text-[var(--text-primary)] font-medium">
+                              {item.value || "—"}
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
                     <div className="space-y-4">
-                      <h3 className="text-xs font-bold uppercase tracking-widest text-brand-orange">Parent / Guardian</h3>
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-brand-orange">
+                        Parent / Guardian
+                      </h3>
                       {[
                         { icon: User, label: "Name", value: profile?.guardianName },
                         { icon: Phone, label: "Phone", value: profile?.guardianPhone },
                         { icon: Mail, label: "Email", value: profile?.guardianEmail },
                       ].map((item) => (
-                        <div key={item.label} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]">
+                        <div
+                          key={item.label}
+                          className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-disabled)]"
+                        >
                           <item.icon size={14} className="text-brand-orange mt-0.5 shrink-0" />
                           <div>
-                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{item.label}</div>
-                            <div className="text-sm text-[var(--text-primary)] font-medium">{item.value || "—"}</div>
+                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                              {item.label}
+                            </div>
+                            <div className="text-sm text-[var(--text-primary)] font-medium">
+                              {item.value || "—"}
+                            </div>
                           </div>
                         </div>
                       ))}
-                      {!profile?.guardianName && !profile?.guardianPhone && !profile?.guardianEmail && (
-                        <p className="text-xs text-[var(--text-muted)]">No guardian details linked.</p>
-                      )}
+                      {!profile?.guardianName &&
+                        !profile?.guardianPhone &&
+                        !profile?.guardianEmail && (
+                          <p className="text-xs text-[var(--text-muted)]">
+                            No guardian details linked.
+                          </p>
+                        )}
                     </div>
                   </div>
                 </div>

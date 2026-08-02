@@ -19,7 +19,9 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   let input: z.infer<typeof schema>;
-  try { input = schema.parse(await request.json()); } catch {
+  try {
+    input = schema.parse(await request.json());
+  } catch {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
@@ -42,12 +44,18 @@ export async function POST(request: NextRequest) {
 
   await prisma.auditLog.create({
     data: {
-      schoolId: user.schoolId, actorUserId: user.id,
-      action: "BROADCAST_SENT", entityType: "UserNotification", entityId: "bulk",
+      schoolId: user.schoolId,
+      actorUserId: user.id,
+      action: "BROADCAST_SENT",
+      entityType: "UserNotification",
+      entityId: "bulk",
       ipAddress: getClientIp(request),
       metadata: { title: input.title, count: users.length, scope: input.scope } as never,
     },
   });
 
-  return NextResponse.json({ sent: users.length, message: `Broadcast sent to ${users.length} user(s).` });
+  return NextResponse.json({
+    sent: users.length,
+    message: `Broadcast sent to ${users.length} user(s).`,
+  });
 }

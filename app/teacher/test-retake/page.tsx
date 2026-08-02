@@ -7,7 +7,13 @@ import { useToast } from "@/components/Toast";
 import { LoaderCircle, RotateCcw, CheckCircle2 } from "lucide-react";
 
 type Exam = { id: string; title: string; subjectName: string; className: string };
-type Row = { id: string; studentId: string; displayName: string; hasRetake: boolean; retakeUsed: boolean };
+type Row = {
+  id: string;
+  studentId: string;
+  displayName: string;
+  hasRetake: boolean;
+  retakeUsed: boolean;
+};
 
 export default function TestRetakePage() {
   const { toast } = useToast();
@@ -26,31 +32,48 @@ export default function TestRetakePage() {
       const r = await fetch("/api/teacher/exams", { cache: "no-store" });
       const j = await r.json();
       if (r.ok) setExams(j.exams || []);
-    } catch { /* ignore */ }
-    finally { setLoadingExams(false); }
+    } catch {
+      /* ignore */
+    } finally {
+      setLoadingExams(false);
+    }
   }, []);
-  useEffect(() => { void loadExams(); }, [loadExams]);
+  useEffect(() => {
+    void loadExams();
+  }, [loadExams]);
 
   // load students + retake status for the selected exam
-  const loadRows = useCallback(async (id: string) => {
-    if (!id) { setRows([]); return; }
-    setLoadingRows(true);
-    setSelected(new Set());
-    try {
-      const r = await fetch(`/api/teacher/exams/${id}/retake`, { cache: "no-store" });
-      const j = await r.json();
-      if (r.ok) setRows(j.students || []);
-      else toast(j.error || "Unable to load students.", "error");
-    } catch { toast("Unable to load students.", "error"); }
-    finally { setLoadingRows(false); }
-  }, [toast]);
+  const loadRows = useCallback(
+    async (id: string) => {
+      if (!id) {
+        setRows([]);
+        return;
+      }
+      setLoadingRows(true);
+      setSelected(new Set());
+      try {
+        const r = await fetch(`/api/teacher/exams/${id}/retake`, { cache: "no-store" });
+        const j = await r.json();
+        if (r.ok) setRows(j.students || []);
+        else toast(j.error || "Unable to load students.", "error");
+      } catch {
+        toast("Unable to load students.", "error");
+      } finally {
+        setLoadingRows(false);
+      }
+    },
+    [toast],
+  );
 
-  useEffect(() => { if (examId) void loadRows(examId); }, [examId, loadRows]);
+  useEffect(() => {
+    if (examId) void loadRows(examId);
+  }, [examId, loadRows]);
 
   function toggle(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }
@@ -59,7 +82,10 @@ export default function TestRetakePage() {
   }
 
   async function grant() {
-    if (!examId || !selected.size) { toast("Select an exam and at least one student.", "warning"); return; }
+    if (!examId || !selected.size) {
+      toast("Select an exam and at least one student.", "warning");
+      return;
+    }
     setGranting(true);
     try {
       const r = await fetch(`/api/teacher/exams/${examId}/retake`, {
@@ -86,10 +112,15 @@ export default function TestRetakePage() {
         <TeacherSidebar />
         <section className="min-w-0 flex-1 space-y-6">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">Second chances</p>
-            <h1 className="mt-2 font-display text-4xl tracking-widest">TEST <span className="text-brand-green">RETAKE</span></h1>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+              Second chances
+            </p>
+            <h1 className="mt-2 font-display text-4xl tracking-widest">
+              TEST <span className="text-brand-green">RETAKE</span>
+            </h1>
             <p className="mt-3 max-w-2xl text-sm text-white/65">
-              Grant a retake to one student or the whole class. The student can then start a fresh attempt from their exams page.
+              Grant a retake to one student or the whole class. The student can then start a fresh
+              attempt from their exams page.
             </p>
           </div>
 
@@ -103,7 +134,9 @@ export default function TestRetakePage() {
               >
                 <option value="">— choose an exam —</option>
                 {exams.map((e) => (
-                  <option key={e.id} value={e.id}>{e.title} · {e.subjectName} · {e.className}</option>
+                  <option key={e.id} value={e.id}>
+                    {e.title} · {e.subjectName} · {e.className}
+                  </option>
                 ))}
               </select>
             </label>
@@ -113,21 +146,34 @@ export default function TestRetakePage() {
                 disabled={granting || !selected.size}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
               >
-                {granting ? <LoaderCircle className="animate-spin" size={15} /> : <RotateCcw size={15} />}
+                {granting ? (
+                  <LoaderCircle className="animate-spin" size={15} />
+                ) : (
+                  <RotateCcw size={15} />
+                )}
                 Grant retake ({selected.size})
               </button>
             )}
           </div>
 
           {!examId ? (
-            <p className="p-10 text-center text-sm text-[var(--text-muted)]">Pick an exam to see its class students.</p>
+            <p className="p-10 text-center text-sm text-[var(--text-muted)]">
+              Pick an exam to see its class students.
+            </p>
           ) : loadingRows ? (
-            <div className="flex items-center gap-2 p-10 text-[var(--text-muted)]"><LoaderCircle className="animate-spin" size={18} /> Loading students…</div>
+            <div className="flex items-center gap-2 p-10 text-[var(--text-muted)]">
+              <LoaderCircle className="animate-spin" size={18} /> Loading students…
+            </div>
           ) : (
             <div className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]">
               <div className="flex items-center justify-between border-b border-[var(--border-subtle)] p-4">
-                <span className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">{rows.length} students</span>
-                <button onClick={toggleAll} className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                <span className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                  {rows.length} students
+                </span>
+                <button
+                  onClick={toggleAll}
+                  className="text-[10px] font-bold uppercase tracking-widest text-brand-green"
+                >
                   {selected.size === rows.length && rows.length ? "Clear all" : "Select all"}
                 </button>
               </div>
@@ -136,11 +182,18 @@ export default function TestRetakePage() {
                   {rows.map((r) => (
                     <tr key={r.id} className="border-t border-[var(--border-subtle)]">
                       <td className="w-10 p-4">
-                        <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggle(r.id)} className="h-4 w-4 accent-brand-green" />
+                        <input
+                          type="checkbox"
+                          checked={selected.has(r.id)}
+                          onChange={() => toggle(r.id)}
+                          className="h-4 w-4 accent-brand-green"
+                        />
                       </td>
                       <td className="p-4">
                         <b>{r.displayName}</b>
-                        <span className="mt-1 block font-mono text-xs text-[var(--text-muted)]">{r.studentId}</span>
+                        <span className="mt-1 block font-mono text-xs text-[var(--text-muted)]">
+                          {r.studentId}
+                        </span>
                       </td>
                       <td className="p-4 text-right">
                         {r.hasRetake && !r.retakeUsed && (
@@ -149,14 +202,20 @@ export default function TestRetakePage() {
                           </span>
                         )}
                         {r.retakeUsed && (
-                          <span className="rounded-full bg-[var(--surface-disabled)] px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Used</span>
+                          <span className="rounded-full bg-[var(--surface-disabled)] px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                            Used
+                          </span>
                         )}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {!rows.length && <p className="p-10 text-center text-sm text-[var(--text-muted)]">No active students in this class.</p>}
+              {!rows.length && (
+                <p className="p-10 text-center text-sm text-[var(--text-muted)]">
+                  No active students in this class.
+                </p>
+              )}
             </div>
           )}
         </section>

@@ -1,268 +1,396 @@
-Ykay College EduPortal — Full User Flow Documentation
+# Ykay College EduPortal — End-to-End User Flow Documentation
 
-Current implementation snapshot (Updated 2026-07-23)
+## 1. Product Scope
 
-The project has moved beyond a brochure-only website and now includes a working Next.js application with Prisma-backed APIs, role-aware authentication, admissions workflows, teacher/student/parent dashboards, and an IT education experience. The current implementation is structurally strong and visibly functional, but several flows are still partially complete or not yet production-ready.
+This project now functions as a full digital education platform for Ykay College rather than a simple school website. The current experience covers:
 
-What is implemented now:
-- Public website pages and portal shells for admin, teacher, student, parent, super-admin, and IT users
-- Authentication and role-based route protection through middleware and session-based API routes
-- Admissions draft submission, document upload, payment start, payment verification, and status lookup
-- Admin, teacher, student, parent, and IT portal API routes for dashboards, attendance, exams, grades, fees, report cards, and notifications
-- IT education landing pages and portal-facing course enrollment scaffolding
+- public site browsing,
+- admissions submission and tracking,
+- portal sign-in and role-based access,
+- school operations for admin, teacher, student, and parent users,
+- IT education learning and certification scaffolding,
+- and exam/CBT-related workflows.
 
-What is still missing or incomplete:
-- A first-time school setup wizard and full school configuration onboarding
-- Complete admissions review/approval operations and seamless student/parent account handoff
-- Full teacher, student, and parent record management beyond dashboard shells
-- Production-grade finance, notification, archival, and disaster-recovery workflows
-- A fully polished CBT experience with complete moderation, analytics, and result-delivery quality
+The implementation is advanced enough to support a real school operating experience, but some flows still need stronger completion and hardening before they can be considered fully production-ready.
 
-HOW TO READ THIS DOCUMENT
+---
 
-This document has been optimized around the current implementation reality of the project. Some journeys are already visible in the frontend, some are partially implemented, and others remain planned for the next phase of development.
+## 2. How to Read This Document
+
+The flows below are grouped by audience and journey. Each flow reflects what is currently visible in the repository and what is implemented at a practical level.
 
 Status legend:
-- Implemented: visible in the current frontend and working at a demo or UI level.
-- Partially implemented: the journey exists in the app, but data handling, backend integration, or business logic is incomplete.
-- Planned / missing: the flow is part of the product vision but is not yet built in the current codebase.
+- Implemented: visible in the app and wired to live UI/API layers.
+- Partially implemented: the flow exists, but some business logic, data wiring, or operational behavior is still incomplete.
+- Planned / missing: the flow is part of the product vision but is not yet completed in the current implementation.
 
-Current implementation snapshot:
-- Public website browsing is implemented at a strong UI level.
-- Admissions submission and status lookup are partially implemented.
-- Demo login and role-based portal dashboards are implemented at a demo level.
-- Full staff/student/parent operational workflows, real authentication, and database-backed actions are still missing or incomplete.
+---
 
+## 3. Public and Unauthenticated Flows
 
+### Flow 3.1 — Visitor discovers the school website
+Status: Implemented
 
- PART 1: UNAUTHENTICATED / PUBLIC FLOWS
+Who: prospective family, alumni, visitor, or partner
 
+Entry point: homepage or direct page URL
 
+Journey:
+1. The visitor lands on the homepage and sees the branded school experience.
+2. They can navigate to about, academics, admissions, campus life, news, alumni, contact, and portal entry pages.
+3. They can browse public information about the school and move to admissions or portal access.
+4. They can also reach the portal selection page to choose staff, student, parent, or IT learning access.
 
- FLOW 1.1 — Public User Discovers and Browses the School Website [Status: Implemented]
+What is currently supported:
+- strong public page structure,
+- portal entry surface,
+- admissions entry point,
+- IT education hub entry point.
 
-Who: Any person visiting the website (prospective parent, student, alumni, journalist)
+---
 
-Entry Point: Google search, social media link, direct URL
+### Flow 3.2 — Parent begins an admissions application
+Status: Implemented
 
+Who: parent or guardian
 
+Entry point: /admissions
 
-Step 1 — Landing on the Homepage
+Journey:
+1. The parent opens the admissions landing page.
+2. They begin the application form and move through the steps for student details, parent details, academic history, document upload, review, and submission.
+3. The application can be submitted after the required documents and fee payment flow are completed.
+4. The parent receives a confirmation and can track the application later.
 
-The user arrives at `www.ykaycollege.edu.ng`. The page loads with a fullwidth hero section showing a highquality photo or video of the school campus. The school name, motto, and a primary calltoaction button reading "Apply for Admission" are immediately visible. Below the hero, the user sees:
+What is currently supported:
+- multi-step form UI,
+- document upload interface,
+- payment flow integration,
+- submission and status logic through backend APIs.
 
- Key statistics (number of students enrolled, years of operation, WAEC pass rate)
- A brief programmes overview (Junior Secondary and Senior Secondary)
- Student/parent testimonials
- Upcoming events teaser
- A secondary CTA section for parents to check their application status
+What is still maturing:
+- the full review/approval handoff into student records,
+- some operational follow-up automation.
 
-The page is fully mobileresponsive. A sticky navigation bar at the top contains links to: Home, About, Academics, Admissions, Campus Life, News & Events, Alumni, Contact, and a prominent "Student/Parent Login" button.
+---
 
+### Flow 3.3 — Parent checks application status
+Status: Implemented
 
+Who: parent or guardian
 
-Step 2 — Exploring the About Section
+Entry point: /admissions/status
 
-The user clicks "About" from the navigation menu. A dropdown appears with:
+Journey:
+1. The parent enters an application identifier.
+2. The app checks the application state.
+3. The current status is shown to the parent.
 
- Our History
- Vision, Mission & Values
+Current state:
+- the route and status lookup experience are present,
+- the business logic is connected to the backend,
+- but operational decisions such as full approval/decline workflows still need deeper completion.
 
- Staff Directory
- Our Achievements
+---
 
-The user clicks "Director's Message". They land on a page with a professional photo of the Director/Proprietor and a written message about the school's educational philosophy. They scroll and see the core values listed visually. They navigate back.
+## 4. Authentication and Portal Access Flows
 
+### Flow 4.1 — User chooses a portal and signs in
+Status: Implemented
 
+Who: staff, student, parent, IT learner
 
-Step 3 — Exploring the Academics Section
+Entry point: /portal or /login
 
-The user clicks "Academics". They see:
+Journey:
+1. The user visits the portal selection page.
+2. They choose the relevant portal or go directly to login.
+3. They enter credentials on the login page.
+4. The app authenticates the user and routes them based on role.
 
- JSS Programme (JSS1–JSS3): core subjects, BECE preparation
- SS Programme (SS1–SS3): Science, Arts, and Commercial tracks, WAEC preparation
- Curriculum overview (NERDCaligned)
- Extracurricular activities
+Current behavior:
+- login is functional and role-based,
+- middleware protects portal routes,
+- successful auth redirects users to the appropriate dashboard.
 
-The user reads about the SS Commercial track and is satisfied that the school offers the subjects their child needs.
+---
 
+### Flow 4.2 — Staff member accesses the admin or teacher experience
+Status: Implemented
 
+Who: admin, teacher, coordinator, bursar, HOD
 
-Step 4 — Exploring the Admissions Section
+Entry point: /login?portal=staff
 
-The user clicks "Admissions". They see:
+Journey:
+1. The staff user signs in.
+2. The backend verifies the account and issues a session cookie.
+3. Middleware checks the role and sends the user to the correct dashboard.
+4. The user reaches the appropriate admin or teacher portal.
 
- How to Apply (stepbystep process)
- Admission Requirements (age, documents needed)
- Fee Structure overview (ranges, not full breakdown)
- Scholarship information
- A large button: "Start Your Application"
- A smaller link: "Check Application Status"
+What is implemented:
+- role-aware redirection,
+- portal-specific dashboard shell,
+- protected campus operations pages.
 
+---
 
+### Flow 4.3 — Student accesses the student portal
+Status: Implemented
 
-Step 5 — Exploring Campus Life
+Who: enrolled student
 
-The user clicks "Campus Life". They see a photo gallery, information about school facilities (labs, library, sports fields), clubs, and an embedded 360° virtual tour of the campus.
+Entry point: /login?portal=student or /student/dashboard
 
+Journey:
+1. The student signs in.
+2. The backend resolves the student profile and dashboard data.
+3. The student reaches their portal dashboard with attendance, report cards, exams, and profile information.
 
+Current behavior:
+- the student dashboard is live and data-driven,
+- core academic and communication areas are present.
 
-Step 6 — Reading News and Events
+---
 
-The user clicks "News & Events". They see a blogstyle listing of recent school news and upcoming events. They click on an event, read the details, and see an RSVP button for parents.
+### Flow 4.4 — Parent accesses the parent portal
+Status: Implemented
 
+Who: parent or guardian
 
+Entry point: /login?portal=parent or /parent/dashboard
 
-Step 7 — Contacting the School
+Journey:
+1. The parent signs in.
+2. The system loads their linked student and school data.
+3. The parent accesses child-related attendance, fees, report cards, events, and messages.
 
-The user clicks "Contact". They see:
+Current behavior:
+- parent dashboards and sub-pages are present,
+- the experience is role-focused and linked to student records,
+- but more complete child-to-parent workflow automation is still planned.
 
- School address (Sango Ota, Ogun State)
- Phone number and email
- Embedded Google Map showing the school's location
- An enquiry form (Name, Email, Phone, Message, Submit)
- A WhatsApp live chat button that opens a WhatsApp conversation with the school's admin number
+---
 
-The user fills in the enquiry form and clicks "Send Enquiry". The system sends the message to the school admin's dashboard and sends the user an email acknowledging their enquiry.
+## 5. Admin Operations Flow
 
+### Flow 5.1 — Admin reviews the school dashboard
+Status: Implemented
 
+Who: admin or director
 
- FLOW 1.2 — Prospective Parent Submits an Online Admission Application [Status: Partially implemented]
+Entry point: /admin
 
-Who: Parent or guardian of a prospective student
+Journey:
+1. The admin logs in and reaches the admin dashboard.
+2. The dashboard loads live school metrics such as students, teachers, parent count, class count, pending applications, fees, and attendance.
+3. The admin sees activity and follow-up items.
 
-Entry Point: Admissions page → "Start Your Application" button
+What is currently supported:
+- metrics cards,
+- needs-attention sections,
+- recent activity feed,
+- live API-backed dashboard data.
 
+---
 
+### Flow 5.2 — Admin manages students and staff
+Status: Implemented
 
-Step 1 — Starting the Application
+Who: administrator
 
-The parent clicks "Start Your Application". The system opens a multistep application form. A progress bar at the top shows the steps: Student Info → Parent Info → Academic History → Document Upload → Review → Submit.
+Entry point: /admin/students, /admin/staff, /admin/staff-attendance
 
+Journey:
+1. The admin opens the student or staff management area.
+2. The interface presents school-wide operational areas for learners and staff.
+3. The admin can navigate to attendance, class management, report cards, fees, and other school operations surfaces.
 
+Current status:
+- the management surface exists,
+- but the full onboarding and lifecycle workflow still needs further product completion.
 
-Step 2 — Student Information (Step 1 of 6)
+---
 
-The parent fills in:
+### Flow 5.3 — Admin manages finance and reports
+Status: Implemented
 
- Applicant's first name, middle name, surname
- Date of birth
- Gender
- State of origin
- Local Government Area
- Religion
- Blood group (optional at this stage)
- Genotype (optional at this stage)
- Class applying for (dropdown: JSS1, JSS2, JSS3, SS1, SS2, SS3)
- Preferred class arm (if applicable)
+Who: admin or bursar
 
-The parent clicks "Next". The system validates that all required fields are complete. If any required field is empty, the system highlights it in red and shows an inline error message. When valid, the system saves the progress and advances to Step 2.
+Entry point: /admin/fees, /admin/finances, /admin/report-cards
 
+Journey:
+1. The administrator accesses fee and finance management pages.
+2. They can navigate invoice, payment, expense, budget, report-card, and school finance areas.
+3. The system surfaces fee and reporting data through the API layer.
 
+Current status:
+- data models and pages exist,
+- finance operations are present but still need stronger reconciliation and lifecycle hardening.
 
-Step 3 — Parent/Guardian Information (Step 2 of 6)
+---
 
-The parent fills in:
+## 6. Teacher Workflow
 
- Father's name (optional if not applicable)
- Mother's name
- Guardian's name and relationship (if different from parents)
- Primary contact person (dropdown)
- Phone number (Nigerian format: 080XXXXXXXX)
- WhatsApp number (prefilled from phone, editable)
- Email address
- Home address
- Occupation
+### Flow 6.1 — Teacher uses the teaching dashboard
+Status: Implemented
 
-The parent clicks "Next". System validates and saves.
+Who: teacher or HOD
 
+Entry point: /teacher/dashboard
 
+Journey:
+1. The teacher logs in.
+2. The dashboard loads class assignments, student counts, attendance status, gradebook state, and live exam information.
+3. The teacher can navigate to attendance, gradebook, exams, class roster, reports, and communication pages.
 
-Step 4 — Academic History (Step 3 of 6)
+Current state:
+- teacher dashboard is live and role-based,
+- teaching workflows are structurally integrated.
 
-The parent fills in:
+### Flow 6.2 — Teacher marks attendance and manages records
+Status: Implemented
 
- Previous school name
- Previous class/grade completed
- Reason for leaving previous school
- Any academic achievements or distinctions
+Who: teacher
 
-The parent clicks "Next".
+Entry point: /teacher/attendance, /teacher/class/attendance, /teacher/class/attendance-history
 
+Journey:
+1. The teacher opens the attendance workflow.
+2. They record attendance for a session or class.
+3. The attendance data is stored and can be reviewed later.
 
+Current state:
+- attendance entry and review flows are present,
+- correction request workflows exist in the schema and API layer.
 
-Step 5 — Document Upload (Step 4 of 6)
+### Flow 6.3 — Teacher manages gradebook and exams
+Status: Implemented
 
-The parent sees a checklist of required documents:
+Who: teacher
 
- Birth certificate or age declaration (PDF or image, max 5MB)
- Passport photograph (image file, max 2MB)
- Last school report card (PDF or image)
- Transfer certificate (if applicable)
+Entry point: /teacher/gradebook, /teacher/cbt-center, /teacher/question-bank
 
-For each document, there is a file picker button. The parent clicks each one, selects the file from their device, and the system shows a preview or filename confirmation. A green checkmark appears when a document is successfully uploaded.
+Journey:
+1. The teacher opens the gradebook for a class/subject.
+2. They can review or update assessment data.
+3. They can navigate to CBT-related pages and question management routes.
 
-The parent clicks "Next".
+Current state:
+- the interfaces and supporting data model are present,
+- the experience is still being matured into a full exam and moderation workflow.
 
+---
 
+## 7. Student and Parent Learning Flow
 
-Step 6 — Application Fee Payment (Step 5 of 6)
+### Flow 7.1 — Student views academic progress
+Status: Implemented
 
-The parent sees a payment summary:
+Who: student
 
-> Application Fee: ₦5,000
-> This fee is nonrefundable and is required to process your application.
+Entry point: /student/dashboard
 
-A "Pay Now" button is shown. The parent clicks it. The Paystack payment modal opens. The parent enters their card details or chooses bank transfer or USSD. After successful payment, the Paystack confirmation screen appears and the system records the payment. A receipt is sent to the parent's email.
+Journey:
+1. The student signs in.
+2. They see their attendance rate, grade snapshot, fee balance, and latest report card.
+3. They can navigate to exams, attendance, timetable, announcements, and profile pages.
 
-The system advances to Step 6.
+Current state:
+- the student dashboard is live and data-backed,
+- the experience is already useful for everyday school monitoring.
 
+### Flow 7.2 — Student takes exams and practices CBT
+Status: Partially implemented
 
+Who: student
 
-Step 7 — Review and Submit (Step 6 of 6)
+Entry point: /student/exams and /student/waec-practice
 
-The parent sees a full summary of all information entered across all previous steps. Each section has an "Edit" link to go back and correct. The parent reviews everything and clicks "Submit Application".
+Journey:
+1. The student selects a test or practice area.
+2. They enter the exam flow.
+3. They can see results or attempt history.
 
-The system:
+Current state:
+- the architecture and routes exist,
+- the experience is still evolving into a polished end-to-end CBT journey.
 
-1. Creates an admission application record with status "Pending Review"
-2. Generates a unique Application ID (e.g., YKCAPP20250047)
-3. Sends an SMS and email to the parent: "Your application for [Student Name] has been received. Your Application ID is YKCAPP20250047. You can track your application status at www.ykaycollege.edu.ng/admissions/status"
-4. Creates a task in the admin dashboard for the admissions team to review
+### Flow 7.3 — Parent monitors child progress
+Status: Implemented
 
-The parent sees a confirmation page with the Application ID, instructions for checking status, and a button to save/print the confirmation.
+Who: parent
 
+Entry point: /parent/dashboard
 
+Journey:
+1. The parent signs in and sees child-related information.
+2. They can access attendance, fees, report cards, events, and messages.
+3. The experience is designed around ongoing school communication.
 
- FLOW 1.3 — Parent Checks Application Status [Status: Partially implemented]
+Current state:
+- the core parent monitoring experience is present,
+- deeper workflow automation is still planned.
 
-Who: Parent who has already submitted an application
+---
 
-Entry Point: Admissions page → "Check Application Status" link
+## 8. IT Education and IT Portal Flow
 
+### Flow 8.1 — Learner discovers IT education offerings
+Status: Implemented
 
+Who: prospective learner or enrolled student
 
-Step 1 — Entering Application ID
+Entry point: /it-education and /it-portal/auth
 
-The parent clicks "Check Application Status". A simple form appears with one field: Application ID. The parent types their Application ID (e.g., YKCAPP20250047) and clicks "Check Status".
+Journey:
+1. The learner opens the IT education hub.
+2. They browse course tracks such as Python, AI, cybersecurity, and Microsoft Office.
+3. They can choose to sign up or sign in to the IT portal.
 
+Current state:
+- the public IT education hub is a strong product pillar,
+- course catalog and portal sign-in flows are implemented.
 
+### Flow 8.2 — IT learner uses the portal
+Status: Implemented
 
-Step 2 — Viewing Status
+Who: IT student or external learner
 
-The system looks up the application. One of four states is shown:
+Entry point: /it-portal/dashboard
 
-State A — Pending Review:
-> "Your application is currently under review by our admissions team. You will be notified via SMS and email once a decision has been made. Expected review time: 3–5 business days."
+Journey:
+1. The learner signs in or creates an account.
+2. They access the portal dashboard and can continue into course and learning workflows.
+3. The portal is designed to support certificate-oriented learning.
 
-State B — Documents Requested:
-> "Our admissions team has reviewed your application and requires additional documents. Please log in to your application portal or contact the school directly. Documents needed: [list of requested documents]."
+Current status:
+- the portal experience is present and structured,
+- some learning journey detail and reporting still need further completion.
 
-State C — Approved:
-> "Congratulations! [Student Name]'s application has been approved for [Class]. Your child's login credentials have been sent to [email/phone]. Please proceed to the school for enrollment orientation."
+---
 
-State D — Declined:
-> "We regret to inform you that [Student Name]'s application has not been approved at this time. Please contact the admissions office for more information."
+## 9. Current Gaps and Next Priorities
+
+### Major gaps
+- first-time school setup wizard,
+- full admissions review and enrollment handoff,
+- production-grade notification and archive workflows,
+- more complete CBT moderation and result delivery,
+- stronger end-to-end onboarding for students, parents, and staff.
+
+### Highest-value next steps
+1. finish the onboarding and school-setup experience,
+2. complete admissions review and handoff to student records,
+3. harden finance and reporting workflows,
+4. mature IT learning and CBT experiences,
+5. improve operational monitoring and backup/restore readiness.
+
+---
+
+## 10. Executive Summary
+
+The project has already evolved into a meaningful school platform with public pages, a real admissions journey, role-aware authentication, dashboard-driven portals, and IT education support. The next phase should focus less on adding new surface area and more on completing the workflows that make the system truly useful, reliable, and ready for real school operations.
 
 
 

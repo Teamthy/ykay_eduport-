@@ -6,6 +6,7 @@ import { useTheme } from "@/src/theme";
 import { Card } from "@/src/components/cards";
 import { H2, Body } from "@/src/components/typography";
 import { Button } from "@/src/components/buttons";
+import { useToast } from "@/components/MobileToast";
 import { ActivityIndicator } from "react-native";
 import { CheckCircle2, X } from "lucide-react-native";
 
@@ -13,12 +14,16 @@ export default function PayScreen() {
   const { url, reference } = useLocalSearchParams<{ url: string; reference: string }>();
   const router = useRouter();
   const { colors, spacing } = useTheme();
+  const { toast } = useToast();
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(true);
 
   function onNav(navState: any) {
     const u: string = navState.url || "";
-    if (u.includes("verify=") || u.includes("status=success") || u.includes("parent/fees")) setDone(true);
+    if (!done && (u.includes("verify=") || u.includes("status=success") || u.includes("parent/fees"))) {
+      setDone(true);
+      toast("Payment received. We’re verifying it now.", "success");
+    }
   }
 
   if (done) {

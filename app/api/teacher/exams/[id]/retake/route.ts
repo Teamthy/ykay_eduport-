@@ -15,7 +15,13 @@ async function resolveExamAndTeacher(userId: string, schoolId: string, examId: s
   if (!profile) return null;
   const exam = await prisma.exam.findFirst({
     where: { id: examId, schoolId },
-    select: { id: true, title: true, subjectName: true, classId: true, classroom: { select: { displayName: true } } },
+    select: {
+      id: true,
+      title: true,
+      subjectName: true,
+      classId: true,
+      classroom: { select: { displayName: true } },
+    },
   });
   if (!exam) return null;
   return { profile, exam };
@@ -23,7 +29,12 @@ async function resolveExamAndTeacher(userId: string, schoolId: string, examId: s
 
 /** GET /api/teacher/exams/[id]/retake — exam + its class students + who already has a retake. */
 export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const user = await requireRole([UserRole.TEACHER, UserRole.HOD, UserRole.ADMIN, UserRole.DIRECTOR]);
+  const user = await requireRole([
+    UserRole.TEACHER,
+    UserRole.HOD,
+    UserRole.ADMIN,
+    UserRole.DIRECTOR,
+  ]);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await context.params;
   const ctx = await resolveExamAndTeacher(user.id, user.schoolId, id);
@@ -35,7 +46,10 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       select: { id: true, studentId: true, displayName: true },
       orderBy: { displayName: "asc" },
     }),
-    prisma.examRetake.findMany({ where: { examId: ctx.exam.id }, select: { studentProfileId: true, used: true } }),
+    prisma.examRetake.findMany({
+      where: { examId: ctx.exam.id },
+      select: { studentProfileId: true, used: true },
+    }),
   ]);
 
   const retakeMap = new Map(retakes.map((r) => [r.studentProfileId, r.used]));
@@ -62,7 +76,12 @@ const grantSchema = z.object({
 
 /** POST /api/teacher/exams/[id]/retake — grant a retake to one or many students (idempotent upsert). */
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
-  const user = await requireRole([UserRole.TEACHER, UserRole.HOD, UserRole.ADMIN, UserRole.DIRECTOR]);
+  const user = await requireRole([
+    UserRole.TEACHER,
+    UserRole.HOD,
+    UserRole.ADMIN,
+    UserRole.DIRECTOR,
+  ]);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await context.params;
   const ctx = await resolveExamAndTeacher(user.id, user.schoolId, id);
@@ -77,7 +96,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
 
   // Only grant retakes to active students in this exam's class.
   const eligible = await prisma.studentProfile.findMany({
-    where: { id: { in: input.studentProfileIds }, currentClassId: ctx.exam.classId, isActive: true },
+    where: {
+      id: { in: input.studentProfileIds },
+      currentClassId: ctx.exam.classId,
+      isActive: true,
+    },
     select: { id: true },
   });
   const eligibleIds = new Set(eligible.map((s) => s.id));

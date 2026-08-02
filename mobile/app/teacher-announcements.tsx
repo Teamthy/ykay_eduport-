@@ -5,14 +5,16 @@ import { useTheme } from "@/src/theme";
 import { H2 } from "@/src/components/typography";
 import { ListItem } from "@/src/components/lists";
 import { EmptyState } from "@/src/components/feedback";
+import { useToast } from "@/components/MobileToast";
 import { Bell, Megaphone, AlertCircle, Info } from "lucide-react-native";
 
 export default function TeacherAnnouncements() {
   const { colors, spacing } = useTheme();
+  const { toast } = useToast();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  async function load() { try { setData(await teacherApi.announcements()); } catch {} finally { setRefreshing(false); } }
+  async function load() { try { setData(await teacherApi.announcements()); } catch { toast("We couldn’t refresh announcements right now.", "error"); } finally { setRefreshing(false); } }
   useEffect(() => { load(); }, []);
 
   const items = data?.announcements || [];

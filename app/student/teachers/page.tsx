@@ -5,8 +5,15 @@ import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import { useApi } from "@/lib/useApi";
 import {
-  LayoutDashboard, CalendarDays, FileText, User, Bell, ClipboardCheck,
-  GraduationCap, BookOpen, School,
+  LayoutDashboard,
+  CalendarDays,
+  FileText,
+  User,
+  Bell,
+  ClipboardCheck,
+  GraduationCap,
+  BookOpen,
+  School,
 } from "lucide-react";
 
 const SIDEBAR_ITEMS = [
@@ -22,24 +29,42 @@ const SIDEBAR_ITEMS = [
 type Teacher = { id: string; name: string; role: string; subject: string; photoUrl: string | null };
 
 function initials(name: string) {
-  return name.split(" ").map((n) => n[0]).filter(Boolean).slice(0, 2).join("").toUpperCase() || "?";
+  return (
+    name
+      .split(" ")
+      .map((n) => n[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "?"
+  );
 }
 
 function TeacherCard({ t, form }: { t: Teacher; form?: boolean }) {
   return (
-    <div className={`p-6 rounded-2xl bg-[var(--surface-card)] border ${form ? "border-brand-orange/30" : "border-[var(--border-subtle)]"} shadow-[var(--card-shadow)] hover:border-brand-green/40 hover:-translate-y-0.5 transition-all`}>
+    <div
+      className={`p-6 rounded-2xl bg-[var(--surface-card)] border ${form ? "border-brand-orange/30" : "border-[var(--border-subtle)]"} shadow-[var(--card-shadow)] hover:border-brand-green/40 hover:-translate-y-0.5 transition-all`}
+    >
       <div className="flex items-start gap-4">
         <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-brand-green to-brand-green-dark flex items-center justify-center text-white font-display text-lg shrink-0">
           {t.photoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={t.photoUrl} alt={t.name} className="h-full w-full object-cover" />
-          ) : (<span>{initials(t.name)}</span>)}
+          ) : (
+            <span>{initials(t.name)}</span>
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-[var(--text-primary)] mb-1">{t.name}</h3>
-          <div className={`text-xs font-bold mb-2 ${form ? "text-brand-orange" : "text-brand-green"}`}>{t.role || (form ? "Form Teacher" : "Subject Teacher")}</div>
+          <div
+            className={`text-xs font-bold mb-2 ${form ? "text-brand-orange" : "text-brand-green"}`}
+          >
+            {t.role || (form ? "Form Teacher" : "Subject Teacher")}
+          </div>
           {t.subject && (
-            <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded font-bold ${form ? "bg-brand-orange/10 text-brand-orange" : "bg-brand-green/10 text-brand-green"}`}>
+            <span
+              className={`inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded font-bold ${form ? "bg-brand-orange/10 text-brand-orange" : "bg-brand-green/10 text-brand-green"}`}
+            >
               <BookOpen size={11} /> {t.subject}
             </span>
           )}
@@ -50,10 +75,16 @@ function TeacherCard({ t, form }: { t: Teacher; form?: boolean }) {
 }
 
 export default function TeachersDirectoryPage() {
-  const { data, loading } = useApi<{ className: string | null; teachers: Teacher[] }>("/api/student/teachers");
+  const { data, loading } = useApi<{ className: string | null; teachers: Teacher[] }>(
+    "/api/student/teachers",
+  );
   const all = data?.teachers ?? [];
-  const formTeachers = all.filter((t) => !t.subject || t.subject === "Class Teacher" || /form/i.test(t.role));
-  const subjectTeachers = all.filter((t) => t.subject && t.subject !== "Class Teacher" && !/form/i.test(t.role));
+  const formTeachers = all.filter(
+    (t) => !t.subject || t.subject === "Class Teacher" || /form/i.test(t.role),
+  );
+  const subjectTeachers = all.filter(
+    (t) => t.subject && t.subject !== "Class Teacher" && !/form/i.test(t.role),
+  );
 
   return (
     <>
@@ -64,7 +95,9 @@ export default function TeachersDirectoryPage() {
             <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
               MY <span className="text-brand-green">TEACHERS</span>
             </h1>
-            <p className="text-white/60 text-sm">Faculty teaching your class{data?.className ? ` (${data.className})` : ""}.</p>
+            <p className="text-white/60 text-sm">
+              Faculty teaching your class{data?.className ? ` (${data.className})` : ""}.
+            </p>
           </div>
         </section>
 
@@ -74,9 +107,13 @@ export default function TeachersDirectoryPage() {
 
             <div className="flex-1 min-w-0 space-y-8">
               {loading ? (
-                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm">Loading teachers…</div>
+                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm">
+                  Loading teachers…
+                </div>
               ) : all.length === 0 ? (
-                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm">No teachers assigned to your class yet.</div>
+                <div className="p-6 rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] text-sm">
+                  No teachers assigned to your class yet.
+                </div>
               ) : (
                 <>
                   {!!formTeachers.length && (
@@ -85,7 +122,9 @@ export default function TeachersDirectoryPage() {
                         <School size={14} /> Form Teacher
                       </h2>
                       <div className="grid md:grid-cols-2 gap-4">
-                        {formTeachers.map((t) => (<TeacherCard key={t.id} t={t} form />))}
+                        {formTeachers.map((t) => (
+                          <TeacherCard key={t.id} t={t} form />
+                        ))}
                       </div>
                     </div>
                   )}
@@ -95,7 +134,9 @@ export default function TeachersDirectoryPage() {
                         <BookOpen size={14} /> Subject Teachers
                       </h2>
                       <div className="grid md:grid-cols-2 gap-4">
-                        {subjectTeachers.map((t) => (<TeacherCard key={t.id} t={t} />))}
+                        {subjectTeachers.map((t) => (
+                          <TeacherCard key={t.id} t={t} />
+                        ))}
                       </div>
                     </div>
                   )}

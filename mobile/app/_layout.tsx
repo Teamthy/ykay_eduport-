@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, View, Text } from "react-native";
 import { useFonts } from "expo-font";
 import { Anton_400Regular } from "@expo-google-fonts/anton";
-import { DM_Sans_400Regular, DM_Sans_500Medium, DM_Sans_700Bold } from "@expo-google-fonts/dm-sans";
+import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold } from "@expo-google-fonts/dm-sans";
 import { getMe, type SessionUser } from "@/lib/api";
 import { setAuthExpiredHandler } from "@/lib/http";
 import { configureNotifications, registerForPushNotifications } from "@/lib/notifications";
@@ -12,15 +12,16 @@ import { ThemeProvider } from "@/src/theme";
 import { Colors } from "@/src/theme/colors";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { BiometricGate } from "@/components/BiometricGate";
+import { ToastProvider } from "@/components/MobileToast";
 
 export default function RootLayout() {
   const router = useRouter();
   const [user, setUser] = useState<SessionUser | null | undefined>(undefined);
   const [fontsLoaded] = useFonts({
     Anton: Anton_400Regular,
-    "DM Sans": DM_Sans_400Regular,
-    "DM Sans Medium": DM_Sans_500Medium,
-    "DM Sans Bold": DM_Sans_700Bold,
+    "DM Sans": DMSans_400Regular,
+    "DM Sans Medium": DMSans_500Medium,
+    "DM Sans Bold": DMSans_700Bold,
   });
   const [timedOut, setTimedOut] = useState(false);
 
@@ -50,7 +51,6 @@ export default function RootLayout() {
   }
 
   const resolvedUser = user === undefined ? null : user;
-
   const stack = (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.background.primary } }}>
       <Stack.Screen name="index" />
@@ -86,17 +86,19 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <View style={{ flex: 1, backgroundColor: Colors.background.primary }}>
-        <StatusBar style="light" />
-        {resolvedUser ? (
-          <BiometricGate>
-            {stack}
-            <OfflineIndicator />
-          </BiometricGate>
-        ) : (
-          stack
-        )}
-      </View>
+      <ToastProvider>
+        <View style={{ flex: 1, backgroundColor: Colors.background.primary }}>
+          <StatusBar style="light" />
+          {resolvedUser ? (
+            <BiometricGate>
+              {stack}
+              <OfflineIndicator />
+            </BiometricGate>
+          ) : (
+            stack
+          )}
+        </View>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

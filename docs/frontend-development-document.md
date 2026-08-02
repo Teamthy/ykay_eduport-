@@ -1,238 +1,190 @@
 # Frontend Development Document
 
-## 1. Product Overview
+## Executive Summary for Stakeholders
 
-The frontend is being built as a digital education platform for Ykay College, not only as a traditional school website. The product must serve three core audiences at once:
-- prospective students and parents,
-- school staff and administrators,
-- and learners engaging with the school’s academic and digital learning ecosystem.
+Ykay College EduPortal has evolved from a simple school website into a functional digital education platform. It now supports public discovery, admissions, role-based school portals, student and parent engagement, and an IT education experience.
 
-The experience should reflect four major product pillars:
-- a polished public school website,
-- a role-based school portal,
-- a strong IT education experience,
-- and a growing CBT and exam-preparation product.
+### What is already in place
+- a polished public website for school information and admissions,
+- a real admissions journey with submission and status tracking,
+- role-based access for admin, teacher, student, parent, and IT learner users,
+- live dashboard-driven modules for school operations,
+- and an expanding exam and IT-learning surface.
 
-The current frontend is visually strong and presentation-ready, but it still needs to move from a demo-style experience to a fully data-backed, production-oriented product.
+### Why this matters
+The platform creates value across the entire school lifecycle: parents can begin admission online, staff can work from role-specific dashboards, students and parents can monitor academic progress, and the school gains a foundation for digital operations and future growth.
 
----
+### Simple architecture view
 
-## 2. What We Are Building
+```mermaid
+flowchart LR
+    Visitor[Visitors / Parents] --> Web[Next.js Frontend]
+    Staff[Admins / Teachers / Students / Parents] --> Web
+    Web --> API[App Router API Layer]
+    API --> DB[(PostgreSQL via Prisma)]
+    API --> Auth[Session Auth / Middleware]
+    API --> Pay[Paystack]
+    API --> Mail[Resend]
+    API --> Storage[S3-compatible Storage]
+```
 
-### A. Public Website
-The public website must feel professional, credible, and modern. It should clearly communicate:
-- the school’s mission,
-- academic strengths,
-- admissions value,
-- campus culture,
-- and the school’s digital learning identity.
-
-The site should prominently showcase IT education as a flagship offering rather than a minor section.
-
-### B. Role-Based Portals
-The platform must provide distinct experience paths for:
-- Admin Portal
-- Teacher Portal
-- Student Portal
-- Parent Portal
-
-Each portal should have a unique information architecture, navigation, and dashboard structure suited to that user’s job or needs.
-
-### C. IT Education Experience
-IT education should be treated as a major product pillar. The frontend should make it easy for users to explore:
-- digital literacy,
-- Microsoft Office programs,
-- Excel,
-- PowerPoint,
-- Word,
-- Python,
-- cybersecurity,
-- AI,
-- and other practical technology learning pathways.
-
-### D. CBT and Exam Preparation Experience
-The frontend should also support a future-ready CBT experience that allows users to:
-- choose subjects,
-- take practice tests,
-- review results,
-- and progress through guided study paths.
+### Main priorities for the next phase
+1. complete the admissions review and onboarding handoff,
+2. harden finance, reporting, and notification workflows,
+3. finish the CBT and IT-learning experience,
+4. improve reliability, monitoring, and deployment readiness.
 
 ---
 
-## 3. Current Frontend Status (Updated 2026-07-23)
+## 1. Product Positioning
 
-### Implemented and visible in the repository
-- A branded public experience with a header, footer, hero sections, and reusable layout components.
-- Public pages for admissions, academics, campus life, alumni, contact, news, testimonials, privacy policy, and IT education.
-- Portal-style dashboard shells for admin, teacher, student, parent, super-admin, and IT portal users.
-- A working admissions workflow UI for multi-step application entry, document upload, payment, and status checks.
-- A role-aware login experience and middleware-driven route handling for protected portal areas.
-- An IT education hub with course cards, certification-focused content, and a student-facing interest experience.
-- Reusable UI components for payments, notifications, receipts, modals, sidebars, and portal navigation.
+The frontend is now a full digital education platform rather than a brochure-style school website. It serves four primary audiences:
 
-### Partially implemented
-- The admissions experience is connected to real backend APIs, but some operational review and handoff screens still need completion.
-- The login and portal shell experience is live, but several modules still depend on partial data or shell-based placeholders rather than full production data flows.
-- Admin and teacher dashboards are present and connected to endpoints, but some cards and modules still need stronger real-data wiring and empty/error state handling.
-- The CBT experience exists structurally, but the student journey, result workflows, and analytics presentation are still not fully polished.
+- prospective parents and students,
+- school administrators and staff,
+- enrolled students and parents,
+- and learners using the IT education and CBT experience.
 
-### Still missing or incomplete
-- A complete first-time school setup wizard UI for school profile, session/term, grading scale, and CA configuration.
-- Fully data-backed student, parent, and staff onboarding experiences.
-- Mature role-based navigation and portal-specific workflows for all edge cases.
-- Stronger loading, empty-state, error-state, accessibility, and responsive behavior across portal modules.
-- A fully complete IT certification and CBT experience that feels end-to-end rather than promotional or scaffolded.
+The product is organized around four major experience pillars:
+
+- a polished public website,
+- role-based school portals,
+- an IT education academy,
+- and a growing exam-preparation and CBT surface.
+
+The current frontend is visually strong and already includes many live routes and interactive flows. It is no longer only a presentation layer; it now supports real sign-in, role-aware navigation, dashboard data loading, and portal-specific modules.
 
 ---
 
-## 4. Frontend Requirements
+## 2. Current Frontend Surface
 
-### 4.1 Navigation and Information Architecture
-The frontend must support a clear and scalable information structure.
+### A. Public Experience
+The public experience is implemented through routes such as:
 
-The main navigation should include strong visibility for:
-- IT Education
-- Admissions
-- Academics
-- Portal
-- CBT or Exam Preparation
+- / for the homepage
+- /about for school story and values
+- /academics for academic programmes
+- /admissions for application entry
+- /admissions/status for status lookup
+- /campus-life for facilities and student life
+- /news-events and /news-events/[slug] for school updates
+- /contact and /faq for support and information
+- /portal for portal selection
+- /login, /reset-password, /signup, /privacy-policy
 
-### 4.2 Portal Navigation Requirements
-Each portal should have a dedicated navbar and sidebar tailored to its role.
+These pages are built with a reusable header, footer, and themed visual system that is consistent across the public site.
 
-Recommended structure:
-- Admin Portal
-  - Dashboard
-  - Admissions
-  - Students
-  - Staff
-  - Fees
-  - Reports
-  - Settings
+### B. Admissions Experience
+The admissions flow is one of the most complete user-facing journeys in the frontend.
 
-- Teacher Portal
-  - Dashboard
-  - Classes
-  - Attendance
-  - Gradebook
-  - Exams
-  - Messages
-  - Resources
+It includes:
 
-- Student Portal
-  - Dashboard
-  - Results
-  - Attendance
-  - Fees
-  - Exams
-  - IT Track
-  - Messages
+- a multi-step admissions form,
+- document upload UI,
+- payment and review steps,
+- and status-checking after submission.
 
-- Parent Portal
-  - Dashboard
-  - Child Records
-  - Attendance
-  - Fees
-  - Messages
-  - Announcements
+The implementation is connected to real backend APIs for draft creation, upload URL handling, payment start, payment verification, and submission.
 
-### 4.3 IT Education Presentation
-The IT education experience should be visible, persuasive, and structured around outcomes such as:
-- digital skills,
-- practical certification readiness,
-- career exposure,
-- and modern learning pathways.
+### C. Portal Experience
+The portal surface is implemented through role-specific entry points and dashboards:
 
-### 4.4 CBT Experience Presentation
-The CBT experience should feel focused, modern, and exam-ready. It should support:
-- subject selection,
-- test flow,
-- result review,
-- and analytics progression.
+- /admin and /admin-admissions
+- /teacher/dashboard and teacher sub-pages
+- /student/dashboard and student sub-pages
+- /parent/dashboard and parent sub-pages
+- /super-admin for school and platform oversight
+- /it-portal/auth and /it-portal/dashboard for IT learning
+
+The frontend uses role-aware navigation and protected route handling to steer users to the right experience after authentication.
+
+### D. Module-Specific Pages
+The product includes a broad set of portal pages for daily school operations:
+
+- teacher attendance, gradebook, reports, question bank, evaluations, CBT center, class roster, and performance pages,
+- student attendance, report cards, exams, timetable, profile, announcements, and WAEC practice pages,
+- parent fees, attendance, report cards, messages, and events pages,
+- admin admissions, students, staff, fees, finance, reports, class manager, budgets, expenses, and notifications pages,
+- super-admin schools, portals, broadcasts, health, and system oversight pages.
 
 ---
 
-## 5. What Is Already Working Well
+## 3. What Is Implemented Well
 
-- The visual direction is strong and consistent.
-- The UI is modern and presentation-ready.
-- The app already has a good foundation for future growth.
-- The product story is clearly moving toward a digital school platform.
+### Strong visual foundation
+The UI is modern, branded, and presentation-ready. The school identity is visible throughout the site and the portal experience.
 
----
+### Real role-based structure
+The app now has a clear distinction between public pages, admissions flow, and the student/teacher/parent/admin portal surfaces.
 
-## 6. What Still Needs Work
+### Live data-backed dashboards
+Admin, teacher, student, and parent dashboards are not purely static. They fetch data from backend endpoints for metrics, activity, reports, attendance, and fees.
 
-### A. Content and Messaging
-Some sections still need more authentic, school-specific copy and stronger product positioning.
+### Strong IT education presentation
+The IT education hub is a clear product pillar and includes a dedicated portal entry point for learners.
 
-### B. Real Interactivity
-A much larger part of the experience still needs to be wired to real data and user actions.
-
-### C. Authentication and Access Control
-The frontend should move away from mock-based access and move toward real login and protected role-based experiences.
-
-### D. Data Integration
-Portal screens should no longer rely only on static or placeholder data.
-
-### E. Accessibility and Performance
-The UI should be reviewed for stronger accessibility, clearer loading states, responsive behavior, and smoother interaction design.
+### Secure entry flow
+The login and route-protection experience is built around real authentication and session handling rather than a mock-only experience.
 
 ---
 
-## 7. Recommended Frontend Priorities
+## 4. Frontend Maturity Assessment
 
-### Priority 1: Finish the Core Experience
-- complete the core public pages,
-- ensure navigation is clear and consistent,
-- and make the IT education and CBT links highly visible.
+### Mature areas
+- public website structure,
+- admissions experience,
+- portal shell and dashboard layout,
+- authentication and route redirection,
+- IT education entry experience.
 
-### Priority 2: Build Role-Based Portal UX
-- create clear navbar and sidebar flows for each portal,
-- align each dashboard to the user’s needs,
-- and support real navigation patterns.
-
-### Priority 3: Connect UI to Real Data
-- replace placeholder content with real API-driven panels,
-- connect admissions, fees, results, and portal content to backend systems,
-- and support actual user sessions.
-
-### Priority 4: Strengthen Product-Specific Experiences
-- make IT education a flagship experience,
-- create a polished CBT learning journey,
-- and tie both experiences to admissions and school identity.
-
-### Priority 5: Production Readiness
-- improve accessibility,
-- optimize performance,
-- tighten error states,
-- and prepare the frontend for deployment.
+### Still maturing
+- onboarding and school setup experience,
+- fully polished exam/CBT experience,
+- deeper empty-state and error-state handling,
+- accessibility across all portal screens,
+- consistent data-loading behavior across modules.
 
 ---
 
-## 8. Suggested Delivery Milestones
+## 5. User Experience Priorities
 
-### Milestone 1 — Public Platform Foundation
-- complete the main public pages,
-- strengthen the homepage and key landing pages,
-- and improve the visibility of IT education and CBT.
+### Priority 1 — Finish the core experience
+The main public and portal entry points should feel complete and consistent. Navigation should be obvious and the CTA flow should be clear from home to admissions to login.
 
-### Milestone 2 — Portal Experience
-- implement role-specific navigation,
-- build the main dashboard layouts,
-- and make each portal feel distinct and usable.
+### Priority 2 — Make each portal feel distinct
+Admin, teacher, student, and parent experiences should each feel tailored to the user’s task rather than looking like generic dashboards.
 
-### Milestone 3 — Data-Driven Experience
-- connect forms, dashboards, and portal modules to live backend data,
-- and replace placeholder UI states with real content.
+### Priority 3 — Connect more UI to live data
+More forms and modules should show real state, handle empty data gracefully, and surface actionable errors.
 
-### Milestone 4 — Full Product Readiness
-- complete the IT education hub,
-- launch the first CBT experience,
-- and prepare the product for deployment and real user use.
+### Priority 4 — Improve product-specific depth
+The IT education and CBT areas should feel more like full learning products and less like catalog or shell experiences.
+
+### Priority 5 — Harden production readiness
+The frontend should continue improving accessibility, responsive behavior, loading states, error recovery, and consistency across modules.
 
 ---
 
-## 9. Final Assessment
+## 6. Recommended Frontend Roadmap
 
-The frontend is already strong in visual design and structure. The next step is to evolve it into a real product experience that consistently supports the school website, the portal system, IT education, and CBT. The strongest opportunity is to make the frontend feel like a complete digital education platform rather than a collection of attractive pages.
+### Near term
+- complete onboarding and school-setup UI,
+- unify loading and empty-state patterns,
+- improve portal navigation clarity,
+- strengthen role-specific CTA flows.
+
+### Medium term
+- connect remaining modules to live APIs,
+- improve exam and result presentation,
+- deliver a fuller IT portal learning experience.
+
+### Longer term
+- add stronger analytics surfaces,
+- polish welfare and communication features,
+- move the whole experience toward a production-grade school operating platform.
+
+---
+
+## 7. Frontend Summary
+
+The frontend already demonstrates a credible digital school platform. The biggest opportunity is to move from attractive and structurally complete pages to a fully coherent, data-driven, and role-aware product experience that feels complete from first visit to daily school operations.

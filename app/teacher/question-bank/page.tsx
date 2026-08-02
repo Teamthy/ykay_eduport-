@@ -4,7 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
-import { BookOpen, FileText, LoaderCircle, PlusCircle, ClipboardList, CheckCircle2 } from "lucide-react";
+import {
+  BookOpen,
+  FileText,
+  LoaderCircle,
+  PlusCircle,
+  ClipboardList,
+  CheckCircle2,
+} from "lucide-react";
 
 type Exam = {
   id: string;
@@ -59,29 +66,38 @@ export default function QuestionBankPage() {
               QUESTION <span className="text-brand-green">BANK</span>
             </h1>
             <p className="mt-3 max-w-2xl text-sm text-white/65">
-              Every test and exam you own, with live question counts. Upload items from CSV/Excel/Word/JSON, preview, then publish.
+              Every test and exam you own, with live question counts. Upload items from
+              CSV/Excel/Word/JSON, preview, then publish.
             </p>
           </div>
 
           {error && (
-            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">{error}</div>
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">
+              {error}
+            </div>
           )}
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
               <FileText className="mb-2 text-brand-green" size={18} />
               <div className="font-display text-2xl">{exams.length}</div>
-              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Exams / tests</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                Exams / tests
+              </div>
             </div>
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
               <BookOpen className="mb-2 text-brand-orange" size={18} />
               <div className="font-display text-2xl">{totalQuestions}</div>
-              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Questions</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                Questions
+              </div>
             </div>
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
               <ClipboardList className="mb-2 text-blue-500" size={18} />
               <div className="font-display text-2xl">{drafts}</div>
-              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">Drafts</div>
+              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                Drafts
+              </div>
             </div>
           </div>
 
@@ -120,7 +136,9 @@ export default function QuestionBankPage() {
                       <td className="p-4 text-xs text-[var(--text-muted)]">
                         {e.subjectName} · {e.className}
                       </td>
-                      <td className="p-4 font-display text-base text-brand-green">{e.questionCount}</td>
+                      <td className="p-4 font-display text-base text-brand-green">
+                        {e.questionCount}
+                      </td>
                       <td className="p-4">{e.totalMarks}</td>
                       <td className="p-4">
                         <span
@@ -143,7 +161,10 @@ export default function QuestionBankPage() {
             {!loading && !exams.length && (
               <div className="p-10 text-center">
                 <p className="text-sm text-[var(--text-muted)]">No exams yet.</p>
-                <Link href="/teacher/upload-questions" className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-brand-green">
+                <Link
+                  href="/teacher/upload-questions"
+                  className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-brand-green"
+                >
                   <PlusCircle size={15} /> Upload your first set of questions
                 </Link>
               </div>

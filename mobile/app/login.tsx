@@ -10,6 +10,7 @@ import { Button } from "@/src/components/buttons";
 import { H3, Body } from "@/src/components/typography";
 import { BackgroundCarousel } from "@/src/components/carousel";
 import { YkayLogo } from "@/components/YkayLogo";
+import { useToast } from "@/components/MobileToast";
 import { Mail, Lock, ArrowRight, ShieldCheck, Eye, EyeOff } from "lucide-react-native";
 
 const ALLOWED_ROLES = ["STUDENT", "IT_STUDENT", "PARENT", "TEACHER", "HOD", "ADMIN"];
@@ -26,6 +27,7 @@ const CAROUSEL_IMAGES = [
 export default function LoginScreen() {
   const router = useRouter();
   const { colors, spacing } = useTheme();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -33,6 +35,7 @@ export default function LoginScreen() {
 
   async function handleLogin() {
     if (!email || !password) {
+      toast("Please enter your email and password.", "warning");
       Alert.alert("Missing fields", "Please enter your email and password.");
       return;
     }
@@ -41,14 +44,17 @@ export default function LoginScreen() {
       const { user } = await login(email, password);
       if (!ALLOWED_ROLES.includes(user.role)) {
         await logout();
+        toast("This account is managed from the web portal.", "info");
         Alert.alert("Use the web portal", "This account manages the school from the web portal — not the mobile app.");
         return;
       }
+      toast("Signed in successfully.", "success");
       if (user.role === "TEACHER" || user.role === "HOD") router.replace("/(teacher)/dashboard");
       else if (user.role === "PARENT") router.replace("/(parent)/dashboard");
       else if (user.role === "ADMIN") router.replace("/(admin)/dashboard");
       else router.replace("/(student)/dashboard");
     } catch (err) {
+      toast("Login failed. Please check your credentials.", "error");
       Alert.alert("Login failed", err instanceof Error ? err.message : "Invalid credentials.");
     } finally {
       setLoading(false);
