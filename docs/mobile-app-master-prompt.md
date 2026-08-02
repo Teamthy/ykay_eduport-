@@ -1,6 +1,6 @@
 # Master Prompt for the Ykay College Mobile App Build
 
-Generate a complete modern mobile app UI design system and full screen designs for a school platform mobile app called "Ykay College".
+Generate a complete modern mobile app UI design system and full screen designs for a school-platform mobile app called "Ykay College".
 
 Ykay College is a premium, modern education platform designed to help students, parents, teachers, and administrators stay connected to school life through a beautiful, mobile-first experience. The app helps users:
 
@@ -15,7 +15,18 @@ Ykay College is a premium, modern education platform designed to help students, 
 - and access school services quickly from a phone.
 
 ## Product Vision
-The app should feel polished, trustworthy, modern, easy to use, and purpose-built for education. It should balance academic seriousness with a warm, premium, student-friendly experience.
+The app should feel polished, trustworthy, modern, and easy to use, while remaining purpose-built for education. It should balance academic seriousness with a warm, premium, student-friendly experience.
+
+## Current Product Reality to Respect
+This mobile app is already being built as an Expo-based React Native application with:
+- Expo Router structure and route groups,
+- role-based navigation for students, parents, teachers, and admins,
+- shared theming and reusable UI primitives,
+- offline-aware API access with caching and queued writes,
+- secure authentication and session handling,
+- and a broad catalog of screens for school operations.
+
+The prompt should therefore reflect a product that is already partially implemented and should now be evolved into a more polished, cohesive, and production-ready mobile experience.
 
 ## Core User Groups
 The app should support:
@@ -27,7 +38,7 @@ The app should support:
 Each group should have a tailored experience with the right dashboard, actions, and information hierarchy.
 
 ## Design Style
-Use an ultra-modern 2026 startup aesthetic with a premium educational feel.
+Use an ultra-modern 2026 startup aesthetic with a premium education-platform feel.
 
 Visual direction:
 - minimal, clean, and uncluttered layouts,
@@ -39,6 +50,15 @@ Visual direction:
 - warm, trustworthy, professional tone,
 - premium mobile UI that feels refined rather than corporate or childish.
 
+## Brand Consistency Requirements
+Keep the app visually aligned with the existing Ykay identity:
+- dark premium base with green brand accents,
+- strong contrast for readability and clarity,
+- refined card-based layouts,
+- modern typography with clear hierarchy,
+- consistent spacing and component language across all screens,
+- calm and trustworthy visual treatment rather than flashy or noisy styling.
+
 ## Color Palette
 Use a polished school-platform palette inspired by modern education apps:
 - Deep navy background: #071126
@@ -46,7 +66,6 @@ Use a polished school-platform palette inspired by modern education apps:
 - Soft off-white cards: #F8FAFC
 - Primary green accent: #4EC54D
 - Deep green accent: #1B7A2D
-- Soft blue accent: #2D6CDF
 - Muted slate text: #1F2937
 - Secondary gray text: #6B7280
 - Subtle green gradients for CTAs and success states
@@ -195,6 +214,15 @@ Do not make it feel cluttered, overly playful, or too corporate.
 - "New announcement posted"
 - "Fee reminder" or "Exam starts soon"
 - mobile-friendly notification visuals
+
+## Routing and Navigation Expectations
+The UI should reflect the app’s current routing model:
+- a root entry flow for landing and authentication,
+- role-based route groups for student, parent, teacher, and admin,
+- tab-based navigation for the main role experiences,
+- and modal or stacked navigation for flows such as exams, payments, announcements, and profile settings.
+
+The screens should feel like part of one cohesive app system rather than isolated mockups.
 
 ## Design System Components
 Include the full design system for the app:
