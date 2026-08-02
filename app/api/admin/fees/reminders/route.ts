@@ -82,6 +82,8 @@ export async function POST(request: NextRequest) {
         recipientName: parentName,
         recipientEmail: email,
         recipientPhone: invoice.parentProfile?.phone || null,
+        // Honour the parent's "Fees" preference on email too, not just push.
+        recipientUserId: invoice.parentProfile?.userId ?? null,
         dedupeKey: `fee-rem:${invoice.id}:${day}:email`,
         metadata: { invoiceId: invoice.id, amount },
       });

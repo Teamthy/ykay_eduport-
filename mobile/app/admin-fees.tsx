@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, ScrollView, RefreshControl, Alert } from "react-native";
 import { adminApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
+import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption, Label } from "@/src/components/typography";
 import { Button } from "@/src/components/buttons";
@@ -15,9 +16,21 @@ export default function AdminFees() {
   const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
-  async function load() { try { setData(await adminApi.fees()); } catch {} finally { setRefreshing(false); } }
+  async function load() {
+    try {
+      setError(null);
+      setData(await adminApi.fees());
+    } catch (err) {
+      // Previously `catch {}` — a failed request rendered an empty
+      // screen indistinguishable from "there is nothing here".
+      setError(err instanceof Error ? err.message : "Couldn't load fees.");
+    } finally {
+      setRefreshing(false);
+    }
+  }
   useEffect(() => { load(); }, []);
 
   async function sendReminders() {
@@ -32,6 +45,7 @@ export default function AdminFees() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
       <H2 style={{ marginBottom: spacing.lg }}>Fees</H2>
+      {error ? <InlineError message={error} onRetry={() => { void load(); }} /> : null}
 
       <Card variant="bordered" style={{ marginBottom: spacing.md, borderColor: s.totalOutstanding > 0 ? colors.danger : colors.success }}>
         <Row2 icon={<CreditCard size={18} color={s.totalOutstanding > 0 ? colors.danger : colors.success} />} label="Outstanding" />

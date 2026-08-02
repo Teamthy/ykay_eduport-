@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, ScrollView, Switch, TouchableOpacity, Linking, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { getPrefs, setPref, type PrefKey } from "@/lib/prefs";
+import { notificationPrefsApi, type NotificationPrefs } from "@/lib/api";
 import { biometricAvailable } from "@/lib/biometric";
 import { haptic } from "@/lib/haptics";
 import { useSession } from "@/lib/useSession";
@@ -37,6 +38,18 @@ import {
 const SCHOOL_EMAIL = "info@ykaycollege.com";
 const SCHOOL_PHONE = "+2347015374411";
 
+/**
+ * Notification toggles are SERVER state — the dispatcher reads them when
+ * deciding whether to push. The device copy (expo-secure-store) is only a
+ * cache so the switches render instantly instead of flickering on open.
+ */
+const NOTIFY_KEY_TO_CATEGORY: Partial<Record<PrefKey, keyof NotificationPrefs>> = {
+  notifyAnnouncements: "announcements",
+  notifyAttendance: "attendance",
+  notifyFees: "fees",
+  notifyResults: "results",
+};
+
 export default function SettingsScreen() {
   const router = useRouter();
   const { colors, spacing, radius } = useTheme();
@@ -62,6 +75,31 @@ export default function SettingsScreen() {
       setPrefs(values);
       setBioSupported(bio);
       setLoaded(true);
+
+      // Then reconcile the notification toggles with the server, which is the
+      // copy that actually governs delivery. A device that has been offline
+      // could otherwise show "Fees: off" while the server happily pushes.
+      try {
+        const { prefs: server } = await notificationPrefsApi.get();
+        if (cancelled) return;
+        setPrefs((p) => ({
+          ...p,
+          notifyAnnouncements: server.announcements,
+          notifyAttendance: server.attendance,
+          notifyFees: server.fees,
+          notifyResults: server.results,
+        }));
+        // Refresh the local cache so the next cold start renders correctly.
+        await Promise.all([
+          setPref("notifyAnnouncements", server.announcements),
+          setPref("notifyAttendance", server.attendance),
+          setPref("notifyFees", server.fees),
+          setPref("notifyResults", server.results),
+        ]);
+      } catch {
+        // Offline or signed out — keep the cached values rather than blanking
+        // the switches. They will reconcile on the next successful load.
+      }
     })();
     return () => {
       cancelled = true;
@@ -69,9 +107,24 @@ export default function SettingsScreen() {
   }, []);
 
   async function toggle(key: PrefKey, value: boolean) {
+    const previous = !!prefs[key];
     setPrefs((p) => ({ ...p, [key]: value }));
     await setPref(key, value);
     haptic("light");
+
+    // Notification categories must reach the server or they do nothing at all.
+    const category = NOTIFY_KEY_TO_CATEGORY[key];
+    if (!category) return;
+    try {
+      await notificationPrefsApi.update({ [category]: value });
+    } catch {
+      // Roll the switch back rather than leaving the user believing they have
+      // muted something they have not. A silent failure here recreates exactly
+      // the bug this replaced.
+      setPrefs((p) => ({ ...p, [key]: previous }));
+      await setPref(key, previous);
+      haptic("error");
+    }
   }
 
   /**

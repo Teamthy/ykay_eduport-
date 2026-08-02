@@ -27,6 +27,8 @@ export default function ExamRunner() {
   const [error, setError] = useState("");
   const [result, setResult] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+  // Timestamp of the last failed autosave, or null when the last one succeeded.
+  const [saveFailedAt, setSaveFailedAt] = useState<number | null>(null);
 
   const answersRef = useRef<Record<string, string>>({});
   useEffect(() => { answersRef.current = answers; }, [answers]);
@@ -53,7 +55,35 @@ export default function ExamRunner() {
   useEffect(() => { if (phase !== "running") return; const handler = () => { Alert.alert("Leave exam?", "Your progress is saved.", [{ text: "Stay", style: "cancel" }, { text: "Leave", style: "destructive", onPress: () => router.back() }]); return true; }; const sub = BackHandler.addEventListener("hardwareBackPress", handler); return () => sub.remove(); }, [phase]);
 
   function setAnswer(qId: string, value: string) { setAnswers((prev) => ({ ...prev, [qId]: value })); }
-  async function doSave() { if (!attemptIdRef.current) return; setSaving(true); try { await studentApi.saveExam(examIdRef.current, attemptIdRef.current, Object.entries(answersRef.current).map(([questionId, response]) => ({ questionId, response }))); } catch {} finally { setSaving(false); } }
+
+  /**
+   * Autosave. Previously `catch {}`.
+   *
+   * A silent failure here is the worst kind in the app: the student keeps
+   * answering, the "Saving…" pill flashes as if all is well, and they discover
+   * at submission that nothing persisted. They need to know while they still
+   * have time on the clock and can do something about it.
+   *
+   * A failure is NOT fatal — answers live in `answersRef` and submission sends
+   * the full set, so one failed autosave is recoverable. So this warns rather
+   * than interrupting: no modal over a running exam.
+   */
+  async function doSave() {
+    if (!attemptIdRef.current) return;
+    setSaving(true);
+    try {
+      await studentApi.saveExam(
+        examIdRef.current,
+        attemptIdRef.current,
+        Object.entries(answersRef.current).map(([questionId, response]) => ({ questionId, response })),
+      );
+      setSaveFailedAt(null);
+    } catch {
+      setSaveFailedAt(Date.now());
+    } finally {
+      setSaving(false);
+    }
+  }
   async function doSubmit(auto = false) {
     if (phase === "submitting" || phase === "done") return;
     setPhase("submitting");
@@ -155,9 +185,23 @@ export default function ExamRunner() {
         )}
       </View>
 
-      {saving && (
+      {saving && !saveFailedAt && (
         <View style={{ position: "absolute", bottom: 90, alignSelf: "center", backgroundColor: colors.background.overlay, paddingHorizontal: spacing.sm + 2, paddingVertical: 6, borderRadius: 8 }}>
           <Caption>Saving…</Caption>
+        </View>
+      )}
+
+      {/* Autosave is failing. Non-blocking: answers are held locally and the
+          full set is sent on submit, so the exam can continue. */}
+      {saveFailedAt !== null && (
+        <View style={{ position: "absolute", bottom: 90, left: spacing.lg, right: spacing.lg, flexDirection: "row", alignItems: "center", gap: spacing.sm, backgroundColor: colors.status.errorBg, borderWidth: 1, borderColor: colors.danger, paddingHorizontal: spacing.sm + 2, paddingVertical: spacing.sm, borderRadius: 12 }}>
+          <AlertTriangle size={16} color={colors.danger} />
+          <Caption style={{ flex: 1, color: colors.danger }}>
+            Not saving to the server — check your connection. Your answers are kept on this device and will be sent when you submit.
+          </Caption>
+          <TouchableOpacity onPress={() => doSave()} accessibilityRole="button">
+            <Caption style={{ color: colors.danger, fontFamily: bodyFont("bold") }}>Retry</Caption>
+          </TouchableOpacity>
         </View>
       )}
     </View>

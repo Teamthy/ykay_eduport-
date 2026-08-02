@@ -7,6 +7,7 @@ import {
   resolveCurrentLabels,
 } from "@/lib/academic-session";
 import { GRADEBOOK_ADMIN_ROLES, waecGrade } from "@/lib/gradebook";
+import { indexFeeBalances, tallyAttendance } from "@/lib/report-cards";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
 import { requireRole } from "@/lib/session";
@@ -100,14 +101,24 @@ export async function POST(request: NextRequest) {
   // it with a guessed term.
   let sessionLabel: string;
   let termLabel: string;
+  let termId: string;
+  let termIndex: number;
   try {
-    ({ sessionLabel, termLabel } = await requireCurrentLabels(user.schoolId));
+    ({ sessionLabel, termLabel, termId, termIndex } = await requireCurrentLabels(user.schoolId));
   } catch (labelError) {
     if (labelError instanceof NoCurrentTermError) {
       return NextResponse.json({ error: labelError.message }, { status: 409 });
     }
     throw labelError;
   }
+
+  // The term's date window. Attendance and fees on a report card describe THIS
+  // term — without it, both queries reach back over the student's whole career.
+  const term = await prisma.term.findFirst({
+    where: { id: termId, schoolId: user.schoolId },
+    select: { startsOn: true, endsOn: true },
+  });
+  if (!term) return NextResponse.json({ error: "Current term not found." }, { status: 409 });
 
   const schoolClass = await prisma.schoolClass.findFirst({
     where: { id: payload.classId, schoolId: user.schoolId, isActive: true },
@@ -212,31 +223,73 @@ export async function POST(request: NextRequest) {
   const nextResumption = payload.nextResumption || "See school calendar";
   let generated = 0;
 
+  const studentIds = students.map((student) => student.id);
+
+  // Attendance for THIS TERM ONLY, for the whole class in one query.
+  //
+  // This previously ran per student with no date filter, so a report card
+  // counted every attendance entry ever recorded for that child. A student with
+  // perfect attendance this term but absences last year had those old absences
+  // printed on the current card — verified: 2/2 present rendered as "40%".
+  // It also disagreed with the parent portal, which does scope by month.
+  const attendanceRows = await prisma.attendanceEntry.findMany({
+    where: {
+      studentProfileId: { in: studentIds },
+      session: { sessionDate: { gte: term.startsOn, lte: term.endsOn } },
+    },
+    select: { studentProfileId: true, status: true },
+  });
+
+  const attendanceByStudent = tallyAttendance(studentIds, attendanceRows, AttendanceStatus.PRESENT);
+
+  // Outstanding fees for the whole class in one grouped query, likewise scoped
+  // to this term's invoices rather than every unpaid invoice in the student's
+  // history.
+  const feeRows = await prisma.feeInvoice.groupBy({
+    by: ["studentProfileId"],
+    where: {
+      studentProfileId: { in: studentIds },
+      status: { in: ["UNPAID", "PARTIAL", "OVERDUE"] },
+      termLabel,
+    },
+    _sum: { balanceDue: true },
+  });
+  const feeByStudent = indexFeeBalances(feeRows);
+
   for (let index = 0; index < ranked.length; index += 1) {
     const { student, aggregate, average } = ranked[index];
     if (!aggregate.subjects.length) continue;
 
-    const attendanceEntries = await prisma.attendanceEntry.findMany({
-      where: { studentProfileId: student.id },
-      select: { status: true },
-    });
-    const attendancePresent = attendanceEntries.filter(
-      (entry) => entry.status === AttendanceStatus.PRESENT,
-    ).length;
-    const attendanceTotal = attendanceEntries.length || 1;
+    const attendance = attendanceByStudent.get(student.id) || { present: 0, total: 0 };
+    const attendancePresent = attendance.present;
+    // Keep the divide-by-zero guard, but only for display — a class with no
+    // register taken yet shows 0/1 rather than crashing.
+    const attendanceTotal = attendance.total || 1;
 
-    const openInvoices = await prisma.feeInvoice.aggregate({
-      where: { studentProfileId: student.id, status: { in: ["UNPAID", "PARTIAL", "OVERDUE"] } },
-      _sum: { balanceDue: true },
-    });
-    const feeBalance = openInvoices._sum.balanceDue || 0;
+    const feeBalance = feeByStudent.get(student.id) || 0;
 
-    const reportNumber = `RC/${termYearSuffix}/${termLabel.split(" ")[0].toUpperCase()}/${student.studentId.replace(/\//g, "-")}`;
+    // Term INDEX, not a word parsed out of the label. `termLabel.split(" ")[0]`
+    // produced "1ST" for both "1st Term" and "1st Semester", and reportNumber
+    // is globally unique — so two different terms would have collided and the
+    // second generation would have overwritten the first term's card.
+    const reportNumber = `RC/${termYearSuffix}/T${termIndex}/${student.studentId.replace(/\//g, "-")}`;
 
     await prisma.$transaction(async (tx) => {
-      const existing = await tx.reportCard.findUnique({
-        where: { reportNumber },
-        select: { id: true, status: true },
+      // Match on the card's real identity — this student, this session, this
+      // term — not on the generated number.
+      //
+      // The number format changed (a parsed term word became the term index),
+      // so looking it up by number would miss a card generated under the old
+      // format and create a SECOND card for the same term. reportNumber is
+      // globally unique, but the identity of a report card is the student and
+      // the term; the number is a label for that identity, not the identity.
+      const existing = await tx.reportCard.findFirst({
+        where: {
+          studentProfileId: student.id,
+          sessionLabel,
+          termLabel,
+        },
+        select: { id: true, status: true, reportNumber: true },
       });
       if (existing?.status === ReportCardStatus.RELEASED) return;
 
@@ -245,6 +298,10 @@ export async function POST(request: NextRequest) {
         await tx.reportCard.update({
           where: { id: existing.id },
           data: {
+            // Deliberately NOT rewriting reportNumber. A released card may be
+            // printed and publicly verifiable at /verify/report/<number>;
+            // renaming it would break that link. Drafts keep their number too,
+            // so the value an admin already saw stays stable.
             classNameSnapshot: schoolClass.displayName,
             overallTotal: aggregate.overallTotal,
             overallAverage: average,

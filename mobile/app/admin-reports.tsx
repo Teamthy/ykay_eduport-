@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, ScrollView, RefreshControl, Alert } from "react-native";
 import { adminApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
+import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption, Label } from "@/src/components/typography";
 import { Badge } from "@/src/components/badges";
@@ -15,9 +16,21 @@ export default function AdminReports() {
   const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
-  async function load() { try { setData(await adminApi.reportCards()); } catch {} finally { setRefreshing(false); } }
+  async function load() {
+    try {
+      setError(null);
+      setData(await adminApi.reportCards());
+    } catch (err) {
+      // Previously `catch {}` — a failed request rendered an empty
+      // screen indistinguishable from "there is nothing here".
+      setError(err instanceof Error ? err.message : "Couldn't load report cards.");
+    } finally {
+      setRefreshing(false);
+    }
+  }
   useEffect(() => { load(); }, []);
 
   async function generate() {
@@ -33,6 +46,7 @@ export default function AdminReports() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
       <H2 style={{ marginBottom: spacing.lg }}>Report Cards</H2>
+      {error ? <InlineError message={error} onRetry={() => { void load(); }} /> : null}
 
       <View style={{ flexDirection: "row", gap: spacing.sm, marginBottom: spacing.md }}>
         <Mini label="Total" value={s.totalReports ?? 0} color={colors.text.primary} />

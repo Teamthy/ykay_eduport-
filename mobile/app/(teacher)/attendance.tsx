@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, RefreshControl, Alert, ActivityIndicator } from "react-native";
 import { teacherApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
+import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption, Label } from "@/src/components/typography";
 import { Button } from "@/src/components/buttons";
@@ -24,6 +25,7 @@ export default function TeacherAttendance() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const STATUS_META: Record<Status, { color: string; icon: any; label: string }> = {
     PRESENT: { color: colors.success, icon: Check, label: "P" },
@@ -35,6 +37,7 @@ export default function TeacherAttendance() {
   async function load(cid?: string, d?: string) {
     setLoading(true);
     try {
+      setError(null);
       const res: any = await teacherApi.attendance(cid || undefined, d);
       setClasses(res.availableClasses || []);
       if (!cid) setClassId(res.selectedClass?.id || res.availableClasses?.[0]?.id || "");
@@ -43,7 +46,12 @@ export default function TeacherAttendance() {
       const init: Record<string, Status> = {};
       for (const r of res.roster || res.rows || []) init[r.studentProfileId] = (r.status as Status) || "PRESENT";
       setStatuses(init);
-    } catch {} finally { setLoading(false); setRefreshing(false); }
+    } catch (err) {
+      // Previously `catch {}`. An empty roster looks exactly like a class with
+      // no students — a teacher could mark an entire register against nothing.
+      setError(err instanceof Error ? err.message : "Couldn't load the register.");
+      setRows([]);
+    } finally { setLoading(false); setRefreshing(false); }
   }
 
   useEffect(() => { load(); }, []);
@@ -68,6 +76,7 @@ export default function TeacherAttendance() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(classId, date); }} tintColor={colors.brand.greenLight} />}>
       <H2 style={{ marginBottom: spacing.md }}>Attendance</H2>
+      {error ? <InlineError message={error} onRetry={() => { void load(classId, date); }} /> : null}
 
       {classes.length > 0 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.sm + 2 }}>

@@ -17,12 +17,15 @@ export default function PortalTopbar({ title = "Workspace" }: { title?: string }
           {title}
         </div>
         <div className="flex items-center gap-3">
-          <button
-            aria-label="Notifications"
-            className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--surface-card-hover)]"
+          {/* Was a dead button with no handler. Now the way into notification
+              preferences, which previously existed only in the mobile app. */}
+          <Link
+            href="/settings/notifications"
+            aria-label="Notification settings"
+            className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--surface-card-hover)] hover:text-brand-green"
           >
             <Bell size={18} />
-          </button>
+          </Link>
           <span className="hidden text-right text-xs sm:block">
             <b className="block text-[var(--text-primary)]">{user?.name || "Account"}</b>
             <span className="uppercase tracking-wider text-[10px] text-[var(--text-muted)]">

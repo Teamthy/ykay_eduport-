@@ -74,6 +74,12 @@ export async function POST(request: NextRequest) {
       const msg = `The ${d.termLabel} (${d.sessionLabel}) report card for ${
         d.studentProfile.displayName || "your child"
       } has been released. Overall: ${d.overallAverage}% (${d.overallGrade}).`;
+      // Resolved before queueing so the email can honour the same "Results"
+      // preference the push does. Null when the guardian has no account —
+      // that address then gets the email regardless, which is right: there is
+      // nobody to have expressed a preference.
+      const parentUserId = d.studentProfile.parentLinks[0]?.parentProfile?.userId;
+
       if (d.studentProfile.guardianEmail) {
         await queueNotificationJob({
           schoolId: user.schoolId,
@@ -83,11 +89,11 @@ export async function POST(request: NextRequest) {
           body: msg,
           recipientName: d.studentProfile.guardianName,
           recipientEmail: d.studentProfile.guardianEmail,
+          recipientUserId: parentUserId ?? null,
           dedupeKey: `report:${d.id}:email`,
           metadata: { reportCardId: d.id, reportNumber: d.reportNumber },
         });
       }
-      const parentUserId = d.studentProfile.parentLinks[0]?.parentProfile?.userId;
       if (parentUserId) {
         await createInAppNotification({
           schoolId: user.schoolId,

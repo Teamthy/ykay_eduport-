@@ -52,6 +52,19 @@ const mockPrisma = {
     findMany: vi.fn(),
     upsert: vi.fn(),
   },
+  notificationJob: {
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
+  notificationPreference: {
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    upsert: vi.fn(),
+    update: vi.fn(),
+    deleteMany: vi.fn(),
+  },
   academicSession: {
     findFirst: vi.fn(),
     findMany: vi.fn(),

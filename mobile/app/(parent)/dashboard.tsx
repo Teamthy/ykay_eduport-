@@ -3,6 +3,7 @@ import { View, ScrollView, RefreshControl } from "react-native";
 import { parentApi } from "@/lib/api";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/src/theme";
+import { useCurrentTerm } from "@/lib/useCurrentTerm";
 import { AppHeader } from "@/src/components/navigation";
 import {
   DashboardGreeting,
@@ -12,6 +13,7 @@ import {
   SectionHeading,
   ChildSwitcher,
   InlineError,
+  TermChip,
 } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H3, Body, Caption } from "@/src/components/typography";
@@ -36,6 +38,7 @@ const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 export default function ParentDashboard() {
   const router = useRouter();
   const { colors, spacing } = useTheme();
+  const { term } = useCurrentTerm();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -97,6 +100,19 @@ export default function ParentDashboard() {
         name={data?.parent?.displayName || (loading ? "" : "Parent")}
         subtitle={child ? `Viewing ${child.displayName}` : null}
         onAvatarPress={() => router.push("/(parent)/profile")}
+      />
+
+
+      <TermChip
+
+        sessionLabel={term?.sessionLabel}
+
+        termLabel={term?.termLabel}
+
+        estimated={term?.isEstimated}
+
+        style={{ marginBottom: spacing.md }}
+
       />
 
       {error ? <InlineError message={error} onRetry={() => void load(childId)} /> : null}

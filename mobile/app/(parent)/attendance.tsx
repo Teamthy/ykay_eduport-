@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
 import { parentApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
+import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption, Label } from "@/src/components/typography";
 import { Row, Column } from "@/src/components/layout";
@@ -13,9 +14,19 @@ export default function ParentAttendance() {
   const [data, setData] = useState<any>(null);
   const [childId, setChildId] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function load(id?: string) {
-    try { const res = await parentApi.attendance(id || undefined); setData(res); if (!id) setChildId(res?.selectedChild?.id || ""); } catch {} finally { setRefreshing(false); }
+    try {
+      setError(null);
+      const res = await parentApi.attendance(id || undefined); setData(res); if (!id) setChildId(res?.selectedChild?.id || "");
+    } catch (err) {
+      // Previously `catch {}` — a failed request rendered an empty
+      // screen indistinguishable from "there is nothing here".
+      setError(err instanceof Error ? err.message : "Couldn't load attendance.");
+    } finally {
+      setRefreshing(false);
+    }
   }
   useEffect(() => { load(); }, []);
   function selectChild(id: string) { setChildId(id); load(id); }
@@ -27,6 +38,7 @@ export default function ParentAttendance() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(childId); }} tintColor={colors.brand.greenLight} />}>
       <H2 style={{ marginBottom: spacing.xs }}>Attendance</H2>
+      {error ? <InlineError message={error} onRetry={() => { void load(childId); }} /> : null}
       {data?.monthLabel && <Caption style={{ marginBottom: spacing.md }}>{data.monthLabel}</Caption>}
 
       {children.length > 1 && (

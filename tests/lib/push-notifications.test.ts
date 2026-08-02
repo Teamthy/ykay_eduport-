@@ -29,8 +29,21 @@ const pushUsers = vi.fn<(userIds: string[], payload: PushPayload) => Promise<voi
 
 vi.mock("@/lib/push", () => ({ pushUser, pushUsers, sendPush: vi.fn() }));
 
-/** Push is deliberately not awaited; let the microtask queue drain. */
-const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+/**
+ * Push is deliberately not awaited.
+ *
+ * `deliverPush` resolves two dynamic imports (notification-prefs, push) and a
+ * preference lookup before it calls pushUser, so a single macrotask tick is not
+ * enough — the original `setTimeout(0)` became flaky once preference checking
+ * was added. Poll for the call instead of betting on a duration.
+ */
+const flush = async (check?: () => boolean, timeoutMs = 2000) => {
+  const deadline = Date.now() + timeoutMs;
+  do {
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    if (!check) return;
+  } while (!check() && Date.now() < deadline);
+};
 
 describe("createInAppNotification — push delivery", () => {
   beforeEach(() => {
@@ -60,7 +73,7 @@ describe("createInAppNotification — push delivery", () => {
   it("also pushes to the user's devices", async () => {
     const { createInAppNotification } = await import("@/lib/notifications");
     await createInAppNotification(input);
-    await flush();
+    await flush(() => pushUser.mock.calls.length > 0);
 
     expect(pushUser).toHaveBeenCalledWith(
       "usr_parent",
@@ -71,7 +84,7 @@ describe("createInAppNotification — push delivery", () => {
   it("carries kind and link so the app can deep-link the tap", async () => {
     const { createInAppNotification } = await import("@/lib/notifications");
     await createInAppNotification(input);
-    await flush();
+    await flush(() => pushUser.mock.calls.length > 0);
 
     // Without these the app opens on whatever screen it was last on and the
     // user has to go hunting for what they were told about.
@@ -84,7 +97,9 @@ describe("createInAppNotification — push delivery", () => {
   it("can be suppressed with push: false", async () => {
     const { createInAppNotification } = await import("@/lib/notifications");
     await createInAppNotification({ ...input, push: false });
-    await flush();
+    // No condition to poll for — wait long enough that a push WOULD have
+    // landed, or this passes for the wrong reason.
+    await flush(() => false, 120);
 
     expect(mockPrisma.userNotification.create).toHaveBeenCalled();
     expect(pushUser).not.toHaveBeenCalled();
@@ -97,7 +112,7 @@ describe("createInAppNotification — push delivery", () => {
     // The in-app row is the source of truth and is already committed — a
     // gateway outage must never fail the caller that triggered the alert.
     const result = await createInAppNotification(input);
-    await flush();
+    await flush(() => false, 120);
 
     expect(result).toEqual({ id: "n1" });
   });
@@ -120,7 +135,7 @@ describe("createInAppNotification — push delivery", () => {
   it("handles a null link without breaking the payload", async () => {
     const { createInAppNotification } = await import("@/lib/notifications");
     await createInAppNotification({ ...input, link: undefined });
-    await flush();
+    await flush(() => pushUser.mock.calls.length > 0);
 
     expect(pushUser.mock.calls[0]?.[1].data?.link).toBeNull();
   });

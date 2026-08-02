@@ -6,7 +6,7 @@ import { Badge } from "@/src/components/badges";
 import { Body, Caption, Label } from "@/src/components/typography";
 import { Avatar } from "@/src/components/avatar";
 import { bodyFont } from "@/src/theme/typography";
-import { ChevronRight, AlertCircle } from "lucide-react-native";
+import { ChevronRight, AlertCircle, CalendarRange } from "lucide-react-native";
 
 /**
  * Shared dashboard building blocks.
@@ -358,6 +358,60 @@ export function InlineError({ message, onRetry }: { message: string; onRetry?: (
           </Caption>
         </TouchableOpacity>
       ) : null}
+    </View>
+  );
+}
+
+/**
+ * "2026/2027 · Second Term" — which term the figures on this screen belong to.
+ *
+ * The app showed marks, invoices and attendance with no indication of the term
+ * they came from, so a parent looking at a balance could not tell whether it
+ * was this term's or last. Renders nothing when the term is unknown: a wrong
+ * term label is worse than none.
+ *
+ * `estimated` marks a month-based guess (no term configured) in brand orange
+ * rather than presenting it as fact.
+ */
+export function TermChip({
+  sessionLabel,
+  termLabel,
+  estimated,
+  style,
+}: {
+  sessionLabel?: string | null;
+  termLabel?: string | null;
+  estimated?: boolean;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const { colors, spacing, radius } = useTheme();
+  if (!sessionLabel || !termLabel) return null;
+
+  const tint = estimated ? colors.brand.orange : colors.brand.greenLight;
+
+  return (
+    <View
+      style={[
+        {
+          alignSelf: "flex-start",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 6,
+          paddingHorizontal: spacing.sm + 2,
+          paddingVertical: 4,
+          borderRadius: radius.sm,
+          backgroundColor: `${tint}1A`,
+          borderWidth: 1,
+          borderColor: `${tint}55`,
+        },
+        style,
+      ]}
+    >
+      <CalendarRange size={12} color={tint} />
+      <Caption style={{ color: tint, fontFamily: bodyFont("bold"), fontSize: 11 }}>
+        {sessionLabel} · {termLabel}
+        {estimated ? " (estimated)" : ""}
+      </Caption>
     </View>
   );
 }

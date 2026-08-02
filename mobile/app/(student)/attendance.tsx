@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, ScrollView, RefreshControl } from "react-native";
 import { studentApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
+import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Caption, Label } from "@/src/components/typography";
 import { Row, Column } from "@/src/components/layout";
@@ -11,8 +12,20 @@ export default function StudentAttendance() {
   const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function load() { try { setData(await studentApi.attendance()); } catch {} finally { setRefreshing(false); } }
+  async function load() {
+    try {
+      setError(null);
+      setData(await studentApi.attendance());
+    } catch (err) {
+      // Previously `catch {}` — a failed request rendered an empty
+      // screen indistinguishable from "there is nothing here".
+      setError(err instanceof Error ? err.message : "Couldn't load your attendance.");
+    } finally {
+      setRefreshing(false);
+    }
+  }
   useEffect(() => { load(); }, []);
 
   const rate = data?.summary ? Math.round((data.summary.present / data.summary.total) * 100) : 0;
@@ -20,6 +33,7 @@ export default function StudentAttendance() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
       <H2 style={{ marginBottom: spacing.lg }}>My Attendance</H2>
+      {error ? <InlineError message={error} onRetry={() => { void load(); }} /> : null}
 
       <Card variant="bordered" style={{ alignItems: "center", marginBottom: spacing.lg }}>
         <Label>Attendance Rate</Label>

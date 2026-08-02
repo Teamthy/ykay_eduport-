@@ -153,6 +153,10 @@ export async function PATCH(request: NextRequest) {
 
       const message = `The ${updated.termLabel} (${updated.sessionLabel}) report card for ${student?.displayName || "your child"} has been released. Overall: ${updated.overallAverage}% (${updated.overallGrade}). Sign in to the EduPortal to view and download it.`;
 
+      // Resolved before queueing so the email honours the same "Results"
+      // preference the push does.
+      const parentUserId = student?.parentLinks[0]?.parentProfile?.userId;
+
       if (student?.guardianEmail) {
         await queueNotificationJob({
           schoolId: user.schoolId,
@@ -162,11 +166,11 @@ export async function PATCH(request: NextRequest) {
           body: message,
           recipientName: student.guardianName,
           recipientEmail: student.guardianEmail,
+          recipientUserId: parentUserId ?? null,
           dedupeKey: `report:${updated.id}:email`,
           metadata: { reportCardId: updated.id, reportNumber: updated.reportNumber },
         });
       }
-      const parentUserId = student?.parentLinks[0]?.parentProfile?.userId;
       if (parentUserId) {
         await createInAppNotification({
           schoolId: user.schoolId,

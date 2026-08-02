@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ScrollView, RefreshControl } from "react-native";
 import { adminApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
+import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption, Label } from "@/src/components/typography";
 import { Badge } from "@/src/components/badges";
@@ -21,7 +22,19 @@ export default function AdminAdmissions() {
   const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
-  async function load() { try { setData(await adminApi.admissions()); } catch {} finally { setRefreshing(false); } }
+  const [error, setError] = useState<string | null>(null);
+  async function load() {
+    try {
+      setError(null);
+      setData(await adminApi.admissions());
+    } catch (err) {
+      // Previously `catch {}` — a failed request rendered an empty
+      // screen indistinguishable from "there is nothing here".
+      setError(err instanceof Error ? err.message : "Couldn't load admissions.");
+    } finally {
+      setRefreshing(false);
+    }
+  }
   useEffect(() => { load(); }, []);
 
   const apps = data?.applications || [];
@@ -30,6 +43,7 @@ export default function AdminAdmissions() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
       <H2 style={{ marginBottom: spacing.xs }}>Admissions</H2>
+      {error ? <InlineError message={error} onRetry={() => { void load(); }} /> : null}
       <Caption style={{ marginBottom: spacing.lg }}>{apps.length} applications · {pending} pending review</Caption>
 
       {apps.length > 0 ? (

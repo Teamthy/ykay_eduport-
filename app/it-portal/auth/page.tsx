@@ -52,7 +52,7 @@ export default function ItPortalAuthPage() {
 
   return (
     <main className="min-h-screen bg-brand-navy px-6 py-16">
-      <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl md:grid-cols-2">
+      <div className="mx-auto grid max-w-5xl overflow-hidden rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--bg-elevated)] shadow-[var(--card-shadow)] md:grid-cols-2">
         <section className="bg-brand-navy p-9 text-white md:p-12">
           <Link
             href="/portal"
@@ -90,8 +90,8 @@ export default function ItPortalAuthPage() {
           </ul>
         </section>
 
-        <section className="bg-white p-9 text-slate-900 md:p-12">
-          <div className="mb-8 grid grid-cols-2 rounded-full border border-slate-200 bg-slate-100 p-1 text-center text-xs font-bold uppercase tracking-widest">
+        <section className="bg-[var(--bg-elevated)] p-9 text-[var(--text-primary)] md:p-12">
+          <div className="mb-8 grid grid-cols-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] p-1 text-center text-xs font-bold uppercase tracking-widest">
             <button
               type="button"
               onClick={() => {
@@ -101,7 +101,7 @@ export default function ItPortalAuthPage() {
               className={`rounded-full px-4 py-2.5 transition-all ${
                 mode === "signin"
                   ? "bg-brand-navy text-white shadow"
-                  : "text-slate-600 hover:text-brand-navy"
+                  : "text-[var(--text-secondary)] hover:text-brand-green"
               }`}
             >
               Sign In
@@ -115,7 +115,7 @@ export default function ItPortalAuthPage() {
               className={`rounded-full px-4 py-2.5 transition-all ${
                 mode === "signup"
                   ? "bg-brand-orange text-white shadow"
-                  : "text-slate-600 hover:text-brand-navy"
+                  : "text-[var(--text-secondary)] hover:text-brand-green"
               }`}
             >
               Sign Up
@@ -125,7 +125,7 @@ export default function ItPortalAuthPage() {
           <h2 className="font-display text-3xl tracking-widest text-brand-navy">
             {mode === "signup" ? "CREATE ACCOUNT" : "WELCOME BACK"}
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">
+          <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
             {mode === "signup"
               ? "Join the Ykay IT Hub — free for Ykay students and external learners."
               : "Sign in to continue your IT learning journey."}
@@ -133,18 +133,18 @@ export default function ItPortalAuthPage() {
 
           <form onSubmit={submit} className="mt-8 space-y-4">
             {mode === "signup" && (
-              <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
+              <label className="block text-xs font-bold uppercase tracking-widest text-[var(--input-label)]">
                 Full name
                 <input
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Adaeze Okafor"
-                  className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-brand-green focus:ring-4 focus:ring-brand-green/15"
+                  className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] outline-none focus:border-[var(--input-border-focus)] focus:ring-4 focus:ring-brand-green/15"
                 />
               </label>
             )}
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
+            <label className="block text-xs font-bold uppercase tracking-widest text-[var(--input-label)]">
               Email
               <input
                 required
@@ -152,10 +152,10 @@ export default function ItPortalAuthPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-brand-green focus:ring-4 focus:ring-brand-green/15"
+                className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] outline-none focus:border-[var(--input-border-focus)] focus:ring-4 focus:ring-brand-green/15"
               />
             </label>
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-700">
+            <label className="block text-xs font-bold uppercase tracking-widest text-[var(--input-label)]">
               Password
               <input
                 required
@@ -165,7 +165,7 @@ export default function ItPortalAuthPage() {
                 placeholder={
                   mode === "signup" ? "Min. 8 characters with a number" : "Your password"
                 }
-                className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-brand-green focus:ring-4 focus:ring-brand-green/15"
+                className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] outline-none focus:border-[var(--input-border-focus)] focus:ring-4 focus:ring-brand-green/15"
               />
             </label>
 
@@ -195,7 +195,7 @@ export default function ItPortalAuthPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-xs leading-relaxed text-slate-500">
+          <p className="mt-6 text-center text-xs leading-relaxed text-[var(--text-muted)]">
             By creating an account you agree to receive learning updates from Ykay College. Your
             data is protected under our{" "}
             <Link href="/privacy-policy" className="font-semibold text-brand-green hover:underline">

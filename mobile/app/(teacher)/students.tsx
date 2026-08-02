@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, RefreshControl, Linking } from "react-native";
 import { teacherApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
+import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption } from "@/src/components/typography";
 import { Column } from "@/src/components/layout";
@@ -13,8 +14,20 @@ export default function TeacherStudents() {
   const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function load() { try { setData(await teacherApi.roster()); } catch {} finally { setRefreshing(false); } }
+  async function load() {
+    try {
+      setError(null);
+      setData(await teacherApi.roster());
+    } catch (err) {
+      // Previously `catch {}` — a failed request rendered an empty
+      // screen indistinguishable from "there is nothing here".
+      setError(err instanceof Error ? err.message : "Couldn't load your class roster.");
+    } finally {
+      setRefreshing(false);
+    }
+  }
   useEffect(() => { load(); }, []);
 
   const students = data?.students || [];
@@ -26,7 +39,7 @@ export default function TeacherStudents() {
       style={{ flex: 1, backgroundColor: colors.background.primary }}
       contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}
-      ListHeaderComponent={() => (<View><H2>{data?.className || "My Class"}</H2><Caption style={{ marginTop: 4, marginBottom: spacing.lg }}>{students.length} students</Caption></View>)}
+      ListHeaderComponent={() => (<View><H2>{data?.className || "My Class"}</H2><Caption style={{ marginTop: 4, marginBottom: spacing.lg }}>{students.length} students</Caption>{error ? <InlineError message={error} onRetry={() => { void load(); }} /> : null}</View>)}
       renderItem={({ item }) => (
         <Card variant="default" padding={spacing.sm + 2} style={{ marginBottom: spacing.xs }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>

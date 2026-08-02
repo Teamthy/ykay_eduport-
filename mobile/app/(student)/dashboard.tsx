@@ -3,6 +3,7 @@ import { ScrollView, RefreshControl, View } from "react-native";
 import { studentApi } from "@/lib/api";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/src/theme";
+import { useCurrentTerm } from "@/lib/useCurrentTerm";
 import { AppHeader } from "@/src/components/navigation";
 import {
   DashboardGreeting,
@@ -11,6 +12,7 @@ import {
   ActionRow,
   SectionHeading,
   InlineError,
+  TermChip,
 } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { Body, Caption } from "@/src/components/typography";
@@ -35,6 +37,7 @@ const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 export default function StudentDashboard() {
   const router = useRouter();
   const { colors, spacing } = useTheme();
+  const { term } = useCurrentTerm();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -88,6 +91,19 @@ export default function StudentDashboard() {
             : null
         }
         onAvatarPress={() => router.push("/(student)/profile")}
+      />
+
+
+      <TermChip
+
+        sessionLabel={term?.sessionLabel}
+
+        termLabel={term?.termLabel}
+
+        estimated={term?.isEstimated}
+
+        style={{ marginBottom: spacing.md }}
+
       />
 
       {error ? <InlineError message={error} onRetry={() => void load()} /> : null}

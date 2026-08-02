@@ -110,9 +110,37 @@ export type QueueJobInput = {
   recipientPhone?: string | null;
   dedupeKey?: string | null;
   metadata?: Prisma.InputJsonValue;
+  /**
+   * The user this job is addressed to, when known.
+   *
+   * NotificationJob is keyed by email address, not by user, so the dispatcher
+   * cannot work out whose preferences to honour on its own. Callers that DO
+   * know the recipient pass it here and the job is skipped when that user has
+   * muted the category. Omitting it means "no preference check" — which is the
+   * old behaviour, and correct for jobs addressed to a bare guardian email
+   * with no account behind it.
+   */
+  recipientUserId?: string | null;
 };
 
+/**
+ * Queue an outbound notification (email/SMS/WhatsApp).
+ *
+ * Returns null when the recipient has muted this category. Drop 11 gated PUSH
+ * on notification preferences but left this path untouched, so a parent who
+ * turned "Fees" off stopped getting the push and kept getting the email.
+ *
+ * Same rules as push, deliberately: the category map is shared, and an
+ * unmapped kind (SYSTEM, ADMISSION_UPDATE) is always sent. Two different
+ * answers to "is this muted?" would be a bug waiting to happen.
+ */
 export async function queueNotificationJob(input: QueueJobInput) {
+  if (input.recipientUserId) {
+    const { userAllowsDelivery } = await import("@/lib/notification-prefs");
+    // Same predicate as push — one definition of "muted", not two.
+    if (!(await userAllowsDelivery(input.recipientUserId, input.kind))) return null;
+  }
+
   if (input.dedupeKey) {
     const existing = await prisma.notificationJob.findUnique({
       where: { dedupeKey: input.dedupeKey },
@@ -185,6 +213,12 @@ export async function createInAppNotification(input: InAppNotificationInput) {
 }
 
 async function deliverPush(input: InAppNotificationInput) {
+  // Honour the user's notification preferences. This suppresses the PUSH only —
+  // the in-app row above is already written and stays in their notification
+  // list. "Stop buzzing my phone about fees" is not "hide my invoice from me".
+  const { userAllowsDelivery } = await import("@/lib/notification-prefs");
+  if (!(await userAllowsDelivery(input.userId, input.kind))) return;
+
   const { pushUser } = await import("@/lib/push");
   await pushUser(input.userId, {
     title: input.title,
@@ -311,6 +345,9 @@ export async function bridgeAttendanceAlerts(limit = 50) {
       recipientName: alert.recipientName,
       recipientEmail: alert.recipientEmail,
       recipientPhone: alert.recipientPhone,
+      // Honour the parent's "Attendance" preference here too. Null when the
+      // alert is addressed to a guardian with no account.
+      recipientUserId: alert.parentProfile?.userId ?? null,
       dedupeKey: `att:${alert.id}`,
       metadata: { attendanceAlertJobId: alert.id },
     });

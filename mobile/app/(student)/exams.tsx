@@ -3,6 +3,7 @@ import { View, ScrollView, TouchableOpacity, RefreshControl, Alert } from "react
 import { studentApi } from "@/lib/api";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/src/theme";
+import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption } from "@/src/components/typography";
 import { Badge } from "@/src/components/badges";
@@ -17,8 +18,20 @@ export default function StudentExams() {
   const { colors, spacing } = useTheme();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function load() { try { setData(await studentApi.exams()); } catch {} finally { setRefreshing(false); } }
+  async function load() {
+    try {
+      setError(null);
+      setData(await studentApi.exams());
+    } catch (err) {
+      // Previously `catch {}` — a failed request rendered an empty
+      // screen indistinguishable from "there is nothing here".
+      setError(err instanceof Error ? err.message : "Couldn't load your exams.");
+    } finally {
+      setRefreshing(false);
+    }
+  }
   useEffect(() => { load(); }, []);
 
   const exams = data?.exams || [];
@@ -30,6 +43,7 @@ export default function StudentExams() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
       <H2 style={{ marginBottom: spacing.xs }}>My Exams</H2>
+      {error ? <InlineError message={error} onRetry={() => { void load(); }} /> : null}
       <Caption style={{ marginBottom: spacing.lg }}>Computer-based tests for your class</Caption>
 
       {exams.length > 0 ? (

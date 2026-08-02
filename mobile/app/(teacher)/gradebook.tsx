@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput, RefreshControl, Alert, ActivityIndicator } from "react-native";
 import { teacherApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
+import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption, Label } from "@/src/components/typography";
 import { Button } from "@/src/components/buttons";
@@ -18,17 +19,24 @@ export default function TeacherGradebook() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function load(id?: string) {
     setLoading(true);
     try {
+      setError(null);
       const res: any = await teacherApi.gradebook(id);
       setData(res);
       if (!id) setAssignmentId(res.selectedAssignmentId || res.assignments?.[0]?.id || "");
       const init: Record<string, Scores> = {};
       for (const e of res.gradebook?.entries || []) init[e.studentProfileId] = { ca1: String(e.ca1 ?? ""), ca2: String(e.ca2 ?? ""), midterm: String(e.midterm ?? ""), assignment: String(e.assignment ?? ""), exam: String(e.exam ?? "") };
       setScores(init);
-    } catch {} finally { setLoading(false); setRefreshing(false); }
+    } catch (err) {
+      // Previously `catch {}`. This also swallowed the 409 the API returns when
+      // no academic term is set, so the teacher saw a blank gradebook instead
+      // of "set a current term in Sessions & Terms".
+      setError(err instanceof Error ? err.message : "Couldn't load the gradebook.");
+    } finally { setLoading(false); setRefreshing(false); }
   }
   useEffect(() => { load(); }, []);
   useEffect(() => { if (assignmentId) load(assignmentId); }, [assignmentId]);
@@ -65,6 +73,7 @@ export default function TeacherGradebook() {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(assignmentId); }} tintColor={colors.brand.greenLight} />}>
       <H2 style={{ marginBottom: spacing.xs }}>Gradebook</H2>
+      {error ? <InlineError message={error} onRetry={() => { void load(assignmentId); }} /> : null}
       <Caption style={{ marginBottom: spacing.md }}>Enter continuous assessment &amp; exam scores</Caption>
 
       {assignments.length > 0 && (

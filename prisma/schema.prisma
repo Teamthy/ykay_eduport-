@@ -183,6 +183,7 @@ model School {
   itEnrollments           ItEnrollment[]
   notificationJobs        NotificationJob[]
   userNotifications       UserNotification[]
+  notificationPreferences NotificationPreference[]
   gradebooks              SubjectGradebook[]
   exams                   Exam[]
   newsPosts               NewsPost[]
@@ -230,6 +231,7 @@ model User {
   newsPosts                   NewsPost[]
   messageParticipants         MessageParticipant[]
   sentMessages                Message[]
+  notificationPreference      NotificationPreference?
 
   @@unique([schoolId, email])
   @@index([schoolId, role])
@@ -746,6 +748,39 @@ model NotificationJob {
   @@index([schoolId, kind, createdAt])
   @@index([schoolId, channel, status])
   @@index([status, nextAttemptAt])
+}
+
+/// Per-user notification opt-outs.
+///
+/// These lived only in expo-secure-store on the handset, which meant the
+/// server — the thing that actually decides whether to send — could not read
+/// them. Every toggle in mobile Settings was decorative: turning "Fees" off
+/// still delivered fee pushes.
+///
+/// Stored as one row per user with a column per category rather than a
+/// key/value table: there are four fixed categories, a column gives them a
+/// type, and a missing row means "all defaults on" without needing a backfill.
+model NotificationPreference {
+  id       String @id @default(cuid())
+  schoolId String
+  userId   String @unique
+
+  /// Maps to NotificationKind.BROADCAST.
+  announcements Boolean @default(true)
+  /// Maps to NotificationKind.ATTENDANCE_ALERT.
+  attendance    Boolean @default(true)
+  /// Maps to NotificationKind.FEE_REMINDER.
+  fees          Boolean @default(true)
+  /// Maps to NotificationKind.REPORT_RELEASED.
+  results       Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
 }
 
 model UserNotification {

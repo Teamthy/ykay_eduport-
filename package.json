@@ -33,6 +33,8 @@
     "test:e2e:mobile": "tsx scripts/e2e-mobile.ts",
     "verify:rls": "tsx scripts/verify-rls.ts",
     "check:drift": "tsx scripts/check-schema-drift.ts",
+    "reconcile:labels": "tsx scripts/reconcile-labels.ts",
+    "diagnose:db": "tsx scripts/diagnose-db.ts",
     "verify:admissions": "tsx scripts/verify-admissions-loop.ts",
     "db:backup": "tsx scripts/backup-db.ts",
     "cleanup:artifacts": "tsx scripts/cleanup-artifacts.ts",

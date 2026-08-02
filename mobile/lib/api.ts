@@ -274,3 +274,44 @@ export const adminApi = {
   attendanceAnalytics: () => api("/api/admin/attendance/analytics"),
   classManager: () => api("/api/admin/class-manager"),
 };
+
+// ── Notification preferences ──────────────────────────────
+//
+// These used to live only in expo-secure-store, which the server cannot read —
+// so the toggles changed nothing. They are now server-side, and the device
+// copy is a cache for instant rendering.
+
+export type NotificationPrefs = {
+  announcements: boolean;
+  attendance: boolean;
+  fees: boolean;
+  results: boolean;
+};
+
+export const notificationPrefsApi = {
+  get: () => api<{ prefs: NotificationPrefs }>("/api/me/notification-prefs"),
+  update: (patch: Partial<NotificationPrefs>) =>
+    api<{ ok: boolean; prefs: NotificationPrefs }>("/api/me/notification-prefs", {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    }),
+};
+
+// ── Current academic term ─────────────────────────────────
+//
+// The app previously had no notion of a term: marks, invoices and attendance
+// were shown with nothing saying which term they belonged to. `isEstimated`
+// is true when the school has not configured a term and the labels are a
+// month-based guess — surface that rather than presenting it as fact.
+
+export type CurrentTerm = {
+  sessionLabel: string;
+  termLabel: string;
+  termIndex: number | null;
+  source: "TERM" | "CALENDAR";
+  isEstimated: boolean;
+};
+
+export const termApi = {
+  current: () => api<CurrentTerm>("/api/me/current-term"),
+};
