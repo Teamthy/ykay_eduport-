@@ -112,6 +112,7 @@ const mockPrisma = {
     return Promise.resolve(fn);
   }),
   $queryRaw: vi.fn(),
+  $executeRaw: vi.fn(),
 };
 
 vi.mock("@/lib/prisma", () => ({

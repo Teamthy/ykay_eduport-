@@ -29,6 +29,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "tsx scripts/e2e-smoke.ts",
+    "verify:rls": "tsx scripts/verify-rls.ts",
     "cleanup:artifacts": "tsx scripts/cleanup-artifacts.ts",
     "audit:routes": "tsx scripts/e2e-smoke.ts --list-only"
   },
