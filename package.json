@@ -35,6 +35,7 @@
     "check:drift": "tsx scripts/check-schema-drift.ts",
     "reconcile:labels": "tsx scripts/reconcile-labels.ts",
     "diagnose:db": "tsx scripts/diagnose-db.ts",
+    "repair:labels": "tsx scripts/repair-labels.ts",
     "verify:admissions": "tsx scripts/verify-admissions-loop.ts",
     "db:backup": "tsx scripts/backup-db.ts",
     "cleanup:artifacts": "tsx scripts/cleanup-artifacts.ts",

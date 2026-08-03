@@ -242,15 +242,26 @@ export async function POST(request: NextRequest) {
 
   const attendanceByStudent = tallyAttendance(studentIds, attendanceRows, AttendanceStatus.PRESENT);
 
-  // Outstanding fees for the whole class in one grouped query, likewise scoped
-  // to this term's invoices rather than every unpaid invoice in the student's
-  // history.
+  // Outstanding fees for the whole class in one grouped query.
+  //
+  // Deliberately NOT filtered by term, unlike attendance above. The two
+  // numbers mean different things:
+  //
+  //   attendance — a measurement OF this term, so it must be scoped to it
+  //   feeBalance — what the family currently OWES, which is cumulative
+  //
+  // A card reading "₦0 owing" while last term's fees are unpaid is worse than
+  // useless: it tells a parent they are settled when they are not.
+  //
+  // Scoping this by `termLabel` was also fragile in a second way — it matched a
+  // free-text string against invoices whose label may predate the
+  // AcademicSession work. On real data ("First Term 2026/2027" vs "First Term")
+  // it matched nothing and printed ₦0 for a student owing ₦85,000.
   const feeRows = await prisma.feeInvoice.groupBy({
     by: ["studentProfileId"],
     where: {
       studentProfileId: { in: studentIds },
       status: { in: ["UNPAID", "PARTIAL", "OVERDUE"] },
-      termLabel,
     },
     _sum: { balanceDue: true },
   });
