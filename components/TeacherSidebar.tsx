@@ -115,6 +115,7 @@ export default function TeacherSidebar() {
   const subject: NavItem[] = [
     { label: "Gradebook", href: "/teacher/gradebook", icon: BookOpen },
     { label: "Performance Records", href: "/teacher/performance-records", icon: BookOpen },
+    { label: "Exam Centre", href: "/teacher/exam-center", icon: BookOpen },
     { label: "CBT Center", href: "/teacher/cbt-center", icon: ClipboardCheck },
     { label: "Analytics", href: "/teacher/analytics", icon: BarChart3 },
   ];

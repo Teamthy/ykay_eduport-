@@ -15,9 +15,10 @@ export async function GET() {
     where: { teacherProfileId: context.teacherProfile.id },
     orderBy: { createdAt: "desc" },
     include: {
-      classroom: { select: { displayName: true } },
-      questions: { select: { id: true, marks: true } },
+      classroom: { select: { displayName: true, level: true } },
+      questions: { select: { id: true, marks: true, type: true } },
       attempts: { select: { id: true, status: true } },
+      subject: { select: { id: true, name: true } },
     },
   });
 
@@ -44,7 +45,26 @@ export async function GET() {
       resultsReleased: exam.resultsReleased,
       attemptCount: exam.attempts.length,
       submittedCount: exam.attempts.filter((attempt) => attempt.status !== "IN_PROGRESS").length,
+      inProgressCount: exam.attempts.filter((attempt) => attempt.status === "IN_PROGRESS").length,
       createdAt: exam.createdAt.toISOString(),
+      // Scheduling, so the management centre can show what is coming up.
+      scheduledFor: exam.scheduledFor?.toISOString() || null,
+      availableUntil: exam.availableUntil?.toISOString() || null,
+      theoryMinutes: exam.theoryMinutes ?? 0,
+      subjectId: exam.subjectId,
+      subjectLabel: exam.subject?.name ?? exam.subjectName,
+      // Essays need a human, so an exam containing them can never be fully
+      // auto-graded. Surfacing it here stops a teacher waiting for results
+      // that will not appear on their own.
+      essayCount: exam.questions.filter((question) => question.type === "ESSAY").length,
+      // The two things that most often go wrong: publishing an exam with no
+      // questions, or scheduling one and forgetting to publish it.
+      readiness:
+        exam.questions.length === 0
+          ? "NO_QUESTIONS"
+          : exam.status === "DRAFT"
+            ? "UNPUBLISHED"
+            : "READY",
     })),
   });
 }
@@ -58,6 +78,15 @@ const createSchema = z.object({
   instructions: z.string().trim().max(2000).optional(),
   shuffleQuestions: z.boolean().optional(),
   bulkQuestions: z.string().trim().max(100_000).optional(),
+  // The sitting window. Added to the schema in drop 24 but never accepted
+  // here, so a teacher could not actually set an exam date — the student list
+  // had a "when" column with nothing to put in it.
+  scheduledFor: z.string().datetime().nullable().optional(),
+  availableUntil: z.string().datetime().nullable().optional(),
+  theoryMinutes: z.number().int().min(0).max(240).optional(),
+  /// Links the exam to a catalogued Subject, which is what limits it to the
+  /// students who actually take that subject.
+  subjectId: z.string().trim().min(1).nullable().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -79,6 +108,34 @@ export async function POST(request: NextRequest) {
       { error: "You are not assigned to this subject and class." },
       { status: 403 },
     );
+  }
+
+  // A window that closes before it opens would silently make the exam
+  // unsittable — refuse rather than create it.
+  const opensAt = payload.scheduledFor ? new Date(payload.scheduledFor) : null;
+  const closesAt = payload.availableUntil ? new Date(payload.availableUntil) : null;
+  if (opensAt && closesAt && closesAt <= opensAt) {
+    return NextResponse.json(
+      { error: "The closing time must be after the opening time." },
+      { status: 400 },
+    );
+  }
+
+  // A subject from another school, or another level, must not be attachable.
+  if (payload.subjectId) {
+    const subject = await prisma.subject.findFirst({
+      where: { id: payload.subjectId, schoolId: context.user.schoolId, isActive: true },
+      select: { id: true, level: true },
+    });
+    if (!subject) {
+      return NextResponse.json({ error: "Subject not found." }, { status: 404 });
+    }
+    if (subject.level !== assignment.classroom.level) {
+      return NextResponse.json(
+        { error: `That subject belongs to ${subject.level}, not ${assignment.classroom.level}.` },
+        { status: 400 },
+      );
+    }
   }
 
   let parsed: ReturnType<typeof parseBulkQuestions> = { questions: [], errors: [] };
@@ -104,6 +161,10 @@ export async function POST(request: NextRequest) {
       passMark: payload.passMark,
       instructions: payload.instructions || null,
       shuffleQuestions: payload.shuffleQuestions ?? true,
+      scheduledFor: opensAt,
+      availableUntil: closesAt,
+      theoryMinutes: payload.theoryMinutes ?? 0,
+      subjectId: payload.subjectId ?? null,
       totalMarks: parsed.questions.reduce((sum, question) => sum + question.marks, 0),
       questions: {
         create: parsed.questions.map((question, index) => ({

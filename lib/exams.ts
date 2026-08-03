@@ -17,7 +17,7 @@ export type ExamTeacherContext = {
     subjectAssignments: Array<{
       id: string;
       subjectName: string;
-      classroom: { id: string; displayName: string };
+      classroom: { id: string; displayName: string; level: string };
     }>;
   };
 };
@@ -37,7 +37,7 @@ export async function getExamTeacherContext(): Promise<ExamTeacherContext | null
         select: {
           id: true,
           subjectName: true,
-          classroom: { select: { id: true, displayName: true } },
+          classroom: { select: { id: true, displayName: true, level: true } },
         },
       },
     },
