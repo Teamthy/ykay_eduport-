@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Alert, BackHandler } from "react-native";
+import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Alert, BackHandler, AppState } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { studentApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
@@ -54,7 +54,34 @@ export default function ExamRunner() {
   useEffect(() => { if (phase !== "running") return; const t = setInterval(() => doSave(), 20_000); return () => clearInterval(t); }, [phase]);
   useEffect(() => { if (phase !== "running") return; const handler = () => { Alert.alert("Leave exam?", "Your progress is saved.", [{ text: "Stay", style: "cancel" }, { text: "Leave", style: "destructive", onPress: () => router.back() }]); return true; }; const sub = BackHandler.addEventListener("hardwareBackPress", handler); return () => sub.remove(); }, [phase]);
 
-  function setAnswer(qId: string, value: string) { setAnswers((prev) => ({ ...prev, [qId]: value })); }
+  /**
+   * Save the moment the app leaves the foreground.
+   *
+   * The 20-second autosave leaves a window where a student who takes a call,
+   * gets a notification, or has Android reclaim memory loses answers they had
+   * already given. Backgrounding is exactly when that is most likely, so it is
+   * the one moment worth an unconditional save.
+   */
+  useEffect(() => {
+    if (phase !== "running") return;
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "active") void doSave();
+    });
+    return () => sub.remove();
+  }, [phase]);
+
+  /**
+   * Persist shortly after a change rather than only on the 20s tick.
+   * Debounced so typing an essay does not fire a request per keystroke.
+   */
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); }, []);
+
+  function setAnswer(qId: string, value: string) {
+    setAnswers((prev) => ({ ...prev, [qId]: value }));
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => void doSave(), 2_000);
+  }
 
   /**
    * Autosave. Previously `catch {}`.

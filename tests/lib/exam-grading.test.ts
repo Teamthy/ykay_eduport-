@@ -303,7 +303,11 @@ describe("finalizeAttempt", () => {
     const { finalizeAttempt } = await import("@/lib/exams");
     await finalizeAttempt("att_1");
 
+    // Both write paths, because drop 28 moved grading from per-answer
+    // `update` to bucketed `updateMany` — asserting only the old one would
+    // pass vacuously and stop protecting essays from being auto-zeroed.
     expect(mockPrisma.examAnswer.update).not.toHaveBeenCalled();
+    expect(mockPrisma.examAnswer.updateMany).not.toHaveBeenCalled();
   });
 
   it("scores an all-blank attempt as zero", async () => {

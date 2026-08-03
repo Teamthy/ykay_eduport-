@@ -4,6 +4,7 @@ import { z } from "zod";
 import { finalizeAttempt, getStudentExamContext } from "@/lib/exams";
 import { getStudentFeeLock } from "@/lib/fee-lock";
 import { prisma } from "@/lib/prisma";
+import { attemptDeadline, startWindowRefusal } from "@/lib/subjects";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +59,19 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
       );
     }
 
+    // The sitting window, enforced. The student list hides the Start button
+    // outside it, but the list is a view — this endpoint is the boundary, and
+    // until now it let a stale tab or a typed URL start an exam days early.
+    // Note this guards NEW attempts only: an attempt already in progress falls
+    // into the resume branch above and keeps its own clock.
+    const refusal = startWindowRefusal({
+      scheduledFor: exam.scheduledFor,
+      availableUntil: exam.availableUntil,
+    });
+    if (refusal) {
+      return NextResponse.json({ error: refusal.message, code: refusal.code }, { status: 409 });
+    }
+
     const feeLock = await getStudentFeeLock(
       studentContext.user.schoolId,
       studentContext.studentProfile.id,
@@ -97,7 +111,12 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
         examId: exam.id,
         studentProfileId: studentContext.studentProfile.id,
         attemptNumber: (existing?.attemptNumber || 0) + 1,
-        deadlineAt: new Date(Date.now() + exam.durationMinutes * 60_000),
+        // Bounded by the window as well as the duration: starting a minute
+        // before close must not buy a full extra sitting.
+        deadlineAt: attemptDeadline({
+          durationMinutes: exam.durationMinutes,
+          availableUntil: exam.availableUntil,
+        }),
       },
     });
   }
@@ -192,12 +211,49 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     validQuestionIds.has(answer.questionId),
   );
 
-  for (const answer of answers) {
-    await prisma.examAnswer.upsert({
-      where: { attemptId_questionId: { attemptId: attempt.id, questionId: answer.questionId } },
-      update: { response: answer.response },
-      create: { attemptId: attempt.id, questionId: answer.questionId, response: answer.response },
-    });
+  /**
+   * Autosave is the hottest path in the product: every student in a sitting
+   * class hits it every 15 seconds, and the client sends its FULL answer set
+   * each time (deliberately — it is what makes a dropped save recoverable).
+   *
+   * It used to issue one awaited upsert per answer. A 60-question paper was
+   * therefore 60 sequential round trips every 15 seconds per student; 40
+   * students sitting together is ~9,600 queries a minute to save data that had
+   * mostly not changed.
+   *
+   * Two changes: skip answers whose stored response already matches, then run
+   * whatever genuinely changed concurrently in one transaction. A typical save
+   * touches one or two answers, so the steady state is now a single read plus
+   * a tiny write batch.
+   */
+  const existingAnswers = await prisma.examAnswer.findMany({
+    where: { attemptId: attempt.id },
+    select: { questionId: true, response: true },
+  });
+  const storedByQuestion = new Map(
+    existingAnswers.map((entry) => [entry.questionId, entry.response]),
+  );
+
+  const changed = answers.filter(
+    (answer) =>
+      !storedByQuestion.has(answer.questionId) ||
+      storedByQuestion.get(answer.questionId) !== answer.response,
+  );
+
+  if (changed.length) {
+    await prisma.$transaction(
+      changed.map((answer) =>
+        prisma.examAnswer.upsert({
+          where: { attemptId_questionId: { attemptId: attempt.id, questionId: answer.questionId } },
+          update: { response: answer.response },
+          create: {
+            attemptId: attempt.id,
+            questionId: answer.questionId,
+            response: answer.response,
+          },
+        }),
+      ),
+    );
   }
 
   const expired = attempt.deadlineAt.getTime() < Date.now();

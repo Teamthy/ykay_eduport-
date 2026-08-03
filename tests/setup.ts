@@ -158,6 +158,7 @@ const mockPrisma = {
   examAnswer: {
     findMany: vi.fn(),
     update: vi.fn(),
+    updateMany: vi.fn(),
     upsert: vi.fn(),
   },
   subject: {
@@ -237,8 +238,14 @@ const mockPrisma = {
   teacherClassAssignment: {
     findMany: vi.fn(),
   },
+  // Interactive form: hand the callback the same mock so `tx.x` and
+  // `prisma.x` are one object. Batch form: real Prisma awaits every promise
+  // in the array and resolves to the array of RESULTS — `Promise.resolve(fn)`
+  // handed back the unresolved promises instead, so any code reading a value
+  // out of a batch saw a Promise. Anything indexing `results[n]` needs this.
   $transaction: vi.fn((fn: any) => {
     if (typeof fn === "function") return fn(mockPrisma);
+    if (Array.isArray(fn)) return Promise.all(fn);
     return Promise.resolve(fn);
   }),
   $queryRaw: vi.fn(),

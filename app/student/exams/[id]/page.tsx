@@ -53,8 +53,10 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
   const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [error, setError] = useState("");
   const [isOffline, setIsOffline] = useState(false);
+  const [saveState, setSaveState] = useState<"IDLE" | "SAVING" | "SAVED" | "FAILED">("IDLE");
   const dirtyRef = useRef(false);
   const answersRef = useRef<Record<string, string>>({});
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Start / resume attempt (caches for offline use)
   useEffect(() => {
@@ -167,11 +169,57 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
     const interval = setInterval(() => {
       if (dirtyRef.current) {
         dirtyRef.current = false;
-        void persist("SAVE");
+        setSaveState("SAVING");
+        void persist("SAVE").then((result) => setSaveState(result?.error ? "FAILED" : "SAVED"));
       }
     }, 15_000);
     return () => clearInterval(interval);
   }, [data, persist]);
+
+  /**
+   * Flush pending answers when the page goes away.
+   *
+   * The 15-second timer means a student who closes the tab, gets a call, or
+   * has the browser killed can lose up to 15 seconds of answering. `pagehide`
+   * fires in cases `beforeunload` does not (notably iOS Safari and mobile tab
+   * eviction), and `keepalive` lets the request outlive the document — a
+   * normal fetch is cancelled the moment the page unloads.
+   *
+   * Best-effort by design: it never blocks the unload and never shows a
+   * "leave site?" dialog, which students read as the exam breaking.
+   */
+  useEffect(() => {
+    if (!data) return;
+    const flush = () => {
+      if (!dirtyRef.current) return;
+      dirtyRef.current = false;
+      const payload = JSON.stringify({
+        attemptId: data.attempt.id,
+        action: "SAVE",
+        answers: Object.entries(answersRef.current).map(([questionId, response]) => ({
+          questionId,
+          response: response || null,
+        })),
+      });
+      try {
+        void fetch(`/api/student/exams/${id}/attempt`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: payload,
+          keepalive: true,
+        });
+      } catch {
+        // Nothing useful to do while the page is being torn down; the answers
+        // are still in IndexedDB via the normal autosave path.
+      }
+    };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", flush);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", flush);
+    };
+  }, [data, id]);
 
   // Countdown + auto-submit
   useEffect(() => {
@@ -219,7 +267,64 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
       return next;
     });
     dirtyRef.current = true;
+
+    /**
+     * Choosing an option is a decision the student expects to stick. Waiting
+     * up to 15 seconds to persist it is the gap where a dead battery or a lost
+     * connection costs real marks, so a change also schedules a save ~2s later
+     * — debounced, so holding a key in an essay box does not fire a request
+     * per character.
+     */
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (!dirtyRef.current) return;
+      dirtyRef.current = false;
+      setSaveState("SAVING");
+      void persist("SAVE").then((result) => setSaveState(result?.error ? "FAILED" : "SAVED"));
+    }, 2_000);
   }
+
+  // Clear a pending debounce on unmount so it cannot fire against a dead page.
+  useEffect(() => () => void (debounceRef.current && clearTimeout(debounceRef.current)), []);
+
+  /**
+   * Keyboard navigation. A 60-question paper is 60 round trips of
+   * hand-to-mouse-to-option; A–E picks an option, arrows move between
+   * questions. Ignored while typing, or an essay could not contain the letter
+   * "a".
+   */
+  useEffect(() => {
+    if (!data) return;
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+      const active = data.questions[index];
+      if (!active) return;
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setIndex((previous) => Math.min(data.questions.length - 1, previous + 1));
+        return;
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setIndex((previous) => Math.max(0, previous - 1));
+        return;
+      }
+      if (active.options) {
+        const key = event.key.toUpperCase();
+        const match = active.options.find((option) => option.key.toUpperCase() === key);
+        if (match) {
+          event.preventDefault();
+          setAnswer(active.id, match.key);
+        }
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [data, index]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function submitNow() {
     setSubmitting(true);
@@ -286,6 +391,21 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* A failed save must be visible while the student still has time
+                to do something about it — not discovered at submission. */}
+            {saveState === "FAILED" ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-orange px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                <AlertTriangle size={11} /> Save failed — retrying
+              </span>
+            ) : saveState === "SAVING" ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white/70">
+                <LoaderCircle size={11} className="animate-spin" /> Saving
+              </span>
+            ) : saveState === "SAVED" ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-green/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                <CheckCircle2 size={11} /> Saved
+              </span>
+            ) : null}
             <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white/70">
               <Shield size={11} /> Monitored
             </span>
@@ -453,6 +573,11 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
               {data.questions.length - answeredCount})
             </div>
           </div>
+          {/* Shortcuts are worthless if nobody knows they exist. */}
+          <p className="mt-4 border-t border-[var(--border-subtle)] pt-4 text-[10px] leading-relaxed text-[var(--text-muted)]">
+            Press <strong className="text-[var(--text-secondary)]">A–D</strong> to answer,{" "}
+            <strong className="text-[var(--text-secondary)]">← →</strong> to move between questions.
+          </p>
           <button
             onClick={() => setConfirmSubmit(true)}
             disabled={submitting}

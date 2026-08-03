@@ -245,6 +245,64 @@ export function examAvailability(params: {
   return "READY";
 }
 
+/**
+ * Server-side gate for *starting* an attempt.
+ *
+ * `examAvailability` above is what the list renders. Rendering is not a
+ * control: hiding a button stops nobody who keeps a tab open past the close,
+ * types the URL, or uses the mobile client. This is the same rule expressed as
+ * a refusal, for the one endpoint that actually creates an attempt.
+ *
+ * Returns null when the start is allowed.
+ */
+export function startWindowRefusal(params: {
+  scheduledFor: Date | null;
+  availableUntil: Date | null;
+  now?: Date;
+}): { code: "NOT_OPEN_YET" | "WINDOW_CLOSED"; message: string } | null {
+  const now = params.now ?? new Date();
+
+  if (params.scheduledFor && now < params.scheduledFor) {
+    return {
+      code: "NOT_OPEN_YET",
+      message: `This exam opens ${params.scheduledFor.toLocaleString("en-NG", {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        hour: "numeric",
+        minute: "2-digit",
+      })}.`,
+    };
+  }
+
+  if (params.availableUntil && now > params.availableUntil) {
+    return {
+      code: "WINDOW_CLOSED",
+      message: "The window for this exam has closed. Ask your teacher for a retake.",
+    };
+  }
+
+  return null;
+}
+
+/**
+ * When an attempt started now must end.
+ *
+ * Bounded by BOTH the exam duration and the close of the window — without the
+ * clamp, starting one minute before close would hand out the full duration and
+ * the closing time would mean nothing.
+ */
+export function attemptDeadline(params: {
+  durationMinutes: number;
+  availableUntil: Date | null;
+  startedAt?: Date;
+}): Date {
+  const startedAt = params.startedAt ?? new Date();
+  const byDuration = startedAt.getTime() + params.durationMinutes * 60_000;
+  if (!params.availableUntil) return new Date(byDuration);
+  return new Date(Math.min(byDuration, params.availableUntil.getTime()));
+}
+
 /** Human-readable label for the student's exam list. */
 export function availabilityLabel(state: ExamAvailability): string {
   switch (state) {
