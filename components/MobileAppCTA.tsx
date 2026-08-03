@@ -1,12 +1,13 @@
-import { Download, QrCode } from "lucide-react";
+import { Download, QrCode, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 import Reveal from "@/components/Reveal";
+import { apkFallbackUrl, apkQrUrl, apkSizeLabel, apkUrl as resolveApkUrl } from "@/lib/apk";
 
 export default function MobileAppCTA() {
-  const apkUrl = process.env.NEXT_PUBLIC_APK_URL;
-  const fallbackUrl = process.env.NEXT_PUBLIC_APK_FALLBACK_URL;
-  const qr = apkUrl
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=${encodeURIComponent(apkUrl)}`
-    : null;
+  const apkUrl = resolveApkUrl();
+  const fallbackUrl = apkFallbackUrl();
+  const sizeLabel = apkSizeLabel();
+  const qr = apkUrl ? apkQrUrl(apkUrl) : null;
 
   return (
     <section
@@ -37,16 +38,26 @@ export default function MobileAppCTA() {
               </h2>
               <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-8 leading-relaxed">
                 Results, attendance, fees, timetables, CBT practice and push notifications — all
-                offline-ready. Download the Android app and sign in with your full name and the
-                shared student password.
+                offline-ready. Download the Android app and sign in with the email address the
+                school has on record for you.
               </p>
               <div className="flex flex-wrap items-center gap-5">
-                <a
-                  href={apkUrl || "#download-app"}
+                {/* Always route through /download rather than straight at the
+                    .apk. Android shows an "unknown source" warning for any
+                    sideloaded app, and a parent who taps a raw file link with
+                    no explanation will stop there. The page also survives the
+                    URL not being configured yet. */}
+                <Link
+                  href="/download"
                   className="inline-flex items-center gap-3 rounded-full bg-brand-orange px-8 py-4 font-body text-sm font-bold uppercase tracking-[0.15em] text-white transition-all duration-300 hover:scale-[1.03] hover:bg-brand-orange-dark active:scale-[0.97] shadow-lg shadow-black/30"
                 >
                   <Download size={18} /> Download for Android
-                </a>
+                  {sizeLabel ? (
+                    <span className="font-normal normal-case tracking-normal opacity-80">
+                      ({sizeLabel})
+                    </span>
+                  ) : null}
+                </Link>
                 {fallbackUrl && (
                   <a
                     href={fallbackUrl}
@@ -58,6 +69,13 @@ export default function MobileAppCTA() {
                   </a>
                 )}
               </div>
+              <p className="mt-5 flex items-start gap-2 font-body text-xs leading-relaxed text-white/50">
+                <ShieldCheck size={14} className="mt-0.5 shrink-0 text-brand-green" />
+                <span>
+                  Android will warn that the file is from an unknown source — that is normal for
+                  apps installed outside the Play Store. iPhone users can use the web portal.
+                </span>
+              </p>
             </div>
           </Reveal>
           <div className="flex justify-center lg:justify-end">

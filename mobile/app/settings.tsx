@@ -3,6 +3,7 @@ import { View, ScrollView, Switch, TouchableOpacity, Linking, Platform } from "r
 import { useRouter } from "expo-router";
 import { getPrefs, setPref, type PrefKey } from "@/lib/prefs";
 import { notificationPrefsApi, type NotificationPrefs } from "@/lib/api";
+import { updateInfo } from "@/lib/updates";
 import { biometricAvailable } from "@/lib/biometric";
 import { haptic } from "@/lib/haptics";
 import { useSession } from "@/lib/useSession";
@@ -54,6 +55,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { colors, spacing, radius } = useTheme();
   const { user, portal, roleLabel } = useSession();
+  const build = updateInfo();
 
   const [prefs, setPrefs] = useState<Record<string, boolean>>({});
   const [bioSupported, setBioSupported] = useState(false);
@@ -403,8 +405,18 @@ export default function SettingsScreen() {
 
       <View style={{ alignItems: "center", marginTop: spacing.xl }}>
         <Caption style={{ fontSize: 11 }}>Ykay College &amp; Leadership Academy</Caption>
+        {/* Read from expo-updates, not hardcoded.
+            With a sideloaded APK there is no store listing to check, so this
+            is the only way support can tell which build a parent is running —
+            and whether they have picked up an OTA fix at all. */}
         <Caption style={{ fontSize: 11, marginTop: 2 }}>
-          Version 1.0.0 · {Platform.OS === "ios" ? "iOS" : "Android"}
+          Version {build.runtimeVersion} · {Platform.OS === "ios" ? "iOS" : "Android"}
+        </Caption>
+        <Caption style={{ fontSize: 10, marginTop: 2, opacity: 0.6 }}>
+          {build.isEmbedded
+            ? "Base build (no updates applied yet)"
+            : `Update ${build.updateId?.slice(0, 8) ?? "unknown"}`}
+          {build.channel ? ` · ${build.channel}` : ""}
         </Caption>
       </View>
     </ScrollView>

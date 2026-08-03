@@ -160,6 +160,17 @@ const mockPrisma = {
     update: vi.fn(),
     upsert: vi.fn(),
   },
+  feeStructure: {
+    findFirst: vi.fn(),
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
+  feeStructureItem: {
+    deleteMany: vi.fn(),
+    createMany: vi.fn(),
+  },
   schoolClass: {
     findFirst: vi.fn(),
     findMany: vi.fn(),

@@ -7,6 +7,7 @@ import { Anton_400Regular } from "@expo-google-fonts/anton";
 import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold } from "@expo-google-fonts/dm-sans";
 import { getMe, type SessionUser } from "@/lib/api";
 import { setAuthExpiredHandler } from "@/lib/http";
+import { UpdateBanner } from "@/components/UpdateBanner";
 import {
   addNotificationTapListener,
   configureNotifications,
@@ -127,6 +128,9 @@ export default function RootLayout() {
           {resolvedUser ? (
             <BiometricGate>
               {stack}
+              {/* Sideloaded APKs have no store to nag a stale install, so the
+                  app has to surface its own updates. */}
+              <UpdateBanner />
               <OfflineIndicator />
             </BiometricGate>
           ) : (

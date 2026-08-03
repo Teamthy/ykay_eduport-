@@ -1,6 +1,7 @@
 import { ApplicationStatus, AttendanceStatus, ReportCardStatus, UserRole } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAcademicAlerts } from "@/lib/academic-alerts";
 import { requireRole } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -64,7 +65,12 @@ export async function GET() {
     (entry) => entry.status === AttendanceStatus.PRESENT,
   ).length;
 
+  // Calendar drift warnings — an un-advanced term produces no error anywhere,
+  // so the dashboard is the only place it can surface.
+  const academicAlerts = await getAcademicAlerts(schoolId);
+
   return NextResponse.json({
+    academicAlerts,
     admin: { name: user.name, role: user.role },
     stats: {
       studentCount,

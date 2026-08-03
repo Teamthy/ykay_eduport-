@@ -225,10 +225,31 @@ export async function commitPromotion(params: {
         // Graduated, withdrawn or transferred: no new enrolment. The profile
         // is deactivated but KEPT, so transcripts and the alumni list still
         // resolve. currentClassId is left pointing at their final class.
-        await tx.studentProfile.update({
+        const leaver = await tx.studentProfile.update({
           where: { id: d.studentProfileId },
           data: { isActive: false },
+          select: { userId: true },
         });
+
+        // Close the login too.
+        //
+        // Deactivating only the profile left the User row active, so a
+        // graduate could still sign in — and then hit "No live student profile
+        // is linked to this account yet", because every portal lookup filters
+        // on isActive. A dead end for every leaver, every year.
+        //
+        // Released report cards stay verifiable at /verify/report/<number>
+        // without a login, so closing the account does not cut them off from
+        // their own results.
+        if (leaver?.userId) {
+          await tx.user.update({
+            where: { id: leaver.userId },
+            // Bumping tokenVersion revokes any session already issued —
+            // otherwise a leaver stays signed in on their phone until the
+            // token happens to expire.
+            data: { isActive: false, tokenVersion: { increment: 1 } },
+          });
+        }
         if (d.outcome === EnrolmentOutcome.GRADUATED) result.graduated++;
         else if (d.outcome === EnrolmentOutcome.WITHDRAWN) result.withdrawn++;
         else result.transferred++;

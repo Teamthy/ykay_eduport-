@@ -62,6 +62,12 @@ export default function AdminClassManagerPage() {
   const [teacherPick, setTeacherPick] = useState<Record<string, string>>({});
   const [movePick, setMovePick] = useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
+  // Class creation — there was no way to add a class from the app at all, which
+  // also made the promotion engine's own advice ("Create it, or choose a
+  // class") impossible to follow.
+  const [newLevel, setNewLevel] = useState("");
+  const [newArm, setNewArm] = useState("");
+  const [creating, setCreating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -119,6 +125,33 @@ export default function AdminClassManagerPage() {
 
   const query = search.trim().toLowerCase();
 
+  async function createClass() {
+    const level = newLevel.trim().toUpperCase();
+    const arm = newArm.trim().toUpperCase();
+    if (!level || !arm) return;
+    setCreating(true);
+    try {
+      const response = await fetch("/api/admin/class-manager", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ level, arm }),
+      });
+      const body = (await response.json()) as { message?: string; error?: string };
+      if (!response.ok) throw new Error(body.error || "Unable to create the class.");
+      toast(body.message || `${level}${arm} created.`, "success");
+      setNewLevel("");
+      setNewArm("");
+      await load();
+    } catch (createError) {
+      toast(
+        createError instanceof Error ? createError.message : "Unable to create the class.",
+        "error",
+      );
+    } finally {
+      setCreating(false);
+    }
+  }
+
   return (
     <>
       <PortalTopbar />
@@ -143,6 +176,45 @@ export default function AdminClassManagerPage() {
             <AdminSidebar />
 
             <div className="min-w-0 flex-1 space-y-6">
+              {/* Create a class. Level + arm are separate fields and the
+                  display name is derived server-side — a hand-typed "JSS 1 A"
+                  would not match LEVEL_PROGRESSION and would break promotion
+                  for that class. */}
+              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
+                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                  Add a class
+                </p>
+                <div className="flex flex-wrap items-end gap-2">
+                  <label className="flex-1 min-w-[120px]">
+                    <span className="mb-1.5 block text-xs text-[var(--text-secondary)]">Level</span>
+                    <input
+                      value={newLevel}
+                      onChange={(event) => setNewLevel(event.target.value)}
+                      placeholder="JSS1"
+                      className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm uppercase text-[var(--input-text)]"
+                    />
+                  </label>
+                  <label className="w-24">
+                    <span className="mb-1.5 block text-xs text-[var(--text-secondary)]">Arm</span>
+                    <input
+                      value={newArm}
+                      onChange={(event) => setNewArm(event.target.value)}
+                      placeholder="A"
+                      className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm uppercase text-[var(--input-text)]"
+                    />
+                  </label>
+                  <button
+                    onClick={() => void createClass()}
+                    disabled={creating || !newLevel.trim() || !newArm.trim()}
+                    className="rounded-full bg-brand-green px-6 py-3 text-sm font-bold text-white disabled:opacity-60"
+                  >
+                    {creating
+                      ? "Creating…"
+                      : `Create ${newLevel.trim().toUpperCase()}${newArm.trim().toUpperCase()}`}
+                  </button>
+                </div>
+              </div>
+
               {error ? (
                 <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
                   {error}

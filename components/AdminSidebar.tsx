@@ -35,6 +35,8 @@ const ADMIN_NAV = [
   { label: "Promotion", href: "/admin/promotion", icon: GraduationCap },
   { label: "Staff Assignments", href: "/admin/staff-assignments", icon: BookOpen },
   { label: "Fee Management", href: "/admin/fees", icon: CreditCard },
+  { label: "Fee Structures", href: "/admin/fees/structures", icon: CreditCard },
+  { label: "Generate Invoices", href: "/admin/fees/generate", icon: CreditCard },
   { label: "Transfer Review", href: "/admin/fees/transfers", icon: CreditCard },
   { label: "Expenses", href: "/admin/expenses", icon: CreditCard },
   { label: "Budgets", href: "/admin/budgets", icon: CreditCard },

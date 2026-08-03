@@ -184,6 +184,7 @@ model School {
   notificationJobs        NotificationJob[]
   userNotifications       UserNotification[]
   notificationPreferences NotificationPreference[]
+  feeStructures           FeeStructure[]
   gradebooks              SubjectGradebook[]
   exams                   Exam[]
   newsPosts               NewsPost[]
@@ -490,6 +491,61 @@ model AttendanceCorrectionRequest {
   @@index([attendanceSessionId, status])
 }
 
+/// What a level costs for a given term — the template invoices are raised from.
+///
+/// Before this, `FeeInvoice` rows could only be created by a demo seed with
+/// four hardcoded students. There was no way for a bursar to say "JSS1 tuition
+/// is 85,000 this term", so there was no way to bill anyone at all.
+///
+/// Keyed by (session, term, level) rather than by class: JSS1A and JSS1B pay
+/// the same fees, and duplicating a structure per arm is how the two silently
+/// drift apart.
+model FeeStructure {
+  id        String  @id @default(cuid())
+  schoolId  String
+  sessionId String
+  termId    String
+  /// "JSS1", "SS3" — matches SchoolClass.level.
+  level     String
+  /// Shown on the invoice, e.g. "JSS1 School Fees".
+  title     String
+  /// Days after generation the invoice falls due. Null = no due date.
+  dueInDays Int?
+  /// Set false to retire a structure without deleting its history.
+  isActive  Boolean @default(true)
+
+  createdByUserId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  school  School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  session AcademicSession    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  term    Term               @relation(fields: [termId], references: [id], onDelete: Cascade)
+  items   FeeStructureItem[]
+
+  /// One structure per level per term. The generator relies on this.
+  @@unique([termId, level])
+  @@index([schoolId, sessionId])
+}
+
+/// A single line on a fee structure — "Tuition", "PTA Levy", "Exam Fee".
+model FeeStructureItem {
+  id          String  @id @default(cuid())
+  structureId String
+  label       String
+  /// Kobo-free integer naira, matching FeeInvoiceItem.
+  amount      Int
+  /// Optional items (bus, boarding) can be excluded per student at generation.
+  mandatory   Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  structure FeeStructure @relation(fields: [structureId], references: [id], onDelete: Cascade)
+
+  @@index([structureId, sortOrder])
+}
+
 model FeeInvoice {
   id               String           @id @default(cuid())
   schoolId         String
@@ -498,6 +554,9 @@ model FeeInvoice {
   invoiceNumber    String           @unique
   title            String
   termLabel        String
+  /// Set when the invoice was raised from a structure. Null for manual /
+  /// legacy invoices, so this is additive and nothing needs backfilling.
+  termId           String?
   status           FeeInvoiceStatus @default(UNPAID)
   totalAmount      Int
   amountPaid       Int              @default(0)
@@ -510,14 +569,19 @@ model FeeInvoice {
   school          School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   studentProfile  StudentProfile      @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
   parentProfile   ParentProfile?      @relation(fields: [parentProfileId], references: [id], onDelete: SetNull)
+  term            Term?               @relation("InvoiceTerm", fields: [termId], references: [id], onDelete: SetNull)
   items           FeeInvoiceItem[]
   payments        FeePayment[]
   paymentAttempts FeePaymentAttempt[]
 
+  /// One invoice per student per term when raised from a structure. This is
+  /// what makes generation safely re-runnable.
+  @@unique([studentProfileId, termId])
   @@index([schoolId, status, dueDate])
   @@index([studentProfileId, status])
   @@index([studentProfileId, issuedAt])
   @@index([parentProfileId, issuedAt])
+  @@index([schoolId, termId])
 }
 
 model FeeInvoiceItem {
@@ -1488,9 +1552,10 @@ model AcademicSession {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school     School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  terms      Term[]
-  enrolments StudentEnrolment[]
+  school        School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  terms         Term[]
+  enrolments    StudentEnrolment[]
+  feeStructures FeeStructure[]
 
   @@unique([schoolId, label])
   @@index([schoolId, isCurrent])
@@ -1510,8 +1575,10 @@ model Term {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school  School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  session AcademicSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  school        School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  session       AcademicSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  feeStructures FeeStructure[]
+  invoices      FeeInvoice[]    @relation("InvoiceTerm")
 
   @@unique([sessionId, index])
   @@index([schoolId, isCurrent])

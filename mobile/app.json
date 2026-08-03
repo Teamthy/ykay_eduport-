@@ -9,13 +9,39 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ykaycollege.app"
+      "bundleIdentifier": "com.ykaycollege.app",
+      "associatedDomains": [
+        "applinks:ykaycollege.com",
+        "applinks:www.ykaycollege.com"
+      ]
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#00072D"
       },
-      "package": "com.ykaycollege.app"
+      "package": "com.ykaycollege.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "ykaycollege.com",
+              "pathPrefix": "/reset-password"
+            },
+            {
+              "scheme": "https",
+              "host": "ykaycollege.com",
+              "pathPrefix": "/verify/report"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -35,7 +61,8 @@
             "flipper": false
           }
         }
-      ]
+      ],
+      "expo-updates"
     ],
     "experiments": {
       "typedRoutes": true
@@ -47,6 +74,14 @@
       "eas": {
         "projectId": "f38053b7-646c-4e7a-ae26-df18e92c3cb9"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f38053b7-646c-4e7a-ae26-df18e92c3cb9",
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "ON_LOAD"
     }
   }
 }

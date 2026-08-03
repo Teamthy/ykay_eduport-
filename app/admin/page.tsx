@@ -22,7 +22,17 @@ import {
   Wallet,
 } from "lucide-react";
 
+type AcademicAlert = {
+  severity: "warning" | "info";
+  title: string;
+  detail: string;
+  href: string;
+  action: string;
+};
+
 type DashboardResponse = {
+  /** Calendar drift warnings — see lib/academic-alerts.ts. */
+  academicAlerts?: AcademicAlert[];
   admin: { name: string; role: string };
   stats: {
     studentCount: number;
@@ -145,6 +155,52 @@ export default function AdminDashboardPage() {
             <AdminSidebar />
 
             <div className="flex-1 min-w-0 space-y-8">
+              {/* An un-advanced term produces no error anywhere in the system —
+                  teachers just quietly enter next term's scores into this
+                  term's gradebook. The dashboard is the only place it can
+                  surface, so it goes above everything else. */}
+              {data?.academicAlerts?.length ? (
+                <div className="space-y-3">
+                  {data.academicAlerts.map((alert) => (
+                    <div
+                      key={alert.title}
+                      className={`flex flex-wrap items-start gap-3 rounded-2xl border p-4 ${
+                        alert.severity === "warning"
+                          ? "border-brand-orange/40 bg-brand-orange/10"
+                          : "border-[var(--border-subtle)] bg-[var(--surface-card)]"
+                      }`}
+                    >
+                      <AlertCircle
+                        size={18}
+                        className={`mt-0.5 shrink-0 ${
+                          alert.severity === "warning" ? "text-brand-orange" : "text-brand-green"
+                        }`}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className={`text-sm font-bold ${
+                            alert.severity === "warning"
+                              ? "text-brand-orange"
+                              : "text-[var(--text-primary)]"
+                          }`}
+                        >
+                          {alert.title}
+                        </p>
+                        <p className="mt-0.5 text-xs leading-relaxed text-[var(--text-secondary)]">
+                          {alert.detail}
+                        </p>
+                      </div>
+                      <Link
+                        href={alert.href}
+                        className="inline-flex items-center gap-1 rounded-full border border-current px-4 py-1.5 text-xs font-bold text-brand-green"
+                      >
+                        {alert.action} <ArrowRight size={12} />
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
               {error ? (
                 <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
                   {error}

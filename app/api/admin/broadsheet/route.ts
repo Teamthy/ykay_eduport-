@@ -26,10 +26,16 @@ export async function GET(request: NextRequest) {
   const schoolClass = classes.find((entry) => entry.id === classId);
   if (!schoolClass) return NextResponse.json({ error: "Class not found." }, { status: 404 });
 
+  // Match on the class the report was ISSUED for, not the student's class
+  // today. Keying on currentClassId meant that the moment a cohort was
+  // promoted, last year's JSS1A broadsheet silently became "whoever is in
+  // JSS1A now" — a different set of children, with the previous year's marks
+  // filtered out. classNameSnapshot is written at generation precisely so the
+  // record survives promotion.
   const reports = await prisma.reportCard.findMany({
     where: {
       schoolId: user.schoolId,
-      studentProfile: { currentClassId: classId },
+      classNameSnapshot: schoolClass.displayName,
     },
     take: 500,
     orderBy: [{ generatedAt: "desc" }],

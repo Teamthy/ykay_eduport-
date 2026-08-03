@@ -1,4 +1,4 @@
-import { TeacherAssignmentRole, UserRole } from "@prisma/client";
+import { Prisma, TeacherAssignmentRole, UserRole } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -197,5 +197,165 @@ export async function PATCH(request: NextRequest) {
   return NextResponse.json({
     ok: true,
     message: `${student.displayName} moved to ${targetClass.displayName}.`,
+  });
+}
+
+/**
+ * Create a class.
+ *
+ * There was no way to do this from the application at all — the six classes in
+ * production exist only because `prisma/seed-all.ts` created them. That also
+ * made the promotion engine's own advice impossible to follow: it reports
+ * "Class JSS2B does not exist. Create it, or choose a class."
+ */
+const createSchema = z.object({
+  level: z
+    .string()
+    .trim()
+    .min(2)
+    .max(10)
+    .transform((value) => value.toUpperCase()),
+  arm: z
+    .string()
+    .trim()
+    .min(1)
+    .max(4)
+    .transform((value) => value.toUpperCase()),
+  capacity: z.number().int().min(1).max(200).nullable().optional(),
+});
+
+export async function POST(request: NextRequest) {
+  const user = await requireRole(ADMIN_ROLES);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  let input: z.infer<typeof createSchema>;
+  try {
+    input = createSchema.parse(await request.json());
+  } catch {
+    return NextResponse.json(
+      { error: "Provide a level (e.g. JSS1) and an arm (e.g. A)." },
+      { status: 400 },
+    );
+  }
+
+  // displayName is derived, never typed. A hand-typed "JSS 1 A" would not match
+  // LEVEL_PROGRESSION and would quietly break promotion for that class.
+  const displayName = `${input.level}${input.arm}`;
+
+  const existing = await prisma.schoolClass.findFirst({
+    where: { schoolId: user.schoolId, displayName },
+    select: { id: true, isActive: true },
+  });
+
+  if (existing?.isActive) {
+    return NextResponse.json({ error: `${displayName} already exists.` }, { status: 409 });
+  }
+
+  // Reactivate rather than create a second row: the archived class still owns
+  // its enrolment history, and StudentEnrolment.classId is RESTRICT.
+  if (existing) {
+    const revived = await prisma.schoolClass.update({
+      where: { id: existing.id },
+      data: { isActive: true, capacity: input.capacity ?? null },
+    });
+    await prisma.auditLog.create({
+      data: {
+        schoolId: user.schoolId,
+        actorUserId: user.id,
+        action: "CLASS_REACTIVATED",
+        entityType: "SchoolClass",
+        entityId: revived.id,
+        ipAddress: getClientIp(request),
+        metadata: { displayName },
+      },
+    });
+    return NextResponse.json({
+      ok: true,
+      schoolClass: revived,
+      message: `${displayName} was archived and has been restored with its history intact.`,
+    });
+  }
+
+  try {
+    const schoolClass = await prisma.schoolClass.create({
+      data: {
+        schoolId: user.schoolId,
+        level: input.level,
+        arm: input.arm,
+        displayName,
+        capacity: input.capacity ?? null,
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        schoolId: user.schoolId,
+        actorUserId: user.id,
+        action: "CLASS_CREATED",
+        entityType: "SchoolClass",
+        entityId: schoolClass.id,
+        ipAddress: getClientIp(request),
+        metadata: { displayName, level: input.level, arm: input.arm },
+      },
+    });
+
+    return NextResponse.json(
+      { ok: true, schoolClass, message: `${displayName} created.` },
+      { status: 201 },
+    );
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return NextResponse.json({ error: `${displayName} already exists.` }, { status: 409 });
+    }
+    throw error;
+  }
+}
+
+/**
+ * Archive a class. Never a hard delete.
+ *
+ * StudentEnrolment.classId is RESTRICT precisely so a class cannot be removed
+ * out from under a student's history. Refuse while students are still in it —
+ * they must be moved first, or their portal breaks.
+ */
+export async function DELETE(request: NextRequest) {
+  const user = await requireRole(ADMIN_ROLES);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const id = request.nextUrl.searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "Missing class id." }, { status: 400 });
+
+  const schoolClass = await prisma.schoolClass.findFirst({
+    where: { id, schoolId: user.schoolId },
+    include: { students: { where: { isActive: true }, select: { id: true } } },
+  });
+  if (!schoolClass) return NextResponse.json({ error: "Class not found." }, { status: 404 });
+
+  if (schoolClass.students.length) {
+    return NextResponse.json(
+      {
+        error: `${schoolClass.displayName} still has ${schoolClass.students.length} active student(s). Move them to another class first.`,
+      },
+      { status: 409 },
+    );
+  }
+
+  await prisma.schoolClass.update({ where: { id }, data: { isActive: false } });
+
+  await prisma.auditLog.create({
+    data: {
+      schoolId: user.schoolId,
+      actorUserId: user.id,
+      action: "CLASS_ARCHIVED",
+      entityType: "SchoolClass",
+      entityId: id,
+      ipAddress: getClientIp(request),
+      metadata: { displayName: schoolClass.displayName },
+    },
+  });
+
+  return NextResponse.json({
+    ok: true,
+    message: `${schoolClass.displayName} archived. Its history is preserved.`,
   });
 }

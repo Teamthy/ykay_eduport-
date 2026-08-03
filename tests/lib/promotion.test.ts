@@ -135,6 +135,12 @@ describe("commitPromotion", () => {
     actorUserId: "u_admin",
   };
 
+  beforeEach(() => {
+    // Leaver handling reads back userId to close the login, so the update must
+    // resolve to something. Default to a student who HAS an account.
+    mockPrisma.studentProfile.update.mockResolvedValue({ userId: "u9" });
+  });
+
   it("refuses to promote a session into itself", async () => {
     const { commitPromotion } = await import("@/lib/promotion");
     await expect(
@@ -256,7 +262,46 @@ describe("commitPromotion", () => {
     expect(mockPrisma.studentProfile.update).toHaveBeenCalledWith({
       where: { id: "s9" },
       data: { isActive: false },
+      select: { userId: true },
     });
+    // ...and the LOGIN is closed too. Deactivating only the profile left the
+    // User row active, so a graduate could still sign in and then hit "No live
+    // student profile is linked to this account yet" — a dead end for every
+    // leaver, every year.
+    expect(mockPrisma.user.update).toHaveBeenCalledWith({
+      where: { id: "u9" },
+      data: { isActive: false, tokenVersion: { increment: 1 } },
+    });
+  });
+
+  it("revokes an existing session so a leaver is signed out, not just blocked", async () => {
+    mockPrisma.studentEnrolment.count.mockResolvedValue(0);
+    mockPrisma.studentProfile.update.mockResolvedValue({ userId: "u9" });
+
+    const { commitPromotion } = await import("@/lib/promotion");
+    await commitPromotion({
+      ...base,
+      decisions: [{ studentProfileId: "s9", outcome: "GRADUATED" }],
+    });
+
+    // Without the tokenVersion bump they stay signed in on their phone until
+    // the token happens to expire.
+    const call = mockPrisma.user.update.mock.calls[0][0];
+    expect(call.data.tokenVersion).toEqual({ increment: 1 });
+  });
+
+  it("does not attempt a user update for a student with no login", async () => {
+    mockPrisma.studentEnrolment.count.mockResolvedValue(0);
+    // Plenty of younger students have a profile but no account of their own.
+    mockPrisma.studentProfile.update.mockResolvedValue({ userId: null });
+
+    const { commitPromotion } = await import("@/lib/promotion");
+    await commitPromotion({
+      ...base,
+      decisions: [{ studentProfileId: "s9", outcome: "GRADUATED" }],
+    });
+
+    expect(mockPrisma.user.update).not.toHaveBeenCalled();
   });
 
   it("treats withdrawn and transferred as leavers too", async () => {
