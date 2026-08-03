@@ -64,3 +64,8 @@ prisma/*.db-journal
 *.patch
 *.zip
 public/Screenshot *.png
+
+# Agent delivery scripts — tooling for applying changes, not part of the app.
+# These were being swept into commits by `git add -A`.
+ykay-*.ps1
+ykay-*.cmd
