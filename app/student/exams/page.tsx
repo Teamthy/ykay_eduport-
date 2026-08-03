@@ -13,7 +13,32 @@ import {
   PlayCircle,
   RotateCcw,
   Shield,
+  CalendarClock,
+  Lock,
+  XCircle,
 } from "lucide-react";
+
+/** "Mon 14 Sep, 9:00 am" — a student needs the day and the time, not an ISO string. */
+function whenLabel(iso: string | null): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+/** Colour + icon per state, so the list is scannable without reading it. */
+const AVAILABILITY_STYLE: Record<string, { chip: string; icon: typeof Clock }> = {
+  READY: { chip: "bg-brand-green/10 text-brand-green", icon: PlayCircle },
+  UPCOMING: { chip: "bg-brand-orange/10 text-brand-orange", icon: CalendarClock },
+  CLOSED: { chip: "bg-red-500/10 text-red-500", icon: XCircle },
+  COMPLETED: { chip: "bg-[var(--surface-disabled)] text-[var(--text-muted)]", icon: CheckCircle2 },
+};
 
 type ExamCard = {
   id: string;
@@ -28,6 +53,12 @@ type ExamCard = {
   hasEssay: boolean;
   status: string;
   instructions: string | null;
+  theoryMinutes: number;
+  scheduledFor: string | null;
+  availableUntil: string | null;
+  availability: "UPCOMING" | "READY" | "CLOSED" | "COMPLETED";
+  availabilityLabel: string;
+  feeLocked: boolean;
   canStart: boolean;
   canResume: boolean;
   attempt: {
@@ -138,6 +169,22 @@ export default function StudentExamsPage() {
                             {exam.hasEssay ? " · Essay included" : ""}
                           </span>
                         </div>
+                        {/* When to sit it — the whole point of the list. */}
+                        {whenLabel(exam.scheduledFor) ? (
+                          <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
+                            <CalendarClock size={12} className="text-brand-green" />
+                            {exam.availability === "UPCOMING" ? "Opens" : "Scheduled"}{" "}
+                            {whenLabel(exam.scheduledFor)}
+                            {whenLabel(exam.availableUntil)
+                              ? ` — closes ${whenLabel(exam.availableUntil)}`
+                              : ""}
+                          </p>
+                        ) : null}
+                        {exam.theoryMinutes > 0 ? (
+                          <p className="mt-1 text-xs text-[var(--text-muted)]">
+                            {exam.durationMinutes} min objective + {exam.theoryMinutes} min theory
+                          </p>
+                        ) : null}
                         {exam.instructions ? (
                           <p className="mt-2 text-xs text-[var(--text-secondary)]">
                             {exam.instructions}
@@ -159,6 +206,21 @@ export default function StudentExamsPage() {
                         ) : exam.attempt && exam.attempt.status !== "IN_PROGRESS" ? (
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
                             <CheckCircle2 size={12} /> Submitted — awaiting results
+                          </span>
+                        ) : null}
+                        {/* Why there is no button. Previously an exam that
+                            could not be started showed nothing at all — no
+                            button, no reason — so a student stared at a card
+                            that appeared broken. */}
+                        {!exam.canResume && !exam.canStart ? (
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest ${
+                              AVAILABILITY_STYLE[exam.availability]?.chip ??
+                              "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
+                            }`}
+                          >
+                            {exam.feeLocked ? <Lock size={12} /> : null}
+                            {exam.feeLocked ? "Fees outstanding" : exam.availabilityLabel}
                           </span>
                         ) : null}
                         {exam.canResume ? (

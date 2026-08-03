@@ -31,6 +31,7 @@ const ADMIN_NAV = [
   { label: "Staff Accounts", href: "/admin/staff", icon: UserPlus },
   { label: "Staff QR Attendance", href: "/admin/staff-attendance", icon: ClipboardCheck },
   { label: "Class Manager", href: "/admin/class-manager", icon: School },
+  { label: "Subjects", href: "/admin/subjects", icon: BookOpen },
   { label: "Sessions & Terms", href: "/admin/sessions", icon: CalendarDays },
   { label: "Promotion", href: "/admin/promotion", icon: GraduationCap },
   { label: "Staff Assignments", href: "/admin/staff-assignments", icon: BookOpen },

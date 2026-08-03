@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Phone,
   MessageSquare,
+  BookOpen,
   AlertCircle,
 } from "lucide-react";
 
@@ -262,6 +263,14 @@ export default function ClassRosterPage() {
                             className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-orange/10 text-brand-orange text-[10px] font-bold hover:bg-brand-orange hover:text-white transition-all"
                           >
                             <MessageSquare size={10} /> Message
+                          </Link>
+                          {/* Not every student takes every subject — this is
+                              where a form teacher records their electives. */}
+                          <Link
+                            href={`/teacher/students/subjects?studentProfileId=${encodeURIComponent(s.id)}`}
+                            className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-navy/10 text-[var(--text-secondary)] text-[10px] font-bold hover:bg-brand-navy hover:text-white transition-all"
+                          >
+                            <BookOpen size={10} /> Subjects
                           </Link>
                         </div>
                       </div>
