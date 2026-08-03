@@ -40,6 +40,19 @@ export function apkSizeLabel(): string | null {
   return value.trim() || null;
 }
 
+/**
+ * The stable, publishable download link.
+ *
+ * ALWAYS share this, never the storage URL. It survives the file moving
+ * between hosts — which it will: the repo goes private after launch, so
+ * GitHub Release assets stop working and the APK moves to R2 or similar.
+ * Printed letters, QR codes and forwarded WhatsApp messages cannot be edited
+ * afterwards.
+ */
+export function apkDownloadPath(): string {
+  return "/download/apk";
+}
+
 /** QR image for the download URL, so a parent on a laptop can scan it. */
 export function apkQrUrl(url: string): string {
   return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=${encodeURIComponent(url)}`;

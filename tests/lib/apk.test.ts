@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { apkFallbackUrl, apkQrUrl, apkSizeLabel, apkUrl } from "@/lib/apk";
+import { apkDownloadPath, apkFallbackUrl, apkQrUrl, apkSizeLabel, apkUrl } from "@/lib/apk";
 
 /**
  * APK download URL resolution.
@@ -85,5 +85,31 @@ describe("apkQrUrl", () => {
     // The ampersand from the target must not leak into the QR service's own
     // query string, or the QR encodes a truncated URL.
     expect(qr.split("data=")[1]).not.toContain("&");
+  });
+});
+
+describe("apkDownloadPath", () => {
+  it("is a stable path that does not depend on where the file is hosted", () => {
+    // The repo goes private after launch, which kills GitHub Release assets
+    // (a private asset 404s on its public URL), so the APK WILL move hosts.
+    // Printed letters, noticeboard QR codes and forwarded WhatsApp messages
+    // cannot be edited afterwards — so the published link must never contain
+    // the storage URL.
+    process.env.NEXT_PUBLIC_APK_URL = "https://github.com/x/releases/download/v1/a.apk";
+    const first = apkDownloadPath();
+
+    process.env.NEXT_PUBLIC_APK_URL = "https://pub-abc.r2.dev/a.apk";
+    expect(apkDownloadPath()).toBe(first);
+  });
+
+  it("stays valid even when no storage URL is configured", () => {
+    // The route redirects to an explanatory page rather than 500ing at a link
+    // that is already in circulation.
+    expect(apkDownloadPath()).toBe("/download/apk");
+  });
+
+  it("is relative, so it works on any host the site is served from", () => {
+    expect(apkDownloadPath().startsWith("/")).toBe(true);
+    expect(apkDownloadPath()).not.toMatch(/^https?:/);
   });
 });

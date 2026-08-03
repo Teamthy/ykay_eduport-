@@ -63,7 +63,7 @@ export default function LiveReportCardPreview({
             </div>
             <h2 className="mt-3 font-display text-4xl tracking-[0.12em]">YKAY COLLEGE</h2>
             <p className="mt-2 text-sm text-white/60">
-              {sessionLabel} Â· {termLabel} Â· {reportNumber}
+              {sessionLabel} · {termLabel} · {reportNumber}
             </p>
           </div>
           <div className="text-right">
@@ -96,7 +96,7 @@ export default function LiveReportCardPreview({
           </div>
           <div className="text-sm text-[var(--text-secondary)]">Total Score: {overallTotal}</div>
           <div className="text-sm text-[var(--text-secondary)]">
-            Position: {classPosition || "â€”"}
+            Position: {classPosition || "—"}
           </div>
         </div>
         <div>

@@ -201,7 +201,7 @@ export default function ParentReportCardsPage() {
                               {child.displayName}
                             </div>
                             <div className="text-[10px] text-[var(--text-muted)]">
-                              {child.className} Â· ID: {child.studentId}
+                              {child.className} · ID: {child.studentId}
                             </div>
                           </button>
                         ))}
@@ -237,7 +237,7 @@ export default function ParentReportCardsPage() {
                                 {data.selectedChild?.displayName}
                               </td>
                               <td className="px-4 py-4 text-xs text-[var(--text-muted)]">
-                                {report.termLabel} Â· {report.sessionLabel}
+                                {report.termLabel} · {report.sessionLabel}
                               </td>
                               <td className="px-4 py-4">
                                 <span

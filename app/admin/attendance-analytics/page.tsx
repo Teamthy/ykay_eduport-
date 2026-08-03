@@ -174,7 +174,7 @@ export default function AdminAttendanceAnalyticsPage() {
         <section className="bg-brand-navy px-6 pb-10 pt-24">
           <div className="mx-auto max-w-7xl">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-green/30 bg-brand-green/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
-              <BarChart3 size={12} /> Phase 3C Â· Attendance Analytics
+              <BarChart3 size={12} /> Phase 3C · Attendance Analytics
             </div>
             <h1 className="font-display text-4xl tracking-widest text-white md:text-5xl">
               ATTENDANCE <span className="text-brand-green">ANALYTICS</span>
@@ -205,7 +205,7 @@ export default function AdminAttendanceAnalyticsPage() {
                     <option value="">All active classes</option>
                     {data?.availableClasses.map((item) => (
                       <option key={item.id} value={item.id}>
-                        {item.displayName} Â· {item.activeStudents} student
+                        {item.displayName} · {item.activeStudents} student
                         {item.activeStudents === 1 ? "" : "s"}
                       </option>
                     ))}
@@ -362,8 +362,8 @@ export default function AdminAttendanceAnalyticsPage() {
                                   </div>
                                   <div className="mt-1 text-xs text-[var(--text-muted)]">
                                     {item.activeStudents} student
-                                    {item.activeStudents === 1 ? "" : "s"} Â· {item.sessions}{" "}
-                                    session{item.sessions === 1 ? "" : "s"}
+                                    {item.activeStudents === 1 ? "" : "s"} · {item.sessions} session
+                                    {item.sessions === 1 ? "" : "s"}
                                   </div>
                                 </div>
                                 <div className="text-right">
@@ -407,7 +407,7 @@ export default function AdminAttendanceAnalyticsPage() {
                                   <div className="font-semibold text-[var(--text-primary)]">
                                     {item.lastSessionDate
                                       ? new Date(item.lastSessionDate).toLocaleDateString()
-                                      : "â€”"}
+                                      : "—"}
                                   </div>
                                 </div>
                               </div>
@@ -498,7 +498,7 @@ export default function AdminAttendanceAnalyticsPage() {
                                   </span>
                                 </div>
                                 <div className="mt-2 text-sm font-semibold text-[var(--text-primary)]">
-                                  {item.className} Â· {item.teacherName}
+                                  {item.className} · {item.teacherName}
                                 </div>
                                 <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">
                                   {item.reason}
@@ -594,7 +594,7 @@ export default function AdminAttendanceAnalyticsPage() {
                                     {new Date(`${item.date}T12:00:00.000Z`).toLocaleDateString()}
                                   </div>
                                   <div className="text-[10px] text-[var(--text-muted)]">
-                                    {item.sessions} session{item.sessions === 1 ? "" : "s"} Â·{" "}
+                                    {item.sessions} session{item.sessions === 1 ? "" : "s"} ·{" "}
                                     {item.total} marks
                                   </div>
                                 </div>
@@ -672,7 +672,7 @@ export default function AdminAttendanceAnalyticsPage() {
                               {item.className}
                             </div>
                             <div className="mt-1 text-xs text-[var(--text-muted)]">
-                              {item.teacherName} Â· {item.periodKey}
+                              {item.teacherName} · {item.periodKey}
                             </div>
                             <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
                               <div>
@@ -686,7 +686,7 @@ export default function AdminAttendanceAnalyticsPage() {
                                 <div className="font-semibold text-[var(--text-primary)]">
                                   {item.submittedAt
                                     ? new Date(item.submittedAt).toLocaleTimeString()
-                                    : "â€”"}
+                                    : "—"}
                                 </div>
                               </div>
                               <div>

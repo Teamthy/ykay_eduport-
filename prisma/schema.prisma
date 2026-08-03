@@ -120,6 +120,13 @@ enum NotificationKind {
   SYSTEM
 }
 
+enum SubjectCategory {
+  /// Every student at this level takes it — auto-enrolled.
+  COMPULSORY
+  /// Chosen per student.
+  ELECTIVE
+}
+
 enum GradebookStatus {
   OPEN
   SUBMITTED
@@ -185,6 +192,8 @@ model School {
   userNotifications       UserNotification[]
   notificationPreferences NotificationPreference[]
   feeStructures           FeeStructure[]
+  subjects                Subject[]
+  studentSubjects         StudentSubject[]
   gradebooks              SubjectGradebook[]
   exams                   Exam[]
   newsPosts               NewsPost[]
@@ -355,6 +364,7 @@ model StudentProfile {
   messageThreads       MessageThread[]
   behaviorRecords      BehaviorRecord[]
   enrolments           StudentEnrolment[]
+  studentSubjects      StudentSubject[]
 
   @@unique([schoolId, studentId])
   @@index([currentClassId, isActive])
@@ -866,6 +876,64 @@ model UserNotification {
   @@index([schoolId, kind, createdAt])
 }
 
+/// A subject the school teaches, per level.
+///
+/// Subjects were free-text strings on TeacherClassAssignment, SubjectGradebook
+/// and Exam. That worked while every student in a class took every subject,
+/// but it cannot express "Adeola takes Further Maths, Chidi takes Literature" —
+/// there was nowhere to record who takes what.
+///
+/// Scoped by level rather than by class: JSS1A and JSS1B are offered the same
+/// curriculum, and duplicating it per arm is how the two drift apart.
+model Subject {
+  id       String          @id @default(cuid())
+  schoolId String
+  /// Canonical name, e.g. "Mathematics". Compared case-insensitively on write.
+  name     String
+  /// Short form for timetables and broadsheets, e.g. "MTH".
+  code     String?
+  /// "JSS1".."SS3" — matches SchoolClass.level.
+  level    String
+  /// COMPULSORY subjects are auto-enrolled for every student at this level.
+  /// ELECTIVE ones must be chosen per student.
+  category SubjectCategory @default(COMPULSORY)
+  isActive Boolean         @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school     School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  enrolments StudentSubject[]
+  exams      Exam[]           @relation("ExamSubject")
+
+  @@unique([schoolId, level, name])
+  @@index([schoolId, level, isActive])
+}
+
+/// Which subjects a given student actually takes.
+///
+/// The row is the enrolment. Absence of a row means the student does not take
+/// that subject, so exams and gradebooks for it must not appear for them.
+model StudentSubject {
+  id               String   @id @default(cuid())
+  schoolId         String
+  studentProfileId String
+  subjectId        String
+  /// Kept so dropping a subject mid-year is reversible and auditable rather
+  /// than a delete that loses the fact it was ever taken.
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  school         School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  subject        Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([studentProfileId, subjectId])
+  @@index([schoolId, subjectId])
+  @@index([studentProfileId, isActive])
+}
+
 model SubjectGradebook {
   id               String          @id @default(cuid())
   schoolId         String
@@ -902,6 +970,10 @@ model GradebookEntry {
   exam             Int      @default(0)
   total            Int      @default(0)
   grade            String   @default("F9")
+  /// Subject-teacher's remark for THIS student in THIS subject, shown on the
+  /// performance-records grid and available to the report card. Distinct from
+  /// the form teacher's overall remark on ReportCard.
+  comment          String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -928,17 +1000,29 @@ model Exam {
   status           ExamStatus @default(DRAFT)
   resultsReleased  Boolean    @default(false)
   scheduledFor     DateTime?
+  /// Close of the sitting window. A student may start any time between
+  /// scheduledFor and this. Null means "no closing time" — the old behaviour,
+  /// so nothing existing changes.
+  availableUntil   DateTime?
+  /// Separate theory allowance, alongside durationMinutes for objectives.
+  theoryMinutes    Int?       @default(0)
+  /// Set when the exam is tied to a catalogued Subject, which is what lets us
+  /// show it only to students who actually take it. Null = legacy/free-text.
+  subjectId        String?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 
   school         School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   classroom      SchoolClass    @relation(fields: [classId], references: [id], onDelete: Cascade)
   teacherProfile TeacherProfile @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  subject        Subject?       @relation("ExamSubject", fields: [subjectId], references: [id], onDelete: SetNull)
   questions      ExamQuestion[]
   attempts       ExamAttempt[]
   retakes        ExamRetake[]
 
   @@index([schoolId, status, createdAt])
+  /// Drives the student exam list: "what am I sitting, and when".
+  @@index([classId, status, scheduledFor])
   @@index([classId, status])
   @@index([teacherProfileId, createdAt])
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
@@ -21,7 +22,15 @@ export default function ClassRosterPage() {
   const { data, loading } = useApi<{
     teacher: { displayName: string };
     classes: { id: string; className: string }[];
-    students: { id: string; studentId: string; displayName: string; className: string }[];
+    students: {
+      id: string;
+      studentId: string;
+      displayName: string;
+      className: string;
+      gender?: string | null;
+      guardianName?: string | null;
+      guardianPhone?: string | null;
+    }[];
   }>("/api/teacher/students");
   const teacher: any = {
     ...(data?.teacher ?? {}),
@@ -35,12 +44,16 @@ export default function ClassRosterPage() {
     id: s.id,
     studentId: s.studentId,
     name: s.displayName,
-    gender: "—",
+    // The API already returns gender and guardian details — the page was
+    // discarding them and hardcoding em-dashes, so "Call Parent" dialled
+    // literally nothing.
+    gender: s.gender || "—",
     status: "Good",
     overallGrade: "—",
     attendanceRate: 0,
     behaviorScore: "—",
-    parentContact: "—",
+    guardianName: s.guardianName || "",
+    parentContact: s.guardianPhone || "",
     photoUrl: "",
   }));
 
@@ -221,15 +234,35 @@ export default function ClassRosterPage() {
                         </div>
 
                         <div className="flex gap-2">
-                          <a
-                            href={`tel:${s.parentContact}`}
-                            className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-green/10 text-brand-green text-[10px] font-bold hover:bg-brand-green hover:text-white transition-all"
+                          {/* tel: opens the dialler on mobile and the default
+                              calling app on desktop. Disabled rather than
+                              dead when no number is on record — a link that
+                              silently does nothing is worse than a greyed one. */}
+                          {s.parentContact ? (
+                            <a
+                              href={`tel:${s.parentContact.replace(/\s+/g, "")}`}
+                              title={`Call ${s.guardianName || "parent"} on ${s.parentContact}`}
+                              className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-green/10 text-brand-green text-[10px] font-bold hover:bg-brand-green hover:text-white transition-all"
+                            >
+                              <Phone size={10} /> Call Parent
+                            </a>
+                          ) : (
+                            <span
+                              title="No guardian phone number on record"
+                              className="flex-1 inline-flex cursor-not-allowed items-center justify-center gap-1 rounded-lg bg-[var(--surface-disabled)] px-3 py-1.5 text-[10px] font-bold text-[var(--text-disabled)]"
+                            >
+                              <Phone size={10} /> No number
+                            </span>
+                          )}
+                          {/* Opens the real parent-teacher messaging thread for
+                              this student, rather than being a button with no
+                              onClick. */}
+                          <Link
+                            href={`/teacher/messages/compose?studentProfileId=${encodeURIComponent(s.id)}`}
+                            className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-orange/10 text-brand-orange text-[10px] font-bold hover:bg-brand-orange hover:text-white transition-all"
                           >
-                            <Phone size={10} /> Call Parent
-                          </a>
-                          <button className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-orange/10 text-brand-orange text-[10px] font-bold hover:bg-brand-orange hover:text-white transition-all">
                             <MessageSquare size={10} /> Message
-                          </button>
+                          </Link>
                         </div>
                       </div>
                     </div>

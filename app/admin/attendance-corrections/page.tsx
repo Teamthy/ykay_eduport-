@@ -203,7 +203,7 @@ export default function AdminAttendanceCorrectionsPage() {
                   {selected.attendanceSession.classroom.displayName}
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  {selected.teacherProfile.displayName} Â·{" "}
+                  {selected.teacherProfile.displayName} ·{" "}
                   {new Date(selected.attendanceSession.sessionDate).toLocaleDateString()}
                 </p>
               </div>

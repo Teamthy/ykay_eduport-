@@ -176,7 +176,7 @@ async function main() {
       schoolId: school.id,
       displayName: teacherUser.name,
       phone: "+2348034567890",
-      roleLabel: "Form Teacher Â· Mathematics",
+      roleLabel: "Form Teacher · Mathematics",
       isActive: true,
     },
     create: {
@@ -184,7 +184,7 @@ async function main() {
       userId: teacherUser.id,
       displayName: teacherUser.name,
       phone: "+2348034567890",
-      roleLabel: "Form Teacher Â· Mathematics",
+      roleLabel: "Form Teacher · Mathematics",
       isActive: true,
     },
   });

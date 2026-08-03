@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getStudentExamContext } from "@/lib/exams";
 import { getStudentFeeLock } from "@/lib/fee-lock";
 import { prisma } from "@/lib/prisma";
+import { availabilityLabel, examAvailability, studentSubjectIds } from "@/lib/subjects";
 
 export const dynamic = "force-dynamic";
 
@@ -10,14 +11,27 @@ export async function GET() {
   const context = await getStudentExamContext();
   if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const feeLock = await getStudentFeeLock(context.user.schoolId, context.studentProfile.id);
+  const [feeLock, mySubjectIds] = await Promise.all([
+    getStudentFeeLock(context.user.schoolId, context.studentProfile.id),
+    studentSubjectIds(context.studentProfile.id),
+  ]);
+
+  // Show exams for this class, but only for subjects this student actually
+  // takes. An exam with no subjectId is legacy free-text and stays visible to
+  // the whole class — removing those silently would hide real exams.
+  const takenSubjects = new Set(mySubjectIds);
 
   const exams = await prisma.exam.findMany({
     where: {
       classId: context.studentProfile.currentClassId,
       status: { in: [ExamStatus.PUBLISHED, ExamStatus.CLOSED] },
+      ...(mySubjectIds.length
+        ? { OR: [{ subjectId: null }, { subjectId: { in: mySubjectIds } }] }
+        : {}),
     },
-    orderBy: { createdAt: "desc" },
+    // Soonest first: a student wants to know what is next, not what was
+    // created most recently.
+    orderBy: [{ scheduledFor: "asc" }, { createdAt: "desc" }],
     include: {
       teacherProfile: { select: { displayName: true } },
       questions: { select: { id: true, marks: true, type: true } },
@@ -40,8 +54,20 @@ export async function GET() {
       const retake = exam.retakes[0] || null;
       const totalMarks = exam.questions.reduce((sum, question) => sum + question.marks, 0);
       const hasUnusedRetake = Boolean(retake && !retake.used);
+      const hasSubmitted = Boolean(
+        latestAttempt && latestAttempt.status !== ExamAttemptStatus.IN_PROGRESS,
+      );
+
+      // One definition of "can this be sat right now", shared with the runner.
+      const availability = examAvailability({
+        scheduledFor: exam.scheduledFor,
+        availableUntil: exam.availableUntil,
+        hasSubmitted: hasSubmitted && !hasUnusedRetake,
+      });
+
       const canStart =
         exam.status === ExamStatus.PUBLISHED &&
+        availability === "READY" &&
         (!latestAttempt ||
           (latestAttempt.status !== ExamAttemptStatus.IN_PROGRESS && hasUnusedRetake));
       const canResume = Boolean(
@@ -55,6 +81,14 @@ export async function GET() {
         teacherName: exam.teacherProfile.displayName,
         examType: exam.examType,
         durationMinutes: exam.durationMinutes,
+        theoryMinutes: exam.theoryMinutes ?? 0,
+        subjectId: exam.subjectId,
+        // When to sit it — the whole point of the student exam list.
+        scheduledFor: exam.scheduledFor?.toISOString() || null,
+        availableUntil: exam.availableUntil?.toISOString() || null,
+        availability,
+        availabilityLabel: availabilityLabel(availability),
+        isElective: exam.subjectId ? takenSubjects.has(exam.subjectId) : false,
         questionCount: exam.questions.length,
         totalMarks,
         passMark: exam.passMark,

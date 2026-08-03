@@ -164,7 +164,7 @@ export default function StudentReportCardsPage() {
                           My Report Cards
                         </h2>
                         <p className="mt-1 text-sm text-[var(--text-muted)]">
-                          {data.student.displayName} Â· {data.student.className}
+                          {data.student.displayName} · {data.student.className}
                         </p>
                       </div>
                       {selected ? (
@@ -203,7 +203,7 @@ export default function StudentReportCardsPage() {
                                 {report.reportNumber}
                               </td>
                               <td className="px-4 py-4 text-xs text-[var(--text-muted)]">
-                                {report.termLabel} Â· {report.sessionLabel}
+                                {report.termLabel} · {report.sessionLabel}
                               </td>
                               <td className="px-4 py-4">
                                 <span
@@ -213,7 +213,7 @@ export default function StudentReportCardsPage() {
                                 </span>
                               </td>
                               <td className="px-4 py-4 font-display text-base font-bold text-brand-green">
-                                {report.overallAverage}% Â· {report.overallGrade}
+                                {report.overallAverage}% · {report.overallGrade}
                               </td>
                               <td className="px-4 py-4">
                                 <button

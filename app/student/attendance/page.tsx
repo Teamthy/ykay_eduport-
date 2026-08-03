@@ -112,7 +112,7 @@ export default function StudentAttendancePage() {
                   </h1>
                   <p className="text-sm text-white/60">
                     {data
-                      ? `${data.student.displayName} Â· ${data.student.className}`
+                      ? `${data.student.displayName} · ${data.student.className}`
                       : "Live attendance calendar"}
                   </p>
                 </div>
@@ -167,7 +167,7 @@ export default function StudentAttendancePage() {
                       days={data.days}
                       month={data.monthLabel}
                       year={data.year}
-                      title={`${data.student.className} â€” ${data.monthLabel} ${data.year}`}
+                      title={`${data.student.className} — ${data.monthLabel} ${data.year}`}
                       subtitle="Personal attendance calendar"
                       viewType="student"
                     />
@@ -230,7 +230,7 @@ export default function StudentAttendancePage() {
                                 className="rounded-xl bg-[var(--surface-disabled)] px-4 py-3"
                               >
                                 <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                                  {new Date(`${day.date}T12:00:00.000Z`).toLocaleDateString()} Â·{" "}
+                                  {new Date(`${day.date}T12:00:00.000Z`).toLocaleDateString()} ·{" "}
                                   {day.status}
                                 </div>
                                 <p className="mt-1 text-sm text-[var(--text-secondary)]">

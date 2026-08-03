@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AlertCircle, Download, QrCode, ShieldCheck, Smartphone } from "lucide-react";
-import { apkFallbackUrl, apkQrUrl, apkSizeLabel, apkUrl } from "@/lib/apk";
+import { apkDownloadPath, apkFallbackUrl, apkQrUrl, apkSizeLabel, apkUrl } from "@/lib/apk";
 
 export const metadata: Metadata = {
   title: "Download the Ykay College app",
@@ -23,11 +23,21 @@ export const metadata: Metadata = {
  *      on the school's own domain.
  */
 
-export default function DownloadPage() {
+export default async function DownloadPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  // /download/apk redirects here when the storage URL is unset, rather than
+  // erroring at a link someone has already printed or forwarded.
+  const { error } = await searchParams;
   const APK_URL = apkUrl();
   const FALLBACK = apkFallbackUrl();
   const SIZE = apkSizeLabel();
-  const QR = APK_URL ? apkQrUrl(APK_URL) : null;
+  const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
+  // QR encodes the PAGE, not the file: a poster on a noticeboard outlives any
+  // one release, and a parent scanning it still gets the install instructions.
+  const QR = SITE ? apkQrUrl(`${SITE}/download`) : null;
   return (
     <main className="grid min-h-screen place-items-center bg-brand-navy px-6 py-20">
       <div className="w-full max-w-lg">
@@ -45,10 +55,20 @@ export default function DownloadPage() {
             and staff of Ykay College &amp; Leadership Academy.
           </p>
 
+          {error === "unavailable" ? (
+            <div className="mt-7 flex items-start gap-3 rounded-2xl border border-brand-orange/30 bg-brand-orange/10 p-4 text-sm text-brand-orange">
+              <AlertCircle size={17} className="mt-0.5 shrink-0" />
+              <span>
+                The download is temporarily unavailable. Please try again shortly, or contact the
+                school office.
+              </span>
+            </div>
+          ) : null}
+
           {APK_URL ? (
             <>
               <a
-                href={APK_URL}
+                href={apkDownloadPath()}
                 className="mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3.5 font-bold text-white transition-opacity hover:opacity-90"
               >
                 <Download size={17} /> Download for Android

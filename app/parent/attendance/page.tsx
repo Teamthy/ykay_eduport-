@@ -190,7 +190,7 @@ export default function ParentAttendancePage() {
                             {child.displayName}
                           </div>
                           <div className="text-[10px] text-[var(--text-muted)]">
-                            {child.className} Â· ID: {child.studentId}
+                            {child.className} · ID: {child.studentId}
                           </div>
                         </button>
                       ))}
@@ -203,8 +203,8 @@ export default function ParentAttendancePage() {
                         days={data.days}
                         month={data.monthLabel || "Current"}
                         year={data.year || new Date().getFullYear()}
-                        title={`${data.selectedChild?.className || "Class"} â€” ${data.monthLabel || "Attendance"}`}
-                        subtitle={`${data.selectedChild?.displayName || "Child"} Â· Student ID: ${data.selectedChild?.studentId || "N/A"}`}
+                        title={`${data.selectedChild?.className || "Class"} — ${data.monthLabel || "Attendance"}`}
+                        subtitle={`${data.selectedChild?.displayName || "Child"} · Student ID: ${data.selectedChild?.studentId || "N/A"}`}
                         viewType="parent"
                       />
                     </div>

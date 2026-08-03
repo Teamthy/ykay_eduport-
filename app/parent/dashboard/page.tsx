@@ -180,7 +180,7 @@ export default function ParentDashboardPage() {
                             {child.displayName}
                           </div>
                           <div className="text-[10px] text-[var(--text-muted)]">
-                            {child.className} Â· ID: {child.studentId}
+                            {child.className} · ID: {child.studentId}
                           </div>
                         </div>
                       ))}
@@ -237,7 +237,7 @@ export default function ParentDashboardPage() {
                             {data.finance.latestInvoice ? (
                               <>
                                 <p className="text-sm text-[var(--text-secondary)]">
-                                  {data.finance.latestInvoice.title} Â·{" "}
+                                  {data.finance.latestInvoice.title} ·{" "}
                                   {data.finance.latestInvoice.termLabel}
                                 </p>
                                 <p className="mt-2 text-xs text-[var(--text-muted)]">

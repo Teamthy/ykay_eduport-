@@ -361,7 +361,7 @@ export default function ClassAttendancePage() {
                     {register?.availableClasses.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item.displayName}
-                        {item.roles.includes("FORM_TEACHER") ? " Â· Form teacher" : ""}
+                        {item.roles.includes("FORM_TEACHER") ? " · Form teacher" : ""}
                       </option>
                     ))}
                   </select>
@@ -509,7 +509,7 @@ export default function ClassAttendancePage() {
                   <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)]">
                     <div className="border-b border-[var(--border-subtle)] px-6 py-4">
                       <h2 className="font-display text-xl text-[var(--text-primary)]">
-                        {register.selectedClass?.displayName} Â· Daily register
+                        {register.selectedClass?.displayName} · Daily register
                       </h2>
                       <p className="mt-1 text-xs text-[var(--text-muted)]">
                         Period key: {register.session?.periodKey || "DAILY_REGISTER"}
@@ -531,7 +531,7 @@ export default function ClassAttendancePage() {
                             </div>
                             {row.guardianPhone ? (
                               <div className="mt-1 text-[11px] text-[var(--text-muted)]">
-                                Guardian: {row.guardianName || "Linked parent"} Â·{" "}
+                                Guardian: {row.guardianName || "Linked parent"} ·{" "}
                                 {row.guardianPhone}
                               </div>
                             ) : null}

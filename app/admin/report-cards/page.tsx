@@ -267,7 +267,7 @@ export default function AdminReportCardsPage() {
                                 </span>
                               </td>
                               <td className="px-4 py-4 font-display text-base font-bold text-brand-green">
-                                {report.overallAverage}% Â· {report.overallGrade}
+                                {report.overallAverage}% · {report.overallGrade}
                               </td>
                               <td className="px-4 py-4 flex gap-2">
                                 <button
