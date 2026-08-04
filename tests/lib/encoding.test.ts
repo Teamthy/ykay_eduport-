@@ -22,6 +22,15 @@ import { join, relative } from "node:path";
 
 const ROOT = process.cwd();
 const SCAN = ["app", "components", "lib", "scripts", "mobile/app", "mobile/src", "mobile/lib"];
+/**
+ * Root-level files, scanned individually.
+ *
+ * The directory walk missed these entirely, which is how `.env.example` kept
+ * a mangled em dash ("Paystack â€” use test keys") through two encoding
+ * sweeps. A guard that only looks where you expect the bug is how the bug
+ * survives.
+ */
+const SCAN_FILES = [".env.example", "README.md", "package.json"];
 const EXTENSIONS = /\.(tsx?|jsx?|css|md|json)$/;
 
 /**
@@ -52,7 +61,10 @@ function walk(dir: string, out: string[] = []): string[] {
 }
 
 describe("source files are valid UTF-8, not mojibake", () => {
-  const files = SCAN.flatMap((dir) => walk(join(ROOT, dir)));
+  const files = [
+    ...SCAN.flatMap((dir) => walk(join(ROOT, dir))),
+    ...SCAN_FILES.map((f) => join(ROOT, f)).filter((f) => existsSync(f)),
+  ];
 
   it("scans a meaningful number of files", () => {
     // Guards the guard: a broken walk would make every assertion below pass.

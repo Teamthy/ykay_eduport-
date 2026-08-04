@@ -60,6 +60,12 @@ prisma/*.db-journal
 
 !mobile/
 !mobile/**
+# ...but NOT its secrets. `!mobile/**` re-includes everything under mobile/,
+# which silently overrode the .env rules above — `git check-ignore` showed
+# mobile/.env.local as tracked-in-waiting. Re-exclude them explicitly.
+mobile/.env
+mobile/.env.local
+mobile/.env.*.local
 
 *.patch
 *.zip

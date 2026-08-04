@@ -29,8 +29,7 @@ import {
   Bell,
   Users,
   CreditCard,
-  Wallet,
-} from "lucide-react-native";
+  Wallet, Mail } from "lucide-react-native";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 
@@ -257,6 +256,16 @@ export default function StudentDashboard() {
           label="Attendance"
           hint="Your day-by-day record"
           onPress={() => router.push("/(student)/attendance")}
+        />
+        {/* Students got messaging on the web in drop 36 — reachableStudentIds()
+            resolves a STUDENT to their own profile — but the mobile dashboard
+            never linked to it, so the screen existed and no student could open
+            it. Parents and teachers already had this row. */}
+        <ActionRow
+          icon={<Mail size={18} color={colors.brand.greenLight} />}
+          label="Messages"
+          hint="Talk to your teachers"
+          onPress={() => router.push("/messages")}
         />
         <ActionRow
           icon={<Bell size={18} color={colors.brand.greenLight} />}

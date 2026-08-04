@@ -11,7 +11,28 @@ import * as SecureStore from "expo-secure-store";
  * EXPO_PUBLIC_API_URL env var isn't passed. Override locally with
  * EXPO_PUBLIC_API_URL=http://<lan-ip>:3000 for dev against a local server.
  */
-export const API_BASE = process.env.EXPO_PUBLIC_API_URL || "https://ykay-eduport2.vercel.app";
+/**
+ * Where the API lives.
+ *
+ * On NATIVE this must be absolute — there is no page origin to be relative to.
+ *
+ * On WEB, an explicitly empty EXPO_PUBLIC_API_URL means "use relative URLs",
+ * which lets Metro's dev proxy (metro.config.js) forward /api/... to the
+ * deployed backend server-side. That is the only way to authenticate from a
+ * web preview: the deployed API allows exactly one CORS origin
+ * (NEXT_PUBLIC_SITE_URL), so a browser on :8081 has its response blocked
+ * before any code runs — the infamous "Failed to fetch".
+ *
+ * `??` rather than `||` on purpose: `||` would treat the deliberate empty
+ * string as "unset" and fall back to the absolute URL, reintroducing CORS.
+ */
+const CONFIGURED_API_URL = process.env.EXPO_PUBLIC_API_URL;
+export const API_BASE =
+  CONFIGURED_API_URL !== undefined && CONFIGURED_API_URL !== ""
+    ? CONFIGURED_API_URL
+    : CONFIGURED_API_URL === "" && typeof window !== "undefined"
+      ? "" // web + explicitly blank -> relative, proxied by Metro
+      : "https://ykay-eduport2.vercel.app";
 
 const SESSION_KEY = "ykay_session";
 

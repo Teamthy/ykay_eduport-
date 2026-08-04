@@ -1,5 +1,6 @@
 import { jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
+import { resolveAllowedOrigin } from "@/lib/cors";
 
 const protectedPrefixes = [
   "/admin",
@@ -78,7 +79,12 @@ export async function middleware(request: NextRequest) {
     return new NextResponse(null, {
       status: 204,
       headers: {
-        "Access-Control-Allow-Origin": process.env.NEXT_PUBLIC_SITE_URL || "*",
+        // Echo the caller's origin when it is allowed. A single hardcoded
+        // value means any local preview gets "Failed to fetch" with nothing
+        // to diagnose — see lib/cors.ts.
+        "Access-Control-Allow-Origin": resolveAllowedOrigin(request.headers.get("origin")),
+        "Access-Control-Allow-Credentials": "true",
+        Vary: "Origin",
         "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type,Authorization,x-idempotency-key",
         "Access-Control-Max-Age": "86400",
