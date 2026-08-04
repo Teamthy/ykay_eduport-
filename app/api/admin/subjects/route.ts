@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
-import { requireRole } from "@/lib/session";
+import { checkRole, explainDenial, type SessionDenial } from "@/lib/session";
 import {
   DEFAULT_CATALOGUE,
   SUBJECT_ADMIN_ROLES,
@@ -13,6 +13,30 @@ import {
 } from "@/lib/subjects";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * A 401 that says why.
+ *
+ * This route 401'd in production and the response gave nothing to act on.
+ * requireRole() returns null for six different reasons, and three of them
+ * (revoked tokenVersion, inactive account, suspended account) are enforced
+ * ONLY here and not in middleware -- which is why the page loads fine while
+ * every button on it fails.
+ *
+ * The reason also goes in a header, so it is visible in the network tab
+ * without parsing the body or making a second request.
+ */
+function unauthorized(denial: { reason: SessionDenial; role?: string }) {
+  return NextResponse.json(
+    {
+      error: explainDenial(denial.reason),
+      code: denial.reason,
+      role: denial.role ?? null,
+      hint: "GET /api/auth/whoami for the full picture.",
+    },
+    { status: 401, headers: { "x-auth-denied": denial.reason } },
+  );
+}
 
 const upsertSchema = z.object({
   level: z.string().trim().min(2).max(10),
@@ -30,8 +54,9 @@ const actionSchema = z.discriminatedUnion("action", [
 ]);
 
 export async function GET(request: NextRequest) {
-  const user = await requireRole(SUBJECT_ADMIN_ROLES);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await checkRole(SUBJECT_ADMIN_ROLES);
+  if (!auth.ok) return unauthorized(auth);
+  const user = auth.user;
 
   const level = request.nextUrl.searchParams.get("level") || undefined;
 
@@ -61,8 +86,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const user = await requireRole(SUBJECT_ADMIN_ROLES);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await checkRole(SUBJECT_ADMIN_ROLES);
+  if (!auth.ok) return unauthorized(auth);
+  const user = auth.user;
 
   let input: z.infer<typeof upsertSchema>;
   try {
@@ -95,8 +121,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const user = await requireRole(SUBJECT_ADMIN_ROLES);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await checkRole(SUBJECT_ADMIN_ROLES);
+  if (!auth.ok) return unauthorized(auth);
+  const user = auth.user;
 
   let input: z.infer<typeof actionSchema>;
   try {
@@ -140,8 +167,9 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const user = await requireRole(SUBJECT_ADMIN_ROLES);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await checkRole(SUBJECT_ADMIN_ROLES);
+  if (!auth.ok) return unauthorized(auth);
+  const user = auth.user;
 
   const id = request.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing subject id." }, { status: 400 });

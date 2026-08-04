@@ -194,7 +194,7 @@ export default function LiveReportCardPreview({
           <div
             className={`mt-2 font-display text-2xl ${feeBalance > 0 ? "text-brand-orange" : "text-brand-green"}`}
           >
-            {feeBalance > 0 ? `â‚¦${feeBalance.toLocaleString()}` : "Fully Paid"}
+            {feeBalance > 0 ? `₦${feeBalance.toLocaleString()}` : "Fully Paid"}
           </div>
         </div>
       </div>

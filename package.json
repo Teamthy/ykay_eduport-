@@ -35,6 +35,7 @@
     "verify:rls:coverage": "tsx scripts/verify-rls-coverage.ts",
     "check:drift": "tsx scripts/check-schema-drift.ts",
     "check:boundary": "tsx scripts/check-client-boundary.ts",
+    "check:orphans": "tsx scripts/check-orphan-pages.ts",
     "reconcile:labels": "tsx scripts/reconcile-labels.ts",
     "diagnose:db": "tsx scripts/diagnose-db.ts",
     "repair:labels": "tsx scripts/repair-labels.ts",

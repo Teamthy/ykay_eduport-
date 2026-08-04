@@ -338,6 +338,31 @@ export default function ExamCenterPage() {
                     </div>
                   ) : null}
 
+                  {/* Where to put a Word/PDF/CSV question file.
+                      /teacher/upload-questions was fully built and reachable
+                      ONLY by clicking through from an existing exam, so a
+                      teacher who had not created one yet could not find it.
+                      It is in the sidebar now; this is the in-context route,
+                      because this is where they are already standing. */}
+                  <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-brand-green/25 bg-brand-green/5 p-4">
+                    <Upload size={18} className="shrink-0 text-brand-green" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-[var(--text-primary)]">
+                        Have your questions in a file?
+                      </p>
+                      <p className="text-xs text-[var(--text-muted)]">
+                        Drop in a Word (.docx), text, CSV or Excel file instead of typing them — or
+                        download a template to fill in.
+                      </p>
+                    </div>
+                    <Link
+                      href="/teacher/upload-questions"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+                    >
+                      <Upload size={13} /> Upload questions
+                    </Link>
+                  </div>
+
                   <div className="flex flex-wrap items-center gap-2">
                     {(["ALL", "MIDTERM", "EXAM"] as const).map((key) => (
                       <button

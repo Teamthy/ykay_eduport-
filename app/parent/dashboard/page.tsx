@@ -203,7 +203,7 @@ export default function ParentDashboardPage() {
                           },
                           {
                             label: "Fee Balance",
-                            value: `â‚¦${data.finance.totalOutstanding.toLocaleString()}`,
+                            value: `₦${data.finance.totalOutstanding.toLocaleString()}`,
                             icon: CreditCard,
                           },
                           {
@@ -264,7 +264,7 @@ export default function ParentDashboardPage() {
                                 Total
                               </div>
                               <div className="mt-2 font-display text-2xl text-[var(--text-primary)]">
-                                â‚¦{data.finance.latestInvoice.totalAmount.toLocaleString()}
+                                ₦{data.finance.latestInvoice.totalAmount.toLocaleString()}
                               </div>
                             </div>
                             <div className="rounded-xl bg-[var(--surface-disabled)] p-4">
@@ -272,7 +272,7 @@ export default function ParentDashboardPage() {
                                 Paid
                               </div>
                               <div className="mt-2 font-display text-2xl text-brand-green">
-                                â‚¦{data.finance.latestInvoice.amountPaid.toLocaleString()}
+                                ₦{data.finance.latestInvoice.amountPaid.toLocaleString()}
                               </div>
                             </div>
                             <div className="rounded-xl bg-[var(--surface-disabled)] p-4">
@@ -280,7 +280,7 @@ export default function ParentDashboardPage() {
                                 Outstanding
                               </div>
                               <div className="mt-2 font-display text-2xl text-brand-orange">
-                                â‚¦{data.finance.latestInvoice.balanceDue.toLocaleString()}
+                                ₦{data.finance.latestInvoice.balanceDue.toLocaleString()}
                               </div>
                             </div>
                           </div>

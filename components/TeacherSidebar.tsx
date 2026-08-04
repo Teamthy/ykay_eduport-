@@ -16,6 +16,10 @@ import {
   Award,
   BarChart3,
   LoaderCircle,
+  Upload,
+  Library,
+  Send,
+  Megaphone,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 
@@ -110,14 +114,50 @@ export default function TeacherSidebar() {
     { label: "My Students", href: "/teacher/students", icon: Users },
     { label: "My Profile", href: "/teacher/profile", icon: Award },
     { label: "My attendance", href: "/staff/attendance", icon: UserCheck },
+    { label: "My Records", href: "/teacher/my-records", icon: FileText },
+    { label: "Announcements", href: "/teacher/announcements", icon: Megaphone },
   ];
 
   const subject: NavItem[] = [
     { label: "Gradebook", href: "/teacher/gradebook", icon: BookOpen },
     { label: "Performance Records", href: "/teacher/performance-records", icon: BookOpen },
-    { label: "Exam Centre", href: "/teacher/exam-center", icon: BookOpen },
-    { label: "CBT Center", href: "/teacher/cbt-center", icon: ClipboardCheck },
     { label: "Analytics", href: "/teacher/analytics", icon: BarChart3 },
+  ];
+
+  /**
+   * Tests & exams, in the order a teacher actually works.
+   *
+   * Two problems this fixes.
+   *
+   * 1. "Exam Centre" and "CBT Center" sat next to each other as peers with no
+   *    hint of the difference. They query the SAME endpoint
+   *    (/api/teacher/exams) — CBT Center is the older single-page builder,
+   *    Exam Centre is the board that added scheduling, retakes and readiness
+   *    warnings. Presented as equals, the only way to learn which to use was
+   *    to open both. Exam Centre now leads and is labelled as the starting
+   *    point; the old builder stays, marked "Classic", because it is a
+   *    perfectly good quick-create form and removing a page teachers may have
+   *    bookmarked mid-term is not worth the tidiness.
+   *
+   * 2. Upload Questions and Question Bank were ORPHANED — fully built and
+   *    reachable only by clicking through from an existing exam. A teacher
+   *    looking for "where do I drop my Word file" could not find it, because
+   *    it was not in the navigation at all. Fifteen teacher pages are in that
+   *    state; these are the two that block the exam workflow.
+   */
+  const assessments: NavItem[] = [
+    {
+      label: "Exam Centre",
+      href: "/teacher/exam-center",
+      icon: ClipboardCheck,
+      badge: "Start here",
+    },
+    { label: "Upload Questions", href: "/teacher/upload-questions", icon: Upload },
+    { label: "Question Bank", href: "/teacher/question-bank", icon: Library },
+    { label: "Edit Test Courses", href: "/teacher/test-courses", icon: BookOpen },
+    { label: "Grade Exams", href: "/teacher/grade-exams", icon: FileText },
+    { label: "Send Results", href: "/teacher/send-results", icon: Send },
+    { label: "Quick Create", href: "/teacher/cbt-center", icon: BookOpen, badge: "Classic" },
   ];
 
   const form: NavItem[] = [
@@ -129,6 +169,8 @@ export default function TeacherSidebar() {
     { label: "Attendance register", href: "/teacher/class/attendance", icon: UserCheck },
     { label: "Attendance history", href: "/teacher/class/attendance-history", icon: History },
     { label: "Class report cards", href: "/teacher/class/report-cards", icon: FileText },
+    { label: "Class parents", href: "/teacher/class/parents", icon: Users },
+    { label: "Class timetable", href: "/teacher/class/timetable", icon: History },
   ];
 
   return (
@@ -172,6 +214,14 @@ export default function TeacherSidebar() {
             title="Subject teaching"
             color="text-brand-green"
             items={subject}
+            pathname={pathname}
+          />
+        ) : null}
+        {isSubject ? (
+          <NavBlock
+            title="Tests & exams"
+            color="text-brand-orange"
+            items={assessments}
             pathname={pathname}
           />
         ) : null}

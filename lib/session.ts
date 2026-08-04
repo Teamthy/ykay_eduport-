@@ -114,6 +114,91 @@ export function sessionCookie(token: string) {
  *
  * This check is lightweight — a single indexed lookup by primary key.
  */
+/**
+ * Why a session was refused.
+ *
+ * `requireRole` returns null for six different reasons and the caller answers
+ * a bare 401 for all of them, so "the page loads but every button says
+ * Unauthorized" is unactionable — you cannot tell an expired cookie from a
+ * revoked token from a suspended account without reading the source.
+ *
+ * `sessionDenialReason()` returns the specific cause. `/api/auth/whoami`
+ * surfaces it, and it is written to the response header on a denial so it
+ * shows up in the network tab without needing a second request.
+ */
+export type SessionDenial =
+  | "NO_SESSION"
+  | "BAD_SIGNATURE_OR_EXPIRED"
+  | "WRONG_ROLE"
+  | "USER_NOT_FOUND"
+  | "USER_INACTIVE"
+  | "USER_SUSPENDED"
+  | "SESSION_REVOKED";
+
+export type SessionCheck =
+  { ok: true; user: SessionUser } | { ok: false; reason: SessionDenial; role?: UserRole };
+
+/**
+ * The same logic as `requireRole`, but it reports WHY it said no.
+ *
+ * Kept as one implementation so the diagnostic can never drift from the
+ * enforcement — a diagnostic that disagrees with the real check is worse than
+ * none, because it sends you looking in the wrong place.
+ */
+export async function checkRole(allowed: UserRole[]): Promise<SessionCheck> {
+  const cookieToken = (await cookies()).get(SESSION_COOKIE)?.value;
+  const authHeader = (await headers()).get("authorization") || "";
+  const bearer = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7).trim() : "";
+
+  if (!cookieToken && !bearer) return { ok: false, reason: "NO_SESSION" };
+
+  const user = await getSession();
+  // A token was presented but did not verify: wrong AUTH_SECRET, tampered, or
+  // past its 8-hour expiry.
+  if (!user) return { ok: false, reason: "BAD_SIGNATURE_OR_EXPIRED" };
+
+  if (!allowed.includes(user.role)) return { ok: false, reason: "WRONG_ROLE", role: user.role };
+
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { tokenVersion: true, isActive: true, isSuspended: true },
+    });
+    if (!dbUser) return { ok: false, reason: "USER_NOT_FOUND", role: user.role };
+    if (dbUser.isSuspended) return { ok: false, reason: "USER_SUSPENDED", role: user.role };
+    if (!dbUser.isActive) return { ok: false, reason: "USER_INACTIVE", role: user.role };
+    if (dbUser.tokenVersion > (user.tokenVersion ?? 0)) {
+      return { ok: false, reason: "SESSION_REVOKED", role: user.role };
+    }
+  } catch {
+    // Matches requireRole: fail OPEN if the database is unreachable. The JWT
+    // signature is already valid; this lookup is an extra revocation check and
+    // must not take the whole app down with the database.
+  }
+
+  return { ok: true, user };
+}
+
+/** Plain-English explanation, safe to show a signed-in staff member. */
+export function explainDenial(reason: SessionDenial): string {
+  switch (reason) {
+    case "NO_SESSION":
+      return "No session cookie was sent. Sign in again.";
+    case "BAD_SIGNATURE_OR_EXPIRED":
+      return "Your session has expired or is no longer valid. Sign in again.";
+    case "WRONG_ROLE":
+      return "Your role does not have access to this action.";
+    case "USER_NOT_FOUND":
+      return "Your account no longer exists.";
+    case "USER_INACTIVE":
+      return "Your account is not active. Ask an administrator to re-enable it.";
+    case "USER_SUSPENDED":
+      return "Your account is suspended.";
+    case "SESSION_REVOKED":
+      return "Your session was ended elsewhere — after a password change, role change, or sign-out-everywhere. Sign in again.";
+  }
+}
+
 export async function requireRole(allowed: UserRole[]) {
   const user = await getSession();
   if (!user || !allowed.includes(user.role)) return null;
