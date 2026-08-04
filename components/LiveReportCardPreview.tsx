@@ -54,7 +54,7 @@ export default function LiveReportCardPreview({
     : 0;
 
   return (
-    <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)] overflow-hidden print:shadow-none print:border-none">
+    <div className="report-card-sheet rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)] overflow-hidden print:shadow-none print:border-none">
       <div className="bg-brand-navy px-8 py-10 text-white">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>

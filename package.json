@@ -37,6 +37,7 @@
     "check:boundary": "tsx scripts/check-client-boundary.ts",
     "check:orphans": "tsx scripts/check-orphan-pages.ts",
     "check:dead-ui": "tsx scripts/check-dead-ui.ts",
+    "check:readiness": "tsx scripts/check-term-readiness.ts",
     "reconcile:labels": "tsx scripts/reconcile-labels.ts",
     "diagnose:db": "tsx scripts/diagnose-db.ts",
     "probe:db": "tsx scripts/probe-db-path.ts",

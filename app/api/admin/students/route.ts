@@ -26,9 +26,16 @@ export async function GET() {
   const [students, classes] = await Promise.all([
     prisma.studentProfile.findMany({
       where: { schoolId: user.schoolId, isActive: true },
-      include: { currentClass: { select: { displayName: true } } },
-      orderBy: { createdAt: "desc" },
-      take: 200,
+      include: {
+        currentClass: { select: { id: true, displayName: true } },
+        // Enough to filter and sort by payment status without a second
+        // request per row. Only the balance is needed, so this stays cheap.
+        feeInvoices: { select: { balanceDue: true } },
+      },
+      orderBy: { displayName: "asc" },
+      // Raised from 200. A 200-row cap silently hid students in a school
+      // bigger than that, with nothing on screen to say the list was cut.
+      take: 2000,
     }),
     prisma.schoolClass.findMany({
       where: { schoolId: user.schoolId, isActive: true },
@@ -36,7 +43,19 @@ export async function GET() {
     }),
   ]);
   return NextResponse.json({
-    students: students.map((s) => ({ ...s, className: s.currentClass.displayName })),
+    students: students.map((s) => {
+      const outstanding = s.feeInvoices.reduce((sum, i) => sum + (i.balanceDue ?? 0), 0);
+      return {
+        ...s,
+        feeInvoices: undefined,
+        className: s.currentClass.displayName,
+        classId: s.currentClass.id,
+        outstanding,
+        // NOT_BILLED is distinct from PAID on purpose: no invoice means
+        // nobody has billed them, which is a gap, not a settled account.
+        feeStatus: s.feeInvoices.length === 0 ? "NOT_BILLED" : outstanding > 0 ? "OWING" : "PAID",
+      };
+    }),
     classes,
   });
 }

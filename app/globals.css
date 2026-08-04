@@ -947,13 +947,102 @@ button:disabled {
     content: "" !important;
   }
 
-  /* Report card sheet: full page width, one card per page */
+  /* ── Report card: must fit on ONE page, not spill across three ──────────
+     The on-screen design is deliberately airy — px-8 py-10, rounded-[2rem],
+     text-5xl figures, tracking-[0.22em] headings. On paper that pushed a
+     five-subject card to three sides, with page 1 and 3 nearly empty.
+
+     Two things caused it. The sheet had generous padding with no print
+     override, and the wide letter-spacing broke headings mid-word: a print
+     engine hyphenates "OFFICIAL" into "O F F I C I A L" when the tracking is
+     large enough to make each glyph its own break opportunity.
+
+     Everything below is a print-only override. The screen design is
+     unchanged. */
   .report-card-sheet {
     width: 100% !important;
     max-width: none !important;
     min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+    border: 1px solid #000 !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    /* One card per sheet, and never split mid-card. */
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Collapse the on-screen breathing room. This is the single biggest win:
+     px-8 py-10 on five stacked sections is ~9cm of pure whitespace. */
+  .report-card-sheet [class*="px-8"] {
+    padding-left: 6mm !important;
+    padding-right: 6mm !important;
+  }
+  .report-card-sheet [class*="py-10"],
+  .report-card-sheet [class*="py-8"],
+  .report-card-sheet [class*="pb-8"],
+  .report-card-sheet [class*="py-6"] {
+    padding-top: 3mm !important;
+    padding-bottom: 3mm !important;
+  }
+  .report-card-sheet [class*="gap-6"],
+  .report-card-sheet [class*="gap-4"] {
+    gap: 3mm !important;
+  }
+
+  /* Tame the display type. text-5xl at 48px is a fifth of the page height. */
+  .report-card-sheet h2 {
+    font-size: 16pt !important;
+    line-height: 1.15 !important;
+  }
+  .report-card-sheet [class*="text-5xl"] {
+    font-size: 20pt !important;
+    line-height: 1.1 !important;
+  }
+  .report-card-sheet [class*="text-4xl"] {
+    font-size: 15pt !important;
+    line-height: 1.15 !important;
+  }
+  .report-card-sheet [class*="text-3xl"] {
+    font-size: 13pt !important;
+  }
+
+  /* Stop headings shattering into single letters. Wide tracking gives the
+     line breaker a break opportunity between every glyph. */
+  .report-card-sheet * {
+    letter-spacing: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+  }
+
+  /* The grid columns stack on paper otherwise, doubling the height. */
+  .report-card-sheet [class*="md:grid-cols-3"] {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  .report-card-sheet [class*="lg:grid-cols-"] {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  /* The marks table is the substance of the document — keep it legible but
+     compact, and never let it break across sheets. */
+  .report-card-sheet table {
+    font-size: 8.5pt !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .report-card-sheet th,
+  .report-card-sheet td {
+    padding: 1.2mm 1.5mm !important;
+  }
+
+  /* A dark header band prints as a solid black block that drains a cartridge
+     and makes white text vanish. Force it light with a rule underneath. */
+  .report-card-sheet [class*="bg-brand-navy"] {
+    border-bottom: 1.5pt solid #000 !important;
   }
   .report-card-sheet + .report-card-sheet {
     break-before: page;

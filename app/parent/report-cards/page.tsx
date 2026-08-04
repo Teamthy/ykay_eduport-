@@ -137,7 +137,7 @@ export default function ParentReportCardsPage() {
     <>
       <PortalTopbar />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
-        <section className="bg-brand-navy px-6 pb-10 pt-24">
+        <section className="no-print bg-brand-navy px-6 pb-10 pt-24">
           <div className="mx-auto max-w-7xl">
             <h1 className="font-display text-[42px] tracking-[3px] text-white md:text-[64px]">
               REPORT <span className="text-brand-green">CARDS</span>
@@ -169,7 +169,11 @@ export default function ParentReportCardsPage() {
 
               {!loading && data ? (
                 <>
-                  <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
+                  {/* The chooser: on-screen only. Without no-print this whole
+                      panel — heading, child tabs, and the five-column table of
+                      every available card — printed as page 1, pushing the
+                      actual report card onto pages 2 and 3. */}
+                  <div className="no-print rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
                     <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                       <div>
                         <h2 className="font-display text-xl text-[var(--text-primary)]">

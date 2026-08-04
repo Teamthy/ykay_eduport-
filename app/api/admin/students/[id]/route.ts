@@ -22,6 +22,27 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
           },
         },
       },
+      // The subjects this child actually offers. An admin looking at a
+      // profile needs the list, not a count.
+      studentSubjects: {
+        where: { isActive: true },
+        select: { subject: { select: { id: true, name: true, category: true } } },
+        orderBy: { subject: { name: "asc" } },
+      },
+      // Enough to state the fee position. `_count.feeInvoices: 3` answers
+      // nothing when a parent is on the phone asking what they owe.
+      feeInvoices: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          termLabel: true,
+          totalAmount: true,
+          amountPaid: true,
+          balanceDue: true,
+          status: true,
+          dueDate: true,
+        },
+      },
       _count: {
         select: {
           attendanceEntries: true,
@@ -34,7 +55,28 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     },
   });
   if (!student) return NextResponse.json({ error: "Student not found." }, { status: 404 });
-  return NextResponse.json({ student });
+
+  const invoices = student.feeInvoices ?? [];
+  const totalBilled = invoices.reduce((sum, i) => sum + (i.totalAmount ?? 0), 0);
+  const totalPaid = invoices.reduce((sum, i) => sum + (i.amountPaid ?? 0), 0);
+  const outstanding = invoices.reduce((sum, i) => sum + (i.balanceDue ?? 0), 0);
+
+  return NextResponse.json({
+    student,
+    subjects: (student.studentSubjects ?? []).map((e) => e.subject),
+    fees: {
+      totalBilled,
+      totalPaid,
+      outstanding,
+      invoices,
+      /**
+       * NOT_BILLED is deliberately distinct from PAID. A student with no
+       * invoice owes nothing, but nobody has billed them either — reporting
+       * that as "paid" hides a billing gap until the end of term.
+       */
+      status: invoices.length === 0 ? "NOT_BILLED" : outstanding > 0 ? "OWING" : "PAID",
+    },
+  });
 }
 
 const patchSchema = z.object({

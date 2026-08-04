@@ -1,5 +1,6 @@
 "use client";
 import { FormEvent, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import AdminSidebar from "@/components/AdminSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
 import { Plus, Search, UserPlus, Users, X } from "lucide-react";
@@ -12,6 +13,9 @@ type Student = {
   guardianPhone: string | null;
   guardianEmail: string | null;
   className: string;
+  classId: string;
+  outstanding: number;
+  feeStatus: "PAID" | "OWING" | "NOT_BILLED";
 };
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]),
@@ -19,7 +23,9 @@ export default function StudentsPage() {
     [open, setOpen] = useState(false),
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
-    [search, setSearch] = useState("");
+    [search, setSearch] = useState(""),
+    [classFilter, setClassFilter] = useState("ALL"),
+    [feeFilter, setFeeFilter] = useState("ALL");
   const load = useCallback(async () => {
     const r = await fetch("/api/admin/students", { cache: "no-store" });
     const j = await r.json();
@@ -54,9 +60,19 @@ export default function StudentsPage() {
     );
     await load();
   }
-  const shown = students.filter((x) =>
-    `${x.displayName} ${x.studentId} ${x.className}`.toLowerCase().includes(search.toLowerCase()),
-  );
+  /**
+   * Text search alone was the only filter, over every student in the school.
+   * An admin chasing unpaid fees in SS2 had to know a name before they could
+   * narrow anything — the list is not useful at 600 rows.
+   */
+  const shown = students.filter((x) => {
+    const matchesText = `${x.displayName} ${x.studentId} ${x.className}`
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    const matchesClass = classFilter === "ALL" || x.classId === classFilter;
+    const matchesFee = feeFilter === "ALL" || x.feeStatus === feeFilter;
+    return matchesText && matchesClass && matchesFee;
+  });
   return (
     <>
       <PortalTopbar title="Student records" />
@@ -95,6 +111,38 @@ export default function StudentsPage() {
                 placeholder="Search students"
               />
             </label>
+
+            {/* Class and payment filters. Text search over every student in
+                the school was the only way to narrow the list, which is
+                useless for "show me everyone in SS2 who still owes". */}
+            <select
+              value={classFilter}
+              onChange={(e) => setClassFilter(e.target.value)}
+              className="rounded-full border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-2.5 text-sm"
+            >
+              <option value="ALL">All classes</option>
+              {classes.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.displayName}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={feeFilter}
+              onChange={(e) => setFeeFilter(e.target.value)}
+              className="rounded-full border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-2.5 text-sm"
+            >
+              <option value="ALL">Any fee status</option>
+              <option value="OWING">Owing</option>
+              <option value="PAID">Paid</option>
+              <option value="NOT_BILLED">Not billed</option>
+            </select>
+
+            <span className="self-center text-xs text-[var(--text-muted)]">
+              {shown.length} of {students.length}
+            </span>
+
             <button
               onClick={() => setOpen(true)}
               className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
@@ -115,10 +163,32 @@ export default function StudentsPage() {
                 {shown.map((s) => (
                   <tr className="border-t border-[var(--border-subtle)]" key={s.id}>
                     <td className="p-4">
-                      <b>{s.displayName}</b>
+                      {/* The rows were static text. There was no way to open a
+                          single child from here at all. */}
+                      <Link
+                        href={`/admin/students/${s.id}`}
+                        className="font-bold text-[var(--text-primary)] hover:text-brand-green hover:underline"
+                      >
+                        {s.displayName}
+                      </Link>
                       <small className="mt-1 block font-mono text-[var(--text-muted)]">
                         {s.studentId}
                       </small>
+                      <span
+                        className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${
+                          s.feeStatus === "PAID"
+                            ? "bg-brand-green/15 text-brand-green"
+                            : s.feeStatus === "OWING"
+                              ? "bg-red-500/15 text-red-500"
+                              : "bg-brand-orange/15 text-brand-orange"
+                        }`}
+                      >
+                        {s.feeStatus === "PAID"
+                          ? "Paid"
+                          : s.feeStatus === "OWING"
+                            ? `Owing ₦${Number(s.outstanding || 0).toLocaleString()}`
+                            : "Not billed"}
+                      </span>
                     </td>
                     <td className="p-4">{s.className}</td>
                     <td className="p-4">
