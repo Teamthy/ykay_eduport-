@@ -220,16 +220,23 @@ async function deliverPush(input: InAppNotificationInput) {
   if (!(await userAllowsDelivery(input.userId, input.kind))) return;
 
   const { pushUser } = await import("@/lib/push");
-  await pushUser(input.userId, {
-    title: input.title,
-    body: input.body,
-    data: {
-      kind: input.kind,
-      // Deep-link target so tapping the notification opens the right screen
-      // instead of dumping the user on the dashboard.
-      link: input.link || null,
+  await pushUser(
+    input.userId,
+    {
+      title: input.title,
+      body: input.body,
+      data: {
+        kind: input.kind,
+        // Deep-link target so tapping the notification opens the right screen
+        // instead of dumping the user on the dashboard.
+        link: input.link || null,
+      },
     },
-  });
+    // Scope the token lookup to the tenant. Every in-app notification already
+    // carries a schoolId; it simply was not being passed down, so the token
+    // read ran unscoped by userId alone.
+    input.schoolId,
+  );
 }
 
 /* ------------------------------------------------------------------

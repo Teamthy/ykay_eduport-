@@ -1,5 +1,8 @@
 import { unzipSync, strFromU8 } from "fflate";
-import { parseBulkQuestions, type ParsedQuestion } from "@/lib/exams";
+// Must be @/lib/exam-questions, NOT @/lib/exams: this module is imported by a
+// client component, and lib/exams pulls in lib/session -> next/headers, which
+// fails the production build.
+import { parseBulkQuestions, type ParsedQuestion } from "@/lib/exam-questions";
 
 /**
  * Importing questions from Word (.docx) and plain text.

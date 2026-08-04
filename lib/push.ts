@@ -34,9 +34,17 @@ export async function sendPush(tokens: string[], payload: PushPayload): Promise<
   }
 }
 
-/** Send a push to every token belonging to a user (e.g. when their result is posted). */
-export async function pushUser(userId: string, payload: PushPayload): Promise<void> {
-  const tokens = await prismaTokensForUser(userId);
+/**
+ * Send a push to every token belonging to a user (e.g. when their result is
+ * posted). Pass `schoolId` wherever the caller knows it, so the read runs
+ * under the tenant policy.
+ */
+export async function pushUser(
+  userId: string,
+  payload: PushPayload,
+  schoolId?: string,
+): Promise<void> {
+  const tokens = await prismaTokensForUser(userId, schoolId);
   await sendPush(tokens, payload);
 }
 
@@ -46,22 +54,51 @@ export async function pushUser(userId: string, payload: PushPayload): Promise<vo
  * One query for all tokens rather than N queries — a broadcast to 800 parents
  * would otherwise be 800 round-trips before a single notification is sent.
  */
-export async function pushUsers(userIds: string[], payload: PushPayload): Promise<void> {
+export async function pushUsers(
+  userIds: string[],
+  payload: PushPayload,
+  /**
+   * The tenant these users belong to.
+   *
+   * Optional because the super-admin broadcast legitimately spans schools —
+   * passing one id there would be wrong, not safer. Everything else should
+   * pass it: the lookup is by userId alone, with no schoolId in the WHERE
+   * clause, so a bad id list would happily push into another school. With a
+   * scope, Postgres refuses that at the row level even if the caller's
+   * filtering is buggy.
+   */
+  schoolId?: string,
+): Promise<void> {
   if (!userIds.length) return;
-  const { prisma } = await import("@/lib/prisma");
-  const rows = await prisma.deviceToken.findMany({
-    where: { userId: { in: userIds } },
-    select: { token: true },
-  });
+
+  const select = { token: true } as const;
+  const where = { userId: { in: userIds } };
+
+  let rows: Array<{ token: string }>;
+  if (schoolId) {
+    const { withSchool } = await import("@/lib/db-rls");
+    rows = await withSchool(schoolId, (tx) => tx.deviceToken.findMany({ where, select }));
+  } else {
+    const { prisma } = await import("@/lib/prisma");
+    rows = await prisma.deviceToken.findMany({ where, select });
+  }
+
   await sendPush(
     rows.map((r) => r.token),
     payload,
   );
 }
 
-async function prismaTokensForUser(userId: string): Promise<string[]> {
+async function prismaTokensForUser(userId: string, schoolId?: string): Promise<string[]> {
+  const where = { userId };
+  const select = { token: true } as const;
+  if (schoolId) {
+    const { withSchool } = await import("@/lib/db-rls");
+    const scoped = await withSchool(schoolId, (tx) => tx.deviceToken.findMany({ where, select }));
+    return scoped.map((r) => r.token);
+  }
   // Imported lazily to avoid loading Prisma in unrelated serverless paths.
   const { prisma } = await import("@/lib/prisma");
-  const rows = await prisma.deviceToken.findMany({ where: { userId }, select: { token: true } });
+  const rows = await prisma.deviceToken.findMany({ where, select });
   return rows.map((r) => r.token);
 }

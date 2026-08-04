@@ -20,12 +20,12 @@ type PushPayload = { title: string; body: string; data?: Record<string, unknown>
 
 // Typed explicitly: inferring from `async () => undefined` gives a zero-arg
 // signature, so mock.calls[0][1] would not type-check.
-const pushUser = vi.fn<(userId: string, payload: PushPayload) => Promise<void>>(
+const pushUser = vi.fn<(userId: string, payload: PushPayload, schoolId?: string) => Promise<void>>(
   async () => undefined,
 );
-const pushUsers = vi.fn<(userIds: string[], payload: PushPayload) => Promise<void>>(
-  async () => undefined,
-);
+const pushUsers = vi.fn<
+  (userIds: string[], payload: PushPayload, schoolId?: string) => Promise<void>
+>(async () => undefined);
 
 vi.mock("@/lib/push", () => ({ pushUser, pushUsers, sendPush: vi.fn() }));
 
@@ -78,7 +78,25 @@ describe("createInAppNotification — push delivery", () => {
     expect(pushUser).toHaveBeenCalledWith(
       "usr_parent",
       expect.objectContaining({ title: "Fee reminder", body: "Second term fees are due." }),
+      // Third argument added in the RLS adoption drop: the token lookup used
+      // to run by userId alone, with no schoolId anywhere in the query.
+      input.schoolId,
     );
+  });
+
+  /**
+   * The tenant scope is the whole point of passing schoolId down — without it
+   * the DeviceToken read is unscoped and RLS has nothing to enforce against.
+   * Pinned separately so a refactor that drops the argument fails loudly
+   * rather than quietly reverting to an unscoped query.
+   */
+  it("scopes the device-token lookup to the notification's school", async () => {
+    const { createInAppNotification } = await import("@/lib/notifications");
+    await createInAppNotification(input);
+    await flush(() => pushUser.mock.calls.length > 0);
+
+    expect(pushUser.mock.calls[0]?.[2]).toBe(input.schoolId);
+    expect(pushUser.mock.calls[0]?.[2]).toBeTruthy();
   });
 
   it("carries kind and link so the app can deep-link the tap", async () => {

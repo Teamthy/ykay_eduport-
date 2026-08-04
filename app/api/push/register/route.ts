@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { UserRole } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
+import { withSchool } from "@/lib/db-rls";
 import { requireRole } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -30,16 +30,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid token." }, { status: 400 });
   }
 
-  await prisma.deviceToken.upsert({
-    where: { userId_token: { userId: user.id, token: input.token } },
-    update: { platform: input.platform },
-    create: {
-      userId: user.id,
-      schoolId: user.schoolId,
-      token: input.token,
-      platform: input.platform,
-    },
-  });
+  // Written under the tenant context, so Postgres itself refuses a row whose
+  // schoolId does not match the caller's — the WITH CHECK half of the policy.
+  // DeviceToken is the table that was missing RLS entirely until the
+  // 20260804000000 migration, and it is the one holding push tokens, so it is
+  // the right place to start actually using the backstop rather than just
+  // shipping it.
+  await withSchool(user.schoolId, (tx) =>
+    tx.deviceToken.upsert({
+      where: { userId_token: { userId: user.id, token: input.token } },
+      update: { platform: input.platform },
+      create: {
+        userId: user.id,
+        schoolId: user.schoolId,
+        token: input.token,
+        platform: input.platform,
+      },
+    }),
+  );
 
   return NextResponse.json({ ok: true });
 }
