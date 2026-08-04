@@ -1,334 +1,417 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
-import { useApi } from "@/lib/useApi";
 import { useToast } from "@/components/Toast";
 import {
+  AlertCircle,
   BookOpen,
   Calendar,
-  Clock,
-  FileText,
   ChevronDown,
   ChevronUp,
-  Save,
-  Award,
-  Tag,
+  Clock,
   ListChecks,
+  LoaderCircle,
+  Save,
   School,
 } from "lucide-react";
 
-interface TestCourse {
-  subject: string;
-  examDate: string;
-  objectiveHours: number;
-  objectiveMinutes: number;
+/**
+ * Edit Test Courses — exam duration, marks and the sitting window.
+ *
+ * This page used to be a demo. `courses` was `useState({ Mathematics: {...},
+ * Physics: {...} })` — two hardcoded subjects with invented dates — and there
+ * was no POST anywhere in the file, so "Save" changed React state and nothing
+ * else. Refreshing lost everything.
+ *
+ * It now edits the teacher's real exams through
+ * `PATCH /api/teacher/exams { action: "UPDATE_SETTINGS" }`, which did not
+ * exist before this drop: the endpoint could publish, close and release
+ * results, but could not change the exam's own settings once created.
+ */
+
+type Exam = {
+  id: string;
+  title: string;
+  subjectLabel: string;
+  className: string;
+  examType: string;
+  durationMinutes: number;
+  theoryMinutes: number;
+  totalMarks: number;
+  passMark: number;
+  questionCount: number;
+  status: string;
+  scheduledFor: string | null;
+  availableUntil: string | null;
+};
+
+type Draft = {
+  durationHours: number;
+  durationMinutes: number;
   theoryHours: number;
   theoryMinutes: number;
-  numQuestions: number;
-  totalMarks: number;
-  academicTerm: string;
+  passMark: number;
+  scheduledFor: string;
+  availableUntil: string;
+};
+
+/** An ISO instant as the value a `datetime-local` input expects. */
+function toLocalInput(iso: string | null): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function toIsoOrNull(local: string): string | null {
+  if (!local) return null;
+  const date = new Date(local);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function draftFrom(exam: Exam): Draft {
+  return {
+    durationHours: Math.floor(exam.durationMinutes / 60),
+    durationMinutes: exam.durationMinutes % 60,
+    theoryHours: Math.floor((exam.theoryMinutes || 0) / 60),
+    theoryMinutes: (exam.theoryMinutes || 0) % 60,
+    passMark: exam.passMark,
+    scheduledFor: toLocalInput(exam.scheduledFor),
+    availableUntil: toLocalInput(exam.availableUntil),
+  };
 }
 
 export default function TestCoursesPage() {
   const { toast } = useToast();
-  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
-  const teacher = data?.teacher || ({} as any);
-  const [selectedClass, setSelectedClass] = useState("SS3");
-  const [expanded, setExpanded] = useState<string | null>(
-    (teacher.subjectAssignments || [])[0]?.subject || null,
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [drafts, setDrafts] = useState<Record<string, Draft>>({});
+  const [saving, setSaving] = useState<string | null>(null);
+  const [classFilter, setClassFilter] = useState("ALL");
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch("/api/teacher/exams", { cache: "no-store" });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "Unable to load your exams.");
+      const list: Exam[] = body.exams || [];
+      setExams(list);
+      setDrafts(Object.fromEntries(list.map((e) => [e.id, draftFrom(e)])));
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Unable to load your exams.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const classes = useMemo(() => ["ALL", ...new Set(exams.map((e) => e.className))], [exams]);
+  const shown = useMemo(
+    () => (classFilter === "ALL" ? exams : exams.filter((e) => e.className === classFilter)),
+    [exams, classFilter],
   );
 
-  const [courses, setCourses] = useState<Record<string, TestCourse>>({
-    Mathematics: {
-      subject: "Mathematics",
-      examDate: "2026-02-17",
-      objectiveHours: 0,
-      objectiveMinutes: 20,
-      theoryHours: 0,
-      theoryMinutes: 0,
-      numQuestions: 30,
-      totalMarks: 30,
-      academicTerm: "2026/2027 · 2nd Term",
-    },
-    Physics: {
-      subject: "Physics",
-      examDate: "2026-02-19",
-      objectiveHours: 0,
-      objectiveMinutes: 30,
-      theoryHours: 1,
-      theoryMinutes: 0,
-      numQuestions: 40,
-      totalMarks: 60,
-      academicTerm: "2026/2027 · 2nd Term",
-    },
-  });
-
-  const allClasses = [
-    ...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes)),
-  ];
-  const teacherSubjects = (teacher.subjectAssignments || []).map((sa: any) => sa.subject);
-
-  const updateCourse = (subject: string, field: keyof TestCourse, value: any) => {
-    setCourses((prev) => ({
-      ...prev,
-      [subject]: { ...(prev[subject] || ({ subject } as TestCourse)), [field]: value },
+  function patch(examId: string, field: keyof Draft, value: string | number) {
+    setDrafts((previous) => ({
+      ...previous,
+      [examId]: { ...previous[examId], [field]: value },
     }));
-  };
+  }
 
-  const handleSave = (subject: string) => {
-    toast(`${subject} test configuration saved`, "success");
-  };
+  async function save(exam: Exam) {
+    const draft = drafts[exam.id];
+    if (!draft) return;
+
+    const durationMinutes = draft.durationHours * 60 + draft.durationMinutes;
+    if (durationMinutes < 5) {
+      toast("An exam needs at least 5 minutes.", "error");
+      return;
+    }
+
+    setSaving(exam.id);
+    try {
+      const response = await fetch("/api/teacher/exams", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          examId: exam.id,
+          action: "UPDATE_SETTINGS",
+          durationMinutes,
+          theoryMinutes: draft.theoryHours * 60 + draft.theoryMinutes,
+          passMark: Number(draft.passMark),
+          scheduledFor: toIsoOrNull(draft.scheduledFor),
+          availableUntil: toIsoOrNull(draft.availableUntil),
+        }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "Could not save.");
+      toast(`${exam.title} saved.`, "success");
+      await load();
+    } catch (saveError) {
+      toast(saveError instanceof Error ? saveError.message : "Could not save.", "error");
+    } finally {
+      setSaving(null);
+    }
+  }
 
   return (
     <>
-      <PortalTopbar />
-      <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        <section className="pt-24 pb-10 bg-brand-navy px-6">
+      <PortalTopbar title="Edit test courses" />
+      <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+        <section className="bg-brand-navy px-6 pt-28 pb-14">
           <div className="mx-auto max-w-7xl">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-green/20 border border-brand-green/40 text-brand-green text-[10px] font-bold uppercase tracking-widest mb-3">
-              <BookOpen size={11} /> Test Configuration
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-green/40 bg-brand-green/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
+              <ListChecks size={11} /> Assessments
             </span>
-            <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
+            <h1 className="mt-3 font-display text-4xl tracking-widest text-white md:text-5xl">
               EDIT TEST <span className="text-brand-green">COURSES</span>
             </h1>
-            <p className="text-white/60 text-sm">
-              Configure test parameters for each subject and class arm.
+            <p className="mt-3 max-w-2xl font-body text-sm text-white/60">
+              Set the duration, pass mark and sitting window for each paper you own.
             </p>
           </div>
         </section>
 
-        <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
+        <section className="px-6 py-10">
+          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
             <TeacherSidebar />
 
-            <div className="flex-1 min-w-0 space-y-6">
-              {/* Title Banner */}
-              <div className="p-8 rounded-[2rem] bg-gradient-to-br from-brand-green to-brand-green-dark text-white text-center">
-                <h2 className="font-display text-3xl mb-2">EDIT TEST COURSES</h2>
-                <p className="text-white/80 text-sm">
-                  Configure exam duration, marks, and academic terms
-                </p>
-              </div>
-
-              {/* Class Selector */}
-              <div className="p-4 rounded-2xl bg-brand-green text-white flex items-center gap-3">
-                <School size={22} />
-                <span className="font-display text-xl tracking-widest">Class:</span>
-                <select
-                  value={selectedClass}
-                  onChange={(e) => setSelectedClass(e.target.value)}
-                  className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white font-bold focus:outline-none focus:border-white"
-                >
-                  {allClasses.map((c: any) => (
-                    <option key={String(c)} value={String(c)}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Subject Cards */}
-              {teacherSubjects.map((subj: any) => {
-                const course = courses[subj] || {
-                  subject: subj,
-                  examDate: "",
-                  objectiveHours: 0,
-                  objectiveMinutes: 30,
-                  theoryHours: 0,
-                  theoryMinutes: 0,
-                  numQuestions: 20,
-                  totalMarks: 30,
-                  academicTerm: "2025/2026 · 1st Term",
-                };
-                const isExpanded = expanded === subj;
-
-                return (
-                  <div
-                    key={subj}
-                    className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] overflow-hidden shadow-[var(--card-shadow)]"
+            <div className="min-w-0 flex-1 space-y-4">
+              {error ? (
+                <div className="flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                  <AlertCircle size={18} className="shrink-0" />
+                  <span className="flex-1">{error}</span>
+                  <button
+                    onClick={() => void load()}
+                    className="font-bold uppercase tracking-widest"
                   >
-                    <button
-                      onClick={() => setExpanded(isExpanded ? null : subj)}
-                      className="w-full p-5 bg-brand-green text-white flex items-center justify-between hover:bg-brand-green-dark transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <BookOpen size={20} />
-                        <span className="font-display text-xl">{subj.toLowerCase()}</span>
-                      </div>
-                      {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                    </button>
+                    Retry
+                  </button>
+                </div>
+              ) : null}
 
-                    {isExpanded && (
-                      <div className="p-6 space-y-5">
-                        {/* Row 1 */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 flex items-center gap-1">
-                              <Tag size={11} /> Subject Name
-                            </label>
-                            <input
-                              value={course.subject.toLowerCase()}
-                              readOnly
-                              className="w-full p-3 rounded-xl bg-[var(--surface-disabled)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-bold"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 flex items-center gap-1">
-                              <Calendar size={11} /> Exam Date
-                            </label>
-                            <input
-                              type="date"
-                              value={course.examDate}
-                              onChange={(e) => updateCourse(subj, "examDate", e.target.value)}
-                              className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Row 2: Duration */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                          {/* Objective */}
-                          <div className="p-4 rounded-xl bg-brand-green/5 border border-brand-green/20">
-                            <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-3 flex items-center gap-1">
-                              <Clock size={11} /> Objective Test Duration
-                            </label>
-                            <div className="grid grid-cols-2 gap-2">
-                              <div>
-                                <div className="text-[10px] text-[var(--text-muted)] mb-1">
-                                  Hours
-                                </div>
-                                <input
-                                  type="number"
-                                  value={course.objectiveHours}
-                                  onChange={(e) =>
-                                    updateCourse(subj, "objectiveHours", Number(e.target.value))
-                                  }
-                                  min="0"
-                                  max="5"
-                                  className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
-                                />
-                              </div>
-                              <div>
-                                <div className="text-[10px] text-[var(--text-muted)] mb-1">
-                                  Minutes
-                                </div>
-                                <input
-                                  type="number"
-                                  value={course.objectiveMinutes}
-                                  onChange={(e) =>
-                                    updateCourse(subj, "objectiveMinutes", Number(e.target.value))
-                                  }
-                                  min="0"
-                                  max="59"
-                                  className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Theory */}
-                          <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
-                            <label className="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3 flex items-center gap-1">
-                              <FileText size={11} /> Theory Test Duration
-                            </label>
-                            <div className="grid grid-cols-2 gap-2">
-                              <div>
-                                <div className="text-[10px] text-[var(--text-muted)] mb-1">
-                                  Hours
-                                </div>
-                                <input
-                                  type="number"
-                                  value={course.theoryHours}
-                                  onChange={(e) =>
-                                    updateCourse(subj, "theoryHours", Number(e.target.value))
-                                  }
-                                  min="0"
-                                  max="5"
-                                  className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-blue-500"
-                                />
-                              </div>
-                              <div>
-                                <div className="text-[10px] text-[var(--text-muted)] mb-1">
-                                  Minutes
-                                </div>
-                                <input
-                                  type="number"
-                                  value={course.theoryMinutes}
-                                  onChange={(e) =>
-                                    updateCourse(subj, "theoryMinutes", Number(e.target.value))
-                                  }
-                                  min="0"
-                                  max="59"
-                                  className="w-full p-2 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-blue-500"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Row 3 */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 flex items-center gap-1">
-                              <ListChecks size={11} /> Number of Questions
-                            </label>
-                            <input
-                              type="number"
-                              value={course.numQuestions}
-                              onChange={(e) =>
-                                updateCourse(subj, "numQuestions", Number(e.target.value))
-                              }
-                              min="1"
-                              className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 flex items-center gap-1">
-                              <Award size={11} /> Total Marks
-                            </label>
-                            <input
-                              type="number"
-                              value={course.totalMarks}
-                              onChange={(e) =>
-                                updateCourse(subj, "totalMarks", Number(e.target.value))
-                              }
-                              min="1"
-                              className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold uppercase tracking-widest text-brand-green mb-2 flex items-center gap-1">
-                            <Calendar size={11} /> Academic Term
-                          </label>
-                          <select
-                            value={course.academicTerm}
-                            onChange={(e) => updateCourse(subj, "academicTerm", e.target.value)}
-                            className="w-full p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] focus:outline-none focus:border-brand-green"
-                          >
-                            <option>2025/2026 · 1st Term</option>
-                            <option>2025/2026 · 2nd Term</option>
-                            <option>2025/2026 · 3rd Term</option>
-                            <option>2026/2027 · 1st Term</option>
-                            <option>2026/2027 · 2nd Term</option>
-                          </select>
-                        </div>
-
-                        <button
-                          onClick={() => handleSave(subj)}
-                          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-green text-white text-sm font-bold hover:bg-brand-green-dark transition-all shadow-lg"
-                        >
-                          <Save size={14} /> Save Changes
-                        </button>
-                      </div>
-                    )}
+              {loading ? (
+                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10">
+                  <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    your papers…
                   </div>
-                );
-              })}
+                </div>
+              ) : null}
+
+              {!loading && classes.length > 1 ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <School size={14} className="text-[var(--text-muted)]" />
+                  {classes.map((name) => (
+                    <button
+                      key={name}
+                      onClick={() => setClassFilter(name)}
+                      className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${
+                        classFilter === name
+                          ? "bg-brand-green text-white"
+                          : "bg-[var(--surface-card)] text-[var(--text-secondary)]"
+                      }`}
+                    >
+                      {name === "ALL" ? "All classes" : name}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              {!loading &&
+                shown.map((exam) => {
+                  const draft = drafts[exam.id];
+                  const open = expanded === exam.id;
+                  return (
+                    <div
+                      key={exam.id}
+                      className="rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-card)]"
+                    >
+                      <button
+                        onClick={() => setExpanded(open ? null : exam.id)}
+                        className="flex w-full items-center gap-3 p-5 text-left"
+                      >
+                        <BookOpen size={18} className="shrink-0 text-brand-green" />
+                        <div className="min-w-0 flex-1">
+                          <b className="text-[var(--text-primary)]">{exam.title}</b>
+                          <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+                            {exam.subjectLabel} · {exam.className} · {exam.examType} ·{" "}
+                            {exam.questionCount} questions · {exam.durationMinutes} min
+                            {exam.theoryMinutes > 0 ? ` + ${exam.theoryMinutes} theory` : ""}
+                          </p>
+                        </div>
+                        {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+
+                      {open && draft ? (
+                        <div className="border-t border-[var(--border-subtle)] p-5">
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <label className="block">
+                              <span className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                                <Calendar size={11} /> Exam opens
+                              </span>
+                              <input
+                                type="datetime-local"
+                                value={draft.scheduledFor}
+                                onChange={(e) => patch(exam.id, "scheduledFor", e.target.value)}
+                                className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm text-[var(--input-text)]"
+                              />
+                            </label>
+                            <label className="block">
+                              <span className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                                <Calendar size={11} /> Closes
+                              </span>
+                              <input
+                                type="datetime-local"
+                                value={draft.availableUntil}
+                                onChange={(e) => patch(exam.id, "availableUntil", e.target.value)}
+                                className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm text-[var(--input-text)]"
+                              />
+                            </label>
+                          </div>
+
+                          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                            <div>
+                              <span className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                                <Clock size={11} /> Objective duration
+                              </span>
+                              <div className="flex gap-2">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={4}
+                                  value={draft.durationHours}
+                                  onChange={(e) =>
+                                    patch(exam.id, "durationHours", Number(e.target.value))
+                                  }
+                                  className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm text-[var(--input-text)]"
+                                  placeholder="Hours"
+                                />
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={59}
+                                  value={draft.durationMinutes}
+                                  onChange={(e) =>
+                                    patch(exam.id, "durationMinutes", Number(e.target.value))
+                                  }
+                                  className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm text-[var(--input-text)]"
+                                  placeholder="Minutes"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <span className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                                <Clock size={11} /> Theory duration
+                              </span>
+                              <div className="flex gap-2">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={4}
+                                  value={draft.theoryHours}
+                                  onChange={(e) =>
+                                    patch(exam.id, "theoryHours", Number(e.target.value))
+                                  }
+                                  className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm text-[var(--input-text)]"
+                                  placeholder="Hours"
+                                />
+                                <input
+                                  type="number"
+                                  min={0}
+                                  max={59}
+                                  value={draft.theoryMinutes}
+                                  onChange={(e) =>
+                                    patch(exam.id, "theoryMinutes", Number(e.target.value))
+                                  }
+                                  className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm text-[var(--input-text)]"
+                                  placeholder="Minutes"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                            <label className="block">
+                              <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                                Pass mark (%)
+                              </span>
+                              <input
+                                type="number"
+                                min={0}
+                                max={100}
+                                value={draft.passMark}
+                                onChange={(e) => patch(exam.id, "passMark", Number(e.target.value))}
+                                className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm text-[var(--input-text)]"
+                              />
+                            </label>
+                            <div>
+                              <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                                Total marks
+                              </span>
+                              {/* Derived from the questions, not typed. A total
+                                  that disagrees with the paper misreports every
+                                  percentage on it. */}
+                              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--card-bg-subtle)] p-3 text-sm text-[var(--text-secondary)]">
+                                {exam.totalMarks} — from {exam.questionCount} question
+                                {exam.questionCount === 1 ? "" : "s"}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-5 flex flex-wrap gap-2">
+                            <Link
+                              href={`/teacher/upload-questions?examId=${encodeURIComponent(exam.id)}`}
+                              className="rounded-full border border-[var(--border-default)] px-5 py-2.5 text-sm text-[var(--text-secondary)] hover:border-brand-green hover:text-brand-green"
+                            >
+                              Add questions
+                            </Link>
+                            <button
+                              onClick={() => void save(exam)}
+                              disabled={saving === exam.id}
+                              className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-green py-2.5 text-sm font-bold text-white disabled:opacity-50"
+                            >
+                              {saving === exam.id ? (
+                                <LoaderCircle size={15} className="animate-spin" />
+                              ) : (
+                                <Save size={15} />
+                              )}
+                              Save changes
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+
+              {!loading && !shown.length ? (
+                <div className="rounded-[var(--radius-card)] border border-dashed border-[var(--border-default)] p-12 text-center">
+                  <BookOpen className="mx-auto mb-3 text-[var(--text-muted)]" size={28} />
+                  <p className="text-sm text-[var(--text-muted)]">
+                    No papers yet. Create one in the Exam Centre first.
+                  </p>
+                  <Link
+                    href="/teacher/exam-center"
+                    className="mt-4 inline-flex rounded-full bg-brand-green px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+                  >
+                    Go to Exam Centre
+                  </Link>
+                </div>
+              ) : null}
             </div>
           </div>
         </section>

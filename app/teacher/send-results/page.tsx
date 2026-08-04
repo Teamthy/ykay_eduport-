@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 
 interface Recipient {
+  /** StudentProfile.id — what the API authorises against. */
+  profileId: string;
   studentId: string;
   studentName: string;
   parentName: string;
@@ -66,6 +68,7 @@ export default function SendResultsPage() {
     if (data?.students) {
       setRecipients(
         data.students.map((s) => ({
+          profileId: s.id,
           studentId: s.studentId,
           studentName: s.displayName,
           parentName: "—",
@@ -119,23 +122,66 @@ export default function SendResultsPage() {
     setChannels((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
   };
 
+  /**
+   * Actually send.
+   *
+   * This used to be a simulation: a 500ms sleep per recipient and
+   * `Math.random() > 0.1 ? "delivered" : "sent"` for the status. It reported
+   * success to the teacher and delivered nothing — no notification, no email,
+   * no record. There was no POST anywhere in this file.
+   *
+   * It now posts to /api/teacher/send-results, which notifies each linked
+   * parent AND the student through the normal notification pipeline, so
+   * per-user notification preferences are honoured and an in-app row is
+   * written even when push is muted.
+   */
   const handleSend = async () => {
+    if (!selectedRecipients.length) return;
     setSending(true);
     setStep(4);
-    // Simulate sending progressively
-    for (let i = 0; i < selectedRecipients.length; i++) {
-      await new Promise((r) => setTimeout(r, 500));
-      setSentCount(i + 1);
+    try {
+      const response = await fetch("/api/teacher/send-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assessmentLabel: assessment || "Assessment",
+          subjectName: subject || "Result",
+          results: selectedRecipients.map((r) => ({
+            studentProfileId: r.profileId,
+            score: Number(r.score) || 0,
+            total: 100,
+            comment: customMessage
+              ? customMessage.replace("{student_name}", r.studentName)
+              : undefined,
+          })),
+        }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "Could not send the results.");
+
+      setSentCount(body.sent ?? selectedRecipients.length);
       setRecipients((prev) =>
-        prev.map((r: any) =>
-          r.studentId === selectedRecipients[i].studentId
-            ? { ...r, status: Math.random() > 0.1 ? "delivered" : "sent" }
+        prev.map((r: Recipient) =>
+          selectedRecipients.some((sel) => sel.profileId === r.profileId)
+            ? { ...r, status: "delivered" }
             : r,
         ),
       );
+      toast(body.message || `Results sent for ${body.sent} student(s).`, "success");
+    } catch (sendError) {
+      // A failure must be visible. The old simulation could not fail, so the
+      // teacher had no way to learn that nothing had gone out.
+      setRecipients((prev) =>
+        prev.map((r: Recipient) =>
+          selectedRecipients.some((sel) => sel.profileId === r.profileId)
+            ? { ...r, status: "failed" }
+            : r,
+        ),
+      );
+      toast(sendError instanceof Error ? sendError.message : "Could not send.", "error");
+    } finally {
+      setSending(false);
     }
-    setSending(false);
-    toast(`Results sent to ${selectedRecipients.length} parents`, "success");
   };
 
   const previewMessage = (r: Recipient) =>

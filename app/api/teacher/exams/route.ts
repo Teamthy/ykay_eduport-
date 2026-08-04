@@ -1,4 +1,4 @@
-import { ExamStatus, Prisma } from "@prisma/client";
+import { ExamAttemptStatus, ExamStatus, Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getExamTeacherContext, parseBulkQuestions, examStatusLabel } from "@/lib/exams";
@@ -214,9 +214,22 @@ const updateSchema = z.object({
     "UNRELEASE_RESULTS",
     "ADD_QUESTIONS",
     "GRANT_RETAKE",
+    // Editing the exam's own settings after creation. Everything above acts
+    // on state or questions; none of it could change the date, duration,
+    // marks or theory allowance, so an exam was frozen the moment it was
+    // created and /teacher/test-courses had nowhere to save to.
+    "UPDATE_SETTINGS",
   ]),
   bulkQuestions: z.string().trim().max(100_000).optional(),
   studentProfileId: z.string().trim().min(1).optional(),
+  // UPDATE_SETTINGS payload. Every field optional: a partial save must change
+  // only what was sent, never blank an untouched field.
+  durationMinutes: z.number().int().min(5).max(240).optional(),
+  theoryMinutes: z.number().int().min(0).max(240).optional(),
+  passMark: z.number().int().min(0).max(100).optional(),
+  totalMarks: z.number().int().min(0).max(1000).optional(),
+  scheduledFor: z.string().datetime().nullable().optional(),
+  availableUntil: z.string().datetime().nullable().optional(),
 });
 
 export async function PATCH(request: NextRequest) {
@@ -279,6 +292,77 @@ export async function PATCH(request: NextRequest) {
       ok: true,
       message: `${parsed.questions.length} question(s) added.`,
     });
+  }
+
+  if (payload.action === "UPDATE_SETTINGS") {
+    // Resolve the window against what is being saved, falling back to what is
+    // already stored — otherwise editing only the close time could produce a
+    // window that closes before an unchanged opening time.
+    const opensAt =
+      payload.scheduledFor === undefined
+        ? exam.scheduledFor
+        : payload.scheduledFor === null
+          ? null
+          : new Date(payload.scheduledFor);
+    const closesAt =
+      payload.availableUntil === undefined
+        ? exam.availableUntil
+        : payload.availableUntil === null
+          ? null
+          : new Date(payload.availableUntil);
+
+    if (opensAt && closesAt && closesAt <= opensAt) {
+      return NextResponse.json(
+        { error: "The closing time must be after the opening time." },
+        { status: 400 },
+      );
+    }
+
+    // Duration is the student's clock. An attempt's deadlineAt is computed
+    // when it starts and never recalculated, so changing the duration while
+    // someone is sitting the paper would not extend them — it would just
+    // disagree with what they were given. Refuse instead.
+    if (payload.durationMinutes !== undefined && payload.durationMinutes !== exam.durationMinutes) {
+      const live = await prisma.examAttempt.count({
+        where: { examId: exam.id, status: ExamAttemptStatus.IN_PROGRESS },
+      });
+      if (live > 0) {
+        return NextResponse.json(
+          {
+            error: `${live} student(s) are sitting this paper right now. Wait until they submit before changing the duration.`,
+            code: "ATTEMPTS_IN_PROGRESS",
+          },
+          { status: 409 },
+        );
+      }
+    }
+
+    const data: Prisma.ExamUpdateInput = {};
+    if (payload.durationMinutes !== undefined) data.durationMinutes = payload.durationMinutes;
+    if (payload.theoryMinutes !== undefined) data.theoryMinutes = payload.theoryMinutes;
+    if (payload.passMark !== undefined) data.passMark = payload.passMark;
+    if (payload.totalMarks !== undefined) data.totalMarks = payload.totalMarks;
+    if (payload.scheduledFor !== undefined) data.scheduledFor = opensAt;
+    if (payload.availableUntil !== undefined) data.availableUntil = closesAt;
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
+    }
+
+    await prisma.exam.update({ where: { id: exam.id }, data });
+    await prisma.auditLog.create({
+      data: {
+        schoolId: context.user.schoolId,
+        actorUserId: context.user.id,
+        action: "EXAM_SETTINGS_UPDATED",
+        entityType: "Exam",
+        entityId: exam.id,
+        metadata: data as unknown as Prisma.InputJsonValue,
+        ipAddress: getClientIp(request),
+      },
+    });
+
+    return NextResponse.json({ ok: true, message: "Exam settings saved." });
   }
 
   if (payload.action === "PUBLISH") {

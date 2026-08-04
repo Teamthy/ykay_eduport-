@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
@@ -34,7 +34,7 @@ import {
 } from "@/lib/question-import";
 
 type QuestionType = "MCQ" | "TRUE_FALSE" | "FILL_BLANK" | "ESSAY";
-type FileFormat = "csv" | "json" | "xlsx" | "docx" | "txt";
+type FileFormat = "docx" | "txt" | "xlsx";
 
 /**
  * One place that maps a filename to a format.
@@ -46,11 +46,13 @@ type FileFormat = "csv" | "json" | "xlsx" | "docx" | "txt";
  */
 function formatForFilename(name: string): FileFormat | null {
   const ext = name.split(".").pop()?.toLowerCase();
-  if (ext === "csv") return "csv";
-  if (ext === "json") return "json";
   if (ext === "xlsx" || ext === "xls") return "xlsx";
   if (ext === "docx") return "docx";
   if (ext === "txt" || ext === "text" || ext === "md") return "txt";
+  // CSV and JSON were dropped deliberately. No teacher authors a question
+  // paper in either; they existed because they were easy to parse, not
+  // because anyone asked. Four tabs of near-identical choices was the real
+  // cost — the format is detected from the file anyway.
   return null;
 }
 
@@ -128,9 +130,24 @@ export default function UploadQuestionsPage() {
   const { data: examData, refetch: refetchExams } = useApi<any>("/api/teacher/exams");
   const [selectedExamId, setSelectedExamId] = useState("");
 
+  /**
+   * Preselect the exam when arriving from the Exam Centre.
+   *
+   * The Exam Centre links here as `?examId=...`, and this page ignored the
+   * parameter entirely — a teacher who clicked "Questions" on a specific paper
+   * landed on "Choose an exam..." and had to find it again in the dropdown.
+   * Read from window.location rather than useSearchParams so the page does not
+   * need a Suspense boundary for a single optional query value.
+   */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const fromUrl = new URLSearchParams(window.location.search).get("examId");
+    if (fromUrl) setSelectedExamId(fromUrl);
+  }, []);
+
   // File upload state
   const [file, setFile] = useState<File | null>(null);
-  const [fileFormat, setFileFormat] = useState<FileFormat>("csv");
+  const [fileFormat, setFileFormat] = useState<FileFormat>("docx");
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -163,13 +180,7 @@ export default function UploadQuestionsPage() {
       try {
         let result: ParseResult;
 
-        if (format === "csv") {
-          const text = await f.text();
-          result = parseCSVContent(text);
-        } else if (format === "json") {
-          const text = await f.text();
-          result = parseJSONContent(text);
-        } else if (format === "docx") {
+        if (format === "docx") {
           const buffer = await f.arrayBuffer();
           result = importedToParseResult(() => importQuestionsFromDocx(new Uint8Array(buffer)));
         } else if (format === "txt") {
@@ -561,14 +572,10 @@ export default function UploadQuestionsPage() {
       );
       return;
     }
-    if (format === "csv") {
-      const blob = new Blob([CSV_TEMPLATE], { type: "text/csv" });
-      downloadBlob(blob, "ykay-question-template.csv");
-    } else if (format === "json") {
-      const blob = new Blob([JSON_TEMPLATE], { type: "application/json" });
-      downloadBlob(blob, "ykay-question-template.json");
-    } else {
-      // Generate CSV template (opens in Excel/Word; read-excel-file cannot write .xlsx)
+    {
+      // A CSV the spreadsheet apps open natively. read-excel-file can read
+      // .xlsx but cannot write one, so the Excel template is delivered as CSV
+      // — Excel opens it without complaint and saves back as .xlsx.
       const templateRows = [
         [
           "type",
@@ -749,27 +756,29 @@ export default function UploadQuestionsPage() {
               Download Template
             </h2>
             <div className="grid gap-3 sm:grid-cols-3">
-              {(["docx", "txt", "csv", "json", "xlsx"] as FileFormat[]).map((fmt) => (
+              {(["docx", "txt", "xlsx"] as FileFormat[]).map((fmt) => (
                 <button
                   key={fmt}
                   onClick={() => downloadTemplate(fmt)}
                   className="flex items-center gap-3 rounded-xl border border-[var(--border-subtle)] p-4 text-left transition hover:border-brand-green hover:bg-brand-green/5"
                 >
-                  {fmt === "csv" ? (
-                    <File size={20} className="text-brand-orange" />
-                  ) : fmt === "json" ? (
+                  {fmt === "docx" ? (
                     <FileText size={20} className="text-blue-500" />
+                  ) : fmt === "txt" ? (
+                    <File size={20} className="text-brand-orange" />
                   ) : (
                     <FileSpreadsheet size={20} className="text-brand-green" />
                   )}
                   <div>
-                    <div className="text-sm font-bold">{fmt.toUpperCase()} Template</div>
+                    <div className="text-sm font-bold">
+                      {fmt === "docx" ? "Word" : fmt === "txt" ? "Text" : "Excel"} template
+                    </div>
                     <div className="text-[11px] text-[var(--text-muted)]">
-                      {fmt === "csv"
-                        ? "Comma-separated"
-                        : fmt === "json"
-                          ? "JSON array"
-                          : "Excel spreadsheet"}
+                      {fmt === "docx"
+                        ? "Type your paper as normal"
+                        : fmt === "txt"
+                          ? "Plain text, same layout"
+                          : "Spreadsheet columns"}
                     </div>
                   </div>
                   <Download size={14} className="ml-auto text-[var(--text-muted)]" />
@@ -799,7 +808,7 @@ export default function UploadQuestionsPage() {
 
             {/* Format selector */}
             <div className="mb-4 flex gap-2">
-              {(["docx", "txt", "csv", "json", "xlsx"] as FileFormat[]).map((fmt) => (
+              {(["docx", "txt", "xlsx"] as FileFormat[]).map((fmt) => (
                 <button
                   key={fmt}
                   onClick={() => setFileFormat(fmt)}
@@ -836,7 +845,7 @@ export default function UploadQuestionsPage() {
                 // from the filename anyway, and a teacher whose Word file was
                 // greyed out because the CSV tab was selected would conclude
                 // Word upload does not work.
-                accept=".docx,.txt,.csv,.json,.xlsx,.xls"
+                accept=".docx,.txt,.xlsx,.xls"
                 onChange={handleFileChange}
                 className="hidden"
               />
