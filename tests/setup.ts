@@ -132,6 +132,7 @@ const mockPrisma = {
     count: vi.fn(),
   },
   reportCard: {
+    findFirst: vi.fn(),
     findMany: vi.fn(),
     aggregate: vi.fn(),
     groupBy: vi.fn(),

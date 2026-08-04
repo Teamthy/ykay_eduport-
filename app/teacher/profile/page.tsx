@@ -31,12 +31,43 @@ export default function TeacherProfilePage() {
   const [phone, setPhone] = useState(teacher.phone);
   const [bio, setBio] = useState(teacher.bio);
 
-  const handleSave = () => {
-    toast("Profile updated successfully", "success");
-    setEditing(false);
+  const [saving, setSaving] = useState(false);
+
+  /**
+   * Actually save.
+   *
+   * This was `toast("Profile updated successfully")` and nothing else — the
+   * teacher was told it worked, the edit lived in React state, and the next
+   * refresh threw it away.
+   *
+   * Only `phone` is persisted: TeacherProfile has displayName, phone,
+   * roleLabel and photoUrl, and no column for Bio. Rather than invent a
+   * migration nobody asked for, Bio is left as a local note and the UI says
+   * so — better than accepting text and silently discarding it.
+   */
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch("/api/teacher/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: phone || null }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "Could not save your profile.");
+      toast(body.message || "Profile saved.", "success");
+      setEditing(false);
+    } catch (saveError) {
+      toast(saveError instanceof Error ? saveError.message : "Could not save.", "error");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const editableFields = ["Photo", "Phone Number", "Bio / About Me"];
+  // Bio is not saved anywhere — there is no column for it. Listing it as
+  // editable while it silently vanishes is the kind of thing that makes staff
+  // stop trusting the whole page.
+  const editableFields = ["Phone Number"];
   const lockedFields = [
     "Full Name",
     "Email",
@@ -111,7 +142,8 @@ export default function TeacherProfilePage() {
                           Cancel
                         </button>
                         <button
-                          onClick={handleSave}
+                          onClick={() => void handleSave()}
+                          disabled={saving}
                           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-green text-white text-xs font-bold hover:bg-brand-green-dark"
                         >
                           <Save size={12} /> Save Changes

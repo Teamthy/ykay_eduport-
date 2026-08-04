@@ -32,13 +32,43 @@ export default function ClassReportCardsPage() {
     setShowRemarkModal(true);
   };
 
-  const saveRemark = () => {
+  const [savingRemark, setSavingRemark] = useState(false);
+
+  /**
+   * Actually save the remark.
+   *
+   * This used to be a toast and a closed modal — no request. A form teacher
+   * could write a remark for every child in the class, be told it worked each
+   * time, and none of it reached a report card.
+   */
+  const saveRemark = async () => {
     if (!remark.trim()) {
       toast("Please enter a remark", "warning");
       return;
     }
-    toast(`Remark added for ${selectedStudent?.name}`, "success");
-    setShowRemarkModal(false);
+    const reportCardId = selectedStudent?.reportCardId || selectedStudent?.id;
+    if (!reportCardId) {
+      toast("No report card has been generated for this student yet.", "warning");
+      return;
+    }
+
+    setSavingRemark(true);
+    try {
+      const response = await fetch("/api/teacher/class/report-cards", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportCardId, remark: remark.trim() }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "Could not save the remark.");
+      toast(body.message || "Remark saved.", "success");
+      setShowRemarkModal(false);
+      setRemark("");
+    } catch (saveError) {
+      toast(saveError instanceof Error ? saveError.message : "Could not save.", "error");
+    } finally {
+      setSavingRemark(false);
+    }
   };
 
   return (
@@ -225,7 +255,8 @@ export default function ClassReportCardsPage() {
             />
 
             <button
-              onClick={saveRemark}
+              onClick={() => void saveRemark()}
+              disabled={savingRemark}
               className="w-full py-3 rounded-full bg-brand-orange text-white font-bold text-sm hover:bg-brand-orange-dark transition-all flex items-center justify-center gap-2"
             >
               <Save size={14} /> Save Remark

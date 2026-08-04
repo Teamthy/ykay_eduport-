@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
@@ -38,18 +38,31 @@ export default function BulkAnnouncementPage() {
   const [channels, setChannels] = useState<string[]>(["portal"]);
   const [schedule, setSchedule] = useState<"now" | "later">("now");
   const [scheduledDate, setScheduledDate] = useState("");
+  const [sending, setSending] = useState(false);
 
-  const allClasses = [
-    ...new Set((teacher.subjectAssignments || []).flatMap((sa: any) => sa.classes)),
-  ];
-  const totalRecipients =
-    audience === "all-classes"
-      ? teacher.totalStudentsTaught
-      : audience === "all-parents"
-        ? teacher.totalStudentsTaught
-        : audience === "specific-class"
-          ? selectedClasses.length * 30
-          : 0;
+  /**
+   * Real classes with real ids.
+   *
+   * This used to flatten `sa.classes` into display names, which meant the
+   * page had no class id to send anywhere — and the recipient count was
+   * `selectedClasses.length * 30`, a literal guess of thirty children per
+   * class shown to the teacher as fact.
+   */
+  const classOptions: { id: string; name: string }[] = useMemo(() => {
+    // /api/teacher/profile returns `classes: [{ id, name, role, subject }]`.
+    // A Map because a teacher assigned to one class for two subjects appears
+    // twice, and offering the same class twice in the picker is confusing.
+    const seen = new Map<string, string>();
+    for (const entry of teacher.classes || []) {
+      if (entry?.id && entry?.name) seen.set(entry.id, entry.name);
+    }
+    return [...seen].map(([id, name]) => ({ id, name }));
+  }, [teacher]);
+
+  const targetClassIds =
+    audience === "all-classes" || audience === "all-parents"
+      ? classOptions.map((c) => c.id)
+      : selectedClasses;
 
   const toggleClass = (c: string) => {
     setSelectedClasses((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
@@ -59,21 +72,66 @@ export default function BulkAnnouncementPage() {
     setChannels((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
   };
 
-  const handleSend = () => {
-    if (!title || !message) {
+  /**
+   * Actually send.
+   *
+   * This used to be a toast and nothing else: no request, no recipients, no
+   * record. The teacher was told "Announcement sent to N recipients" where N
+   * was an estimate the page had invented.
+   *
+   * One request per class, because the endpoint authorises per class — a
+   * teacher must only be able to address classes they are assigned to.
+   */
+  const handleSend = async () => {
+    if (!title.trim() || !message.trim()) {
       toast("Please fill title and message", "warning");
       return;
     }
-    if (channels.length === 0) {
-      toast("Select at least one channel", "warning");
+    if (!targetClassIds.length) {
+      toast("Select at least one class", "warning");
       return;
     }
-    toast(
-      `Announcement ${schedule === "now" ? "sent" : "scheduled"} to ${totalRecipients} recipients`,
-      "success",
-    );
-    setTitle("");
-    setMessage("");
+
+    setSending(true);
+    try {
+      const apiAudience = audience.includes("parents") ? "PARENTS" : "BOTH";
+      let delivered = 0;
+      const failures: string[] = [];
+
+      for (const classId of targetClassIds) {
+        const response = await fetch("/api/teacher/announcements", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            classId,
+            title: title.trim(),
+            body: message.trim(),
+            audience: apiAudience,
+          }),
+        });
+        const body = await response.json();
+        if (!response.ok) {
+          failures.push(body.error || "failed");
+          continue;
+        }
+        delivered += body.sent || 0;
+      }
+
+      if (failures.length && !delivered) {
+        throw new Error(failures[0]);
+      }
+      toast(
+        `Announcement sent to ${delivered} recipient(s)` +
+          (failures.length ? ` — ${failures.length} class(es) failed.` : "."),
+        failures.length ? "warning" : "success",
+      );
+      setTitle("");
+      setMessage("");
+    } catch (sendError) {
+      toast(sendError instanceof Error ? sendError.message : "Could not send.", "error");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -175,17 +233,17 @@ export default function BulkAnnouncementPage() {
                         Select Classes
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {allClasses.map((c: any) => (
+                        {classOptions.map((c) => (
                           <button
-                            key={String(c)}
-                            onClick={() => toggleClass(String(c))}
+                            key={c.id}
+                            onClick={() => toggleClass(c.id)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                              selectedClasses.includes(String(c))
+                              selectedClasses.includes(c.id)
                                 ? "bg-brand-green text-white"
                                 : "bg-[var(--surface-disabled)] text-[var(--text-muted)] hover:bg-brand-green/10"
                             }`}
                           >
-                            {c}
+                            {c.name}
                           </button>
                         ))}
                       </div>
@@ -413,8 +471,12 @@ export default function BulkAnnouncementPage() {
                   </div>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-[var(--text-muted)]">Recipients</span>
-                      <span className="font-bold text-brand-green">{totalRecipients}</span>
+                      <span className="text-[var(--text-muted)]">Classes</span>
+                      {/* Was `selectedClasses.length * 30` — an invented head
+                          count presented to the teacher as fact. The real
+                          recipient total is only known after sending, so it is
+                          reported in the confirmation instead of guessed here. */}
+                      <span className="font-bold text-brand-green">{targetClassIds.length}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-[var(--text-muted)]">Channels</span>
