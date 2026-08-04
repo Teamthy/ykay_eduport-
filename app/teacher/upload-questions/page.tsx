@@ -27,10 +27,32 @@ import {
 } from "lucide-react";
 import Papa from "papaparse";
 import readXlsxFile from "read-excel-file/browser";
-import { unzipSync, strFromU8 } from "fflate";
+import {
+  importQuestionsFromDocx,
+  importQuestionsFromText,
+  type ImportResult,
+} from "@/lib/question-import";
 
 type QuestionType = "MCQ" | "TRUE_FALSE" | "FILL_BLANK" | "ESSAY";
-type FileFormat = "csv" | "json" | "xlsx" | "docx";
+type FileFormat = "csv" | "json" | "xlsx" | "docx" | "txt";
+
+/**
+ * One place that maps a filename to a format.
+ *
+ * The drag-and-drop handler used to compute this inline and forgot .docx, so
+ * a Word file dropped on the page was parsed as a spreadsheet and failed with
+ * "Could not read this Excel file". The picker path had it right. Two copies
+ * of the same decision is what let them disagree.
+ */
+function formatForFilename(name: string): FileFormat | null {
+  const ext = name.split(".").pop()?.toLowerCase();
+  if (ext === "csv") return "csv";
+  if (ext === "json") return "json";
+  if (ext === "xlsx" || ext === "xls") return "xlsx";
+  if (ext === "docx") return "docx";
+  if (ext === "txt" || ext === "text" || ext === "md") return "txt";
+  return null;
+}
 
 interface ParsedQuestion {
   type: QuestionType;
@@ -149,7 +171,10 @@ export default function UploadQuestionsPage() {
           result = parseJSONContent(text);
         } else if (format === "docx") {
           const buffer = await f.arrayBuffer();
-          result = parseDocxContent(buffer);
+          result = importedToParseResult(() => importQuestionsFromDocx(new Uint8Array(buffer)));
+        } else if (format === "txt") {
+          const text = await f.text();
+          result = importedToParseResult(() => importQuestionsFromText(text));
         } else {
           const buffer = await f.arrayBuffer();
           result = await parseXLSXContent(buffer);
@@ -264,84 +289,59 @@ export default function UploadQuestionsPage() {
     }
   }
 
-  // ── Word .docx parser (extracts the first table; same columns as the CSV template) ──
-  function parseDocxContent(buffer: ArrayBuffer): ParseResult {
+  /**
+   * Bridge the shared importer's result into this page's ParseResult shape.
+   *
+   * The .docx/.txt reading now lives in lib/question-import.ts so it can be
+   * unit-tested against real OOXML under Node — this page's original version
+   * used DOMParser and could only ever run in a browser, which is why it was
+   * never covered by a test.
+   */
+  function importedToParseResult(run: () => ImportResult): ParseResult {
     const emptyStats = { total: 0, valid: 0, mcq: 0, trueFalse: 0, fillBlank: 0, essay: 0 };
-    const needTable =
-      "Put questions in a Word table with header columns: type, question, option_a..option_d, correct, marks, topic, difficulty, explanation.";
+    let imported: ImportResult;
     try {
-      const files = unzipSync(new Uint8Array(buffer));
-      const xmlBytes = files["word/document.xml"];
-      if (!xmlBytes) {
-        return {
-          questions: [],
-          errors: [{ row: 0, message: "Not a valid .docx file." }],
-          warnings: [],
-          stats: emptyStats,
-        };
-      }
-      const doc = new DOMParser().parseFromString(strFromU8(xmlBytes), "application/xml");
-      const table = doc.getElementsByTagName("w:tbl")[0];
-      if (!table) {
-        return {
-          questions: [],
-          errors: [{ row: 0, message: needTable }],
-          warnings: [],
-          stats: emptyStats,
-        };
-      }
-      const rows: string[][] = [];
-      const trs = table.getElementsByTagName("w:tr");
-      for (let i = 0; i < trs.length; i += 1) {
-        const cells = trs[i].getElementsByTagName("w:tc");
-        const row: string[] = [];
-        for (let c = 0; c < cells.length; c += 1) {
-          const texts = cells[c].getElementsByTagName("w:t");
-          let cellText = "";
-          for (let t = 0; t < texts.length; t += 1) cellText += texts[t].textContent ?? "";
-          row.push(cellText);
-        }
-        rows.push(row);
-      }
-      if (rows.length < 2) {
-        return {
-          questions: [],
-          errors: [{ row: 0, message: needTable }],
-          warnings: [],
-          stats: emptyStats,
-        };
-      }
-      const headers = (rows[0] ?? []).map((h) => h.trim());
-      const dataRows: Record<string, string>[] = [];
-      for (let i = 1; i < rows.length; i += 1) {
-        const row = rows[i] ?? [];
-        const obj: Record<string, string> = {};
-        headers.forEach((h, idx) => {
-          if (h)
-            obj[
-              h
-                .trim()
-                .toLowerCase()
-                .replace(/[^a-z0-9]/g, "_")
-            ] = String(row[idx] ?? "");
-        });
-        dataRows.push(obj);
-      }
-      return validateRows(dataRows, []);
-    } catch {
+      imported = run();
+    } catch (importError) {
       return {
         questions: [],
         errors: [
           {
             row: 0,
             message:
-              "Could not read this Word document. For legacy .doc, please re-save as .docx (File → Save As → Word Document (.docx)).",
+              importError instanceof Error ? importError.message : "Could not read that file.",
           },
         ],
         warnings: [],
         stats: emptyStats,
       };
     }
+
+    const questions: ParsedQuestion[] = imported.questions.map((q) => ({
+      type: q.type as QuestionType,
+      questionText: q.questionText,
+      options: q.options,
+      correctKey: q.correctKey,
+      correctText: q.correctText,
+      marks: q.marks,
+      topic: undefined,
+      difficulty: undefined,
+      explanation: undefined,
+    }));
+
+    return {
+      questions,
+      errors: imported.errors.map((message) => ({ row: 0, message })),
+      warnings: imported.warnings.map((message) => ({ row: 0, message })),
+      stats: {
+        total: questions.length,
+        valid: questions.length,
+        mcq: questions.filter((q) => q.type === "MCQ").length,
+        trueFalse: questions.filter((q) => q.type === "TRUE_FALSE").length,
+        fillBlank: questions.filter((q) => q.type === "FILL_BLANK").length,
+        essay: questions.filter((q) => q.type === "ESSAY").length,
+      },
+    };
   }
 
   function validateRows(
@@ -511,7 +511,56 @@ export default function UploadQuestionsPage() {
   }
 
   // ── Template downloads ──────────────────────────────────────
+  /**
+   * A .txt template written the way a teacher writes a paper.
+   *
+   * The old "Word template" button downloaded a CSV, which is not a Word file
+   * and not the shape a teacher would ever type. This is the prose format the
+   * importer now reads, so a teacher can open it, replace the text, and save
+   * as .docx or .txt.
+   */
+  const PROSE_TEMPLATE = [
+    "1. What is the capital of Nigeria?",
+    "A) Lagos",
+    "B) Abuja",
+    "C) Kano",
+    "D) Port Harcourt",
+    "Answer: B",
+    "Marks: 2",
+    "",
+    "2. Water boils at 100 degrees Celsius at sea level.",
+    "Answer: TRUE",
+    "",
+    "3. Photosynthesis occurs in the ______.",
+    "FILL: chloroplast",
+    "Marks: 2",
+    "",
+    "4. Explain the water cycle.",
+    "ESSAY",
+    "Marks: 10",
+    "",
+    "-- Notes ------------------------------------------------------",
+    "Options may be written A) A. A: or (A), up to E.",
+    "The answer line may be Answer:, Correct: or Ans:, and may give",
+    "either the letter or the full option text.",
+    "Marks: defaults to 1 if you leave it out.",
+    "Leave a blank line between questions, or just start the next",
+    "number -- both work.",
+    "",
+    "If you type this in Word, turn OFF automatic numbering",
+    "(Home -> Numbering), because Word stores those numbers outside",
+    "the text and they will not reach us.",
+  ].join("\r\n");
+
   function downloadTemplate(format: FileFormat) {
+    if (format === "txt" || format === "docx") {
+      // Same content for both: .docx is authored by opening this in Word.
+      downloadBlob(
+        new Blob([PROSE_TEMPLATE], { type: "text/plain;charset=utf-8" }),
+        "ykay-question-template.txt",
+      );
+      return;
+    }
     if (format === "csv") {
       const blob = new Blob([CSV_TEMPLATE], { type: "text/csv" });
       downloadBlob(blob, "ykay-question-template.csv");
@@ -599,23 +648,35 @@ export default function UploadQuestionsPage() {
     e.preventDefault();
     setDragging(false);
     const f = e.dataTransfer.files[0];
-    if (f) {
-      setFile(f);
-      const ext = f.name.split(".").pop()?.toLowerCase();
-      if (ext === "csv") setFileFormat("csv");
-      else if (ext === "json") setFileFormat("json");
-      else if (ext === "xlsx" || ext === "xls") setFileFormat("xlsx");
-      else if (ext === "docx") setFileFormat("docx");
-      void parseFile(f, ext === "json" ? "json" : ext === "csv" ? "csv" : "xlsx");
+    if (!f) return;
+    const detected = formatForFilename(f.name);
+    if (!detected) {
+      if (/\.doc$/i.test(f.name)) {
+        toast(
+          "Legacy .doc is not supported. Open it in Word and use File \u2192 Save As \u2192 Word Document (.docx).",
+          "error",
+        );
+      } else {
+        toast("Unsupported file type. Use .docx, .txt, .csv, .xlsx or .json.", "error");
+      }
+      return;
     }
+    setFile(f);
+    setFileFormat(detected);
+    // Parse with the DETECTED format, not a guess: dropping a .docx used to
+    // be handed to the Excel reader.
+    void parseFile(f, detected);
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
-    if (f) {
-      setFile(f);
-      void parseFile(f, fileFormat);
-    }
+    if (!f) return;
+    setFile(f);
+    // Trust the file over the selected tab: picking a .docx while the CSV tab
+    // happens to be active must still read it as Word.
+    const detected = formatForFilename(f.name) ?? fileFormat;
+    if (detected !== fileFormat) setFileFormat(detected);
+    void parseFile(f, detected);
   }
 
   function resetAll() {
@@ -688,7 +749,7 @@ export default function UploadQuestionsPage() {
               Download Template
             </h2>
             <div className="grid gap-3 sm:grid-cols-3">
-              {(["csv", "json", "xlsx", "docx"] as FileFormat[]).map((fmt) => (
+              {(["docx", "txt", "csv", "json", "xlsx"] as FileFormat[]).map((fmt) => (
                 <button
                   key={fmt}
                   onClick={() => downloadTemplate(fmt)}
@@ -738,7 +799,7 @@ export default function UploadQuestionsPage() {
 
             {/* Format selector */}
             <div className="mb-4 flex gap-2">
-              {(["csv", "json", "xlsx", "docx"] as FileFormat[]).map((fmt) => (
+              {(["docx", "txt", "csv", "json", "xlsx"] as FileFormat[]).map((fmt) => (
                 <button
                   key={fmt}
                   onClick={() => setFileFormat(fmt)}
@@ -771,15 +832,11 @@ export default function UploadQuestionsPage() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept={
-                  fileFormat === "csv"
-                    ? ".csv"
-                    : fileFormat === "json"
-                      ? ".json"
-                      : fileFormat === "docx"
-                        ? ".docx"
-                        : ".xlsx,.xls"
-                }
+                // Always allow every supported type: the format is detected
+                // from the filename anyway, and a teacher whose Word file was
+                // greyed out because the CSV tab was selected would conclude
+                // Word upload does not work.
+                accept=".docx,.txt,.csv,.json,.xlsx,.xls"
                 onChange={handleFileChange}
                 className="hidden"
               />

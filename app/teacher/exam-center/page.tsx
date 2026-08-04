@@ -14,6 +14,7 @@ import {
   FileText,
   LoaderCircle,
   Plus,
+  RotateCcw,
   Send,
   Upload,
   Users,
@@ -62,6 +63,14 @@ type Assignment = {
   subjectName: string;
   className: string;
   classId: string;
+};
+
+type RetakeStudent = {
+  id: string;
+  studentId: string;
+  displayName: string;
+  hasRetake: boolean;
+  retakeUsed: boolean;
 };
 
 type Payload = {
@@ -178,6 +187,66 @@ export default function ExamCenterPage() {
       );
     } finally {
       setCreating(false);
+    }
+  }
+
+  /**
+   * Retakes.
+   *
+   * `/api/teacher/exams/[id]/retake` has existed since an earlier drop and
+   * nothing ever called it — so "enable a retake", which the student-facing
+   * error message explicitly tells a student to ask their teacher for, was
+   * impossible to actually do. The GET lists the class with who already has
+   * one, so a teacher can see state before granting.
+   */
+  const [retakeFor, setRetakeFor] = useState<Exam | null>(null);
+  const [retakeRoster, setRetakeRoster] = useState<RetakeStudent[] | null>(null);
+  const [retakePicked, setRetakePicked] = useState<Set<string>>(new Set());
+  const [retakeBusy, setRetakeBusy] = useState(false);
+
+  async function openRetake(exam: Exam) {
+    setRetakeFor(exam);
+    setRetakeRoster(null);
+    setRetakePicked(new Set());
+    try {
+      const response = await fetch(`/api/teacher/exams/${exam.id}/retake`, { cache: "no-store" });
+      const body = (await response.json()) as { students?: RetakeStudent[]; error?: string };
+      if (!response.ok) throw new Error(body.error || "Unable to load the class.");
+      setRetakeRoster(body.students || []);
+    } catch (retakeError) {
+      toast(
+        retakeError instanceof Error ? retakeError.message : "Unable to load the class.",
+        "error",
+      );
+      setRetakeFor(null);
+    }
+  }
+
+  async function grantRetakes() {
+    if (!retakeFor || !retakePicked.size) return;
+    setRetakeBusy(true);
+    try {
+      const response = await fetch(`/api/teacher/exams/${retakeFor.id}/retake`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentProfileIds: [...retakePicked] }),
+      });
+      const body = (await response.json()) as {
+        granted?: number;
+        message?: string;
+        error?: string;
+      };
+      if (!response.ok) throw new Error(body.error || "Unable to grant the retake.");
+      toast(body.message || `Retake enabled for ${body.granted} student(s).`, "success");
+      setRetakeFor(null);
+      await load();
+    } catch (grantError) {
+      toast(
+        grantError instanceof Error ? grantError.message : "Unable to grant the retake.",
+        "error",
+      );
+    } finally {
+      setRetakeBusy(false);
     }
   }
 
@@ -409,6 +478,14 @@ export default function ExamCenterPage() {
                         <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                           Paste questions (optional — blank line between each)
                         </span>
+                        <span className="mb-2 block text-xs text-[var(--text-muted)]">
+                          Options can be <code>A)</code>, <code>A.</code>, <code>A:</code> or{" "}
+                          <code>(A)</code>, up to E. The answer can be <code>Answer:</code>,{" "}
+                          <code>Correct:</code> or <code>Ans:</code>, given as the letter or the
+                          full option text. Add <code>Marks: 2</code> for anything worth more than
+                          one, <code>FILL: answer</code> for a blank, or <code>ESSAY</code> on its
+                          own line for a written answer.
+                        </span>
                         <textarea
                           value={form.bulkQuestions}
                           onChange={(e) => setForm({ ...form, bulkQuestions: e.target.value })}
@@ -518,6 +595,17 @@ export default function ExamCenterPage() {
                               >
                                 <FileText size={12} /> Results
                               </Link>
+                              {/* Only meaningful once somebody has actually
+                                  sat it — a retake before any attempt is just
+                                  a normal attempt. */}
+                              {exam.submittedCount > 0 ? (
+                                <button
+                                  onClick={() => void openRetake(exam)}
+                                  className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-card-hover)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:text-brand-orange"
+                                >
+                                  <RotateCcw size={12} /> Retake
+                                </button>
+                              ) : null}
                               {exam.readiness === "UNPUBLISHED" && exam.questionCount > 0 ? (
                                 <button
                                   onClick={() => void publish(exam)}
@@ -549,6 +637,100 @@ export default function ExamCenterPage() {
           </div>
         </section>
       </main>
+
+      {/* Retake picker */}
+      {retakeFor ? (
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-6">
+          <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-t-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 sm:rounded-[2rem]">
+            <h3 className="font-display text-xl tracking-widest text-[var(--text-primary)]">
+              ENABLE RETAKE
+            </h3>
+            <p className="mt-1 text-xs text-[var(--text-muted)]">
+              {retakeFor.title} · {retakeFor.className}
+            </p>
+            <p className="mt-3 text-xs text-[var(--text-secondary)]">
+              A retake lets a student start this paper once more. Their previous score stays on
+              record until the new attempt is submitted.
+            </p>
+
+            {retakeRoster === null ? (
+              <div className="mt-6 flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                <LoaderCircle className="animate-spin text-brand-green" size={16} /> Loading class…
+              </div>
+            ) : !retakeRoster.length ? (
+              <p className="mt-6 text-sm text-[var(--text-muted)]">
+                No active students in this class.
+              </p>
+            ) : (
+              <div className="mt-4 space-y-1.5">
+                {retakeRoster.map((student) => {
+                  const picked = retakePicked.has(student.id);
+                  return (
+                    <button
+                      key={student.id}
+                      onClick={() =>
+                        setRetakePicked((previous) => {
+                          const next = new Set(previous);
+                          if (next.has(student.id)) next.delete(student.id);
+                          else next.add(student.id);
+                          return next;
+                        })
+                      }
+                      className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm transition-colors ${
+                        picked
+                          ? "border-brand-green bg-brand-green/10 text-[var(--text-primary)]"
+                          : "border-[var(--border-subtle)] bg-[var(--card-bg-subtle)] text-[var(--text-secondary)]"
+                      }`}
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate font-semibold">{student.displayName}</span>
+                        <span className="block text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                          {student.studentId}
+                        </span>
+                      </span>
+                      {/* State matters: re-granting a used retake re-arms it,
+                          granting an unused one again is a no-op. */}
+                      {student.hasRetake ? (
+                        <span
+                          className={`shrink-0 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest ${
+                            student.retakeUsed
+                              ? "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
+                              : "bg-brand-orange/15 text-brand-orange"
+                          }`}
+                        >
+                          {student.retakeUsed ? "Retake used" : "Retake pending"}
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="mt-6 flex gap-2">
+              <button
+                onClick={() => setRetakeFor(null)}
+                className="rounded-full border border-[var(--border-default)] px-5 py-2.5 text-sm text-[var(--text-secondary)]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void grantRetakes()}
+                disabled={retakeBusy || !retakePicked.size}
+                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-orange py-2.5 text-sm font-bold text-white disabled:opacity-50"
+              >
+                {retakeBusy ? (
+                  <LoaderCircle size={15} className="animate-spin" />
+                ) : (
+                  <RotateCcw size={15} />
+                )}
+                Enable for {retakePicked.size || "…"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <Footer />
     </>
   );

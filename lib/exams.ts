@@ -95,6 +95,24 @@ export type ParsedQuestion = {
   marks: number;
 };
 
+/**
+ * An option line, in any of the shapes teachers actually type:
+ *   `A: text`  `A. text`  `A) text`  `(A) text`  `A - text`  `a) text`
+ *
+ * Deliberately requires a separator. Without one, the first line of prose
+ * beginning with a capital letter ("A candidate should…") would be captured
+ * as option A and silently corrupt the paper.
+ *
+ * A–E, because WAEC papers routinely use five options.
+ */
+const OPTION_LINE = /^\(?([A-E])\)?\s*[:.)\-–]\s*(.+)$/i;
+
+/** `Correct: B` · `ANSWER: B` · `Ans - B` · `correct answer: B` */
+const ANSWER_LINE = /^(?:correct\s*answer|correct|answer|ans)\s*[:.)\-–]?\s*(.+)$/i;
+
+/** `Q: text` · `Q. text` · `1. text` · `12) text` */
+const QUESTION_LINE = /^(?:Q\s*[:.)\-–]|\d+\s*[:.)\-–])\s*(.+)$/i;
+
 export function parseBulkQuestions(raw: string): { questions: ParsedQuestion[]; errors: string[] } {
   const blocks = raw
     .replace(/\r\n/g, "\n")
@@ -110,25 +128,40 @@ export function parseBulkQuestions(raw: string): { questions: ParsedQuestion[]; 
       .split("\n")
       .map((line) => line.trim())
       .filter(Boolean);
-    const qLine = lines.find((line) => /^Q[:.]/i.test(line));
-    if (!qLine) {
-      errors.push(`Block ${index + 1}: missing "Q:" line.`);
+    if (!lines.length) return;
+
+    // Find the question. Prefer an explicit marker; otherwise fall back to the
+    // first line that is not an option/answer/directive — teachers very often
+    // just type the question with no prefix at all.
+    let questionText: string | null = null;
+    const explicit = lines.find((line) => QUESTION_LINE.test(line));
+    if (explicit) {
+      questionText = explicit.replace(QUESTION_LINE, "$1").trim();
+    } else {
+      const first = lines[0];
+      const isDirective =
+        OPTION_LINE.test(first) || ANSWER_LINE.test(first) || /^(FILL|ESSAY|Marks)\b/i.test(first);
+      if (!isDirective) questionText = first;
+    }
+
+    if (!questionText) {
+      errors.push(`Block ${index + 1}: could not find the question text.`);
       return;
     }
-    const questionText = qLine.replace(/^Q[:.]\s*/i, "");
-    const marksLine = lines.find((line) => /^Marks[:.]/i.test(line));
+
+    const marksLine = lines.find((line) => /^Marks\s*[:.\-–]/i.test(line));
     const marks = marksLine
-      ? Math.max(1, Math.min(20, parseInt(marksLine.replace(/^Marks[:.]\s*/i, ""), 10) || 1))
+      ? Math.max(1, Math.min(20, parseInt(marksLine.replace(/^Marks\s*[:.\-–]\s*/i, ""), 10) || 1))
       : 1;
 
-    const fillLine = lines.find((line) => /^FILL[:.]/i.test(line));
+    const fillLine = lines.find((line) => /^FILL\s*[:.\-–]/i.test(line));
     if (fillLine) {
       questions.push({
         type: ExamQuestionType.FILL_BLANK,
         questionText,
         options: null,
         correctKey: null,
-        correctText: fillLine.replace(/^FILL[:.]\s*/i, "").trim(),
+        correctText: fillLine.replace(/^FILL\s*[:.\-–]\s*/i, "").trim(),
         marks,
       });
       return;
@@ -146,17 +179,27 @@ export function parseBulkQuestions(raw: string): { questions: ParsedQuestion[]; 
       return;
     }
 
-    const correctLine = lines.find((line) => /^Correct[:.]/i.test(line));
-    if (!correctLine) {
-      errors.push(`Block ${index + 1}: missing "Correct:" line.`);
+    // Options first: the answer line is validated against them.
+    const options: Array<{ key: string; text: string }> = [];
+    for (const line of lines) {
+      if (line === questionText) continue;
+      const match = line.match(OPTION_LINE);
+      if (match) options.push({ key: match[1].toUpperCase(), text: match[2].trim() });
+    }
+
+    const answerLine = lines.find(
+      (line) => line !== questionText && !OPTION_LINE.test(line) && ANSWER_LINE.test(line),
+    );
+    if (!answerLine) {
+      errors.push(
+        `Block ${index + 1}: no answer line. Add "Answer: B" (or "Correct: B") so it can be marked.`,
+      );
       return;
     }
-    const correctKey = correctLine
-      .replace(/^Correct[:.]\s*/i, "")
-      .trim()
-      .toUpperCase();
+    const rawAnswer = (answerLine.match(ANSWER_LINE)?.[1] || "").trim();
+    const upperAnswer = rawAnswer.toUpperCase();
 
-    if (correctKey === "TRUE" || correctKey === "FALSE") {
+    if (upperAnswer === "TRUE" || upperAnswer === "FALSE") {
       questions.push({
         type: ExamQuestionType.TRUE_FALSE,
         questionText,
@@ -164,26 +207,35 @@ export function parseBulkQuestions(raw: string): { questions: ParsedQuestion[]; 
           { key: "TRUE", text: "True" },
           { key: "FALSE", text: "False" },
         ],
-        correctKey,
+        correctKey: upperAnswer,
         correctText: null,
         marks,
       });
       return;
     }
 
-    const options: Array<{ key: string; text: string }> = [];
-    for (const line of lines) {
-      const match = line.match(/^([A-D])[:.]\s*(.+)$/i);
-      if (match) options.push({ key: match[1].toUpperCase(), text: match[2].trim() });
-    }
     if (options.length < 2) {
       errors.push(`Block ${index + 1}: needs at least options A and B.`);
       return;
     }
-    if (!options.some((option) => option.key === correctKey)) {
-      errors.push(`Block ${index + 1}: Correct answer "${correctKey}" does not match any option.`);
+
+    // The answer is normally a letter, but teachers also write the option out
+    // in full ("Answer: Abuja"). Match on the letter first, then the text.
+    let correctKey: string | null = null;
+    if (/^[A-E]$/.test(upperAnswer) && options.some((option) => option.key === upperAnswer)) {
+      correctKey = upperAnswer;
+    } else {
+      const byText = options.find(
+        (option) => option.text.trim().toLowerCase() === rawAnswer.toLowerCase(),
+      );
+      if (byText) correctKey = byText.key;
+    }
+
+    if (!correctKey) {
+      errors.push(`Block ${index + 1}: answer "${rawAnswer}" does not match any option.`);
       return;
     }
+
     questions.push({
       type: ExamQuestionType.MCQ,
       questionText,

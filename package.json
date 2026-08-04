@@ -38,6 +38,7 @@
     "repair:labels": "tsx scripts/repair-labels.ts",
     "verify:admissions": "tsx scripts/verify-admissions-loop.ts",
     "verify:grading": "tsx scripts/verify-exam-grading.ts",
+    "verify:docx": "tsx scripts/verify-docx-import.ts",
     "db:backup": "tsx scripts/backup-db.ts",
     "cleanup:artifacts": "tsx scripts/cleanup-artifacts.ts",
     "audit:routes": "tsx scripts/e2e-smoke.ts --list-only"

@@ -233,7 +233,9 @@ const mockPrisma = {
   },
   examRetake: {
     findUnique: vi.fn(),
+    findMany: vi.fn(),
     update: vi.fn(),
+    upsert: vi.fn(),
   },
   teacherClassAssignment: {
     findMany: vi.fn(),
