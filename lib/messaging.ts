@@ -61,6 +61,25 @@ export async function reachableStudentIds(user: MessagingActor): Promise<string[
     return students.map((s) => s.id);
   }
 
+  /**
+   * A student may discuss exactly one student: themselves.
+   *
+   * Before this, STUDENT fell through to the empty return, so students had no
+   * messaging at all — no inbox, no way to ask a form teacher a question, no
+   * reply to a message sent about them.
+   *
+   * Resolved by userId, deliberately NOT by class. Widening to classmates
+   * would make every thread about every child in the class visible to all of
+   * them, because the inbox query selects on `studentProfileId IN (...)`.
+   */
+  if (user.role === UserRole.STUDENT) {
+    const student = await prisma.studentProfile.findFirst({
+      where: { schoolId: user.schoolId, userId: user.id, isActive: true },
+      select: { id: true },
+    });
+    return student ? [student.id] : [];
+  }
+
   if (OVERSIGHT_ROLES.includes(user.role)) {
     const students = await prisma.studentProfile.findMany({
       where: { schoolId: user.schoolId, isActive: true },
@@ -116,6 +135,10 @@ export async function participantsForStudent(
     where: { id: studentProfileId, schoolId },
     select: {
       currentClassId: true,
+      // The student's own login. Without it, a thread ABOUT a student is
+      // invisible TO that student — they would be the only participant in
+      // their own conversation who could not read it.
+      userId: true,
       parentLinks: { select: { parentProfile: { select: { userId: true } } } },
     },
   });
@@ -124,6 +147,9 @@ export async function participantsForStudent(
   const parentUserIds = student.parentLinks
     .map((l) => l.parentProfile?.userId)
     .filter((v): v is string => !!v);
+
+  // Nullable: a student record can exist before its login is provisioned.
+  const studentUserIds = student.userId ? [student.userId] : [];
 
   // Only the FORM teacher is auto-added. Adding every subject teacher would put
   // a private family conversation in front of a dozen staff by default.
@@ -140,7 +166,7 @@ export async function participantsForStudent(
     .map((a) => a.teacherProfile?.userId)
     .filter((v): v is string => !!v);
 
-  return [...new Set([...parentUserIds, ...teacherUserIds])];
+  return [...new Set([...studentUserIds, ...parentUserIds, ...teacherUserIds])];
 }
 
 /** Trim a body down to a one-line inbox preview. */

@@ -230,19 +230,48 @@ async function main() {
         `The server is up but "${database}" was not found.`,
         "Check the database name at the end of DATABASE_URL.",
       );
-    } else if (message.includes("P1001")) {
+    } else if (
+      message.includes("P1001") ||
+      // Prisma does not always include the code in the message body — the
+      // 6.x wording is just "Can't reach database server at ...". Matching
+      // only on "P1001" sent this straight to the generic branch, which was
+      // caught by running the diagnostic rather than reading it.
+      /can't reach database server/i.test(message)
+    ) {
       // We already proved TCP works, so this is NOT an unreachable server.
-      fail(
-        "Prisma connect",
-        "TCP succeeded above, yet Prisma still reports P1001.",
-        host.includes("neon.tech")
-          ? "On Neon the proxy answers TCP even while the compute is suspended, so the socket " +
-              "test above does not prove the branch is awake. Wait ~10s and re-run — repeated " +
-              "rapid attempts during a restart can keep it failing. If it persists, check " +
-              "neonstatus.com."
-          : "Likely TLS or the connection string rather than the server. Check sslmode and " +
-              "whether a proxy/antivirus is inspecting TLS on this port.",
-      );
+      if (host.includes("neon.tech")) {
+        // On Neon, P1001 with a working socket almost always means the compute
+        // is suspended and waking. The proxy answers TCP throughout, which is
+        // why the socket test above passes and Prisma still fails.
+        //
+        // Neon's own docs are explicit that hammering it makes this worse:
+        // "This issue sometimes occurs due to repeated connection attempts
+        // during the compute's restart phase." So this waits patiently rather
+        // than retrying fast — a cold start is typically a few seconds, and
+        // the whole point is to give it room.
+        const woken = await wakeNeon(prisma);
+        if (woken) {
+          pass(
+            "Prisma connect",
+            "the compute was suspended and has now woken — re-run your command",
+          );
+        } else {
+          fail(
+            "Prisma connect",
+            "TCP succeeded, but Prisma could not connect even after waiting for a cold start.",
+            "The compute did not wake within ~40s. Open the Neon dashboard and check the " +
+              "branch is not disabled or over quota, then check neonstatus.com. Do NOT retry " +
+              "in a tight loop — repeated attempts during a restart keep it failing.",
+          );
+        }
+      } else {
+        fail(
+          "Prisma connect",
+          "TCP succeeded above, yet Prisma still reports P1001.",
+          "Likely TLS or the connection string rather than the server. Check sslmode and " +
+            "whether a proxy/antivirus is inspecting TLS on this port.",
+        );
+      }
     } else {
       // Surface the first meaningful line, not just "PrismaClientInitializationError".
       const meaningful =
@@ -263,6 +292,40 @@ async function main() {
       ? `${RED}Stopped at the first failing layer — fix that one and re-run.${RESET}\n`
       : `${GREEN}All layers healthy. The database is reachable.${RESET}\n`,
   );
+}
+
+/**
+ * Give a suspended Neon compute time to wake, without hammering it.
+ *
+ * Neon scales a branch to zero after inactivity. The first connection has to
+ * start the compute, and until it is up Prisma reports P1001 — indistinguishable
+ * from a genuinely unreachable host, because the Neon proxy keeps answering TCP
+ * the whole time.
+ *
+ * Backoff is deliberately generous and capped at four attempts. Neon's docs
+ * warn that "repeated connection attempts during the compute's restart phase"
+ * are themselves a cause of this error, so a tight retry loop makes a cold
+ * start worse rather than better. Earlier in this project a 3/6/9/12s ladder
+ * was actively counter-productive for exactly that reason.
+ */
+async function wakeNeon(prisma: { $queryRawUnsafe: (sql: string) => Promise<unknown> }) {
+  const waits = [5_000, 10_000, 12_000, 12_000];
+  process.stdout.write("      compute may be suspended — waiting for it to wake");
+
+  for (const wait of waits) {
+    await new Promise((resolve) => setTimeout(resolve, wait));
+    process.stdout.write(".");
+    try {
+      await prisma.$queryRawUnsafe("SELECT 1");
+      process.stdout.write("\n");
+      return true;
+    } catch {
+      /* still starting */
+    }
+  }
+
+  process.stdout.write("\n");
+  return false;
 }
 
 main().catch((error) => {

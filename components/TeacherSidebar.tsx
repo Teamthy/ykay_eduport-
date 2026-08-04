@@ -20,6 +20,7 @@ import {
   Library,
   Send,
   Megaphone,
+  MessageCircle,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 
@@ -116,6 +117,7 @@ export default function TeacherSidebar() {
     { label: "My attendance", href: "/staff/attendance", icon: UserCheck },
     { label: "My Records", href: "/teacher/my-records", icon: FileText },
     { label: "Announcements", href: "/teacher/announcements", icon: Megaphone },
+    { label: "Messages", href: "/teacher/messages", icon: MessageCircle },
   ];
 
   const subject: NavItem[] = [

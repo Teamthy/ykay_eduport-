@@ -7,6 +7,7 @@ import PortalSidebar from "@/components/PortalSidebar";
 import { useToast } from "@/components/Toast";
 import Image from "next/image";
 import {
+  MessageCircle,
   LayoutDashboard,
   User,
   FileText,
@@ -22,6 +23,7 @@ const SIDEBAR_ITEMS = [
   { label: "My Profile", href: "/student/profile", icon: User },
   { label: "ID Card", href: "/student/id-card", icon: IdCard },
   { label: "Report Cards", href: "/student/report-cards", icon: FileText },
+  { label: "Messages", href: "/student/messages", icon: MessageCircle },
   { label: "Announcements", href: "/student/announcements", icon: Bell },
 ];
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  MessageCircle,
   BarChart3,
   BookOpen,
   CalendarDays,
@@ -32,6 +33,7 @@ const ADMIN_NAV = [
   { label: "Staff QR Attendance", href: "/admin/staff-attendance", icon: ClipboardCheck },
   { label: "Class Manager", href: "/admin/class-manager", icon: School },
   { label: "Subjects", href: "/admin/subjects", icon: BookOpen },
+  { label: "Messages", href: "/admin/messages", icon: MessageCircle },
   { label: "Sessions & Terms", href: "/admin/sessions", icon: CalendarDays },
   { label: "Promotion", href: "/admin/promotion", icon: GraduationCap },
   { label: "Staff Assignments", href: "/admin/staff-assignments", icon: BookOpen },

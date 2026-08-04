@@ -4,6 +4,7 @@ import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import {
+  MessageCircle,
   LayoutDashboard,
   CalendarDays,
   FileText,
@@ -21,6 +22,7 @@ const SIDEBAR_ITEMS = [
   { label: "Attendance", href: "/student/attendance", icon: CalendarDays },
   { label: "Timetable", href: "/student/timetable", icon: CalendarDays },
   { label: "Report Cards", href: "/student/report-cards", icon: FileText },
+  { label: "Messages", href: "/student/messages", icon: MessageCircle },
   { label: "Announcements", href: "/student/announcements", icon: Bell },
   { label: "My Profile", href: "/student/dashboard", icon: User },
 ];

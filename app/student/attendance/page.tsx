@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import AttendanceCalendar, { type AttendanceDay } from "@/components/AttendanceCalendar";
 import {
+  MessageCircle,
   CalendarDays,
   Check,
   Clock,
@@ -27,6 +28,7 @@ const SIDEBAR_ITEMS = [
   { label: "Timetable", href: "/student/timetable", icon: Calendar },
   { label: "CBT Tests", href: "/student/exams", icon: ClipboardCheck },
   { label: "Report Cards", href: "/student/report-cards", icon: FileText },
+  { label: "Messages", href: "/student/messages", icon: MessageCircle },
   { label: "Announcements", href: "/student/announcements", icon: Bell },
   { label: "My Profile", href: "/student/profile", icon: User },
   { label: "Teachers", href: "/student/teachers", icon: GraduationCap },
