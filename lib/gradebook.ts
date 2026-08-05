@@ -1,5 +1,4 @@
 import { GradebookStatus, TeacherAssignmentRole, UserRole } from "@prisma/client";
-import { calendarLabels } from "@/lib/academic-session";
 import { prisma } from "@/lib/prisma";
 import { requireRole, type SessionUser } from "@/lib/session";
 
@@ -26,23 +25,44 @@ export const SCORE_LIMITS = {
 
 export type ScoreField = keyof typeof SCORE_LIMITS;
 
-/**
- * @deprecated Guesses the session from the month. Use
- * `resolveCurrentLabels(schoolId)` to read, or `requireCurrentLabels(schoolId)`
- * to write — both in `lib/academic-session`, both backed by the term the school
- * actually set.
- *
- * Retained as a thin delegate so there is exactly one calendar heuristic in the
- * codebase. Two copies is how "First Term" and "Third Term" ended up naming the
- * same week.
- */
 export function currentSessionLabel() {
-  return calendarLabels().sessionLabel;
+  const now = new Date();
+  const year = now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
+  return `${year}/${year + 1}`;
 }
 
-/** @deprecated See {@link currentSessionLabel}. */
 export function currentTermLabel() {
-  return calendarLabels().termLabel;
+  const month = new Date().getMonth();
+  if (month >= 8 && month <= 11) return "First Term";
+  if (month >= 0 && month <= 3) return "Second Term";
+  return "Third Term";
+}
+
+/**
+ * Calendar boundaries of the current term, matching currentTermLabel().
+ *
+ *   First Term   Sep – Dec
+ *   Second Term  Jan – Apr
+ *   Third Term   May – Aug
+ *
+ * Needed wherever "this term" has to be expressed as a date range rather than
+ * a label — budget spend, for instance, is computed from Expense.spentAt,
+ * which has no termLabel column to filter on.
+ */
+export function currentTermWindow(now: Date = new Date()) {
+  const month = now.getMonth();
+  const year = now.getFullYear();
+
+  if (month >= 8) {
+    // First Term: 1 Sep – 31 Dec of this year.
+    return { from: new Date(year, 8, 1), to: new Date(year + 1, 0, 1) };
+  }
+  if (month <= 3) {
+    // Second Term: 1 Jan – 30 Apr.
+    return { from: new Date(year, 0, 1), to: new Date(year, 4, 1) };
+  }
+  // Third Term: 1 May – 31 Aug.
+  return { from: new Date(year, 4, 1), to: new Date(year, 8, 1) };
 }
 
 export function waecGrade(total: number) {

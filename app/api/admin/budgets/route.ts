@@ -2,11 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getAdminFinanceContext } from "@/lib/finance";
 import { assertNotImpersonating } from "@/lib/session";
-import {
-  NoCurrentTermError,
-  requireCurrentLabels,
-  resolveCurrentLabels,
-} from "@/lib/academic-session";
+import { currentSessionLabel, currentTermLabel, currentTermWindow } from "@/lib/gradebook";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
 
@@ -25,7 +21,9 @@ export async function GET() {
   const context = await getAdminFinanceContext();
   if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { sessionLabel, termLabel, source } = await resolveCurrentLabels(context.user.schoolId);
+  const sessionLabel = currentSessionLabel();
+  const termLabel = currentTermLabel();
+  const termWindow = currentTermWindow();
 
   const [budgets, expenses] = await Promise.all([
     prisma.budget.findMany({
@@ -33,26 +31,32 @@ export async function GET() {
       where: { schoolId: context.user.schoolId, sessionLabel },
       orderBy: [{ termLabel: "asc" }, { category: "asc" }],
     }),
-    prisma.expense.findMany({
-      take: 500,
-      where: { schoolId: context.user.schoolId },
-      select: { category: true, amount: true, spentAt: true },
+    // Spend for THIS TERM only, summed in SQL.
+    //
+    // This previously loaded up to 500 expenses with no date predicate and
+    // summed them in Node, so "term spend" silently included every expense the
+    // school had ever recorded — a bursar comparing spend against a term budget
+    // was reading a wrong number, and it drifted further out every term. The
+    // 500-row cap also meant the figure was quietly incomplete once a school
+    // passed that many records.
+    prisma.expense.groupBy({
+      by: ["category"],
+      where: {
+        schoolId: context.user.schoolId,
+        spentAt: { gte: termWindow.from, lt: termWindow.to },
+      },
+      _sum: { amount: true },
     }),
   ]);
 
-  // Approximate term spend: current calendar window is enough for ops MVP
   const spentByCategory = new Map<string, number>();
-  for (const e of expenses) {
-    spentByCategory.set(
-      e.category.toLowerCase(),
-      (spentByCategory.get(e.category.toLowerCase()) || 0) + e.amount,
-    );
+  for (const row of expenses) {
+    spentByCategory.set(row.category.toLowerCase(), row._sum.amount ?? 0);
   }
 
   return NextResponse.json({
     sessionLabel,
     termLabel,
-    labelSource: source,
     budgets: budgets.map((b) => {
       const spent = spentByCategory.get(b.category.toLowerCase()) || 0;
       const remaining = b.amountLimit - spent;
@@ -87,23 +91,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid budget details." }, { status: 400 });
   }
 
-  // A budget keys on (category, term, session) — a guessed term silently
-  // creates a second budget for the same real-world period.
-  let sessionLabel: string;
-  let termLabel: string;
-  try {
-    const current = await requireCurrentLabels(context.user.schoolId);
-    sessionLabel = input.sessionLabel || current.sessionLabel;
-    termLabel = input.termLabel || current.termLabel;
-  } catch (labelError) {
-    if (labelError instanceof NoCurrentTermError && !(input.sessionLabel && input.termLabel)) {
-      return NextResponse.json({ error: labelError.message }, { status: 409 });
-    }
-    if (!(labelError instanceof NoCurrentTermError)) throw labelError;
-    // Both labels supplied explicitly — the caller is not relying on a guess.
-    sessionLabel = input.sessionLabel as string;
-    termLabel = input.termLabel as string;
-  }
+  const sessionLabel = input.sessionLabel || currentSessionLabel();
+  const termLabel = input.termLabel || currentTermLabel();
 
   const budget = await prisma.budget.upsert({
     where: {

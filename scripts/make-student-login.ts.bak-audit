@@ -6,18 +6,15 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma";
 
-const EMAIL = "student1@ykaycollege.com";
+const EMAIL = process.env.STUDENT_EMAIL || "student1@ykaycollege.com";
 
-// Operator-supplied, no fallback — this script previously hardcoded the same
-// literal that shipped in .env.example, which meant a known password on a real
-// student account.
-const PASSWORD = process.env.STUDENT_PASSWORD || process.env.SEED_PASSWORD || "";
-
+// Supplied by the operator, never hardcoded — this script creates a real,
+// loginable account and a literal here becomes a known credential.
+const PASSWORD = process.env.STUDENT_PASSWORD || "";
 if (!PASSWORD || PASSWORD.length < 12) {
-  console.error("\n✖ STUDENT_PASSWORD (or SEED_PASSWORD) is required, min 12 characters.\n");
-  console.error('    PowerShell:  $env:STUDENT_PASSWORD="<a strong password>"');
   console.error(
-    '    bash:        STUDENT_PASSWORD="<a strong password>" npx tsx scripts/make-student-login.ts\n',
+    "\nSTUDENT_PASSWORD is required and must be at least 12 characters.\n\n" +
+      '  STUDENT_PASSWORD="<a-strong-password>" npx tsx scripts/make-student-login.ts\n',
   );
   process.exit(1);
 }

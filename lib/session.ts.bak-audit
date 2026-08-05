@@ -109,121 +109,6 @@ export function sessionCookie(token: string) {
 }
 
 /**
- * Validates the session and checks tokenVersion against the database.
- * If the user's tokenVersion in the DB is higher than the one in the JWT,
- * the session has been revoked (e.g. user was suspended or password was reset).
- *
- * This check is lightweight — a single indexed lookup by primary key.
- */
-/**
- * Why a session was refused.
- *
- * `requireRole` returns null for six different reasons and the caller answers
- * a bare 401 for all of them, so "the page loads but every button says
- * Unauthorized" is unactionable — you cannot tell an expired cookie from a
- * revoked token from a suspended account without reading the source.
- *
- * `sessionDenialReason()` returns the specific cause. `/api/auth/whoami`
- * surfaces it, and it is written to the response header on a denial so it
- * shows up in the network tab without needing a second request.
- */
-export type SessionDenial =
-  | "NO_SESSION"
-  | "BAD_SIGNATURE_OR_EXPIRED"
-  | "WRONG_ROLE"
-  | "USER_NOT_FOUND"
-  | "USER_INACTIVE"
-  | "USER_SUSPENDED"
-  | "SESSION_REVOKED"
-  // Not a refusal on the merits: the database could not be reached to confirm
-  // identity state. Callers must answer 503, not 401 — see isUnavailable().
-  | "IDENTITY_UNVERIFIABLE";
-
-export type SessionCheck =
-  { ok: true; user: SessionUser } | { ok: false; reason: SessionDenial; role?: UserRole };
-
-/**
- * The same logic as `requireRole`, but it reports WHY it said no.
- *
- * Kept as one implementation so the diagnostic can never drift from the
- * enforcement — a diagnostic that disagrees with the real check is worse than
- * none, because it sends you looking in the wrong place.
- */
-export async function checkRole(allowed: UserRole[]): Promise<SessionCheck> {
-  const cookieToken = (await cookies()).get(SESSION_COOKIE)?.value;
-  const authHeader = (await headers()).get("authorization") || "";
-  const bearer = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7).trim() : "";
-
-  if (!cookieToken && !bearer) return { ok: false, reason: "NO_SESSION" };
-
-  const user = await getSession();
-  // A token was presented but did not verify: wrong AUTH_SECRET, tampered, or
-  // past its 8-hour expiry.
-  if (!user) return { ok: false, reason: "BAD_SIGNATURE_OR_EXPIRED" };
-
-  if (!allowed.includes(user.role)) return { ok: false, reason: "WRONG_ROLE", role: user.role };
-
-  try {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { tokenVersion: true, isActive: true, isSuspended: true },
-    });
-    if (!dbUser) return { ok: false, reason: "USER_NOT_FOUND", role: user.role };
-    if (dbUser.isSuspended) return { ok: false, reason: "USER_SUSPENDED", role: user.role };
-    if (!dbUser.isActive) return { ok: false, reason: "USER_INACTIVE", role: user.role };
-    if (dbUser.tokenVersion > (user.tokenVersion ?? 0)) {
-      return { ok: false, reason: "SESSION_REVOKED", role: user.role };
-    }
-  } catch (error) {
-    // Matches requireRole: fail CLOSED. This lookup is the ONLY thing that
-    // sees suspensions and revocations, so allowing the request through on a
-    // database error left a suspended user authorised for the remaining
-    // lifetime of their 8-hour token. Reported as its own reason so the
-    // caller can answer 503 rather than 401.
-    logger.error("Identity state lookup failed — denying request", {
-      userId: user.id,
-      error: String(error),
-    });
-    return { ok: false, reason: "IDENTITY_UNVERIFIABLE", role: user.role };
-  }
-
-  return { ok: true, user };
-}
-
-/**
- * True when a denial means "we could not check", not "you may not".
- *
- * Lets a route answer 503 for an infrastructure problem while still answering
- * 401 for a genuine authorisation failure, without inspecting the reason
- * string at every call site.
- */
-export function isUnavailable(reason: SessionDenial): boolean {
-  return reason === "IDENTITY_UNVERIFIABLE";
-}
-
-/** Plain-English explanation, safe to show a signed-in staff member. */
-export function explainDenial(reason: SessionDenial): string {
-  switch (reason) {
-    case "NO_SESSION":
-      return "No session cookie was sent. Sign in again.";
-    case "BAD_SIGNATURE_OR_EXPIRED":
-      return "Your session has expired or is no longer valid. Sign in again.";
-    case "WRONG_ROLE":
-      return "Your role does not have access to this action.";
-    case "USER_NOT_FOUND":
-      return "Your account no longer exists.";
-    case "USER_INACTIVE":
-      return "Your account is not active. Ask an administrator to re-enable it.";
-    case "USER_SUSPENDED":
-      return "Your account is suspended.";
-    case "SESSION_REVOKED":
-      return "Your session was ended elsewhere — after a password change, role change, or sign-out-everywhere. Sign in again.";
-    case "IDENTITY_UNVERIFIABLE":
-      return "We could not confirm your account status just now. This is a temporary problem on our side — please try again in a moment.";
-  }
-}
-
-/**
  * Thrown when the database cannot confirm a user's current identity state.
  *
  * Distinct from "not authorised" on purpose: the caller should answer 503
@@ -239,6 +124,12 @@ export class IdentityCheckUnavailableError extends Error {
 }
 
 /**
+ * Validates the session and checks tokenVersion against the database.
+ * If the user's tokenVersion in the DB is higher than the one in the JWT,
+ * the session has been revoked (e.g. user was suspended or password was reset).
+ *
+ * This check is lightweight — a single indexed lookup by primary key.
+ *
  * ── Fail CLOSED ────────────────────────────────────────────────────────────
  * This used to swallow database errors and allow the request through, on the
  * reasoning that the JWT signature was still valid. That was wrong: the whole
@@ -247,9 +138,9 @@ export class IdentityCheckUnavailableError extends Error {
  * meant a suspended user stayed authorised for up to the 8-hour token lifetime
  * on every route, for as long as the database was unhappy.
  *
- * It now throws IdentityCheckUnavailableError. Routes using requireRoleOr503
- * turn that into a 503; anything else propagates as a 500. Both are correct —
- * neither grants access.
+ * It now throws IdentityCheckUnavailableError. Routes that use the
+ * withAuth/requireRoleOr503 helpers turn that into a 503; anything else
+ * propagates as a 500. Both are correct — neither grants access.
  */
 export async function requireRole(allowed: UserRole[]) {
   const user = await getSession();

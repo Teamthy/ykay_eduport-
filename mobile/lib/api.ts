@@ -8,7 +8,7 @@
  * Shared HTTP primitives live in lib/http (imported here and by the offline
  * cache) to avoid a require cycle.
  */
-import { API_BASE, getToken, setToken, clearToken, authHeaders, notifyAuthExpired, type SessionUser } from "@/lib/http";
+import { API_BASE, IS_WEB, fetchOptions, getToken, setToken, clearToken, authHeaders, notifyAuthExpired, type SessionUser } from "@/lib/http";
 import { cachedGet, queuedWrite } from "@/lib/offline/cache";
 
 // Re-export so existing `import { API_BASE, getToken, ... } from "@/lib/api"` keeps working.
@@ -35,8 +35,12 @@ export async function api<T = any>(
     return cachedGet<T>(path);
   }
   // Mutations (payments, login, exam start) are sent directly — never queued.
-  const token = await getToken();
+  // On web the token is only a local "signed in" marker, not a JWT — the real
+  // credential is the httpOnly cookie. Sending it as a Bearer would be a junk
+  // header the backend tries (and fails) to verify.
+  const token = IS_WEB ? null : await getToken();
   const res = await fetch(`${API_BASE}${path}`, {
+    ...fetchOptions,
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -66,6 +70,7 @@ export async function login(
   password: string,
 ): Promise<{ user: SessionUser; token: string }> {
   const res = await fetch(`${API_BASE}/api/auth/login`, {
+    ...fetchOptions,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -73,9 +78,31 @@ export async function login(
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Login failed");
 
-  const setCookie = res.headers.get("set-cookie") || "";
-  const tokenMatch = setCookie.match(/ykay_session=([^;]+)/);
-  const token = tokenMatch?.[1] || "";
+  /**
+   * Recover the session token.
+   *
+   * NATIVE: there is no cookie jar, so we scrape `Set-Cookie` off the response
+   * and replay it manually on later requests.
+   *
+   * WEB: `Set-Cookie` is a FORBIDDEN RESPONSE HEADER — the Fetch spec requires
+   * browsers to filter it out of `res.headers` unconditionally. So the line
+   * below always returned `null` on web, `token` was always `""`, `setToken`
+   * was never called, and the root layout's `getMe()` bailed at
+   * `if (!token) return null` — bouncing the user straight back to the login
+   * screen it had just accepted them through. It reads like a rejected
+   * password; it is actually a header the browser is required to hide.
+   *
+   * The real cookie IS set (httpOnly), and travels automatically now that
+   * requests use `credentials: "include"`. All we need locally is a marker
+   * that a session exists, so the layout's `if (!token)` gate passes.
+   */
+  let token = "";
+  if (IS_WEB) {
+    token = "web-session"; // marker only; the httpOnly cookie is the real auth
+  } else {
+    const setCookie = res.headers.get("set-cookie") || "";
+    token = setCookie.match(/ykay_session=([^;]+)/)?.[1] || "";
+  }
 
   if (token) await setToken(token);
   return { user: data.user, token };
@@ -90,6 +117,7 @@ export async function login(
  */
 export async function requestPasswordReset(email: string): Promise<{ message: string }> {
   const res = await fetch(`${API_BASE}/api/auth/password-reset/request`, {
+    ...fetchOptions,
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),

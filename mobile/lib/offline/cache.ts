@@ -2,7 +2,7 @@
  * Offline read-cache + write-queue + sync, with an inferred online flag.
  * Imports shared primitives from lib/http (NOT lib/api) to avoid a cycle.
  */
-import { API_BASE, authHeaders, notifyAuthExpired } from "@/lib/http";
+import { API_BASE, fetchOptions, authHeaders, notifyAuthExpired } from "@/lib/http";
 import { addQueue, getCache, getQueue, removeQueue, setCache, queueCount } from "./db";
 
 // ── Online state (inferred) ──────────────────────────────────────────────
@@ -40,7 +40,7 @@ async function refreshPending() {
 export async function cachedGet<T = unknown>(path: string): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, { headers: await authHeaders() });
+    res = await fetch(`${API_BASE}${path}`, { ...fetchOptions, headers: await authHeaders() });
   } catch {
     setOnline(false);
     const cached = await getCache<T>(path);
@@ -67,6 +67,7 @@ export async function queuedWrite<T = unknown>(
   let res: Response;
   try {
     res = await fetch(`${API_BASE}${path}`, {
+      ...fetchOptions,
       method,
       headers: await authHeaders(),
       body: JSON.stringify(body ?? {}),
@@ -96,6 +97,7 @@ export async function flushQueue(): Promise<void> {
     for (const item of items) {
       try {
         const res = await fetch(`${API_BASE}${item.path}`, {
+          ...fetchOptions,
           method: item.method,
           headers: await authHeaders(),
           body: item.body || undefined,

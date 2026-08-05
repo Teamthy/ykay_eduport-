@@ -21,12 +21,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Audit dependencies (non-blocking)
-        # Surfaces high+ vulns in the run log. Non-blocking because the only
-        # fixes are dev-toolchain majors (eslint 10 / expo 57) that would break
-        # the build. Reviewed manually.
+      - name: Audit dependencies
+        # Blocking. The previous exemption ("only fixes are toolchain majors")
+        # was stale — the outstanding brace-expansion and undici advisories
+        # were both fixable in-place via the lockfile with no API change.
+        # If a future advisory genuinely has no safe fix, add a scoped, dated
+        # `--exclude` here with a comment rather than silencing the whole step.
         run: npm audit --audit-level=high
-        continue-on-error: true
 
       - name: Generate Prisma client
         run: npx prisma generate
@@ -38,7 +39,12 @@ jobs:
         run: npm run lint
 
       - name: Type check
+        # Explicit heap: tsc peaks well above Node's default on a project this
+        # size, and an OOM here reads as a mysterious CI failure rather than a
+        # type error.
         run: npx tsc --noEmit
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Run tests
         run: npx vitest run

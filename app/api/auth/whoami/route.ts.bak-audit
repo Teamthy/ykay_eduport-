@@ -61,7 +61,7 @@ export async function GET() {
       authenticated: true,
       reason: "DB_UNREACHABLE",
       message:
-        "Your session is valid but the database could not be reached to confirm it. Identity checks fail CLOSED, so protected requests will be refused with 503 until the database recovers. This is deliberate: the lookup is the only thing that sees suspensions and revocations.",
+        "Your session is valid but the database could not be reached to confirm it. requireRole fails OPEN in this case, so requests should still succeed.",
       detail: dbError instanceof Error ? dbError.message.split("\n")[0] : String(dbError),
       session: { id: session.id, role: session.role, email: session.email },
     });

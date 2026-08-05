@@ -532,7 +532,7 @@ export default function InstructorDashboard() {
                 <FileText size={40} className="mx-auto mb-3 text-[var(--text-muted)]" />
                 <p className="text-sm text-[var(--text-muted)]">No exams created yet.</p>
                 <Link
-                  href="/teacher/exams"
+                  href="/teacher/exam-center"
                   className="mt-4 inline-block rounded-full bg-[#0F1F2E] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#1a3148]"
                 >
                   Create Exam

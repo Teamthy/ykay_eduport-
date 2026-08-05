@@ -68,28 +68,44 @@ function logDenial(
   });
 }
 
+/**
+ * Stamp the resolved CORS headers onto a response.
+ *
+ * This MUST be applied to the real response, not only to the preflight.
+ * A browser re-checks Access-Control-Allow-Origin on every single response;
+ * passing the preflight buys nothing if the actual POST comes back carrying a
+ * different origin. That mismatch was the "Failed to fetch" login bug — the
+ * preflight said `http://localhost:8081` while a static header block in
+ * next.config.ts stamped `https://ykaycollege.edu.ng` onto the POST.
+ */
+function applyCors(response: NextResponse, request: NextRequest): NextResponse {
+  const origin = resolveAllowedOrigin(request.headers.get("origin"));
+  response.headers.set("Access-Control-Allow-Origin", origin);
+  response.headers.set("Access-Control-Allow-Credentials", "true");
+  // Responses vary by Origin, so caches (and Vercel's CDN) must not serve one
+  // caller's allow-origin to another.
+  response.headers.append("Vary", "Origin");
+  return response;
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const method = request.method;
+  const isApi = pathname.startsWith("/api/");
 
   // ── CORS preflight for API routes ──
   // Native mobile ignores CORS; this serves browser cross-origin callers
-  // (e.g. a future custom-domain web app) and standards-compliant tooling.
-  if (pathname.startsWith("/api/") && method === "OPTIONS") {
-    return new NextResponse(null, {
+  // (e.g. the Expo web build, or a future custom-domain web app).
+  if (isApi && method === "OPTIONS") {
+    const preflight = new NextResponse(null, {
       status: 204,
       headers: {
-        // Echo the caller's origin when it is allowed. A single hardcoded
-        // value means any local preview gets "Failed to fetch" with nothing
-        // to diagnose — see lib/cors.ts.
-        "Access-Control-Allow-Origin": resolveAllowedOrigin(request.headers.get("origin")),
-        "Access-Control-Allow-Credentials": "true",
-        Vary: "Origin",
         "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type,Authorization,x-idempotency-key",
         "Access-Control-Max-Age": "86400",
       },
     });
+    return applyCors(preflight, request);
   }
 
   // ── Read-only super-admin impersonation ──
@@ -110,9 +126,15 @@ export async function middleware(request: NextRequest) {
       try {
         const { payload } = await jwtVerify(impToken, encoder.encode(impSecret));
         if (payload.impersonatedBy) {
-          return NextResponse.json(
-            { error: "Writes are not permitted while impersonating. End impersonation first." },
-            { status: 403 },
+          // CORS headers on the error too — otherwise the browser blocks the
+          // 403 and the caller sees an opaque "Failed to fetch" instead of the
+          // actual reason.
+          return applyCors(
+            NextResponse.json(
+              { error: "Writes are not permitted while impersonating. End impersonation first." },
+              { status: 403 },
+            ),
+            request,
           );
         }
       } catch {
@@ -121,8 +143,16 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (publicPaths.some((path) => pathname.startsWith(path))) return NextResponse.next();
-  if (!protectedPrefixes.some((prefix) => pathname.startsWith(prefix))) return NextResponse.next();
+  // Every /api/* response that passes through here needs the CORS headers,
+  // because next.config.ts no longer supplies them. `/api/auth/login` lands on
+  // this line — it is not a protected prefix — so this is the branch the
+  // mobile login actually returns through.
+  if (publicPaths.some((path) => pathname.startsWith(path))) {
+    return isApi ? applyCors(NextResponse.next(), request) : NextResponse.next();
+  }
+  if (!protectedPrefixes.some((prefix) => pathname.startsWith(prefix))) {
+    return isApi ? applyCors(NextResponse.next(), request) : NextResponse.next();
+  }
 
   const token = request.cookies.get("ykay_session")?.value;
   const secret = process.env.AUTH_SECRET;

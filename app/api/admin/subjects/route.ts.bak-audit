@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
-import { checkRole, explainDenial, isUnavailable, type SessionDenial } from "@/lib/session";
+import { checkRole, explainDenial, type SessionDenial } from "@/lib/session";
 import {
   DEFAULT_CATALOGUE,
   SUBJECT_ADMIN_ROLES,
@@ -27,12 +27,6 @@ export const dynamic = "force-dynamic";
  * without parsing the body or making a second request.
  */
 function unauthorized(denial: { reason: SessionDenial; role?: string }) {
-  // A database outage is not an authorisation failure. Answering 401 would
-  // tell a legitimate signed-in admin their credentials are wrong and send
-  // them to re-authenticate, which cannot help. 503 + Retry-After is the
-  // truth, and keeps the client's retry logic correct.
-  const unavailable = isUnavailable(denial.reason);
-
   return NextResponse.json(
     {
       error: explainDenial(denial.reason),
@@ -40,12 +34,7 @@ function unauthorized(denial: { reason: SessionDenial; role?: string }) {
       role: denial.role ?? null,
       hint: "GET /api/auth/whoami for the full picture.",
     },
-    {
-      status: unavailable ? 503 : 401,
-      headers: unavailable
-        ? { "x-auth-denied": denial.reason, "Retry-After": "5" }
-        : { "x-auth-denied": denial.reason },
-    },
+    { status: 401, headers: { "x-auth-denied": denial.reason } },
   );
 }
 

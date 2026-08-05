@@ -43,13 +43,17 @@ export async function GET() {
   }
 
   // ── Overall status ─────────────────────────────────────────
-  const allUp = checks.database.status === "up" && checks.redis.status !== "down";
+  // Only the DATABASE decides the HTTP status.
+  //
+  // This used to 503 whenever Redis was down, which meant a Redis blip made
+  // every otherwise-healthy instance look dead to the load balancer and got it
+  // pulled from rotation — turning a degraded-rate-limiting incident into an
+  // outage. Redis being down is real and still reported as "degraded" in the
+  // body, but the app can serve every request without it.
+  const databaseUp = checks.database.status === "up";
+  const allUp = databaseUp && checks.redis.status !== "down";
 
-  const status: HealthStatus["status"] = allUp
-    ? "healthy"
-    : checks.database.status === "up"
-      ? "degraded"
-      : "unhealthy";
+  const status: HealthStatus["status"] = allUp ? "healthy" : databaseUp ? "degraded" : "unhealthy";
 
   const body: HealthStatus = {
     status,
@@ -58,5 +62,5 @@ export async function GET() {
     checks,
   };
 
-  return NextResponse.json(body, { status: allUp ? 200 : 503 });
+  return NextResponse.json(body, { status: databaseUp ? 200 : 503 });
 }

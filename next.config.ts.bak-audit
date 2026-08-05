@@ -50,9 +50,7 @@ const nextConfig: NextConfig = {
         // geolocation stay denied.
         //
         // CORS is deliberately NOT declared here — middleware owns it, so the
-        // allowed-origin logic lives in exactly one place. Declaring it in
-        // both meant a static header from next.config could contradict the
-        // dynamic, origin-aware one middleware sets.
+        // allowed-origin logic lives in exactly one place.
         source: "/admin/staff-attendance",
         headers: [
           {
