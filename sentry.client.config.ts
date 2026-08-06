@@ -1,41 +1,44 @@
+import * as Sentry from "@sentry/nextjs";
+
 /**
- * Sentry configuration for client-side error tracking.
+ * Browser error tracking.
  *
- * Install: npm install @sentry/nextjs
- * Then run: npx @sentry/wizard@latest -i nextjs
- *
- * This file provides the base config. The wizard will create
- * the full integration files automatically.
- *
- * For now, this is a no-op config that can be activated by
- * setting NEXT_PUBLIC_SENTRY_DSN in your environment.
+ * Catches the failures a server never sees: a component that throws during
+ * hydration, a fetch that fails on a parent's phone, the QR scanner refusing
+ * to open the camera. That last one shipped to production and was invisible
+ * for weeks precisely because nothing watched the browser.
  */
 
-const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN;
+const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
 
-if (SENTRY_DSN) {
-  // Dynamic import to avoid bundling Sentry when not configured
-  import("@sentry/nextjs")
-    .then((Sentry) => {
-      Sentry.init({
-        dsn: SENTRY_DSN,
-        environment: process.env.NODE_ENV,
-        tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-        replaysSessionSampleRate: 0,
-        replaysOnErrorSampleRate: 1.0,
-        denyUrls: [/webpack/i, /chunk/i],
-        ignoreErrors: [
-          "ResizeObserver loop limit exceeded",
-          "Non-Error promise rejection captured",
-          "Loading chunk",
-          "NetworkError",
-          "Failed to fetch",
-        ],
-      });
-    })
-    .catch(() => {
-      // Sentry not installed — silently skip
-    });
-}
+Sentry.init({
+  dsn,
+  environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV || "development",
+  enabled: Boolean(dsn),
 
-export {};
+  // Most Nigerian users are on metered mobile data. Session replay ships a lot
+  // of bytes from the user's bundle, so it is off by default and sampled only
+  // on error if you ever turn it on.
+  tracesSampleRate: 0.1,
+  replaysSessionSampleRate: 0,
+  replaysOnErrorSampleRate: 0,
+
+  sendDefaultPii: false,
+
+  ignoreErrors: [
+    // Browser extensions and third-party injections, not our bugs.
+    "top.GLOBALS",
+    "ResizeObserver loop limit exceeded",
+    "ResizeObserver loop completed with undelivered notifications",
+    // A user navigating away mid-request is not an incident.
+    "AbortError",
+    "NetworkError when attempting to fetch resource",
+    "Failed to fetch",
+  ],
+
+  beforeSend(event) {
+    // Password-reset and staff-activation tokens live in query strings.
+    if (event.request?.url) event.request.url = event.request.url.split("?")[0];
+    return event;
+  },
+});

@@ -2,17 +2,71 @@
  * Next.js instrumentation hook — runs once, before the server handles any
  * request.
  *
- * This is where environment validation belongs. lib/env.ts existed for months
- * with zero importers, so its promised fail-fast never happened: production
- * could boot with no RESEND_API_KEY and the first sign of trouble would be a
- * parent never receiving their portal login.
+ * Two jobs: validate the environment, and start error tracking.
  *
- * Guarded to the Node runtime — the Edge runtime has a different (smaller)
- * environment and does not need this check.
+ * ── Why everything here is wrapped in try/catch ────────────────────────────
+ * Next.js treats a throw from register() as fatal: the server does not start
+ * and EVERY route returns 500. That is the right response to a genuinely
+ * unservable config (no database, no signing secret) and a catastrophic
+ * over-reaction to anything else.
+ *
+ * This was not hypothetical. An earlier version of lib/env.ts listed
+ * RESEND_API_KEY as production-required, so the first production start
+ * without an email key took the whole site down — caught only because an
+ * end-to-end run booted a real production server.
+ *
+ * assertEnv() now throws only for genuinely fatal settings, and the catch is
+ * the second layer: a mistake in the validation rules, or in the monitoring
+ * SDK, must surface as a very loud log rather than an outage. Monitoring that
+ * can take the site down is worse than no monitoring.
  */
 export async function register() {
-  if (process.env.NEXT_RUNTIME !== "nodejs") return;
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    try {
+      const { assertEnv } = await import("@/lib/env");
+      assertEnv();
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      console.error(
+        "\n" +
+          "==============================================================\n" +
+          "  ENVIRONMENT VALIDATION FAILED\n" +
+          "==============================================================\n" +
+          detail +
+          "\n--------------------------------------------------------------\n" +
+          "  The server is starting anyway so the site stays reachable.\n" +
+          "  Fix the settings above: affected features will not work.\n" +
+          "==============================================================\n",
+      );
+    }
 
-  const { assertEnv } = await import("@/lib/env");
-  assertEnv();
+    try {
+      await import("./sentry.server.config");
+    } catch (error) {
+      console.error("[sentry] server init failed (continuing without it):", error);
+    }
+  }
+
+  if (process.env.NEXT_RUNTIME === "edge") {
+    try {
+      await import("./sentry.edge.config");
+    } catch (error) {
+      console.error("[sentry] edge init failed (continuing without it):", error);
+    }
+  }
+}
+
+/**
+ * Reports errors thrown by nested React Server Components, which Next.js
+ * cannot attach to a request automatically.
+ */
+export async function onRequestError(
+  ...args: Parameters<NonNullable<typeof import("@sentry/nextjs").captureRequestError>>
+) {
+  try {
+    const Sentry = await import("@sentry/nextjs");
+    Sentry.captureRequestError(...args);
+  } catch {
+    // Never let the reporter break the request it is reporting on.
+  }
 }

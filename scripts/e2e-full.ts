@@ -22,7 +22,16 @@ const LIST_ONLY = process.argv.includes("--list-only");
 const jsonIdx = process.argv.indexOf("--json");
 const JSON_OUT = jsonIdx >= 0 ? process.argv[jsonIdx + 1] : null;
 
-const PASSWORD = process.env.SEED_PASSWORD || "Ykay@2026!Secure";
+// No fallback: this literal also shipped in .env.example, so defaulting to it
+// meant the smoke test authenticated with a publicly known password — and
+// would keep passing against an environment that still used it.
+const PASSWORD = process.env.SEED_PASSWORD || "";
+if (!PASSWORD) {
+  console.error("\nSEED_PASSWORD is required.\n");
+  console.error('  PowerShell:  $env:SEED_PASSWORD="<the seeded password>"');
+  console.error('  bash:        SEED_PASSWORD="<the seeded password>" npm run test:e2e:full\n');
+  process.exit(1);
+}
 
 /** Seeded accounts, one per role. */
 const ACCOUNTS: Record<string, string> = {

@@ -144,11 +144,31 @@ export default function PortalPage() {
             <div className="mt-16 p-10 rounded-[2rem] bg-gradient-to-br from-brand-navy to-brand-navy-light border border-white/5 text-center">
               <h3 className="font-display text-2xl text-white mb-4">Need help signing in?</h3>
               <p className="font-body text-white/60 max-w-2xl mx-auto mb-6">
-                Staff, student, and parent credentials are issued by the school administration. If
-                you have lost access to your account, use the password reset option or contact the
-                school office.
+                Staff, student, and parent credentials are issued by the school administration —
+                there is no public sign-up. If you have lost access to your account, use the
+                password reset option or contact the school office.
+              </p>
+              <p className="font-body text-white/60 max-w-2xl mx-auto mb-6">
+                Not yet part of Ykay College?{" "}
+                <Link href="/admissions" className="font-bold text-brand-orange hover:underline">
+                  Apply for admission online
+                </Link>{" "}
+                — no account required. You will receive an Application ID to{" "}
+                <Link
+                  href="/admissions/status"
+                  className="font-bold text-brand-orange hover:underline"
+                >
+                  track your application
+                </Link>{" "}
+                at any time.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-4">
+                <Link
+                  href="/admissions"
+                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full border-2 border-brand-orange text-brand-orange font-body text-sm font-bold tracking-widest hover:bg-brand-orange hover:text-white transition-all"
+                >
+                  Apply for Admission
+                </Link>
                 <Link
                   href="/reset-password"
                   className="inline-flex items-center gap-2 px-8 py-3 rounded-full border-2 border-white/20 text-white font-body text-sm font-bold tracking-widest hover:bg-white hover:text-brand-navy transition-all"

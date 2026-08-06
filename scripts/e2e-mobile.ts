@@ -12,7 +12,15 @@
  * Usage: BASE_URL=http://127.0.0.1:3000 npx tsx scripts/e2e-mobile.ts
  */
 const BASE = (process.env.BASE_URL || "http://127.0.0.1:3000").replace(/\/$/, "");
-const PASSWORD = process.env.SEED_PASSWORD || "Ykay@2026!Secure";
+// No fallback — see scripts/e2e-full.ts. A smoke test that silently falls back
+// to a known password hides the very misconfiguration it should surface.
+const PASSWORD = process.env.SEED_PASSWORD || "";
+if (!PASSWORD) {
+  console.error("\nSEED_PASSWORD is required.\n");
+  console.error('  PowerShell:  $env:SEED_PASSWORD="<the seeded password>"');
+  console.error('  bash:        SEED_PASSWORD="<the seeded password>" npm run test:e2e:mobile\n');
+  process.exit(1);
+}
 
 const ACCOUNTS: Record<string, string> = {
   ADMIN: "admin@ykaycollege.com",

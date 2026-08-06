@@ -46,6 +46,16 @@ deliverables/
 # PowerShell ingest scripts (development artifacts)
 *.ps1
 
+# Scratch Node scripts (apply-drop*.cjs, push.cjs, ykay.cjs and friends).
+# Same category as the *.ps1 artifacts above: one-shot delivery helpers, not
+# source. They were committed once and broke the prettier pre-commit gate,
+# since .prettierignore does not cover them either.
+*.cjs
+
+# Backups written by apply scripts before they overwrite a file.
+*.bak
+*.bak-audit
+
 # Phase notes (development artifacts)
 PHASE*_NOTES.md
 TRANSFORMATION_*.md
@@ -75,3 +85,21 @@ public/Screenshot *.png
 # These were being swept into commits by `git add -A`.
 ykay-*.ps1
 ykay-*.cmd
+
+# Scratch Node scripts (apply-drop*.cjs, push.cjs, ykay.cjs and friends).
+# Same category as the *.ps1 artifacts above: one-shot delivery helpers, not
+# source. They were committed once and broke the prettier pre-commit gate,
+# since .prettierignore did not cover them either.
+*.cjs
+
+# Backups written by apply scripts before they overwrite a file.
+# Every suffix used so far — a missing one gets swept in by `git add -A`,
+# which is exactly how 7 *.bak-audit files reached the remote.
+*.bak
+*.bak-*
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

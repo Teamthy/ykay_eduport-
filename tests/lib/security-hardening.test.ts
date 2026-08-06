@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { mockPrisma } from "../setup";
 
 // Must be set before lib/session is imported — secret() reads it eagerly.
@@ -251,6 +252,7 @@ describe("CORS is owned by middleware alone", () => {
  * publicly known password across every role, admin included.
  */
 describe("no hardcoded seed credentials", () => {
+  // Split so this file does not itself contain the literal it forbids.
   const LEAKED = "Ykay@2026" + "!Secure";
 
   it("the seed script has no fallback password", () => {
@@ -268,5 +270,39 @@ describe("no hardcoded seed credentials", () => {
     const example = readFileSync(".env.example", "utf8");
     expect(example).not.toContain(LEAKED);
     expect(example).toMatch(/SEED_PASSWORD=""/);
+  });
+
+  /**
+   * The three assertions above name specific files, which is why they passed
+   * while scripts/e2e-full.ts and scripts/e2e-mobile.ts still carried the same
+   * literal: a test that checks the files you remembered cannot catch the file
+   * you forgot.
+   *
+   * This walks the whole tree instead. Adding a new script with the old
+   * password now fails here, wherever it lives.
+   */
+  it("no tracked source file anywhere contains the literal", () => {
+    const SKIP = new Set(["node_modules", ".next", ".git", "out", "dist", "coverage", "mobile"]);
+    const offenders: string[] = [];
+
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (SKIP.has(entry.name)) continue;
+        const full = join(dir, entry.name);
+        if (entry.isDirectory()) {
+          walk(full);
+          continue;
+        }
+        if (!/\.(ts|tsx|js|jsx|mjs|cjs|json|yml|yaml|env|example|md)$/i.test(entry.name)) continue;
+        // This test file legitimately references the literal, in halves.
+        if (full.endsWith("security-hardening.test.ts")) continue;
+        if (readFileSync(full, "utf8").includes(LEAKED)) {
+          offenders.push(full.replace(process.cwd() + "/", ""));
+        }
+      }
+    };
+    walk(process.cwd());
+
+    expect(offenders, `hardcoded password found in:\n  ${offenders.join("\n  ")}`).toEqual([]);
   });
 });

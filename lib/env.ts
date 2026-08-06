@@ -25,20 +25,28 @@ const baseSchema = z.object({
 });
 
 /**
- * Additionally required in production.
+ * Fatal in production: the app cannot serve a correct response without these.
  *
- * Each of these silently degrades a real user journey if missing, which is
- * exactly the failure mode worth catching at boot:
- *   NEXT_PUBLIC_SITE_URL  — password-reset and staff-activation links
- *   RESEND_API_KEY        — parent welcome emails, staff invites
- *   PAYSTACK_SECRET_KEY   — webhook signature verification
+ *   NEXT_PUBLIC_SITE_URL  — password-reset and staff-activation links are
+ *                           built from it; a wrong value sends users nowhere
+ *   PAYSTACK_SECRET_KEY   — webhook signature verification. Missing means
+ *                           unverified payment callbacks, which is a money bug
+ *
+ * ── Why this list is short ─────────────────────────────────────────────────
+ * An earlier version of this file also demanded RESEND_API_KEY and EMAIL_FROM
+ * here, and instrumentation.ts turns any failure into a thrown error at boot.
+ * The result: a deploy without an email key did not degrade email — it
+ * refused to start the server at all, and every page returned 500.
+ *
+ * That is strictly worse than the problem it was meant to prevent. A school
+ * whose welcome emails are silently not sending still has a working portal;
+ * a school whose portal will not boot has nothing. Anything that only breaks
+ * one feature belongs in the warning list below, however loudly.
  */
 const productionSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url("NEXT_PUBLIC_SITE_URL must be a full URL in production."),
   PAYSTACK_PUBLIC_KEY: z.string().min(8, "PAYSTACK_PUBLIC_KEY is required in production."),
   PAYSTACK_SECRET_KEY: z.string().min(8, "PAYSTACK_SECRET_KEY is required in production."),
-  RESEND_API_KEY: z.string().min(8, "RESEND_API_KEY is required in production."),
-  EMAIL_FROM: z.string().min(3, "EMAIL_FROM is required in production."),
 });
 
 export type ValidatedEnv = z.infer<typeof baseSchema>;
@@ -74,7 +82,20 @@ export function checkEnv(source: NodeJS.ProcessEnv = process.env): EnvValidation
       }
     }
 
-    // Not fatal, but each one weakens production in a way worth shouting about.
+    // Degraded, not fatal. Each of these disables a real feature and deserves
+    // a loud warning on every boot — but refusing to serve the site is worse
+    // than serving it without email, so none of them throws.
+    if (!source.RESEND_API_KEY) {
+      warnings.push(
+        "RESEND_API_KEY is not set — parent welcome emails, staff invitations and " +
+          "password-reset emails will NOT be delivered.",
+      );
+    }
+    if (!source.EMAIL_FROM) {
+      warnings.push(
+        "EMAIL_FROM is not set — outbound email has no verified sender address and will fail.",
+      );
+    }
     if (!source.UPSTASH_REDIS_REST_URL || !source.UPSTASH_REDIS_REST_TOKEN) {
       warnings.push(
         "Redis is not configured — rate limiting falls back to per-instance memory, " +

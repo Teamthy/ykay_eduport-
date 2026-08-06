@@ -97,7 +97,25 @@ function LoginForm() {
             Sign in with the credentials issued to you by Ykay College. For account help, contact
             the school administration.
           </p>
+          {/*
+            There is deliberately no "Sign up" on this form: staff, student and
+            parent accounts are created by the school, never self-registered.
+            Prospective families DO have a self-service route — admissions —
+            and without signposting it here they land on a sign-in page with no
+            credentials and no obvious next step.
+          */}
           <p className="mt-8 max-w-sm rounded-2xl border border-white/10 bg-white/5 p-4 text-xs leading-6 text-white/55">
+            New to Ykay College?{" "}
+            <Link href="/admissions" className="font-bold text-brand-orange hover:underline">
+              Apply for admission
+            </Link>{" "}
+            — no account needed. Already applied?{" "}
+            <Link href="/admissions/status" className="font-bold text-brand-orange hover:underline">
+              Track your application
+            </Link>{" "}
+            with your Application ID.
+          </p>
+          <p className="mt-4 max-w-sm rounded-2xl border border-white/10 bg-white/5 p-4 text-xs leading-6 text-white/55">
             Looking for IT Education courses?{" "}
             <Link href="/it-portal/auth" className="font-bold text-brand-green hover:underline">
               Go to the IT Education portal
