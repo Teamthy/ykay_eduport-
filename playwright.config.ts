@@ -61,11 +61,21 @@ export default defineConfig({
     },
   ],
 
-  // Reuse an already-running dev server locally; start one in CI.
+  // Reuse an already-running server locally; start one in CI.
+  //
+  // ── Why `node .next/standalone/server.js` and not `next start` ────────────
+  // next.config.ts sets `output: "standalone"` (for the Docker image), and
+  // `next start` refuses to serve that build — it prints a warning and then
+  // fails. The standalone bundle also does NOT include .next/static or
+  // public/; the Dockerfile copies them in, so anything running the bundle
+  // directly has to do the same or every stylesheet and script 404s.
+  //
+  // scripts/e2e-server.mjs does that copy and then boots the bundle, so what
+  // the tests exercise is byte-for-byte the artefact that ships in Docker.
   webServer: process.env.E2E_NO_SERVER
     ? undefined
     : {
-        command: `npx next start -p ${PORT}`,
+        command: `node scripts/e2e-server.mjs ${PORT}`,
         url: BASE_URL,
         reuseExistingServer: !process.env.CI,
         timeout: 180_000,

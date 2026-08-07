@@ -227,7 +227,7 @@ jobs:
 
       - name: Start the server
         run: |
-          npx next start -p 3100 &
+          node scripts/e2e-server.mjs 3100 &
           for i in $(seq 1 60); do
             code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 http://127.0.0.1:3100/login || true)
             [ "$code" = "200" ] && { echo "ready after ${i}s"; exit 0; }

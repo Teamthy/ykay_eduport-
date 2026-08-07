@@ -7,6 +7,7 @@ import { sessionCookie, signSession } from "@/lib/session";
 import { resolveTenantFromHost } from "@/lib/tenant";
 import { recordSecurityEvent, getUserAgent } from "@/lib/forensics";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 const schema = z.object({
   email: z.string().trim().toLowerCase().email(),
@@ -153,7 +154,30 @@ export async function POST(request: NextRequest) {
     const cookie = sessionCookie(token);
     response.cookies.set(cookie.name, cookie.value, cookie.options);
     return response;
-  } catch {
-    return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
+  } catch (error) {
+    // ── Do NOT answer 401 for an infrastructure failure ───────────────────
+    // This used to be a bare `catch { 401 }`, so a database outage told every
+    // user their password was wrong. That is actively harmful: staff retype
+    // credentials that are correct, burn through the 3-failures-per-email
+    // limiter, and lock themselves out for 15 minutes on top of the outage.
+    // It also hides the real fault — the logs show a wall of "bad password"
+    // while the actual problem is that Postgres is unreachable.
+    //
+    // A malformed body is still the caller's fault (400). Anything else is
+    // ours: 503 with Retry-After, and the error is logged rather than
+    // swallowed.
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: "Invalid email or password." }, { status: 400 });
+    }
+
+    logger.error("Login failed with an unexpected error", {
+      error: error instanceof Error ? error.message : String(error),
+      ipAddress: ip,
+    });
+
+    return NextResponse.json(
+      { error: "Sign-in is temporarily unavailable. Please try again in a moment." },
+      { status: 503, headers: { "Retry-After": "10" } },
+    );
   }
 }

@@ -32,7 +32,16 @@ const SECONDS = arg("seconds", 30);
 const PASSWORD = process.env.E2E_PASSWORD || process.env.SEED_PASSWORD || "";
 
 if (!PASSWORD) {
-  console.error("\nSEED_PASSWORD (or E2E_PASSWORD) is required — it signs the virtual users in.\n");
+  console.error("\nSEED_PASSWORD (or E2E_PASSWORD) is required — it signs the virtual users in.");
+  console.error("It must match the password the database was seeded with.\n");
+  console.error('  PowerShell:  $env:SEED_PASSWORD="<the seeded password>"');
+  console.error('  bash:        export SEED_PASSWORD="<the seeded password>"\n');
+  console.error("Then start the server in another terminal:\n");
+  console.error("  node scripts/e2e-server.mjs 3100\n");
+  console.error(
+    '(not `next start` — next.config.ts uses output: "standalone", which\n' +
+      " next start refuses to serve.)\n",
+  );
   process.exit(1);
 }
 

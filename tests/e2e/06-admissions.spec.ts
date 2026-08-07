@@ -14,8 +14,17 @@ import { test, expect } from "@playwright/test";
  */
 
 test.describe("admissions (public, no account)", () => {
+  /**
+   * `waitUntil: "domcontentloaded"` throughout, not the default "load".
+   *
+   * The admissions hero pulls a photograph from images.unsplash.com. Waiting
+   * for "load" waits for that third-party request too, so a slow or blocked
+   * CDN times the test out and reports it as "admissions is unreachable" —
+   * which is both alarming and wrong. What these tests care about is that the
+   * school's own HTML is served without a sign-in wall.
+   */
   test("the admissions page is reachable by an anonymous visitor", async ({ page }) => {
-    const response = await page.goto("/admissions");
+    const response = await page.goto("/admissions", { waitUntil: "domcontentloaded" });
 
     expect(response!.status()).toBeLessThan(400);
     expect(page.url(), "admissions should not require signing in").not.toContain("/login");
@@ -23,7 +32,7 @@ test.describe("admissions (public, no account)", () => {
   });
 
   test("the status tracker is reachable without a session", async ({ page }) => {
-    const response = await page.goto("/admissions/status");
+    const response = await page.goto("/admissions/status", { waitUntil: "domcontentloaded" });
 
     expect(response!.status()).toBeLessThan(400);
     expect(page.url()).not.toContain("/login");
@@ -58,7 +67,7 @@ test.describe("admissions (public, no account)", () => {
    * commonest way a school loses an applicant before they have applied.
    */
   test("the sign-in page points prospective families to admissions", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
 
     const applyLink = page.getByRole("link", { name: /apply for admission/i });
     await expect(applyLink).toBeVisible();
@@ -68,14 +77,14 @@ test.describe("admissions (public, no account)", () => {
   });
 
   test("the portal chooser states there is no public sign-up", async ({ page }) => {
-    await page.goto("/portal");
+    await page.goto("/portal", { waitUntil: "domcontentloaded" });
 
     await expect(page.locator("body")).toContainText(/no public sign-up/i);
     await expect(page.getByRole("link", { name: /apply for admission/i }).first()).toBeVisible();
   });
 
   test("there is no self-service registration for staff or student accounts", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
 
     // A "create account" control here would contradict the whole access model:
     // school-issued credentials only.

@@ -1,4 +1,4 @@
-import { Anton, DM_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -9,17 +9,46 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 import DemoIndicator from "@/components/DemoIndicator";
 import OfflineIndicator from "@/components/OfflineIndicator";
 
-const anton = Anton({
-  subsets: ["latin"],
+/**
+ * Fonts are self-hosted, not fetched from Google at build time.
+ *
+ * `next/font/google` downloads the font files during `next build`. That makes
+ * every build depend on reaching fonts.googleapis.com, and when the network
+ * hiccups the build does not degrade — it FAILS:
+ *
+ *   next/font: error: Failed to fetch `Anton` from Google Fonts.
+ *   > Build error occurred
+ *
+ * That happened on a real machine on a Nigerian connection, and it would
+ * happen just as easily in CI or on a Vercel build. A school's deploy should
+ * not be able to fail because a font CDN was briefly unreachable.
+ *
+ * These are the same files Google serves for the `latin` subset, committed to
+ * the repo (55 KB total). Self-hosting also removes a third-party request from
+ * every page load, which is faster on mobile data and avoids sending visitor
+ * IPs to Google — worth having for a site used by children's parents.
+ *
+ * To update: fetch the woff2 URLs from the Google CSS and replace the files.
+ */
+const anton = localFont({
+  src: "./fonts/Anton-Regular.woff2",
   weight: "400",
+  style: "normal",
   variable: "--font-display",
   display: "swap",
+  // Matches the metrics Google's own CSS declares, so the fallback swap does
+  // not shift the layout while the font loads.
+  fallback: ["system-ui", "sans-serif"],
 });
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+
+const dmSans = localFont({
+  // Variable font: one file covers the whole 300-700 range the site uses.
+  src: "./fonts/DMSans-Variable.woff2",
+  weight: "300 700",
+  style: "normal",
   variable: "--font-body",
   display: "swap",
+  fallback: ["system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {
