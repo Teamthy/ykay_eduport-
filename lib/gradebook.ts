@@ -1,4 +1,4 @@
-import { GradebookStatus, TeacherAssignmentRole, UserRole } from "@prisma/client";
+import { GradebookStatus, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireRole, type SessionUser } from "@/lib/session";
 

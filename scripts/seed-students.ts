@@ -10,6 +10,7 @@
  */
 import { prisma } from "../lib/prisma";
 import { uniqueStudentNumber, passwordHash, oneTimeSecret } from "../lib/people";
+import { logger } from "@/lib/logger";
 
 const FIRST = [
   "Chinedu",
@@ -201,7 +202,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error(e);
+    logger.error("Request failed", { error: e instanceof Error ? e.message : String(e) });
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());

@@ -2,6 +2,7 @@ import { FeeInvoiceStatus, FeePaymentMethod, FeePaymentStatus, Prisma } from "@p
 import { resolveCurrentLabels } from "../lib/academic-session";
 import { prisma } from "../lib/prisma";
 import { getSchool } from "../lib/school";
+import { logger } from "@/lib/logger";
 
 function invoiceStatus(totalAmount: number, amountPaid: number, dueDate?: Date | null) {
   if (amountPaid >= totalAmount) return FeeInvoiceStatus.PAID;
@@ -293,7 +294,9 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error);
+    logger.error("Request failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     process.exitCode = 1;
   })
   .finally(async () => {

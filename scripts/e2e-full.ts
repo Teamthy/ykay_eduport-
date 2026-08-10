@@ -16,6 +16,7 @@
  */
 import { readdirSync, statSync, writeFileSync } from "fs";
 import { join, relative, sep } from "path";
+import { logger } from "@/lib/logger";
 
 const BASE = (process.env.BASE_URL || "http://127.0.0.1:3000").replace(/\/$/, "");
 const LIST_ONLY = process.argv.includes("--list-only");
@@ -338,6 +339,6 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error(e);
+  logger.error("Request failed", { error: e instanceof Error ? e.message : String(e) });
   process.exit(1);
 });

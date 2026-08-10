@@ -15,7 +15,6 @@ import {
   GraduationCap,
   Mail,
   Phone,
-  MapPin,
   Shield,
   Camera,
   LoaderCircle,

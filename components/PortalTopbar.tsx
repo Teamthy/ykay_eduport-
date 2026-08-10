@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Bell, LogOut, Menu, ShieldCheck } from "lucide-react";
+import { Bell, LogOut, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 export default function PortalTopbar({ title = "Workspace" }: { title?: string }) {
   const { user, logout } = useAuth();

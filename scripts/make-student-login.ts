@@ -5,6 +5,7 @@
  */
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma";
+import { logger } from "@/lib/logger";
 
 const EMAIL = "student1@ykaycollege.com";
 
@@ -79,7 +80,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error("❌ Failed:", e);
+    logger.error("❌ Failed:", { error: e instanceof Error ? e.message : String(e) });
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());

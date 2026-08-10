@@ -9,22 +9,16 @@ import { useToast } from "@/components/Toast";
 import {
   MessageSquare,
   Send,
-  Users,
   Check,
-  X,
   ChevronRight,
   ChevronLeft,
   Mail,
   Phone,
   MessageCircle,
-  FileText,
   CheckCircle2,
   Clock,
-  AlertCircle,
   Eye,
-  Filter,
   Search,
-  BookOpen,
 } from "lucide-react";
 
 interface Recipient {

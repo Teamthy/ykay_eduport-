@@ -2,6 +2,7 @@ import { GradebookStatus, TeacherAssignmentRole } from "@prisma/client";
 import { resolveCurrentLabels } from "../lib/academic-session";
 import { prisma } from "../lib/prisma";
 import { getSchool } from "../lib/school";
+import { logger } from "@/lib/logger";
 
 function waecGrade(total: number) {
   if (total >= 75) return "A1";
@@ -137,7 +138,9 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error);
+    logger.error("Request failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());

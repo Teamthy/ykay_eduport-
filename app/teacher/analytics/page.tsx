@@ -10,15 +10,11 @@ import {
   TrendingUp,
   TrendingDown,
   Users,
-  BookOpen,
   Award,
   Target,
-  Clock,
   Activity,
   Zap,
   Download,
-  Filter,
-  Calendar,
 } from "lucide-react";
 
 export default function TeacherAnalyticsPage() {

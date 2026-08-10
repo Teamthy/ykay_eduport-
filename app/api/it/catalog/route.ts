@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,7 +39,9 @@ export async function GET() {
       })),
     });
   } catch (error) {
-    console.error(error);
+    logger.error("Request failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json({ courses: [] }, { status: 200 });
   }
 }

@@ -14,7 +14,6 @@ import {
   TrendingUp,
   ClipboardCheck,
   Download,
-  CheckCircle2,
 } from "lucide-react";
 
 const RECORDS = [
@@ -95,8 +94,7 @@ const TYPE_ICONS: Record<string, typeof FileText> = {
 };
 
 export default function MyRecordsPage() {
-  const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
-  const teacher = data?.teacher || ({} as any);
+  const { loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
 
   return (
     <>

@@ -16,6 +16,7 @@
  * failure so it can gate a deploy.
  */
 import { PrismaClient, ApplicationStatus, PaymentStatus, PaymentProvider } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 const prisma = new PrismaClient({ log: [] });
 
@@ -241,7 +242,9 @@ async function main() {
 }
 
 main().catch(async (error) => {
-  console.error("\nVerification crashed:", error);
+  logger.error("\nVerification crashed:", {
+    error: error instanceof Error ? error.message : String(error),
+  });
   await cleanup().catch(() => {});
   await prisma.$disconnect();
   process.exit(1);

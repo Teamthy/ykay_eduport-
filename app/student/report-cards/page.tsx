@@ -77,7 +77,7 @@ export default function StudentReportCardsPage() {
   const [data, setData] = useState<Response | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isStale, setIsStale] = useState(false);
+  const [, setIsStale] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState("");
 
   useEffect(() => {

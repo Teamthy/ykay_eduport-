@@ -15,6 +15,7 @@ import net from "node:net";
 import dns from "node:dns/promises";
 import tls from "node:tls";
 import { PrismaClient } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 const RESET = "\x1b[0m";
 const RED = "\x1b[31m";
@@ -329,6 +330,8 @@ async function wakeNeon(prisma: { $queryRawUnsafe: (sql: string) => Promise<unkn
 }
 
 main().catch((error) => {
-  console.error("Diagnostic itself failed:", error);
+  logger.error("Diagnostic itself failed:", {
+    error: error instanceof Error ? error.message : String(error),
+  });
   process.exitCode = 1;
 });

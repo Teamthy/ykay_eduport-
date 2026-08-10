@@ -6,7 +6,6 @@ import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
-import DownloadForOffline from "@/components/DownloadForOffline";
 import {
   Award,
   Calendar,
@@ -83,7 +82,7 @@ export default function ParentDashboardPage() {
   const [data, setData] = useState<ParentDashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isStale, setIsStale] = useState(false);
+  const [, setIsStale] = useState(false);
 
   useEffect(() => {
     let active = true;

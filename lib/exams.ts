@@ -1,4 +1,4 @@
-import { ExamAttemptStatus, ExamQuestionType, ExamStatus, UserRole } from "@prisma/client";
+import { ExamAttemptStatus, ExamQuestionType, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireRole, type SessionUser } from "@/lib/session";
 import { gradeObjectiveAnswer } from "@/lib/exam-questions";

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useSyncStatus } from "@/lib/offline/hooks";
 import { initSyncManager } from "@/lib/offline/sync";
-import { Wifi, WifiOff, CloudUpload, CheckCircle2, Loader2 } from "lucide-react";
+import { WifiOff, CloudUpload, CheckCircle2, Loader2 } from "lucide-react";
 
 /**
  * Floating offline/sync status indicator.
@@ -24,23 +24,19 @@ export default function OfflineIndicator() {
 
   let icon = <CheckCircle2 size={14} className="text-green-500" />;
   let text = "All changes synced";
-  let bg = "bg-green-500/10 border-green-500/20";
   let textColor = "text-green-500";
 
   if (status === "offline") {
     icon = <WifiOff size={14} className="text-orange-500" />;
     text = pending > 0 ? `Offline — ${pending} change${pending > 1 ? "s" : ""} queued` : "Offline";
-    bg = "bg-orange-500/10 border-orange-500/20";
     textColor = "text-orange-500";
   } else if (status === "syncing") {
     icon = <Loader2 size={14} className="text-blue-500 animate-spin" />;
     text = `Syncing ${pending} change${pending > 1 ? "s" : ""}...`;
-    bg = "bg-blue-500/10 border-blue-500/20";
     textColor = "text-blue-500";
   } else if (status === "error") {
     icon = <CloudUpload size={14} className="text-red-500" />;
     text = `${pending} change${pending > 1 ? "s" : ""} failed to sync — will retry`;
-    bg = "bg-red-500/10 border-red-500/20";
     textColor = "text-red-500";
   }
 

@@ -5,7 +5,7 @@ import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useApi } from "@/lib/useApi";
-import { LoaderCircle } from "lucide-react";
+
 import { useToast } from "@/components/Toast";
 import {
   User,
@@ -14,7 +14,6 @@ import {
   Award,
   Calendar,
   School,
-  BookOpen,
   Edit3,
   Save,
   Camera,
@@ -63,19 +62,6 @@ export default function TeacherProfilePage() {
       setSaving(false);
     }
   };
-
-  // Bio is not saved anywhere — there is no column for it. Listing it as
-  // editable while it silently vanishes is the kind of thing that makes staff
-  // stop trusting the whole page.
-  const editableFields = ["Phone Number"];
-  const lockedFields = [
-    "Full Name",
-    "Email",
-    "Qualification",
-    "Subject Assignments",
-    "Class Teacher Role",
-    "Employment Date",
-  ];
 
   return (
     <>

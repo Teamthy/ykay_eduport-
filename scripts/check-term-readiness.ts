@@ -13,6 +13,7 @@
  * Read-only. Safe against production.
  */
 import { PrismaClient } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 const prisma = new PrismaClient();
 
@@ -298,7 +299,9 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error);
+    logger.error("Request failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     process.exitCode = 1;
   })
   .finally(() => prisma.$disconnect());

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +62,9 @@ export async function POST(request: NextRequest) {
         { status: 422 },
       );
     }
-    console.error("Onboarding save failed", error);
+    logger.error("Onboarding save failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json({ error: "Could not save your settings." }, { status: 500 });
   }
 }

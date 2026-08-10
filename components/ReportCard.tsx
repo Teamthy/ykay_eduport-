@@ -1,12 +1,4 @@
-import {
-  Award,
-  BookOpen,
-  CheckCircle2,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  Printer,
-} from "lucide-react";
+import { Award, BookOpen, Printer } from "lucide-react";
 
 interface SubjectScore {
   subject: string;

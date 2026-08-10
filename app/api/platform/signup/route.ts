@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { sessionCookie, signSession } from "@/lib/session";
 
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 export const dynamic = "force-dynamic";
 
 const schema = z.object({
@@ -119,7 +120,9 @@ export async function POST(request: NextRequest) {
     response.cookies.set(cookie.name, cookie.value, cookie.options);
     return response;
   } catch (error) {
-    console.error("Platform signup failed", error);
+    logger.error("Platform signup failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       { error: "Could not create your school. Please try again." },
       { status: 500 },

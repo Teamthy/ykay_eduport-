@@ -12,6 +12,7 @@ import { enforceRateLimit } from "@/lib/rate-limit";
 import { createApplicationId, createOpaqueToken, hashToken } from "@/lib/security";
 import { getSchool } from "@/lib/school";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -87,7 +88,9 @@ export async function POST(request: NextRequest) {
         { status: 422 },
       );
     }
-    console.error("Admission draft creation failed", error);
+    logger.error("Admission draft creation failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return jsonNoStore(
       { error: "We could not start your application. Please try again." },
       { status: 500 },
@@ -124,7 +127,9 @@ export async function PUT(request: NextRequest) {
         { status: 422 },
       );
     }
-    console.error("Admission draft update failed", error);
+    logger.error("Admission draft update failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return jsonNoStore(
       { error: "We could not save your changes. Please try again." },
       { status: 500 },

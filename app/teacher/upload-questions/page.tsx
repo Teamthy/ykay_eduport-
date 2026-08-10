@@ -16,16 +16,13 @@ import {
   AlertCircle,
   AlertTriangle,
   LoaderCircle,
-  Trash2,
   Eye,
   ChevronDown,
   ChevronUp,
   Database,
-  RefreshCcw,
   Info,
   X,
 } from "lucide-react";
-import Papa from "papaparse";
 import readXlsxFile from "read-excel-file/browser";
 import {
   importQuestionsFromDocx,
@@ -82,38 +79,6 @@ interface ParseResult {
   };
 }
 
-const CSV_TEMPLATE = `type,question,option_a,option_b,option_c,option_d,correct,marks,topic,difficulty,explanation
-MCQ,What is the capital of Nigeria?,Lagos,Abuja,Kano,Port Harcourt,B,2,Geography,Easy,Abuja became the capital in 1991
-MCQ,Which planet is closest to the Sun?,Venus,Mars,Mercury,Jupiter,C,1,Science,Medium,
-TRUE_FALSE,Water boils at 100 degrees Celsius at sea level,,,,, TRUE,1,Science,Easy,
-FILL_BLANK,The process by which plants make food is called ______,,,,, photosynthesis,2,Science,Medium,Plants use sunlight and CO2
-ESSAY,Explain the causes and effects of deforestation in Nigeria,,,,, ,10,Environmental Science,Hard,`;
-
-const JSON_TEMPLATE = JSON.stringify(
-  [
-    {
-      type: "MCQ",
-      question: "What is 2+2?",
-      option_a: "3",
-      option_b: "4",
-      option_c: "5",
-      option_d: "6",
-      correct: "B",
-      marks: 1,
-    },
-    { type: "TRUE_FALSE", question: "The Earth is flat.", correct: "FALSE", marks: 1 },
-    {
-      type: "FILL_BLANK",
-      question: "H2O is the chemical formula for ______.",
-      correct: "water",
-      marks: 2,
-    },
-    { type: "ESSAY", question: "Discuss the impact of technology on education.", marks: 10 },
-  ],
-  null,
-  2,
-);
-
 const TYPE_COLORS: Record<QuestionType, string> = {
   MCQ: "bg-blue-500/10 text-blue-500 border-blue-500/30",
   TRUE_FALSE: "bg-purple-500/10 text-purple-500 border-purple-500/30",
@@ -123,8 +88,6 @@ const TYPE_COLORS: Record<QuestionType, string> = {
 
 export default function UploadQuestionsPage() {
   const { toast } = useToast();
-  const { data } = useApi<any>("/api/teacher/profile");
-  const teacher = data?.teacher || ({} as any);
 
   // Exam selection
   const { data: examData, refetch: refetchExams } = useApi<any>("/api/teacher/exams");
@@ -168,8 +131,6 @@ export default function UploadQuestionsPage() {
   // Preview toggle
   const [previewOpen, setPreviewOpen] = useState(true);
 
-  const subjects = [...new Set((teacher.subjectAssignments || []).map((sa: any) => sa.subject))];
-
   // ── File parsing ────────────────────────────────────────────
   const parseFile = useCallback(
     async (f: File, format: FileFormat) => {
@@ -202,7 +163,7 @@ export default function UploadQuestionsPage() {
         } else {
           toast(`${result.questions.length} questions parsed successfully!`, "success");
         }
-      } catch (err) {
+      } catch (_err) {
         toast("Failed to parse file. Check the format.", "error");
       } finally {
         setParsing(false);
@@ -210,53 +171,6 @@ export default function UploadQuestionsPage() {
     },
     [toast],
   );
-
-  // ── CSV parser ──────────────────────────────────────────────
-  function parseCSVContent(content: string): ParseResult {
-    const parsed = Papa.parse<Record<string, string>>(content, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (h: string) =>
-        h
-          .trim()
-          .toLowerCase()
-          .replace(/[^a-z0-9]/g, "_"),
-    });
-    return validateRows(
-      parsed.data,
-      parsed.errors.map((e: any) => ({ row: e.row ?? 0, message: e.message ?? "Parse error" })),
-    );
-  }
-
-  // ── JSON parser ─────────────────────────────────────────────
-  function parseJSONContent(content: string): ParseResult {
-    let data: Record<string, unknown>[];
-    try {
-      const j = JSON.parse(content);
-      data = Array.isArray(j) ? j : (j.questions ?? []);
-    } catch {
-      return {
-        questions: [],
-        errors: [{ row: 0, message: "Invalid JSON." }],
-        warnings: [],
-        stats: { total: 0, valid: 0, mcq: 0, trueFalse: 0, fillBlank: 0, essay: 0 },
-      };
-    }
-    return validateRows(
-      data.map((row) => {
-        const r: Record<string, string> = {};
-        for (const [k, v] of Object.entries(row))
-          r[
-            k
-              .trim()
-              .toLowerCase()
-              .replace(/[^a-z0-9]/g, "_")
-          ] = String(v ?? "");
-        return r;
-      }),
-      [],
-    );
-  }
 
   // ── XLSX parser (read-excel-file — replaces vulnerable SheetJS) ──
   async function parseXLSXContent(buffer: ArrayBuffer): Promise<ParseResult> {

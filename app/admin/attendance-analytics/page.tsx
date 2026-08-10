@@ -14,11 +14,8 @@ import {
   CheckCircle2,
   Clock3,
   FileWarning,
-  GraduationCap,
   LoaderCircle,
-  School,
   ShieldAlert,
-  Users,
   XCircle,
 } from "lucide-react";
 

@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { UserRole } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { getSchool } from "../lib/school";
+import { logger } from "@/lib/logger";
 
 async function main() {
   const school = await getSchool();
@@ -43,7 +44,9 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error);
+    logger.error("Request failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());

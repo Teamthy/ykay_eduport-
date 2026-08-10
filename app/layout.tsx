@@ -102,14 +102,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const session = await getSession();
 
   let schoolId: string | null = null;
-  let fallbackName = "EduPortal";
 
   if (session) {
     schoolId = session.schoolId;
   } else {
     const { tenant } = await resolveTenantFromHost(host);
     schoolId = tenant?.id ?? null;
-    fallbackName = tenant?.name ?? "EduPortal";
   }
 
   const branding = schoolId ? await getTenantBranding(schoolId) : null;
@@ -117,9 +115,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const primary = branding?.primaryColor ?? DEFAULT_BRANDING.primaryColor;
   const secondary = branding?.secondaryColor ?? DEFAULT_BRANDING.secondaryColor;
   const accent = branding?.accentColor ?? DEFAULT_BRANDING.accentColor;
-  const logoUrl = branding?.logoUrl ?? "/ykay-logo.png";
   const faviconUrl = branding?.faviconUrl ?? "/ykay-logo.png";
-  const displayName = branding?.displayName ?? fallbackName;
 
   return (
     <html

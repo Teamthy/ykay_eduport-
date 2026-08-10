@@ -6,6 +6,7 @@ import { postCompletedFeePayment } from "@/lib/fee-payment-service";
 import { prisma } from "@/lib/prisma";
 import { toPrismaJson, verifyPaystackWebhookSignature } from "@/lib/paystack";
 import { jsonNoStore } from "@/lib/requests";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -88,7 +89,9 @@ export async function POST(request: NextRequest) {
     await markApplicationPaid(application.applicationId, reference, toPrismaJson(payload));
     return jsonNoStore({ ok: true });
   } catch (error) {
-    console.error("Paystack webhook failed", error);
+    logger.error("Paystack webhook failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return jsonNoStore({ error: "Webhook processing failed." }, { status: 500 });
   }
 }

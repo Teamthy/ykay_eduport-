@@ -2,15 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  AlertCircle,
-  ArrowRight,
-  CheckCircle2,
-  Clock3,
-  FileQuestion,
-  Search,
-  ShieldCheck,
-} from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, Clock3, Search, ShieldCheck } from "lucide-react";
 import { formatApplicationId } from "@/lib/admissions";
 
 type StatusResult = {

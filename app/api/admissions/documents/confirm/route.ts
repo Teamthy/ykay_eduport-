@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { verifyStoredDocument } from "@/lib/storage";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -78,7 +79,9 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && "issues" in error) {
       return jsonNoStore({ error: "Please check the file and try again." }, { status: 422 });
     }
-    console.error("Admission document confirmation failed", error);
+    logger.error("Admission document confirmation failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return jsonNoStore(
       { error: "We could not save this document. Please try again." },
       { status: 500 },

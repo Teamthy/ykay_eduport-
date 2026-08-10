@@ -6,7 +6,6 @@ import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
-import DownloadForOffline from "@/components/DownloadForOffline";
 import {
   MessageCircle,
   LayoutDashboard,
@@ -21,7 +20,6 @@ import {
   ChevronRight,
   Activity,
   Award,
-  Wallet,
   CheckCircle2,
   XCircle,
   Clock,
@@ -80,7 +78,7 @@ export default function StudentDashboardPage() {
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isStale, setIsStale] = useState(false);
+  const [, setIsStale] = useState(false);
 
   useEffect(() => {
     const url = "/api/student/dashboard";

@@ -10,6 +10,7 @@ import { verifyPaystackTransaction } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -106,7 +107,9 @@ export async function POST(request: NextRequest) {
       error instanceof Error
         ? error.message
         : "We could not submit your application. Please try again.";
-    console.error("Admission submission failed", error);
+    logger.error("Admission submission failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return jsonNoStore({ error: message }, { status: 500 });
   }
 }

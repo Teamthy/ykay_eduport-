@@ -7,7 +7,7 @@ type Theme = "light" | "dark";
 interface ThemeContextValue {
   theme: Theme;
   resolvedTheme: Theme;
-  setTheme: (theme: Theme) => void;
+  setTheme: (_theme: Theme) => void;
   toggleTheme: () => void;
 }
 

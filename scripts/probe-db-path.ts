@@ -24,6 +24,7 @@
 import net from "node:net";
 import tls from "node:tls";
 import dns from "node:dns/promises";
+import { logger } from "@/lib/logger";
 
 const GREEN = "\u001b[32m";
 const RED = "\u001b[31m";
@@ -236,6 +237,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error("Probe failed:", error);
+  logger.error("Probe failed:", { error: error instanceof Error ? error.message : String(error) });
   process.exitCode = 1;
 });

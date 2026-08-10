@@ -18,6 +18,7 @@
  * gate. Use --json for machine-readable output.
  */
 import { PrismaClient } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 const prisma = new PrismaClient();
 const asJson = process.argv.includes("--json");
@@ -52,7 +53,9 @@ async function connectWithRetry(attempts = 5): Promise<boolean> {
               `at the first real problem.\n`,
           );
         } else {
-          console.error("\nDatabase error:", error);
+          logger.error("\nDatabase error:", {
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
         return false;
       }
@@ -286,7 +289,9 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error("Reconciliation failed:", error);
+    logger.error("Reconciliation failed:", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     process.exitCode = 1;
   })
   .finally(() => prisma.$disconnect());

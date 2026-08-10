@@ -11,6 +11,7 @@ import {
 } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { getSchool } from "../lib/school";
+import { logger } from "@/lib/logger";
 
 type SeedUserConfig = {
   email: string;
@@ -615,7 +616,9 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error);
+    logger.error("Request failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     process.exitCode = 1;
   })
   .finally(async () => {

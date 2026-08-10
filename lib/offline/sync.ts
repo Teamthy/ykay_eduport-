@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  getQueuedWrites,
-  removeQueuedWrite,
-  incrementRetry,
-  getQueueCount,
-  type QueuedWrite,
-} from "./db";
+import { getQueuedWrites, removeQueuedWrite, incrementRetry, getQueueCount } from "./db";
 
 /**
  * Offline sync manager.
@@ -21,7 +15,7 @@ import {
 
 export type SyncStatus = "idle" | "syncing" | "error" | "offline";
 
-const listeners = new Set<(status: SyncStatus, pending: number) => void>();
+const listeners = new Set<(_status: SyncStatus, _pending: number) => void>();
 let currentStatus: SyncStatus =
   typeof navigator !== "undefined" && !navigator.onLine ? "offline" : "idle";
 let currentPending = 0;
@@ -30,7 +24,7 @@ export function getSyncStatus(): { status: SyncStatus; pending: number } {
   return { status: currentStatus, pending: currentPending };
 }
 
-export function onSyncChange(fn: (status: SyncStatus, pending: number) => void): () => void {
+export function onSyncChange(fn: (_status: SyncStatus, _pending: number) => void): () => void {
   listeners.add(fn);
   fn(currentStatus, currentPending);
   return () => listeners.delete(fn);

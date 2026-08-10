@@ -13,6 +13,7 @@
  * Exits non-zero if any check fails, so it can gate a deploy.
  */
 import { PrismaClient, Prisma } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 /**
  * Pin the pool to a SINGLE connection.
@@ -262,7 +263,9 @@ async function main() {
 }
 
 main().catch(async (error) => {
-  console.error("\nVerification crashed:", error);
+  logger.error("\nVerification crashed:", {
+    error: error instanceof Error ? error.message : String(error),
+  });
   await cleanup().catch(() => {});
   await prisma.$disconnect();
   process.exit(1);

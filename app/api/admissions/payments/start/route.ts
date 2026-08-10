@@ -6,6 +6,7 @@ import { getPaystackPublicKey } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -86,7 +87,9 @@ export async function POST(request: NextRequest) {
         { status: 422 },
       );
     }
-    console.error("Admission payment initialization failed", error);
+    logger.error("Admission payment initialization failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return jsonNoStore(
       { error: "We could not start the payment. Please try again." },
       { status: 500 },

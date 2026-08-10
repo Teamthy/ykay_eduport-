@@ -20,7 +20,18 @@ const eslintConfig = [
   {
     rules: {
       // Match the previous permissive intent (lint never actually ran before).
-      "no-unused-vars": "off",
+      // Unused code is debt — treat it as an error. Underscore-prefixed names
+      // are the documented "intentionally ignored" convention; everything else
+      // must be removed or used.
+      "no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
       "react/no-unescaped-entities": "off",
       "@next/next/no-img-element": "off",
       // Obsolete in the App Router.

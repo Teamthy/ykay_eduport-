@@ -1,6 +1,6 @@
 import { PlanTier, SubscriptionStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { MODULE_KEYS, type ModuleKey } from "@/lib/modules";
+import { type ModuleKey } from "@/lib/modules";
 
 /**
  * EDUos billing / plan-gating service.

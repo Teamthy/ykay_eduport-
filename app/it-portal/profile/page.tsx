@@ -6,14 +6,12 @@ import { useToast } from "@/components/Toast";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import {
-  Award,
   BookOpen,
   Calendar,
   ChevronLeft,
   Clock,
   Eye,
   EyeOff,
-  Flame,
   GraduationCap,
   LoaderCircle,
   Lock,

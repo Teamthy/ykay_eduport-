@@ -27,6 +27,7 @@
  * Exits non-zero on any gap, so it can gate a deploy.
  */
 import { PrismaClient } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 const ADMIN_URL = process.env.DATABASE_URL;
 const PROBE_ROLE = "eduos_rls_probe";
@@ -264,6 +265,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error);
+  logger.error("Request failed", { error: error instanceof Error ? error.message : String(error) });
   process.exitCode = 1;
 });

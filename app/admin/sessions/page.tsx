@@ -113,7 +113,7 @@ export default function SessionsPage() {
 
   type PatchResult = { termLabel?: string; created?: number };
 
-  async function patch(body: Record<string, unknown>, okMsg: (j: PatchResult) => string) {
+  async function patch(body: Record<string, unknown>, okMsg: (_j: PatchResult) => string) {
     setBusy(true);
     try {
       const r = await fetch("/api/admin/sessions", {

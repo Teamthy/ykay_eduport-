@@ -15,7 +15,7 @@ export type DeliveryResult =
 export interface ChannelAdapter {
   channel: AlertChannel;
   configured: boolean;
-  send(job: {
+  send(_job: {
     recipientName: string | null;
     recipientEmail: string | null;
     recipientPhone: string | null;

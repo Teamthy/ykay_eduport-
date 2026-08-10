@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { UserRole } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
 import { STAFF_ROLES, PEOPLE_ADMIN_ROLES, hashValue, oneTimeSecret } from "@/lib/people";
 import { getClientIp } from "@/lib/requests";

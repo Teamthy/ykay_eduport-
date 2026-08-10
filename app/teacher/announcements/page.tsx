@@ -38,7 +38,7 @@ export default function BulkAnnouncementPage() {
   const [channels, setChannels] = useState<string[]>(["portal"]);
   const [schedule, setSchedule] = useState<"now" | "later">("now");
   const [scheduledDate, setScheduledDate] = useState("");
-  const [sending, setSending] = useState(false);
+  const [, setSending] = useState(false);
 
   /**
    * Real classes with real ids.

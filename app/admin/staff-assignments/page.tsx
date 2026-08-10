@@ -2,7 +2,7 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
-import { BookOpen, Plus, UserCog, X } from "lucide-react";
+import { Plus, UserCog, X } from "lucide-react";
 type T = {
   id: string;
   name: string;

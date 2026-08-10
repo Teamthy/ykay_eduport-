@@ -56,7 +56,7 @@ const SCHOOL_ID_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9_-]{0,62}[A-Za-z0-9])?$/;
  *    that had once run withSchool() would silently return zero rows for every
  *    later unscoped query.
  */
-export async function withSchool<T>(schoolId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
+export async function withSchool<T>(schoolId: string, fn: (_tx: Tx) => Promise<T>): Promise<T> {
   if (!schoolId || !SCHOOL_ID_PATTERN.test(schoolId)) {
     // Fail loud. A blank or malformed id would set an empty context, which the
     // policy treats as "no tenant" — i.e. it would silently disable isolation.

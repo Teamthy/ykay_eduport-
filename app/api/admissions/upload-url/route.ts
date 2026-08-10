@@ -4,6 +4,7 @@ import { findAuthorizedApplication } from "@/lib/admission-service";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { createSecureUploadUrl } from "@/lib/storage";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -52,7 +53,9 @@ export async function POST(request: NextRequest) {
         { status: 422 },
       );
     }
-    console.error("Admission upload URL failed", error);
+    logger.error("Admission upload URL failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return jsonNoStore(
       { error: "We could not prepare a secure upload. Please try again." },
       { status: 500 },

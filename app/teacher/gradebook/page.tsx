@@ -2,7 +2,7 @@
 
 import { cacheGet, cacheSet } from "@/lib/offline/db";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -76,7 +76,6 @@ function waecGrade(total: number) {
 
 export default function TeacherGradebookPage() {
   const { toast } = useToast();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [data, setData] = useState<GradebookResponse | null>(null);
   const [rows, setRows] = useState<EntryRow[]>([]);
@@ -84,11 +83,11 @@ export default function TeacherGradebookPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [isStale, setIsStale] = useState(false);
+  const [, setIsStale] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
 
-  const loadGradebook = useCallback(async (assignmentId: string, pushUrl = false) => {
+  const loadGradebook = useCallback(async (assignmentId: string, _pushUrl = false) => {
     const query = assignmentId ? `?assignmentId=${encodeURIComponent(assignmentId)}` : "";
     const url = `/api/teacher/gradebook${query}`;
     // Offline: show cached data instantly

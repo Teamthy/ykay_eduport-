@@ -20,7 +20,7 @@ type DaySchedule = {
 export default function StudentTimetablePage() {
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error] = useState("");
   const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
   const load = useCallback(async () => {

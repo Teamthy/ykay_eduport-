@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { oneTimeSecret, passwordHash, uniqueStudentNumber } from "@/lib/people";
 import { getClientIp } from "@/lib/requests";
 import { requireRole } from "@/lib/session";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -325,7 +326,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    console.error(error);
+    logger.error("Request failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       { error: "Enrollment could not be completed. No partial record was saved." },
       { status: 500 },

@@ -52,7 +52,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
   const [submitting, setSubmitting] = useState(false);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [error, setError] = useState("");
-  const [isOffline, setIsOffline] = useState(false);
+  const [, setIsOffline] = useState(false);
   const [saveState, setSaveState] = useState<"IDLE" | "SAVING" | "SAVED" | "FAILED">("IDLE");
   const dirtyRef = useRef(false);
   const answersRef = useRef<Record<string, string>>({});

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Cookie, Check, X } from "lucide-react";
+import { Cookie, Check } from "lucide-react";
 
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
-  const [accepted, setAccepted] = useState(false);
+  const [, setAccepted] = useState(false);
 
   useEffect(() => {
     const consent = localStorage.getItem("ykay_cookie_consent");

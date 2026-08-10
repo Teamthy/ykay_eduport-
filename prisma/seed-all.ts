@@ -20,11 +20,11 @@
  */
 
 import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { UserRole, TeacherAssignmentRole } from "@prisma/client";
 import { prisma } from "../lib/prisma";
 import { getSchool } from "../lib/school";
 import { createSession, ensureEnrolments } from "../lib/academic-session";
+import { logger } from "@/lib/logger";
 
 // ── Configuration ──────────────────────────────────────────────────
 
@@ -301,7 +301,7 @@ async function main() {
     const primarySubject = teacherDef.subjects[0];
     if (primarySubject) {
       let classIdx = 0;
-      for (const [className, classInfo] of classMap.entries()) {
+      for (const [, classInfo] of classMap.entries()) {
         if (classIdx >= 3) break;
         classIdx++;
 
@@ -579,7 +579,9 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error("❌ Seed failed:", error);
+    logger.error("❌ Seed failed:", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());

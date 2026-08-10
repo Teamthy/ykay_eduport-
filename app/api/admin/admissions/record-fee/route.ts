@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { PEOPLE_ADMIN_ROLES } from "@/lib/people";
 import { getClientIp } from "@/lib/requests";
 import { requireRole } from "@/lib/session";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -138,7 +139,9 @@ export async function POST(request: NextRequest) {
       message: "Application fee recorded. This applicant can now be enrolled.",
     });
   } catch (error) {
-    console.error("Offline fee recording failed", error);
+    logger.error("Offline fee recording failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       { error: "Could not record the payment. Nothing was changed." },
       { status: 500 },

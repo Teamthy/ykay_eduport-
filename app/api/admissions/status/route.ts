@@ -4,6 +4,7 @@ import { applicationStatusSchema } from "@/lib/admissions";
 import { getApplicationForStatus } from "@/lib/admission-service";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 const statusContent: Record<
   ApplicationStatus,
@@ -84,7 +85,9 @@ export async function GET(request: NextRequest) {
       submittedAt: application.submittedAt?.toISOString() || null,
     });
   } catch (error) {
-    console.error("Admission status lookup failed", error);
+    logger.error("Admission status lookup failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return jsonNoStore(
       { error: "We could not check the application status right now. Please try again shortly." },
       { status: 500 },

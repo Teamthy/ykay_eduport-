@@ -11,7 +11,6 @@ import {
   MapPin,
   Mail,
   Phone,
-  Check,
   Eye,
   Target,
   AlertCircle,

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
 import { PEOPLE_ADMIN_ROLES, oneTimeSecret, passwordHash, uniqueStudentNumber } from "@/lib/people";
 import { requireRole } from "@/lib/session";
+import { logger } from "@/lib/logger";
 
 const schema = z.object({
   firstName: z.string().trim().min(2).max(80),
@@ -224,7 +225,9 @@ export async function POST(request: NextRequest) {
           { status: prior.statusCode },
         );
     }
-    console.error(error);
+    logger.error("Request failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       { error: "Enrollment could not be completed. No partial record was saved." },
       { status: 500 },

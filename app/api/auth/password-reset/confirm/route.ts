@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     // Revoke all existing JWT sessions for this user
     await revokeAllSessions(record.userId);
     return NextResponse.json({ ok: true });
-  } catch (e) {
+  } catch (_e) {
     return NextResponse.json({ error: "Unable to reset password." }, { status: 400 });
   }
 }

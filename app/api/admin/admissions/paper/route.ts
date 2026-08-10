@@ -7,6 +7,7 @@ import { PEOPLE_ADMIN_ROLES } from "@/lib/people";
 import { getClientIp } from "@/lib/requests";
 import { createApplicationId } from "@/lib/security";
 import { requireRole } from "@/lib/session";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -208,7 +209,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    console.error("Paper admission intake failed", error);
+    logger.error("Paper admission intake failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       { error: "Could not save the application. No partial record was created." },
       { status: 500 },

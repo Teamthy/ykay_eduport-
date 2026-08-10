@@ -97,7 +97,7 @@ export default function TeacherDashboard() {
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isStale, setIsStale] = useState(false);
+  const [, setIsStale] = useState(false);
 
   useEffect(() => {
     const url = "/api/teacher/dashboard";

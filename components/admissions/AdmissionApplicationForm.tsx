@@ -23,21 +23,24 @@ import {
   APPLICATION_FEE_NAIRA,
   DOCUMENT_RULES,
   DOCUMENT_TYPES,
-  formatApplicationId,
   type AdmissionDocumentType,
   type AdmissionDraft,
 } from "@/lib/admissions";
 
 declare global {
+  // Global window.PaystackPop augmentation — referenced below (window.PaystackPop.setup).
+  // no-unused-vars flags the interface name; a false positive on a declare-global
+  // type augmentation, so the rule is disabled for this declaration.
+  // eslint-disable-next-line no-unused-vars
   interface Window {
     PaystackPop?: {
-      setup: (options: {
+      setup: (_options: {
         key: string;
         email: string;
         amount: number;
         ref: string;
         currency: string;
-        callback: (response: { reference: string }) => void;
+        callback: (_response: { reference: string }) => void;
         onClose: () => void;
       }) => { openIframe: () => void };
     };
@@ -630,7 +633,7 @@ function StudentStep({
   errors,
 }: {
   data: AdmissionDraft;
-  setField: <Key extends keyof AdmissionDraft>(key: Key, value: AdmissionDraft[Key]) => void;
+  setField: <Key extends keyof AdmissionDraft>(_key: Key, _value: AdmissionDraft[Key]) => void;
   errors: FormErrors;
 }) {
   return (
@@ -791,7 +794,7 @@ function ParentStep({
   errors,
 }: {
   data: AdmissionDraft;
-  setField: <Key extends keyof AdmissionDraft>(key: Key, value: AdmissionDraft[Key]) => void;
+  setField: <Key extends keyof AdmissionDraft>(_key: Key, _value: AdmissionDraft[Key]) => void;
   errors: FormErrors;
 }) {
   return (
@@ -943,7 +946,7 @@ function AcademicStep({
   errors,
 }: {
   data: AdmissionDraft;
-  setField: <Key extends keyof AdmissionDraft>(key: Key, value: AdmissionDraft[Key]) => void;
+  setField: <Key extends keyof AdmissionDraft>(_key: Key, _value: AdmissionDraft[Key]) => void;
   errors: FormErrors;
 }) {
   return (
@@ -1015,7 +1018,7 @@ function DocumentStep({
 }: {
   documents: UploadedDocuments;
   uploadingDocument: AdmissionDocumentType | null;
-  onSelectFile: (type: AdmissionDocumentType, file?: File) => Promise<void>;
+  onSelectFile: (_type: AdmissionDocumentType, _file?: File) => Promise<void>;
 }) {
   return (
     <div>
@@ -1166,7 +1169,7 @@ function ReviewStep({
   data: AdmissionDraft;
   documents: UploadedDocuments;
   paymentReference: string | null;
-  onEdit: (step: number) => void;
+  onEdit: (_step: number) => void;
 }) {
   const sections = [
     {

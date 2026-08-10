@@ -17,6 +17,7 @@
  */
 import { PrismaClient } from "@prisma/client";
 import { finalizeAttempt } from "../lib/exams";
+import { logger } from "@/lib/logger";
 
 const prisma = new PrismaClient();
 
@@ -263,7 +264,9 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error);
+    logger.error("Request failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     process.exitCode = 1;
   })
   .finally(() => prisma.$disconnect());

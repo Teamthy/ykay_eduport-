@@ -8,7 +8,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import {
   Award,
-  Calendar,
   ChevronLeft,
   Download,
   ExternalLink,
@@ -16,7 +15,6 @@ import {
   GraduationCap,
   LoaderCircle,
   Share2,
-  Trophy,
   BookOpen,
   Clock,
   Copy,
@@ -50,24 +48,6 @@ type CertData = {
     totalEnrollments: number;
     completedCourses: number;
   };
-};
-
-const COURSE_IMAGES: Record<string, string> = {
-  python:
-    "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=480&q=80",
-  ai: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=480&q=80",
-  cybersecurity:
-    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=480&q=80",
-  "digital-literacy":
-    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=480&q=80",
-  "microsoft-word":
-    "https://images.unsplash.com/photo-1589810264340-0ce27bfbf751?auto=format&fit=crop&w=480&q=80",
-  "microsoft-excel":
-    "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=480&q=80",
-  "microsoft-powerpoint":
-    "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=480&q=80",
-  "excel-expert":
-    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=480&q=80",
 };
 
 export default function CertificatesPage() {
@@ -219,7 +199,6 @@ export default function CertificatesPage() {
         {data && data.certificates.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {data.certificates.map((cert) => {
-              const img = COURSE_IMAGES[cert.course.slug] || COURSE_IMAGES["digital-literacy"];
               return (
                 <div
                   key={cert.id}

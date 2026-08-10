@@ -6,6 +6,7 @@
 import { PrismaClient } from "@prisma/client";
 import { zipSync, strToU8 } from "fflate";
 import { importQuestionsFromDocx } from "../lib/question-import";
+import { logger } from "@/lib/logger";
 
 const prisma = new PrismaClient();
 let failed = 0;
@@ -154,7 +155,7 @@ async function main() {
 }
 main()
   .catch((e) => {
-    console.error(e);
+    logger.error("Request failed", { error: e instanceof Error ? e.message : String(e) });
     process.exitCode = 1;
   })
   .finally(() => prisma.$disconnect());

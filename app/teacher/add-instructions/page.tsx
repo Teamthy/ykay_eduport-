@@ -11,7 +11,6 @@ import {
   Plus,
   Trash2,
   School,
-  BookOpen,
   ChevronDown,
   ChevronUp,
   Save,
@@ -140,7 +139,7 @@ export default function AddInstructionsPage() {
                         Instructions
                       </h3>
 
-                      {instructions.map((inst, idx) => (
+                      {instructions.map((inst, _idx) => (
                         <div
                           key={inst.id}
                           className="mb-4 p-4 rounded-xl bg-[var(--surface-disabled)] relative"

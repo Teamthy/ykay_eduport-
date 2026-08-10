@@ -24,6 +24,7 @@
  * Exits non-zero on drift so it can gate a merge or deploy.
  */
 import { execFileSync } from "node:child_process";
+import { logger } from "@/lib/logger";
 
 function run(args: string[]) {
   return execFileSync("npx", ["prisma", ...args], {
@@ -59,7 +60,9 @@ function main() {
     output = `${err.stdout ?? ""}${err.stderr ?? ""}`;
     drifted = err.status === 2;
     if (!drifted) {
-      console.error("Drift check could not run:\n", output);
+      logger.error("Drift check could not run:\n", {
+        error: output instanceof Error ? output.message : String(output),
+      });
       process.exit(1);
     }
   }

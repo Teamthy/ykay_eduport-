@@ -8,16 +8,13 @@ import { useToast } from "@/components/Toast";
 import {
   Award,
   BookOpen,
-  ChevronDown,
   Clock,
-  LoaderCircle,
   PlayCircle,
   Search,
   TrendingUp,
   Trophy,
   Grid3X3,
   List,
-  LogOut,
 } from "lucide-react";
 
 type Course = {

@@ -3,7 +3,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import AdminSidebar from "@/components/AdminSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
-import { Plus, Search, UserPlus, Users, X } from "lucide-react";
+import { Search, UserPlus, X } from "lucide-react";
 type Class = { id: string; displayName: string; capacity: number | null };
 type Student = {
   id: string;

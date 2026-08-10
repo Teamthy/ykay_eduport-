@@ -21,7 +21,7 @@ export default function TestRetakePage() {
   const [examId, setExamId] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [loadingExams, setLoadingExams] = useState(true);
+  const [, setLoadingExams] = useState(true);
   const [loadingRows, setLoadingRows] = useState(false);
   const [granting, setGranting] = useState(false);
 

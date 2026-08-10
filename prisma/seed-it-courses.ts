@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma";
+import { logger } from "@/lib/logger";
 
 type ModuleSeed = { title: string; summary: string; content: string; durationMinutes: number };
 type CourseSeed = {
@@ -468,7 +469,9 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error);
+    logger.error("Request failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());

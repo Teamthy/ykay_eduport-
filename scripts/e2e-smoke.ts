@@ -6,6 +6,7 @@
  *   npm run test:e2e -- --list-only
  */
 import { spawn } from "child_process";
+import { logger } from "@/lib/logger";
 
 type Check = {
   name: string;
@@ -182,6 +183,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error);
+  logger.error("Request failed", { error: error instanceof Error ? error.message : String(error) });
   process.exit(1);
 });

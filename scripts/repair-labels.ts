@@ -25,6 +25,7 @@
  * about than none.
  */
 import { PrismaClient, Prisma } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 /** A planned write, expressed against the TRANSACTION client. */
 type Step = (tx: Prisma.TransactionClient) => Promise<unknown>;
@@ -250,7 +251,9 @@ main()
         `\n${RED}Repair failed.${RESET} Verify the actual state with ` +
           `\`npm run reconcile:labels\` before re-running.\n`,
       );
-      console.error(error);
+      logger.error("Request failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
     process.exitCode = 1;
   })

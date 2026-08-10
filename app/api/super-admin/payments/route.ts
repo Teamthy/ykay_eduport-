@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
         newStatus,
       },
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: "Payment operation failed. No changes were made." },
       { status: 500 },

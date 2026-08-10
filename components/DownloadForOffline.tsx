@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cacheSet } from "@/lib/offline/db";
-import { Download, CheckCircle2, Loader2, CloudOff } from "lucide-react";
+import { CheckCircle2, Loader2, CloudOff } from "lucide-react";
 
 /**
  * "Download for Offline" button.

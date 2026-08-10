@@ -3,7 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { UserRole, ExamQuestionType, Prisma } from "@prisma/client";
-import type { ParsedQuestion } from "@/lib/question-parser";
+
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -136,7 +137,9 @@ export async function POST(request: NextRequest) {
       totalMarks,
     });
   } catch (error) {
-    console.error("[bulk-questions] Transaction failed:", error);
+    logger.error("[bulk-questions] Transaction failed:", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       {
         error: "Failed to sync questions to database. No questions were saved.",

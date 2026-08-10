@@ -13,7 +13,7 @@ interface Props {
   busy?: boolean;
   onClose: () => void;
   /** Optional legacy callback — unused when authorizationUrl is set. */
-  onSuccess?: (ref: string) => void;
+  onSuccess?: (_ref: string) => void;
   onPaystackRedirect?: () => void;
 }
 

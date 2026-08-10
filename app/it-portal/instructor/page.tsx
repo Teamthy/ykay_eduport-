@@ -9,18 +9,12 @@ import {
   Award,
   BarChart3,
   BookOpen,
-  ChevronLeft,
-  Clock,
   GraduationCap,
   LoaderCircle,
   TrendingUp,
   Users,
   FileText,
-  PlayCircle,
   CheckCircle2,
-  Star,
-  UserPlus,
-  Activity,
   ArrowUpRight,
 } from "lucide-react";
 

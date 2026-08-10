@@ -6,6 +6,7 @@ import { PEOPLE_ADMIN_ROLES, oneTimeSecret, passwordHash, uniqueStudentNumber } 
 import { getClientIp } from "@/lib/requests";
 import { sendParentWelcomeEmail } from "@/lib/email";
 import { requireRole } from "@/lib/session";
+import { logger } from "@/lib/logger";
 const schema = z.object({
   applicationId: z.string().min(1),
   classId: z.string().min(1),
@@ -182,7 +183,9 @@ export async function POST(request: NextRequest) {
         });
         welcomeEmailSent = true;
       } catch (emailError) {
-        console.error("Parent welcome email failed", emailError);
+        logger.error("Parent welcome email failed", {
+          error: emailError instanceof Error ? emailError.message : String(emailError),
+        });
       }
     }
 
@@ -215,7 +218,9 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    console.error(error);
+    logger.error("Request failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       { error: "Enrollment could not be completed. No partial record was saved." },
       { status: 500 },

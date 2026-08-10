@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 /**
  * Mobile API contract smoke.
  *
@@ -215,6 +216,6 @@ async function main() {
 }
 
 main().catch((e) => {
-  console.error(e);
+  logger.error("Request failed", { error: e instanceof Error ? e.message : String(e) });
   process.exit(1);
 });

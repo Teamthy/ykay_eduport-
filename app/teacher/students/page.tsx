@@ -62,7 +62,7 @@ export default function TeacherStudentsPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
-  const [isStale, setIsStale] = useState(false);
+  const [, setIsStale] = useState(false);
   const [open, setOpen] = useState(false);
 
   const load = useCallback(async () => {

@@ -14,7 +14,7 @@ export default function StaffQrScanner({
   onScan,
   active,
 }: {
-  onScan: (code: string) => void;
+  onScan: (_code: string) => void;
   active: boolean;
 }) {
   const elementId = "staff-qr-reader";

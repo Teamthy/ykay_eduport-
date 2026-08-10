@@ -6,6 +6,7 @@
 
 import { prisma } from "@/lib/prisma";
 import type { SecurityEventType } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 interface ForensicEntry {
   eventType: SecurityEventType;
@@ -36,7 +37,7 @@ export async function recordSecurityEvent(entry: ForensicEntry): Promise<void> {
     });
   } catch {
     // Never let forensic logging crash the main request flow
-    console.error("[forensics] Failed to record security event", entry.eventType);
+    logger.error("[forensics] Failed to record security event", { eventType: entry.eventType });
   }
 }
 
@@ -44,7 +45,7 @@ export async function recordSecurityEvent(entry: ForensicEntry): Promise<void> {
  * Extracts the User-Agent header from a NextRequest-like object.
  */
 export function getUserAgent(request: {
-  headers: { get(name: string): string | null };
+  headers: { get(_name: string): string | null };
 }): string | undefined {
   return request.headers.get("user-agent") ?? undefined;
 }

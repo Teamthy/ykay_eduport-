@@ -53,7 +53,7 @@ export default function ChangePassword() {
               required
               type="password"
               value={String(value)}
-              onChange={(e) => (setter as (v: string) => void)(e.target.value)}
+              onChange={(e) => (setter as (_v: string) => void)(e.target.value)}
               className="mt-2 w-full rounded-xl border p-3 text-sm"
             />
           </label>

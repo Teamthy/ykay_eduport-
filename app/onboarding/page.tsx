@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Palette, Check, ArrowRight, School } from "lucide-react";
+import { Building2, Palette, ArrowRight, School } from "lucide-react";
 
 export default function OnboardingPage() {
   const router = useRouter();
