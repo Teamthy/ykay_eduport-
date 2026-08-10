@@ -49,6 +49,12 @@ jobs:
       - name: Run tests
         run: npx vitest run
 
+      - name: Dead-UI & orphan-page checks
+        # No database needed — fail on unreachable portal pages or dead UI.
+        run: |
+          npx tsx scripts/check-dead-ui.ts
+          npx tsx scripts/check-orphan-pages.ts
+
   schema-drift:
     name: Schema Drift
     runs-on: ubuntu-latest
@@ -277,15 +283,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
 
       - name: Install dependencies
-        # mobile/ has no committed lockfile yet. Commit mobile/package-lock.json
-        # to switch to `npm ci` + npm caching for speed and determinism.
-        run: npm install
+        # mobile/package-lock.json is committed, so use a deterministic `npm ci`.
+        run: npm ci
+
+      - name: Type check (Expo)
+        # The root tsc config excludes mobile/, so mobile TypeScript is only
+        # checked here. Must stay green — a mobile type regression must block CI.
+        run: npm run typecheck
 
       - name: Validate Expo project (expo-doctor)
-        # Verifies Expo SDK / package compatibility + app.json config. Surfaced
-        # as info (non-blocking) until confirmed green; promote to a hard gate
-        # by removing continue-on-error.
+        # Verifies Expo SDK / package compatibility + app.json config.
         run: npx --yes expo-doctor@latest
-        continue-on-error: true
