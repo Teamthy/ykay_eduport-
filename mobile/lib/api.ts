@@ -328,6 +328,14 @@ export const adminApi = {
   attendanceCorrections: () => api("/api/admin/attendance/corrections"),
   attendanceAnalytics: () => api("/api/admin/attendance/analytics"),
   classManager: () => api("/api/admin/class-manager"),
+
+  staffAttendance: (date?: string) =>
+    api(`/api/admin/staff-attendance${date ? `?date=${encodeURIComponent(date)}` : ""}`),
+  recordStaffScan: (badgeCode: string, eventType?: "CHECK_IN" | "CHECK_OUT" | "AUTO") =>
+    api("/api/admin/staff-attendance", {
+      method: "POST",
+      body: JSON.stringify({ badgeCode, eventType: eventType || "AUTO" }),
+    }),
 };
 
 // ── Notification preferences ──────────────────────────────

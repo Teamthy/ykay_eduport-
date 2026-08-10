@@ -32,6 +32,7 @@ import {
   Bell,
   ClipboardCheck,
   Receipt,
+  ScanLine,
 } from "lucide-react-native";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
@@ -102,6 +103,12 @@ export default function AdminDashboard() {
       route: "/admin-staff",
       count: s?.teacherCount,
     },
+    {
+      icon: ScanLine,
+      label: "Staff Attendance",
+      desc: "Badge check-in/out",
+      route: "/staff-attendance",
+    },
     { icon: DollarSign, label: "Finance", desc: "Revenue & net position", route: "/admin-finance" },
     { icon: Receipt, label: "Expenses", desc: "Record & review spend", route: "/admin-expenses" },
     {
@@ -162,9 +169,7 @@ export default function AdminDashboard() {
         onAvatarPress={() => router.push("/(admin)/profile")}
       />
 
-
       <TermChip
-
         sessionLabel={term?.sessionLabel}
 
         termLabel={term?.termLabel}
@@ -172,7 +177,6 @@ export default function AdminDashboard() {
         estimated={term?.isEstimated}
 
         style={{ marginBottom: spacing.md }}
-
       />
 
       {error ? <InlineError message={error} onRetry={() => void load()} /> : null}
@@ -189,54 +193,56 @@ export default function AdminDashboard() {
       ) : (
         <>
           {!hideOutstanding ? (
-          <Dismissible onDismiss={dismissOutstanding} closeLabel="Hide outstanding fees card">
-          <Card
-            variant="bordered"
-            padding={spacing.md}
-            onPress={() => router.push("/admin-fees")}
-            style={{
-              marginBottom: spacing.sm + 2,
-              borderColor: hasOutstanding ? colors.status.errorBorder : colors.status.successBorder,
-              backgroundColor: hasOutstanding ? colors.status.errorBg : colors.status.successBg,
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-              <CreditCard
-                size={17}
-                color={hasOutstanding ? colors.status.errorText : colors.status.successText}
-              />
-              <Caption
+            <Dismissible onDismiss={dismissOutstanding} closeLabel="Hide outstanding fees card">
+              <Card
+                variant="bordered"
+                padding={spacing.md}
+                onPress={() => router.push("/admin-fees")}
                 style={{
-                  flex: 1,
-                  color: hasOutstanding ? colors.status.errorText : colors.status.successText,
-                  fontFamily: bodyFont("bold"),
-                  letterSpacing: 0.6,
+                  marginBottom: spacing.sm + 2,
+                  borderColor: hasOutstanding
+                    ? colors.status.errorBorder
+                    : colors.status.successBorder,
+                  backgroundColor: hasOutstanding ? colors.status.errorBg : colors.status.successBg,
                 }}
               >
-                OUTSTANDING FEES
-              </Caption>
-            </View>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                  <CreditCard
+                    size={17}
+                    color={hasOutstanding ? colors.status.errorText : colors.status.successText}
+                  />
+                  <Caption
+                    style={{
+                      flex: 1,
+                      color: hasOutstanding ? colors.status.errorText : colors.status.successText,
+                      fontFamily: bodyFont("bold"),
+                      letterSpacing: 0.6,
+                    }}
+                  >
+                    OUTSTANDING FEES
+                  </Caption>
+                </View>
 
-            <Body
-              tone="primary"
-              style={{
-                fontFamily: "Anton",
-                fontSize: 30,
-                lineHeight: 36,
-                marginTop: spacing.xs,
-                color: hasOutstanding ? colors.status.errorText : colors.status.successText,
-              }}
-            >
-              {naira(outstanding)}
-            </Body>
-            <Caption style={{ marginTop: 2 }}>
-              {s?.openInvoiceCount || 0} open invoices
-              {s?.attendanceRateToday != null
-                ? ` · ${s.attendanceRateToday}% present today`
-                : ""}
-            </Caption>
-          </Card>
-          </Dismissible>
+                <Body
+                  tone="primary"
+                  style={{
+                    fontFamily: "Anton",
+                    fontSize: 30,
+                    lineHeight: 36,
+                    marginTop: spacing.xs,
+                    color: hasOutstanding ? colors.status.errorText : colors.status.successText,
+                  }}
+                >
+                  {naira(outstanding)}
+                </Body>
+                <Caption style={{ marginTop: 2 }}>
+                  {s?.openInvoiceCount || 0} open invoices
+                  {s?.attendanceRateToday != null
+                    ? ` · ${s.attendanceRateToday}% present today`
+                    : ""}
+                </Caption>
+              </Card>
+            </Dismissible>
           ) : null}
 
           <MetricGrid style={{ marginBottom: spacing.lg }}>
@@ -291,16 +297,12 @@ export default function AdminDashboard() {
                       width: 36,
                       height: 36,
                       borderRadius: radius.sm + 2,
-                      backgroundColor:
-                        (t.alert ? colors.warning : colors.brand.green) + "1F",
+                      backgroundColor: (t.alert ? colors.warning : colors.brand.green) + "1F",
                       justifyContent: "center",
                       alignItems: "center",
                     }}
                   >
-                    <Icon
-                      size={19}
-                      color={t.alert ? colors.warning : colors.brand.greenLight}
-                    />
+                    <Icon size={19} color={t.alert ? colors.warning : colors.brand.greenLight} />
                   </View>
                   {showBadge ? (
                     <Badge tone={t.alert ? "warning" : "neutral"}>{String(t.count)}</Badge>

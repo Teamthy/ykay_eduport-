@@ -109,6 +109,7 @@ export default function RootLayout() {
       <Stack.Screen name="news" />
       <Stack.Screen name="news-detail" />
       <Stack.Screen name="school-info" />
+      <Stack.Screen name="staff-attendance" />
       <Stack.Screen name="pay" />
       <Stack.Screen name="teacher-announcements" />
       <Stack.Screen name="student-teachers" />
