@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
-import { ScrollView, RefreshControl, View } from "react-native";
+import { RefreshControl, View } from "react-native";
 import { studentApi } from "@/lib/api";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/src/theme";
 import { useCurrentTerm } from "@/lib/useCurrentTerm";
 import { AppHeader } from "@/src/components/navigation";
+import { Screen } from "@/src/components/layout";
 import {
   DashboardGreeting,
   Metric,
   MetricGrid,
-  ActionRow,
+  QuickActions,
   SectionHeading,
   InlineError,
   TermChip,
@@ -66,9 +67,8 @@ export default function StudentDashboard() {
   const feeBalance = Number(stats?.feeBalance ?? 0);
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background.primary }}
-      contentContainerStyle={{ padding: spacing.lg, paddingTop: 56, paddingBottom: 40 }}
+    <Screen
+      scroll
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -232,60 +232,51 @@ export default function StudentDashboard() {
       ) : null}
 
       <SectionHeading title="Quick actions" />
-      <View style={{ gap: spacing.sm }}>
-        <ActionRow
-          icon={<Award size={18} color={colors.brand.greenLight} />}
-          label="Report cards"
-          hint="Termly results and remarks"
-          onPress={() => router.push("/(student)/report-cards")}
-        />
-        <ActionRow
-          icon={<ClipboardCheck size={18} color={colors.brand.greenLight} />}
-          label="Exams"
-          hint="Sit a computer-based test"
-          onPress={() => router.push("/(student)/exams")}
-        />
-        <ActionRow
-          icon={<GraduationCap size={18} color={colors.brand.greenLight} />}
-          label="Practice tests"
-          hint="Past questions by subject"
-          onPress={() => router.push("/practice")}
-        />
-        <ActionRow
-          icon={<Calendar size={18} color={colors.brand.greenLight} />}
-          label="Attendance"
-          hint="Your day-by-day record"
-          onPress={() => router.push("/(student)/attendance")}
-        />
-        {/* Students got messaging on the web in drop 36 — reachableStudentIds()
-            resolves a STUDENT to their own profile — but the mobile dashboard
-            never linked to it, so the screen existed and no student could open
-            it. Parents and teachers already had this row. */}
-        <ActionRow
-          icon={<Mail size={18} color={colors.brand.greenLight} />}
-          label="Messages"
-          hint="Talk to your teachers"
-          onPress={() => router.push("/messages")}
-        />
-        <ActionRow
-          icon={<Bell size={18} color={colors.brand.greenLight} />}
-          label="Announcements"
-          hint="School news and notices"
-          onPress={() => router.push("/announcements")}
-        />
-        <ActionRow
-          icon={<Users size={18} color={colors.brand.greenLight} />}
-          label="My teachers"
-          hint="Who teaches what"
-          onPress={() => router.push("/student-teachers")}
-        />
-        <ActionRow
-          icon={<CreditCard size={18} color={colors.brand.greenLight} />}
-          label="ID card"
-          hint="Your digital student ID"
-          onPress={() => router.push("/id-card")}
-        />
-      </View>
-    </ScrollView>
+      <QuickActions
+        actions={[
+          {
+            label: "Report cards",
+            icon: <Award size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/(student)/report-cards"),
+          },
+          {
+            label: "Exams",
+            icon: <ClipboardCheck size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/(student)/exams"),
+          },
+          {
+            label: "Practice",
+            icon: <GraduationCap size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/practice"),
+          },
+          {
+            label: "Attendance",
+            icon: <Calendar size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/(student)/attendance"),
+          },
+          {
+            label: "Messages",
+            icon: <Mail size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/messages"),
+          },
+          {
+            label: "Announcements",
+            icon: <Bell size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/announcements"),
+          },
+          {
+            label: "My teachers",
+            icon: <Users size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/student-teachers"),
+          },
+          {
+            label: "ID card",
+            icon: <CreditCard size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/id-card"),
+          },
+        ]}
+        style={{ marginBottom: spacing.lg }}
+      />
+    </Screen>
   );
 }
