@@ -113,3 +113,39 @@ describe("sessionCookie", () => {
     expect(cookie.options.path).toBe("/");
   });
 });
+
+describe("session lifetime", () => {
+  // The audit's top mobile UX papercut was an 8-hour hard cap forcing a
+  // re-login daily. Sessions now last 30 days; revocation is still enforced by
+  // the per-request DB lookup (isActive / isSuspended / tokenVersion), so the
+  // long JWT does not create a revocation gap. These tests pin that behaviour.
+  it("issues JWTs that expire after 30 days, not 8 hours", async () => {
+    const { signSession } = await import("@/lib/session");
+    const { jwtVerify } = await import("jose");
+
+    const token = await signSession({
+      id: "user_ttl",
+      schoolId: "school_1",
+      role: "PARENT" as any,
+      name: "TTL Parent",
+      email: "ttl@school.com",
+    });
+
+    const { payload } = await jwtVerify(
+      token,
+      new TextEncoder().encode(
+        "test-secret-that-is-at-least-32-characters-long-for-testing",
+      ),
+    );
+    expect(typeof payload.exp).toBe("number");
+    const remaining = (payload.exp as number) - Math.floor(Date.now() / 1000);
+    // ~30 days, and definitely not the old 8 hours (28,800s).
+    expect(remaining).toBeGreaterThan(60 * 60 * 24 * 29);
+  });
+
+  it("sets a matching 30-day cookie maxAge", async () => {
+    const { sessionCookie } = await import("@/lib/session");
+    const cookie = sessionCookie("t");
+    expect(cookie.options.maxAge).toBe(60 * 60 * 24 * 30);
+  });
+});

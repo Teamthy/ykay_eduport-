@@ -6,6 +6,29 @@ import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 export const SESSION_COOKIE = "ykay_session";
+
+/**
+ * Session lifetime.
+ *
+ * The JWT and the cookie both expire after this, and there is deliberately no
+ * refresh-token rotation. That is safe here because authorisation is NOT
+ * delegated to the token's expiry: every protected route calls `requireRole` /
+ * `checkRole`, which look the user up in the database on every request and
+ * reject them if `isActive` is false, `isSuspended` is true, or `tokenVersion`
+ * is newer than the one in the JWT (see revokeAllSessions). So a suspended or
+ * revoked account is locked out within one request no matter how long the JWT
+ * lives.
+ *
+ * The only thing the 8-hour expiry used to buy us was forcing a re-login every
+ * day — which is exactly the friction this app should not have: parents and
+ * teachers open the mobile app and web portal daily, and the audit flagged the
+ * daily re-login as the top UX papercut. With DB-backed revocation in place,
+ * a longer lifetime is a pure UX win with no revocation gap, so sessions now
+ * last 30 days for an active user.
+ */
+export const SESSION_TTL_JOSE = "30d";
+export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
+
 const encoder = new TextEncoder();
 
 function secret() {
@@ -44,7 +67,7 @@ export async function signSession(
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
     .setIssuedAt()
-    .setExpirationTime("8h")
+    .setExpirationTime(SESSION_TTL_JOSE)
     .sign(secret());
 }
 
@@ -103,7 +126,7 @@ export function sessionCookie(token: string) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax" as const,
       path: "/",
-      maxAge: 60 * 60 * 8,
+      maxAge: SESSION_TTL_SECONDS,
     },
   };
 }
@@ -158,7 +181,7 @@ export async function checkRole(allowed: UserRole[]): Promise<SessionCheck> {
 
   const user = await getSession();
   // A token was presented but did not verify: wrong AUTH_SECRET, tampered, or
-  // past its 8-hour expiry.
+  // past its token expiry (or an invalid/revoked signature).
   if (!user) return { ok: false, reason: "BAD_SIGNATURE_OR_EXPIRED" };
 
   if (!allowed.includes(user.role)) return { ok: false, reason: "WRONG_ROLE", role: user.role };
@@ -178,7 +201,7 @@ export async function checkRole(allowed: UserRole[]): Promise<SessionCheck> {
     // Matches requireRole: fail CLOSED. This lookup is the ONLY thing that
     // sees suspensions and revocations, so allowing the request through on a
     // database error left a suspended user authorised for the remaining
-    // lifetime of their 8-hour token. Reported as its own reason so the
+    // lifetime of their session token. Reported as its own reason so the
     // caller can answer 503 rather than 401.
     logger.error("Identity state lookup failed — denying request", {
       userId: user.id,
@@ -244,7 +267,7 @@ export class IdentityCheckUnavailableError extends Error {
  * reasoning that the JWT signature was still valid. That was wrong: the whole
  * point of the lookup is to catch state the JWT cannot know about — a
  * suspended account, a revoked session, a password reset. Swallowing the error
- * meant a suspended user stayed authorised for up to the 8-hour token lifetime
+ * meant a suspended user stayed authorised for up to the remaining session-token lifetime
  * on every route, for as long as the database was unhappy.
  *
  * It now throws IdentityCheckUnavailableError. Routes using requireRoleOr503
