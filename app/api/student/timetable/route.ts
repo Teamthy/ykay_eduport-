@@ -16,15 +16,34 @@ export async function GET() {
   });
 
   if (!student?.currentClass) {
-    return NextResponse.json({ schedule: [] });
+    return NextResponse.json({ schedule: [], class: null });
   }
 
-  // For now, return an empty schedule.
-  // The full timetable feature requires a Timetable model which can be
-  // added in a future migration. This ensures the page works gracefully
-  // without mock data.
+  // The full schedule for this student's class, ordered by day and start time.
+  const slots = await prisma.timetableSlot.findMany({
+    where: { schoolId: user.schoolId, classId: student.currentClassId },
+    orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
+    select: {
+      id: true,
+      dayOfWeek: true,
+      startTime: true,
+      endTime: true,
+      subjectName: true,
+      teacherName: true,
+      room: true,
+    },
+  });
+
   return NextResponse.json({
-    schedule: [],
+    schedule: slots.map((slot) => ({
+      id: slot.id,
+      day: slot.dayOfWeek,
+      start: slot.startTime,
+      end: slot.endTime,
+      subject: slot.subjectName,
+      teacher: slot.teacherName,
+      room: slot.room,
+    })),
     class: student.currentClass.displayName,
   });
 }

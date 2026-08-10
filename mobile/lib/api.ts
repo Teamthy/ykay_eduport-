@@ -179,6 +179,7 @@ export const studentApi = {
   exams: () => api("/api/student/exams"),
   announcements: () => api("/api/student/announcements"),
   teachers: () => api("/api/student/teachers"),
+  timetable: () => api("/api/student/timetable"),
 
   startExam: (examId: string) => api(`/api/student/exams/${examId}/attempt`, { method: "POST" }),
   saveExam: (examId: string, attemptId: string, answers: ExamAnswer[]) =>

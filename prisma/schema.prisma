@@ -210,6 +210,7 @@ model School {
   academicSessions        AcademicSession[]
   terms                   Term[]
   studentEnrolments       StudentEnrolment[]
+  timetableSlots          TimetableSlot[]
 }
 
 model User {
@@ -322,6 +323,7 @@ model SchoolClass {
   gradebooks         SubjectGradebook[]
   exams              Exam[]
   enrolments         StudentEnrolment[]
+  timetableSlots     TimetableSlot[]
 
   @@unique([schoolId, displayName])
   @@index([schoolId, level, arm])
@@ -1690,4 +1692,26 @@ model StudentEnrolment {
   @@unique([studentProfileId, sessionId])
   @@index([classId, sessionId])
   @@index([schoolId, sessionId, outcome])
+}
+
+model TimetableSlot {
+  id        String   @id @default(cuid())
+  schoolId  String
+  classId   String
+  /// e.g. MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY
+  dayOfWeek String
+  /// 24h local start time, e.g. "08:00"
+  startTime String
+  endTime   String
+  subjectName String
+  teacherName String?
+  room      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school    School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  classroom SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@index([classId, dayOfWeek])
+  @@index([schoolId])
 }
