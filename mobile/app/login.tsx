@@ -56,7 +56,12 @@ export default function LoginScreen() {
       const { user } = await login(email.trim(), password);
       if (!ALLOWED_ROLES.includes(user.role)) {
         await logout();
-        setFormError("This account is managed from the web portal.");
+        // Be specific about the role so a Bursar or Director isn't left wondering
+        // whether their account is broken — it's fine, it's just web-managed.
+        const roleName = user.role?.replaceAll("_", " ").toLowerCase() || "this account";
+        setFormError(
+          `${roleName} access is managed from the web portal — please sign in on a computer.`,
+        );
         haptic("error");
         return;
       }
