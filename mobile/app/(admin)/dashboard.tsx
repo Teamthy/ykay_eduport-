@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, ScrollView, RefreshControl, TouchableOpacity } from "react-native";
+import { View, RefreshControl, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { adminApi } from "@/lib/api";
 import { getPref, setPref } from "@/lib/prefs";
 import { useTheme } from "@/src/theme";
 import { useCurrentTerm } from "@/lib/useCurrentTerm";
 import { AppHeader } from "@/src/components/navigation";
+import { Screen } from "@/src/components/layout";
 import {
   DashboardGreeting,
   Metric,
@@ -140,9 +141,8 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background.primary }}
-      contentContainerStyle={{ padding: spacing.lg, paddingTop: 56, paddingBottom: 40 }}
+    <Screen
+      scroll
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -321,6 +321,6 @@ export default function AdminDashboard() {
           );
         })}
       </View>
-    </ScrollView>
+    </Screen>
   );
 }

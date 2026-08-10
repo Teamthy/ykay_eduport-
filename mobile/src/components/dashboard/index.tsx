@@ -424,6 +424,8 @@ export interface QuickAction {
   onPress: () => void;
   /** Optional tint; defaults to brand green. */
   tint?: string;
+  /** Optional count badge shown at the top-right (e.g. open gradebooks). */
+  badge?: string | number;
 }
 
 /**
@@ -455,6 +457,26 @@ export function QuickActions({ actions, style }: { actions: QuickAction[]; style
               borderColor: colors.border.subtle,
             }}
           >
+            {a.badge != null && a.badge !== "" && Number(a.badge) !== 0 ? (
+              <View
+                style={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  minWidth: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  paddingHorizontal: 5,
+                  backgroundColor: colors.brand.orange,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Body tone="inverse" style={{ fontSize: 11, fontFamily: bodyFont("bold") }}>
+                  {a.badge}
+                </Body>
+              </View>
+            ) : null}
             <View
               style={{
                 width: 38,

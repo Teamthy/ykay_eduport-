@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, ScrollView, RefreshControl } from "react-native";
+import { View, RefreshControl } from "react-native";
 import { parentApi } from "@/lib/api";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/src/theme";
@@ -9,12 +9,13 @@ import {
   DashboardGreeting,
   Metric,
   MetricGrid,
-  ActionRow,
+  QuickActions,
   SectionHeading,
   ChildSwitcher,
   InlineError,
   TermChip,
 } from "@/src/components/dashboard";
+import { Screen } from "@/src/components/layout";
 import { Card } from "@/src/components/cards";
 import { H3, Body, Caption } from "@/src/components/typography";
 import { Skeleton, EmptyState } from "@/src/components/feedback";
@@ -80,9 +81,8 @@ export default function ParentDashboard() {
   const firstName = child?.displayName?.split(" ")[0] || "your ward";
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background.primary }}
-      contentContainerStyle={{ padding: spacing.lg, paddingTop: 56, paddingBottom: 40 }}
+    <Screen
+      scroll
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -263,36 +263,36 @@ export default function ParentDashboard() {
           </MetricGrid>
 
           <SectionHeading title="Quick actions" />
-          <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
-            <ActionRow
-              icon={<FileText size={18} color={colors.brand.greenLight} />}
-              label="Report cards"
-              hint={`${firstName}'s termly results`}
-              onPress={() => router.push("/(parent)/report-cards")}
-            />
-            <ActionRow
-              icon={<Calendar size={18} color={colors.brand.greenLight} />}
-              label="Attendance"
-              hint="Day-by-day record"
-              onPress={() => router.push("/(parent)/attendance")}
-            />
-            <ActionRow
-              icon={<CreditCard size={18} color={colors.brand.greenLight} />}
-              label="Fees & payments"
-              hint="Invoices and receipts"
-              onPress={() => router.push("/(parent)/fees")}
-            />
-            <ActionRow
-              icon={<Megaphone size={18} color={colors.brand.greenLight} />}
-              label="School events"
-              onPress={() => router.push("/parent-events")}
-            />
-            <ActionRow
-              icon={<Mail size={18} color={colors.brand.greenLight} />}
-              label="Messages"
-              onPress={() => router.push("/messages")}
-            />
-          </View>
+          <QuickActions
+            style={{ marginBottom: spacing.lg }}
+            actions={[
+              {
+                label: "Report cards",
+                icon: <FileText size={18} color={colors.brand.greenLight} />,
+                onPress: () => router.push("/(parent)/report-cards"),
+              },
+              {
+                label: "Attendance",
+                icon: <Calendar size={18} color={colors.brand.greenLight} />,
+                onPress: () => router.push("/(parent)/attendance"),
+              },
+              {
+                label: "Fees & payments",
+                icon: <CreditCard size={18} color={colors.brand.greenLight} />,
+                onPress: () => router.push("/(parent)/fees"),
+              },
+              {
+                label: "School events",
+                icon: <Megaphone size={18} color={colors.brand.greenLight} />,
+                onPress: () => router.push("/parent-events"),
+              },
+              {
+                label: "Messages",
+                icon: <Mail size={18} color={colors.brand.greenLight} />,
+                onPress: () => router.push("/messages"),
+              },
+            ]}
+          />
         </>
       ) : null}
 
@@ -324,6 +324,6 @@ export default function ParentDashboard() {
           </View>
         </>
       ) : null}
-    </ScrollView>
+    </Screen>
   );
 }

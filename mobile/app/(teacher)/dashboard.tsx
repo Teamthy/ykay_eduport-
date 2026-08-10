@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, ScrollView, RefreshControl } from "react-native";
+import { View, RefreshControl } from "react-native";
 import { teacherApi } from "@/lib/api";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/src/theme";
@@ -9,11 +9,12 @@ import {
   DashboardGreeting,
   Metric,
   MetricGrid,
-  ActionRow,
+  QuickActions,
   SectionHeading,
   InlineError,
   TermChip,
 } from "@/src/components/dashboard";
+import { Screen } from "@/src/components/layout";
 import { Card } from "@/src/components/cards";
 import { Body, Caption } from "@/src/components/typography";
 import { Badge } from "@/src/components/badges";
@@ -68,9 +69,8 @@ export default function TeacherDashboard() {
   const registerDone = !!s?.todayRegisterDone;
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background.primary }}
-      contentContainerStyle={{ padding: spacing.lg, paddingTop: 56, paddingBottom: 40 }}
+    <Screen
+      scroll
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -207,49 +207,47 @@ export default function TeacherDashboard() {
       )}
 
       <SectionHeading title="Quick actions" />
-      <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
-        <ActionRow
-          icon={<ClipboardCheck size={18} color={colors.brand.greenLight} />}
-          label="Take attendance"
-          hint="Mark today's register"
-          onPress={() => router.push("/(teacher)/attendance")}
-        />
-        <ActionRow
-          icon={<BookOpen size={18} color={colors.brand.greenLight} />}
-          label="Gradebook"
-          hint="Enter and submit scores"
-          badge={s?.openGradebooks}
-          onPress={() => router.push("/(teacher)/gradebook")}
-        />
-        <ActionRow
-          icon={<Users size={18} color={colors.brand.greenLight} />}
-          label="Students"
-          hint="Class rosters"
-          onPress={() => router.push("/(teacher)/students")}
-        />
-        <ActionRow
-          icon={<BarChart3 size={18} color={colors.brand.greenLight} />}
-          label="Analytics"
-          hint="Class performance"
-          onPress={() => router.push("/teacher-analytics")}
-        />
-        <ActionRow
-          icon={<Megaphone size={18} color={colors.brand.greenLight} />}
-          label="Announcements"
-          onPress={() => router.push("/teacher-announcements")}
-        />
-        <ActionRow
-          icon={<Heart size={18} color={colors.brand.greenLight} />}
-          label="Behaviour"
-          hint="Log praise or a concern"
-          onPress={() => router.push("/teacher-behavior")}
-        />
-        <ActionRow
-          icon={<Mail size={18} color={colors.brand.greenLight} />}
-          label="Messages"
-          onPress={() => router.push("/messages")}
-        />
-      </View>
+      <QuickActions
+        style={{ marginBottom: spacing.lg }}
+        actions={[
+          {
+            label: "Take attendance",
+            icon: <ClipboardCheck size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/(teacher)/attendance"),
+          },
+          {
+            label: "Gradebook",
+            icon: <BookOpen size={18} color={colors.brand.greenLight} />,
+            badge: s?.openGradebooks,
+            onPress: () => router.push("/(teacher)/gradebook"),
+          },
+          {
+            label: "Students",
+            icon: <Users size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/(teacher)/students"),
+          },
+          {
+            label: "Analytics",
+            icon: <BarChart3 size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/teacher-analytics"),
+          },
+          {
+            label: "Announcements",
+            icon: <Megaphone size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/teacher-announcements"),
+          },
+          {
+            label: "Behaviour",
+            icon: <Heart size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/teacher-behavior"),
+          },
+          {
+            label: "Messages",
+            icon: <Mail size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/messages"),
+          },
+        ]}
+      />
 
       <SectionHeading title="My classes" />
       {!loading && assignments.length === 0 ? (
@@ -285,6 +283,6 @@ export default function TeacherDashboard() {
           ))}
         </View>
       )}
-    </ScrollView>
+    </Screen>
   );
 }
