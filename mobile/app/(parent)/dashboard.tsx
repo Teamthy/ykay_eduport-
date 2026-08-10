@@ -31,6 +31,7 @@ import {
   FileText,
   Megaphone,
   Mail,
+  Newspaper,
   ArrowRight,
 } from "lucide-react-native";
 
@@ -102,9 +103,7 @@ export default function ParentDashboard() {
         onAvatarPress={() => router.push("/(parent)/profile")}
       />
 
-
       <TermChip
-
         sessionLabel={term?.sessionLabel}
 
         termLabel={term?.termLabel}
@@ -112,7 +111,6 @@ export default function ParentDashboard() {
         estimated={term?.isEstimated}
 
         style={{ marginBottom: spacing.md }}
-
       />
 
       {error ? <InlineError message={error} onRetry={() => void load(childId)} /> : null}
@@ -285,6 +283,11 @@ export default function ParentDashboard() {
                 label: "School events",
                 icon: <Megaphone size={18} color={colors.brand.greenLight} />,
                 onPress: () => router.push("/parent-events"),
+              },
+              {
+                label: "School News",
+                icon: <Newspaper size={18} color={colors.brand.greenLight} />,
+                onPress: () => router.push("/news"),
               },
               {
                 label: "Messages",
