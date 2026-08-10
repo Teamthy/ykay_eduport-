@@ -5,15 +5,17 @@ import { useTheme } from "@/src/theme";
 import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, H3, Body, Caption, Label } from "@/src/components/typography";
-import { Column } from "@/src/components/layout";
+import { Column, Screen, AppBar } from "@/src/components/layout";
 import { EmptyState } from "@/src/components/feedback";
 import { bodyFont } from "@/src/theme/typography";
 import { FileText, Award, Share2 } from "lucide-react-native";
 import { shareReport } from "@/lib/reportShare";
 import { useToast } from "@/components/MobileToast";
+import { useRouter } from "expo-router";
 
 export default function ParentReportCards() {
   const { colors, spacing } = useTheme();
+  const router = useRouter();
   const { toast } = useToast();
   const [data, setData] = useState<any>(null);
   const [childId, setChildId] = useState("");
@@ -41,7 +43,8 @@ export default function ParentReportCards() {
   const selected = reports.find((r: any) => r.id === termId) || reports[0];
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(childId); }} tintColor={colors.brand.greenLight} />}>
+    <Screen scroll refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(childId); }} tintColor={colors.brand.greenLight} />}>
+      <AppBar title="Report Cards" onBack={() => router.back()} />
       <H2 style={{ marginBottom: spacing.md }}>Report Cards</H2>
       {error ? <InlineError message={error} onRetry={() => { void load(childId); }} /> : null}
 
@@ -125,7 +128,7 @@ export default function ParentReportCards() {
       ) : (
         <EmptyState icon={<FileText size={48} color={colors.border.strong} />} title="No report cards available" />
       )}
-    </ScrollView>
+    </Screen>
   );
 }
 

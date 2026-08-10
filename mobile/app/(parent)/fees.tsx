@@ -15,7 +15,7 @@ import { Card } from "@/src/components/cards";
 import { H2, H3, Body, Caption, Label } from "@/src/components/typography";
 import { Badge } from "@/src/components/badges";
 import { Button } from "@/src/components/buttons";
-import { Row, Column } from "@/src/components/layout";
+import { Row, Column, Screen, AppBar } from "@/src/components/layout";
 import { EmptyState } from "@/src/components/feedback";
 import { bodyFont } from "@/src/theme/typography";
 import { CreditCard, CheckCircle2, Clock, AlertCircle } from "lucide-react-native";
@@ -96,9 +96,8 @@ export default function ParentFees() {
             };
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background.primary }}
-      contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }}
+    <Screen
+      scroll
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -110,6 +109,7 @@ export default function ParentFees() {
         />
       }
     >
+      <AppBar title="School Fees" onBack={() => router.back()} />
       <H2 style={{ marginBottom: spacing.md }}>School Fees</H2>
 
       {children.length > 1 && (
@@ -223,7 +223,7 @@ export default function ParentFees() {
           title="No invoices yet"
         />
       )}
-    </ScrollView>
+    </Screen>
   );
 }
 

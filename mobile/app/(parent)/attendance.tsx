@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { View, ScrollView, TouchableOpacity, RefreshControl } from "react-native";
+import { useRouter } from "expo-router";
 import { parentApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
 import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption, Label } from "@/src/components/typography";
-import { Row, Column } from "@/src/components/layout";
+import { Row, Column, Screen, AppBar } from "@/src/components/layout";
 import { bodyFont } from "@/src/theme/typography";
 import { Bell } from "lucide-react-native";
 
 export default function ParentAttendance() {
   const { colors, spacing } = useTheme();
+  const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [childId, setChildId] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -36,7 +38,8 @@ export default function ParentAttendance() {
   const rate = s && s.total ? Math.round((s.present / s.total) * 100) : 0;
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(childId); }} tintColor={colors.brand.greenLight} />}>
+    <Screen scroll refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(childId); }} tintColor={colors.brand.greenLight} />}>
+      <AppBar title="Attendance" onBack={() => router.back()} />
       <H2 style={{ marginBottom: spacing.xs }}>Attendance</H2>
       {error ? <InlineError message={error} onRetry={() => { void load(childId); }} /> : null}
       {data?.monthLabel && <Caption style={{ marginBottom: spacing.md }}>{data.monthLabel}</Caption>}
@@ -75,7 +78,7 @@ export default function ParentAttendance() {
           ))}
         </Column>
       )}
-    </ScrollView>
+    </Screen>
   );
 }
 

@@ -8,11 +8,14 @@ import { H2, Body, Caption, Label } from "@/src/components/typography";
 import { Button } from "@/src/components/buttons";
 import { bodyFont } from "@/src/theme/typography";
 import { BookOpen, Lock, Save, Send } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { Screen, AppBar } from "@/src/components/layout";
 
 type Scores = { ca1: string; ca2: string; midterm: string; assignment: string; exam: string };
 
 export default function TeacherGradebook() {
   const { colors, spacing } = useTheme();
+  const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [assignmentId, setAssignmentId] = useState("");
   const [scores, setScores] = useState<Record<string, Scores>>({});
@@ -71,7 +74,8 @@ export default function TeacherGradebook() {
   ];
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(assignmentId); }} tintColor={colors.brand.greenLight} />}>
+    <Screen scroll refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(assignmentId); }} tintColor={colors.brand.greenLight} />}>
+      <AppBar title="Gradebook" onBack={() => router.back()} />
       <H2 style={{ marginBottom: spacing.xs }}>Gradebook</H2>
       {error ? <InlineError message={error} onRetry={() => { void load(assignmentId); }} /> : null}
       <Caption style={{ marginBottom: spacing.md }}>Enter continuous assessment &amp; exam scores</Caption>
@@ -141,6 +145,6 @@ export default function TeacherGradebook() {
           <Caption style={{ marginTop: spacing.sm }}>No subject assignments yet</Caption>
         </View>
       )}
-    </ScrollView>
+    </Screen>
   );
 }

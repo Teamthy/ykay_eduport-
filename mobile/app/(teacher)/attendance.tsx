@@ -6,9 +6,10 @@ import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Body, Caption, Label } from "@/src/components/typography";
 import { Button } from "@/src/components/buttons";
-import { Column } from "@/src/components/layout";
+import { Column, Screen, AppBar } from "@/src/components/layout";
 import { bodyFont } from "@/src/theme/typography";
 import { Check, X, Clock, MinusCircle, ChevronLeft, ChevronRight, Lock } from "lucide-react-native";
+import { useRouter } from "expo-router";
 
 type Status = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -16,6 +17,7 @@ const fmtDate = (s: string) => new Date(s + "T00:00:00").toLocaleDateString("en"
 
 export default function TeacherAttendance() {
   const { colors, spacing } = useTheme();
+  const router = useRouter();
   const [classes, setClasses] = useState<any[]>([]);
   const [classId, setClassId] = useState("");
   const [date, setDate] = useState(todayStr());
@@ -74,7 +76,8 @@ export default function TeacherAttendance() {
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(classId, date); }} tintColor={colors.brand.greenLight} />}>
+    <Screen scroll refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(classId, date); }} tintColor={colors.brand.greenLight} />}>
+      <AppBar title="Attendance" onBack={() => router.back()} />
       <H2 style={{ marginBottom: spacing.md }}>Attendance</H2>
       {error ? <InlineError message={error} onRetry={() => { void load(classId, date); }} /> : null}
 
@@ -160,6 +163,6 @@ export default function TeacherAttendance() {
           <Button variant="primary" fullWidth loading={saving} onPress={() => save(true)}>{saving ? "Submitting…" : "Submit"}</Button>
         </View>
       )}
-    </ScrollView>
+    </Screen>
   );
 }

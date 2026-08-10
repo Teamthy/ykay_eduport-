@@ -8,7 +8,7 @@ import { Card } from "@/src/components/cards";
 import { H2, Body, Caption } from "@/src/components/typography";
 import { Badge } from "@/src/components/badges";
 import { Button } from "@/src/components/buttons";
-import { Column, Row } from "@/src/components/layout";
+import { Column, Row, Screen, AppBar } from "@/src/components/layout";
 import { EmptyState } from "@/src/components/feedback";
 import { bodyFont } from "@/src/theme/typography";
 import { ClipboardCheck, Clock, Play, Lock, CheckCircle2, RotateCcw, CalendarClock } from "lucide-react-native";
@@ -63,7 +63,8 @@ export default function StudentExams() {
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
+    <Screen scroll refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
+      <AppBar title="My Exams" onBack={() => router.back()} />
       <H2 style={{ marginBottom: spacing.xs }}>My Exams</H2>
       {error ? <InlineError message={error} onRetry={() => { void load(); }} /> : null}
       <Caption style={{ marginBottom: spacing.lg }}>Computer-based tests for your class</Caption>
@@ -127,6 +128,6 @@ export default function StudentExams() {
       ) : (
         <EmptyState icon={<ClipboardCheck size={48} color={colors.border.strong} />} title="No exams available" />
       )}
-    </ScrollView>
+    </Screen>
   );
 }
