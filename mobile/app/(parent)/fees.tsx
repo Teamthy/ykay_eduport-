@@ -18,7 +18,7 @@ import { Button } from "@/src/components/buttons";
 import { Row, Column, Screen, AppBar } from "@/src/components/layout";
 import { EmptyState } from "@/src/components/feedback";
 import { bodyFont } from "@/src/theme/typography";
-import { CreditCard, CheckCircle2, Clock, AlertCircle } from "lucide-react-native";
+import { CreditCard, CheckCircle2, Clock, AlertCircle, Receipt } from "lucide-react-native";
 import { useToast } from "@/components/MobileToast";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
@@ -155,6 +155,48 @@ export default function ParentFees() {
           />
         </Row>
       </Card>
+
+      {/* ── Receipt history ── */}
+      {data?.payments?.length > 0 ? (
+        <View style={{ marginBottom: spacing.lg }}>
+          <Label style={{ marginBottom: spacing.sm }}>Payment receipts</Label>
+          {data.payments.slice(0, 10).map((p: any) => (
+            <Card
+              key={p.id}
+              variant="default"
+              padding={spacing.sm + 4}
+              style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm + 2, marginBottom: spacing.xs + 2 }}
+            >
+              <View
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 12,
+                  backgroundColor: `${colors.brand.green}1F`,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Receipt size={18} color={colors.brand.greenLight} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Body tone="primary" style={{ fontFamily: bodyFont("semibold") }}>
+                  {naira(p.amount)}
+                </Body>
+                <Caption numberOfLines={1}>
+                  {p.receiptNumber || p.reference}{" "}
+                  {p.paidAt
+                    ? `· ${new Date(p.paidAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
+                    : ""}
+                </Caption>
+              </View>
+              <Badge tone="success">
+                {p.method === "PAYSTACK" ? "CARD" : p.method || "PAID"}
+              </Badge>
+            </Card>
+          ))}
+        </View>
+      ) : null}
 
       {invoices.length > 0 ? (
         invoices.map((inv: any) => {
