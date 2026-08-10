@@ -159,7 +159,7 @@ export default function StudentReportCardsPage() {
 
               {!loading && data ? (
                 <>
-                  <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
+                  <div className="no-print rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
                     <div className="mb-6 flex items-center justify-between gap-4">
                       <div>
                         <h2 className="font-display text-xl text-[var(--text-primary)]">
