@@ -166,6 +166,30 @@ async function seed() {
 async function main() {
   console.log("RLS tenant-isolation verification\n");
 
+  // ── Guard: a superuser (or any role with BYPASSRLS) silently bypasses every
+  //    policy, so this script's checks pass vacuously while RLS proves nothing.
+  //    That is exactly the trap that produced a confusing "isolation is not
+  //    safe" wall of failures below — the connecting role was a superuser, so
+  //    all reads/writes leaked by design. Fail fast with a clear reason instead.
+  //    The production DATABASE_URL role must therefore be a non-superuser.
+  const roleRow = await prisma.$queryRaw<
+    { by: boolean }[]
+  >`SELECT rolsuper AS by FROM pg_roles WHERE rolname = current_user`;
+  const isSuperuser = roleRow[0]?.by === true;
+  if (isSuperuser) {
+    console.error(
+      "\n✖ The DATABASE_URL role is a SUPERUSER (or BYPASSRLS). Row-Level Security is\n" +
+        "  BYPASSED entirely for this connection, so these checks cannot prove isolation.\n" +
+        "  Create a non-superuser role for the app and re-run with it:\n" +
+        "    CREATE ROLE app LOGIN PASSWORD '<strong>';\n" +
+        "    GRANT USAGE ON SCHEMA public TO app;\n" +
+        "    GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app;\n" +
+        "    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app;\n" +
+        "  then:  DATABASE_URL=postgresql://app:<strong>@host/db npm run verify:rls\n",
+    );
+    process.exit(1);
+  }
+
   await cleanup();
   await seed();
 

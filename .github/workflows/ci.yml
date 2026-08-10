@@ -98,7 +98,20 @@ jobs:
           DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
 
       - name: Verify RLS tenant isolation
-        run: npm run verify:rls
+        # RLS is silently bypassed for a superuser, so create a non-superuser app
+        # role and verify isolation as that role — otherwise the check proves nothing.
+        env:
+          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+        run: |
+          PGPASSWORD=ci psql -h localhost -U ci -d ci -c \
+            "CREATE ROLE rls_app LOGIN PASSWORD 'rls_app_pw'; \
+             GRANT USAGE ON SCHEMA public TO rls_app; \
+             GRANT ALL ON ALL TABLES IN SCHEMA public TO rls_app; \
+             GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO rls_app;"
+          DATABASE_URL="postgresql://rls_app:rls_app_pw@localhost:5432/ci" npx tsx scripts/verify-rls.ts
+
+      - name: Verify RLS coverage
+        run: npm run verify:rls:coverage
         env:
           DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
 

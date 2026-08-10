@@ -51,6 +51,33 @@ npm run db:seed-admin
 npm run db:seed-it-courses
 ```
 
+### ⚠️ The DATABASE_URL role must NOT be a superuser
+
+Row-Level Security (RLS) is a core tenant-isolation control, but a superuser (or
+any role with `BYPASSRLS`) **silently bypasses every policy**. If the app
+connects as a superuser, RLS is effectively off and the isolation guarantee is
+gone — while every test still passes, because the check itself runs under the
+same bypass.
+
+Create a dedicated, least-privilege app role for the `DATABASE_URL`:
+
+```sql
+CREATE ROLE app LOGIN PASSWORD '<a strong password>';
+GRANT USAGE ON SCHEMA public TO app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app;
+```
+
+`npm run verify:rls` refuses to run as a superuser (it fails fast with this
+message), so it doubles as a check that your production role is correctly
+scoped. Run it against production before go-live:
+
+```bash
+DATABASE_URL=postgresql://app:<password>@host/db npm run verify:rls
+npm run verify:rls:coverage
+```
+
 ## Build & Start
 
 The app is configured with `output: "standalone"` (see `next.config.ts`), so the
