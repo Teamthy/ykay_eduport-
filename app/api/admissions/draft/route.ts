@@ -8,7 +8,7 @@ import {
 } from "@/lib/admission-service";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
-import { enforceAdmissionRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import { createApplicationId, createOpaqueToken, hashToken } from "@/lib/security";
 import { getSchool } from "@/lib/school";
 import { z } from "zod";
@@ -23,7 +23,7 @@ const updateDraftSchema = z.object({
 
 export async function POST(request: NextRequest) {
   const ipAddress = getClientIp(request);
-  const limit = await enforceAdmissionRateLimit("draft", ipAddress);
+  const limit = await enforceRateLimit("draft", ipAddress);
 
   if (!limit.success) {
     return jsonNoStore(
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   const ipAddress = getClientIp(request);
-  const limit = await enforceAdmissionRateLimit("draft", ipAddress);
+  const limit = await enforceRateLimit("draft", ipAddress);
   if (!limit.success) {
     return jsonNoStore(
       { error: "Please wait before trying again." },

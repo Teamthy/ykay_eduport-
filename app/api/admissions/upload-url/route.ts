@@ -2,14 +2,14 @@ import { NextRequest } from "next/server";
 import { DOCUMENT_RULES, uploadUrlSchema } from "@/lib/admissions";
 import { findAuthorizedApplication } from "@/lib/admission-service";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
-import { enforceAdmissionRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import { createSecureUploadUrl } from "@/lib/storage";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   const ipAddress = getClientIp(request);
-  const limit = await enforceAdmissionRateLimit("upload", ipAddress);
+  const limit = await enforceRateLimit("upload", ipAddress);
   if (!limit.success) {
     return jsonNoStore(
       {

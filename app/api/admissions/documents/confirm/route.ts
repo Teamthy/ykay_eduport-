@@ -3,14 +3,14 @@ import { confirmDocumentSchema, DOCUMENT_RULES } from "@/lib/admissions";
 import { findAuthorizedApplication } from "@/lib/admission-service";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
-import { enforceAdmissionRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import { verifyStoredDocument } from "@/lib/storage";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   const ipAddress = getClientIp(request);
-  const limit = await enforceAdmissionRateLimit("upload", ipAddress);
+  const limit = await enforceRateLimit("upload", ipAddress);
   if (!limit.success) {
     return jsonNoStore(
       { error: "Please wait before trying again." },

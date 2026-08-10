@@ -147,7 +147,3 @@ export async function enforceRateLimit(kind: RateLimitKind, identifier: string) 
   return { success, retryAfterSeconds, configurationError: false };
 }
 
-/** @deprecated Use enforceRateLimit() instead */
-export async function enforceAdmissionRateLimit(kind: RateLimitKind, identifier: string) {
-  return enforceRateLimit(kind, identifier);
-}

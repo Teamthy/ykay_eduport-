@@ -53,10 +53,25 @@ npm run db:seed-it-courses
 
 ## Build & Start
 
+The app is configured with `output: "standalone"` (see `next.config.ts`), so the
+production server is the traced bundle under `.next/standalone`, not `next start`
+(which refuses to serve a standalone build).
+
 ```bash
+# 1. Build
 npm run build
+
+# 2. Start the production server (copies .next/static + public into the bundle,
+#    then boots .next/standalone/server.js)
 npm start
+
+# Options:
+PORT=3001 npm start            # default port is 3000
+HOSTNAME=127.0.0.1 npm start   # bind only localhost (default binds 0.0.0.0)
 ```
+
+For containers, the included `Dockerfile` already runs the standalone server
+directly with a non-root user and a healthcheck.
 
 ## Health Check
 

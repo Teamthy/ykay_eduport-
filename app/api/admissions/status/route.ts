@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { applicationStatusSchema } from "@/lib/admissions";
 import { getApplicationForStatus } from "@/lib/admission-service";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
-import { enforceAdmissionRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 const statusContent: Record<
   ApplicationStatus,
@@ -44,7 +44,7 @@ const statusContent: Record<
 
 export async function GET(request: NextRequest) {
   const ipAddress = getClientIp(request);
-  const limit = await enforceAdmissionRateLimit("status", ipAddress);
+  const limit = await enforceRateLimit("status", ipAddress);
   if (!limit.success) {
     return jsonNoStore(
       { error: "Please wait before trying again." },

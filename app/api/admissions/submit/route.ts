@@ -9,7 +9,7 @@ import {
 import { verifyPaystackTransaction } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
-import { enforceAdmissionRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -21,7 +21,7 @@ const requiredDocumentTypes: AdmissionDocumentType[] = [
 
 export async function POST(request: NextRequest) {
   const ipAddress = getClientIp(request);
-  const limit = await enforceAdmissionRateLimit("payment", ipAddress);
+  const limit = await enforceRateLimit("payment", ipAddress);
   if (!limit.success) {
     return jsonNoStore(
       { error: "Please wait before trying again." },
