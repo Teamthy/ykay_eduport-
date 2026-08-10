@@ -5,32 +5,37 @@ import PortalTopbar from "@/components/PortalTopbar";
 import StudentSidebar from "@/components/PortalSidebar";
 import { LoaderCircle, Clock, MapPin, User } from "lucide-react";
 
-type Period = {
-  time: string;
+type Slot = {
+  id: string;
+  day: string;
+  start: string;
+  end: string;
   subject: string;
-  teacher: string;
-  room: string;
+  teacher: string | null;
+  room: string | null;
 };
 
-type DaySchedule = {
-  day: string;
-  periods: Period[];
+const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+
+const fmt = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  const ampm = h >= 12 ? "pm" : "am";
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m ?? 0).padStart(2, "0")} ${ampm}`;
 };
 
 export default function StudentTimetablePage() {
-  const [schedule, setSchedule] = useState<DaySchedule[]>([]);
+  const [schedule, setSchedule] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error] = useState("");
   const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
   const load = useCallback(async () => {
     try {
       const r = await fetch("/api/student/timetable", { cache: "no-store" });
       const j = await r.json();
-      if (r.ok && j.schedule) {
+      if (r.ok && Array.isArray(j.schedule)) {
         setSchedule(j.schedule);
       } else {
-        // Graceful fallback: show empty state if no API yet
         setSchedule([]);
       }
     } catch {
@@ -43,6 +48,12 @@ export default function StudentTimetablePage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Group the flat API slots by day, keeping time order.
+  const byDay = DAYS.map((d) => ({
+    day: d,
+    slots: schedule.filter((s) => s.day === d).sort((a, b) => a.start.localeCompare(b.start)),
+  })).filter((g) => g.slots.length > 0);
 
   return (
     <>
@@ -68,13 +79,7 @@ export default function StudentTimetablePage() {
             </div>
           )}
 
-          {error && (
-            <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
-              {error}
-            </div>
-          )}
-
-          {!loading && !schedule.length && (
+          {!loading && !byDay.length && (
             <div className="mt-6 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 text-center">
               <Clock className="mx-auto text-[var(--text-muted)]" size={40} />
               <p className="mt-3 text-sm text-[var(--text-muted)]">
@@ -84,46 +89,46 @@ export default function StudentTimetablePage() {
             </div>
           )}
 
-          {!loading && schedule.length > 0 && (
+          {!loading && byDay.length > 0 && (
             <div className="mt-6 space-y-4">
-              {schedule.map((day) => (
+              {byDay.map((group) => (
                 <div
-                  key={day.day}
+                  key={group.day}
                   className={`rounded-2xl border p-5 ${
-                    day.day === today
+                    group.day === today.toUpperCase()
                       ? "border-brand-green/40 bg-brand-green/5"
                       : "border-[var(--border-subtle)] bg-[var(--surface-card)]"
                   }`}
                 >
                   <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
-                    {day.day === today && (
+                    {group.day === today.toUpperCase() && (
                       <span className="rounded-full bg-brand-green px-2 py-0.5 text-[9px] text-white">
                         TODAY
                       </span>
                     )}
-                    {day.day}
+                    {group.day}
                   </h3>
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {day.periods.map((period, i) => (
+                    {group.slots.map((slot) => (
                       <div
-                        key={i}
+                        key={slot.id}
                         className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-3"
                       >
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-green">
-                          <Clock size={10} /> {period.time}
+                          <Clock size={10} /> {fmt(slot.start)} – {fmt(slot.end)}
                         </div>
                         <p className="mt-1 text-sm font-bold text-[var(--text-primary)]">
-                          {period.subject}
+                          {slot.subject}
                         </p>
                         <div className="mt-1 flex items-center gap-3 text-[11px] text-[var(--text-muted)]">
-                          {period.teacher && (
+                          {slot.teacher && (
                             <span className="flex items-center gap-1">
-                              <User size={10} /> {period.teacher}
+                              <User size={10} /> {slot.teacher}
                             </span>
                           )}
-                          {period.room && (
+                          {slot.room && (
                             <span className="flex items-center gap-1">
-                              <MapPin size={10} /> {period.room}
+                              <MapPin size={10} /> {slot.room}
                             </span>
                           )}
                         </div>
