@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Alert, BackHandler, AppState } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { studentApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
 import { Card } from "@/src/components/cards";
@@ -16,6 +17,7 @@ export default function ExamRunner() {
   const { examId } = useLocalSearchParams<{ examId: string }>();
   const router = useRouter();
   const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [exam, setExam] = useState<any>(null);
@@ -155,7 +157,7 @@ export default function ExamRunner() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
-      <View style={{ paddingHorizontal: spacing.lg, paddingTop: 56, paddingBottom: spacing.sm + 2, borderBottomWidth: 1, borderBottomColor: colors.border.subtle }}>
+      <View style={{ paddingHorizontal: spacing.lg, paddingTop: (insets.top || 8) + spacing.sm, paddingBottom: spacing.sm + 2, borderBottomWidth: 1, borderBottomColor: colors.border.subtle }}>
         <Body tone="primary" style={{ fontFamily: bodyFont("bold"), fontSize: 17 }} numberOfLines={1}>{exam?.title}</Body>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: spacing.xs + 2 }}>
           <Caption>Question {current + 1} of {questions.length} · {answeredCount} answered</Caption>
@@ -164,6 +166,19 @@ export default function ExamRunner() {
             <Text style={{ color: lowTime ? colors.danger : colors.success, fontWeight: "700", fontFamily: bodyFont("bold"), fontSize: 13 }}>{mm}:{ss}</Text>
           </View>
         </View>
+        {/* Answered progress bar */}
+        {questions.length > 0 ? (
+          <View style={{ marginTop: spacing.sm + 2, height: 4, borderRadius: 2, backgroundColor: colors.border.subtle, overflow: "hidden" }}>
+            <View
+              style={{
+                width: `${Math.round((answeredCount / questions.length) * 100)}%`,
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: colors.brand.greenLight,
+              }}
+            />
+          </View>
+        ) : null}
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ maxHeight: 56, paddingVertical: spacing.xs + 2, paddingHorizontal: spacing.md }}>
