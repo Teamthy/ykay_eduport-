@@ -10,13 +10,82 @@ import {
 } from "react-native";
 import { useTheme } from "@/src/theme";
 
-export function EmptyState({ icon, title, message }: { icon?: React.ReactNode; title: string; message?: string }) {
-  const { typography, colors, spacing } = useTheme();
+export function EmptyState({
+  icon,
+  title,
+  message,
+  actionLabel,
+  onAction,
+}: {
+  icon?: React.ReactNode;
+  title: string;
+  message?: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
+  const { typography, colors, spacing, radius } = useTheme();
   return (
-    <View style={{ alignItems: "center", paddingVertical: spacing.xxl }}>
-      {icon && <View style={{ marginBottom: spacing.sm }}>{icon}</View>}
-      <Text style={{ fontFamily: typography.fontFamily.body, fontSize: typography.fontSize.body, fontWeight: typography.fontWeight.semibold, color: colors.text.muted }}>{title}</Text>
-      {message && <Text style={{ fontFamily: typography.fontFamily.body, fontSize: typography.fontSize.caption, color: colors.text.muted, textAlign: "center", marginTop: 6 }}>{message}</Text>}
+    <View style={{ alignItems: "center", paddingVertical: spacing.xxl, paddingHorizontal: spacing.lg }}>
+      {icon && (
+        <View
+          style={{
+            width: 72,
+            height: 72,
+            borderRadius: radius.lg,
+            backgroundColor: `${colors.brand.green}18`,
+            borderWidth: 1,
+            borderColor: `${colors.brand.green}33`,
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: spacing.lg,
+          }}
+        >
+          {icon}
+        </View>
+      )}
+      <Text
+        style={{
+          fontFamily: typography.fontFamily.display,
+          fontSize: 19,
+          color: colors.text.primary,
+          textAlign: "center",
+          letterSpacing: 0.3,
+        }}
+      >
+        {title}
+      </Text>
+      {message && (
+        <Text
+          style={{
+            fontFamily: typography.fontFamily.body,
+            fontSize: typography.fontSize.caption,
+            lineHeight: 20,
+            color: colors.text.muted,
+            textAlign: "center",
+            marginTop: spacing.sm,
+            maxWidth: 280,
+          }}
+        >
+          {message}
+        </Text>
+      )}
+      {actionLabel && onAction ? (
+        <TouchableOpacity
+          onPress={onAction}
+          activeOpacity={0.85}
+          style={{
+            marginTop: spacing.lg,
+            backgroundColor: colors.brand.green,
+            paddingVertical: 12,
+            paddingHorizontal: spacing.lg,
+            borderRadius: radius.sm + 2,
+          }}
+        >
+          <Text style={{ color: colors.brand.white, fontWeight: "700", fontSize: 14 }}>
+            {actionLabel}
+          </Text>
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 }
