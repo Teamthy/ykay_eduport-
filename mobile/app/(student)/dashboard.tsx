@@ -32,7 +32,8 @@ import {
   CreditCard,
   Wallet,
   Mail,
-  Newspaper } from "lucide-react-native";
+  Newspaper,
+  BarChart3 } from "lucide-react-native";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 
@@ -245,6 +246,11 @@ export default function StudentDashboard() {
             label: "Exams",
             icon: <ClipboardCheck size={18} color={colors.brand.greenLight} />,
             onPress: () => router.push("/(student)/exams"),
+          },
+          {
+            label: "Exam results",
+            icon: <BarChart3 size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/exam-results"),
           },
           {
             label: "Practice",

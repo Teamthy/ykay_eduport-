@@ -99,6 +99,7 @@ export default function RootLayout() {
       <Stack.Screen name="(parent)" />
       <Stack.Screen name="(admin)" />
       <Stack.Screen name="exam-runner" />
+      <Stack.Screen name="exam-results" />
       <Stack.Screen name="announcements" />
       <Stack.Screen name="news" />
       <Stack.Screen name="news-detail" />
