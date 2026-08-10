@@ -28,13 +28,14 @@ export {
   ChildSwitcher,
   InlineError,
 } from "./dashboard";
-export type { MetricProps, ChildOption } from "./dashboard";
+export type { MetricProps, ChildOption, QuickAction } from "./dashboard";
+export { QuickActions } from "./dashboard";
 export { Chip, ChipRow, SegmentedControl } from "./chips";
 export type { ChipProps, SegmentedControlProps } from "./chips";
 export { EmptyState, Loading, ErrorState, Skeleton } from "./feedback";
 export { Input, TextArea } from "./inputs";
 export type { InputProps } from "./inputs";
-export { Screen, Container, Section, Row, Column, Spacer, Divider } from "./layout";
+export { Screen, AppBar, Container, Section, Row, Column, Spacer, Divider } from "./layout";
 export { ListItem } from "./lists";
 export type { ListItemProps } from "./lists";
 export { Modal } from "./modals";

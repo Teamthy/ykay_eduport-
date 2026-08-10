@@ -415,3 +415,68 @@ export function TermChip({
     </View>
   );
 }
+
+// ── Quick actions grid ─────────────────────────────────────
+
+export interface QuickAction {
+  label: string;
+  icon: React.ReactNode;
+  onPress: () => void;
+  /** Optional tint; defaults to brand green. */
+  tint?: string;
+}
+
+/**
+ * Grid of primary actions (exams, reports, fees, announcements…). Gives every
+ * role dashboard the same premium, tappable action surface instead of each
+ * screen inventing its own list. Grid is 2 columns and wraps.
+ */
+export function QuickActions({ actions, style }: { actions: QuickAction[]; style?: StyleProp<ViewStyle> }) {
+  const { colors, spacing, radius } = useTheme();
+  return (
+    <View style={[{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm + 2 }, style]}>
+      {actions.map((a, i) => {
+        const tint = a.tint ?? colors.brand.greenLight;
+        return (
+          <TouchableOpacity
+            key={i}
+            onPress={a.onPress}
+            activeOpacity={0.8}
+            style={{
+              width: "48%",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: spacing.sm + 2,
+              paddingVertical: spacing.md,
+              paddingHorizontal: spacing.md,
+              borderRadius: radius.md,
+              backgroundColor: colors.surface.card,
+              borderWidth: 1,
+              borderColor: colors.border.subtle,
+            }}
+          >
+            <View
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: radius.sm + 2,
+                backgroundColor: `${tint}1F`,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {a.icon}
+            </View>
+            <Body
+              tone="primary"
+              numberOfLines={2}
+              style={{ flex: 1, fontFamily: bodyFont("medium"), fontSize: 13.5, lineHeight: 18 }}
+            >
+              {a.label}
+            </Body>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}

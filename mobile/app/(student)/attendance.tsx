@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { View, ScrollView, RefreshControl } from "react-native";
+import { View, RefreshControl } from "react-native";
+import { useRouter } from "expo-router";
 import { studentApi } from "@/lib/api";
 import { useTheme } from "@/src/theme";
 import { InlineError } from "@/src/components/dashboard";
 import { Card } from "@/src/components/cards";
 import { H2, Caption, Label } from "@/src/components/typography";
-import { Row, Column } from "@/src/components/layout";
+import { Screen, AppBar, Row, Column } from "@/src/components/layout";
 import { Check, X, Clock } from "lucide-react-native";
 
 export default function StudentAttendance() {
   const { colors, spacing } = useTheme();
+  const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,8 +33,8 @@ export default function StudentAttendance() {
   const rate = data?.summary ? Math.round((data.summary.present / data.summary.total) * 100) : 0;
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.background.primary }} contentContainerStyle={{ padding: spacing.lg, paddingTop: 56 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
-      <H2 style={{ marginBottom: spacing.lg }}>My Attendance</H2>
+    <Screen scroll refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={colors.brand.greenLight} />}>
+      <AppBar title="My Attendance" onBack={() => router.back()} />
       {error ? <InlineError message={error} onRetry={() => { void load(); }} /> : null}
 
       <Card variant="bordered" style={{ alignItems: "center", marginBottom: spacing.lg }}>
@@ -64,7 +66,7 @@ export default function StudentAttendance() {
           })}
         </Column>
       )}
-    </ScrollView>
+    </Screen>
   );
 }
 

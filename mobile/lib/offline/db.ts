@@ -1,8 +1,21 @@
 /**
  * Offline persistence (expo-sqlite).
  * Two tables: response cache (reads) + write queue (pending mutations).
+ *
+ * The cache previously grew without bound and never expired: every GET response
+ * was stored forever and served stale on a later offline read. To keep the app
+ * usable offline without it turning into a leaking store of stale data, the
+ * cache now has a TTL and a size cap:
+ *   - entries older than CACHE_TTL_MS are treated as a miss and pruned
+ *   - setCache enforces a max row count and evicts oldest entries past the cap
  */
 import * as SQLite from "expo-sqlite";
+
+/** How long a cached response stays valid before it is treated as stale. */
+export const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+/** Hard cap on cached response rows. Prunes oldest-first past this. */
+export const CACHE_MAX_ENTRIES = 300;
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -31,6 +44,26 @@ function getDb() {
   return dbPromise;
 }
 
+/**
+ * Drop expired rows and, if still over the cap, the oldest rows until within it.
+ * Called opportunistically on write so the cache cannot grow unbounded.
+ */
+async function pruneCache(db: SQLite.SQLiteDatabase): Promise<void> {
+  const now = Date.now();
+  // 1) Expired rows.
+  await db.runAsync("DELETE FROM cache WHERE updatedAt < ?", now - CACHE_TTL_MS);
+  // 2) Overflow. Count first, then delete the oldest (lowest updatedAt) rows.
+  const row = await db.getFirstAsync<{ c: number }>("SELECT COUNT(*) AS c FROM cache");
+  const count = row?.c ?? 0;
+  if (count > CACHE_MAX_ENTRIES) {
+    const excess = count - CACHE_MAX_ENTRIES;
+    await db.runAsync(
+      "DELETE FROM cache WHERE url IN (SELECT url FROM cache ORDER BY updatedAt ASC LIMIT ?)",
+      excess,
+    );
+  }
+}
+
 export async function setCache(url: string, body: unknown): Promise<void> {
   const db = await getDb();
   await db.runAsync(
@@ -39,12 +72,27 @@ export async function setCache(url: string, body: unknown): Promise<void> {
     JSON.stringify(body),
     Date.now(),
   );
+  // Keep the store bounded on every write.
+  await pruneCache(db);
 }
 
-export async function getCache<T = unknown>(url: string): Promise<T | null> {
+export async function getCache<T = unknown>(
+  url: string,
+  opts?: { ttlMs?: number },
+): Promise<T | null> {
   const db = await getDb();
-  const row = await db.getFirstAsync<{ body: string }>("SELECT body FROM cache WHERE url = ?", url);
-  return row ? (JSON.parse(row.body) as T) : null;
+  const row = await db.getFirstAsync<{ body: string; updatedAt: number }>(
+    "SELECT body, updatedAt FROM cache WHERE url = ?",
+    url,
+  );
+  if (!row) return null;
+  const ttlMs = opts?.ttlMs ?? CACHE_TTL_MS;
+  if (Date.now() - row.updatedAt > ttlMs) {
+    // Stale entry — drop it and report a miss so the caller refetches.
+    await db.runAsync("DELETE FROM cache WHERE url = ?", url);
+    return null;
+  }
+  return JSON.parse(row.body) as T;
 }
 
 export async function addQueue(method: string, path: string, body: unknown): Promise<void> {
