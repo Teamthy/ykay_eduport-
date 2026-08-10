@@ -32,6 +32,7 @@ import {
   Megaphone,
   Mail,
   Newspaper,
+  School,
   ArrowRight,
 } from "lucide-react-native";
 
@@ -288,6 +289,11 @@ export default function ParentDashboard() {
                 label: "School News",
                 icon: <Newspaper size={18} color={colors.brand.greenLight} />,
                 onPress: () => router.push("/news"),
+              },
+              {
+                label: "School Info",
+                icon: <School size={18} color={colors.brand.greenLight} />,
+                onPress: () => router.push("/school-info"),
               },
               {
                 label: "Messages",

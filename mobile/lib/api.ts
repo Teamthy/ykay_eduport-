@@ -8,7 +8,17 @@
  * Shared HTTP primitives live in lib/http (imported here and by the offline
  * cache) to avoid a require cycle.
  */
-import { API_BASE, IS_WEB, fetchOptions, getToken, setToken, clearToken, authHeaders, notifyAuthExpired, type SessionUser } from "@/lib/http";
+import {
+  API_BASE,
+  IS_WEB,
+  fetchOptions,
+  getToken,
+  setToken,
+  clearToken,
+  authHeaders,
+  notifyAuthExpired,
+  type SessionUser,
+} from "@/lib/http";
 import { cachedGet, queuedWrite } from "@/lib/offline/cache";
 
 // Re-export so existing `import { API_BASE, getToken, ... } from "@/lib/api"` keeps working.
@@ -26,10 +36,7 @@ export type { SessionUser };
  * checking; the rest stay ergonomic instead of littered with casts.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function api<T = any>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
+export async function api<T = any>(path: string, options: RequestInit = {}): Promise<T> {
   // Reads go through the offline read-cache (network-first, cache fallback).
   if (!options.method || options.method === "GET") {
     return cachedGet<T>(path);
@@ -127,8 +134,7 @@ export async function requestPasswordReset(email: string): Promise<{ message: st
     throw new Error(data.error || "Too many reset requests. Please try again later.");
   }
   return {
-    message:
-      data.message || "If this email is registered, you will receive a reset link shortly.",
+    message: data.message || "If this email is registered, you will receive a reset link shortly.",
   };
 }
 
@@ -176,9 +182,17 @@ export const studentApi = {
 
   startExam: (examId: string) => api(`/api/student/exams/${examId}/attempt`, { method: "POST" }),
   saveExam: (examId: string, attemptId: string, answers: ExamAnswer[]) =>
-    apiQueued(`/api/student/exams/${examId}/attempt`, "PATCH", { attemptId, action: "SAVE", answers }),
+    apiQueued(`/api/student/exams/${examId}/attempt`, "PATCH", {
+      attemptId,
+      action: "SAVE",
+      answers,
+    }),
   submitExam: (examId: string, attemptId: string, answers: ExamAnswer[]) =>
-    apiQueued(`/api/student/exams/${examId}/attempt`, "PATCH", { attemptId, action: "SUBMIT", answers }),
+    apiQueued(`/api/student/exams/${examId}/attempt`, "PATCH", {
+      attemptId,
+      action: "SUBMIT",
+      answers,
+    }),
 };
 
 // ── Teacher API ───────────────────────────────────────────
@@ -247,7 +261,12 @@ export const parentApi = {
   pay: (
     invoiceId: string,
     method: "PAYSTACK" | "BANK_TRANSFER",
-    opts?: { amount?: number; transferReference?: string; transferDate?: string; narration?: string },
+    opts?: {
+      amount?: number;
+      transferReference?: string;
+      transferDate?: string;
+      narration?: string;
+    },
   ) =>
     api("/api/parent/fees/payment-intents", {
       method: "POST",
@@ -255,7 +274,9 @@ export const parentApi = {
       // retry/double-tap. Self-contained (Hermes has no crypto.randomUUID).
       headers: {
         "x-idempotency-key":
-          Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2),
+          Date.now().toString(36) +
+          Math.random().toString(36).slice(2) +
+          Math.random().toString(36).slice(2),
       },
       body: JSON.stringify({ invoiceId, method, ...opts }),
     }),
@@ -292,8 +313,13 @@ export const adminApi = {
   reportCards: () => api("/api/admin/report-cards/overview"),
   generateReports: () => api("/api/admin/report-cards/generate", { method: "POST" }),
   news: () => api("/api/admin/news"),
-  postNews: (data: { title: string; excerpt: string; content: string; category: string; isPublished: boolean }) =>
-    api("/api/admin/news", { method: "POST", body: JSON.stringify(data) }),
+  postNews: (data: {
+    title: string;
+    excerpt: string;
+    content: string;
+    category: string;
+    isPublished: boolean;
+  }) => api("/api/admin/news", { method: "POST", body: JSON.stringify(data) }),
   notifications: (status?: string) =>
     api("/api/admin/notifications" + (status ? `?status=${status}` : "")),
   broadcast: (data: { title: string; body: string; channels: string[]; audience: string }) =>
@@ -360,6 +386,18 @@ export interface NewsDetail extends NewsPost {
 
 export const newsApi = {
   list: () => api<{ posts: NewsPost[] }>("/api/news"),
-  get: (slug: string) =>
-    api<{ post: NewsDetail }>(`/api/news?slug=${encodeURIComponent(slug)}`),
+  get: (slug: string) => api<{ post: NewsDetail }>(`/api/news?slug=${encodeURIComponent(slug)}`),
+};
+
+// ── School info (contact) ──────────────────────────────────
+export interface SchoolInfo {
+  name: string;
+  motto: string;
+  address: string;
+  phone: string;
+  email: string;
+}
+
+export const schoolInfoApi = {
+  get: () => api<{ school: SchoolInfo }>(`/api/mobile/config`).then((r) => r.school),
 };

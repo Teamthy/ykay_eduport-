@@ -80,7 +80,12 @@ export default function RootLayout() {
 
   const resolvedUser = user === undefined ? null : user;
   const stack = (
-    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.background.primary } }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: Colors.background.primary },
+      }}
+    >
       <Stack.Screen name="index" />
       <Stack.Screen name="landing" redirect={!!resolvedUser} />
       <Stack.Screen name="login" redirect={!!resolvedUser} />
@@ -103,6 +108,7 @@ export default function RootLayout() {
       <Stack.Screen name="announcements" />
       <Stack.Screen name="news" />
       <Stack.Screen name="news-detail" />
+      <Stack.Screen name="school-info" />
       <Stack.Screen name="pay" />
       <Stack.Screen name="teacher-announcements" />
       <Stack.Screen name="student-teachers" />

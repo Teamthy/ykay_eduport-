@@ -61,6 +61,15 @@ export async function GET(request: Request) {
       message: outdated
         ? "This version of the Ykay College app is no longer supported. Please download the latest version."
         : null,
+      // Public school contact info for the in-app "School Info" screen. Plain
+      // values — nothing sensitive, safe for any signed-in user to see.
+      school: {
+        name: process.env.SCHOOL_NAME || "Ykay College & Leadership Academy",
+        motto: process.env.SCHOOL_MOTTO || "Excellence in Education",
+        address: process.env.SCHOOL_ADDRESS || "",
+        phone: process.env.SCHOOL_PHONE || "",
+        email: process.env.SCHOOL_EMAIL || "",
+      },
     },
     {
       // Short cache: this is checked on launch and must react quickly when a
