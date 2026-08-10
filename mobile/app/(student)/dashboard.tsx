@@ -30,7 +30,9 @@ import {
   Bell,
   Users,
   CreditCard,
-  Wallet, Mail } from "lucide-react-native";
+  Wallet,
+  Mail,
+  Newspaper } from "lucide-react-native";
 
 const naira = (n: number) => "₦" + Number(n || 0).toLocaleString();
 
@@ -263,6 +265,11 @@ export default function StudentDashboard() {
             label: "Announcements",
             icon: <Bell size={18} color={colors.brand.greenLight} />,
             onPress: () => router.push("/announcements"),
+          },
+          {
+            label: "School News",
+            icon: <Newspaper size={18} color={colors.brand.greenLight} />,
+            onPress: () => router.push("/news"),
           },
           {
             label: "My teachers",

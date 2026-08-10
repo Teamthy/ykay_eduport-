@@ -343,3 +343,23 @@ export type CurrentTerm = {
 export const termApi = {
   current: () => api<CurrentTerm>("/api/me/current-term"),
 };
+
+// ── Public school news ─────────────────────────────────────
+export interface NewsPost {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  excerpt: string;
+  publishedAt: string | null;
+}
+
+export interface NewsDetail extends NewsPost {
+  content: string;
+}
+
+export const newsApi = {
+  list: () => api<{ posts: NewsPost[] }>("/api/news"),
+  get: (slug: string) =>
+    api<{ post: NewsDetail }>(`/api/news?slug=${encodeURIComponent(slug)}`),
+};
