@@ -17,7 +17,9 @@ import {
   LoaderCircle,
   MessageCircle,
   Award,
+  Printer,
 } from "lucide-react";
+import { generateReportCardPDF } from "@/lib/branded-pdf";
 
 const SIDEBAR_ITEMS = [
   { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
@@ -133,6 +135,37 @@ export default function ParentReportCardsPage() {
   const selected =
     data?.reports.find((report) => report.id === selectedReportId) || data?.reports[0] || null;
 
+  const downloadSelected = (
+    report: NonNullable<typeof selected>,
+    child?: { displayName?: string; studentId?: string } | null,
+  ) => {
+    generateReportCardPDF({
+      studentName: child?.displayName || data?.selectedChild?.displayName || "Student",
+      studentClass: report.classNameSnapshot,
+      studentId: child?.studentId || data?.selectedChild?.studentId || "",
+      session: report.sessionLabel,
+      term: report.termLabel,
+      subjects: report.subjects.map((s) => ({
+        subject: s.subject,
+        ca1: s.ca1,
+        ca2: s.ca2,
+        midterm: s.midterm,
+        assignment: s.assignment,
+        exam: s.exam,
+        total: s.total,
+        grade: s.grade,
+      })),
+      attendancePresent: report.attendancePresent,
+      attendanceTotal: report.attendanceTotal,
+      overallAverage: report.overallAverage,
+      overallGrade: report.overallGrade,
+      classPosition: report.classPosition || undefined,
+      classTeacherRemark: report.classTeacherRemark,
+      directorRemark: report.directorRemark,
+      reportNo: report.reportNumber,
+    });
+  };
+
   return (
     <>
       <PortalTopbar />
@@ -184,12 +217,20 @@ export default function ParentReportCardsPage() {
                         </p>
                       </div>
                       {selected ? (
-                        <button
-                          onClick={() => window.print()}
-                          className="inline-flex items-center gap-2 rounded-full bg-brand-green px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark"
-                        >
-                          <Download size={14} /> Print / Save PDF
-                        </button>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={() => downloadSelected(selected, data.selectedChild)}
+                            className="inline-flex items-center gap-2 rounded-full bg-brand-green px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark"
+                          >
+                            <Download size={14} /> Download PDF
+                          </button>
+                          <button
+                            onClick={() => window.print()}
+                            className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-4 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:opacity-90"
+                          >
+                            <Printer size={14} /> Print
+                          </button>
+                        </div>
                       ) : null}
                     </div>
 
