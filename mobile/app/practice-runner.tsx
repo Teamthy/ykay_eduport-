@@ -9,6 +9,7 @@ import { Badge } from "@/src/components/badges";
 import { Column } from "@/src/components/layout";
 import { bodyFont } from "@/src/theme/typography";
 import { PRACTICE_SUBJECTS, ALL_PRACTICE_QUESTIONS, type PracticeQuestion } from "@/lib/practiceBank";
+import { recordPracticeSession } from "@/lib/practiceHistory";
 import { haptic } from "@/lib/haptics";
 import { Check, X, RotateCcw, Trophy, ChevronRight } from "lucide-react-native";
 
@@ -40,7 +41,18 @@ export default function PracticeRunner() {
   function next() {
     haptic("light");
     if (i < questions.length - 1) setI(i + 1);
-    else { setDone(true); haptic("success"); }
+    else {
+      setDone(true);
+      haptic("success");
+      // Persist the session for the streak/history feature. Fire-and-forget:
+      // this must never block the results screen.
+      void recordPracticeSession({
+        subjectId: subjectId || "all",
+        total: questions.length,
+        correct: correctCount,
+        pct,
+      }).catch(() => {});
+    }
   }
   function restart() { setAnswers({}); setI(0); setDone(false); haptic("medium"); }
 

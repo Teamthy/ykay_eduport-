@@ -108,6 +108,7 @@ export default function RootLayout() {
       <Stack.Screen name="teacher-analytics" />
       <Stack.Screen name="practice" />
       <Stack.Screen name="practice-runner" />
+      <Stack.Screen name="practice-progress" />
       <Stack.Screen name="admin-students" />
       <Stack.Screen name="admin-staff" />
       <Stack.Screen name="admin-finance" />

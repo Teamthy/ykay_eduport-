@@ -8,7 +8,7 @@ import { AppHeader } from "@/src/components/navigation";
 import { bodyFont } from "@/src/theme/typography";
 import { PRACTICE_SUBJECTS, ALL_PRACTICE_QUESTIONS } from "@/lib/practiceBank";
 import { haptic } from "@/lib/haptics";
-import { Sparkles, ChevronRight, Zap } from "lucide-react-native";
+import { Sparkles, ChevronRight, Zap, Flame } from "lucide-react-native";
 
 export default function PracticeHub() {
   const router = useRouter();
@@ -25,6 +25,20 @@ export default function PracticeHub() {
       <Caption style={{ marginTop: spacing.lg }}>Practice &amp; revise</Caption>
       <H2 style={{ marginTop: 2, marginBottom: spacing.xs }}>Practice Tests</H2>
       <Body style={{ marginBottom: spacing.lg }}>{ALL_PRACTICE_QUESTIONS.length} questions across {PRACTICE_SUBJECTS.length} subjects — instant scoring &amp; explanations, works offline.</Body>
+
+      {/* Streak / history */}
+      <TouchableOpacity onPress={() => router.push("/practice-progress")} style={{ marginBottom: spacing.lg }}>
+        <Card variant="default" padding={spacing.sm + 4} style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm, borderColor: colors.brand.orange }}>
+          <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: colors.brand.orange, justifyContent: "center", alignItems: "center" }}>
+            <Flame size={20} color={colors.brand.white} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Body tone="primary" style={{ fontFamily: bodyFont("bold") }}>My progress &amp; streak</Body>
+            <Caption>Track your daily practice</Caption>
+          </View>
+          <ChevronRight size={18} color={colors.brand.orange} />
+        </Card>
+      </TouchableOpacity>
 
       {/* Quick mix */}
       <TouchableOpacity onPress={() => start("all")}>
