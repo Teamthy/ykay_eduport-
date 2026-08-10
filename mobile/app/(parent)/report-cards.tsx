@@ -115,7 +115,7 @@ export default function ParentReportCards() {
                 </Column>
                 <Column style={{ alignItems: "flex-end" }}>
                   <H3 style={{ fontSize: 18 }}>{s.total}</H3>
-                  <Caption style={{ color: colors.brand.greenLight }}>{s.grade}</Caption>
+                  <GradeChip grade={s.grade} total={s.total} />
                 </Column>
               </Card>
             ))}
@@ -135,4 +135,28 @@ export default function ParentReportCards() {
 function Mini({ label, value, color }: { label: string; value: string; color?: string }) {
   const { colors } = useTheme();
   return (<View><Caption>{label}</Caption><H2 style={{ color: color ?? colors.text.primary, fontSize: 26, marginTop: 2 }}>{value}</H2></View>);
+}
+
+/** Grade pill coloured by score — green (pass, ≥70), amber (≥45), red otherwise. */
+function GradeChip({ grade, total }: { grade?: string; total?: number }) {
+  const { colors, radius, spacing } = useTheme();
+  const tint =
+    total == null ? colors.brand.greenLight : total >= 70 ? colors.success : total >= 45 ? colors.warning : colors.danger;
+  return (
+    <View
+      style={{
+        marginTop: 4,
+        paddingHorizontal: spacing.sm,
+        paddingVertical: 2,
+        borderRadius: radius.sm,
+        backgroundColor: `${tint}22`,
+        borderWidth: 1,
+        borderColor: `${tint}55`,
+      }}
+    >
+      <Caption style={{ color: tint, fontFamily: bodyFont("bold"), fontSize: 11 }}>
+        {grade || "—"}
+      </Caption>
+    </View>
+  );
 }
