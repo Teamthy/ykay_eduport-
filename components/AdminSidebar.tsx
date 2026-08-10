@@ -32,6 +32,7 @@ const ADMIN_NAV = [
   { label: "Staff Accounts", href: "/admin/staff", icon: UserPlus },
   { label: "Staff QR Attendance", href: "/admin/staff-attendance", icon: ClipboardCheck },
   { label: "Class Manager", href: "/admin/class-manager", icon: School },
+  { label: "Timetable", href: "/admin/timetable", icon: CalendarDays },
   { label: "Subjects", href: "/admin/subjects", icon: BookOpen },
   { label: "Messages", href: "/admin/messages", icon: MessageCircle },
   { label: "Sessions & Terms", href: "/admin/sessions", icon: CalendarDays },
