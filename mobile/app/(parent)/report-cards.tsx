@@ -8,10 +8,13 @@ import { H2, H3, Body, Caption, Label } from "@/src/components/typography";
 import { Column } from "@/src/components/layout";
 import { EmptyState } from "@/src/components/feedback";
 import { bodyFont } from "@/src/theme/typography";
-import { FileText, Award } from "lucide-react-native";
+import { FileText, Award, Share2 } from "lucide-react-native";
+import { shareReport } from "@/lib/reportShare";
+import { useToast } from "@/components/MobileToast";
 
 export default function ParentReportCards() {
   const { colors, spacing } = useTheme();
+  const { toast } = useToast();
   const [data, setData] = useState<any>(null);
   const [childId, setChildId] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -77,6 +80,27 @@ export default function ParentReportCards() {
               </View>
             ) : null}
           </Card>
+
+          <TouchableOpacity
+            onPress={async () => {
+              const child = data?.children?.find((c: any) => c.id === childId) || data?.children?.[0];
+              const ok = await shareReport(selected, child?.displayName);
+              if (ok) toast("Report shared");
+              else toast("Sharing isn't available on this device", "error");
+            }}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: spacing.sm,
+              paddingVertical: 12,
+              borderRadius: 20,
+              backgroundColor: colors.brand.green,
+            }}
+          >
+            <Share2 size={16} color={colors.brand.white} />
+            <Body tone="inverse" style={{ fontFamily: bodyFont("semibold") }}>Share this result</Body>
+          </TouchableOpacity>
 
           <Column gap={spacing.xs}>
             <Label>Subjects</Label>
