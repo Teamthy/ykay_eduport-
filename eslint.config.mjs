@@ -37,10 +37,25 @@ const eslintConfig = [
       // Obsolete in the App Router.
       "@next/next/no-html-link-for-pages": "off",
       // eslint-plugin-react-hooks v6 (shipped with eslint-config-next@16) added
-      // aggressive new rules the existing hooks weren't written for. Surface them
-      // as warnings so CI is green on day one; promote to errors in a follow-up.
-      "react-hooks/set-state-in-effect": "warn",
+      // aggressive new rules. They were first surfaced as warnings; after review
+      // (see below) they stay warnings BY DESIGN, not by omission.
+      //
+      // Why not errors:
+      //   - set-state-in-effect (64 hits): flags the standard "load data in a
+      //     useEffect" and "hydrate state from localStorage" patterns used across
+      //     ~60 portal pages. Those are legitimate React patterns; forcing them to
+      //     errors would push the code into worse shapes for no correctness gain.
+      //   - immutability (4): false positives such as `window.location.href = x`.
+      //   - purity (1): Date.now() in render inside a client component — no
+      //     hydration concern.
+      //   - use-memo (2): the intentional `[url, ...deps]` spread in the shared
+      //     useApi/useOffline hooks, already covered by an inline eslint-disable.
+      //   - exhaustive-deps (2): both on correct dependency arrays.
+      // Keeping these as warnings still surfaces NEW suspicious code in CI output
+      // while not demanding refactors of correct code. If a rule's signal improves
+      // (or a genuine bug appears), promote it with evidence in the PR.
       "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/set-state-in-effect": "warn",
       "react-hooks/immutability": "warn",
       "react-hooks/use-memo": "warn",
       "react-hooks/purity": "warn",
