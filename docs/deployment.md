@@ -101,6 +101,42 @@ Expected response:
 4. Set output directory: `.next`
 5. Deploy
 
+## Docker / Container Deployment
+
+The repo ships a production `Dockerfile` (multi-stage, standalone build,
+non-root user, healthcheck) and `.dockerignore`. The **Docker Publish** CI
+workflow builds the image on every tag and push to `main` and publishes it to
+**GitHub Container Registry**:
+
+```bash
+# After pushing a tag (v1.2.3), pull the published image on any host:
+docker pull ghcr.io/<owner>/ykay-eduport:1.2.3
+
+# Or use the :latest / :main tags
+docker run --rm -p 3000:3000 \
+  -e DATABASE_URL=... \
+  -e AUTH_SECRET=... \
+  -e NEXT_PUBLIC_SITE_URL=https://your-domain.com \
+  -e PAYSTACK_PUBLIC_KEY=... \
+  -e PAYSTACK_SECRET_KEY=... \
+  ghcr.io/<owner>/ykay-eduport:1.2.3
+```
+
+Or with the included `docker-compose.yml` (env vars passed from your shell):
+
+```bash
+docker compose up -d --build
+```
+
+Migrations are NOT run by the image (a stateless server should not own schema
+changes). Run them once from a deploy step or a one-off container:
+
+```bash
+# One-off migrate using the image's prisma client:
+docker run --rm -e DATABASE_URL=... ghcr.io/<owner>/ykay-eduport:1.2.3 \
+  npx prisma migrate deploy
+```
+
 ## Post-Deployment Checklist
 
 - [ ] Health check returns `"healthy"`
@@ -114,3 +150,4 @@ Expected response:
 - [ ] Email delivery working (Resend)
 - [ ] Error monitoring configured (Sentry)
 - [ ] Backup schedule confirmed for database
+

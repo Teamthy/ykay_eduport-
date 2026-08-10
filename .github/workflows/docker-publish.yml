@@ -1,0 +1,79 @@
+name: Docker Publish
+
+# Builds and publishes the production image to GitHub Container Registry.
+#
+# The image runs the standalone Next.js build (see Dockerfile) with a non-root
+# user, a healthcheck, and no secrets baked in. Publishing to GHCR means a host
+# (VPS, Render, Fly.io, etc.) can deploy by pulling the tagged image, without a
+# source checkout or a local build.
+#
+# Triggers:
+#   - a tag like v1.2.3  ->  ghcr.io/<owner>/ykay-eduport:1.2.3  and :latest
+#   - push to main      ->  ghcr.io/<owner>/ykay-eduport:main
+#
+# Requires the GITHUB_TOKEN (built in) to have read/write packages permission —
+# enabled by default for the repository's Actions. No extra secrets needed.
+
+on:
+  push:
+    tags: ["v*"]
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  # IMAGE_NAME is derived as lowercase, since GHCR names must be lowercase.
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    name: Build & push image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image tag
+        id: meta
+        run: |
+          # Tag style: "1.2.3" for v1.2.3, else the branch name (squash to safe chars).
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TAG="${GITHUB_REF_NAME#v}"
+          else
+            TAG="${GITHUB_REF_NAME//[^a-zA-Z0-9._-]/-}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "IMAGE=${{ env.IMAGE_NAME }}:$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Image summary
+        run: |
+          echo "Published ${{ env.REGISTRY }}/${{ steps.meta.outputs.IMAGE }}"
+          echo "Pull: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tag }}"
