@@ -9,7 +9,8 @@ import { Screen, AppBar, Row, Column } from "@/src/components/layout";
 import { EmptyState } from "@/src/components/feedback";
 import { useToast } from "@/components/MobileToast";
 import { bodyFont } from "@/src/theme/typography";
-import { CheckCircle2, Clock, UserCheck, ScanLine, Users } from "lucide-react-native";
+import { Camera, ScanLine, Users } from "lucide-react-native";
+import { StaffQrScanner } from "@/components/StaffQrScanner";
 
 export default function StaffAttendanceScreen() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function StaffAttendanceScreen() {
   const { toast } = useToast();
   const [data, setData] = useState<any>(null);
   const [badge, setBadge] = useState("");
+  const [cameraMode, setCameraMode] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,26 +37,36 @@ export default function StaffAttendanceScreen() {
     void load();
   }, []);
 
-  async function record() {
-    const code = badge.trim();
-    if (!code) {
-      toast("Enter or paste a staff badge code.", "error");
-      return;
-    }
+  async function recordCode(code: string) {
+    if (!code.trim()) return;
     setSubmitting(true);
     try {
-      const res: any = await adminApi.recordStaffScan(code);
+      const res: any = await adminApi.recordStaffScan(code.trim());
       toast(
         `${res.staff?.displayName || "Staff"} ${res.event?.eventType === "CHECK_OUT" ? "checked out" : "checked in"}`,
         "success",
       );
       setBadge("");
+      setCameraMode(false);
       void load();
     } catch (err) {
       toast(err instanceof Error ? err.message : "Could not record the scan.", "error");
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function record() {
+    const code = badge.trim();
+    if (!code) {
+      toast("Enter or paste a staff badge code.", "error");
+      return;
+    }
+    await recordCode(code);
+  }
+
+  function handleScan(code: string) {
+    void recordCode(code);
   }
 
   const summary = data?.summary;
@@ -91,54 +103,100 @@ export default function StaffAttendanceScreen() {
         <EmptyState icon={<Users size={44} color={colors.border.strong} />} title={error} />
       ) : !summary ? null : (
         <>
-          {/* ── Manual badge entry ── */}
+          {/* ── Record a scan: camera QR or manual ── */}
           <Card
             variant="bordered"
             padding={spacing.md}
             style={{ marginBottom: spacing.lg, borderColor: colors.brand.green }}
           >
             <Label style={{ marginBottom: spacing.sm }}>Record a scan</Label>
-            <Row gap={spacing.sm}>
-              <TextInput
-                value={badge}
-                onChangeText={setBadge}
-                placeholder="Type staff badge code (e.g. YKST-1234)"
-                placeholderTextColor={colors.text.muted}
-                autoCapitalize="characters"
-                autoCorrect={false}
-                onSubmitEditing={() => void record()}
+
+            {/* Mode toggle */}
+            <View style={{ flexDirection: "row", gap: spacing.sm, marginBottom: spacing.md }}>
+              <TouchableOpacity
+                onPress={() => setCameraMode(true)}
                 style={{
                   flex: 1,
-                  color: colors.text.primary,
-                  backgroundColor: colors.background.primary,
-                  borderRadius: radius.md,
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: 12,
-                  fontSize: 15,
-                  borderWidth: 1,
-                  borderColor: colors.border.default,
-                }}
-              />
-              <TouchableOpacity
-                onPress={() => void record()}
-                disabled={submitting}
-                style={{
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: 14,
-                  borderRadius: radius.md,
-                  backgroundColor: colors.brand.green,
+                  flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "center",
-                  opacity: submitting ? 0.6 : 1,
+                  gap: 6,
+                  paddingVertical: 10,
+                  borderRadius: radius.sm + 2,
+                  backgroundColor: cameraMode ? colors.brand.green : colors.surface.card,
+                  borderWidth: 1,
+                  borderColor: cameraMode ? colors.brand.green : colors.border.subtle,
                 }}
               >
-                <ScanLine size={20} color={colors.brand.white} />
+                <Camera size={16} color={cameraMode ? colors.brand.white : colors.text.secondary} />
+                <Caption style={{ color: cameraMode ? colors.brand.white : colors.text.secondary, fontFamily: bodyFont("bold") }}>Scan QR</Caption>
               </TouchableOpacity>
-            </Row>
-            <Caption style={{ marginTop: spacing.xs }}>
-              QR camera scanning is coming on the app — you can type the badge code on the badge/QR
-              card.
-            </Caption>
+              <TouchableOpacity
+                onPress={() => setCameraMode(false)}
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  paddingVertical: 10,
+                  borderRadius: radius.sm + 2,
+                  backgroundColor: !cameraMode ? colors.brand.green : colors.surface.card,
+                  borderWidth: 1,
+                  borderColor: !cameraMode ? colors.brand.green : colors.border.subtle,
+                }}
+              >
+                <ScanLine size={16} color={!cameraMode ? colors.brand.white : colors.text.secondary} />
+                <Caption style={{ color: !cameraMode ? colors.brand.white : colors.text.secondary, fontFamily: bodyFont("bold") }}>Type code</Caption>
+              </TouchableOpacity>
+            </View>
+
+            {cameraMode ? (
+              <StaffQrScanner onScan={handleScan} onClose={() => setCameraMode(false)} />
+            ) : (
+              <>
+                <Row gap={spacing.sm}>
+                  <TextInput
+                    value={badge}
+                    onChangeText={setBadge}
+                    placeholder="Type staff badge code (e.g. YKST-1234)"
+                    placeholderTextColor={colors.text.muted}
+                    autoCapitalize="characters"
+                    autoCorrect={false}
+                    onSubmitEditing={() => void record()}
+                    style={{
+                      flex: 1,
+                      color: colors.text.primary,
+                      backgroundColor: colors.background.primary,
+                      borderRadius: radius.md,
+                      paddingHorizontal: spacing.md,
+                      paddingVertical: 12,
+                      fontSize: 15,
+                      borderWidth: 1,
+                      borderColor: colors.border.default,
+                    }}
+                  />
+                  <TouchableOpacity
+                    onPress={() => void record()}
+                    disabled={submitting}
+                    style={{
+                      paddingHorizontal: spacing.md,
+                      paddingVertical: 14,
+                      borderRadius: radius.md,
+                      backgroundColor: colors.brand.green,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      opacity: submitting ? 0.6 : 1,
+                    }}
+                  >
+                    <ScanLine size={20} color={colors.brand.white} />
+                  </TouchableOpacity>
+                </Row>
+                <Caption style={{ marginTop: spacing.xs }}>
+                  QR badges are on each staff member's ID card.
+                </Caption>
+              </>
+            )}
           </Card>
 
           {/* ── Summary ── */}

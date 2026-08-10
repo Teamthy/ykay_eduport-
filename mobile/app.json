@@ -52,6 +52,12 @@
       "expo-router",
       "expo-local-authentication",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Ykay College to use the camera to scan staff attendance QR badges."
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
