@@ -259,6 +259,8 @@ export const parentApi = {
   },
   events: () => api("/api/parent/events"),
   messages: () => api("/api/parent/messages"),
+  timetable: (studentId?: string) =>
+    api("/api/parent/timetable" + (studentId ? `?studentId=${encodeURIComponent(studentId)}` : "")),
   pay: (
     invoiceId: string,
     method: "PAYSTACK" | "BANK_TRANSFER",

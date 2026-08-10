@@ -33,6 +33,7 @@ import {
   Mail,
   Newspaper,
   School,
+  CalendarDays,
   ArrowRight,
 } from "lucide-react-native";
 
@@ -294,6 +295,11 @@ export default function ParentDashboard() {
                 label: "School Info",
                 icon: <School size={18} color={colors.brand.greenLight} />,
                 onPress: () => router.push("/school-info"),
+              },
+              {
+                label: "Timetable",
+                icon: <CalendarDays size={18} color={colors.brand.greenLight} />,
+                onPress: () => router.push("/(parent)/timetable"),
               },
               {
                 label: "Messages",
