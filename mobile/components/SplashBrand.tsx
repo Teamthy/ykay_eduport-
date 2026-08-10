@@ -94,24 +94,16 @@ export function SplashBrand({ tagline = "Your school, on the go" }: { tagline?: 
         />
 
         <Animated.View style={{ opacity: fade, transform: [{ translateY: lift }] }}>
+          {/* Clean square mark — no rounded tile, no shadow (per brand note). */}
           <View
             style={{
               width: 88,
               height: 88,
-              borderRadius: 24,
-              backgroundColor: "rgba(255,255,255,0.05)",
-              borderWidth: 1,
-              borderColor: "rgba(255,255,255,0.10)",
               alignItems: "center",
               justifyContent: "center",
-              shadowColor: Colors.brand.green,
-              shadowOpacity: 0.35,
-              shadowRadius: 22,
-              shadowOffset: { width: 0, height: 10 },
-              elevation: 12,
             }}
           >
-            <YkayCrest size={54} />
+            <YkayCrest size={72} />
           </View>
         </Animated.View>
 
