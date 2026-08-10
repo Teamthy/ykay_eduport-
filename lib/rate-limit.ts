@@ -56,6 +56,15 @@ const limiterConfig = {
   // account does not exist yet), so the invite token is the only secret
   // protecting staff-account creation. Throttle guessing.
   staffActivate: { maxRequests: 10, windowMs: 3_600_000, prefix: "ykay:staff:activate" },
+  // Bulk communications — sending results to parents, publishing news or an
+  // announcement, or messaging a family. A teacher is rate-limited per account
+  // so a misbehaving client (or a stuck retry loop) cannot spam every parent's
+  // inbox. Generous limits: they protect against abuse, not legitimate use.
+  sendResults: { maxRequests: 20, windowMs: 3_600_000, prefix: "ykay:teacher:send-results" },
+  announcement: { maxRequests: 30, windowMs: 3_600_000, prefix: "ykay:teacher:announcement" },
+  newsPost: { maxRequests: 30, windowMs: 3_600_000, prefix: "ykay:admin:news" },
+  message: { maxRequests: 60, windowMs: 3_600_000, prefix: "ykay:messages" },
+  broadcast: { maxRequests: 20, windowMs: 3_600_000, prefix: "ykay:super-admin:broadcast" },
 } as const;
 
 const redisLimiters: Record<string, Ratelimit | null> = redis
@@ -109,6 +118,31 @@ const redisLimiters: Record<string, Ratelimit | null> = redis
         redis,
         limiter: Ratelimit.slidingWindow(10, "1 h"),
         prefix: "ykay:staff:activate",
+      }),
+      sendResults: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(20, "1 h"),
+        prefix: "ykay:teacher:send-results",
+      }),
+      announcement: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(30, "1 h"),
+        prefix: "ykay:teacher:announcement",
+      }),
+      newsPost: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(30, "1 h"),
+        prefix: "ykay:admin:news",
+      }),
+      message: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(60, "1 h"),
+        prefix: "ykay:messages",
+      }),
+      broadcast: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(20, "1 h"),
+        prefix: "ykay:super-admin:broadcast",
       }),
     }
   : {};

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { getClientIp } from "@/lib/requests";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,16 @@ const schema = z.object({
 export async function POST(request: NextRequest) {
   const user = await requireRole(["SUPER_ADMIN"]);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Broadcasting hits every active user — a super-admin misclick must not
+  // spam the whole platform. Throttle per super-admin account.
+  const limit = await enforceRateLimit("broadcast", user.id);
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Too many broadcasts. Please wait before broadcasting again." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
+  }
 
   let input: z.infer<typeof schema>;
   try {

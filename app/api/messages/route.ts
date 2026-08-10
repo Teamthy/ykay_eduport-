@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import {
   participantsForStudent,
   postMessage,
@@ -105,6 +106,15 @@ const createSchema = z.object({
 export async function POST(request: NextRequest) {
   const user = await getSession();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Throttle per user — prevents a misbehaving client from spamming parents.
+  const limit = await enforceRateLimit("message", user.id);
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Too many messages. Please wait before sending more." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
+  }
 
   let input: z.infer<typeof createSchema>;
   try {

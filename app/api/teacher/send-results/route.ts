@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getExamTeacherContext } from "@/lib/exams";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,15 @@ const sendSchema = z.object({
 export async function POST(request: NextRequest) {
   const context = await getExamTeacherContext();
   if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Throttle per teacher — a stuck retry loop must not spam every parent's inbox.
+  const limit = await enforceRateLimit("sendResults", context.user.id);
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Too many result broadcasts. Please wait before sending again." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
+  }
 
   let input: z.infer<typeof sendSchema>;
   try {

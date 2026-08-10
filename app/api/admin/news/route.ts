@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import { requireRole } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -55,6 +56,14 @@ const createSchema = z.object({
 export async function POST(request: NextRequest) {
   const user = await requireRole(ADMIN_ROLES);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const limit = await enforceRateLimit("newsPost", user.id);
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Too many news posts. Please wait before posting again." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
+  }
 
   let payload: z.infer<typeof createSchema>;
   try {

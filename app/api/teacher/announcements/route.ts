@@ -4,6 +4,7 @@ import { NotificationKind } from "@prisma/client";
 import { getClientIp } from "@/lib/requests";
 import { prisma } from "@/lib/prisma";
 import { getTeacherContext } from "@/lib/teacher-context";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,15 @@ const postSchema = z.object({
 export async function POST(request: NextRequest) {
   const ctx = await getTeacherContext();
   if (!ctx) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Throttle per teacher so a misbehaving client cannot flood a class's inbox.
+  const limit = await enforceRateLimit("announcement", ctx.user.id);
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Too many announcements. Please wait before posting again." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
+  }
 
   let input: z.infer<typeof postSchema>;
   try {
