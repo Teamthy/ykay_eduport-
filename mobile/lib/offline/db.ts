@@ -125,3 +125,17 @@ export async function queueCount(): Promise<number> {
   const row = await db.getFirstAsync<{ c: number }>("SELECT COUNT(*) AS c FROM queue");
   return row?.c ?? 0;
 }
+
+/**
+ * Clear all locally stored offline data: the response cache, the pending write
+ * queue, and the practice history/streak store. Used by the "Clear offline
+ * data" setting. Does NOT touch authentication tokens or preferences.
+ */
+export async function clearOfflineData(): Promise<void> {
+  const db = await getDb();
+  await db.execAsync(`
+    DELETE FROM cache;
+    DELETE FROM queue;
+    DELETE FROM practice_history;
+  `);
+}

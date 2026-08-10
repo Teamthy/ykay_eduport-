@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { View, ScrollView, Switch, TouchableOpacity, Linking, Platform } from "react-native";
+import { View, ScrollView, Switch, TouchableOpacity, Linking, Platform, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { getPrefs, setPref, type PrefKey } from "@/lib/prefs";
 import { notificationPrefsApi, type NotificationPrefs } from "@/lib/api";
 import { updateInfo } from "@/lib/updates";
 import { biometricAvailable } from "@/lib/biometric";
 import { haptic } from "@/lib/haptics";
+import { clearOfflineData } from "@/lib/offline/db";
 import { useSession } from "@/lib/useSession";
 import { useTheme } from "@/src/theme";
 import { Card } from "@/src/components/cards";
@@ -34,6 +35,7 @@ import {
   ClipboardCheck,
   BarChart3,
   MessageSquare,
+  Trash2,
 } from "lucide-react-native";
 
 const SCHOOL_EMAIL = "info@ykaycollege.com";
@@ -129,6 +131,28 @@ export default function SettingsScreen() {
     }
   }
 
+  function confirmClearData() {
+    Alert.alert(
+      "Clear offline data?",
+      "This removes saved screens, pending offline actions, and your practice history & streak from this device. You will stay signed in.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Clear",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await clearOfflineData();
+              haptic("success");
+            } catch {
+              haptic("error");
+            }
+          },
+        },
+      ],
+    );
+  }
+
   /**
    * Notification categories differ by portal — a teacher has no fee balance,
    * and a student cannot act on an admissions alert. Showing every category to
@@ -149,8 +173,7 @@ export default function SettingsScreen() {
       key: "notifyAttendance",
       icon: <CalendarCheck size={18} color={colors.brand.greenLight} />,
       title: "Attendance",
-      subtitle:
-        portal === "teacher" ? "Register reminders" : "Daily attendance updates",
+      subtitle: portal === "teacher" ? "Register reminders" : "Daily attendance updates",
     });
   }
   if (portal === "parent" || portal === "admin") {
@@ -222,7 +245,11 @@ export default function SettingsScreen() {
       >
         <Avatar name={user?.name} size="lg" />
         <View style={{ flex: 1 }}>
-          <Body tone="primary" style={{ fontFamily: "DM Sans Bold", fontSize: 16 }} numberOfLines={1}>
+          <Body
+            tone="primary"
+            style={{ fontFamily: "DM Sans Bold", fontSize: 16 }}
+            numberOfLines={1}
+          >
             {user?.name || "—"}
           </Body>
           <Caption numberOfLines={1}>{user?.email || ""}</Caption>
@@ -365,6 +392,17 @@ export default function SettingsScreen() {
             />
           </>
         ) : null}
+      </Card>
+
+      {/* ── Data & storage ── */}
+      <Label style={{ marginBottom: spacing.sm }}>Data &amp; storage</Label>
+      <Card variant="default" padding={0} style={{ marginBottom: spacing.xl }}>
+        <SettingLink
+          icon={<Trash2 size={18} color={colors.danger} />}
+          title="Clear offline data"
+          subtitle="Cached screens, pending actions & practice history"
+          onPress={confirmClearData}
+        />
       </Card>
 
       {/* ── Support ── */}
