@@ -224,7 +224,7 @@ export default function ITCourseTrackPage({ course }: { course: ITCourseContent 
               </p>
               <Link
                 href="/it-portal/auth"
-                className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-brand-green-dark"
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy hover:bg-brand-green-dark"
               >
                 Enrol via IT portal <ArrowRight size={14} />
               </Link>

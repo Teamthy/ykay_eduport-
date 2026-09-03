@@ -95,7 +95,7 @@ export default function AdmissionsBanner() {
               >
                 <a
                   href="/admissions"
-                  className="inline-flex items-center gap-3 rounded-full bg-brand-orange px-8 py-4 font-body text-sm font-bold uppercase tracking-[0.15em] text-white shadow-lg shadow-black/30 transition-all duration-300 hover:scale-[1.04] hover:bg-brand-orange-dark active:scale-[0.97]"
+                  className="inline-flex items-center gap-3 rounded-full bg-brand-orange px-8 py-4 font-body text-sm font-bold uppercase tracking-[0.15em] text-brand-navy shadow-lg shadow-black/30 transition-all duration-300 hover:scale-[1.04] hover:bg-brand-orange-dark active:scale-[0.97]"
                 >
                   Apply Now <ArrowRight size={18} />
                 </a>

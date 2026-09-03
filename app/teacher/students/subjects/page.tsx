@@ -241,7 +241,7 @@ function Inner() {
                       <button
                         onClick={() => void save()}
                         disabled={saving}
-                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3.5 font-bold text-white disabled:opacity-60"
+                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3.5 font-bold text-brand-navy disabled:opacity-60"
                       >
                         {saving ? (
                           <LoaderCircle size={16} className="animate-spin" />

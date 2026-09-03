@@ -358,7 +358,7 @@ export default function ItPortalDashboard() {
                 </p>
                 <Link
                   href="/it-education"
-                  className="mt-4 inline-block rounded-full bg-brand-green px-6 py-2.5 text-sm font-bold text-white hover:bg-brand-green-dark"
+                  className="mt-4 inline-block rounded-full bg-brand-green px-6 py-2.5 text-sm font-bold text-brand-navy hover:bg-brand-green-dark"
                 >
                   Browse Courses
                 </Link>
@@ -448,7 +448,7 @@ function CourseCard({ course, view }: { course: Course; view: "grid" | "list" })
           />
           {isComplete && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-              <div className="flex items-center gap-1.5 rounded-full bg-brand-green px-3 py-1.5 text-xs font-bold text-white">
+              <div className="flex items-center gap-1.5 rounded-full bg-brand-green px-3 py-1.5 text-xs font-bold text-brand-navy">
                 <Trophy size={14} /> Completed
               </div>
             </div>
@@ -501,15 +501,15 @@ function CourseCard({ course, view }: { course: Course; view: "grid" | "list" })
                 <Award size={14} /> View Certificate
               </span>
             ) : course.enrolled && course.progressPercent > 0 ? (
-              <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-green py-2.5 text-xs font-bold text-white group-hover:bg-brand-green-dark">
+              <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-green py-2.5 text-xs font-bold text-brand-navy group-hover:bg-brand-green-dark">
                 <PlayCircle size={14} /> Continue Learning
               </span>
             ) : course.enrolled ? (
-              <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-green py-2.5 text-xs font-bold text-white group-hover:bg-brand-green-dark">
+              <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-green py-2.5 text-xs font-bold text-brand-navy group-hover:bg-brand-green-dark">
                 <PlayCircle size={14} /> Start Course
               </span>
             ) : (
-              <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-brand-green bg-transparent py-2.5 text-xs font-bold text-brand-green group-hover:bg-brand-green group-hover:text-white">
+              <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-brand-green bg-transparent py-2.5 text-xs font-bold text-brand-green group-hover:bg-brand-green group-hover:text-brand-navy">
                 Enroll Now — Free
               </span>
             )}

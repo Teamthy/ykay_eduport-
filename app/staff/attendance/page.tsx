@@ -174,7 +174,7 @@ export default function StaffSelfAttendancePage() {
                 <button
                   disabled={busy || data.today?.status === "IN"}
                   onClick={() => void act("CHECK_IN")}
-                  className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-40"
+                  className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-40"
                 >
                   {busy ? <LoaderCircle className="animate-spin" size={16} /> : <LogIn size={16} />}
                   Check in

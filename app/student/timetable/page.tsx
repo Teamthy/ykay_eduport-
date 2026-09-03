@@ -102,7 +102,7 @@ export default function StudentTimetablePage() {
                 >
                   <h3 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
                     {group.day === today.toUpperCase() && (
-                      <span className="rounded-full bg-brand-green px-2 py-0.5 text-[9px] text-white">
+                      <span className="rounded-full bg-brand-green px-2 py-0.5 text-[9px] text-brand-navy">
                         TODAY
                       </span>
                     )}

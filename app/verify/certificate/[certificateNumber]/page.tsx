@@ -59,7 +59,7 @@ export default async function VerifyCertificatePage({
           <div className="mx-auto max-w-2xl">
             {verified && certificate ? (
               <div className="rounded-[2rem] border border-brand-green/30 bg-[var(--surface-card)] p-10 text-center shadow-[var(--card-shadow)]">
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand-green text-white">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand-green text-brand-navy">
                   <BadgeCheck size={40} />
                 </div>
                 <h2 className="font-display text-3xl text-brand-green">AUTHENTIC CERTIFICATE</h2>

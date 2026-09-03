@@ -162,7 +162,7 @@ export default function ReceiptModal({ open, data, onClose }: Props) {
                 {/* Download PDF */}
                 <button
                   onClick={handleDownload}
-                  className="flex flex-col items-center gap-1 py-3 rounded-xl bg-brand-green text-white font-medium text-xs hover:bg-brand-green-dark transition-all"
+                  className="flex flex-col items-center gap-1 py-3 rounded-xl bg-brand-green text-brand-navy font-medium text-xs hover:bg-brand-green-dark transition-all"
                 >
                   <Download size={18} />
                   Download

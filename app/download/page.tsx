@@ -69,7 +69,7 @@ export default async function DownloadPage({
             <>
               <a
                 href={apkDownloadPath()}
-                className="mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3.5 font-bold text-white transition-opacity hover:opacity-90"
+                className="mt-7 flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3.5 font-bold text-brand-navy transition-opacity hover:opacity-90"
               >
                 <Download size={17} /> Download for Android
                 {SIZE ? <span className="font-normal opacity-80">({SIZE})</span> : null}

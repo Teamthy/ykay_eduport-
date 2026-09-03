@@ -101,7 +101,7 @@ export default function AcademicsPage() {
           <div className="mt-10 flex flex-wrap gap-3">
             <Link
               href="/it-education"
-              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy"
             >
               Explore IT programmes <ArrowRight size={14} />
             </Link>

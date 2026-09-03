@@ -243,7 +243,7 @@ export default function ClassRosterPage() {
                             <a
                               href={`tel:${s.parentContact.replace(/\s+/g, "")}`}
                               title={`Call ${s.guardianName || "parent"} on ${s.parentContact}`}
-                              className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-green/10 text-brand-green text-[10px] font-bold hover:bg-brand-green hover:text-white transition-all"
+                              className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-green/10 text-brand-green text-[10px] font-bold hover:bg-brand-green hover:text-brand-navy transition-all"
                             >
                               <Phone size={10} /> Call Parent
                             </a>
@@ -260,7 +260,7 @@ export default function ClassRosterPage() {
                               onClick. */}
                           <Link
                             href={`/teacher/messages/compose?studentProfileId=${encodeURIComponent(s.id)}`}
-                            className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-orange/10 text-brand-orange text-[10px] font-bold hover:bg-brand-orange hover:text-white transition-all"
+                            className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-brand-orange/10 text-brand-orange text-[10px] font-bold hover:bg-brand-orange hover:text-brand-navy transition-all"
                           >
                             <MessageSquare size={10} /> Message
                           </Link>

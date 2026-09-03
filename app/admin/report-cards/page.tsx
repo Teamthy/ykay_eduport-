@@ -173,7 +173,7 @@ export default function AdminReportCardsPage() {
                     <button
                       onClick={() => void releaseAll()}
                       disabled={saving || !data.summary.draftReports}
-                      className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
                     >
                       <CheckCircle2 size={15} /> Release all drafts ({data.summary.draftReports})
                     </button>
@@ -272,7 +272,7 @@ export default function AdminReportCardsPage() {
                               <td className="px-4 py-4 flex gap-2">
                                 <button
                                   onClick={() => setSelectedReportId(report.id)}
-                                  className="inline-flex items-center gap-1 rounded-full bg-brand-green/10 px-3 py-1.5 text-[10px] font-bold text-brand-green hover:bg-brand-green hover:text-white"
+                                  className="inline-flex items-center gap-1 rounded-full bg-brand-green/10 px-3 py-1.5 text-[10px] font-bold text-brand-green hover:bg-brand-green hover:text-brand-navy"
                                 >
                                   View
                                 </button>
@@ -283,7 +283,7 @@ export default function AdminReportCardsPage() {
                                     )
                                   }
                                   disabled={saving}
-                                  className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-disabled)] px-3 py-1.5 text-[10px] font-bold text-[var(--text-secondary)] hover:bg-brand-green hover:text-white disabled:opacity-50"
+                                  className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-disabled)] px-3 py-1.5 text-[10px] font-bold text-[var(--text-secondary)] hover:bg-brand-green hover:text-brand-navy disabled:opacity-50"
                                 >
                                   {report.status === "RELEASED" ? "Set Draft" : "Release"}
                                 </button>

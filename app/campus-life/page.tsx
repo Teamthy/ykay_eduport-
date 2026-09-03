@@ -105,7 +105,7 @@ export default function CampusLifePage() {
                   </p>
                   <a
                     href="/contact"
-                    className="inline-flex items-center gap-2 font-body text-xs font-bold tracking-[0.15em] uppercase text-white bg-brand-orange px-6 py-3 rounded-full hover:bg-brand-orange-dark transition-all duration-300 hover:scale-[1.03] shadow-lg shadow-black/30"
+                    className="inline-flex items-center gap-2 font-body text-xs font-bold tracking-[0.15em] uppercase text-brand-navy bg-brand-orange px-6 py-3 rounded-full hover:bg-brand-orange-dark transition-all duration-300 hover:scale-[1.03] shadow-lg shadow-black/30"
                   >
                     Plan a Visit
                   </a>

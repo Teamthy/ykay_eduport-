@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/alumni",
     "/careers",
     "/privacy-policy",
+    "/virtual",
   ];
   return pages.map((p) => ({
     url: `${base}${p}`,

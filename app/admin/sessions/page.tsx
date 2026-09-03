@@ -212,7 +212,7 @@ export default function SessionsPage() {
                             ? "Final term — use end-of-session promotion to roll over"
                             : undefined
                         }
-                        className="rounded-xl bg-brand-green px-4 py-2.5 text-xs font-bold text-white hover:bg-brand-green-dark disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="rounded-xl bg-brand-green px-4 py-2.5 text-xs font-bold text-brand-navy hover:bg-brand-green-dark disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         Advance term <ArrowRight size={13} className="inline ml-1" />
                       </button>
@@ -437,7 +437,7 @@ export default function SessionsPage() {
               <button
                 onClick={create}
                 disabled={busy}
-                className="w-full py-3 rounded-full bg-brand-green text-white font-bold text-sm hover:bg-brand-green-dark transition-all disabled:opacity-60"
+                className="w-full py-3 rounded-full bg-brand-green text-brand-navy font-bold text-sm hover:bg-brand-green-dark transition-all disabled:opacity-60"
               >
                 {busy ? "Creating…" : "Create Session"}
               </button>

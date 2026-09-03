@@ -491,7 +491,7 @@ export default function ClassAttendancePage() {
                     <button
                       onClick={markAllPresent}
                       disabled={isLocked || Boolean(savingMode)}
-                      className="inline-flex items-center gap-2 rounded-xl bg-brand-green/10 px-4 py-2.5 text-sm font-bold text-brand-green transition-all hover:bg-brand-green hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-xl bg-brand-green/10 px-4 py-2.5 text-sm font-bold text-brand-green transition-all hover:bg-brand-green hover:text-brand-navy disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <Check size={14} /> Mark all present
                     </button>
@@ -619,7 +619,7 @@ export default function ClassAttendancePage() {
                       <button
                         onClick={() => void saveRegister(true)}
                         disabled={isLocked || Boolean(savingMode) || !rows.length}
-                        className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3 text-sm font-bold uppercase tracking-widest text-white shadow-lg transition-all hover:bg-brand-green-dark disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3 text-sm font-bold uppercase tracking-widest text-brand-navy shadow-lg transition-all hover:bg-brand-green-dark disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {savingMode === "submit" ? (
                           <LoaderCircle className="animate-spin" size={16} />
@@ -683,7 +683,7 @@ export default function ClassAttendancePage() {
                                 disabled={
                                   requestingCorrection || correctionReason.trim().length < 10
                                 }
-                                className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-5 py-3 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-brand-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
+                                className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-5 py-3 text-sm font-bold uppercase tracking-widest text-brand-navy transition-all hover:bg-brand-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 {requestingCorrection ? (
                                   <LoaderCircle className="animate-spin" size={16} />

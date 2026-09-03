@@ -167,13 +167,13 @@ export default function ClassReportCardsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleAddRemark(s)}
-                          className="p-2 rounded-lg bg-brand-orange/10 text-brand-orange hover:bg-brand-orange hover:text-white transition-all"
+                          className="p-2 rounded-lg bg-brand-orange/10 text-brand-orange hover:bg-brand-orange hover:text-brand-navy transition-all"
                           title="Add Remark"
                         >
                           <Edit3 size={14} />
                         </button>
                         <button
-                          className="p-2 rounded-lg bg-brand-green/10 text-brand-green hover:bg-brand-green hover:text-white transition-all"
+                          className="p-2 rounded-lg bg-brand-green/10 text-brand-green hover:bg-brand-green hover:text-brand-navy transition-all"
                           title="Preview"
                         >
                           <Eye size={14} />
@@ -198,7 +198,7 @@ export default function ClassReportCardsPage() {
                     Send all approved reports to admin for final release.
                   </p>
                 </div>
-                <button className="px-6 py-3 rounded-full bg-white text-brand-orange font-bold text-sm hover:opacity-90 transition-all">
+                <button className="px-6 py-3 rounded-full bg-white text-[#c2410c] font-bold text-sm hover:opacity-90 transition-all">
                   Submit to Admin
                 </button>
               </div>
@@ -257,7 +257,7 @@ export default function ClassReportCardsPage() {
             <button
               onClick={() => void saveRemark()}
               disabled={savingRemark}
-              className="w-full py-3 rounded-full bg-brand-orange text-white font-bold text-sm hover:bg-brand-orange-dark transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-full bg-brand-orange text-brand-navy font-bold text-sm hover:bg-brand-orange-dark transition-all flex items-center justify-center gap-2"
             >
               <Save size={14} /> Save Remark
             </button>

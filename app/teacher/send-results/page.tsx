@@ -329,7 +329,7 @@ export default function SendResultsPage() {
                     <button
                       onClick={() => setStep(2)}
                       disabled={!subject || !className || !assessment}
-                      className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-brand-green text-white font-bold text-sm uppercase tracking-widest hover:bg-brand-green-dark transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-brand-green text-brand-navy font-bold text-sm uppercase tracking-widest hover:bg-brand-green-dark transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Next: Select Recipients <ChevronRight size={14} />
                     </button>
@@ -354,7 +354,7 @@ export default function SendResultsPage() {
                     </div>
                     <button
                       onClick={selectAll}
-                      className="text-xs px-4 py-2 rounded-full bg-brand-green/10 text-brand-green font-bold hover:bg-brand-green hover:text-white transition-all"
+                      className="text-xs px-4 py-2 rounded-full bg-brand-green/10 text-brand-green font-bold hover:bg-brand-green hover:text-brand-navy transition-all"
                     >
                       {filtered.every((r) => r.selected) ? "Deselect All" : "Select All"}
                     </button>
@@ -438,7 +438,7 @@ export default function SendResultsPage() {
                     <button
                       onClick={() => setStep(3)}
                       disabled={selectedRecipients.length === 0}
-                      className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-brand-green text-white font-bold text-sm uppercase tracking-widest hover:bg-brand-green-dark transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-brand-green text-brand-navy font-bold text-sm uppercase tracking-widest hover:bg-brand-green-dark transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Next: Compose Message <ChevronRight size={14} />
                     </button>
@@ -544,7 +544,7 @@ export default function SendResultsPage() {
                           <button
                             key={v}
                             onClick={() => setCustomMessage(customMessage + " " + v)}
-                            className="text-[10px] px-2 py-0.5 rounded bg-brand-green/10 text-brand-green font-mono hover:bg-brand-green hover:text-white transition-all"
+                            className="text-[10px] px-2 py-0.5 rounded bg-brand-green/10 text-brand-green font-mono hover:bg-brand-green hover:text-brand-navy transition-all"
                           >
                             {v}
                           </button>
@@ -580,7 +580,7 @@ export default function SendResultsPage() {
                     <button
                       onClick={handleSend}
                       disabled={channels.length === 0}
-                      className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-brand-orange text-white font-bold text-sm uppercase tracking-widest hover:bg-brand-orange-dark transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-brand-orange text-brand-navy font-bold text-sm uppercase tracking-widest hover:bg-brand-orange-dark transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Send to {selectedRecipients.length} Parents <Send size={14} />
                     </button>
@@ -702,7 +702,7 @@ export default function SendResultsPage() {
                             setRecipients(INITIAL_RECIPIENTS);
                             setSentCount(0);
                           }}
-                          className="px-6 py-3 rounded-full bg-brand-green text-white font-bold text-sm hover:bg-brand-green-dark transition-all"
+                          className="px-6 py-3 rounded-full bg-brand-green text-brand-navy font-bold text-sm hover:bg-brand-green-dark transition-all"
                         >
                           Send Another
                         </button>

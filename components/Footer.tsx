@@ -16,6 +16,7 @@ const linkGroups = {
     { label: "Testimonials", href: "/testimonials" },
     { label: "News & Events", href: "/news-events" },
     { label: "Gallery", href: "/gallery" },
+    { label: "Ykay Virtual", href: "/virtual" },
   ],
   "Get Started": [
     { label: "Admissions", href: "/admissions" },

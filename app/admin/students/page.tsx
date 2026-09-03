@@ -145,7 +145,7 @@ export default function StudentsPage() {
 
             <button
               onClick={() => setOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy"
             >
               <UserPlus size={15} /> Enrol student
             </button>
@@ -276,7 +276,7 @@ export default function StudentsPage() {
               A new parent account receives a one-time temporary password. Existing parent accounts
               are linked without exposing or changing their password.
             </p>
-            <button className="mt-6 w-full rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white">
+            <button className="mt-6 w-full rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-brand-navy">
               Create student record
             </button>
           </form>

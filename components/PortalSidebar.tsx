@@ -72,7 +72,7 @@ export default function PortalSidebar({ portalName, portalType, items }: PortalS
                 <item.icon size={16} />
                 <span className="flex-1 tracking-wide">{item.label}</span>
                 {item.badge && (
-                  <span className="rounded-full bg-brand-orange px-2 py-0.5 text-[9px] font-bold text-white">
+                  <span className="rounded-full bg-brand-orange px-2 py-0.5 text-[9px] font-bold text-brand-navy">
                     {item.badge}
                   </span>
                 )}

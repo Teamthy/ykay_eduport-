@@ -183,7 +183,7 @@ function ComposeInner() {
                   <button
                     onClick={() => void send()}
                     disabled={sending || !subject.trim() || !body.trim()}
-                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3.5 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3.5 font-bold text-brand-navy disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {sending ? (
                       <LoaderCircle size={16} className="animate-spin" />

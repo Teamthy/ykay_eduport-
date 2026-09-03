@@ -226,14 +226,14 @@ export default function StudentExamsPage() {
                         {exam.canResume ? (
                           <Link
                             href={`/student/exams/${exam.id}`}
-                            className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-orange-dark"
+                            className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-orange-dark"
                           >
                             <RotateCcw size={13} /> Resume Exam
                           </Link>
                         ) : exam.canStart ? (
                           <Link
                             href={`/student/exams/${exam.id}`}
-                            className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark"
+                            className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark"
                           >
                             <PlayCircle size={13} /> Start Exam
                           </Link>

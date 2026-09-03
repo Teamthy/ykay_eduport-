@@ -49,7 +49,7 @@ export default async function VerifyReportPage({
           <div className="mx-auto max-w-2xl">
             {report ? (
               <div className="rounded-[2rem] border border-brand-green/30 bg-[var(--surface-card)] p-10 text-center shadow-[var(--card-shadow)]">
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand-green text-white">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand-green text-brand-navy">
                   <BadgeCheck size={40} />
                 </div>
                 <h2 className="font-display text-3xl text-brand-green">AUTHENTIC DOCUMENT</h2>
@@ -100,7 +100,7 @@ export default async function VerifyReportPage({
                 </p>
                 <Link
                   href="/contact"
-                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-brand-orange-dark"
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy hover:bg-brand-orange-dark"
                 >
                   Contact the School
                 </Link>

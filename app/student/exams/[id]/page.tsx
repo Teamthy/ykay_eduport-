@@ -368,7 +368,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
           <p className="mt-3 text-sm text-white/60">{error || "Something went wrong."}</p>
           <button
             onClick={() => router.replace("/student/exams")}
-            className="mt-6 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white"
+            className="mt-6 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy"
           >
             Back to My Exams
           </button>
@@ -394,7 +394,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
             {/* A failed save must be visible while the student still has time
                 to do something about it — not discovered at submission. */}
             {saveState === "FAILED" ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-brand-orange px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
+              <span className="inline-flex items-center gap-1 rounded-full bg-brand-orange px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-navy">
                 <AlertTriangle size={11} /> Save failed — retrying
               </span>
             ) : saveState === "SAVING" ? (
@@ -512,7 +512,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
               <button
                 onClick={() => setConfirmSubmit(true)}
                 disabled={submitting}
-                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
               >
                 {submitting ? (
                   <LoaderCircle size={14} className="animate-spin" />
@@ -524,7 +524,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
             ) : (
               <button
                 onClick={() => setIndex(Math.min(data.questions.length - 1, index + 1))}
-                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark"
               >
                 Next <ChevronRight size={14} />
               </button>
@@ -581,7 +581,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
           <button
             onClick={() => setConfirmSubmit(true)}
             disabled={submitting}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
           >
             <CheckCircle2 size={13} /> Finish & Submit
           </button>

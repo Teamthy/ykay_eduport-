@@ -323,7 +323,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
                   <button
                     onClick={() => void markComplete()}
                     disabled={completing}
-                    className="flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand-green/20 transition hover:bg-brand-green/90 disabled:opacity-50"
+                    className="flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-sm font-bold text-brand-navy shadow-lg shadow-brand-green/20 transition hover:bg-brand-green/90 disabled:opacity-50"
                   >
                     {completing ? (
                       <LoaderCircle className="animate-spin" size={16} />

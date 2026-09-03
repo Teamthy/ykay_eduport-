@@ -172,11 +172,11 @@ export default function PerformancePage() {
               <div className="flex flex-wrap items-center gap-3">
                 <Link
                   href="/teacher/performance/add"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green text-white text-sm font-bold hover:bg-brand-green-dark transition-all shadow-lg"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green text-brand-navy text-sm font-bold hover:bg-brand-green-dark transition-all shadow-lg"
                 >
                   <Plus size={14} /> Add Performance
                 </Link>
-                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--surface-disabled)] text-[var(--text-primary)] text-sm font-bold hover:bg-brand-green hover:text-white transition-all">
+                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--surface-disabled)] text-[var(--text-primary)] text-sm font-bold hover:bg-brand-green hover:text-brand-navy transition-all">
                   <Download size={14} /> Export Excel
                 </button>
                 <select className="ml-auto px-4 py-2.5 rounded-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] text-sm focus:outline-none focus:border-brand-green">
@@ -235,7 +235,7 @@ export default function PerformancePage() {
                                   {sa.subject}
                                 </span>
                               </div>
-                              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-brand-green text-white font-bold uppercase tracking-widest">
+                              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-brand-green text-brand-navy font-bold uppercase tracking-widest">
                                 <Users size={9} className="inline mr-1" /> {scores.length} students
                               </span>
                             </div>
@@ -325,7 +325,7 @@ export default function PerformancePage() {
                                         {s.comment || "-"}
                                       </td>
                                       <td className="px-3 py-3">
-                                        <button className="p-1.5 rounded-lg bg-brand-green/10 text-brand-green hover:bg-brand-green hover:text-white transition-all">
+                                        <button className="p-1.5 rounded-lg bg-brand-green/10 text-brand-green hover:bg-brand-green hover:text-brand-navy transition-all">
                                           <Edit3 size={12} />
                                         </button>
                                       </td>

@@ -69,7 +69,7 @@ export default function ITFlagshipSection() {
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
                 href="/it-education"
-                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark"
               >
                 Explore programmes <ArrowRight size={14} />
               </Link>

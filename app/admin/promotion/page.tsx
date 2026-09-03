@@ -203,7 +203,7 @@ export default function PromotionPage() {
                   </p>
                   <a
                     href="/admin/sessions"
-                    className="inline-block mt-5 rounded-xl bg-brand-green px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-green-dark"
+                    className="inline-block mt-5 rounded-xl bg-brand-green px-5 py-2.5 text-xs font-bold text-brand-navy hover:bg-brand-green-dark"
                   >
                     Go to Sessions
                   </a>
@@ -366,7 +366,7 @@ export default function PromotionPage() {
                     <button
                       onClick={() => setConfirming(true)}
                       disabled={!canCommit}
-                      className="w-full rounded-2xl bg-brand-orange py-4 text-sm font-bold text-white shadow-lg hover:bg-brand-orange-dark disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-full rounded-2xl bg-brand-orange py-4 text-sm font-bold text-brand-navy shadow-lg hover:bg-brand-orange-dark disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {!toSessionId
                         ? "Choose a target session"

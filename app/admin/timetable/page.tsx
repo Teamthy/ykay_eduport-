@@ -237,7 +237,7 @@ export default function AdminTimetablePage() {
                 <button
                   onClick={() => void addSlot()}
                   disabled={busy || !classId}
-                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
                 >
                   <Plus size={14} /> {busy ? "Adding…" : "Add slot"}
                 </button>

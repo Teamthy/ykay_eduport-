@@ -216,7 +216,7 @@ export default function AdminNotificationsPage() {
                 <button
                   onClick={() => void dispatchNow()}
                   disabled={dispatching}
-                  className="flex flex-col items-center justify-center gap-2 rounded-[2rem] bg-brand-green p-5 text-white shadow-[var(--btn-primary-shadow)] transition-all hover:bg-brand-green-dark disabled:opacity-50"
+                  className="flex flex-col items-center justify-center gap-2 rounded-[2rem] bg-brand-green p-5 text-brand-navy shadow-[var(--btn-primary-shadow)] transition-all hover:bg-brand-green-dark disabled:opacity-50"
                 >
                   {dispatching ? (
                     <LoaderCircle size={22} className="animate-spin" />
@@ -317,7 +317,7 @@ export default function AdminNotificationsPage() {
                               <button
                                 onClick={() => void act(job, "RETRY")}
                                 disabled={busy}
-                                className="inline-flex items-center gap-1.5 rounded-full bg-brand-green/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-green transition-all hover:bg-brand-green hover:text-white disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 rounded-full bg-brand-green/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-green transition-all hover:bg-brand-green hover:text-brand-navy disabled:opacity-50"
                               >
                                 <RefreshCcw size={12} /> Retry
                               </button>

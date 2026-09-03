@@ -131,7 +131,7 @@ export default function AdminNewsPage() {
 
               <button
                 onClick={() => setShowForm(!showForm)}
-                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg"
               >
                 <PlusCircle size={15} /> {showForm ? "Hide Editor" : "New Post"}
               </button>
@@ -183,7 +183,7 @@ export default function AdminNewsPage() {
                     <button
                       onClick={() => void createPost(true)}
                       disabled={busy}
-                      className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg disabled:opacity-50"
                     >
                       {busy ? (
                         <LoaderCircle size={14} className="animate-spin" />
@@ -246,7 +246,7 @@ export default function AdminNewsPage() {
                             <button
                               onClick={() => void act(post, "UNPUBLISH")}
                               disabled={busy}
-                              className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                              className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
                             >
                               <EyeOff size={12} /> Unpublish
                             </button>
@@ -254,7 +254,7 @@ export default function AdminNewsPage() {
                             <button
                               onClick={() => void act(post, "PUBLISH")}
                               disabled={busy}
-                              className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                              className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
                             >
                               <Eye size={12} /> Publish
                             </button>

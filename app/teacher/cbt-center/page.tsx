@@ -267,7 +267,7 @@ export default function TeacherCbtCenterPage() {
                 <>
                   <button
                     onClick={() => setShowCreate(!showCreate)}
-                    className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg transition-all hover:bg-brand-green-dark"
+                    className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg transition-all hover:bg-brand-green-dark"
                   >
                     <PlusCircle size={15} /> {showCreate ? "Hide Form" : "Create New Exam"}
                   </button>
@@ -375,7 +375,7 @@ export default function TeacherCbtCenterPage() {
                       <button
                         onClick={() => void createExam()}
                         disabled={busy}
-                        className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
                       >
                         {busy ? (
                           <LoaderCircle size={14} className="animate-spin" />
@@ -438,7 +438,7 @@ export default function TeacherCbtCenterPage() {
                               <button
                                 onClick={() => void act(exam, "PUBLISH")}
                                 disabled={busy}
-                                className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-brand-green-dark disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-navy hover:bg-brand-green-dark disabled:opacity-50"
                               >
                                 <Send size={12} /> Publish
                               </button>
@@ -460,7 +460,7 @@ export default function TeacherCbtCenterPage() {
                                 )
                               }
                               disabled={busy}
-                              className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-orange hover:bg-brand-orange hover:text-white disabled:opacity-50"
+                              className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-orange hover:bg-brand-orange hover:text-brand-navy disabled:opacity-50"
                             >
                               <CheckCircle2 size={12} />{" "}
                               {exam.resultsReleased ? "Hide Results" : "Release Results"}
@@ -468,7 +468,7 @@ export default function TeacherCbtCenterPage() {
                             <button
                               onClick={() => void openResults(exam.id)}
                               disabled={resultsLoading}
-                              className="inline-flex items-center gap-1.5 rounded-full bg-brand-green/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-green hover:bg-brand-green hover:text-white disabled:opacity-50"
+                              className="inline-flex items-center gap-1.5 rounded-full bg-brand-green/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-green hover:bg-brand-green hover:text-brand-navy disabled:opacity-50"
                             >
                               <Eye size={12} /> Results
                             </button>
@@ -531,7 +531,7 @@ export default function TeacherCbtCenterPage() {
                                     })
                                   }
                                   disabled={busy}
-                                  className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-disabled)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-brand-orange hover:text-white disabled:opacity-50"
+                                  className="inline-flex items-center gap-1 rounded-full bg-[var(--surface-disabled)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] hover:bg-brand-orange hover:text-brand-navy disabled:opacity-50"
                                 >
                                   <RotateCcw size={11} /> Retake
                                 </button>
@@ -574,7 +574,7 @@ export default function TeacherCbtCenterPage() {
                                           );
                                         }}
                                         disabled={busy}
-                                        className="rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white hover:bg-brand-green-dark disabled:opacity-50"
+                                        className="rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-navy hover:bg-brand-green-dark disabled:opacity-50"
                                       >
                                         Save Score
                                       </button>

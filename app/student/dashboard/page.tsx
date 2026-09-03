@@ -226,7 +226,7 @@ export default function StudentDashboardPage() {
                     >
                       <div className="flex flex-wrap items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-green text-white">
+                          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-green text-brand-navy">
                             <Award size={26} />
                           </div>
                           <div>
@@ -349,7 +349,7 @@ export default function StudentDashboardPage() {
                     className="group flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-brand-orange/25 bg-gradient-to-br from-brand-navy to-brand-navy-light p-6 transition-all hover:border-brand-orange"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-orange text-white">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-orange text-brand-navy">
                         <MonitorSmartphone size={26} />
                       </div>
                       <div>
@@ -364,7 +364,7 @@ export default function StudentDashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-orange px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white group-hover:gap-2 transition-all">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-orange px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-brand-navy group-hover:gap-2 transition-all">
                       Start Learning <ChevronRight size={14} />
                     </span>
                   </Link>

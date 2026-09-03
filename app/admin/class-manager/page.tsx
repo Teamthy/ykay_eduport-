@@ -206,7 +206,7 @@ export default function AdminClassManagerPage() {
                   <button
                     onClick={() => void createClass()}
                     disabled={creating || !newLevel.trim() || !newArm.trim()}
-                    className="rounded-full bg-brand-green px-6 py-3 text-sm font-bold text-white disabled:opacity-60"
+                    className="rounded-full bg-brand-green px-6 py-3 text-sm font-bold text-brand-navy disabled:opacity-60"
                   >
                     {creating
                       ? "Creating…"
@@ -250,7 +250,7 @@ export default function AdminClassManagerPage() {
                         if (archived === null) void loadArchived();
                         else setArchived(null);
                       }}
-                      className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow"
+                      className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy shadow"
                     >
                       <Archive size={13} />{" "}
                       {archived === null
@@ -289,7 +289,7 @@ export default function AdminClassManagerPage() {
                                   )
                                 }
                                 disabled={busy}
-                                className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
                               >
                                 <ArchiveRestore size={12} /> Restore
                               </button>
@@ -388,7 +388,7 @@ export default function AdminClassManagerPage() {
                                       });
                                     }}
                                     disabled={busy}
-                                    className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
                                   >
                                     <GraduationCap size={13} /> Update Teacher
                                   </button>
@@ -448,7 +448,7 @@ export default function AdminClassManagerPage() {
                                           });
                                         }}
                                         disabled={busy}
-                                        className="inline-flex items-center gap-1 rounded-full bg-brand-green px-3.5 py-2 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                                        className="inline-flex items-center gap-1 rounded-full bg-brand-green px-3.5 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
                                       >
                                         <MoveRight size={11} /> Move
                                       </button>

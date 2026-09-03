@@ -127,7 +127,7 @@ export default function FeeTransfersPage() {
                           <button
                             disabled={busyId === t.id}
                             onClick={() => void act(t.id, "APPROVE_TRANSFER")}
-                            className="inline-flex items-center gap-1 rounded-full bg-brand-green px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                            className="inline-flex items-center gap-1 rounded-full bg-brand-green px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
                           >
                             {busyId === t.id ? (
                               <LoaderCircle className="animate-spin" size={12} />

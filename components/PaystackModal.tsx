@@ -56,18 +56,18 @@ export default function PaystackModal({
             className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative bg-[#0ea5e9] p-6 text-white">
+            <div className="relative bg-[#0ea5e9] p-6 text-brand-navy">
               {!busy && !leaving && (
                 <button
                   onClick={onClose}
-                  className="absolute right-4 top-4 text-white/80 hover:text-white"
+                  className="absolute right-4 top-4 text-brand-navy/70 hover:text-brand-navy"
                   aria-label="Close"
                 >
                   <X size={20} />
                 </button>
               )}
               <div className="mb-2 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white font-bold text-[#0ea5e9]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white font-bold text-[#0369a1]">
                   P
                 </div>
                 <span className="text-lg font-bold">Paystack Checkout</span>
@@ -91,7 +91,7 @@ export default function PaystackModal({
               <button
                 onClick={handlePay}
                 disabled={!authorizationUrl || busy || leaving}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#0ea5e9] py-4 font-bold text-white transition-all hover:bg-[#0284c7] disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#0ea5e9] py-4 font-bold text-brand-navy transition-all hover:bg-[#0284c7] disabled:opacity-50"
               >
                 {busy || leaving ? (
                   <LoaderCircle className="animate-spin" size={18} />

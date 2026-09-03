@@ -184,7 +184,7 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
                 </p>
                 <Link
                   href="/it-portal/dashboard"
-                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-white hover:bg-brand-orange-dark"
+                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy hover:bg-brand-orange-dark"
                 >
                   Go to Dashboard
                 </Link>
@@ -194,7 +194,7 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
             {!loading && course?.certificateNumber ? (
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-brand-green/30 bg-brand-green/10 p-6">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-green text-white">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-green text-brand-navy">
                     <Award size={22} />
                   </div>
                   <div>
@@ -206,7 +206,7 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
                     </div>
                   </div>
                 </div>
-                <span className="rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white">
+                <span className="rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-navy">
                   {course.certificateNumber}
                 </span>
               </div>
@@ -256,7 +256,7 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
                             <button
                               onClick={() => void completeModule(module)}
                               disabled={Boolean(busyModuleId)}
-                              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg transition-all hover:bg-brand-green-dark disabled:opacity-50"
+                              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg transition-all hover:bg-brand-green-dark disabled:opacity-50"
                             >
                               {busyModuleId === module.id ? (
                                 <LoaderCircle size={14} className="animate-spin" />

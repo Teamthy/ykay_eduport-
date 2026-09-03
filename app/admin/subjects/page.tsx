@@ -208,7 +208,7 @@ export default function AdminSubjectsPage() {
                       onClick={() => void runAction("SYNC_COMPULSORY")}
                       disabled={busy || !compulsory.length}
                       title="Enrol every student at this level into its compulsory subjects. Safe to re-run."
-                      className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-60"
                     >
                       <Users size={13} /> Enrol students
                     </button>
@@ -246,7 +246,7 @@ export default function AdminSubjectsPage() {
                       <button
                         onClick={() => void addSubject()}
                         disabled={busy || !name.trim()}
-                        className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-sm font-bold text-white disabled:opacity-60"
+                        className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-sm font-bold text-brand-navy disabled:opacity-60"
                       >
                         <Plus size={15} /> Add
                       </button>

@@ -170,7 +170,7 @@ export default function StudentProfilePage() {
                         type="button"
                         onClick={() => fileRef.current?.click()}
                         disabled={uploading || loading}
-                        className="absolute -bottom-1 -right-1 grid h-9 w-9 place-items-center rounded-full bg-brand-orange text-white shadow-lg disabled:opacity-50"
+                        className="absolute -bottom-1 -right-1 grid h-9 w-9 place-items-center rounded-full bg-brand-orange text-brand-navy shadow-lg disabled:opacity-50"
                         aria-label="Change photo"
                       >
                         {uploading ? (
@@ -196,7 +196,7 @@ export default function StudentProfilePage() {
                           Student
                         </span>
                         {profile?.className && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green text-white font-bold uppercase tracking-widest">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-brand-green text-brand-navy font-bold uppercase tracking-widest">
                             {profile.className}
                           </span>
                         )}

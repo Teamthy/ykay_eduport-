@@ -362,7 +362,7 @@ export default function FeeStructuresPage() {
                           <button
                             onClick={() => void save()}
                             disabled={saving || total <= 0}
-                            className="flex items-center gap-2 rounded-full bg-brand-green px-6 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+                            className="flex items-center gap-2 rounded-full bg-brand-green px-6 py-2.5 text-sm font-bold text-brand-navy disabled:opacity-60"
                           >
                             {saving ? (
                               <LoaderCircle size={15} className="animate-spin" />

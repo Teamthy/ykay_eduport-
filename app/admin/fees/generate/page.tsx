@@ -265,7 +265,7 @@ export default function GenerateInvoicesPage() {
                   <button
                     onClick={() => setConfirming(true)}
                     disabled={busy || data.summary.billable === 0}
-                    className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3.5 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3.5 font-bold text-brand-navy disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {busy ? (
                       <LoaderCircle size={16} className="animate-spin" />

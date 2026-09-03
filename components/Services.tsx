@@ -75,7 +75,7 @@ export default function Services() {
                 href={s.href}
                 className="group block h-full rounded-[1.75rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)] hover:border-brand-green hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="w-12 h-12 rounded-2xl bg-brand-green/10 text-brand-green flex items-center justify-center mb-6 group-hover:bg-brand-green group-hover:text-white transition-colors">
+                <div className="w-12 h-12 rounded-2xl bg-brand-green/10 text-brand-green flex items-center justify-center mb-6 group-hover:bg-brand-green group-hover:text-brand-navy transition-colors">
                   <s.icon size={22} />
                 </div>
                 <div className="text-[10px] font-bold uppercase tracking-widest text-brand-green mb-2">

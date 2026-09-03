@@ -41,7 +41,7 @@ export default function NewsletterSignup() {
           />
           <button
             type="submit"
-            className="px-6 py-3 rounded-full bg-brand-orange hover:bg-brand-orange-dark text-white font-bold text-sm uppercase tracking-widest shadow-lg"
+            className="px-6 py-3 rounded-full bg-brand-orange hover:bg-brand-orange-dark text-brand-navy font-bold text-sm uppercase tracking-widest shadow-lg"
           >
             Subscribe
           </button>

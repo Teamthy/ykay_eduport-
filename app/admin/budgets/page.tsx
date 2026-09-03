@@ -113,7 +113,7 @@ export default function AdminBudgetsPage() {
           <div className="flex justify-end">
             <button
               onClick={() => setOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy"
             >
               <Plus size={15} /> Set / update budget
             </button>
@@ -239,7 +239,7 @@ export default function AdminBudgetsPage() {
               </button>
               <button
                 disabled={busy}
-                className="flex-1 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                className="flex-1 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
               >
                 Save
               </button>

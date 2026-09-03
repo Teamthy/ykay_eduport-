@@ -82,7 +82,7 @@ export default function CareersPage() {
                   </div>
                   <a
                     href={`mailto:careers@ykaycollege.com?subject=Application: ${job.title}`}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green text-white text-sm font-bold uppercase tracking-widest hover:bg-brand-green-dark transition-all shadow-lg shrink-0"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green text-brand-navy text-sm font-bold uppercase tracking-widest hover:bg-brand-green-dark transition-all shadow-lg shrink-0"
                   >
                     Apply
                   </a>
@@ -99,7 +99,7 @@ export default function CareersPage() {
               </p>
               <a
                 href="mailto:careers@ykaycollege.com"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-orange text-white font-bold text-sm hover:bg-brand-orange-dark transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-orange text-brand-navy font-bold text-sm hover:bg-brand-orange-dark transition-all"
               >
                 careers@ykaycollege.com
               </a>

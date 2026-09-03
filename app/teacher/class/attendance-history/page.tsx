@@ -242,7 +242,7 @@ export default function AttendanceHistoryPage() {
                       {history.selectedClassId ? (
                         <Link
                           href={`/teacher/class/attendance?classId=${encodeURIComponent(history.selectedClassId)}`}
-                          className="inline-flex items-center justify-center rounded-full bg-brand-green px-5 py-3 text-sm font-bold uppercase tracking-widest text-white shadow-lg transition-all hover:bg-brand-green-dark"
+                          className="inline-flex items-center justify-center rounded-full bg-brand-green px-5 py-3 text-sm font-bold uppercase tracking-widest text-brand-navy shadow-lg transition-all hover:bg-brand-green-dark"
                         >
                           Open live register
                         </Link>

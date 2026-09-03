@@ -69,8 +69,11 @@
 }
 
 /* ============================================================
-   DARK MODE — DEFAULT
-   All semantic tokens. Dark is the only theme.
+   THEME TOKENS
+   Dark is the DEFAULT theme (:root). The optional light theme is a
+   complete mirror of every token below under [data-theme="light"] —
+   components consume only the semantic vars, so both themes work
+   everywhere without per-component overrides.
    ============================================================ */
 :root {
   color-scheme: dark;
@@ -113,13 +116,13 @@
   --btn-primary-bg: #4ec54d;
   --btn-primary-bg-hover: #62d35e;
   --btn-primary-bg-active: #87dd84;
-  --btn-primary-text: #ffffff;
+  --btn-primary-text: #0c1824; /* navy on green: ~8.4:1 (was white 2.2:1) */
   --btn-primary-shadow: 0 4px 14px rgba(78, 197, 77, 0.4);
 
   --btn-secondary-bg: #ff6e00;
   --btn-secondary-bg-hover: #ff9133;
   --btn-secondary-bg-active: #ffb366;
-  --btn-secondary-text: #ffffff;
+  --btn-secondary-text: #0c1824; /* navy on orange: ~6.4:1 (was white 2.8:1) */
   --btn-secondary-shadow: 0 4px 14px rgba(255, 110, 0, 0.4);
 
   --btn-outline-border: #f1f5f9;
@@ -222,6 +225,165 @@
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.3);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.5), 0 8px 10px rgba(0, 0, 0, 0.35);
   --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================
+   LIGHT THEME — complete token mirror
+   Activated by ThemeProvider via <html data-theme="light">.
+   Surfaces flip to white/off-white, ink to navy; the footer stays
+   deliberately dark (a common light-mode pattern) and status colors
+   switch to dark-on-tint so text stays readable on light surfaces.
+   ============================================================ */
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Backgrounds */
+  --bg-primary: #f6f9fc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #eef3f8;
+  --bg-elevated: #ffffff;
+  --bg-overlay: rgba(12, 24, 36, 0.55);
+
+  /* Surfaces */
+  --surface-card: #ffffff;
+  --surface-card-hover: #f2f7f4;
+  --surface-input: #ffffff;
+  --surface-disabled: #eef2f6;
+
+  /* Borders */
+  --border-subtle: rgba(12, 24, 36, 0.08);
+  --border-default: rgba(12, 24, 36, 0.16);
+  --border-strong: rgba(12, 24, 36, 0.32);
+  --border-focus: #3aa73a;
+  --border-error: #dc2626;
+
+  /* Text */
+  --text-primary: #0c1824;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-inverse: #f8fafc;
+  --text-disabled: #94a3b8;
+  --text-link: #2b8a2b;
+  --text-link-hover: #1f6d1f;
+
+  /* Accents */
+  --accent-primary: #3aa73a;
+  --accent-secondary: #e65f00;
+  --accent-navy: #0c1824;
+
+  /* Buttons (navy text on brand fills — same accessible pairing as dark) */
+  --btn-primary-bg: #3aa73a;
+  --btn-primary-bg-hover: #4ec54d;
+  --btn-primary-bg-active: #62d35e;
+  --btn-primary-text: #0c1824;
+  --btn-primary-shadow: 0 4px 14px rgba(58, 167, 58, 0.35);
+
+  --btn-secondary-bg: #ff6e00;
+  --btn-secondary-bg-hover: #ff9133;
+  --btn-secondary-bg-active: #ffb366;
+  --btn-secondary-text: #0c1824;
+  --btn-secondary-shadow: 0 4px 14px rgba(255, 110, 0, 0.3);
+
+  --btn-outline-border: #0c1824;
+  --btn-outline-text: #0c1824;
+  --btn-outline-bg-hover: #0c1824;
+  --btn-outline-text-hover: #ffffff;
+
+  --btn-ghost-text: #0c1824;
+  --btn-ghost-bg-hover: rgba(12, 24, 36, 0.08);
+
+  /* Navigation */
+  --nav-bg: #ffffff;
+  --nav-bg-scrolled: rgba(255, 255, 255, 0.92);
+  --nav-border: rgba(12, 24, 36, 0.08);
+  --nav-text: #0c1824;
+  --nav-text-active: #2b8a2b;
+  --nav-text-hover: #e65f00;
+  --nav-mobile-bg: #ffffff;
+
+  /* Footer stays dark by design in light mode */
+  --footer-bg: #0c1824;
+  --footer-text-heading: #ffffff;
+  --footer-text-body: #94a3b8;
+  --footer-text-link: #94a3b8;
+  --footer-text-hover: #62d35e;
+  --footer-border: rgba(255, 255, 255, 0.08);
+
+  /* Hero (text sits on imagery — keep white with a firmer overlay) */
+  --hero-overlay: linear-gradient(180deg, rgba(12, 24, 36, 0.6) 0%, rgba(12, 24, 36, 0.3) 100%);
+  --hero-text: #ffffff;
+  --hero-label: #3aa73a;
+
+  /* Cards */
+  --card-bg: #ffffff;
+  --card-bg-subtle: #f8fafc;
+  --card-bg-hover: #f2f7f4;
+  --card-border: rgba(12, 24, 36, 0.1);
+  --card-border-hover: #3aa73a;
+  --card-shadow: 0 1px 3px rgba(12, 24, 36, 0.1);
+  --card-shadow-hover: 0 12px 32px rgba(12, 24, 36, 0.12), 0 0 0 1px rgba(58, 167, 58, 0.2);
+
+  /* Inputs */
+  --input-bg: #ffffff;
+  --input-bg-disabled: #f1f5f9;
+  --input-border: rgba(12, 24, 36, 0.2);
+  --input-border-focus: #3aa73a;
+  --input-border-error: #dc2626;
+  --input-text: #0c1824;
+  --input-placeholder: #94a3b8;
+  --input-label: #0c1824;
+  --input-hint: #64748b;
+  --input-error: #dc2626;
+
+  /* Loading */
+  --loading-bg: #ffffff;
+  --loading-ring: #0c1824;
+  --loading-icon: #3aa73a;
+  --loading-reveal-text: #0c1824;
+
+  /* Sections */
+  --section-bg-alt: #eef3f8;
+  --section-divider: rgba(12, 24, 36, 0.08);
+
+  /* Selection */
+  --selection-bg: rgba(58, 167, 58, 0.25);
+  --selection-text: #0c1824;
+
+  /* Scrollbar */
+  --scrollbar-track: #f6f9fc;
+  --scrollbar-thumb: rgba(12, 24, 36, 0.18);
+  --scrollbar-thumb-hover: rgba(12, 24, 36, 0.32);
+
+  /* Gradients (brand fills carry their own colors — unchanged) */
+  --gradient-primary: linear-gradient(135deg, #4ec54d, #2f8a2f);
+  --gradient-accent: linear-gradient(135deg, #4ec54d, #ff6e00);
+  --gradient-banner: linear-gradient(135deg, #0c1824 0%, #184b18 55%, #4ec54d 100%);
+  --gradient-cta: linear-gradient(135deg, #ff6e00, #e65f00);
+  --gradient-hero: linear-gradient(180deg, rgba(12, 24, 36, 0.6) 0%, rgba(12, 24, 36, 0.3) 100%);
+
+  /* Status — dark text on tint so it reads on light surfaces */
+  --status-success-bg: rgba(34, 197, 94, 0.14);
+  --status-success-text: #166534;
+  --status-success-border: #22c55e;
+
+  --status-warning-bg: rgba(245, 158, 11, 0.14);
+  --status-warning-text: #92400e;
+  --status-warning-border: #f59e0b;
+
+  --status-error-bg: rgba(239, 68, 68, 0.12);
+  --status-error-text: #b91c1c;
+  --status-error-border: #ef4444;
+
+  --status-info-bg: rgba(59, 130, 246, 0.12);
+  --status-info-text: #1e40af;
+  --status-info-border: #3b82f6;
+
+  /* Shadows — hairline navy instead of heavy black */
+  --shadow-sm: 0 1px 2px rgba(12, 24, 36, 0.08);
+  --shadow-md: 0 4px 6px rgba(12, 24, 36, 0.08), 0 2px 4px rgba(12, 24, 36, 0.06);
+  --shadow-lg: 0 10px 15px rgba(12, 24, 36, 0.1), 0 4px 6px rgba(12, 24, 36, 0.06);
+  --shadow-xl: 0 20px 25px rgba(12, 24, 36, 0.12), 0 8px 10px rgba(12, 24, 36, 0.07);
+  --shadow-2xl: 0 25px 50px rgba(12, 24, 36, 0.16);
 }
 
 /* ============================================================

@@ -155,7 +155,7 @@ export default function MyRecordsPage() {
 
               {/* Export */}
               <div className="flex justify-end">
-                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green/10 text-brand-green text-sm font-bold hover:bg-brand-green hover:text-white transition-all">
+                <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green/10 text-brand-green text-sm font-bold hover:bg-brand-green hover:text-brand-navy transition-all">
                   <Download size={14} /> Export Records
                 </button>
               </div>

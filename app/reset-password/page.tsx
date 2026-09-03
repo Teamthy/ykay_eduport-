@@ -156,7 +156,7 @@ export default function ResetPassword() {
         <button
           type="submit"
           disabled={busy || (ok && Boolean(token))}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3 font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3 font-bold text-brand-navy transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {busy ? (
             <>

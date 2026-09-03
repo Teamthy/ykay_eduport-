@@ -79,7 +79,7 @@ export default function ITAwarenessCTA() {
               </Link>
               <Link
                 href="/it-education#register"
-                className="inline-flex items-center justify-center gap-2 px-8 py-5 rounded-full bg-brand-green text-white font-bold uppercase tracking-widest hover:bg-brand-green-dark transition-all"
+                className="inline-flex items-center justify-center gap-2 px-8 py-5 rounded-full bg-brand-green text-brand-navy font-bold uppercase tracking-widest hover:bg-brand-green-dark transition-all"
               >
                 Register Now <GraduationCap size={18} />
               </Link>

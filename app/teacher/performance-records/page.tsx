@@ -303,7 +303,7 @@ export default function PerformanceRecordsPage() {
                               <button
                                 onClick={() => void save(subject.gradebookId)}
                                 disabled={savingId === subject.gradebookId}
-                                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-60"
+                                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-60"
                               >
                                 {savingId === subject.gradebookId ? (
                                   <LoaderCircle size={13} className="animate-spin" />

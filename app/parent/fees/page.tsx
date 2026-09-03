@@ -349,7 +349,7 @@ export default function ParentFeesPage() {
                       <button
                         onClick={() => void startPaystack()}
                         disabled={initBusy}
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
                       >
                         {initBusy ? (
                           <LoaderCircle className="animate-spin" size={16} />
@@ -393,7 +393,7 @@ export default function ParentFeesPage() {
                         <button
                           onClick={() => void submitTransfer()}
                           disabled={initBusy || transferRef.trim().length < 6}
-                          className="mt-4 w-full rounded-full bg-brand-orange py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                          className="mt-4 w-full rounded-full bg-brand-orange py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
                         >
                           Submit for bursar review
                         </button>

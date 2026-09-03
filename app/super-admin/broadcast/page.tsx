@@ -99,7 +99,7 @@ export default function SuperAdminBroadcastPage() {
           <button
             type="submit"
             disabled={sending || !title.trim() || !body.trim()}
-            className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
           >
             {sending ? <LoaderCircle className="animate-spin" size={15} /> : <Send size={15} />}{" "}
             Send broadcast

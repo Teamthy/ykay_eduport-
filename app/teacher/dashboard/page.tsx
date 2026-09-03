@@ -211,7 +211,7 @@ export default function TeacherDashboard() {
                 {data.teacher.isFormTeacher && (
                   <Link
                     href="/teacher/class/attendance"
-                    className="inline-flex items-center justify-between rounded-2xl bg-brand-orange px-4 py-3 text-sm font-bold text-white"
+                    className="inline-flex items-center justify-between rounded-2xl bg-brand-orange px-4 py-3 text-sm font-bold text-brand-navy"
                   >
                     Take attendance <UserCheck size={16} />
                   </Link>
@@ -219,7 +219,7 @@ export default function TeacherDashboard() {
                 {data.teacher.isSubjectTeacher && (
                   <Link
                     href="/teacher/gradebook"
-                    className="inline-flex items-center justify-between rounded-2xl bg-brand-green px-4 py-3 text-sm font-bold text-white"
+                    className="inline-flex items-center justify-between rounded-2xl bg-brand-green px-4 py-3 text-sm font-bold text-brand-navy"
                   >
                     Open gradebook <BookOpen size={16} />
                   </Link>
@@ -290,7 +290,7 @@ export default function TeacherDashboard() {
                         <div className="mt-3 flex flex-wrap gap-2">
                           <Link
                             href="/teacher/class/attendance"
-                            className="rounded-full bg-brand-orange px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white"
+                            className="rounded-full bg-brand-orange px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-navy"
                           >
                             Attendance
                           </Link>

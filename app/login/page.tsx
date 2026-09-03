@@ -172,7 +172,7 @@ function LoginForm() {
               </label>
               <button
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-4 text-sm font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-4 text-sm font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
               >
                 <LockKeyhole size={16} /> {loading ? "Signing in" : "Sign in"}
               </button>

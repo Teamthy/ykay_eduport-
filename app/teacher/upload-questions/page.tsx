@@ -633,7 +633,7 @@ export default function UploadQuestionsPage() {
           {/* Step 1: Select exam */}
           <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
             <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[var(--text-muted)]">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-xs text-white">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-xs text-brand-navy">
                 1
               </span>
               Select Exam
@@ -664,7 +664,7 @@ export default function UploadQuestionsPage() {
           {/* Step 2: Download template */}
           <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
             <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[var(--text-muted)]">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-xs text-white">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-xs text-brand-navy">
                 2
               </span>
               Download Template
@@ -705,7 +705,7 @@ export default function UploadQuestionsPage() {
           <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-xs text-white">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-green text-xs text-brand-navy">
                   3
                 </span>
                 Upload & Parse
@@ -963,7 +963,7 @@ export default function UploadQuestionsPage() {
                     <button
                       onClick={() => void syncToDatabase()}
                       disabled={syncing}
-                      className="flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand-green/20 transition hover:bg-brand-green/90 disabled:opacity-50"
+                      className="flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-sm font-bold text-brand-navy shadow-lg shadow-brand-green/20 transition hover:bg-brand-green/90 disabled:opacity-50"
                     >
                       {syncing ? (
                         <LoaderCircle className="animate-spin" size={16} />

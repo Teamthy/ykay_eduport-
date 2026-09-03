@@ -524,7 +524,7 @@ export default function SuperAdminPage() {
             </p>
             <a
               href="/super-admin/portals"
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.03]"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy transition-all hover:scale-[1.03]"
             >
               Portal Hub — jump to any portal →
             </a>
@@ -1083,7 +1083,7 @@ export default function SuperAdminPage() {
                     </label>
                     <button
                       onClick={() => void loadUsers(userSearch)}
-                      className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow"
+                      className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy shadow"
                     >
                       <Search size={13} /> Search
                     </button>
@@ -1136,7 +1136,7 @@ export default function SuperAdminPage() {
                     <button
                       disabled={creating || !createForm.name || !createForm.email}
                       onClick={() => void createAdmin()}
-                      className="mt-4 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                      className="mt-4 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
                     >
                       {creating ? "Creating…" : "Create account"}
                     </button>
@@ -1210,7 +1210,7 @@ export default function SuperAdminPage() {
                                   label: `Re-activate ${entry.name}?`,
                                 })
                               }
-                              className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white"
+                              className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-navy"
                             >
                               <ShieldCheck size={12} /> Unsuspend
                             </button>
@@ -1236,7 +1236,7 @@ export default function SuperAdminPage() {
                                 label: `Issue a temporary password for ${entry.name}?`,
                               })
                             }
-                            className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white"
+                            className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-navy"
                           >
                             <KeyRound size={12} /> Reset Password
                           </button>

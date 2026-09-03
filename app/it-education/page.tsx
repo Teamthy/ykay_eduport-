@@ -208,7 +208,7 @@ export default function ITEducationHubPage() {
               </a>
               <Link
                 href="/admissions"
-                className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-7 py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-orange-600"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-7 py-3.5 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-orange-600"
               >
                 Apply to Ykay College
               </Link>
@@ -246,7 +246,7 @@ export default function ITEducationHubPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/85 to-brand-navy/25" />
                     <div className="relative z-10 flex h-full flex-col p-5">
-                      <div className="mb-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-brand-green backdrop-blur transition group-hover:bg-brand-green group-hover:text-white">
+                      <div className="mb-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-brand-green backdrop-blur transition group-hover:bg-brand-green group-hover:text-brand-navy">
                         <Icon size={20} />
                       </div>
                       <div className="mt-6 text-[10px] font-bold uppercase tracking-widest text-brand-orange">

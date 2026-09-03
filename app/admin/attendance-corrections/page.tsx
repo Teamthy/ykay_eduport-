@@ -261,7 +261,7 @@ export default function AdminAttendanceCorrectionsPage() {
               <button
                 onClick={() => void submitDecision()}
                 disabled={saving}
-                className="flex-1 rounded-full bg-brand-green px-5 py-3 text-sm font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                className="flex-1 rounded-full bg-brand-green px-5 py-3 text-sm font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
               >
                 {saving ? (
                   <span className="inline-flex items-center gap-2">

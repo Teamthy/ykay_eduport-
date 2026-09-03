@@ -89,7 +89,7 @@ export default function Hero() {
                 source" warning and still works before the URL is configured. */}
             <a
               href="/download"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-brand-orange text-white font-body text-sm font-bold tracking-[0.15em] uppercase hover:bg-brand-orange-dark transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] shadow-lg shadow-black/30"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-brand-orange text-brand-navy font-body text-sm font-bold tracking-[0.15em] uppercase hover:bg-brand-orange-dark transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] shadow-lg shadow-black/30"
             >
               <Download size={18} /> Download Mobile App
             </a>

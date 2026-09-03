@@ -87,7 +87,7 @@ export default function Assignments() {
           <div className="mt-6 flex justify-end">
             <button
               onClick={() => setOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy"
             >
               <Plus size={15} /> Assign subject
             </button>
@@ -181,7 +181,7 @@ export default function Assignments() {
                 ))}
               </div>
             </fieldset>
-            <button className="mt-6 w-full rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white">
+            <button className="mt-6 w-full rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-brand-navy">
               Save subject assignment
             </button>
           </form>

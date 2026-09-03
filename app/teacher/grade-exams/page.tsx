@@ -131,7 +131,7 @@ export default function GradeExamsPage() {
                         {e.submittedCount > 0 ? (
                           <Link
                             href={`/teacher/test-results?exam=${e.id}`}
-                            className="rounded-full bg-brand-green px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white"
+                            className="rounded-full bg-brand-green px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-navy"
                           >
                             Review {e.submittedCount}
                           </Link>

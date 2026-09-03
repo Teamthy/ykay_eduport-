@@ -524,7 +524,7 @@ export default function PaperIntakePage() {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-orange text-white text-sm font-bold disabled:opacity-60"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-orange text-brand-navy text-sm font-bold disabled:opacity-60"
                 >
                   {busy ? (
                     <LoaderCircle size={16} className="animate-spin" />

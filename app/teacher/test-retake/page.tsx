@@ -144,7 +144,7 @@ export default function TestRetakePage() {
               <button
                 onClick={grant}
                 disabled={granting || !selected.size}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
               >
                 {granting ? (
                   <LoaderCircle className="animate-spin" size={15} />

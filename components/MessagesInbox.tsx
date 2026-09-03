@@ -201,7 +201,7 @@ export default function MessagesInbox({
         <div className="flex justify-end">
           <button
             onClick={() => setComposing((v) => !v)}
-            className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy"
           >
             <Plus size={13} /> New message
           </button>
@@ -262,7 +262,7 @@ export default function MessagesInbox({
             <button
               onClick={() => void startThread()}
               disabled={sending || !form.subject.trim() || !form.body.trim()}
-              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-green py-2.5 text-sm font-bold text-white disabled:opacity-50"
+              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-green py-2.5 text-sm font-bold text-brand-navy disabled:opacity-50"
             >
               {sending ? <LoaderCircle size={15} className="animate-spin" /> : <Send size={15} />}
               Send
@@ -342,7 +342,7 @@ export default function MessagesInbox({
             <button
               onClick={() => void sendReply()}
               disabled={sending || !reply.trim()}
-              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
             >
               {sending ? <LoaderCircle size={13} className="animate-spin" /> : <Send size={13} />}
               Send
@@ -366,7 +366,7 @@ export default function MessagesInbox({
                 <div className="flex flex-wrap items-center gap-2">
                   <b className="text-[var(--text-primary)]">{thread.subject}</b>
                   {thread.unread > 0 ? (
-                    <span className="rounded-full bg-brand-orange px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white">
+                    <span className="rounded-full bg-brand-orange px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-navy">
                       {thread.unread} new
                     </span>
                   ) : null}

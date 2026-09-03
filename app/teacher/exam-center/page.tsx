@@ -357,7 +357,7 @@ export default function ExamCenterPage() {
                     </div>
                     <Link
                       href="/teacher/upload-questions"
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy"
                     >
                       <Upload size={13} /> Upload questions
                     </Link>
@@ -383,7 +383,7 @@ export default function ExamCenterPage() {
                     ))}
                     <button
                       onClick={() => setShowForm((v) => !v)}
-                      className="ml-auto inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+                      className="ml-auto inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy"
                     >
                       <Plus size={13} /> New paper
                     </button>
@@ -534,7 +534,7 @@ export default function ExamCenterPage() {
                         <button
                           onClick={() => void create()}
                           disabled={creating || !form.title.trim() || !form.assignmentId}
-                          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-green py-2.5 text-sm font-bold text-white disabled:opacity-60"
+                          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-green py-2.5 text-sm font-bold text-brand-navy disabled:opacity-60"
                         >
                           {creating ? (
                             <LoaderCircle size={15} className="animate-spin" />
@@ -634,7 +634,7 @@ export default function ExamCenterPage() {
                               {exam.readiness === "UNPUBLISHED" && exam.questionCount > 0 ? (
                                 <button
                                   onClick={() => void publish(exam)}
-                                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-xs font-bold text-white"
+                                  className="inline-flex items-center gap-1.5 rounded-full bg-brand-green px-4 py-2 text-xs font-bold text-brand-navy"
                                 >
                                   <Send size={12} /> Publish
                                 </button>
@@ -742,7 +742,7 @@ export default function ExamCenterPage() {
               <button
                 onClick={() => void grantRetakes()}
                 disabled={retakeBusy || !retakePicked.size}
-                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-orange py-2.5 text-sm font-bold text-white disabled:opacity-50"
+                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-orange py-2.5 text-sm font-bold text-brand-navy disabled:opacity-50"
               >
                 {retakeBusy ? (
                   <LoaderCircle size={15} className="animate-spin" />

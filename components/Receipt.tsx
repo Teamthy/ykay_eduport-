@@ -69,7 +69,7 @@ export default function Receipt({
           </div>
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-brand-green/10 text-brand-green text-xs font-bold hover:bg-brand-green hover:text-white transition-all border border-brand-green/20"
+            className="inline-flex items-center gap-2 rounded-full px-4 py-2 bg-brand-green/10 text-brand-green text-xs font-bold hover:bg-brand-green hover:text-brand-navy transition-all border border-brand-green/20"
           >
             <Printer size={14} /> Print / Download
           </button>

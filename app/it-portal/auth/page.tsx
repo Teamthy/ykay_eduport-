@@ -179,7 +179,7 @@ export default function ItPortalAuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-orange-600 disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-orange-600 disabled:opacity-60"
             >
               {loading ? (
                 "Please wait…"

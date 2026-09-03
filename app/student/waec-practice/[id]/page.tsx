@@ -199,7 +199,7 @@ export default function PracticeRunnerPage() {
             <div className="flex flex-wrap gap-3 justify-center">
               <button
                 onClick={() => void start()}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-orange text-white text-sm font-bold"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-orange text-brand-navy text-sm font-bold"
               >
                 <RotateCcw size={14} /> Try again
               </button>
@@ -252,7 +252,7 @@ export default function PracticeRunnerPage() {
               <div className="flex flex-wrap gap-3 justify-center mt-5">
                 <button
                   onClick={() => void start()}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-orange text-white text-sm font-bold"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-orange text-brand-navy text-sm font-bold"
                 >
                   <RotateCcw size={14} /> Try again
                 </button>
@@ -422,7 +422,7 @@ export default function PracticeRunnerPage() {
               <button
                 onClick={() => void submit()}
                 disabled={submitting}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand-orange text-white text-sm font-bold disabled:opacity-60"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand-orange text-brand-navy text-sm font-bold disabled:opacity-60"
               >
                 {submitting ? <Loader2 size={14} className="animate-spin" /> : null}
                 Submit &amp; see answers

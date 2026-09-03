@@ -185,7 +185,7 @@ export default function AdminIDCardsPage() {
               </button>
               <button
                 onClick={printSheet}
-                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-4 py-2 text-xs font-bold uppercase tracking-widest text-white"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-4 py-2 text-xs font-bold uppercase tracking-widest text-brand-navy"
               >
                 <Printer size={14} /> Print
               </button>

@@ -96,12 +96,12 @@ export default function PortalPage() {
                   }`}
                 >
                   {portal.accent ? (
-                    <span className="absolute top-4 right-4 inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-white bg-brand-orange px-2.5 py-1 rounded-full">
+                    <span className="absolute top-4 right-4 inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-brand-navy bg-brand-orange px-2.5 py-1 rounded-full">
                       <Sparkles size={10} /> Open Enrollment
                     </span>
                   ) : null}
 
-                  <div className="w-14 h-14 rounded-2xl bg-brand-green/10 flex items-center justify-center text-brand-green group-hover:bg-brand-green group-hover:text-white transition-colors mb-6">
+                  <div className="w-14 h-14 rounded-2xl bg-brand-green/10 flex items-center justify-center text-brand-green group-hover:bg-brand-green group-hover:text-brand-navy transition-colors mb-6">
                     <portal.icon size={26} strokeWidth={1.75} />
                   </div>
 
@@ -165,7 +165,7 @@ export default function PortalPage() {
               <div className="flex flex-wrap items-center justify-center gap-4">
                 <Link
                   href="/admissions"
-                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full border-2 border-brand-orange text-brand-orange font-body text-sm font-bold tracking-widest hover:bg-brand-orange hover:text-white transition-all"
+                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full border-2 border-brand-orange text-brand-orange font-body text-sm font-bold tracking-widest hover:bg-brand-orange hover:text-brand-navy transition-all"
                 >
                   Apply for Admission
                 </Link>
@@ -177,7 +177,7 @@ export default function PortalPage() {
                 </Link>
                 <Link
                   href="/contact"
-                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-brand-orange text-white font-body text-sm font-bold tracking-widest hover:bg-brand-orange-dark transition-all shadow-lg"
+                  className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-brand-orange text-brand-navy font-body text-sm font-bold tracking-widest hover:bg-brand-orange-dark transition-all shadow-lg"
                 >
                   Contact Admin
                 </Link>

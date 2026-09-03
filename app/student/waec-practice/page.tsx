@@ -151,7 +151,7 @@ export default function ExamPracticePage() {
                   <p className="text-sm text-[var(--text-primary)] font-semibold mb-1">{error}</p>
                   <button
                     onClick={() => void load()}
-                    className="mt-3 inline-flex items-center gap-2 px-5 py-2 rounded-full bg-brand-orange text-white text-sm font-bold"
+                    className="mt-3 inline-flex items-center gap-2 px-5 py-2 rounded-full bg-brand-orange text-brand-navy text-sm font-bold"
                   >
                     <RotateCcw size={14} /> Try again
                   </button>
@@ -296,7 +296,7 @@ export default function ExamPracticePage() {
                           ) : exam.canStart ? (
                             <Link
                               href={`/student/waec-practice/${exam.id}`}
-                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-orange text-white text-sm font-bold hover:bg-brand-orange-dark transition-all shadow-lg"
+                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-orange text-brand-navy text-sm font-bold hover:bg-brand-orange-dark transition-all shadow-lg"
                             >
                               {exam.attemptCount > 0 ? (
                                 <>

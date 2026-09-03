@@ -536,7 +536,7 @@ export default function BehaviorRecordsPage() {
               <button
                 onClick={handleAdd}
                 disabled={saving}
-                className="w-full py-3 rounded-full bg-brand-orange text-white font-bold text-sm hover:bg-brand-orange-dark transition-all disabled:opacity-60"
+                className="w-full py-3 rounded-full bg-brand-orange text-brand-navy font-bold text-sm hover:bg-brand-orange-dark transition-all disabled:opacity-60"
               >
                 {saving ? "Saving…" : "Save Record"}
               </button>

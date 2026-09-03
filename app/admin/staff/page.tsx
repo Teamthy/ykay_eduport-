@@ -159,7 +159,7 @@ export default function StaffPage() {
             </button>
             <button
               onClick={() => setMode("invite")}
-              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy"
             >
               <UserPlus size={15} /> Invite staff
             </button>
@@ -290,7 +290,7 @@ export default function StaffPage() {
                 ? "The activation token is displayed once and expires after seven days."
                 : "A strong temporary password is shown once. The staff member must change it on first login."}
             </p>
-            <button className="mt-6 w-full rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white">
+            <button className="mt-6 w-full rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-brand-navy">
               {mode === "invite" ? "Create secure invitation" : "Create account now"}
             </button>
           </form>

@@ -202,7 +202,7 @@ export default function AdminAdmissionsPage() {
             </p>
             <Link
               href="/admin-admissions/paper"
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-bold text-white transition-all hover:opacity-90"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-bold text-brand-navy transition-all hover:opacity-90"
             >
               <ClipboardList size={15} /> Enter a paper application
             </Link>
@@ -409,7 +409,7 @@ export default function AdminAdmissionsPage() {
 
               <button
                 disabled={busy || !entrancePassed}
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
               >
                 {busy ? (
                   <LoaderCircle className="animate-spin" size={16} />

@@ -117,7 +117,7 @@ export default function AdminBroadsheetPage() {
                 <button
                   onClick={() => window.print()}
                   disabled={!sheet?.students.length}
-                  className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-lg hover:bg-brand-green-dark disabled:opacity-40"
+                  className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark disabled:opacity-40"
                 >
                   <Printer size={14} /> Print / Save PDF
                 </button>

@@ -49,7 +49,7 @@ export default function MobileAppCTA() {
                     URL not being configured yet. */}
                 <Link
                   href="/download"
-                  className="inline-flex items-center gap-3 rounded-full bg-brand-orange px-8 py-4 font-body text-sm font-bold uppercase tracking-[0.15em] text-white transition-all duration-300 hover:scale-[1.03] hover:bg-brand-orange-dark active:scale-[0.97] shadow-lg shadow-black/30"
+                  className="inline-flex items-center gap-3 rounded-full bg-brand-orange px-8 py-4 font-body text-sm font-bold uppercase tracking-[0.15em] text-brand-navy transition-all duration-300 hover:scale-[1.03] hover:bg-brand-orange-dark active:scale-[0.97] shadow-lg shadow-black/30"
                 >
                   <Download size={18} /> Download for Android
                   {sizeLabel ? (

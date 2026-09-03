@@ -156,7 +156,7 @@ export default function AdminFeesPage() {
               type="button"
               disabled={reminding || loading}
               onClick={() => void sendReminders(false)}
-              className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
             >
               <Send size={14} /> {reminding ? "Queuing…" : "Remind outstanding"}
             </button>
@@ -264,7 +264,7 @@ export default function AdminFeesPage() {
                 </div>
                 <button
                   disabled={cashBusy}
-                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
                 >
                   <CreditCard size={14} /> {cashBusy ? "Saving…" : "Post cash payment"}
                 </button>

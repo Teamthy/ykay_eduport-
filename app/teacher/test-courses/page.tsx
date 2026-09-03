@@ -382,7 +382,7 @@ export default function TestCoursesPage() {
                             <button
                               onClick={() => void save(exam)}
                               disabled={saving === exam.id}
-                              className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-green py-2.5 text-sm font-bold text-white disabled:opacity-50"
+                              className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-brand-green py-2.5 text-sm font-bold text-brand-navy disabled:opacity-50"
                             >
                               {saving === exam.id ? (
                                 <LoaderCircle size={15} className="animate-spin" />
@@ -406,7 +406,7 @@ export default function TestCoursesPage() {
                   </p>
                   <Link
                     href="/teacher/exam-center"
-                    className="mt-4 inline-flex rounded-full bg-brand-green px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+                    className="mt-4 inline-flex rounded-full bg-brand-green px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy"
                   >
                     Go to Exam Centre
                   </Link>

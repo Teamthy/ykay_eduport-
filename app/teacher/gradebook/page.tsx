@@ -325,7 +325,7 @@ export default function TeacherGradebookPage() {
                         <button
                           onClick={() => void persist("SAVE")}
                           disabled={!isEditable || saving || !dirty}
-                          className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-2.5 text-xs font-bold text-white shadow-lg transition-all hover:bg-brand-green-dark disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-2.5 text-xs font-bold text-brand-navy shadow-lg transition-all hover:bg-brand-green-dark disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {saving ? (
                             <LoaderCircle size={14} className="animate-spin" />
@@ -337,7 +337,7 @@ export default function TeacherGradebookPage() {
                         <button
                           onClick={() => setConfirmSubmit(true)}
                           disabled={!isEditable || saving}
-                          className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-2.5 text-xs font-bold text-white shadow-lg transition-all hover:bg-brand-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-2.5 text-xs font-bold text-brand-navy shadow-lg transition-all hover:bg-brand-orange-dark disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <Send size={14} /> Submit Final
                         </button>

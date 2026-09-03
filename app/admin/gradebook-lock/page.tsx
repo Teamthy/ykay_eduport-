@@ -319,7 +319,7 @@ export default function AdminGradebookLockPage() {
                                       setPendingAction({ gradebook, action: "REOPEN" })
                                     }
                                     disabled={busy}
-                                    className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-disabled)] px-4 py-1.5 text-[10px] font-bold text-[var(--text-secondary)] transition-all hover:bg-brand-orange hover:text-white disabled:opacity-50"
+                                    className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-disabled)] px-4 py-1.5 text-[10px] font-bold text-[var(--text-secondary)] transition-all hover:bg-brand-orange hover:text-brand-navy disabled:opacity-50"
                                   >
                                     <Unlock size={12} /> Reopen
                                   </button>
@@ -327,7 +327,7 @@ export default function AdminGradebookLockPage() {
                                   <button
                                     onClick={() => setPendingAction({ gradebook, action: "LOCK" })}
                                     disabled={busy}
-                                    className="inline-flex items-center gap-1.5 rounded-full bg-brand-green/10 px-4 py-1.5 text-[10px] font-bold text-brand-green transition-all hover:bg-brand-green hover:text-white disabled:opacity-50"
+                                    className="inline-flex items-center gap-1.5 rounded-full bg-brand-green/10 px-4 py-1.5 text-[10px] font-bold text-brand-green transition-all hover:bg-brand-green hover:text-brand-navy disabled:opacity-50"
                                   >
                                     <Lock size={12} /> Lock Scores
                                   </button>
@@ -415,7 +415,7 @@ export default function AdminGradebookLockPage() {
                         <button
                           onClick={() => setPendingGenerate(schoolClass)}
                           disabled={!schoolClass.readyToGenerate || busy}
-                          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold text-white shadow-lg transition-all hover:bg-brand-green-dark disabled:cursor-not-allowed disabled:opacity-40"
+                          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold text-brand-navy shadow-lg transition-all hover:bg-brand-green-dark disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <FileText size={14} /> Generate Draft Report Cards
                         </button>

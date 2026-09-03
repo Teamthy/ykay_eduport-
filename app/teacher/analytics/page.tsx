@@ -92,7 +92,7 @@ export default function TeacherAnalyticsPage() {
                   <option>First Term 2025/2026</option>
                   <option>Full Session</option>
                 </select>
-                <button className="ml-auto inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green text-white text-sm font-bold hover:bg-brand-green-dark transition-all">
+                <button className="ml-auto inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green text-brand-navy text-sm font-bold hover:bg-brand-green-dark transition-all">
                   <Download size={14} /> Export Report
                 </button>
               </div>

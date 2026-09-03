@@ -104,7 +104,7 @@ export default function QuestionBankPage() {
           <div className="flex justify-end">
             <Link
               href="/teacher/upload-questions"
-              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy"
             >
               <PlusCircle size={15} /> Upload questions
             </Link>

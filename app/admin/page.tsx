@@ -410,7 +410,7 @@ export default function AdminDashboardPage() {
                           className="group flex items-center justify-between rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] px-5 py-4 hover:border-brand-green transition-all"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green/10 text-brand-green group-hover:bg-brand-green group-hover:text-white transition-colors">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green/10 text-brand-green group-hover:bg-brand-green group-hover:text-brand-navy transition-colors">
                               <item.icon size={18} />
                             </div>
                             <span className="text-sm font-bold text-[var(--text-primary)]">
