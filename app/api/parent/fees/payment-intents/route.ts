@@ -119,17 +119,20 @@ export async function POST(request: NextRequest) {
       await releaseReservation();
       return jsonNoStore({ error: "Bank transfer reference is required." }, { status: 400 });
     }
+    // Capture the narrowed value: property narrowing does not survive into
+    // the transaction closure below.
+    const transferReference = input.transferReference;
 
     try {
       const transferResponse = await prisma.$transaction(async (tx) => {
         const duplicate = await tx.feePaymentAttempt.findUnique({
-          where: { reference: input.transferReference },
+          where: { reference: transferReference },
         });
         if (duplicate) {
           throw new Error("DUPLICATE_TRANSFER_REFERENCE");
         }
         const paidDup = await tx.feePayment.findUnique({
-          where: { reference: input.transferReference },
+          where: { reference: transferReference },
         });
         if (paidDup) {
           throw new Error("DUPLICATE_TRANSFER_REFERENCE");
@@ -143,7 +146,7 @@ export async function POST(request: NextRequest) {
             parentProfileId: context.profile.id,
             provider: PaymentProvider.BANK_TRANSFER,
             amount,
-            reference: input.transferReference,
+            reference: transferReference,
             status: PaymentStatus.PENDING,
             payerEmail: context.profile.user.email,
             transferDate: input.transferDate ? new Date(input.transferDate) : null,
@@ -162,7 +165,7 @@ export async function POST(request: NextRequest) {
             metadata: {
               invoiceNumber: invoice.invoiceNumber,
               amount,
-              reference: input.transferReference,
+              reference: transferReference,
             },
           },
         });

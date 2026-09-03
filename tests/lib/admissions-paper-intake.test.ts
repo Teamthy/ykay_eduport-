@@ -166,7 +166,7 @@ describe("POST /api/admin/admissions/paper", () => {
     expect(mockPrisma.admissionApplication.create).toHaveBeenCalled();
     // The stored replay response was written inside the transaction.
     const completion = mockPrisma.idempotencyRecord.updateMany.mock.calls.find(
-      ([args]: never[]) => (args as { data?: { status?: string } }).data?.status === "COMPLETED",
+      (call) => (call[0] as { data?: { status?: string } }).data?.status === "COMPLETED",
     );
     expect(completion).toBeTruthy();
   });

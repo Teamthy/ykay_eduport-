@@ -29,7 +29,7 @@ describe("enforceRateLimit — production fail-closed policy (C-005)", () => {
   });
 
   it("fails closed for login when production has no distributed store", async () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
     const { enforceRateLimit } = await freshLimiter();
 
     const result = await enforceRateLimit("login", "203.0.113.9");
@@ -39,7 +39,7 @@ describe("enforceRateLimit — production fail-closed policy (C-005)", () => {
   });
 
   it("fails closed for payment and admissions kinds, not just login", async () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
     const { enforceRateLimit } = await freshLimiter();
 
     for (const kind of ["payment", "draft", "signup", "staffActivate"] as const) {
@@ -50,7 +50,7 @@ describe("enforceRateLimit — production fail-closed policy (C-005)", () => {
   });
 
   it("allows non-critical kinds to use the memory fallback in production", async () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
     const { enforceRateLimit } = await freshLimiter();
 
     const result = await enforceRateLimit("message", "user_1");
@@ -59,7 +59,7 @@ describe("enforceRateLimit — production fail-closed policy (C-005)", () => {
   });
 
   it("honours an explicit ALLOW_MEMORY_RATE_LIMITS acceptance", async () => {
-    process.env.NODE_ENV = "production";
+    vi.stubEnv("NODE_ENV", "production");
     process.env.ALLOW_MEMORY_RATE_LIMITS = "true";
     const { enforceRateLimit } = await freshLimiter();
 
@@ -69,7 +69,7 @@ describe("enforceRateLimit — production fail-closed policy (C-005)", () => {
   });
 
   it("keeps the memory fallback outside production (dev/test)", async () => {
-    process.env.NODE_ENV = "test";
+    vi.stubEnv("NODE_ENV", "test");
     const { enforceRateLimit } = await freshLimiter();
 
     const result = await enforceRateLimit("login", "192.168.1.77");
