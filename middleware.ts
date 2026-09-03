@@ -81,7 +81,9 @@ function logDenial(
 function applyCors(response: NextResponse, request: NextRequest): NextResponse {
   const origin = resolveAllowedOrigin(request.headers.get("origin"));
   response.headers.set("Access-Control-Allow-Origin", origin);
-  response.headers.set("Access-Control-Allow-Credentials", "true");
+  if (origin !== "*") {
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+  }
   // Responses vary by Origin, so caches (and Vercel's CDN) must not serve one
   // caller's allow-origin to another.
   response.headers.append("Vary", "Origin");
@@ -101,7 +103,8 @@ export async function middleware(request: NextRequest) {
       status: 204,
       headers: {
         "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type,Authorization,x-idempotency-key",
+        "Access-Control-Allow-Headers":
+          "Content-Type,Authorization,x-idempotency-key,idempotency-key",
         "Access-Control-Max-Age": "86400",
       },
     });

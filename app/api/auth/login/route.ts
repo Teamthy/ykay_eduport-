@@ -129,6 +129,7 @@ export async function POST(request: NextRequest) {
       name: user.name,
       email: user.email,
       mustChangePassword: user.mustChangePassword,
+      tokenVersion: user.tokenVersion,
     });
 
     await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });

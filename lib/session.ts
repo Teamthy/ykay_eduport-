@@ -98,7 +98,7 @@ export async function verifySession(token: string): Promise<SessionUser | null> 
   }
 }
 
-export async function getSession() {
+export async function getRawSession() {
   // 1) Web browser sessions — signed cookie
   const cookieToken = (await cookies()).get(SESSION_COOKIE)?.value;
   if (cookieToken) {
@@ -115,6 +115,37 @@ export async function getSession() {
     }
   }
   return null;
+}
+
+async function verifyCurrentSession(user: SessionUser): Promise<SessionUser | null> {
+  let dbUser: { tokenVersion: number; isActive: boolean; isSuspended: boolean } | null;
+  try {
+    dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { tokenVersion: true, isActive: true, isSuspended: true },
+    });
+  } catch (error) {
+    logger.error("Identity state lookup failed — denying request", {
+      userId: user.id,
+      error: String(error),
+    });
+    throw new IdentityCheckUnavailableError();
+  }
+  if (!dbUser) return null;
+  if (!dbUser.isActive || dbUser.isSuspended) return null;
+  if (dbUser.tokenVersion > (user.tokenVersion ?? 0)) return null;
+  return user;
+}
+
+/**
+ * Default session helper: signature/expiry PLUS current DB account state.
+ * Raw JWT reads are intentionally kept behind getRawSession() for diagnostics
+ * only, so revoked/suspended accounts are not honoured until JWT expiry.
+ */
+export async function getSession() {
+  const session = await getRawSession();
+  if (!session) return null;
+  return verifyCurrentSession(session);
 }
 
 export function sessionCookie(token: string) {
@@ -179,7 +210,7 @@ export async function checkRole(allowed: UserRole[]): Promise<SessionCheck> {
 
   if (!cookieToken && !bearer) return { ok: false, reason: "NO_SESSION" };
 
-  const user = await getSession();
+  const user = await getRawSession();
   // A token was presented but did not verify: wrong AUTH_SECRET, tampered, or
   // past its token expiry (or an invalid/revoked signature).
   if (!user) return { ok: false, reason: "BAD_SIGNATURE_OR_EXPIRED" };
@@ -277,25 +308,6 @@ export class IdentityCheckUnavailableError extends Error {
 export async function requireRole(allowed: UserRole[]) {
   const user = await getSession();
   if (!user || !allowed.includes(user.role)) return null;
-
-  let dbUser: { tokenVersion: number; isActive: boolean; isSuspended: boolean } | null;
-  try {
-    dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { tokenVersion: true, isActive: true, isSuspended: true },
-    });
-  } catch (error) {
-    logger.error("Identity state lookup failed — denying request", {
-      userId: user.id,
-      error: String(error),
-    });
-    throw new IdentityCheckUnavailableError();
-  }
-
-  if (!dbUser) return null;
-  if (!dbUser.isActive || dbUser.isSuspended) return null;
-  if (dbUser.tokenVersion > (user.tokenVersion ?? 0)) return null; // Session revoked
-
   return user;
 }
 

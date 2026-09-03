@@ -7,6 +7,12 @@ import { assertNotImpersonating } from "@/lib/session";
 import { initializePaystackTransaction } from "@/lib/paystack";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { randomBytes } from "crypto";
+import {
+  idempotencyRequestHash,
+  replayIdempotency,
+  requestMethodForIdempotency,
+  requestPathForIdempotency,
+} from "@/lib/idempotency";
 
 export const runtime = "nodejs";
 
@@ -39,6 +45,21 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
+  let rawBody: unknown;
+  let input: z.infer<typeof schema>;
+  try {
+    rawBody = await request.json();
+    input = schema.parse(rawBody);
+  } catch {
+    return jsonNoStore({ error: "Invalid payment details." }, { status: 400 });
+  }
+  const requestHash = idempotencyRequestHash({
+    method: requestMethodForIdempotency(request),
+    path: requestPathForIdempotency(request, "/api/parent/fees/payment-intents"),
+    actorId: context.user.id,
+    scope: "FEE_PAYMENT",
+    body: rawBody,
+  });
   const existingPayment = await prisma.idempotencyRecord.findUnique({
     where: {
       schoolId_scope_key: {
@@ -49,17 +70,8 @@ export async function POST(request: NextRequest) {
     },
   });
   if (existingPayment) {
-    return jsonNoStore(
-      { ...(existingPayment.response as object), idempotentReplay: true },
-      { status: existingPayment.statusCode },
-    );
-  }
-
-  let input: z.infer<typeof schema>;
-  try {
-    input = schema.parse(await request.json());
-  } catch {
-    return jsonNoStore({ error: "Invalid payment details." }, { status: 400 });
+    const replay = replayIdempotency(existingPayment, requestHash);
+    return jsonNoStore(replay.body, { status: replay.status });
   }
 
   const invoice = await prisma.feeInvoice.findFirst({
@@ -145,7 +157,7 @@ export async function POST(request: NextRequest) {
         schoolId: context.user.schoolId,
         scope: "FEE_PAYMENT",
         key: idemKey,
-        requestHash: "v1",
+        requestHash,
         response: transferResponse,
         statusCode: 201,
       },
@@ -191,7 +203,7 @@ export async function POST(request: NextRequest) {
         schoolId: context.user.schoolId,
         scope: "FEE_PAYMENT",
         key: idemKey,
-        requestHash: "v1",
+        requestHash,
         response: paystackResponse,
         statusCode: 200,
       },

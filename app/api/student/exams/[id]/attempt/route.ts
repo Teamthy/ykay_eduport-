@@ -195,6 +195,17 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   });
   if (!attempt) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
   if (attempt.status !== ExamAttemptStatus.IN_PROGRESS) {
+    // Idempotent submit retry: if the first SUBMIT reached the server but the
+    // mobile client timed out, a repeated SUBMIT should return the canonical
+    // submitted state instead of a scary conflict.
+    if (payload.action === "SUBMIT") {
+      return NextResponse.json({
+        ok: true,
+        submitted: true,
+        message: "Exam was already submitted successfully.",
+        status: attempt.status,
+      });
+    }
     return NextResponse.json({ error: "This attempt is already submitted." }, { status: 409 });
   }
 

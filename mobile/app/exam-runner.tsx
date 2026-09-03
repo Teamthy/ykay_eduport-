@@ -118,9 +118,11 @@ export default function ExamRunner() {
     setPhase("submitting");
     try {
       const res: any = await studentApi.submitExam(examIdRef.current, attemptIdRef.current, Object.entries(answersRef.current).map(([questionId, response]) => ({ questionId, response })));
-      if (res?.queued) { setResult({ message: "You're offline — your answers are saved and will be submitted automatically when you reconnect." }); setPhase("done"); return; }
       setResult(res); setPhase("done");
-    } catch (e: any) { setError(e.message || "Submission failed. Your answers were autosaved — try again."); setPhase("error"); }
+    } catch (e: any) {
+      setError(e.message || "Submission failed. Your exam is NOT submitted yet — reconnect and try again before leaving this screen.");
+      setPhase("error");
+    }
   }
   function confirmSubmit() {
     const unanswered = questions.filter((q) => !answers[q.id]).length;
@@ -137,9 +139,13 @@ export default function ExamRunner() {
   if (phase === "error") return (
     <View style={{ flex: 1, backgroundColor: colors.background.primary, justifyContent: "center", alignItems: "center", padding: spacing.lg }}>
       <AlertTriangle size={48} color={colors.danger} />
-      <H2 style={{ marginTop: spacing.md, textAlign: "center" }}>Can't start exam</H2>
+      <H2 style={{ marginTop: spacing.md, textAlign: "center" }}>{attemptIdRef.current ? "Submission not confirmed" : "Can't start exam"}</H2>
       <Body style={{ textAlign: "center", marginTop: spacing.xs }}>{error}</Body>
-      <Button variant="primary" size="lg" style={{ marginTop: spacing.xxl }} onPress={() => router.back()}>Go back</Button>
+      {attemptIdRef.current ? (
+        <Button variant="primary" size="lg" style={{ marginTop: spacing.xxl }} onPress={() => doSubmit(false)}>Retry submission</Button>
+      ) : (
+        <Button variant="primary" size="lg" style={{ marginTop: spacing.xxl }} onPress={() => router.back()}>Go back</Button>
+      )}
     </View>
   );
 

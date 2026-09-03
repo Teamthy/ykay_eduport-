@@ -24,16 +24,22 @@ export async function POST(request: NextRequest) {
   });
   if (!user || !(await bcrypt.compare(input.currentPassword, user.passwordHash)))
     return NextResponse.json({ error: "Current password is incorrect." }, { status: 400 });
-  await prisma.$transaction([
-    prisma.user.update({
+  const newPasswordHash = await bcrypt.hash(input.newPassword, 12);
+  const updated = await prisma.$transaction(async (tx) => {
+    const changed = await tx.user.update({
       where: { id: user.id },
-      data: { passwordHash: await bcrypt.hash(input.newPassword, 12), mustChangePassword: false },
-    }),
-    prisma.passwordResetToken.updateMany({
+      data: {
+        passwordHash: newPasswordHash,
+        mustChangePassword: false,
+        tokenVersion: { increment: 1 },
+      },
+      select: { tokenVersion: true },
+    });
+    await tx.passwordResetToken.updateMany({
       where: { userId: user.id, usedAt: null },
       data: { usedAt: new Date() },
-    }),
-    prisma.auditLog.create({
+    });
+    await tx.auditLog.create({
       data: {
         schoolId: user.schoolId,
         actorUserId: user.id,
@@ -41,9 +47,14 @@ export async function POST(request: NextRequest) {
         entityType: "User",
         entityId: user.id,
       },
-    }),
-  ]);
-  const token = await signSession({ ...session, mustChangePassword: false });
+    });
+    return changed;
+  });
+  const token = await signSession({
+    ...session,
+    mustChangePassword: false,
+    tokenVersion: updated.tokenVersion,
+  });
   const response = NextResponse.json({ ok: true });
   const cookie = sessionCookie(token);
   response.cookies.set(cookie.name, cookie.value, cookie.options);

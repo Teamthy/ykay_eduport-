@@ -102,9 +102,15 @@ export async function flushQueue(): Promise<void> {
           headers: await authHeaders(),
           body: item.body || undefined,
         });
-        if (res.ok || res.status === 409) {
+        const payload = item.body ? JSON.parse(item.body) as { action?: string } : null;
+        const isFinalSubmit = payload?.action === "SUBMIT";
+        if (res.ok || (res.status === 409 && !isFinalSubmit)) {
           await removeQueue(item.id);
         } else if (res.status >= 400 && res.status < 500) {
+          // Do not silently drop a queued final exam submit from old app builds.
+          // Keep it pending so support can reconcile rather than pretending it
+          // was submitted. New builds do not queue final submits at all.
+          if (isFinalSubmit) break;
           await removeQueue(item.id);
         } else {
           break;

@@ -163,9 +163,9 @@ export async function PATCH(request: NextRequest) {
     case "UNSUSPEND":
       await prisma.user.update({
         where: { id: target.id },
-        data: { isSuspended: false, isActive: true },
+        data: { isSuspended: false, isActive: true, tokenVersion: { increment: 1 } },
       });
-      message = `${target.name} re-activated.`;
+      message = `${target.name} re-activated. Existing sessions remain revoked; they must sign in again.`;
       break;
     case "RESET_PASSWORD": {
       temporaryPassword = `Ykay-${crypto.randomBytes(6).toString("base64url")}`;
@@ -179,12 +179,18 @@ export async function PATCH(request: NextRequest) {
       break;
     }
     case "PROMOTE_ADMIN":
-      await prisma.user.update({ where: { id: target.id }, data: { role: UserRole.ADMIN } });
-      message = `${target.name} promoted to ADMIN.`;
+      await prisma.user.update({
+        where: { id: target.id },
+        data: { role: UserRole.ADMIN, tokenVersion: { increment: 1 } },
+      });
+      message = `${target.name} promoted to ADMIN. Existing sessions revoked.`;
       break;
     case "DEMOTE_TEACHER":
-      await prisma.user.update({ where: { id: target.id }, data: { role: UserRole.TEACHER } });
-      message = `${target.name} set to TEACHER role.`;
+      await prisma.user.update({
+        where: { id: target.id },
+        data: { role: UserRole.TEACHER, tokenVersion: { increment: 1 } },
+      });
+      message = `${target.name} set to TEACHER role. Existing sessions revoked.`;
       break;
     default:
       return NextResponse.json({ error: "Unsupported action." }, { status: 400 });

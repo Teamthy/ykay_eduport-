@@ -2,29 +2,42 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
+import { requireRole, type SessionUser } from "@/lib/session";
 import { getClientIp } from "@/lib/requests";
 
 export const dynamic = "force-dynamic";
 
-async function resolveExamAndTeacher(userId: string, schoolId: string, examId: string) {
-  const profile = await prisma.teacherProfile.findFirst({
-    where: { userId, schoolId, isActive: true },
-    select: { id: true },
-  });
-  if (!profile) return null;
+const STAFF_EXAM_ROLES = new Set<UserRole>([UserRole.TEACHER, UserRole.HOD]);
+const OVERSIGHT_ROLES = new Set<UserRole>([UserRole.ADMIN, UserRole.DIRECTOR]);
+
+async function resolveExamAndTeacher(user: SessionUser, examId: string) {
   const exam = await prisma.exam.findFirst({
-    where: { id: examId, schoolId },
+    where: { id: examId, schoolId: user.schoolId },
     select: {
       id: true,
       title: true,
       subjectName: true,
       classId: true,
+      teacherProfileId: true,
       classroom: { select: { displayName: true } },
     },
   });
   if (!exam) return null;
-  return { profile, exam };
+
+  if (STAFF_EXAM_ROLES.has(user.role)) {
+    const profile = await prisma.teacherProfile.findFirst({
+      where: { userId: user.id, schoolId: user.schoolId, isActive: true },
+      select: { id: true },
+    });
+    if (!profile || exam.teacherProfileId !== profile.id) return null;
+    return { profile, exam, oversight: false };
+  }
+
+  if (OVERSIGHT_ROLES.has(user.role)) {
+    return { profile: null, exam, oversight: true };
+  }
+
+  return null;
 }
 
 /** GET /api/teacher/exams/[id]/retake — exam + its class students + who already has a retake. */
@@ -37,12 +50,12 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
   ]);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await context.params;
-  const ctx = await resolveExamAndTeacher(user.id, user.schoolId, id);
+  const ctx = await resolveExamAndTeacher(user, id);
   if (!ctx) return NextResponse.json({ error: "Exam not found." }, { status: 404 });
 
   const [students, retakes] = await Promise.all([
     prisma.studentProfile.findMany({
-      where: { currentClassId: ctx.exam.classId, isActive: true },
+      where: { schoolId: user.schoolId, currentClassId: ctx.exam.classId, isActive: true },
       select: { id: true, studentId: true, displayName: true },
       orderBy: { displayName: "asc" },
     }),
@@ -84,7 +97,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   ]);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await context.params;
-  const ctx = await resolveExamAndTeacher(user.id, user.schoolId, id);
+  const ctx = await resolveExamAndTeacher(user, id);
   if (!ctx) return NextResponse.json({ error: "Exam not found." }, { status: 404 });
 
   let input: z.infer<typeof grantSchema>;
@@ -94,10 +107,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  // Only grant retakes to active students in this exam's class.
+  // Only grant retakes to active students in this exam's class and school.
   const eligible = await prisma.studentProfile.findMany({
     where: {
       id: { in: input.studentProfileIds },
+      schoolId: user.schoolId,
       currentClassId: ctx.exam.classId,
       isActive: true,
     },
@@ -120,11 +134,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
     data: {
       schoolId: user.schoolId,
       actorUserId: user.id,
-      action: "EXAM_RETAKE_GRANTED",
+      action: ctx.oversight ? "EXAM_RETAKE_GRANTED_BY_OVERSIGHT" : "EXAM_RETAKE_GRANTED",
       entityType: "Exam",
       entityId: ctx.exam.id,
       ipAddress: getClientIp(request),
-      metadata: { examTitle: ctx.exam.title, count: granted } as never,
+      metadata: { examTitle: ctx.exam.title, count: granted, oversight: ctx.oversight } as never,
     },
   });
 

@@ -18,6 +18,7 @@ export async function getStudentReportCardContext() {
       displayName: true,
       currentClass: { select: { displayName: true } },
       reportCards: {
+        where: { status: ReportCardStatus.RELEASED },
         orderBy: [{ generatedAt: "desc" }, { createdAt: "desc" }],
         include: {
           subjects: { orderBy: { sortOrder: "asc" } },
@@ -55,6 +56,7 @@ export async function getParentReportCardContext() {
               displayName: true,
               currentClass: { select: { displayName: true } },
               reportCards: {
+                where: { status: ReportCardStatus.RELEASED },
                 orderBy: [{ generatedAt: "desc" }, { createdAt: "desc" }],
                 include: { subjects: { orderBy: { sortOrder: "asc" } } },
               },

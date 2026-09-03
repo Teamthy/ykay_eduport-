@@ -30,14 +30,14 @@ export async function register() {
       console.error(
         "\n" +
           "==============================================================\n" +
-          "  ENVIRONMENT VALIDATION FAILED\n" +
+          "  FATAL ENVIRONMENT VALIDATION FAILED\n" +
           "==============================================================\n" +
           detail +
           "\n--------------------------------------------------------------\n" +
-          "  The server is starting anyway so the site stays reachable.\n" +
-          "  Fix the settings above: affected features will not work.\n" +
+          "  Production cannot safely serve traffic with this configuration.\n" +
           "==============================================================\n",
       );
+      if (process.env.NODE_ENV === "production") throw error;
     }
 
     try {

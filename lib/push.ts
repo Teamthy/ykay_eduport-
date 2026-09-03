@@ -5,6 +5,7 @@
  */
 
 const EXPO_PUSH_URL = "https://exp.host/--/api/v2/push/send";
+const EXPO_RECEIPTS_URL = "https://exp.host/--/api/v2/push/getReceipts";
 
 export interface PushPayload {
   title: string;
@@ -12,26 +13,99 @@ export interface PushPayload {
   data?: Record<string, unknown>;
 }
 
+type ExpoTicket = {
+  status?: "ok" | "error";
+  id?: string;
+  message?: string;
+  details?: { error?: string };
+};
+
+type ExpoReceipt = ExpoTicket;
+
 function chunk<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
   return out;
 }
 
+async function deleteTokens(tokens: string[]) {
+  if (!tokens.length) return;
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    await prisma.deviceToken.deleteMany({ where: { token: { in: tokens } } });
+  } catch (error) {
+    console.warn("[push] could not delete invalid Expo tokens", error);
+  }
+}
+
+async function checkReceipts(receiptIds: string[]) {
+  if (!receiptIds.length) return;
+  try {
+    const response = await fetch(EXPO_RECEIPTS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: receiptIds }),
+    });
+    const data = (await response.json().catch(() => null)) as {
+      data?: Record<string, ExpoReceipt>;
+    } | null;
+    if (!response.ok || !data?.data) {
+      console.warn("[push] Expo receipt lookup failed", response.status);
+      return;
+    }
+    for (const [id, receipt] of Object.entries(data.data)) {
+      if (receipt.status === "error") {
+        console.warn("[push] Expo receipt error", {
+          id,
+          message: receipt.message,
+          error: receipt.details?.error,
+        });
+      }
+    }
+  } catch (error) {
+    console.warn("[push] Expo receipt lookup threw", error);
+  }
+}
+
 /** Send a push to many tokens (batches of 100, per Expo limits). */
 export async function sendPush(tokens: string[], payload: PushPayload): Promise<void> {
   if (!tokens.length) return;
+  const invalidTokens: string[] = [];
+  const receiptIds: string[] = [];
+
   for (const batch of chunk(tokens, 100)) {
     try {
-      await fetch(EXPO_PUSH_URL, {
+      const response = await fetch(EXPO_PUSH_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(batch.map((to) => ({ to, ...payload }))),
       });
-    } catch {
-      /* fire-and-forget per batch */
+      const data = (await response.json().catch(() => null)) as { data?: ExpoTicket[] } | null;
+      if (!response.ok || !Array.isArray(data?.data)) {
+        console.warn("[push] Expo send failed", response.status);
+        continue;
+      }
+      data.data.forEach((ticket, index) => {
+        if (ticket.status === "ok" && ticket.id) {
+          receiptIds.push(ticket.id);
+          return;
+        }
+        if (ticket.status === "error") {
+          const token = batch[index];
+          const code = ticket.details?.error;
+          console.warn("[push] Expo ticket error", { token, code, message: ticket.message });
+          if (code === "DeviceNotRegistered") invalidTokens.push(token);
+        }
+      });
+    } catch (error) {
+      console.warn("[push] Expo send threw", error);
     }
   }
+
+  await deleteTokens([...new Set(invalidTokens)]);
+  // Receipts are often available shortly after ticket creation. Best-effort:
+  // failed lookup is logged but never blocks the in-app notification path.
+  void checkReceipts(receiptIds);
 }
 
 /**

@@ -8,6 +8,12 @@ import { getClientIp } from "@/lib/requests";
 import { createApplicationId } from "@/lib/security";
 import { requireRole } from "@/lib/session";
 import { logger } from "@/lib/logger";
+import {
+  idempotencyRequestHash,
+  replayIdempotency,
+  requestMethodForIdempotency,
+  requestPathForIdempotency,
+} from "@/lib/idempotency";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -57,9 +63,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  let rawBody: unknown;
   let input: z.infer<typeof schema>;
   try {
-    input = schema.parse(await request.json());
+    rawBody = await request.json();
+    input = schema.parse(rawBody);
   } catch (error) {
     const issues =
       error instanceof z.ZodError
@@ -70,6 +78,13 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
+  const requestHash = idempotencyRequestHash({
+    method: requestMethodForIdempotency(request),
+    path: requestPathForIdempotency(request, "/api/admin/admissions/paper"),
+    actorId: user.id,
+    scope: "ADMISSION_PAPER",
+    body: rawBody,
+  });
 
   if (input.feePaid && !input.feeMethod) {
     return NextResponse.json(
@@ -82,10 +97,8 @@ export async function POST(request: NextRequest) {
     where: { schoolId_scope_key: { schoolId: user.schoolId, scope: "ADMISSION_PAPER", key } },
   });
   if (replay) {
-    return NextResponse.json(
-      { ...(replay.response as object), idempotentReplay: true },
-      { status: replay.statusCode },
-    );
+    const resolved = replayIdempotency(replay, requestHash);
+    return NextResponse.json(resolved.body, { status: resolved.status });
   }
 
   const draft = input.draft;
@@ -201,7 +214,7 @@ export async function POST(request: NextRequest) {
         schoolId: user.schoolId,
         scope: "ADMISSION_PAPER",
         key,
-        requestHash: "v1",
+        requestHash,
         response,
         statusCode: 201,
       },

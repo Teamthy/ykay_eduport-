@@ -7,6 +7,12 @@ import { getClientIp } from "@/lib/requests";
 import { sendParentWelcomeEmail } from "@/lib/email";
 import { requireRole } from "@/lib/session";
 import { logger } from "@/lib/logger";
+import {
+  idempotencyRequestHash,
+  replayIdempotency,
+  requestMethodForIdempotency,
+  requestPathForIdempotency,
+} from "@/lib/idempotency";
 const schema = z.object({
   applicationId: z.string().min(1),
   classId: z.string().min(1),
@@ -23,20 +29,28 @@ export async function POST(request: NextRequest) {
       { error: "An Idempotency-Key header (min. 16 chars) is required." },
       { status: 400 },
     );
+  let rawBody: unknown;
   let input: z.infer<typeof schema>;
   try {
-    input = schema.parse(await request.json());
+    rawBody = await request.json();
+    input = schema.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid placement details." }, { status: 400 });
   }
+  const requestHash = idempotencyRequestHash({
+    method: requestMethodForIdempotency(request),
+    path: requestPathForIdempotency(request, "/api/admin/admissions/enroll"),
+    actorId: user.id,
+    scope: "ADMISSION_ENROLLMENT",
+    body: rawBody,
+  });
   const replay = await prisma.idempotencyRecord.findUnique({
     where: { schoolId_scope_key: { schoolId: user.schoolId, scope: "ADMISSION_ENROLLMENT", key } },
   });
-  if (replay)
-    return NextResponse.json(
-      { ...(replay.response as object), idempotentReplay: true },
-      { status: replay.statusCode },
-    );
+  if (replay) {
+    const resolved = replayIdempotency(replay, requestHash);
+    return NextResponse.json(resolved.body, { status: resolved.status });
+  }
   const application = await prisma.admissionApplication.findFirst({
     where: { schoolId: user.schoolId, applicationId: input.applicationId },
     include: { enrolledStudent: true },
@@ -62,7 +76,6 @@ export async function POST(request: NextRequest) {
     );
   const schoolClass = await prisma.schoolClass.findFirst({
     where: { id: input.classId, schoolId: user.schoolId, isActive: true },
-    include: { _count: { select: { students: { where: { isActive: true } } } } },
   });
   if (!schoolClass) return NextResponse.json({ error: "Class not found." }, { status: 404 });
   if (schoolClass.level !== application.classApplying)
@@ -70,8 +83,6 @@ export async function POST(request: NextRequest) {
       { error: `Placement must match the applied class level (${application.classApplying}).` },
       { status: 409 },
     );
-  if (schoolClass.capacity !== null && schoolClass._count.students >= schoolClass.capacity)
-    return NextResponse.json({ error: "This class is at capacity." }, { status: 409 });
   const existingParent = await prisma.user.findFirst({
     where: { email: application.parentEmail, schoolId: user.schoolId },
   });
@@ -82,6 +93,15 @@ export async function POST(request: NextRequest) {
   const tempPassword = oneTimeSecret();
   try {
     const result = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "SchoolClass" WHERE id = ${schoolClass.id} AND "schoolId" = ${user.schoolId} AND "isActive" = true FOR UPDATE`;
+      const lockedClass = await tx.schoolClass.findFirst({
+        where: { id: schoolClass.id, schoolId: user.schoolId, isActive: true },
+        include: { _count: { select: { students: { where: { isActive: true } } } } },
+      });
+      if (!lockedClass) throw new Error("CLASS_NOT_FOUND");
+      if (lockedClass.capacity !== null && lockedClass._count.students >= lockedClass.capacity) {
+        throw new Error("CLASS_AT_CAPACITY");
+      }
       let parent = existingParent
         ? await tx.parentProfile.findFirst({ where: { userId: existingParent.id } })
         : null;
@@ -114,7 +134,7 @@ export async function POST(request: NextRequest) {
       const student = await tx.studentProfile.create({
         data: {
           schoolId: user.schoolId,
-          currentClassId: schoolClass.id,
+          currentClassId: lockedClass.id,
           admissionApplicationId: application.id,
           studentId: number,
           firstName: application.firstName,
@@ -143,7 +163,7 @@ export async function POST(request: NextRequest) {
           reviewedAt: new Date(),
           entranceScore: input.entranceScore,
           entrancePassed: true,
-          recommendedClassId: schoolClass.id,
+          recommendedClassId: lockedClass.id,
           entranceReviewedAt: new Date(),
         },
       });
@@ -157,12 +177,17 @@ export async function POST(request: NextRequest) {
           ipAddress: getClientIp(request),
           metadata: {
             studentId: number,
-            className: schoolClass.displayName,
+            className: lockedClass.displayName,
             entranceScore: input.entranceScore,
           },
         },
       });
-      return { student, parentCreated, parentDisplayName: parent.displayName };
+      return {
+        student,
+        parentCreated,
+        parentDisplayName: parent.displayName,
+        className: lockedClass.displayName,
+      };
     });
     // Email the parent their portal credentials.
     //
@@ -178,7 +203,7 @@ export async function POST(request: NextRequest) {
           parentName: result.parentDisplayName,
           studentName: displayName,
           studentId: number,
-          className: schoolClass.displayName,
+          className: result.className,
           temporaryPassword: tempPassword,
         });
         welcomeEmailSent = true;
@@ -190,7 +215,7 @@ export async function POST(request: NextRequest) {
     }
 
     const response = {
-      student: { studentId: number, displayName, className: schoolClass.displayName },
+      student: { studentId: number, displayName, className: result.className },
       parentAccount: {
         email: application.parentEmail,
         temporaryPassword: result.parentCreated ? tempPassword : null,
@@ -203,7 +228,7 @@ export async function POST(request: NextRequest) {
         schoolId: user.schoolId,
         scope: "ADMISSION_ENROLLMENT",
         key,
-        requestHash: "v1",
+        requestHash,
         response: {
           student: response.student,
           parentAccount: {
@@ -221,6 +246,9 @@ export async function POST(request: NextRequest) {
     logger.error("Request failed", {
       error: error instanceof Error ? error.message : String(error),
     });
+    if (error instanceof Error && error.message === "CLASS_AT_CAPACITY") {
+      return NextResponse.json({ error: "This class is at capacity." }, { status: 409 });
+    }
     return NextResponse.json(
       { error: "Enrollment could not be completed. No partial record was saved." },
       { status: 500 },

@@ -102,8 +102,16 @@ export async function PATCH(request: NextRequest) {
     const payload = updateSchema.parse(await request.json());
     const ipAddress = getClientIp(request);
     const updated = await prisma.$transaction(async (tx) => {
+      const owned = await tx.reportCard.findFirst({
+        where: { id: payload.reportCardId, schoolId: user.schoolId },
+        select: { id: true },
+      });
+      if (!owned) {
+        throw new Error("REPORT_CARD_NOT_FOUND_FOR_SCHOOL");
+      }
+
       const report = await tx.reportCard.update({
-        where: { id: payload.reportCardId },
+        where: { id: owned.id },
         data: {
           status: payload.status,
           releasedAt: payload.status === ReportCardStatus.RELEASED ? new Date() : null,
@@ -221,7 +229,16 @@ export async function PATCH(request: NextRequest) {
         subjects: updated.subjects,
       },
     });
-  } catch {
-    return NextResponse.json({ error: "Unable to update report card status." }, { status: 400 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    return NextResponse.json(
+      {
+        error:
+          message === "REPORT_CARD_NOT_FOUND_FOR_SCHOOL"
+            ? "Report card not found."
+            : "Unable to update report card status.",
+      },
+      { status: message === "REPORT_CARD_NOT_FOUND_FOR_SCHOOL" ? 404 : 400 },
+    );
   }
 }

@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
       role: result.admin.role,
       name: result.admin.name,
       email: result.admin.email,
+      tokenVersion: result.admin.tokenVersion,
     });
 
     const response = NextResponse.json({

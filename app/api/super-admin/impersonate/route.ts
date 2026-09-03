@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
       isActive: true,
       isSuspended: true,
       mustChangePassword: true,
+      tokenVersion: true,
     },
   });
 
@@ -60,6 +61,7 @@ export async function POST(request: NextRequest) {
     name: target.name,
     email: target.email,
     mustChangePassword: false,
+    tokenVersion: target.tokenVersion,
     impersonatedBy: superAdmin.id,
   });
 
@@ -162,6 +164,7 @@ export async function DELETE(request: NextRequest) {
       role: true,
       schoolId: true,
       mustChangePassword: true,
+      tokenVersion: true,
     },
   });
   if (!superAdmin)
@@ -187,6 +190,7 @@ export async function DELETE(request: NextRequest) {
     name: superAdmin.name,
     email: superAdmin.email,
     mustChangePassword: superAdmin.mustChangePassword,
+    tokenVersion: superAdmin.tokenVersion,
   });
 
   const response = NextResponse.json({

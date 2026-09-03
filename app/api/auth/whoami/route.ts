@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { UserRole } from "@prisma/client";
-import { checkRole, explainDenial, getSession } from "@/lib/session";
+import { checkRole, explainDenial, getRawSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +23,7 @@ export const dynamic = "force-dynamic";
  * would make the diagnostic undiagnosable.
  */
 export async function GET() {
-  const session = await getSession();
+  const session = await getRawSession();
 
   if (!session) {
     return NextResponse.json({

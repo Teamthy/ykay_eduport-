@@ -246,6 +246,7 @@ async function deliverPush(input: InAppNotificationInput) {
    ------------------------------------------------------------------ */
 
 const BACKOFF_MINUTES = [5, 30, 120];
+const PROCESSING_LEASE_MS = 2 * 60_000;
 
 export async function dispatchDueNotifications(limit = 25) {
   const now = new Date();
@@ -261,6 +262,13 @@ export async function dispatchDueNotifications(limit = 25) {
   let retried = 0;
 
   for (const job of due) {
+    const leaseUntil = new Date(Date.now() + PROCESSING_LEASE_MS);
+    const claim = await prisma.notificationJob.updateMany({
+      where: { id: job.id, status: AlertDeliveryStatus.PENDING, nextAttemptAt: { lte: now } },
+      data: { nextAttemptAt: leaseUntil, lastError: "PROCESSING lease claimed" },
+    });
+    if (claim.count !== 1) continue;
+
     const adapter = adapters[job.channel];
 
     // Channels without a configured provider are skipped (not failed) so

@@ -36,11 +36,14 @@ export const IS_WEB = Platform.OS === "web";
  * same-origin, so CORS never enters the picture on web at all.
  */
 const CONFIGURED_API_URL = process.env.EXPO_PUBLIC_API_URL;
+if (!IS_WEB && !CONFIGURED_API_URL && process.env.NODE_ENV === "production") {
+  throw new Error("EXPO_PUBLIC_API_URL must be set for production mobile builds.");
+}
 export const API_BASE = IS_WEB
   ? "" // web -> relative, proxied by Metro. Never cross-origin.
   : CONFIGURED_API_URL && CONFIGURED_API_URL !== ""
-    ? CONFIGURED_API_URL
-    : "https://ykay-eduport2.vercel.app";
+    ? CONFIGURED_API_URL.replace(/\/$/, "")
+    : "http://localhost:3000";
 
 const SESSION_KEY = "ykay_session";
 

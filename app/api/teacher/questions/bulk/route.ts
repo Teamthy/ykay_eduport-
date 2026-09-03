@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { UserRole, ExamQuestionType, Prisma } from "@prisma/client";
+import { requireRole, type SessionUser } from "@/lib/session";
+import { UserRole, ExamQuestionType, ExamStatus, Prisma } from "@prisma/client";
 
 import { logger } from "@/lib/logger";
 
@@ -36,10 +36,19 @@ const schema = z.object({
     .max(500),
 });
 
+const TEACHING_ROLES = new Set<UserRole>([UserRole.TEACHER, UserRole.HOD]);
+function examAccessWhere(user: SessionUser, examId: string) {
+  return {
+    id: examId,
+    schoolId: user.schoolId,
+    ...(TEACHING_ROLES.has(user.role) ? { teacherProfile: { userId: user.id } } : {}),
+  } as const;
+}
+
 /**
  * POST — Bulk upload questions to an exam.
- * Validates ownership, then creates all questions in a single transaction
- * to ensure atomic sync (all or nothing).
+ * Validates ownership and DRAFT status, then creates all questions and
+ * recalculates total marks in one transaction.
  */
 export async function POST(request: NextRequest) {
   const user = await requireRole([
@@ -61,15 +70,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Validation failed.", details: issues }, { status: 400 });
   }
 
-  // Verify exam exists and belongs to this teacher
   const exam = await prisma.exam.findFirst({
-    where: {
-      id: input.examId,
-      schoolId: user.schoolId,
-      ...(user.role === UserRole.TEACHER || user.role === UserRole.HOD
-        ? { teacherProfile: { userId: user.id } }
-        : {}),
-    },
+    where: examAccessWhere(user, input.examId),
     include: {
       questions: { select: { id: true } },
     },
@@ -79,6 +81,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: "Exam not found or you don't have access." },
       { status: 404 },
+    );
+  }
+  if (exam.status !== ExamStatus.DRAFT) {
+    return NextResponse.json(
+      { error: "Questions can only be changed while the exam is still in DRAFT." },
+      { status: 409 },
     );
   }
 
@@ -92,7 +100,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Build question data for Prisma
   const typeMap: Record<string, ExamQuestionType> = {
     MCQ: ExamQuestionType.MCQ,
     TRUE_FALSE: ExamQuestionType.TRUE_FALSE,
@@ -111,30 +118,31 @@ export async function POST(request: NextRequest) {
     sortOrder: exam.questions.length + idx + 1,
   }));
 
-  // Atomic transaction — all questions created or none
   try {
-    const created = await prisma.$transaction(
-      questionData.map((data) => prisma.examQuestion.create({ data })),
-    );
-
-    // Recalculate total marks
-    const allQuestions = await prisma.examQuestion.findMany({
-      where: { examId: input.examId },
-      select: { marks: true },
-    });
-    const totalMarks = allQuestions.reduce((sum, q) => sum + q.marks, 0);
-
-    await prisma.exam.update({
-      where: { id: input.examId },
-      data: { totalMarks },
+    const result = await prisma.$transaction(async (tx) => {
+      const created = [];
+      for (const data of questionData) {
+        created.push(await tx.examQuestion.create({ data }));
+      }
+      const aggregate = await tx.examQuestion.aggregate({
+        where: { examId: input.examId },
+        _sum: { marks: true },
+        _count: { _all: true },
+      });
+      const totalMarks = aggregate._sum.marks ?? 0;
+      await tx.exam.update({
+        where: { id: input.examId },
+        data: { totalMarks },
+      });
+      return { created, totalQuestions: aggregate._count._all, totalMarks };
     });
 
     return NextResponse.json({
       ok: true,
-      message: `${created.length} questions synced successfully.`,
-      created: created.length,
-      totalQuestions: allQuestions.length,
-      totalMarks,
+      message: `${result.created.length} questions synced successfully.`,
+      created: result.created.length,
+      totalQuestions: result.totalQuestions,
+      totalMarks: result.totalMarks,
     });
   } catch (error) {
     logger.error("[bulk-questions] Transaction failed:", {
@@ -165,7 +173,7 @@ export async function GET(request: NextRequest) {
   if (!examId) return NextResponse.json({ error: "examId required" }, { status: 400 });
 
   const exam = await prisma.exam.findFirst({
-    where: { id: examId, schoolId: user.schoolId },
+    where: examAccessWhere(user, examId),
     include: {
       questions: { orderBy: { sortOrder: "asc" } },
       classroom: { select: { displayName: true } },
@@ -213,13 +221,38 @@ export async function DELETE(request: NextRequest) {
   const question = await prisma.examQuestion.findFirst({
     where: {
       id: questionId,
-      exam: { schoolId: user.schoolId },
+      exam: {
+        schoolId: user.schoolId,
+        ...(TEACHING_ROLES.has(user.role) ? { teacherProfile: { userId: user.id } } : {}),
+      },
     },
+    include: { exam: { select: { id: true, status: true } } },
   });
 
   if (!question) return NextResponse.json({ error: "Question not found." }, { status: 404 });
+  if (question.exam.status !== ExamStatus.DRAFT) {
+    return NextResponse.json(
+      { error: "Questions can only be deleted while the exam is still in DRAFT." },
+      { status: 409 },
+    );
+  }
 
-  await prisma.examQuestion.delete({ where: { id: questionId } });
+  const result = await prisma.$transaction(async (tx) => {
+    await tx.examQuestion.delete({ where: { id: questionId } });
+    const aggregate = await tx.examQuestion.aggregate({
+      where: { examId: question.exam.id },
+      _sum: { marks: true },
+      _count: { _all: true },
+    });
+    const totalMarks = aggregate._sum.marks ?? 0;
+    await tx.exam.update({ where: { id: question.exam.id }, data: { totalMarks } });
+    return { totalMarks, totalQuestions: aggregate._count._all };
+  });
 
-  return NextResponse.json({ ok: true, message: "Question deleted." });
+  return NextResponse.json({
+    ok: true,
+    message: "Question deleted.",
+    totalMarks: result.totalMarks,
+    totalQuestions: result.totalQuestions,
+  });
 }

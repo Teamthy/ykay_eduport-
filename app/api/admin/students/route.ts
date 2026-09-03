@@ -5,6 +5,12 @@ import { getClientIp } from "@/lib/requests";
 import { PEOPLE_ADMIN_ROLES, oneTimeSecret, passwordHash, uniqueStudentNumber } from "@/lib/people";
 import { requireRole } from "@/lib/session";
 import { logger } from "@/lib/logger";
+import {
+  idempotencyRequestHash,
+  replayIdempotency,
+  requestMethodForIdempotency,
+  requestPathForIdempotency,
+} from "@/lib/idempotency";
 
 const schema = z.object({
   firstName: z.string().trim().min(2).max(80),
@@ -69,27 +75,32 @@ export async function POST(request: NextRequest) {
       { error: "An Idempotency-Key header (min. 16 chars) is required." },
       { status: 400 },
     );
+  let rawBody: unknown;
   let input: z.infer<typeof schema>;
   try {
-    input = schema.parse(await request.json());
+    rawBody = await request.json();
+    input = schema.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid student details." }, { status: 400 });
   }
+  const requestHash = idempotencyRequestHash({
+    method: requestMethodForIdempotency(request),
+    path: requestPathForIdempotency(request, "/api/admin/students"),
+    actorId: user.id,
+    scope: "STUDENT_ENROLLMENT",
+    body: rawBody,
+  });
   const existing = await prisma.idempotencyRecord.findUnique({
     where: { schoolId_scope_key: { schoolId: user.schoolId, scope: "STUDENT_ENROLLMENT", key } },
   });
-  if (existing)
-    return NextResponse.json(
-      { ...(existing.response as object), idempotentReplay: true },
-      { status: existing.statusCode },
-    );
+  if (existing) {
+    const replay = replayIdempotency(existing, requestHash);
+    return NextResponse.json(replay.body, { status: replay.status });
+  }
   const schoolClass = await prisma.schoolClass.findFirst({
     where: { id: input.classId, schoolId: user.schoolId, isActive: true },
-    include: { _count: { select: { students: { where: { isActive: true } } } } },
   });
   if (!schoolClass) return NextResponse.json({ error: "Class not found." }, { status: 404 });
-  if (schoolClass.capacity !== null && schoolClass._count.students >= schoolClass.capacity)
-    return NextResponse.json({ error: "This class is already at capacity." }, { status: 409 });
   const duplicate = await prisma.studentProfile.findFirst({
     where: {
       schoolId: user.schoolId,
@@ -111,6 +122,15 @@ export async function POST(request: NextRequest) {
   const tempPassword = oneTimeSecret();
   try {
     const result = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "SchoolClass" WHERE id = ${schoolClass.id} AND "schoolId" = ${user.schoolId} AND "isActive" = true FOR UPDATE`;
+      const lockedClass = await tx.schoolClass.findFirst({
+        where: { id: schoolClass.id, schoolId: user.schoolId, isActive: true },
+        include: { _count: { select: { students: { where: { isActive: true } } } } },
+      });
+      if (!lockedClass) throw new Error("CLASS_NOT_FOUND");
+      if (lockedClass.capacity !== null && lockedClass._count.students >= lockedClass.capacity) {
+        throw new Error("CLASS_AT_CAPACITY");
+      }
       let parentId: string | undefined;
       let parentCreated = false;
       if (input.guardianEmail) {
@@ -143,7 +163,7 @@ export async function POST(request: NextRequest) {
       const student = await tx.studentProfile.create({
         data: {
           schoolId: user.schoolId,
-          currentClassId: schoolClass.id,
+          currentClassId: lockedClass.id,
           studentId: number,
           firstName: input.firstName,
           lastName: input.lastName,
@@ -172,17 +192,17 @@ export async function POST(request: NextRequest) {
           entityType: "StudentProfile",
           entityId: student.id,
           ipAddress: getClientIp(request),
-          metadata: { studentId: number, className: schoolClass.displayName, parentCreated },
+          metadata: { studentId: number, className: lockedClass.displayName, parentCreated },
         },
       });
-      return { student, parentCreated };
+      return { student, parentCreated, className: lockedClass.displayName };
     });
     const response = {
       student: {
         id: result.student.id,
         studentId: number,
         displayName,
-        className: schoolClass.displayName,
+        className: result.className,
       },
       parentAccount: input.guardianEmail
         ? {
@@ -197,7 +217,7 @@ export async function POST(request: NextRequest) {
         schoolId: user.schoolId,
         scope: "STUDENT_ENROLLMENT",
         key,
-        requestHash: "v1",
+        requestHash,
         response: {
           student: response.student,
           parentAccount: response.parentAccount
@@ -213,17 +233,19 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && error.message === "CLASS_AT_CAPACITY") {
+      return NextResponse.json({ error: "This class is already at capacity." }, { status: 409 });
+    }
     if (error instanceof Error && error.message.includes("Unique constraint")) {
       const prior = await prisma.idempotencyRecord.findUnique({
         where: {
           schoolId_scope_key: { schoolId: user.schoolId, scope: "STUDENT_ENROLLMENT", key },
         },
       });
-      if (prior)
-        return NextResponse.json(
-          { ...(prior.response as object), idempotentReplay: true },
-          { status: prior.statusCode },
-        );
+      if (prior) {
+        const replay = replayIdempotency(prior, requestHash);
+        return NextResponse.json(replay.body, { status: replay.status });
+      }
     }
     logger.error("Request failed", {
       error: error instanceof Error ? error.message : String(error),

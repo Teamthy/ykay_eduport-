@@ -36,6 +36,7 @@ const exam = {
   title: "Midterm Test",
   subjectName: "Biology",
   classId: "cls_1",
+  teacherProfileId: "tp_1",
   classroom: { displayName: "SS 2" },
 };
 

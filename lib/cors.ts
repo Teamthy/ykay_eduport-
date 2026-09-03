@@ -39,8 +39,9 @@ export function resolveAllowedOrigin(
   const extraRaw = env.extra ?? process.env.CORS_EXTRA_ORIGINS ?? "";
 
   // Nothing configured at all: local development with a bare .env. Production
-  // always sets NEXT_PUBLIC_SITE_URL, so this branch never runs there.
-  if (!siteUrl) return "*";
+  // validation requires NEXT_PUBLIC_SITE_URL and instrumentation rethrows fatal
+  // errors, so never return a credentialed wildcard in production.
+  if (!siteUrl) return process.env.NODE_ENV === "production" ? "null" : "*";
 
   if (!requestOrigin) return siteUrl;
 

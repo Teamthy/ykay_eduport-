@@ -189,10 +189,14 @@ export const studentApi = {
       answers,
     }),
   submitExam: (examId: string, attemptId: string, answers: ExamAnswer[]) =>
-    apiQueued(`/api/student/exams/${examId}/attempt`, "PATCH", {
-      attemptId,
-      action: "SUBMIT",
-      answers,
+    api(`/api/student/exams/${examId}/attempt`, {
+      method: "PATCH",
+      headers: { "x-idempotency-key": `${attemptId}:submit` },
+      body: JSON.stringify({
+        attemptId,
+        action: "SUBMIT",
+        answers,
+      }),
     }),
 };
 

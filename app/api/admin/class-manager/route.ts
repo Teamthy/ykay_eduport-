@@ -170,33 +170,99 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (payload.action === "RESTORE_STUDENT") {
-    await prisma.studentProfile.update({ where: { id: student.id }, data: { isActive: true } });
-    await audit("STUDENT_RESTORED", "StudentProfile", student.id, { studentId: student.studentId });
+    const restored = await prisma
+      .$transaction(async (tx) => {
+        await tx.$queryRaw`SELECT id FROM "SchoolClass" WHERE id = ${student.currentClassId} AND "schoolId" = ${user.schoolId} AND "isActive" = true FOR UPDATE`;
+        const currentClass = await tx.schoolClass.findFirst({
+          where: { id: student.currentClassId, schoolId: user.schoolId, isActive: true },
+          include: { _count: { select: { students: { where: { isActive: true } } } } },
+        });
+        if (!currentClass) throw new Error("CURRENT_CLASS_NOT_FOUND");
+        if (
+          currentClass.capacity !== null &&
+          currentClass._count.students >= currentClass.capacity
+        ) {
+          throw new Error("CURRENT_CLASS_FULL");
+        }
+        await tx.studentProfile.update({ where: { id: student.id }, data: { isActive: true } });
+        await tx.auditLog.create({
+          data: {
+            schoolId: user.schoolId,
+            actorUserId: user.id,
+            action: "STUDENT_RESTORED",
+            entityType: "StudentProfile",
+            entityId: student.id,
+            metadata: {
+              studentId: student.studentId,
+              className: currentClass.displayName,
+            } as never,
+            ipAddress: getClientIp(request),
+          },
+        });
+        return currentClass;
+      })
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : "";
+        if (message === "CURRENT_CLASS_FULL") return { full: true } as const;
+        if (message === "CURRENT_CLASS_NOT_FOUND") return null;
+        throw error;
+      });
+    if (!restored) return NextResponse.json({ error: "Current class not found." }, { status: 404 });
+    if ("full" in restored)
+      return NextResponse.json({ error: "Current class is at capacity." }, { status: 409 });
     return NextResponse.json({
       ok: true,
-      message: `${student.displayName} restored to ${"active roll"}.`,
+      message: `${student.displayName} restored to active roll in ${restored.displayName}.`,
     });
   }
 
   // MOVE_STUDENT
   if (!payload.targetClassId)
     return NextResponse.json({ error: "Target class is required." }, { status: 400 });
-  const targetClass = await prisma.schoolClass.findFirst({
-    where: { id: payload.targetClassId, schoolId: user.schoolId, isActive: true },
-  });
-  if (!targetClass) return NextResponse.json({ error: "Target class not found." }, { status: 404 });
-
-  await prisma.studentProfile.update({
-    where: { id: student.id },
-    data: { currentClassId: targetClass.id },
-  });
-  await audit("STUDENT_MOVED", "StudentProfile", student.id, {
-    studentId: student.studentId,
-    toClass: targetClass.displayName,
-  });
+  const result = await prisma
+    .$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "SchoolClass" WHERE id = ${payload.targetClassId} AND "schoolId" = ${user.schoolId} AND "isActive" = true FOR UPDATE`;
+      const targetClass = await tx.schoolClass.findFirst({
+        where: { id: payload.targetClassId, schoolId: user.schoolId, isActive: true },
+        include: { _count: { select: { students: { where: { isActive: true } } } } },
+      });
+      if (!targetClass) throw new Error("TARGET_CLASS_NOT_FOUND");
+      if (
+        student.currentClassId !== targetClass.id &&
+        targetClass.capacity !== null &&
+        targetClass._count.students >= targetClass.capacity
+      ) {
+        throw new Error("TARGET_CLASS_FULL");
+      }
+      await tx.studentProfile.update({
+        where: { id: student.id },
+        data: { currentClassId: targetClass.id },
+      });
+      await tx.auditLog.create({
+        data: {
+          schoolId: user.schoolId,
+          actorUserId: user.id,
+          action: "STUDENT_MOVED",
+          entityType: "StudentProfile",
+          entityId: student.id,
+          metadata: { studentId: student.studentId, toClass: targetClass.displayName } as never,
+          ipAddress: getClientIp(request),
+        },
+      });
+      return targetClass;
+    })
+    .catch((error) => {
+      const message = error instanceof Error ? error.message : "";
+      if (message === "TARGET_CLASS_NOT_FOUND") return null;
+      if (message === "TARGET_CLASS_FULL") return { full: true } as const;
+      throw error;
+    });
+  if (!result) return NextResponse.json({ error: "Target class not found." }, { status: 404 });
+  if ("full" in result)
+    return NextResponse.json({ error: "Target class is at capacity." }, { status: 409 });
   return NextResponse.json({
     ok: true,
-    message: `${student.displayName} moved to ${targetClass.displayName}.`,
+    message: `${student.displayName} moved to ${result.displayName}.`,
   });
 }
 

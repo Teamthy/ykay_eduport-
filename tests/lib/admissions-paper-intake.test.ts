@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mockPrisma } from "../setup";
+import { idempotencyRequestHash } from "@/lib/idempotency";
 
 /**
  * Paper intake + offline fee recording.
@@ -51,9 +52,21 @@ const validDraft = {
 
 function request(body: unknown, key = "idem-key-1234567890abcdef") {
   return {
+    method: "POST",
+    nextUrl: { pathname: "/api/admin/admissions/paper" },
     json: async () => body,
     headers: { get: (name: string) => (name === "idempotency-key" ? key : null) },
   } as never;
+}
+
+function paperHash(body: unknown) {
+  return idempotencyRequestHash({
+    method: "POST",
+    path: "/api/admin/admissions/paper",
+    actorId: adminUser.id,
+    scope: "ADMISSION_PAPER",
+    body,
+  });
 }
 
 describe("POST /api/admin/admissions/paper", () => {
@@ -79,6 +92,7 @@ describe("POST /api/admin/admissions/paper", () => {
 
   it("replays the stored response instead of creating a second application", async () => {
     mockPrisma.idempotencyRecord.findUnique.mockResolvedValue({
+      requestHash: paperHash({ draft: validDraft }),
       response: { application: { applicationId: "YKCAPP2026ABC123" } },
       statusCode: 201,
     });
