@@ -139,7 +139,7 @@ export function generateCertificatePDF(data: {
   doc.setFontSize(6);
   doc.setTextColor(80, 80, 80);
   doc.text(
-    "This certificate was digitally issued by Ykay College & Leadership Academy. Verify at ykaycollege.edu.ng/verify",
+    "This certificate was digitally issued by Ykay College & Leadership Academy. Verify at ykaycollege.com/verify",
     W / 2,
     H - 15,
     { align: "center" },

@@ -1,7 +1,7 @@
 ﻿import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng";
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.com";
   const pages = [
     "",
     "/about",

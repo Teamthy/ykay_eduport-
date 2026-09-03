@@ -285,7 +285,7 @@ export default function SettingsScreen() {
         <SettingLink
           icon={<Shield size={18} color={colors.brand.greenLight} />}
           title="Privacy policy"
-          onPress={() => Linking.openURL("https://ykaycollege.edu.ng/privacy-policy")}
+          onPress={() => Linking.openURL("https://ykaycollege.com/privacy-policy")}
         />
       </Card>
 
@@ -425,7 +425,7 @@ export default function SettingsScreen() {
         <SettingLink
           icon={<LifeBuoy size={18} color={colors.brand.greenLight} />}
           title="Help centre"
-          onPress={() => Linking.openURL("https://ykaycollege.edu.ng/faq")}
+          onPress={() => Linking.openURL("https://ykaycollege.com/faq")}
         />
       </Card>
 

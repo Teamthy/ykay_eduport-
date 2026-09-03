@@ -410,7 +410,7 @@ Entry Point: First access after the platform is provisioned for Ykay College
 
 Step 1 — Accessing the Setup Wizard
 
-The Director navigates to the admin URL (e.g., `app.ykaycollege.edu.ng/setup`). They see a welcome screen: "Welcome to Ykay College EduPortal. Let's configure your school."
+The Director navigates to the admin URL (e.g., `app.ykaycollege.com/setup`). They see a welcome screen: "Welcome to Ykay College EduPortal. Let's configure your school."
 
 
 
@@ -482,7 +482,7 @@ The Director clicks "Complete Setup". The system creates the school's full confi
 
 Who: Admin, Bursar, Teacher, Academic Coordinator, HOD
 
-Entry Point: `app.ykaycollege.edu.ng/login`
+Entry Point: `app.ykaycollege.com/login`
 
 
 
@@ -536,7 +536,7 @@ Entry Point: Student portal login page
 
 Step 1 — Login
 
-The student navigates to `app.ykaycollege.edu.ng/student/login` or clicks "Student Login" on the main site. They enter their Student ID (e.g., YKC/2025/001) and their Password (set during enrollment or via the welcome email).
+The student navigates to `app.ykaycollege.com/student/login` or clicks "Student Login" on the main site. They enter their Student ID (e.g., YKC/2025/001) and their Password (set during enrollment or via the welcome email).
 
 
 
@@ -567,7 +567,7 @@ Entry Point: Parent portal login
 
 Step 1 — Login
 
-The parent navigates to `app.ykaycollege.edu.ng/parent/login`. They enter the email address registered during their child's enrollment and their password.
+The parent navigates to `app.ykaycollege.com/parent/login`. They enter the email address registered during their child's enrollment and their password.
 
 
 
@@ -729,7 +729,7 @@ The system:
 1. Autogenerates Student ID (e.g., YKC/2025/042)
 2. Creates the student profile with status Active
 3. Creates a parent account (if email provided) with a temporary password
-4. Sends a welcome SMS/WhatsApp to the parent: "Your child [Name] has been enrolled at Ykay College. Student ID: YKC/2025/042. Parent portal login: app.ykaycollege.edu.ng/parent. Temporary password: XXXX"
+4. Sends a welcome SMS/WhatsApp to the parent: "Your child [Name] has been enrolled at Ykay College. Student ID: YKC/2025/042. Parent portal login: app.ykaycollege.com/parent. Temporary password: XXXX"
 5. Autogenerates a fee invoice for the current term
 6. Shows a success toast: "Student enrolled successfully. Student ID: YKC/2025/042"
 

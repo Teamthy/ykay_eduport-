@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   // Derived from env so a preview deployment does not advertise production
   // URLs. The literal was ykaycollege.com — a domain the school does not own,
   // which made every canonical link and social card point at the wrong site.
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.com"),
   title: {
     default: "Ykay College & Leadership Academy — Excellence in Education",
     template: "%s | Ykay College",
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     siteName: "Ykay College",
     locale: "en_NG",
     type: "website",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.com",
     images: [{ url: "/ykay-logo.png", width: 800, height: 800, alt: "Ykay College Logo" }],
   },
   twitter: {

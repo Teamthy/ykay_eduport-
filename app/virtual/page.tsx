@@ -10,12 +10,12 @@ import {
   Users,
 } from "lucide-react";
 
-const VIRTUAL_URL = process.env.NEXT_PUBLIC_VIRTUAL_URL || "https://nuvora.com";
+const VIRTUAL_URL = process.env.NEXT_PUBLIC_VIRTUAL_URL || "https://virtual.ykaycollege.com";
 
 export const metadata = {
   title: "Ykay Virtual — Learn Online Anywhere | Ykay College",
   description:
-    "Ykay Virtual (NUVORA) is the online arm of the Ykay family — live online classes, private 1-on-1 tuition, and UTME/WAEC/IELTS preparation you can join from anywhere.",
+    "Ykay Virtual is the online arm of the Ykay family — live online classes, private 1-on-1 tuition, and UTME/WAEC/IELTS preparation you can join from anywhere.",
 };
 
 const FEATURES = [
@@ -68,7 +68,7 @@ export default function VirtualPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-4 text-sm font-bold text-brand-navy shadow-lg transition-all hover:bg-brand-green-dark hover:scale-[1.02]"
               >
-                Continue to Ykay Virtual
+                Continue to YK-Virtual
                 <ArrowRight size={18} />
               </a>
               <span className="text-xs text-white/60">
@@ -84,8 +84,8 @@ export default function VirtualPage() {
             What you can do on Ykay Virtual
           </h2>
           <p className="mx-auto mb-12 max-w-2xl text-center text-sm leading-relaxed text-[var(--text-muted)] md:text-base">
-            NUVORA is the home of Ykay Virtual — a full online school built by the same team, for
-            learners who study best from home or need extra support.
+            YK-Virtual is the home of Ykay Virtual — a full online school built by the same team,
+            for learners who study best from home or need extra support.
           </p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {FEATURES.map((f) => (
