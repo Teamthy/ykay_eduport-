@@ -97,7 +97,7 @@ export default function MobileAppCTA() {
                       height={196}
                     />
                   ) : (
-                    <div className="flex h-[196px] w-[196px] items-center justify-center text-center text-xs text-slate-400">
+                    <div className="flex h-[196px] w-[196px] items-center justify-center text-center text-xs text-slate-600">
                       QR appears here once the download link is configured
                     </div>
                   )}

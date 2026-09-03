@@ -31,7 +31,7 @@ export default function ChangePassword() {
   return (
     <main className="grid min-h-screen place-items-center bg-brand-navy p-5">
       <form onSubmit={submit} className="w-full max-w-md rounded-3xl bg-white p-8">
-        <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
+        <p className="text-xs font-bold uppercase tracking-widest text-[#2b8a2b]">
           Security required
         </p>
         <h1 className="mt-3 font-display text-4xl tracking-widest text-brand-navy">SET PASSWORD</h1>

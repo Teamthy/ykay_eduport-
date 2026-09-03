@@ -431,7 +431,7 @@ export default function AdmissionApplicationForm() {
           <div className="mx-auto mb-6 grid size-16 place-items-center rounded-3xl bg-brand-green/10 text-brand-green">
             <CheckCircle2 size={36} />
           </div>
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-brand-green">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-[var(--text-accent)]">
             Application received
           </p>
           <h2 className="mt-3 font-display text-3xl tracking-[0.06em] text-[var(--text-primary)] md:text-4xl">

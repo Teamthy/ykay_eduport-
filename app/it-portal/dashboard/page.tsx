@@ -252,25 +252,25 @@ export default function ItPortalDashboard() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/it-portal/certificates"
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-brand-green"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-[var(--text-accent)]"
               >
                 <Award size={14} /> My Certificates
               </Link>
               <Link
                 href="/it-portal/profile"
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-brand-green"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-[var(--text-accent)]"
               >
                 Profile & Settings
               </Link>
               <Link
                 href="/it-portal/instructor"
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-brand-green"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-[var(--text-accent)]"
               >
                 Instructor Dashboard
               </Link>
               <Link
                 href="/it-education"
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-brand-green"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green hover:text-[var(--text-accent)]"
               >
                 Browse Catalog
               </Link>

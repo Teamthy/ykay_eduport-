@@ -287,7 +287,7 @@ export default function MessagesInbox({
               setOpenId(null);
               setMessages([]);
             }}
-            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-brand-green"
+            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] hover:text-[var(--text-accent)]"
           >
             <ArrowLeft size={13} /> Back to inbox
           </button>

@@ -364,7 +364,7 @@ export default function ParentFeesPage() {
                   <div className="space-y-4 lg:col-span-2">
                     {remaining > 0 && (
                       <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
-                        <div className="mb-3 flex items-center gap-2 text-brand-orange">
+                        <div className="mb-3 flex items-center gap-2 text-[var(--text-accent-warm)]">
                           <Building2 size={18} />
                           <h3 className="font-display text-xl">BANK TRANSFER</h3>
                         </div>

@@ -79,14 +79,14 @@ export default function QuestionBankPage() {
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-              <FileText className="mb-2 text-brand-green" size={18} />
+              <FileText className="mb-2 text-[var(--text-accent)]" size={18} />
               <div className="font-display text-2xl">{exams.length}</div>
               <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                 Exams / tests
               </div>
             </div>
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-              <BookOpen className="mb-2 text-brand-orange" size={18} />
+              <BookOpen className="mb-2 text-[var(--text-accent-warm)]" size={18} />
               <div className="font-display text-2xl">{totalQuestions}</div>
               <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                 Questions

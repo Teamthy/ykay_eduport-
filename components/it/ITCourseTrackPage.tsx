@@ -162,7 +162,7 @@ export default function ITCourseTrackPage({ course }: { course: ITCourseContent 
 
             <aside className="space-y-5">
               <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
-                <BookOpen className="text-brand-green" size={22} />
+                <BookOpen className="text-[var(--text-accent)]" size={22} />
                 <h3 className="mt-3 font-display text-xl tracking-wide">Who it&apos;s for</h3>
                 <ul className="mt-4 space-y-2 text-sm text-[var(--text-secondary)]">
                   {course.targetAudience.map((item) => (
@@ -171,7 +171,7 @@ export default function ITCourseTrackPage({ course }: { course: ITCourseContent 
                 </ul>
               </div>
               <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
-                <GraduationCap className="text-brand-orange" size={22} />
+                <GraduationCap className="text-[var(--text-accent-warm)]" size={22} />
                 <h3 className="mt-3 font-display text-xl tracking-wide">Prerequisites</h3>
                 <ul className="mt-4 space-y-2 text-sm text-[var(--text-secondary)]">
                   {course.prerequisites.map((item) => (

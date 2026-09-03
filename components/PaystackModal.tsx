@@ -81,7 +81,7 @@ export default function PaystackModal({
 
             <div className="space-y-4 p-6 text-gray-800">
               <div className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 text-sm">
-                <ShieldCheck className="mt-0.5 shrink-0 text-brand-green" size={18} />
+                <ShieldCheck className="mt-0.5 shrink-0 text-[#2b8a2b]" size={18} />
                 <p>
                   Card details are entered only on Paystack&apos;s secure page. Ykay College never
                   stores or processes raw card numbers.

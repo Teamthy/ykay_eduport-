@@ -77,7 +77,7 @@ export default function SuperAdminHealthPage() {
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           {/* Database */}
           <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
-            <Database className="mb-3 text-brand-green" size={20} />
+            <Database className="mb-3 text-[var(--text-accent)]" size={20} />
             {loading ? (
               <p className="text-sm text-[var(--text-muted)]">Loading…</p>
             ) : (
@@ -91,7 +91,7 @@ export default function SuperAdminHealthPage() {
           </div>
           {/* Redis */}
           <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
-            <Zap className="mb-3 text-brand-orange" size={20} />
+            <Zap className="mb-3 text-[var(--text-accent-warm)]" size={20} />
             {loading ? (
               <p className="text-sm text-[var(--text-muted)]">Loading…</p>
             ) : (

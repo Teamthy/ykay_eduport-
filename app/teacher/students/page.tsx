@@ -183,14 +183,14 @@ export default function TeacherStudentsPage() {
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-              <Users className="mb-2 text-brand-green" size={18} />
+              <Users className="mb-2 text-[var(--text-accent)]" size={18} />
               <div className="font-display text-2xl">{students.length}</div>
               <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                 Visible students
               </div>
             </div>
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-              <BookOpen className="mb-2 text-brand-orange" size={18} />
+              <BookOpen className="mb-2 text-[var(--text-accent-warm)]" size={18} />
               <div className="font-display text-2xl">{assignments.length}</div>
               <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                 Assignments

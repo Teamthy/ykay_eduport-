@@ -52,7 +52,9 @@ export default async function VerifyReportPage({
                 <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-brand-green text-brand-navy">
                   <BadgeCheck size={40} />
                 </div>
-                <h2 className="font-display text-3xl text-brand-green">AUTHENTIC DOCUMENT</h2>
+                <h2 className="font-display text-3xl text-[var(--text-accent)]">
+                  AUTHENTIC DOCUMENT
+                </h2>
                 <p className="mt-2 text-sm text-[var(--text-secondary)]">
                   This report card was officially issued and released by Ykay College &amp;
                   Leadership Academy.

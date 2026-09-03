@@ -794,7 +794,7 @@ export default function UploadQuestionsPage() {
               {/* Stats */}
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
                 <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 text-center">
-                  <div className="text-2xl font-bold text-brand-green">
+                  <div className="text-2xl font-bold text-[var(--text-accent)]">
                     {parseResult.stats.valid}
                   </div>
                   <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">

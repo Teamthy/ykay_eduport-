@@ -98,7 +98,7 @@ export default function ClassRosterPage() {
               {/* Stats */}
               <div className="grid grid-cols-4 gap-4">
                 <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-4">
-                  <Users className="text-brand-orange mb-2" size={18} />
+                  <Users className="text-[var(--text-accent-warm)] mb-2" size={18} />
                   <div className="font-display text-2xl text-[var(--text-primary)]">
                     {teacher.formClassStudentCount}
                   </div>

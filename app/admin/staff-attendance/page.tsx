@@ -286,35 +286,35 @@ export default function AdminStaffAttendancePage() {
             <>
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-                  <UsersIcon className="mb-2 text-brand-green" size={18} />
+                  <UsersIcon className="mb-2 text-[var(--text-accent)]" size={18} />
                   <div className="font-display text-2xl">{data.summary.staffTotal}</div>
                   <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                     Staff
                   </div>
                 </div>
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-                  <CheckCircle2 className="mb-2 text-brand-green" size={18} />
+                  <CheckCircle2 className="mb-2 text-[var(--text-accent)]" size={18} />
                   <div className="font-display text-2xl">{data.summary.present}</div>
                   <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                     Present
                   </div>
                 </div>
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-                  <UserX className="mb-2 text-brand-green" size={18} />
+                  <UserX className="mb-2 text-[var(--text-accent)]" size={18} />
                   <div className="font-display text-2xl">{data.summary.absent}</div>
                   <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                     Absent
                   </div>
                 </div>
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-                  <Clock3 className="mb-2 text-brand-green" size={18} />
+                  <Clock3 className="mb-2 text-[var(--text-accent)]" size={18} />
                   <div className="font-display text-2xl">{data.summary.late}</div>
                   <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                     Late
                   </div>
                 </div>
                 <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-                  <LogIn className="mb-2 text-brand-green" size={18} />
+                  <LogIn className="mb-2 text-[var(--text-accent)]" size={18} />
                   <div className="font-display text-2xl">{data.summary.stillIn}</div>
                   <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                     Still in

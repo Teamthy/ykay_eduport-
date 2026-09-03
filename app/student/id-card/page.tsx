@@ -140,11 +140,11 @@ export default function IDCardPage() {
 
                     <div className="grid grid-cols-2 gap-3 text-xs text-left mb-4">
                       <div className="p-2 rounded-lg bg-gray-50">
-                        <div className="text-[9px] text-gray-400 uppercase">Student ID</div>
+                        <div className="text-[9px] text-gray-600 uppercase">Student ID</div>
                         <div className="font-bold text-brand-navy">{profile?.studentId || "—"}</div>
                       </div>
                       <div className="p-2 rounded-lg bg-gray-50">
-                        <div className="text-[9px] text-gray-400 uppercase">Session</div>
+                        <div className="text-[9px] text-gray-600 uppercase">Session</div>
                         <div className="font-bold text-brand-navy">2025/2026</div>
                       </div>
                     </div>

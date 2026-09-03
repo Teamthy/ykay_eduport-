@@ -140,7 +140,7 @@ export default function ExamPracticePage() {
             <div className="flex-1 min-w-0 space-y-6">
               {loading && (
                 <div className="p-12 rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-3">
-                  <Loader2 size={28} className="animate-spin text-brand-orange" />
+                  <Loader2 size={28} className="animate-spin text-[var(--text-accent-warm)]" />
                   <p className="text-sm text-[var(--text-muted)]">Loading your practice sets…</p>
                 </div>
               )}

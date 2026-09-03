@@ -66,14 +66,14 @@ export default function TestResultsPage() {
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-              <Award className="mb-2 text-brand-green" size={18} />
+              <Award className="mb-2 text-[var(--text-accent)]" size={18} />
               <div className="font-display text-2xl">{released.length}</div>
               <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                 Released
               </div>
             </div>
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-              <FileCheck2 className="mb-2 text-brand-orange" size={18} />
+              <FileCheck2 className="mb-2 text-[var(--text-accent-warm)]" size={18} />
               <div className="font-display text-2xl">
                 {exams.reduce((s, e) => s + e.submittedCount, 0)}
               </div>

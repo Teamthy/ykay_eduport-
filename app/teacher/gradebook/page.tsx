@@ -237,7 +237,7 @@ export default function TeacherGradebookPage() {
 
               {!loading && data && !data.assignments.length ? (
                 <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 text-center shadow-[var(--card-shadow)]">
-                  <ShieldCheck className="mx-auto mb-4 text-brand-orange" size={36} />
+                  <ShieldCheck className="mx-auto mb-4 text-[var(--text-accent-warm)]" size={36} />
                   <h2 className="font-display text-2xl text-[var(--text-primary)]">
                     No subject assignment found
                   </h2>
@@ -293,7 +293,7 @@ export default function TeacherGradebookPage() {
                       <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                         Class Average
                       </div>
-                      <div className="flex items-center gap-2 font-display text-2xl text-brand-green">
+                      <div className="flex items-center gap-2 font-display text-2xl text-[var(--text-accent)]">
                         <TrendingUp size={18} /> {stats.average}%
                       </div>
                     </div>

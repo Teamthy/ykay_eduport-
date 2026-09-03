@@ -105,6 +105,8 @@
   --text-inverse: #0c1824;
   --text-disabled: #475569;
   --text-link: #62d35e;
+  --text-accent: #62d35e;
+  --text-accent-warm: #ff9133;
   --text-link-hover: #87dd84;
 
   /* Accents */
@@ -264,6 +266,8 @@
   --text-inverse: #f8fafc;
   --text-disabled: #94a3b8;
   --text-link: #2b8a2b;
+  --text-accent: #2b8a2b;
+  --text-accent-warm: #c2410c;
   --text-link-hover: #1f6d1f;
 
   /* Accents */

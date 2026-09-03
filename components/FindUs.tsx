@@ -95,17 +95,17 @@ export default function FindUs() {
               </div>
 
               <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)] group-hover:border-brand-green transition-all">
-                <div className="text-[10px] uppercase tracking-widest text-brand-green font-bold mb-2">
+                <div className="text-[10px] uppercase tracking-widest text-[var(--text-accent)] font-bold mb-2">
                   Admissions News · March 15, 2025
                 </div>
-                <h3 className="font-display text-2xl md:text-3xl text-[var(--text-primary)] mb-3 tracking-[1px] group-hover:text-brand-green transition-colors">
+                <h3 className="font-display text-2xl md:text-3xl text-[var(--text-primary)] mb-3 tracking-[1px] group-hover:text-[var(--text-accent)] transition-colors">
                   Ykay College Opens 2025 / 2026 Admissions
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
                   Applications are now open for JSS1 through SS3. Apply online and track your
                   application status in real time.
                 </p>
-                <span className="inline-flex items-center gap-2 text-sm font-bold text-brand-green group-hover:gap-3 transition-all">
+                <span className="inline-flex items-center gap-2 text-sm font-bold text-[var(--text-accent)] group-hover:gap-3 transition-all">
                   Read More <ArrowRight size={14} />
                 </span>
               </div>

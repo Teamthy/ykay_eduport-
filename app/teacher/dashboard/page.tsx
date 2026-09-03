@@ -378,7 +378,7 @@ export default function TeacherDashboard() {
                   )}
                   <Link
                     href="/teacher/cbt-center"
-                    className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-brand-green"
+                    className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[var(--text-accent)]"
                   >
                     Manage CBT <ArrowRight size={12} />
                   </Link>
@@ -438,7 +438,7 @@ export default function TeacherDashboard() {
                     </p>
                   )}
                   {data.stats.pendingCorrections > 0 && (
-                    <p className="mt-4 text-xs font-bold text-brand-orange">
+                    <p className="mt-4 text-xs font-bold text-[var(--text-accent-warm)]">
                       {data.stats.pendingCorrections} attendance correction(s) pending admin review
                     </p>
                   )}

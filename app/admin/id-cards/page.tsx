@@ -215,7 +215,7 @@ export default function AdminIDCardsPage() {
                         {s.studentId} · {s.className}
                       </span>
                     </div>
-                    <IdCard size={16} className="text-brand-green" />
+                    <IdCard size={16} className="text-[var(--text-accent)]" />
                   </label>
                 ))
               )}

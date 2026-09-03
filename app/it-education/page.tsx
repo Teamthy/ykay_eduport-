@@ -275,7 +275,7 @@ export default function ITEducationHubPage() {
         <section className="bg-[var(--section-bg-alt)] px-6 py-16">
           <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
             <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8">
-              <Award className="text-brand-green" size={28} />
+              <Award className="text-[var(--text-accent)]" size={28} />
               <h2 className="mt-4 font-display text-3xl tracking-widest text-[var(--text-primary)]">
                 HOW IT WORKS
               </h2>

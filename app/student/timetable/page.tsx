@@ -74,7 +74,7 @@ export default function StudentTimetablePage() {
 
           {loading && (
             <div className="mt-6 flex items-center gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10">
-              <LoaderCircle className="animate-spin text-brand-green" size={20} />
+              <LoaderCircle className="animate-spin text-[var(--text-accent)]" size={20} />
               <span className="text-sm text-[var(--text-secondary)]">Loading schedule...</span>
             </div>
           )}

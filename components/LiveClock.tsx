@@ -38,7 +38,7 @@ export default function LiveClock() {
 
   return (
     <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--surface-card)] border border-[var(--border-subtle)] text-xs">
-      <Clock size={12} className="text-brand-green" />
+      <Clock size={12} className="text-[var(--text-accent)]" />
       <span className="text-[var(--text-primary)] font-bold font-mono">{time}</span>
       <span className="text-[var(--text-muted)]">·</span>
       <span className="text-[var(--text-muted)]">{date}</span>

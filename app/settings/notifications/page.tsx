@@ -172,7 +172,7 @@ export default function NotificationSettingsPage() {
                         key={category.key}
                         className="flex items-center gap-4 p-5 transition-colors hover:bg-[var(--surface-card-hover)]"
                       >
-                        <span className="text-brand-green">{category.icon}</span>
+                        <span className="text-[var(--text-accent)]">{category.icon}</span>
                         <div className="min-w-0 flex-1">
                           <p className="font-semibold text-[var(--text-primary)]">
                             {category.title}
@@ -209,7 +209,7 @@ export default function NotificationSettingsPage() {
                   otherwise would think their invoice had vanished.
                 */}
                 <div className="flex items-start gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-                  <ShieldCheck size={17} className="mt-0.5 shrink-0 text-brand-green" />
+                  <ShieldCheck size={17} className="mt-0.5 shrink-0 text-[var(--text-accent)]" />
                   <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
                     Turning a category off stops push notifications and emails for it. The
                     notification is still recorded and stays visible in your portal, so nothing is

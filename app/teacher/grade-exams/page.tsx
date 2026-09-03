@@ -72,14 +72,14 @@ export default function GradeExamsPage() {
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-              <ClipboardCheck className="mb-2 text-brand-green" size={18} />
+              <ClipboardCheck className="mb-2 text-[var(--text-accent)]" size={18} />
               <div className="font-display text-2xl">{toGrade.length}</div>
               <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                 Awaiting grading
               </div>
             </div>
             <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-              <FileCheck2 className="mb-2 text-brand-orange" size={18} />
+              <FileCheck2 className="mb-2 text-[var(--text-accent-warm)]" size={18} />
               <div className="font-display text-2xl">
                 {toGrade.reduce((s, e) => s + e.submittedCount, 0)}
               </div>
