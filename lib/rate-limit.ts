@@ -150,34 +150,93 @@ const redisLimiters: Record<string, Ratelimit | null> = redis
 export type RateLimitKind = keyof typeof limiterConfig;
 
 /**
+ * Kinds whose entire purpose is brute-force / credential-stuffing / payment
+ * abuse resistance. Without a SHARED store these are not controls at all:
+ * in-memory state is per container, so serverless gives every invocation a
+ * fresh budget and multi-instance multiplies the budget by replica count.
+ *
+ * In production these kinds FAIL CLOSED (503 via configurationError) when no
+ * distributed limiter is available. A genuinely single-instance deployment can
+ * opt in to the memory fallback with ALLOW_MEMORY_RATE_LIMITS=true — that is
+ * an explicit, documented risk acceptance, not a silent downgrade.
+ */
+const DISTRIBUTED_REQUIRED: ReadonlySet<RateLimitKind> = new Set<RateLimitKind>([
+  "login",
+  "loginStrict",
+  "passwordReset",
+  "changePassword",
+  "signup",
+  "staffActivate",
+  // Admissions surface (public, unauthenticated writes and reads)
+  "draft",
+  "upload",
+  "payment",
+  "status",
+]);
+
+const ALLOW_MEMORY_RATE_LIMITS = process.env.ALLOW_MEMORY_RATE_LIMITS === "true";
+
+const failClosedWarned = new Set<string>();
+
+function failClosed(kind: RateLimitKind, reason: string) {
+  if (!failClosedWarned.has(kind)) {
+    failClosedWarned.add(kind);
+    logger.error(
+      `Rate limiter for "${kind}" is FAILING CLOSED: ${reason}. ` +
+        "Configure UPSTASH_REDIS_REST_URL/TOKEN (or set ALLOW_MEMORY_RATE_LIMITS=true " +
+        "only for an accepted single-instance deployment).",
+    );
+  }
+  return {
+    success: false,
+    retryAfterSeconds: 900,
+    configurationError: true as const,
+  };
+}
+
+/**
  * Generic rate limiter — works for admissions, auth, and any future endpoint.
- * Tries Redis first, falls back to in-memory if unavailable.
+ * Tries Redis first, falls back to in-memory if unavailable — except for
+ * security-critical kinds in production, which fail closed instead of
+ * silently downgrading to a per-instance budget (see DISTRIBUTED_REQUIRED).
  */
 export async function enforceRateLimit(kind: RateLimitKind, identifier: string) {
-  // ── Try Redis first ──────────────────────────────────────
-  const redisLimiter = redisLimiters[kind];
-  if (redisLimiter) {
-    try {
-      const result = await redisLimiter.limit(identifier);
-      const retryAfterSeconds = Math.max(1, Math.ceil((result.reset - Date.now()) / 1000));
-      return {
-        success: result.success,
-        retryAfterSeconds,
-        configurationError: false,
-      };
-    } catch (err) {
-      logger.error("Redis rate limit failed, falling back to in-memory", {
-        error: String(err),
+  const production = process.env.NODE_ENV === "production";
+  const critical = DISTRIBUTED_REQUIRED.has(kind) && !ALLOW_MEMORY_RATE_LIMITS;
+
+  // ── No shared store configured at all ─────────────────────
+  if (!redis) {
+    if (production && critical) {
+      return failClosed(
         kind,
-      });
+        "no distributed store configured (UPSTASH_REDIS_REST_URL/TOKEN missing)",
+      );
+    }
+  } else {
+    // ── Try Redis first ──────────────────────────────────────
+    const redisLimiter = redisLimiters[kind];
+    if (redisLimiter) {
+      try {
+        const result = await redisLimiter.limit(identifier);
+        const retryAfterSeconds = Math.max(1, Math.ceil((result.reset - Date.now()) / 1000));
+        return {
+          success: result.success,
+          retryAfterSeconds,
+          configurationError: false as const,
+        };
+      } catch (err) {
+        logger.error("Redis rate limit failed", { error: String(err), kind });
+        if (production && critical) {
+          return failClosed(kind, "the configured Redis store errored");
+        }
+      }
     }
   }
 
-  // ── In-memory fallback ────────────────────────────────────
+  // ── In-memory fallback (dev/test, non-critical kinds, or accepted risk) ──
   const config = limiterConfig[kind];
   const key = `${config.prefix}:${identifier}`;
   const { success, retryAfterSeconds } = inMemoryCheck(key, config.maxRequests, config.windowMs);
 
-  return { success, retryAfterSeconds, configurationError: false };
+  return { success, retryAfterSeconds, configurationError: false as const };
 }
-

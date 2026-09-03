@@ -9,10 +9,12 @@ import { createApplicationId } from "@/lib/security";
 import { requireRole } from "@/lib/session";
 import { logger } from "@/lib/logger";
 import {
+  completeReservedIdempotency,
   idempotencyRequestHash,
-  replayIdempotency,
+  releaseReservedIdempotency,
   requestMethodForIdempotency,
   requestPathForIdempotency,
+  reserveIdempotency,
 } from "@/lib/idempotency";
 
 export const runtime = "nodejs";
@@ -93,13 +95,31 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const replay = await prisma.idempotencyRecord.findUnique({
-    where: { schoolId_scope_key: { schoolId: user.schoolId, scope: "ADMISSION_PAPER", key } },
+  // Reserve the idempotency key BEFORE any side effect: the insert either
+  // wins the unique (schoolId, scope, key) race or tells us to replay /
+  // back off. Concurrent double-clicks can no longer both pass the old
+  // check-then-act replay lookup.
+  const reservation = await reserveIdempotency({
+    schoolId: user.schoolId,
+    scope: "ADMISSION_PAPER",
+    key,
+    requestHash,
   });
-  if (replay) {
-    const resolved = replayIdempotency(replay, requestHash);
-    return NextResponse.json(resolved.body, { status: resolved.status });
+  if (reservation.outcome !== "reserved") {
+    return NextResponse.json(reservation.body, {
+      status: reservation.status,
+      ...(reservation.outcome === "in-progress"
+        ? { headers: { "Retry-After": String(reservation.retryAfterSeconds) } }
+        : {}),
+    });
   }
+  const releaseReservation = () =>
+    releaseReservedIdempotency({
+      schoolId: user.schoolId,
+      scope: "ADMISSION_PAPER",
+      key,
+      lockedUntil: reservation.lockedUntil,
+    });
 
   const draft = input.draft;
   const applicationId = createApplicationId();
@@ -108,7 +128,7 @@ export async function POST(request: NextRequest) {
   const offlineReference = `OFFLINE-${applicationId}-${(input.feeReference || "NA").slice(0, 40)}`;
 
   try {
-    const application = await prisma.$transaction(async (tx) => {
+    const response = await prisma.$transaction(async (tx) => {
       const created = await tx.admissionApplication.create({
         data: {
           schoolId: user.schoolId,
@@ -193,35 +213,46 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      return created;
-    });
-
-    const response = {
-      application: {
-        applicationId: application.applicationId,
-        studentName,
-        classApplying: application.classApplying,
-        status: application.status,
-        paymentStatus: application.paymentStatus,
-      },
-      nextStep: input.feePaid
-        ? "Record the entrance score, then enrol from the admissions review page."
-        : "Application saved. Record the application fee before the applicant can be enrolled.",
-    };
-
-    await prisma.idempotencyRecord.create({
-      data: {
+      const responseBody = {
+        application: {
+          applicationId: created.applicationId,
+          studentName,
+          classApplying: created.classApplying,
+          status: created.status,
+          paymentStatus: created.paymentStatus,
+        },
+        nextStep: input.feePaid
+          ? "Record the entrance score, then enrol from the admissions review page."
+          : "Application saved. Record the application fee before the applicant can be enrolled.",
+      };
+      // Complete the reservation INSIDE the transaction: the replayable
+      // response commits (or rolls back) together with the side effects, so a
+      // crash can never leave a committed application without a replay record.
+      await completeReservedIdempotency(tx, {
         schoolId: user.schoolId,
         scope: "ADMISSION_PAPER",
         key,
-        requestHash,
-        response,
+        lockedUntil: reservation.lockedUntil,
+        response: responseBody,
         statusCode: 201,
-      },
+      });
+      return responseBody;
     });
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && error.message === "IDEMPOTENCY_RESERVATION_LOST") {
+      return NextResponse.json(
+        {
+          error:
+            "The request outlived its idempotency lease and was rolled back. Please retry the same request.",
+        },
+        { status: 409 },
+      );
+    }
+    // The transaction rolled back — nothing was created, so give the key back
+    // instead of burning it for the lease duration.
+    await releaseReservation();
     logger.error("Paper admission intake failed", {
       error: error instanceof Error ? error.message : String(error),
     });

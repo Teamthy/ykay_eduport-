@@ -8,10 +8,12 @@ import { sendParentWelcomeEmail } from "@/lib/email";
 import { requireRole } from "@/lib/session";
 import { logger } from "@/lib/logger";
 import {
+  completeReservedIdempotency,
   idempotencyRequestHash,
-  replayIdempotency,
+  releaseReservedIdempotency,
   requestMethodForIdempotency,
   requestPathForIdempotency,
+  reserveIdempotency,
 } from "@/lib/idempotency";
 const schema = z.object({
   applicationId: z.string().min(1),
@@ -44,45 +46,85 @@ export async function POST(request: NextRequest) {
     scope: "ADMISSION_ENROLLMENT",
     body: rawBody,
   });
-  const replay = await prisma.idempotencyRecord.findUnique({
-    where: { schoolId_scope_key: { schoolId: user.schoolId, scope: "ADMISSION_ENROLLMENT", key } },
+  // Reserve the idempotency key BEFORE any side effect (atomic insert under
+  // the unique constraint) so concurrent double-submits cannot both enrol.
+  const reservation = await reserveIdempotency({
+    schoolId: user.schoolId,
+    scope: "ADMISSION_ENROLLMENT",
+    key,
+    requestHash,
   });
-  if (replay) {
-    const resolved = replayIdempotency(replay, requestHash);
-    return NextResponse.json(resolved.body, { status: resolved.status });
+  if (reservation.outcome !== "reserved") {
+    return NextResponse.json(reservation.body, {
+      status: reservation.status,
+      ...(reservation.outcome === "in-progress"
+        ? { headers: { "Retry-After": String(reservation.retryAfterSeconds) } }
+        : {}),
+    });
   }
+  const releaseReservation = () =>
+    releaseReservedIdempotency({
+      schoolId: user.schoolId,
+      scope: "ADMISSION_ENROLLMENT",
+      key,
+      lockedUntil: reservation.lockedUntil,
+    });
   const application = await prisma.admissionApplication.findFirst({
     where: { schoolId: user.schoolId, applicationId: input.applicationId },
     include: { enrolledStudent: true },
   });
-  if (!application) return NextResponse.json({ error: "Application not found." }, { status: 404 });
-  if (application.enrolledStudent)
-    return NextResponse.json({
+  if (!application) {
+    await releaseReservation();
+    return NextResponse.json({ error: "Application not found." }, { status: 404 });
+  }
+  if (application.enrolledStudent) {
+    // Not an error and no side effect: record it so retries replay the same
+    // answer instead of re-reading a possibly-changed application.
+    const alreadyResponse = {
       student: {
         studentId: application.enrolledStudent.studentId,
         displayName: application.enrolledStudent.displayName,
       },
       alreadyEnrolled: true,
+    };
+    await completeReservedIdempotency(prisma, {
+      schoolId: user.schoolId,
+      scope: "ADMISSION_ENROLLMENT",
+      key,
+      lockedUntil: reservation.lockedUntil,
+      response: alreadyResponse,
+      statusCode: 200,
     });
-  if (application.paymentStatus !== PaymentStatus.PAID)
+    return NextResponse.json(alreadyResponse);
+  }
+  if (application.paymentStatus !== PaymentStatus.PAID) {
+    await releaseReservation();
     return NextResponse.json(
       { error: "Admission payment has not been verified." },
       { status: 409 },
     );
-  if (!input.entrancePassed)
+  }
+  if (!input.entrancePassed) {
+    await releaseReservation();
     return NextResponse.json(
       { error: "Only applicants who passed the entrance assessment may be enrolled." },
       { status: 409 },
     );
+  }
   const schoolClass = await prisma.schoolClass.findFirst({
     where: { id: input.classId, schoolId: user.schoolId, isActive: true },
   });
-  if (!schoolClass) return NextResponse.json({ error: "Class not found." }, { status: 404 });
-  if (schoolClass.level !== application.classApplying)
+  if (!schoolClass) {
+    await releaseReservation();
+    return NextResponse.json({ error: "Class not found." }, { status: 404 });
+  }
+  if (schoolClass.level !== application.classApplying) {
+    await releaseReservation();
     return NextResponse.json(
       { error: `Placement must match the applied class level (${application.classApplying}).` },
       { status: 409 },
     );
+  }
   const existingParent = await prisma.user.findFirst({
     where: { email: application.parentEmail, schoolId: user.schoolId },
   });
@@ -182,6 +224,25 @@ export async function POST(request: NextRequest) {
           },
         },
       });
+      // Complete the reservation inside this transaction so the replayable
+      // response commits atomically with the enrolment. The temporary password
+      // is deliberately never persisted in the replay response.
+      await completeReservedIdempotency(tx, {
+        schoolId: user.schoolId,
+        scope: "ADMISSION_ENROLLMENT",
+        key,
+        lockedUntil: reservation.lockedUntil,
+        response: {
+          student: { studentId: number, displayName, className: lockedClass.displayName },
+          parentAccount: {
+            email: application.parentEmail,
+            temporaryPassword: null,
+            mustChangePassword: parentCreated,
+            welcomeEmailSent: false,
+          },
+        },
+        statusCode: 201,
+      });
       return {
         student,
         parentCreated,
@@ -223,32 +284,52 @@ export async function POST(request: NextRequest) {
         welcomeEmailSent,
       },
     };
-    await prisma.idempotencyRecord.create({
-      data: {
-        schoolId: user.schoolId,
-        scope: "ADMISSION_ENROLLMENT",
-        key,
-        requestHash,
-        response: {
-          student: response.student,
-          parentAccount: {
-            email: response.parentAccount.email,
-            temporaryPassword: null,
-            mustChangePassword: response.parentAccount.mustChangePassword,
-            welcomeEmailSent: response.parentAccount.welcomeEmailSent,
+    // The transaction stored the replay response with welcomeEmailSent=false
+    // (email is attempted after commit); refresh it now, best-effort.
+    if (result.parentCreated) {
+      try {
+        await prisma.idempotencyRecord.updateMany({
+          where: {
+            schoolId: user.schoolId,
+            scope: "ADMISSION_ENROLLMENT",
+            key,
+            status: "COMPLETED",
           },
-        },
-        statusCode: 201,
-      },
-    });
+          data: {
+            response: {
+              student: response.student,
+              parentAccount: {
+                email: response.parentAccount.email,
+                temporaryPassword: null,
+                mustChangePassword: response.parentAccount.mustChangePassword,
+                welcomeEmailSent,
+              },
+            },
+          },
+        });
+      } catch {
+        // Replay fidelity only — the enrollment itself is committed.
+      }
+    }
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && error.message === "IDEMPOTENCY_RESERVATION_LOST") {
+      return NextResponse.json(
+        {
+          error:
+            "The request outlived its idempotency lease and was rolled back. Please retry the same request.",
+        },
+        { status: 409 },
+      );
+    }
+    if (error instanceof Error && error.message === "CLASS_AT_CAPACITY") {
+      await releaseReservation();
+      return NextResponse.json({ error: "This class is at capacity." }, { status: 409 });
+    }
+    await releaseReservation();
     logger.error("Request failed", {
       error: error instanceof Error ? error.message : String(error),
     });
-    if (error instanceof Error && error.message === "CLASS_AT_CAPACITY") {
-      return NextResponse.json({ error: "This class is at capacity." }, { status: 409 });
-    }
     return NextResponse.json(
       { error: "Enrollment could not be completed. No partial record was saved." },
       { status: 500 },

@@ -66,7 +66,61 @@ const emailAdapter: ChannelAdapter = {
   },
 };
 
-/** SMS/WhatsApp adapter stub — mark configured once a provider is wired in. */
+/**
+ * SMS adapter — Termii (Nigerian SMS provider, https://termii.com).
+ * Configure with TERMII_API_KEY and TERMII_SENDER_ID. Unconfigured = the
+ * dispatcher marks the channel skipped (C-009), never silently "sent".
+ */
+const smsAdapter: ChannelAdapter = {
+  channel: AlertChannel.SMS,
+  get configured() {
+    return Boolean(process.env.TERMII_API_KEY && process.env.TERMII_SENDER_ID);
+  },
+  async send(job) {
+    const apiKey = process.env.TERMII_API_KEY;
+    const senderId = process.env.TERMII_SENDER_ID;
+    if (!apiKey || !senderId || !job.recipientPhone) {
+      return { ok: false, error: "SMS provider is not configured.", permanent: false };
+    }
+    try {
+      const response = await fetch("https://api.ng.termii.com/api/sms/send", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          to: job.recipientPhone,
+          from: senderId,
+          sms: job.body,
+          type: "plain",
+          channel: "generic",
+          api_key: apiKey,
+        }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      // Termii answers 200 with a body even for some failures; treat both.
+      const payload = (await response.json().catch(() => null)) as {
+        message?: string;
+        smsStatus?: string;
+      } | null;
+      const ok =
+        response.ok &&
+        (payload?.smsStatus === "Message Sent" || payload?.message === "Successfully Sent");
+      if (ok) return { ok: true as const };
+      return {
+        ok: false as const,
+        error: `Termii error: ${response.status} ${payload?.message ?? response.statusText}`,
+        // 4xx apart from 429 means the request itself is wrong — do not retry.
+        permanent: response.status >= 400 && response.status < 500 && response.status !== 429,
+      };
+    } catch (error) {
+      return {
+        ok: false as const,
+        error: error instanceof Error ? error.message : "Termii request failed.",
+      };
+    }
+  },
+};
+
+/** WhatsApp adapter stub — wire the WhatsApp Cloud API or Termii when needed. */
 function stubAdapter(channel: AlertChannel): ChannelAdapter {
   return {
     channel,
@@ -79,7 +133,7 @@ function stubAdapter(channel: AlertChannel): ChannelAdapter {
 
 const adapters: Record<AlertChannel, ChannelAdapter> = {
   [AlertChannel.EMAIL]: emailAdapter,
-  [AlertChannel.SMS]: stubAdapter(AlertChannel.SMS),
+  [AlertChannel.SMS]: smsAdapter,
   [AlertChannel.WHATSAPP]: stubAdapter(AlertChannel.WHATSAPP),
 };
 

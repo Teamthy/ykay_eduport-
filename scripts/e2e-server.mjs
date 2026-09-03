@@ -49,7 +49,16 @@ for (const [from, to] of [
 
 const server = spawn(process.execPath, [join(STANDALONE, "server.js")], {
   stdio: "inherit",
-  env: { ...process.env, PORT, HOSTNAME: process.env.HOSTNAME || "127.0.0.1" },
+  env: {
+    ...process.env,
+    PORT,
+    HOSTNAME: process.env.HOSTNAME || "127.0.0.1",
+    // This is a deliberate, scoped acceptance of the in-memory rate-limit
+    // fallback: the e2e server is single-instance on one port, so a process-
+    // local limiter is a real control here. Production (Vercel/multi-instance
+    // Docker) must configure Upstash instead — see lib/rate-limit.ts.
+    ALLOW_MEMORY_RATE_LIMITS: process.env.ALLOW_MEMORY_RATE_LIMITS || "true",
+  },
 });
 
 // Forward signals so Playwright and CI can stop it cleanly rather than

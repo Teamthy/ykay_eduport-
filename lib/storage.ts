@@ -1,4 +1,9 @@
-import { HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { AdmissionDocumentType } from "@/lib/admissions";
 import { safeFileName } from "@/lib/security";
@@ -83,4 +88,28 @@ export async function verifyStoredDocument(storageKey: string, expectedSize: num
   );
 
   return result.ContentLength === expectedSize;
+}
+
+/**
+ * Reads a stored document's bytes for malware scanning (C-006). Admission
+ * documents are identity paperwork (a few MB at most), so buffering in memory
+ * is fine — anything larger than the cap refuses to scan rather than silently
+ * streaming unbounded objects through the app.
+ */
+export async function getStoredDocumentBytes(
+  storageKey: string,
+  maxBytes = 25 * 1024 * 1024,
+): Promise<Uint8Array> {
+  const config = getStorageConfig();
+  const result = await getClient().send(
+    new GetObjectCommand({ Bucket: config.bucket, Key: storageKey }),
+  );
+  if (!result.Body) {
+    throw new Error("Stored object has no body.");
+  }
+  const bytes = await result.Body.transformToByteArray();
+  if (bytes.byteLength > maxBytes) {
+    throw new Error(`Stored object exceeds the ${maxBytes}-byte scan limit.`);
+  }
+  return bytes;
 }

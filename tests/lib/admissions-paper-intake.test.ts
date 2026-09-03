@@ -72,8 +72,12 @@ function paperHash(body: unknown) {
 describe("POST /api/admin/admissions/paper", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: the reservation insert succeeds and in-transaction completion
+    // matches exactly one PROCESSING row (the happy path).
     mockPrisma.idempotencyRecord.findUnique.mockResolvedValue(null);
     mockPrisma.idempotencyRecord.create.mockResolvedValue({});
+    mockPrisma.idempotencyRecord.updateMany.mockResolvedValue({ count: 1 });
+    mockPrisma.idempotencyRecord.deleteMany.mockResolvedValue({ count: 0 });
     mockPrisma.admissionApplication.create.mockImplementation(async ({ data }: never) => ({
       id: "app_row_1",
       ...(data as Record<string, unknown>),
@@ -91,8 +95,12 @@ describe("POST /api/admin/admissions/paper", () => {
   });
 
   it("replays the stored response instead of creating a second application", async () => {
+    // The reservation insert loses the unique-constraint race, and the
+    // existing record is COMPLETED with the same request hash → replay.
+    mockPrisma.idempotencyRecord.create.mockRejectedValueOnce({ code: "P2002" });
     mockPrisma.idempotencyRecord.findUnique.mockResolvedValue({
       requestHash: paperHash({ draft: validDraft }),
+      status: "COMPLETED",
       response: { application: { applicationId: "YKCAPP2026ABC123" } },
       statusCode: 201,
     });
@@ -102,6 +110,65 @@ describe("POST /api/admin/admissions/paper", () => {
 
     expect(body.idempotentReplay).toBe(true);
     expect(mockPrisma.admissionApplication.create).not.toHaveBeenCalled();
+  });
+
+  it("rejects a concurrent same-key request while the first is still processing", async () => {
+    // Second double-click loses the insert race and finds a live PROCESSING
+    // lease: 409 + Retry-After, and crucially NO side effect.
+    mockPrisma.idempotencyRecord.create.mockRejectedValueOnce({ code: "P2002" });
+    mockPrisma.idempotencyRecord.findUnique.mockResolvedValue({
+      requestHash: paperHash({ draft: validDraft }),
+      status: "PROCESSING",
+      lockedUntil: new Date(Date.now() + 60_000),
+    });
+    mockPrisma.idempotencyRecord.updateMany.mockResolvedValue({ count: 0 });
+
+    const { POST } = await import("@/app/api/admin/admissions/paper/route");
+    const response = await POST(request({ draft: validDraft }));
+
+    expect(response.status).toBe(409);
+    expect(response.headers.get("retry-after")).toBeTruthy();
+    expect(mockPrisma.admissionApplication.create).not.toHaveBeenCalled();
+  });
+
+  it("rejects the same key reused with a different request body", async () => {
+    mockPrisma.idempotencyRecord.create.mockRejectedValueOnce({ code: "P2002" });
+    mockPrisma.idempotencyRecord.findUnique.mockResolvedValue({
+      requestHash: paperHash({ draft: { ...validDraft, firstName: "Ada" } }),
+      status: "COMPLETED",
+      response: { application: { applicationId: "YKCAPP2026OTHER" } },
+      statusCode: 201,
+    });
+
+    const { POST } = await import("@/app/api/admin/admissions/paper/route");
+    const response = await POST(request({ draft: validDraft }));
+
+    expect(response.status).toBe(409);
+    expect(mockPrisma.admissionApplication.create).not.toHaveBeenCalled();
+  });
+
+  it("takes over an expired PROCESSING lease (crash recovery) and completes", async () => {
+    // Insert loses the race; the existing PROCESSING row's lease has expired;
+    // the compare-and-swap takeover succeeds → the request proceeds.
+    mockPrisma.idempotencyRecord.create.mockRejectedValueOnce({ code: "P2002" });
+    mockPrisma.idempotencyRecord.findUnique.mockResolvedValue({
+      requestHash: paperHash({ draft: validDraft }),
+      status: "PROCESSING",
+      lockedUntil: new Date(Date.now() - 1_000),
+    });
+    mockPrisma.idempotencyRecord.updateMany.mockResolvedValueOnce({ count: 1 }); // takeover
+    mockPrisma.idempotencyRecord.updateMany.mockResolvedValueOnce({ count: 1 }); // complete in tx
+
+    const { POST } = await import("@/app/api/admin/admissions/paper/route");
+    const response = await POST(request({ draft: validDraft }));
+
+    expect(response.status).toBe(201);
+    expect(mockPrisma.admissionApplication.create).toHaveBeenCalled();
+    // The stored replay response was written inside the transaction.
+    const completion = mockPrisma.idempotencyRecord.updateMany.mock.calls.find(
+      ([args]: never[]) => (args as { data?: { status?: string } }).data?.status === "COMPLETED",
+    );
+    expect(completion).toBeTruthy();
   });
 
   it("rejects an incomplete form with field-level messages", async () => {

@@ -8,9 +8,9 @@ import * as SecureStore from "expo-secure-store";
 
 /**
  * Point this at the deployed Ykay College backend.
- * Default is the live Vercel backend so the app works even if the build-time
- * EXPO_PUBLIC_API_URL env var isn't passed. Override locally with
- * EXPO_PUBLIC_API_URL=http://<lan-ip>:3000 for dev against a local server.
+ * NATIVE production builds REQUIRE EXPO_PUBLIC_API_URL at build time — the
+ * app throws on launch if it is missing rather than guessing a URL (see
+ * eas.json profiles). Dev overrides with EXPO_PUBLIC_API_URL=http://<lan-ip>:3000.
  */
 export const IS_WEB = Platform.OS === "web";
 

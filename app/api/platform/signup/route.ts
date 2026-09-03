@@ -26,8 +26,20 @@ const schema = z.object({
  * POST /api/platform/signup — self-serve school onboarding for EDUos.
  * Creates a School + an ADMIN user (the school's super admin) + a FREE/trial
  * Subscription. The admin is signed in immediately.
+ *
+ * C-011: this is the EDUos SaaS surface. A deployment that is a single
+ * school's portal (e.g. Ykay College itself) must NOT allow the public to
+ * mint tenants and admin accounts, so the endpoint is disabled unless
+ * ENABLE_PLATFORM_SIGNUP=true is set explicitly.
  */
 export async function POST(request: NextRequest) {
+  if (process.env.ENABLE_PLATFORM_SIGNUP !== "true") {
+    return NextResponse.json(
+      { error: "Self-serve school sign-up is not available on this deployment." },
+      { status: 404 },
+    );
+  }
+
   const ipLimit = await enforceRateLimit(
     "signup",
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown",

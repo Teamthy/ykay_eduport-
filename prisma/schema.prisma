@@ -1184,6 +1184,16 @@ model AdmissionDocument {
   sizeBytes     Int
   storageKey    String                @unique
   uploadedAt    DateTime              @default(now())
+  /**
+   * Malware scan verdict (C-006). PENDING until a scanner runs (or when the
+   * scanner was unreachable — retried on next confirm), CLEAN when the
+   * scanner cleared the bytes, INFECTED when it found a signature (document
+   * is quarantined: never generate download links for it), SKIPPED when no
+   * scanner is configured (dev/test or an explicitly accepted deployment).
+   */
+  scanStatus    String                @default("PENDING")
+  scannedAt     DateTime?
+  scanResult    String?
 
   application AdmissionApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
@@ -1273,14 +1283,26 @@ model StaffInvite {
 }
 
 model IdempotencyRecord {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   schoolId    String
   scope       String
   key         String
   requestHash String
-  response    Json
-  statusCode  Int
-  createdAt   DateTime @default(now())
+  /**
+   * Reservation protocol (C-001):
+   *   PROCESSING — the record is inserted BEFORE side effects run. It acts as
+   *                a mutual-exclusion lock (`lockedUntil`) so two concurrent
+   *                requests with the same key cannot both commit side effects.
+   *   COMPLETED — side effects are done; `response`/`statusCode` hold the
+   *               replay payload and retries are answered from this row.
+   * Legacy rows written by the old create-after-mutation flow are backfilled
+   * to COMPLETED by the atomic_idempotency_reservation migration.
+   */
+  status      String    @default("COMPLETED")
+  lockedUntil DateTime?
+  response    Json?
+  statusCode  Int?
+  createdAt   DateTime  @default(now())
 
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 

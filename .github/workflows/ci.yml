@@ -115,6 +115,13 @@ jobs:
         env:
           DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
 
+      - name: Report tenant-route coverage (C-007 ratchet)
+        # Non-blocking visibility: which tenant-model routes use withSchool(),
+        # which rely on app-level schoolId filters, and which have neither.
+        # The policy stays fail-open until this list is empty — then flip the
+        # RLS policies to fail-closed and add --strict here.
+        run: npm run check:tenant-coverage
+
       - name: Verify admissions operations loop
         run: npm run verify:admissions
         env:

@@ -288,7 +288,7 @@ export default function CertificatesPage() {
 
                     {/* Verify link */}
                     <Link
-                      href={`/verify/report/${cert.certificateNumber}`}
+                      href={`/verify/certificate/${cert.certificateNumber}`}
                       className="mt-3 flex items-center justify-center gap-1 text-[11px] text-[#4EC54D] hover:underline"
                     >
                       <ExternalLink size={11} /> Verify this certificate

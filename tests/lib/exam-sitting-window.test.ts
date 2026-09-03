@@ -191,3 +191,90 @@ describe("POST /api/student/exams/[id]/attempt — sitting window", () => {
     expect(created.deadlineAt.getTime()).toBeLessThan(closesAt.getTime());
   });
 });
+
+/**
+ * C-004 — official exam start must be concurrency-safe.
+ *
+ * Double-tapping Start (or a mobile network retry) used to race the retake
+ * consumption against the attempt create: the loser got a unique-constraint
+ * 500 on exam day, and a crash between "retake used" and "attempt created"
+ * burned the retake entirely. The start path now runs retake consumption and
+ * attempt creation in one transaction, and a unique-race loser resumes the
+ * winner's in-progress attempt instead of erroring.
+ */
+describe("POST /api/student/exams/[id]/attempt — start race (C-004)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockPrisma.examAttempt.findFirst.mockResolvedValue(null);
+    mockPrisma.examAnswer.findMany.mockResolvedValue([]);
+    mockPrisma.examAttempt.create.mockImplementation(async ({ data }: never) => ({
+      id: "att_new",
+      ...(data as Record<string, unknown>),
+    }));
+  });
+
+  it("resumes the winner's attempt when a concurrent start loses the unique race", async () => {
+    mockPrisma.exam.findFirst.mockResolvedValue(scheduledExam());
+    // 1st read: no existing attempt (the racer's view). After losing the
+    // insert race, the re-read finds the winner's IN_PROGRESS attempt.
+    mockPrisma.examAttempt.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({
+      id: "att_live",
+      status: "IN_PROGRESS",
+      attemptNumber: 1,
+      deadlineAt: new Date(Date.now() + 10 * 60_000),
+    });
+    // The transaction loses the (examId, studentProfileId, attemptNumber)
+    // unique constraint race against the concurrent winner.
+    mockPrisma.$transaction.mockRejectedValueOnce({ code: "P2002" });
+
+    const { POST } = await import("@/app/api/student/exams/[id]/attempt/route");
+    const response = await POST({} as never, params);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.attempt.id).toBe("att_live");
+  });
+
+  it("consumes the retake and creates the attempt inside one transaction", async () => {
+    mockPrisma.exam.findFirst.mockResolvedValue(scheduledExam());
+    // A previous SUBMITTED attempt exists → this start needs a retake.
+    mockPrisma.examAttempt.findFirst.mockResolvedValue({
+      id: "att_1",
+      status: "SUBMITTED",
+      attemptNumber: 1,
+      deadlineAt: new Date(Date.now() - HOUR),
+    });
+    mockPrisma.examRetake.findUnique.mockResolvedValue({ id: "rt_1", used: false });
+    mockPrisma.examRetake.update.mockResolvedValue({ id: "rt_1", used: true });
+
+    const { POST } = await import("@/app/api/student/exams/[id]/attempt/route");
+    const response = await POST({} as never, params);
+
+    expect(response.status).toBe(200);
+    expect(mockPrisma.examRetake.update).toHaveBeenCalledWith({
+      where: { id: "rt_1" },
+      data: { used: true },
+    });
+    expect(mockPrisma.examAttempt.create).toHaveBeenCalledTimes(1);
+  });
+
+  it("still refuses a start when the retake is missing or already used", async () => {
+    mockPrisma.exam.findFirst.mockResolvedValue(scheduledExam());
+    mockPrisma.examAttempt.findFirst.mockResolvedValue({
+      id: "att_1",
+      status: "SUBMITTED",
+      attemptNumber: 1,
+      deadlineAt: new Date(Date.now() - HOUR),
+    });
+    mockPrisma.examRetake.findUnique.mockResolvedValue({ id: "rt_1", used: true });
+
+    const { POST } = await import("@/app/api/student/exams/[id]/attempt/route");
+    const response = await POST({} as never, params);
+    const body = await response.json();
+
+    expect(response.status).toBe(409);
+    expect(body.error).toMatch(/already taken this exam/i);
+    expect(mockPrisma.examAttempt.create).not.toHaveBeenCalled();
+    expect(mockPrisma.examRetake.update).not.toHaveBeenCalled();
+  });
+});

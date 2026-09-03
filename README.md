@@ -5,7 +5,7 @@
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![Expo](https://img.shields.io/badge/Expo-RN-000)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791)
-![tests](https://img.shields.io/badge/tests-645%20passing-brightgreen)
+![tests](https://img.shields.io/badge/tests-663%2B%20passing-brightgreen)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
 A full-stack digital education platform for **Ykay College & Leadership Academy**:
@@ -163,7 +163,7 @@ npm run android   # or: npm run ios / npm run web
 
 ## Testing & Quality
 
-- **645 unit/integration tests** (Vitest) covering payments, exams, session
+- **663+ unit/integration tests** (Vitest) covering payments, exams, session
   revocation, RLS, rate limiting, and security hardening.
 - **Browser E2E** (Playwright) over authenticated journeys against a real DB.
 - **Schema-drift check** builds a fresh Postgres from migrations and asserts it

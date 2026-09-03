@@ -88,37 +88,69 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
       );
     }
 
-    if (existing) {
-      const retake = await prisma.examRetake.findUnique({
-        where: {
-          examId_studentProfileId: {
-            examId: exam.id,
-            studentProfileId: studentContext.studentProfile.id,
-          },
-        },
-      });
-      if (!retake || retake.used) {
+    // Retake consumption and attempt creation must be atomic. A double-tap or
+    // a network retry used to consume the retake and then race the create,
+    // producing a unique-violation 500 — or burning the retake with no new
+    // attempt to show for it. The transaction plus the existing
+    // (examId, studentProfileId, attemptNumber) unique constraint make the
+    // racing loser roll back entirely and resume the winner's attempt.
+    try {
+      attempt = await prisma
+        .$transaction(async (tx) => {
+          if (existing) {
+            const retake = await tx.examRetake.findUnique({
+              where: {
+                examId_studentProfileId: {
+                  examId: exam.id,
+                  studentProfileId: studentContext.studentProfile.id,
+                },
+              },
+            });
+            if (!retake || retake.used) {
+              throw new Error("RETAKE_REQUIRED");
+            }
+            await tx.examRetake.update({ where: { id: retake.id }, data: { used: true } });
+          }
+          return tx.examAttempt.create({
+            data: {
+              examId: exam.id,
+              studentProfileId: studentContext.studentProfile.id,
+              attemptNumber: (existing?.attemptNumber || 0) + 1,
+              // Bounded by the window as well as the duration: starting a minute
+              // before close must not buy a full extra sitting.
+              deadlineAt: attemptDeadline({
+                durationMinutes: exam.durationMinutes,
+                availableUntil: exam.availableUntil,
+              }),
+            },
+          });
+        })
+        .catch(async (error: unknown) => {
+          if (
+            typeof error === "object" &&
+            error !== null &&
+            (error as { code?: unknown }).code === "P2002"
+          ) {
+            // A concurrent start won the race and its attempt is IN_PROGRESS:
+            // serve the standard resume payload for that attempt instead of a
+            // scary 500 on the single most stressful click of exam day.
+            const raced = await prisma.examAttempt.findFirst({
+              where: { examId: exam.id, studentProfileId: studentContext.studentProfile.id },
+              orderBy: { attemptNumber: "desc" },
+            });
+            if (raced && raced.status === ExamAttemptStatus.IN_PROGRESS) return raced;
+          }
+          throw error;
+        });
+    } catch (error) {
+      if (error instanceof Error && error.message === "RETAKE_REQUIRED") {
         return NextResponse.json(
           { error: "You have already taken this exam. Ask your teacher to enable a retake." },
           { status: 409 },
         );
       }
-      await prisma.examRetake.update({ where: { id: retake.id }, data: { used: true } });
+      throw error;
     }
-
-    attempt = await prisma.examAttempt.create({
-      data: {
-        examId: exam.id,
-        studentProfileId: studentContext.studentProfile.id,
-        attemptNumber: (existing?.attemptNumber || 0) + 1,
-        // Bounded by the window as well as the duration: starting a minute
-        // before close must not buy a full extra sitting.
-        deadlineAt: attemptDeadline({
-          durationMinutes: exam.durationMinutes,
-          availableUntil: exam.availableUntil,
-        }),
-      },
-    });
   }
 
   if (!attempt)
