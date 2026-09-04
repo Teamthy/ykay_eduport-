@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 import { ArrowRight, Award, BookOpen, FlaskConical, GraduationCap } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 const programmes = [
   {
     icon: BookOpen,
@@ -58,9 +59,11 @@ export default function AcademicsPage() {
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-brand-green">
                 Programmes
               </p>
-              <h1 className="mt-4 font-display text-5xl tracking-widest text-[var(--text-primary)] md:text-7xl">
-                ACADEMICS
-              </h1>
+              <AnimatedText
+                as="h1"
+                className="mt-4 font-display text-5xl tracking-widest text-[var(--text-primary)] md:text-7xl"
+                text="ACADEMICS"
+              />
               <p className="mt-4 max-w-2xl text-base text-[var(--text-secondary)] md:text-lg">
                 A rigorous, NERDC-aligned curriculum spanning Junior Secondary (JSS1–JSS3) and
                 Senior Secondary (SS1–SS3) — with Science, Arts, Commercial, and flagship IT
@@ -85,7 +88,7 @@ export default function AcademicsPage() {
                     {item.subtitle}
                   </p>
                   <h2 className="mt-2 font-display text-2xl tracking-wide text-[var(--text-primary)]">
-                    {item.title}
+                    <AnimatedText text={item.title} delay={0.0} />
                   </h2>
                   <p className="mt-3 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">
                     {item.desc}
@@ -119,9 +122,11 @@ export default function AcademicsPage() {
             </div>
 
             <div className="mt-16 rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 md:p-10">
-              <h2 className="font-display text-3xl tracking-widest text-[var(--text-primary)]">
-                CURRICULUM FOCUS
-              </h2>
+              <AnimatedText
+                as="h2"
+                className="font-display text-3xl tracking-widest text-[var(--text-primary)]"
+                text="CURRICULUM FOCUS"
+              />
               <p className="mt-3 max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
                 All academic content is aligned with the Nigerian Educational Research and
                 Development Council (NERDC) curriculum. Students receive continuous assessment,

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
+import { AnimatedText } from "@/components/AnimatedText";
 import {
   GraduationCap,
   User,
@@ -74,7 +75,10 @@ export default function PortalPage() {
                 <LockKeyhole size={12} /> Secure Access
               </span>
               <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-                YKAY <span className="text-brand-green">EDUPORTAL</span>
+                <AnimatedText text="YKAY" delay={0.0} />
+                <span className="text-brand-green">
+                  <AnimatedText text="EDUPORTAL" delay={0.1} />
+                </span>
               </h1>
               <p className="text-white/60 font-body max-w-2xl mx-auto mt-6 text-base md:text-lg">
                 One digital ecosystem for the whole school community. Choose your portal below and

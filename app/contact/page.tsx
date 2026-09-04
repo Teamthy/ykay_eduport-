@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 export default function ContactPage() {
   return (
     <>
@@ -14,7 +15,10 @@ export default function ContactPage() {
           <section className="pt-32 pb-20 bg-brand-navy px-6">
             <div className="mx-auto max-w-7xl text-center">
               <h1 className="font-display text-[56px] md:text-[80px] text-white">
-                CONTACT <span className="text-brand-green">US</span>
+                <AnimatedText text="CONTACT" delay={0.0} />
+                <span className="text-brand-green">
+                  <AnimatedText text="US" delay={0.175} />
+                </span>
               </h1>
               <p className="text-white/50 max-w-md mx-auto mt-4">
                 We are here to answer your questions and welcome you to our campus.
@@ -27,7 +31,11 @@ export default function ContactPage() {
           <section className="py-20 px-6">
             <div className="mx-auto max-w-7xl grid lg:grid-cols-2 gap-16">
               <div>
-                <h2 className="font-display text-3xl text-[var(--text-primary)] mb-8">Reach Out</h2>
+                <AnimatedText
+                  as="h2"
+                  className="font-display text-3xl text-[var(--text-primary)] mb-8"
+                  text="Reach Out"
+                />
                 <div className="space-y-4">
                   {[
                     { icon: Mail, label: "Email", val: "info@ykaycollege.com" },
@@ -51,9 +59,11 @@ export default function ContactPage() {
                 </div>
               </div>
               <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] p-10 rounded-[2.5rem] shadow-[var(--card-shadow)]">
-                <h2 className="font-display text-3xl text-[var(--text-primary)] mb-8">
-                  Send a Message
-                </h2>
+                <AnimatedText
+                  as="h2"
+                  className="font-display text-3xl text-[var(--text-primary)] mb-8"
+                  text="Send a Message"
+                />
                 <form
                   className="space-y-4"
                   onSubmit={(e) => {

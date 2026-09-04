@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 
+import { AnimatedText } from "@/components/AnimatedText";
 export default function GalleryPage() {
   const images = [
     {
@@ -47,9 +48,11 @@ export default function GalleryPage() {
               <p className="font-body text-xs font-bold tracking-[0.25em] uppercase text-[var(--accent-primary)] mb-4">
                 GALLERY
               </p>
-              <h1 className="font-display text-[56px] md:text-[100px] lg:text-[130px] leading-[0.85] tracking-[4px] text-[var(--text-primary)] mb-4">
-                CAMPUS GALLERY
-              </h1>
+              <AnimatedText
+                as="h1"
+                className="font-display text-[56px] md:text-[100px] lg:text-[130px] leading-[0.85] tracking-[4px] text-[var(--text-primary)] mb-4"
+                text="CAMPUS GALLERY"
+              />
               <p className="font-body text-base md:text-lg text-[var(--text-secondary)] max-w-xl">
                 A visual journey through our facilities, events, and student life at Ykay College.
               </p>

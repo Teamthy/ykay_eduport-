@@ -2,6 +2,7 @@
 
 import { Clock, MapPin } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 export default function ServiceInfo() {
   return (
     <section className="relative z-20 -mt-10 md:-mt-14 mx-4 md:mx-auto max-w-5xl px-6 md:px-10">
@@ -9,7 +10,7 @@ export default function ServiceInfo() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div className="flex-1">
             <h2 className="font-display text-2xl md:text-3xl tracking-[4px] text-[var(--text-primary)] mb-1">
-              School Hours &amp; Location
+              <AnimatedText text="School Hours & Location" delay={0.0} />
             </h2>
             <p className="font-body text-sm text-[var(--text-muted)]">
               Ykay College &amp; Leadership Academy — Sango Ota, Ogun State

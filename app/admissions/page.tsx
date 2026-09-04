@@ -4,6 +4,7 @@ import { Reveal } from "@/components/Reveal";
 import AdmissionApplicationForm from "@/components/admissions/AdmissionApplicationForm";
 import { CheckCircle2, Clock3, FileText, ShieldCheck } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 const assurances = [
   {
     icon: FileText,
@@ -44,9 +45,11 @@ export default function AdmissionsPage() {
                   2025 / 2026 admissions
                 </p>
                 <h1 className="mt-5 font-display text-5xl leading-[0.88] tracking-[0.08em] text-white sm:text-7xl md:text-8xl">
-                  START YOUR
+                  <AnimatedText text="START YOUR" delay={0.0} />
                   <br />
-                  <span className="text-brand-green">APPLICATION</span>
+                  <span className="text-brand-green">
+                    <AnimatedText text="APPLICATION" delay={0.25} />
+                  </span>
                 </h1>
                 <p className="mt-7 max-w-2xl text-base leading-7 text-white md:text-lg">
                   Apply to Ykay College &amp; Leadership Academy for JSS1 through SS3. Before you
@@ -78,7 +81,7 @@ export default function AdmissionsPage() {
               >
                 <item.icon className="text-brand-green" size={22} />
                 <h2 className="mt-4 font-display text-xl tracking-wide text-[var(--text-primary)]">
-                  {item.title}
+                  <AnimatedText text={item.title} delay={0.0} />
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
                   {item.text}

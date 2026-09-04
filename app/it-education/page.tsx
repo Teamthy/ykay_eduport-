@@ -20,6 +20,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 
+import { AnimatedText } from "@/components/AnimatedText";
 type CatalogCourse = {
   slug: string;
   title: string;
@@ -188,7 +189,10 @@ export default function ITEducationHubPage() {
                 <Sparkles size={12} /> Flagship digital academy
               </span>
               <h1 className="mt-5 max-w-4xl font-display text-5xl tracking-widest md:text-6xl">
-                IT EDUCATION AT <span className="text-brand-green">YKAY COLLEGE</span>
+                <AnimatedText text="IT EDUCATION AT" delay={0.0} />
+                <span className="text-brand-green">
+                  <AnimatedText text="YKAY COLLEGE" delay={0.375} />
+                </span>
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-relaxed text-white md:text-lg">
                 Industry-aligned pathways in programming, AI, cybersecurity, digital literacy, and
@@ -231,7 +235,10 @@ export default function ITEducationHubPage() {
                 Programmes
               </p>
               <h2 className="mt-2 font-display text-4xl tracking-widest text-[var(--text-primary)]">
-                CHOOSE YOUR <span className="text-brand-green">TRACK</span>
+                <AnimatedText text="CHOOSE YOUR" delay={0.0} />
+                <span className="text-brand-green">
+                  <AnimatedText text="TRACK" delay={0.275} />
+                </span>
               </h2>
               <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
                 {courses.map((course) => {
@@ -282,9 +289,11 @@ export default function ITEducationHubPage() {
             <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
               <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8">
                 <Award className="text-[var(--text-accent)]" size={28} />
-                <h2 className="mt-4 font-display text-3xl tracking-widest text-[var(--text-primary)]">
-                  HOW IT WORKS
-                </h2>
+                <AnimatedText
+                  as="h2"
+                  className="mt-4 font-display text-3xl tracking-widest text-[var(--text-primary)]"
+                  text="HOW IT WORKS"
+                />
                 <ol className="mt-6 space-y-4 text-sm text-[var(--text-secondary)]">
                   <li>
                     <b className="text-[var(--text-primary)]">1. Explore</b> — pick a track on this
@@ -306,7 +315,10 @@ export default function ITEducationHubPage() {
               </div>
               <div className="rounded-[2rem] bg-brand-navy p-8 text-white">
                 <h2 className="font-display text-3xl tracking-widest">
-                  READY TO <span className="text-brand-green">BEGIN?</span>
+                  <AnimatedText text="READY TO" delay={0.0} />
+                  <span className="text-brand-green">
+                    <AnimatedText text="BEGIN?" delay={0.2} />
+                  </span>
                 </h2>
                 <p className="mt-4 text-sm leading-relaxed text-white/85">
                   Parents can highlight IT interest during school admissions. Community learners can

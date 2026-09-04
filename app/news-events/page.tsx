@@ -5,6 +5,7 @@ import { Reveal } from "@/components/Reveal";
 import { prisma } from "@/lib/prisma";
 import { ArrowRight, Calendar } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 export const dynamic = "force-dynamic";
 
 async function loadPosts() {
@@ -43,7 +44,10 @@ export default async function NewsPage() {
                 School journal
               </p>
               <h1 className="mt-3 font-display text-5xl tracking-widest">
-                NEWS & <span className="text-brand-green">EVENTS</span>
+                <AnimatedText text="NEWS &" delay={0.0} />
+                <span className="text-brand-green">
+                  <AnimatedText text="EVENTS" delay={0.15} />
+                </span>
               </h1>
               <p className="mt-3 max-w-2xl text-sm text-white/65">
                 Official updates from Ykay College — published by the school communications team.
@@ -71,7 +75,7 @@ export default async function NewsPage() {
                       </span>
                     </div>
                     <h2 className="font-display text-2xl tracking-wide text-[var(--text-primary)]">
-                      {post.title}
+                      <AnimatedText text={post.title} delay={0.0} />
                     </h2>
                     <p className="mt-3 flex-1 text-sm leading-relaxed text-[var(--text-secondary)]">
                       {post.excerpt}

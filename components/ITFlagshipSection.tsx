@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Award, Code2, Shield, Sparkles } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 const TRACKS = [
   {
     title: "Python",
@@ -59,7 +60,10 @@ export default function ITFlagshipSection() {
               <Sparkles size={12} /> Flagship programme
             </span>
             <h2 className="mt-4 font-display text-4xl tracking-widest text-[var(--text-primary)] md:text-5xl">
-              IT EDUCATION FOR THE <span className="text-brand-green">NEXT GENERATION</span>
+              <AnimatedText text="IT EDUCATION FOR THE" delay={0.0} />
+              <span className="text-brand-green">
+                <AnimatedText text="NEXT GENERATION" delay={0.5} />
+              </span>
             </h2>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--text-secondary)]">
               Ykay College is not only a secondary school — it is a digital learning brand. Students

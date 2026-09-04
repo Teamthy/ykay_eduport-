@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 import { Sparkles, Zap, Bug, Package } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 const CHANGES = [
   {
     date: "July 2025",
@@ -58,7 +59,10 @@ export default function WhatsNewPage() {
                 <Package size={30} />
               </div>
               <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-                WHAT'S <span className="text-brand-green">NEW</span>
+                <AnimatedText text="WHAT'S" delay={0.0} />
+                <span className="text-brand-green">
+                  <AnimatedText text="NEW" delay={0.15} />
+                </span>
               </h1>
               <p className="text-white/60 mt-6 max-w-2xl mx-auto">
                 Recent updates and improvements to Ykay College EduPortal.

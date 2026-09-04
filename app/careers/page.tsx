@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 import { Briefcase, MapPin, Clock, Mail } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 const OPENINGS = [
   {
     title: "Mathematics Teacher",
@@ -46,7 +47,10 @@ export default function CareersPage() {
                 Join Our Team
               </span>
               <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-                CAREERS <span className="text-brand-green">AT YKAY</span>
+                <AnimatedText text="CAREERS" delay={0.0} />
+                <span className="text-brand-green">
+                  <AnimatedText text="AT YKAY" delay={0.175} />
+                </span>
               </h1>
               <p className="text-white/60 mt-6 max-w-2xl mx-auto">
                 Build your career at one of Nigeria's most innovative schools. We hire passionate
@@ -60,7 +64,7 @@ export default function CareersPage() {
           <section className="py-20 px-6">
             <div className="mx-auto max-w-4xl space-y-4">
               <h2 className="font-display text-2xl text-brand-green tracking-widest mb-6">
-                Current Openings ({OPENINGS.length})
+                <AnimatedText text={`Current Openings (${OPENINGS.length})`} />
               </h2>
               {OPENINGS.map((job, i) => (
                 <div

@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 import { GraduationCap, Briefcase, Award, Users } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 const ALUMNI = [
   {
     name: "Dr. Kemi Adeleke",
@@ -54,7 +55,10 @@ export default function AlumniPage() {
                 <GraduationCap size={30} />
               </div>
               <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-                OUR <span className="text-brand-green">ALUMNI</span>
+                <AnimatedText text="OUR" delay={0.0} />
+                <span className="text-brand-green">
+                  <AnimatedText text="ALUMNI" delay={0.075} />
+                </span>
               </h1>
               <p className="text-white/60 mt-6 max-w-2xl mx-auto">
                 Ykay graduates are making waves across Nigeria and the world. Meet a few of them.

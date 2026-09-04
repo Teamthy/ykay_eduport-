@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { AnimatedText } from "@/components/AnimatedText";
 import {
   GraduationCap,
   ClipboardCheck,
@@ -58,7 +59,10 @@ export default function Services() {
             Programmes & Services
           </span>
           <h2 className="font-display text-4xl md:text-6xl text-[var(--text-primary)] tracking-[2px]">
-            WHAT WE <span className="text-brand-green">OFFER</span>
+            <AnimatedText text="WHAT WE" delay={0.0} />
+            <span className="text-brand-green">
+              <AnimatedText text="OFFER" delay={0.175} />
+            </span>
           </h2>
         </div>
 

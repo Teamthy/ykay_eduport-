@@ -65,7 +65,6 @@
     "@prisma/client": "^6.15.0",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-slot": "^1.2.0",
-    "@react-three/fiber": "^9.7.0",
     "@sentry/nextjs": "^10.69.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
@@ -88,7 +87,6 @@
     "read-excel-file": "^9.3.4",
     "resend": "^4.8.0",
     "tailwind-merge": "^2.6.0",
-    "three": "^0.185.1",
     "zod": "^3.24.0"
   },
   "devDependencies": {
@@ -103,7 +101,6 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@types/three": "^0.185.4",
     "@vitest/coverage-v8": "^4.1.10",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.20.0",

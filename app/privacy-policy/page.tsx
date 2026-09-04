@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 import { Shield, Lock, FileText, Mail } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 export default function PrivacyPolicyPage() {
   return (
     <>
@@ -24,7 +25,10 @@ export default function PrivacyPolicyPage() {
                     </span>
                   </div>
                   <h1 className="font-display text-[36px] md:text-[56px] tracking-[3px] text-white mb-3">
-                    PRIVACY <span className="text-brand-green-light">POLICY</span>
+                    <AnimatedText text="PRIVACY" delay={0.0} />
+                    <span className="text-brand-green-light">
+                      <AnimatedText text="POLICY" delay={0.175} />
+                    </span>
                   </h1>
                   <p className="font-body text-base md:text-lg text-white/80">
                     Ykay College &amp; Leadership Academy — NDPR Compliance Statement
@@ -46,7 +50,7 @@ export default function PrivacyPolicyPage() {
                     <Lock size={18} className="text-[var(--accent-primary)]" />
                   </div>
                   <h2 className="font-display text-xl tracking-[2px] text-[var(--text-primary)]">
-                    Data Protection &amp; Privacy
+                    <AnimatedText text="Data Protection & Privacy" delay={0.0} />
                   </h2>
                 </div>
                 <p className="font-body text-sm text-[var(--text-secondary)] leading-relaxed mb-4">
@@ -67,9 +71,11 @@ export default function PrivacyPolicyPage() {
                   <div className="w-10 h-10 rounded-xl bg-[var(--accent-primary)]/10 flex items-center justify-center">
                     <FileText size={18} className="text-[var(--accent-primary)]" />
                   </div>
-                  <h2 className="font-display text-xl tracking-[2px] text-[var(--text-primary)]">
-                    What Data We Collect
-                  </h2>
+                  <AnimatedText
+                    as="h2"
+                    className="font-display text-xl tracking-[2px] text-[var(--text-primary)]"
+                    text="What Data We Collect"
+                  />
                 </div>
                 <ul className="space-y-3">
                   {[
@@ -93,9 +99,11 @@ export default function PrivacyPolicyPage() {
 
               {/* Rights */}
               <div className="rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] p-8 md:p-10">
-                <h2 className="font-display text-xl tracking-[2px] text-[var(--text-primary)] mb-6">
-                  Your Rights
-                </h2>
+                <AnimatedText
+                  as="h2"
+                  className="font-display text-xl tracking-[2px] text-[var(--text-primary)] mb-6"
+                  text="Your Rights"
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {[
                     { title: "Access", desc: "Request a copy of your personal data." },
@@ -127,9 +135,11 @@ export default function PrivacyPolicyPage() {
               <div className="rounded-[2rem] bg-gradient-to-br from-brand-navy via-brand-navy-light to-green-900 p-8 md:p-10 shadow-xl relative overflow-hidden">
                 <div className="absolute -top-16 -right-16 w-60 h-60 rounded-full bg-brand-green/20 blur-3xl" />
                 <div className="relative z-10">
-                  <h2 className="font-display text-xl tracking-[2px] text-white mb-4">
-                    Cookie Consent
-                  </h2>
+                  <AnimatedText
+                    as="h2"
+                    className="font-display text-xl tracking-[2px] text-white mb-4"
+                    text="Cookie Consent"
+                  />
                   <p className="font-body text-sm text-white/80 mb-6 leading-relaxed">
                     This website uses cookies and similar technologies to enhance user experience,
                     remember preferences, and analyze traffic. By continuing to use this site, you
@@ -155,9 +165,11 @@ export default function PrivacyPolicyPage() {
                   <div className="w-10 h-10 rounded-xl bg-[var(--accent-primary)]/10 flex items-center justify-center">
                     <Mail size={18} className="text-[var(--accent-primary)]" />
                   </div>
-                  <h2 className="font-display text-xl tracking-[2px] text-[var(--text-primary)]">
-                    Data Requests
-                  </h2>
+                  <AnimatedText
+                    as="h2"
+                    className="font-display text-xl tracking-[2px] text-[var(--text-primary)]"
+                    text="Data Requests"
+                  />
                 </div>
                 <p className="font-body text-sm text-[var(--text-secondary)] leading-relaxed">
                   To request access to, correction of, or deletion of your personal data, please

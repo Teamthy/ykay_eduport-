@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 import { GraduationCap, Trophy, BookOpen, Music, Users } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 export default function CampusLifePage() {
   return (
     <>
@@ -15,9 +16,11 @@ export default function CampusLifePage() {
               <p className="font-body text-xs font-bold tracking-[0.25em] uppercase text-[var(--accent-primary)] mb-4">
                 CAMPUS LIFE
               </p>
-              <h1 className="font-display text-[56px] md:text-[100px] lg:text-[130px] leading-[0.85] tracking-[4px] text-[var(--text-primary)] mb-6">
-                BEYOND THE CLASSROOM
-              </h1>
+              <AnimatedText
+                as="h1"
+                className="font-display text-[56px] md:text-[100px] lg:text-[130px] leading-[0.85] tracking-[4px] text-[var(--text-primary)] mb-6"
+                text="BEYOND THE CLASSROOM"
+              />
               <p className="font-body text-base md:text-lg text-[var(--text-secondary)] max-w-2xl leading-relaxed">
                 At Ykay College, education extends far beyond textbooks. Our students discover their
                 talents, build character, and develop leadership skills through clubs, sports, and
@@ -99,9 +102,11 @@ export default function CampusLifePage() {
                     <p className="font-body text-xs font-bold tracking-[0.25em] uppercase text-brand-green mb-4">
                       FACILITIES
                     </p>
-                    <h2 className="font-display text-[32px] md:text-[48px] leading-[0.9] tracking-[2px] md:tracking-[4px] text-white mb-4">
-                      CAMPUS FACILITIES
-                    </h2>
+                    <AnimatedText
+                      as="h2"
+                      className="font-display text-[32px] md:text-[48px] leading-[0.9] tracking-[2px] md:tracking-[4px] text-white mb-4"
+                      text="CAMPUS FACILITIES"
+                    />
                     <p className="font-body text-sm md:text-base text-white/90 leading-relaxed mb-6">
                       Modern science laboratories, a fully equipped library with digital resources,
                       dedicated sports fields, a 360° virtual campus tour, and technology-enhanced

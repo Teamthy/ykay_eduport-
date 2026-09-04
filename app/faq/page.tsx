@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 import { ChevronDown, HelpCircle } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 const FAQS = [
   {
     category: "Admissions",
@@ -109,7 +110,10 @@ export default function FAQPage() {
                 <HelpCircle size={30} />
               </div>
               <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-                FREQUENTLY <span className="text-brand-green">ASKED</span>
+                <AnimatedText text="FREQUENTLY" delay={0.0} />
+                <span className="text-brand-green">
+                  <AnimatedText text="ASKED" delay={0.25} />
+                </span>
               </h1>
               <p className="text-white/60 mt-6 max-w-2xl mx-auto">
                 Quick answers to the most common questions about Ykay College — admissions, fees,
@@ -125,7 +129,7 @@ export default function FAQPage() {
               {FAQS.map((cat) => (
                 <div key={cat.category}>
                   <h2 className="font-display text-2xl text-brand-green tracking-widest mb-6">
-                    {cat.category}
+                    <AnimatedText text={cat.category} delay={0.0} />
                   </h2>
                   <div className="space-y-3">
                     {cat.items.map((item, i) => {

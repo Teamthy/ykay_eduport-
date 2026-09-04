@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { MapPin, ArrowRight, Play } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 export default function FindUs() {
   return (
     <section id="find-us" className="w-full bg-[var(--bg-primary)] py-16 md:py-24 theme-transition">
@@ -20,7 +21,10 @@ export default function FindUs() {
               FIND US
             </span>
             <h2 className="font-display text-4xl md:text-6xl leading-[0.95] tracking-[2px] text-[var(--text-primary)] mb-8">
-              YKAY <span className="text-brand-green">COLLEGE</span>
+              <AnimatedText text="YKAY" delay={0.0} />
+              <span className="text-brand-green">
+                <AnimatedText text="COLLEGE" delay={0.1} />
+              </span>
             </h2>
 
             {/* Map */}
@@ -74,7 +78,10 @@ export default function FindUs() {
               FEATURED NEWS
             </span>
             <h2 className="font-display text-4xl md:text-6xl leading-[0.95] tracking-[2px] text-[var(--text-primary)] mb-8">
-              LATEST FROM <span className="text-brand-green">THE SCHOOL</span>
+              <AnimatedText text="LATEST FROM" delay={0.0} />
+              <span className="text-brand-green">
+                <AnimatedText text="THE SCHOOL" delay={0.275} />
+              </span>
             </h2>
 
             {/* Featured News Card */}

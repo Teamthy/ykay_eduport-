@@ -3,7 +3,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { Download } from "lucide-react";
-import { HeroCanvas } from "@/components/three/HeroCanvas";
+import { AnimatedText, WordCycle, Marquee } from "@/components/AnimatedText";
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -19,9 +19,6 @@ export default function Hero() {
       ref={sectionRef}
       className="relative w-full min-h-[88vh] md:min-h-[92vh] bg-brand-navy-dark overflow-hidden flex items-center"
     >
-      {/* 3D knowledge constellation (gated, decorative) */}
-      <HeroCanvas className="absolute inset-0 z-[1] overflow-hidden" />
-
       {/* Background image with overlay */}
       <div className="absolute inset-0 z-0">
         <img
@@ -49,16 +46,12 @@ export default function Hero() {
             YKAY COLLEGE &amp; LEADERSHIP ACADEMY
           </motion.p>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 90, damping: 14, delay: 0.3 }}
-            className="font-display text-[52px] md:text-[96px] lg:text-[130px] leading-[0.85] tracking-[3px] md:tracking-[6px] text-white mb-6 md:mb-8"
-          >
-            EXCELLENCE IN
-            <br />
-            <span className="text-white">EDUCATION</span>
-          </motion.h1>
+          <h1 className="font-display text-[52px] md:text-[96px] lg:text-[130px] leading-[0.85] tracking-[3px] md:tracking-[6px] text-white mb-6 md:mb-8">
+            <AnimatedText text="EXCELLENCE IN" className="block" animateOnLoad delay={0.15} />
+            <span className="block text-brand-green">
+              <WordCycle words={["EDUCATION", "EXCELLENCE", "LEADERSHIP", "CHARACTER"]} />
+            </span>
+          </h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -121,6 +114,12 @@ export default function Hero() {
           </motion.div>
         </div>
       </motion.div>
+
+      <Marquee
+        items={["ADMISSIONS OPEN", "WAEC", "NECO", "JAMB", "IT ACADEMY"]}
+        className="absolute bottom-0 left-0 right-0 z-10 border-t border-white/15 bg-brand-navy-dark/70 py-3 backdrop-blur-sm"
+        itemClassName="font-body text-xs md:text-sm font-bold tracking-[0.25em] uppercase text-brand-green"
+      />
     </section>
   );
 }

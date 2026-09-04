@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
+import { AnimatedText } from "@/components/AnimatedText";
 import {
   ArrowRight,
   Globe,
@@ -57,7 +58,10 @@ export default function VirtualPage() {
                 The Ykay Family
               </p>
               <h1 className="mx-auto mb-6 max-w-3xl font-display text-4xl tracking-wide text-white md:text-6xl">
-                YKAY <span className="text-brand-green">VIRTUAL</span>
+                <AnimatedText text="YKAY" delay={0.0} />
+                <span className="text-brand-green">
+                  <AnimatedText text="VIRTUAL" delay={0.1} />
+                </span>
               </h1>
               <p className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-white/85 md:text-lg">
                 The same teachers and standards you trust at Ykay College — now online. Live
@@ -85,9 +89,11 @@ export default function VirtualPage() {
         {/* Features */}
         <Reveal>
           <section className="mx-auto max-w-7xl px-6 py-16 md:py-24">
-            <h2 className="mb-3 text-center font-display text-3xl tracking-wide md:text-4xl">
-              What you can do on Ykay Virtual
-            </h2>
+            <AnimatedText
+              as="h2"
+              className="mb-3 text-center font-display text-3xl tracking-wide md:text-4xl"
+              text="What you can do on Ykay Virtual"
+            />
             <p className="mx-auto mb-12 max-w-2xl text-center text-sm leading-relaxed text-[var(--text-muted)] md:text-base">
               YK-Virtual is the home of Ykay Virtual — a full online school built by the same team,
               for learners who study best from home or need extra support.
@@ -114,9 +120,11 @@ export default function VirtualPage() {
           <section className="border-t border-[var(--section-divider)] bg-[var(--section-bg-alt)]">
             <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
               <div className="mb-10 text-center">
-                <h2 className="mb-3 font-display text-3xl tracking-wide md:text-4xl">
-                  Two schools · one family
-                </h2>
+                <AnimatedText
+                  as="h2"
+                  className="mb-3 font-display text-3xl tracking-wide md:text-4xl"
+                  text="Two schools · one family"
+                />
                 <p className="mx-auto max-w-xl text-sm text-[var(--text-muted)] md:text-base">
                   Learn on campus with Ykay College, or online with Ykay Virtual — whichever fits
                   your child.

@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 
+import { AnimatedText } from "@/components/AnimatedText";
 export default function AboutPage() {
   return (
     <>
@@ -14,9 +15,11 @@ export default function AboutPage() {
               <p className="font-body text-xs font-bold tracking-[0.25em] uppercase text-[var(--accent-primary)] mb-4">
                 ABOUT US
               </p>
-              <h1 className="font-display text-[56px] md:text-[100px] lg:text-[130px] leading-[0.85] tracking-[4px] text-[var(--text-primary)] mb-6">
-                OUR STORY
-              </h1>
+              <AnimatedText
+                as="h1"
+                className="font-display text-[56px] md:text-[100px] lg:text-[130px] leading-[0.85] tracking-[4px] text-[var(--text-primary)] mb-6"
+                text="OUR STORY"
+              />
               <p className="font-body text-base md:text-xl text-[var(--text-secondary)] max-w-2xl leading-relaxed">
                 Founded with a vision to raise leaders through excellence in education, Ykay College
                 has grown into one of the most respected secondary schools in Ogun State.
@@ -31,9 +34,11 @@ export default function AboutPage() {
             <div className="mx-auto max-w-7xl px-6">
               <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start mb-16">
                 <div>
-                  <h2 className="font-display text-[28px] md:text-[36px] tracking-[2px] text-[var(--text-primary)] mb-6">
-                    A VISION FOR EXCELLENCE
-                  </h2>
+                  <AnimatedText
+                    as="h2"
+                    className="font-display text-[28px] md:text-[36px] tracking-[2px] text-[var(--text-primary)] mb-6"
+                    text="A VISION FOR EXCELLENCE"
+                  />
                   <div className="space-y-5 text-[var(--text-secondary)] font-body text-base leading-relaxed">
                     <p>
                       Ykay College &amp; Leadership Academy was established on the conviction that

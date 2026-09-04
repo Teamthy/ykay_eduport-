@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 const clubs = [
   {
     title: "Science & Technology Club",
@@ -55,9 +56,11 @@ export default function Clubs() {
             <span className="font-body text-[10px] font-bold tracking-[0.25em] uppercase text-white/30 mb-3 block">
               CLUBS &amp; SOCIETIES
             </span>
-            <h2 className="font-display text-[32px] md:text-[48px] leading-[0.9] tracking-[2px] md:tracking-[4px] text-white">
-              CAMPUS LIFE
-            </h2>
+            <AnimatedText
+              as="h2"
+              className="font-display text-[32px] md:text-[48px] leading-[0.9] tracking-[2px] md:tracking-[4px] text-white"
+              text="CAMPUS LIFE"
+            />
           </div>
         </div>
 

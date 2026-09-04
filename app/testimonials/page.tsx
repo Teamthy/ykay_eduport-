@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 import { Quote, Star } from "lucide-react";
 
+import { AnimatedText } from "@/components/AnimatedText";
 const TESTIMONIALS = [
   {
     name: "Mrs. Chinwe Okafor",
@@ -60,7 +61,11 @@ export default function TestimonialsPage() {
                 Real Stories
               </span>
               <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-                WHAT <span className="text-brand-green">FAMILIES</span> SAY
+                <AnimatedText text="WHAT" delay={0.0} />
+                <span className="text-brand-green">
+                  <AnimatedText text="FAMILIES" delay={0.1} />
+                </span>{" "}
+                <AnimatedText text="SAY" delay={0.3} />
               </h1>
               <p className="text-white/60 mt-6 max-w-2xl mx-auto">
                 Hear from parents, students, and alumni about their Ykay College experience.
