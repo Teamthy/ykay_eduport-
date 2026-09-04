@@ -1,13 +1,15 @@
 import { Download, QrCode, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
-import { apkFallbackUrl, apkQrUrl, apkSizeLabel, apkUrl as resolveApkUrl } from "@/lib/apk";
+import { apkQrUrl, apkSizeLabel, apkUrl as resolveApkUrl } from "@/lib/apk";
 
 export default function MobileAppCTA() {
   const apkUrl = resolveApkUrl();
-  const fallbackUrl = apkFallbackUrl();
   const sizeLabel = apkSizeLabel();
-  const qr = apkUrl ? apkQrUrl(apkUrl) : null;
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.com").replace(/\/$/, "");
+  // QR encodes the INSTALL PAGE, not the file — it works for iPhone users too
+  // and outlives any one APK release.
+  const qr = apkQrUrl(`${site}/download`);
 
   return (
     <section
@@ -37,43 +39,41 @@ export default function MobileAppCTA() {
                 <span className="text-brand-green">YOUR POCKET</span>
               </h2>
               <p className="font-body text-base md:text-lg text-white/70 max-w-lg mb-8 leading-relaxed">
-                Results, attendance, fees, timetables, CBT practice and push notifications — all
-                offline-ready. Download the Android app and sign in with the email address the
-                school has on record for you.
+                Results, attendance, fees, timetables and push notifications — all offline-ready.
+                Install the app instantly from this website on{" "}
+                <b className="text-white">iPhone and Android</b>: it is the full mobile app,
+                installs in seconds and updates itself. Android users can also grab the app file
+                (APK).
               </p>
               <div className="flex flex-wrap items-center gap-5">
                 {/* Always route through /download rather than straight at the
-                    .apk. Android shows an "unknown source" warning for any
-                    sideloaded app, and a parent who taps a raw file link with
-                    no explanation will stop there. The page also survives the
-                    URL not being configured yet. */}
+                    .apk. The page explains instant PWA install (both platforms)
+                    and handles the Android "unknown source" warning for the
+                    APK — a parent who taps a raw file link with no explanation
+                    will stop there. */}
                 <Link
                   href="/download"
-                  className="inline-flex items-center gap-3 rounded-full bg-brand-orange px-8 py-4 font-body text-sm font-bold uppercase tracking-[0.15em] text-brand-navy transition-all duration-300 hover:scale-[1.03] hover:bg-brand-orange-dark active:scale-[0.97] shadow-lg shadow-black/30"
+                  className="inline-flex items-center gap-3 rounded-full bg-brand-green px-8 py-4 font-body text-sm font-bold uppercase tracking-[0.15em] text-brand-navy transition-all duration-300 hover:scale-[1.03] hover:bg-brand-green-dark active:scale-[0.97] shadow-lg shadow-black/30"
                 >
-                  <Download size={18} /> Download for Android
-                  {sizeLabel ? (
-                    <span className="font-normal normal-case tracking-normal opacity-80">
-                      ({sizeLabel})
-                    </span>
-                  ) : null}
+                  <Download size={18} /> Install the app
+                  <span className="font-normal normal-case tracking-normal opacity-80">
+                    iPhone · Android
+                  </span>
                 </Link>
-                {fallbackUrl && (
+                {apkUrl && (
                   <a
-                    href={fallbackUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="/download"
                     className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white"
                   >
-                    or download via GitHub ↗
+                    or the Android APK{sizeLabel ? ` (${sizeLabel})` : ""} ↗
                   </a>
                 )}
               </div>
               <p className="mt-5 flex items-start gap-2 font-body text-xs leading-relaxed text-white/50">
                 <ShieldCheck size={14} className="mt-0.5 shrink-0 text-brand-green" />
                 <span>
-                  Android will warn that the file is from an unknown source — that is normal for
-                  apps installed outside the Play Store. iPhone users can use the web portal.
+                  No app store needed and no unknown-source warnings — the installable app comes
+                  straight from the school&apos;s own website.
                 </span>
               </p>
             </div>
@@ -84,7 +84,7 @@ export default function MobileAppCTA() {
                 <div className="mb-4 flex items-center gap-2 text-brand-green">
                   <QrCode size={18} />
                   <span className="font-body text-[10px] font-bold uppercase tracking-[0.25em]">
-                    Scan to install
+                    Scan to open the install page
                   </span>
                 </div>
                 <div className="rounded-2xl bg-white p-3 shadow-xl">

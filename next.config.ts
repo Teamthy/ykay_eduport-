@@ -36,7 +36,10 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: https:",
               "font-src 'self' data:",
               "connect-src 'self' https://api.paystack.co https://*.upstash.io https://*.neon.tech",
-              "frame-src 'self' https://checkout.paystack.com",
+              // frame-src: Paystack checkout + the Google Maps embed on the
+              // home page (Find Us). Without these origins the map iframe is
+              // silently blocked by the CSP and renders as a blank box.
+              "frame-src 'self' https://checkout.paystack.com https://www.google.com https://maps.google.com https://*.gstatic.com",
             ].join("; "),
           },
         ],
