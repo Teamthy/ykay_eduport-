@@ -43,10 +43,10 @@ export default async function NewsPage() {
               <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
                 School journal
               </p>
-              <h1 className="mt-3 font-display text-5xl tracking-widest">
-                <AnimatedText text="NEWS &" delay={0.0} />
+              <h1 className="mt-3 font-display tracking-widest text-[clamp(3rem,11vw,9.5rem)]">
+                <AnimatedText heavy stagger={0.034} text="NEWS &" delay={0.0} />
                 <span className="text-brand-green">
-                  <AnimatedText text="EVENTS" delay={0.15} />
+                  <AnimatedText heavy stagger={0.034} text="EVENTS" delay={0.15} />
                 </span>
               </h1>
               <p className="mt-3 max-w-2xl text-sm text-white/65">

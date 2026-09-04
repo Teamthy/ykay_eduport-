@@ -17,7 +17,9 @@ export default function AboutPage() {
               </p>
               <AnimatedText
                 as="h1"
-                className="font-display text-[56px] md:text-[100px] lg:text-[130px] leading-[0.85] tracking-[4px] text-[var(--text-primary)] mb-6"
+                heavy
+                stagger={0.034}
+                className="font-display text-[clamp(3rem,11vw,9.5rem)] leading-[0.82] tracking-[-0.01em] text-[var(--text-primary)] mb-6"
                 text="OUR STORY"
               />
               <p className="font-body text-base md:text-xl text-[var(--text-secondary)] max-w-2xl leading-relaxed">

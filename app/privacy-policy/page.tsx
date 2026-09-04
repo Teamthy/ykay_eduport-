@@ -24,10 +24,10 @@ export default function PrivacyPolicyPage() {
                       NDPR Compliant
                     </span>
                   </div>
-                  <h1 className="font-display text-[36px] md:text-[56px] tracking-[3px] text-white mb-3">
-                    <AnimatedText text="PRIVACY" delay={0.0} />
+                  <h1 className="font-display tracking-[-0.01em] text-white mb-3 text-[clamp(3rem,11vw,9.5rem)]">
+                    <AnimatedText heavy stagger={0.034} text="PRIVACY" delay={0.0} />
                     <span className="text-brand-green-light">
-                      <AnimatedText text="POLICY" delay={0.175} />
+                      <AnimatedText heavy stagger={0.034} text="POLICY" delay={0.175} />
                     </span>
                   </h1>
                   <p className="font-body text-base md:text-lg text-white/80">

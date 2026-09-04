@@ -61,6 +61,8 @@ export default function AcademicsPage() {
               </p>
               <AnimatedText
                 as="h1"
+                heavy
+                stagger={0.034}
                 className="mt-4 font-display text-5xl tracking-widest text-[var(--text-primary)] md:text-7xl"
                 text="ACADEMICS"
               />

@@ -188,10 +188,10 @@ export default function ITEducationHubPage() {
               <span className="inline-flex items-center gap-2 rounded-full border border-brand-green/50 bg-brand-green/20 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">
                 <Sparkles size={12} /> Flagship digital academy
               </span>
-              <h1 className="mt-5 max-w-4xl font-display text-5xl tracking-widest md:text-6xl">
-                <AnimatedText text="IT EDUCATION AT" delay={0.0} />
+              <h1 className="mt-5 max-w-4xl font-display tracking-widest text-[clamp(3rem,11vw,9.5rem)]">
+                <AnimatedText heavy stagger={0.034} text="IT EDUCATION AT" delay={0.0} />
                 <span className="text-brand-green">
-                  <AnimatedText text="YKAY COLLEGE" delay={0.375} />
+                  <AnimatedText heavy stagger={0.034} text="YKAY COLLEGE" delay={0.375} />
                 </span>
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-relaxed text-white md:text-lg">

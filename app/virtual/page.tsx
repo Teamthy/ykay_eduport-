@@ -57,10 +57,10 @@ export default function VirtualPage() {
                 <Globe size={14} className="text-brand-green" />
                 The Ykay Family
               </p>
-              <h1 className="mx-auto mb-6 max-w-3xl font-display text-4xl tracking-wide text-white md:text-6xl">
-                <AnimatedText text="YKAY" delay={0.0} />
+              <h1 className="mx-auto mb-6 max-w-3xl font-display tracking-wide text-white text-[clamp(3rem,11vw,9.5rem)]">
+                <AnimatedText heavy stagger={0.034} text="YKAY" delay={0.0} />
                 <span className="text-brand-green">
-                  <AnimatedText text="VIRTUAL" delay={0.1} />
+                  <AnimatedText heavy stagger={0.034} text="VIRTUAL" delay={0.1} />
                 </span>
               </h1>
               <p className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-white/85 md:text-lg">

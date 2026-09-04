@@ -46,10 +46,10 @@ export default function CareersPage() {
               <span className="text-brand-green text-xs font-bold tracking-widest uppercase mb-4 block">
                 Join Our Team
               </span>
-              <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-                <AnimatedText text="CAREERS" delay={0.0} />
+              <h1 className="font-display text-white leading-[0.82] text-[clamp(3rem,11vw,9.5rem)]">
+                <AnimatedText heavy stagger={0.034} text="CAREERS" delay={0.0} />
                 <span className="text-brand-green">
-                  <AnimatedText text="AT YKAY" delay={0.175} />
+                  <AnimatedText heavy stagger={0.034} text="AT YKAY" delay={0.175} />
                 </span>
               </h1>
               <p className="text-white/60 mt-6 max-w-2xl mx-auto">

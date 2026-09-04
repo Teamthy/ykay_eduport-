@@ -58,10 +58,10 @@ export default function WhatsNewPage() {
               <div className="w-16 h-16 rounded-2xl bg-brand-green/20 text-brand-green flex items-center justify-center mx-auto mb-6">
                 <Package size={30} />
               </div>
-              <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-                <AnimatedText text="WHAT'S" delay={0.0} />
+              <h1 className="font-display text-white leading-[0.82] text-[clamp(3rem,11vw,9.5rem)]">
+                <AnimatedText heavy stagger={0.034} text="WHAT'S" delay={0.0} />
                 <span className="text-brand-green">
-                  <AnimatedText text="NEW" delay={0.15} />
+                  <AnimatedText heavy stagger={0.034} text="NEW" delay={0.15} />
                 </span>
               </h1>
               <p className="text-white/60 mt-6 max-w-2xl mx-auto">

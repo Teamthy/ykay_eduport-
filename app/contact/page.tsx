@@ -14,10 +14,10 @@ export default function ContactPage() {
         <Reveal>
           <section className="pt-32 pb-20 bg-brand-navy px-6">
             <div className="mx-auto max-w-7xl text-center">
-              <h1 className="font-display text-[56px] md:text-[80px] text-white">
-                <AnimatedText text="CONTACT" delay={0.0} />
+              <h1 className="font-display text-white text-[clamp(3rem,11vw,9.5rem)]">
+                <AnimatedText heavy stagger={0.034} text="CONTACT" delay={0.0} />
                 <span className="text-brand-green">
-                  <AnimatedText text="US" delay={0.175} />
+                  <AnimatedText heavy stagger={0.034} text="US" delay={0.175} />
                 </span>
               </h1>
               <p className="text-white/50 max-w-md mx-auto mt-4">

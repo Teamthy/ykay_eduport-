@@ -74,10 +74,10 @@ export default function PortalPage() {
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-green/10 border border-brand-green/30 text-brand-green text-[10px] font-bold tracking-[0.2em] uppercase mb-6">
                 <LockKeyhole size={12} /> Secure Access
               </span>
-              <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-                <AnimatedText text="YKAY" delay={0.0} />
+              <h1 className="font-display text-white leading-[0.82] text-[clamp(3rem,11vw,9.5rem)]">
+                <AnimatedText heavy stagger={0.034} text="YKAY" delay={0.0} />
                 <span className="text-brand-green">
-                  <AnimatedText text="EDUPORTAL" delay={0.1} />
+                  <AnimatedText heavy stagger={0.034} text="EDUPORTAL" delay={0.1} />
                 </span>
               </h1>
               <p className="text-white/60 font-body max-w-2xl mx-auto mt-6 text-base md:text-lg">

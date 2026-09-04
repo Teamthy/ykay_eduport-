@@ -44,11 +44,11 @@ export default function AdmissionsPage() {
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-brand-green">
                   2025 / 2026 admissions
                 </p>
-                <h1 className="mt-5 font-display text-5xl leading-[0.88] tracking-[0.08em] text-white sm:text-7xl md:text-8xl">
-                  <AnimatedText text="START YOUR" delay={0.0} />
+                <h1 className="mt-5 font-display leading-[0.82] tracking-[-0.01em] text-white text-[clamp(3rem,11vw,9.5rem)]">
+                  <AnimatedText heavy stagger={0.034} text="START YOUR" delay={0.0} />
                   <br />
                   <span className="text-brand-green">
-                    <AnimatedText text="APPLICATION" delay={0.25} />
+                    <AnimatedText heavy stagger={0.034} text="APPLICATION" delay={0.25} />
                   </span>
                 </h1>
                 <p className="mt-7 max-w-2xl text-base leading-7 text-white md:text-lg">

@@ -36,7 +36,7 @@ export default function Hero() {
         style={{ y: contentY, opacity: contentOpacity }}
         className="relative z-10 mx-auto max-w-7xl px-6 py-24 md:py-36 w-full"
       >
-        <div className="max-w-4xl">
+        <div className="max-w-6xl">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -46,10 +46,17 @@ export default function Hero() {
             YKAY COLLEGE &amp; LEADERSHIP ACADEMY
           </motion.p>
 
-          <h1 className="font-display text-[52px] md:text-[96px] lg:text-[130px] leading-[0.85] tracking-[3px] md:tracking-[6px] text-white mb-6 md:mb-8">
-            <AnimatedText text="EXCELLENCE IN" className="block" animateOnLoad delay={0.15} />
+          <h1 className="font-display text-[clamp(3.25rem,13vw,11.5rem)] leading-[0.82] tracking-[-0.01em] text-white mb-6 md:mb-8">
+            <AnimatedText
+              text="EXCELLENCE IN"
+              className="block"
+              animateOnLoad
+              heavy
+              delay={0.15}
+              stagger={0.038}
+            />
             <span className="block text-brand-green">
-              <WordCycle words={["EDUCATION", "EXCELLENCE", "LEADERSHIP", "CHARACTER"]} />
+              <WordCycle words={["EDUCATION", "EXCELLENCE", "LEADERSHIP", "CHARACTER"]} heavy />
             </span>
           </h1>
 
