@@ -2,10 +2,14 @@
 
 import { motion } from "framer-motion";
 import { Download } from "lucide-react";
+import { HeroCanvas } from "@/components/three/HeroCanvas";
 
 export default function Hero() {
   return (
     <section className="relative w-full min-h-[88vh] md:min-h-[92vh] bg-brand-navy-dark overflow-hidden flex items-center">
+      {/* 3D knowledge constellation (gated, decorative) */}
+      <HeroCanvas className="absolute inset-0 z-[1] overflow-hidden" />
+
       {/* Background image with overlay */}
       <div className="absolute inset-0 z-0">
         <img

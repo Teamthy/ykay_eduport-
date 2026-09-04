@@ -1,5 +1,6 @@
 ﻿import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Reveal } from "@/components/Reveal";
 import { Quote, Star } from "lucide-react";
 
 const TESTIMONIALS = [
@@ -52,53 +53,57 @@ export default function TestimonialsPage() {
     <>
       <Header />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        <section className="pt-32 pb-16 bg-brand-navy px-6">
-          <div className="mx-auto max-w-4xl text-center">
-            <span className="text-brand-green text-xs font-bold tracking-widest uppercase mb-4 block">
-              Real Stories
-            </span>
-            <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-              WHAT <span className="text-brand-green">FAMILIES</span> SAY
-            </h1>
-            <p className="text-white/60 mt-6 max-w-2xl mx-auto">
-              Hear from parents, students, and alumni about their Ykay College experience.
-            </p>
-          </div>
-        </section>
+        <Reveal>
+          <section className="pt-32 pb-16 bg-brand-navy px-6">
+            <div className="mx-auto max-w-4xl text-center">
+              <span className="text-brand-green text-xs font-bold tracking-widest uppercase mb-4 block">
+                Real Stories
+              </span>
+              <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
+                WHAT <span className="text-brand-green">FAMILIES</span> SAY
+              </h1>
+              <p className="text-white/60 mt-6 max-w-2xl mx-auto">
+                Hear from parents, students, and alumni about their Ykay College experience.
+              </p>
+            </div>
+          </section>
+        </Reveal>
 
-        <section className="py-20 px-6">
-          <div className="mx-auto max-w-6xl grid md:grid-cols-2 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <div
-                key={i}
-                className="p-8 rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/30 hover:-translate-y-1 transition-all"
-              >
-                <Quote className="text-brand-green mb-4" size={32} />
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} size={14} className="fill-brand-orange text-brand-orange" />
-                  ))}
-                </div>
-                <p className="text-[var(--text-secondary)] italic mb-6 leading-relaxed">
-                  "{t.quote}"
-                </p>
-                <div className="flex items-center gap-4 pt-6 border-t border-[var(--border-subtle)]">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-green to-brand-green-dark text-white flex items-center justify-center font-display text-lg">
-                    {t.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .slice(0, 2)}
+        <Reveal>
+          <section className="py-20 px-6">
+            <div className="mx-auto max-w-6xl grid md:grid-cols-2 gap-6">
+              {TESTIMONIALS.map((t, i) => (
+                <div
+                  key={i}
+                  className="p-8 rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)] hover:border-brand-green/30 hover:-translate-y-1 transition-all"
+                >
+                  <Quote className="text-brand-green mb-4" size={32} />
+                  <div className="flex gap-0.5 mb-4">
+                    {Array.from({ length: t.rating }).map((_, i) => (
+                      <Star key={i} size={14} className="fill-brand-orange text-brand-orange" />
+                    ))}
                   </div>
-                  <div>
-                    <div className="font-bold text-[var(--text-primary)]">{t.name}</div>
-                    <div className="text-xs text-[var(--text-muted)]">{t.role}</div>
+                  <p className="text-[var(--text-secondary)] italic mb-6 leading-relaxed">
+                    "{t.quote}"
+                  </p>
+                  <div className="flex items-center gap-4 pt-6 border-t border-[var(--border-subtle)]">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-green to-brand-green-dark text-white flex items-center justify-center font-display text-lg">
+                      {t.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .slice(0, 2)}
+                    </div>
+                    <div>
+                      <div className="font-bold text-[var(--text-primary)]">{t.name}</div>
+                      <div className="text-xs text-[var(--text-muted)]">{t.role}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        </Reveal>
       </main>
       <Footer />
     </>

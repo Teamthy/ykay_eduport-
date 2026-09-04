@@ -1,5 +1,6 @@
 ﻿import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Reveal } from "@/components/Reveal";
 import { Sparkles, Zap, Bug, Package } from "lucide-react";
 
 const CHANGES = [
@@ -50,58 +51,62 @@ export default function WhatsNewPage() {
     <>
       <Header />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        <section className="pt-32 pb-16 bg-brand-navy px-6">
-          <div className="mx-auto max-w-4xl text-center">
-            <div className="w-16 h-16 rounded-2xl bg-brand-green/20 text-brand-green flex items-center justify-center mx-auto mb-6">
-              <Package size={30} />
-            </div>
-            <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-              WHAT'S <span className="text-brand-green">NEW</span>
-            </h1>
-            <p className="text-white/60 mt-6 max-w-2xl mx-auto">
-              Recent updates and improvements to Ykay College EduPortal.
-            </p>
-          </div>
-        </section>
-
-        <section className="py-20 px-6">
-          <div className="mx-auto max-w-4xl space-y-8">
-            {CHANGES.map((release, i) => (
-              <div
-                key={i}
-                className="p-8 rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]"
-              >
-                <div className="flex items-baseline justify-between mb-6">
-                  <div>
-                    <div className="text-brand-green text-xs font-bold uppercase tracking-widest">
-                      {release.date}
-                    </div>
-                    <h3 className="font-display text-2xl text-[var(--text-primary)]">
-                      {release.title}
-                    </h3>
-                  </div>
-                  <span className="text-xs px-3 py-1 rounded-full bg-[var(--surface-disabled)] text-[var(--text-muted)] font-bold">
-                    {release.version}
-                  </span>
-                </div>
-                <ul className="space-y-3">
-                  {release.items.map((item, j) => {
-                    const Icon = iconMap[item.type as keyof typeof iconMap];
-                    return (
-                      <li key={j} className="flex items-start gap-3">
-                        <Icon
-                          size={14}
-                          className={`${colorMap[item.type as keyof typeof colorMap]} mt-1 shrink-0`}
-                        />
-                        <span className="text-sm text-[var(--text-secondary)]">{item.text}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
+        <Reveal>
+          <section className="pt-32 pb-16 bg-brand-navy px-6">
+            <div className="mx-auto max-w-4xl text-center">
+              <div className="w-16 h-16 rounded-2xl bg-brand-green/20 text-brand-green flex items-center justify-center mx-auto mb-6">
+                <Package size={30} />
               </div>
-            ))}
-          </div>
-        </section>
+              <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
+                WHAT'S <span className="text-brand-green">NEW</span>
+              </h1>
+              <p className="text-white/60 mt-6 max-w-2xl mx-auto">
+                Recent updates and improvements to Ykay College EduPortal.
+              </p>
+            </div>
+          </section>
+        </Reveal>
+
+        <Reveal>
+          <section className="py-20 px-6">
+            <div className="mx-auto max-w-4xl space-y-8">
+              {CHANGES.map((release, i) => (
+                <div
+                  key={i}
+                  className="p-8 rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]"
+                >
+                  <div className="flex items-baseline justify-between mb-6">
+                    <div>
+                      <div className="text-brand-green text-xs font-bold uppercase tracking-widest">
+                        {release.date}
+                      </div>
+                      <h3 className="font-display text-2xl text-[var(--text-primary)]">
+                        {release.title}
+                      </h3>
+                    </div>
+                    <span className="text-xs px-3 py-1 rounded-full bg-[var(--surface-disabled)] text-[var(--text-muted)] font-bold">
+                      {release.version}
+                    </span>
+                  </div>
+                  <ul className="space-y-3">
+                    {release.items.map((item, j) => {
+                      const Icon = iconMap[item.type as keyof typeof iconMap];
+                      return (
+                        <li key={j} className="flex items-start gap-3">
+                          <Icon
+                            size={14}
+                            className={`${colorMap[item.type as keyof typeof colorMap]} mt-1 shrink-0`}
+                          />
+                          <span className="text-sm text-[var(--text-secondary)]">{item.text}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </section>
+        </Reveal>
       </main>
       <Footer />
     </>

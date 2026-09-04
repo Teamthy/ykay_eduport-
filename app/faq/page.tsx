@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Reveal } from "@/components/Reveal";
 import { ChevronDown, HelpCircle } from "lucide-react";
 
 const FAQS = [
@@ -101,60 +102,64 @@ export default function FAQPage() {
     <>
       <Header />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
-        <section className="pt-32 pb-16 bg-brand-navy px-6">
-          <div className="mx-auto max-w-4xl text-center">
-            <div className="w-16 h-16 rounded-2xl bg-brand-green/20 text-brand-green flex items-center justify-center mx-auto mb-6">
-              <HelpCircle size={30} />
-            </div>
-            <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
-              FREQUENTLY <span className="text-brand-green">ASKED</span>
-            </h1>
-            <p className="text-white/60 mt-6 max-w-2xl mx-auto">
-              Quick answers to the most common questions about Ykay College — admissions, fees,
-              academics, and our EduPortal.
-            </p>
-          </div>
-        </section>
-
-        <section className="py-20 px-6">
-          <div className="mx-auto max-w-4xl space-y-10">
-            {FAQS.map((cat) => (
-              <div key={cat.category}>
-                <h2 className="font-display text-2xl text-brand-green tracking-widest mb-6">
-                  {cat.category}
-                </h2>
-                <div className="space-y-3">
-                  {cat.items.map((item, i) => {
-                    const id = `${cat.category}-${i}`;
-                    const isOpen = openItems.includes(id);
-                    return (
-                      <div
-                        key={id}
-                        className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] overflow-hidden"
-                      >
-                        <button
-                          onClick={() => toggle(id)}
-                          className="w-full p-6 text-left flex items-center justify-between gap-4 hover:bg-[var(--surface-disabled)] transition-colors"
-                        >
-                          <span className="font-medium text-[var(--text-primary)]">{item.q}</span>
-                          <ChevronDown
-                            size={20}
-                            className={`text-brand-green shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                          />
-                        </button>
-                        {isOpen && (
-                          <div className="px-6 pb-6 pt-0 text-sm text-[var(--text-secondary)] leading-relaxed">
-                            {item.a}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+        <Reveal>
+          <section className="pt-32 pb-16 bg-brand-navy px-6">
+            <div className="mx-auto max-w-4xl text-center">
+              <div className="w-16 h-16 rounded-2xl bg-brand-green/20 text-brand-green flex items-center justify-center mx-auto mb-6">
+                <HelpCircle size={30} />
               </div>
-            ))}
-          </div>
-        </section>
+              <h1 className="font-display text-[52px] md:text-[80px] text-white leading-[0.95]">
+                FREQUENTLY <span className="text-brand-green">ASKED</span>
+              </h1>
+              <p className="text-white/60 mt-6 max-w-2xl mx-auto">
+                Quick answers to the most common questions about Ykay College — admissions, fees,
+                academics, and our EduPortal.
+              </p>
+            </div>
+          </section>
+        </Reveal>
+
+        <Reveal>
+          <section className="py-20 px-6">
+            <div className="mx-auto max-w-4xl space-y-10">
+              {FAQS.map((cat) => (
+                <div key={cat.category}>
+                  <h2 className="font-display text-2xl text-brand-green tracking-widest mb-6">
+                    {cat.category}
+                  </h2>
+                  <div className="space-y-3">
+                    {cat.items.map((item, i) => {
+                      const id = `${cat.category}-${i}`;
+                      const isOpen = openItems.includes(id);
+                      return (
+                        <div
+                          key={id}
+                          className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] overflow-hidden"
+                        >
+                          <button
+                            onClick={() => toggle(id)}
+                            className="w-full p-6 text-left flex items-center justify-between gap-4 hover:bg-[var(--surface-disabled)] transition-colors"
+                          >
+                            <span className="font-medium text-[var(--text-primary)]">{item.q}</span>
+                            <ChevronDown
+                              size={20}
+                              className={`text-brand-green shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                            />
+                          </button>
+                          {isOpen && (
+                            <div className="px-6 pb-6 pt-0 text-sm text-[var(--text-secondary)] leading-relaxed">
+                              {item.a}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </Reveal>
       </main>
       <Footer />
     </>

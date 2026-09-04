@@ -8,6 +8,7 @@ import CookieConsent from "@/components/CookieConsent";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import DemoIndicator from "@/components/DemoIndicator";
 import OfflineIndicator from "@/components/OfflineIndicator";
+import { MotionProvider } from "@/components/MotionProvider";
 
 /**
  * Fonts are self-hosted, not fetched from Google at build time.
@@ -158,7 +159,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider>
           <AuthProvider>
             <ToastProvider>
-              {children}
+              <MotionProvider>{children}</MotionProvider>
               <CookieConsent />
               <WhatsAppFloat />
               <DemoIndicator />

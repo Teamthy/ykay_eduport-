@@ -9,6 +9,7 @@ import MobileAppCTA from "@/components/MobileAppCTA";
 import Groups from "@/components/Groups";
 import FindUs from "@/components/FindUs";
 import Footer from "@/components/Footer";
+import { Reveal } from "@/components/Reveal";
 
 /**
  * A school's public home page (tenant portal landing).
@@ -21,13 +22,25 @@ export default function SchoolHome() {
       <Header />
       <main className="flex flex-col">
         <Hero />
-        <ServiceInfo />
-        <ITFlagshipSection />
-        <AdmissionsBanner />
-        <Services />
-        <Groups />
+        <Reveal>
+          <ServiceInfo />
+        </Reveal>
+        <Reveal delay={60}>
+          <ITFlagshipSection />
+        </Reveal>
+        <Reveal delay={60}>
+          <AdmissionsBanner />
+        </Reveal>
+        <Reveal>
+          <Services />
+        </Reveal>
+        <Reveal delay={60}>
+          <Groups />
+        </Reveal>
         <MobileAppCTA />
-        <FindUs />
+        <Reveal delay={60}>
+          <FindUs />
+        </Reveal>
       </main>
       <Footer />
     </>

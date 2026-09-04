@@ -1,6 +1,6 @@
 import { Download, QrCode, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import Reveal from "@/components/Reveal";
+import { Reveal } from "@/components/Reveal";
 import { apkFallbackUrl, apkQrUrl, apkSizeLabel, apkUrl as resolveApkUrl } from "@/lib/apk";
 
 export default function MobileAppCTA() {
