@@ -130,7 +130,8 @@ export default function Hero() {
             <span className="text-[min(10.5cqw,15vh)]">IN&nbsp;</span>
             <WordCycle
               words={["EDUCATION", "LEADERSHIP", "CHARACTER", "DISCIPLINE"]}
-              heavy
+              smooth
+              interval={2600}
               className="text-[min(10.5cqw,15vh)]"
               tracking={-0.02}
             />
@@ -212,7 +213,7 @@ export default function Hero() {
 
       <Marquee
         items={["ADMISSIONS OPEN", "WAEC", "NECO", "JAMB", "IT ACADEMY"]}
-        className="relative z-10 mt-10 border-y border-white/15 bg-brand-navy-dark/70 py-3 backdrop-blur-sm md:absolute md:inset-x-0 md:bottom-0 md:mt-0 md:border-b-0"
+        className="relative z-10 mt-10 border-y border-white/15 bg-brand-navy-dark/70 py-3 backdrop-blur-sm md:mt-14"
         itemClassName="font-body text-[10px] sm:text-xs md:text-sm font-bold tracking-[0.25em] uppercase text-brand-green"
       />
     </section>

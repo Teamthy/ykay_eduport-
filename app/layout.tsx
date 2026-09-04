@@ -1,5 +1,5 @@
 import localFont from "next/font/local";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ToastProvider } from "@/components/Toast";
@@ -10,6 +10,8 @@ import DemoIndicator from "@/components/DemoIndicator";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { MotionProvider } from "@/components/MotionProvider";
 import { AmbientBackdrop } from "@/components/AmbientBackdrop";
+import { RegisterSW } from "@/components/RegisterSW";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 /**
  * Fonts are self-hosted, not fetched from Google at build time.
@@ -82,11 +84,25 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   icons: {
-    icon: [{ url: "/ykay-logo.png", sizes: "any", type: "image/png" }],
-    apple: [{ url: "/ykay-logo.png", sizes: "180x180", type: "image/png" }],
-    shortcut: "/ykay-logo.png",
+    icon: [
+      { url: "/ykay-logo.png", sizes: "any", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/icons/icon-192.png",
   },
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Ykay College",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0c1824",
+  width: "device-width",
+  initialScale: 1,
 };
 
 import { headers } from "next/headers";
@@ -155,6 +171,33 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         `,
           }}
         />
+        {/* Structured data — tells Google this is a real school (rich results). */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "School",
+              name: "Ykay College & Leadership Academy",
+              alternateName: "Ykay College",
+              description:
+                "Premium day secondary school (JSS1 to SS3) in Sango Ota, Ogun State — NERDC-aligned academics, IT education and leadership training.",
+              url: process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.com",
+              logo: `${(process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.com").replace(/\/$/, "")}/ykay-logo.png`,
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "Km 38, Lagos-Abeokuta Expressway",
+                addressLocality: "Sango Ota",
+                addressRegion: "Ogun State",
+                addressCountry: "NG",
+              },
+              telephone: "+2347015374411",
+              email: "info@ykaycollege.com",
+              openingHours: "Mo-Fr 07:30-14:30",
+              sameAs: ["https://virtual.ykaycollege.com"],
+            }),
+          }}
+        />
       </head>
       <body className="min-h-screen antialiased bg-[var(--bg-primary)] text-[var(--text-primary)] theme-transition">
         <ThemeProvider>
@@ -168,6 +211,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <WhatsAppFloat />
               <DemoIndicator />
               <OfflineIndicator />
+              <InstallPrompt />
+              <RegisterSW />
             </ToastProvider>
           </AuthProvider>
         </ThemeProvider>

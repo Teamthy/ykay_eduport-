@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -34,6 +34,7 @@ const navLinks = [
   { label: "News", href: "/news-events" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
+  { label: "Virtual", href: "/virtual" },
   { label: "Portal", href: "/portal" },
 ];
 

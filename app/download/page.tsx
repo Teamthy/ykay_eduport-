@@ -43,7 +43,7 @@ export default async function DownloadPage({
       <div className="w-full max-w-lg">
         <div className="rounded-[var(--radius-card)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)] backdrop-blur">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-green/40 bg-brand-green/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
-            <Smartphone size={11} /> Android app
+            <Smartphone size={11} /> Get the app
           </span>
 
           <h1 className="mt-5 font-display text-4xl tracking-widest text-[var(--text-primary)]">
@@ -53,6 +53,49 @@ export default async function DownloadPage({
           <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]">
             Check results, attendance, fees and school notices on your phone. For parents, students
             and staff of Ykay College &amp; Leadership Academy.
+          </p>
+
+          {/* ── Option A: the PWA — instant, works on iPhone AND Android ── */}
+          <div className="mt-7 rounded-2xl border border-brand-green/30 bg-brand-green/5 p-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-green">
+              Option A · Install instantly — no download
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
+              The website is now an installable app (PWA). It installs in seconds, takes almost no
+              space, updates itself, and works on{" "}
+              <b className="text-[var(--text-primary)]">iPhone and Android</b> alike.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3.5">
+                <p className="text-xs font-bold text-[var(--text-primary)]">On Android</p>
+                <ol className="mt-1.5 list-decimal space-y-1 pl-4 text-xs text-[var(--text-secondary)]">
+                  <li>Open this site in Chrome.</li>
+                  <li>
+                    Tap <b className="text-[var(--text-primary)]">Install</b> on the banner, or menu{" "}
+                    <b className="text-[var(--text-primary)]">⋮ → Install app</b>.
+                  </li>
+                  <li>Confirm — the Ykay icon appears on your home screen.</li>
+                </ol>
+              </div>
+              <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3.5">
+                <p className="text-xs font-bold text-[var(--text-primary)]">On iPhone</p>
+                <ol className="mt-1.5 list-decimal space-y-1 pl-4 text-xs text-[var(--text-secondary)]">
+                  <li>Open this site in Safari.</li>
+                  <li>
+                    Tap the <b className="text-[var(--text-primary)]">Share</b> button.
+                  </li>
+                  <li>
+                    Scroll down, tap{" "}
+                    <b className="text-[var(--text-primary)]">Add to Home Screen</b>, then Add.
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Option B: the Android APK ── */}
+          <p className="mt-7 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+            Option B · Android app file (APK)
           </p>
 
           {error === "unavailable" ? (

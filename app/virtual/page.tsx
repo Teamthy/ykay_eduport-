@@ -2,15 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 import { AnimatedText } from "@/components/AnimatedText";
-import {
-  ArrowRight,
-  Globe,
-  Laptop,
-  MessageSquare,
-  MonitorSmartphone,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { ArrowRight, Globe, Laptop, MapPin, Sparkles, Users } from "lucide-react";
 
 const VIRTUAL_URL = process.env.NEXT_PUBLIC_VIRTUAL_URL || "https://virtual.ykaycollege.com";
 
@@ -37,95 +29,144 @@ const FEATURES = [
     desc: "Structured revision, past-question practice and mock exams for the results that matter.",
   },
   {
-    icon: MessageSquare,
+    icon: Globe,
     title: "Visible progress",
     desc: "Parents and learners see attendance, scores and feedback — the same transparency as the college.",
   },
 ];
 
+/**
+ * The gateway between the two Ykay schools.
+ *
+ * A full-viewport split screen: college on one side, virtual on the other.
+ * CSS-only hover expansion (no JS) — hovering a side grows it so choosing
+ * feels physical. On mobile the two halves stack. Below the split: what
+ * Ykay Virtual offers, then the side-by-side comparison.
+ */
 export default function VirtualPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-        {/* Hero */}
+      <main className="bg-[var(--bg-primary)] text-[var(--text-primary)]">
+        {/* ── The split gateway ── */}
+        <section className="flex min-h-[calc(100vh-5rem)] w-full flex-col md:flex-row">
+          {/* College half — you are already here */}
+          <div className="group relative flex min-h-[42vh] flex-1 flex-col justify-between overflow-hidden bg-brand-navy-dark p-8 transition-[flex-grow] duration-500 md:p-12 md:hover:flex-[1.35]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-brand-green/10 blur-3xl"
+            />
+            <div className="relative">
+              <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 font-body text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">
+                <MapPin size={11} className="text-brand-green" /> You are here
+              </p>
+              <h2 className="font-display text-[clamp(2.5rem,7vw,6rem)] leading-[0.86] tracking-[-0.015em] text-white">
+                YKAY
+                <span className="block text-brand-orange">COLLEGE</span>
+              </h2>
+              <p className="mt-4 max-w-md font-body text-sm leading-relaxed text-white/75">
+                The campus school in Sango Ota — JSS1 to SS3, laboratories, sports, clubs and a full
+                IT academy built into the timetable.
+              </p>
+            </div>
+            <div className="relative mt-8 flex flex-wrap items-center gap-4">
+              <a
+                href="/admissions"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-7 py-3.5 font-body text-xs font-bold uppercase tracking-[0.15em] text-brand-navy shadow-lg transition-all duration-300 hover:scale-[1.03] hover:bg-brand-orange-dark active:scale-[0.97]"
+              >
+                Apply to the college <ArrowRight size={14} />
+              </a>
+              <span className="font-body text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
+                ykaycollege.com
+              </span>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="relative h-px w-full md:h-auto md:w-px">
+            <div className="absolute inset-0 bg-[var(--border-subtle)]" />
+            <span className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-4 py-2 font-body text-[10px] font-bold uppercase tracking-[0.25em] text-[var(--text-muted)]">
+              or
+            </span>
+          </div>
+
+          {/* Virtual half — the destination */}
+          <div className="group relative flex min-h-[42vh] flex-1 flex-col justify-between overflow-hidden bg-brand-navy p-8 transition-[flex-grow] duration-500 md:p-12 md:hover:flex-[1.35]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-brand-green/15 blur-3xl"
+            />
+            <div className="relative">
+              <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-green/40 bg-brand-green/15 px-3 py-1 font-body text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">
+                <Globe size={11} /> Online · anywhere
+              </p>
+              <h2 className="font-display text-[clamp(2.5rem,7vw,6rem)] leading-[0.86] tracking-[-0.015em] text-white">
+                YKAY
+                <span className="block text-brand-green">VIRTUAL</span>
+              </h2>
+              <p className="mt-4 max-w-md font-body text-sm leading-relaxed text-white/75">
+                The same teachers and standards — online. Live classes, private 1-on-1 tuition and
+                exam preparation on any device, anywhere in Nigeria.
+              </p>
+            </div>
+            <div className="relative mt-8 flex flex-wrap items-center gap-4">
+              <a
+                href={VIRTUAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-7 py-3.5 font-body text-xs font-bold uppercase tracking-[0.15em] text-brand-navy shadow-lg transition-all duration-300 hover:scale-[1.03] hover:bg-brand-green-dark active:scale-[0.97]"
+              >
+                Continue to Ykay Virtual <ArrowRight size={14} />
+              </a>
+              <span className="font-body text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
+                {VIRTUAL_URL.replace(/^https?:\/\//, "")}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* ── What you can do on Ykay Virtual ── */}
         <Reveal>
-          <section className="relative overflow-hidden border-b border-[var(--border-subtle)]">
-            <div aria-hidden className="absolute inset-0 bg-[var(--gradient-banner)] opacity-90" />
-            <div className="relative mx-auto max-w-7xl px-6 py-20 md:py-28 text-center">
-              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-black/20 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-white">
-                <Globe size={14} className="text-brand-green" />
-                The Ykay Family
+          <section className="w-full py-16 md:py-24">
+            <div className="mx-auto w-full max-w-7xl px-6 md:px-10">
+              <AnimatedText
+                as="h2"
+                className="mb-3 font-display text-3xl tracking-wide md:text-4xl"
+                text="What you can do on Ykay Virtual"
+              />
+              <p className="mb-12 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)] md:text-base">
+                YK-Virtual is the home of Ykay Virtual — a full online school built by the same
+                team, for learners who study best from home or need extra support.
               </p>
-              <h1 className="mx-auto mb-6 max-w-3xl font-display tracking-wide text-white text-[clamp(3rem,11vw,9.5rem)]">
-                <AnimatedText heavy stagger={0.034} text="YKAY" delay={0.0} />
-                <span className="text-brand-green">
-                  <AnimatedText heavy stagger={0.034} text="VIRTUAL" delay={0.1} />
-                </span>
-              </h1>
-              <p className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-white/85 md:text-lg">
-                The same teachers and standards you trust at Ykay College — now online. Live
-                classes, private tutors and exam preparation for learners anywhere in Nigeria, on
-                any device.
-              </p>
-              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a
-                  href={VIRTUAL_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-4 text-sm font-bold text-brand-navy shadow-lg transition-all hover:bg-brand-green-dark hover:scale-[1.02]"
-                >
-                  Continue to YK-Virtual
-                  <ArrowRight size={18} />
-                </a>
-                <span className="text-xs text-white/60">
-                  Opens {VIRTUAL_URL.replace(/^https?:\/\//, "")} in a new tab
-                </span>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {FEATURES.map((f) => (
+                  <div
+                    key={f.title}
+                    className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6 transition-all hover:border-[var(--card-border-hover)]"
+                  >
+                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green text-brand-navy">
+                      <f.icon size={22} />
+                    </div>
+                    <h3 className="mb-2 text-lg font-bold">{f.title}</h3>
+                    <p className="text-sm leading-relaxed text-[var(--text-muted)]">{f.desc}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
         </Reveal>
 
-        {/* Features */}
+        {/* ── Two schools · one family ── */}
         <Reveal>
-          <section className="mx-auto max-w-7xl px-6 py-16 md:py-24">
-            <AnimatedText
-              as="h2"
-              className="mb-3 text-center font-display text-3xl tracking-wide md:text-4xl"
-              text="What you can do on Ykay Virtual"
-            />
-            <p className="mx-auto mb-12 max-w-2xl text-center text-sm leading-relaxed text-[var(--text-muted)] md:text-base">
-              YK-Virtual is the home of Ykay Virtual — a full online school built by the same team,
-              for learners who study best from home or need extra support.
-            </p>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {FEATURES.map((f) => (
-                <div
-                  key={f.title}
-                  className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-6 transition-all hover:border-[var(--card-border-hover)]"
-                >
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green text-brand-navy">
-                    <f.icon size={22} />
-                  </div>
-                  <h3 className="mb-2 text-lg font-bold">{f.title}</h3>
-                  <p className="text-sm leading-relaxed text-[var(--text-muted)]">{f.desc}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        </Reveal>
-
-        {/* Compare strip */}
-        <Reveal>
-          <section className="border-t border-[var(--section-divider)] bg-[var(--section-bg-alt)]">
-            <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-              <div className="mb-10 text-center">
+          <section className="w-full border-t border-[var(--section-divider)] bg-[var(--section-bg-alt)]">
+            <div className="mx-auto w-full max-w-7xl px-6 py-16 md:px-10 md:py-20">
+              <div className="mb-10">
                 <AnimatedText
                   as="h2"
                   className="mb-3 font-display text-3xl tracking-wide md:text-4xl"
                   text="Two schools · one family"
                 />
-                <p className="mx-auto max-w-xl text-sm text-[var(--text-muted)] md:text-base">
+                <p className="max-w-xl text-sm text-[var(--text-muted)] md:text-base">
                   Learn on campus with Ykay College, or online with Ykay Virtual — whichever fits
                   your child.
                 </p>
@@ -133,7 +174,7 @@ export default function VirtualPage() {
               <div className="grid gap-6 lg:grid-cols-2">
                 <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-7">
                   <div className="mb-1 flex items-center gap-2">
-                    <MonitorSmartphone size={18} className="text-brand-green" />
+                    <Laptop size={18} className="text-brand-green" />
                     <h3 className="font-display text-xl tracking-wide">Ykay Virtual</h3>
                   </div>
                   <p className="mb-4 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
@@ -162,7 +203,7 @@ export default function VirtualPage() {
                   </ul>
                 </div>
               </div>
-              <div className="mt-10 text-center">
+              <div className="mt-10">
                 <a
                   href={VIRTUAL_URL}
                   target="_blank"

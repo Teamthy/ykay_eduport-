@@ -132,6 +132,7 @@ export function WordCycle({
   className,
   interval = 2200,
   heavy = false,
+  smooth = false,
   fitWords = false,
   fitBasis = 100,
   fitMax,
@@ -143,6 +144,12 @@ export function WordCycle({
   interval?: number;
   /** Heavier swap: bigger travel, more overshoot, blur on the outgoing word. */
   heavy?: boolean;
+  /**
+   * Calm swap for inline running text: a plain crossfade with a short eased
+   * slide. No spring physics, no rotation, no blur, no per-word resizing —
+   * nothing bounces and nothing reflows, so surrounding text stays put.
+   */
+  smooth?: boolean;
   /**
    * Size each word individually so every one spans the same width, however
    * many letters it has. Anton is near-monospaced in caps, so character count
@@ -235,12 +242,18 @@ export function WordCycle({
           initial={false}
           animate={
             idx === i
-              ? { opacity: 1, y: 0, rotate: 0, scale: 1, filter: "blur(0px)" }
+              ? smooth
+                ? { opacity: 1, y: 0 }
+                : { opacity: 1, y: 0, rotate: 0, scale: 1, filter: "blur(0px)" }
               : heavy
                 ? { opacity: 0, y: "-0.9em", rotate: 10, scale: 0.7, filter: "blur(10px)" }
-                : { opacity: 0, y: "-0.45em", rotate: 5, scale: 0.85, filter: "blur(0px)" }
+                : smooth
+                  ? { opacity: 0, y: "0.35em" }
+                  : { opacity: 0, y: "-0.45em", rotate: 5, scale: 0.85, filter: "blur(0px)" }
           }
-          transition={heavy ? SPRING_HEAVY : SPRING}
+          transition={
+            smooth ? { duration: 0.55, ease: [0.22, 1, 0.36, 1] } : heavy ? SPRING_HEAVY : SPRING
+          }
         >
           {word}
         </motion.span>

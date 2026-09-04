@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -27,15 +27,19 @@ export default function FindUs() {
               </span>
             </h2>
 
-            {/* Map */}
-            <div className="rounded-3xl overflow-hidden border border-[var(--border-subtle)] mb-6 aspect-[4/3] shadow-lg">
+            {/* Map — plain place embed (no API key, no signed pb token that
+                expires or points at the wrong place). q= is the campus
+                address; Google geocodes it and centres the pin. */}
+            <div className="mb-6 aspect-[4/3] overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-lg">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.5!2d3.1!3d6.75!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sSango%20Ota%2C%20Ogun%20State!5e0!3m2!1sen!2sng!4v1234567890"
+                src="https://maps.google.com/maps?q=Km%2038%2C%20Lagos-Abeokuta%20Expressway%2C%20Sango%20Ota%2C%20Ogun%20State&t=&z=14&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
                 allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
                 loading="lazy"
+                title="Map showing Ykay College, Km 38 Lagos-Abeokuta Expressway, Sango Ota"
               />
             </div>
 
@@ -55,7 +59,7 @@ export default function FindUs() {
                     Sango Ota, Ogun State
                   </div>
                   <a
-                    href="https://maps.google.com/?q=Sango+Ota+Ogun+State"
+                    href="https://www.google.com/maps/search/Km+38,+Lagos-Abeokuta+Expressway,+Sango+Ota,+Ogun+State"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 mt-3 text-sm text-brand-green font-bold hover:underline"

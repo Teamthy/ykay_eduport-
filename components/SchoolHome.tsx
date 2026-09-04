@@ -8,6 +8,7 @@ import AdmissionsBanner from "@/components/AdmissionsBanner";
 import Services from "@/components/Services";
 import MobileAppCTA from "@/components/MobileAppCTA";
 import Groups from "@/components/Groups";
+import VirtualBridge from "@/components/VirtualBridge";
 import FindUs from "@/components/FindUs";
 import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
@@ -52,6 +53,9 @@ export default function SchoolHome() {
           <Groups />
         </Reveal>
         <MobileAppCTA />
+        <Reveal delay={60}>
+          <VirtualBridge />
+        </Reveal>
         <Reveal delay={60}>
           <FindUs />
         </Reveal>
