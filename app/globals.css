@@ -391,6 +391,83 @@
 }
 
 /* ============================================================
+   AMBIENT BACKDROP (site-wide animated background)
+   Two drifting brand glows + a breathing hairline grid, painted
+   behind all content by <AmbientBackdrop/>. Transform-only
+   keyframes; reduced-motion users get a static composition.
+   ============================================================ */
+.ambient-blob {
+  position: absolute;
+  width: 46vmax;
+  height: 46vmax;
+  border-radius: 9999px;
+  filter: blur(90px);
+  will-change: transform;
+}
+
+.ambient-blob-a {
+  left: -12vmax;
+  top: -14vmax;
+  background: radial-gradient(circle at center, var(--accent-primary) 0%, transparent 65%);
+  opacity: 0.16;
+  animation: ambient-drift-a 46s ease-in-out infinite alternate;
+}
+
+.ambient-blob-b {
+  right: -14vmax;
+  bottom: -16vmax;
+  background: radial-gradient(circle at center, var(--accent-secondary) 0%, transparent 65%);
+  opacity: 0.12;
+  animation: ambient-drift-b 58s ease-in-out infinite alternate;
+}
+
+.ambient-grid {
+  position: absolute;
+  inset: -60px;
+  background-image:
+    linear-gradient(var(--border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: 0.35;
+  animation: ambient-grid-pan 120s linear infinite;
+}
+
+@keyframes ambient-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(9vw, 12vh, 0) scale(1.15);
+  }
+}
+
+@keyframes ambient-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  to {
+    transform: translate3d(-8vw, -10vh, 0) scale(0.95);
+  }
+}
+
+@keyframes ambient-grid-pan {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(56px, 56px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-blob-a,
+  .ambient-blob-b,
+  .ambient-grid {
+    animation: none;
+  }
+}
+
+/* ============================================================
    BASE STYLES
    ============================================================ */
 *,

@@ -9,6 +9,7 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 import DemoIndicator from "@/components/DemoIndicator";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { MotionProvider } from "@/components/MotionProvider";
+import { AmbientBackdrop } from "@/components/AmbientBackdrop";
 
 /**
  * Fonts are self-hosted, not fetched from Google at build time.
@@ -159,7 +160,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider>
           <AuthProvider>
             <ToastProvider>
-              <MotionProvider>{children}</MotionProvider>
+              <AmbientBackdrop />
+              <MotionProvider>
+                <div className="relative z-10">{children}</div>
+              </MotionProvider>
               <CookieConsent />
               <WhatsAppFloat />
               <DemoIndicator />

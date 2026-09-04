@@ -1,9 +1,69 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from "framer-motion";
 import { useRef } from "react";
 import { Download } from "lucide-react";
-import { AnimatedText, WordCycle, Marquee } from "@/components/AnimatedText";
+import { WordCycle, Marquee } from "@/components/AnimatedText";
+
+/**
+ * One letter of the giant hero word. The intro is a heavy spring rise; the
+ * outro (the reference site's signature) unsticks each letter individually
+ * as you scroll: letters drift up, tilt and fade on a per-letter stagger.
+ */
+function OutfitLetter({
+  char,
+  index,
+  progress,
+}: {
+  char: string;
+  index: number;
+  progress: MotionValue<number>;
+}) {
+  const start = 0.1 + index * 0.035;
+  const y = useTransform(progress, [start, start + 0.3], [0, -(110 + index * 9)]);
+  const opacity = useTransform(progress, [start, start + 0.22], [1, 0]);
+  const rotate = useTransform(progress, [start, start + 0.3], [0, index % 2 ? 7 : -7]);
+  return (
+    <motion.span style={{ display: "inline-block", y, opacity, rotate }}>
+      <motion.span
+        style={{ display: "inline-block", willChange: "transform" }}
+        initial={{ opacity: 0, y: "1.05em", rotate: -14, scale: 0.62, filter: "blur(9px)" }}
+        animate={{ opacity: 1, y: 0, rotate: 0, scale: 1, filter: "blur(0px)" }}
+        transition={{
+          type: "spring",
+          stiffness: 260,
+          damping: 17,
+          mass: 0.9,
+          delay: 0.12 + index * 0.034,
+        }}
+      >
+        {char}
+      </motion.span>
+    </motion.span>
+  );
+}
+
+/** The full-bleed hero word: intro springs + per-letter scroll outro. */
+function OutfitWord({
+  word,
+  progress,
+  className,
+}: {
+  word: string;
+  progress: MotionValue<number>;
+  className?: string;
+}) {
+  const reduce = useReducedMotion();
+  if (reduce) return <span className={className}>{word}</span>;
+  return (
+    <span className={className} aria-hidden="true">
+      <span className="sr-only">{word}</span>
+      {Array.from(word).map((char, i) => (
+        <OutfitLetter key={`${char}-${i}`} char={char} index={i} progress={progress} />
+      ))}
+    </span>
+  );
+}
 
 /**
  * Editorial hero.
@@ -57,23 +117,22 @@ export default function Hero() {
             width, so the type always touches both gutters. Sizes come from
             Anton's cap advance width rather than a fixed vw, because the
             cycling words have different letter counts. */}
-        <h1 className="font-display leading-[0.78] tracking-[-0.02em] text-white [container-type:inline-size] [--cap:30vh] md:[--cap:34vh]">
-          <AnimatedText
-            text="EXCELLENCE IN"
-            className="block whitespace-nowrap text-[min(18.55cqw,var(--cap))]"
-            animateOnLoad
-            heavy
-            delay={0.12}
-            stagger={0.034}
+        <h1 className="font-display leading-[0.78] tracking-[-0.02em] text-white [container-type:inline-size] [--cap:34vh] md:[--cap:42vh]">
+          {/* The word IS the hero (reference: outfit.hellohello.is) — set
+              edge-to-edge, Anton caps advance ≈ 0.385em, 10 letters. */}
+          <OutfitWord
+            word="EXCELLENCE"
+            progress={scrollYProgress}
+            className="block whitespace-nowrap text-[min(25.9cqw,var(--cap))]"
           />
-          <span className="mt-0.5 block text-brand-green sm:mt-1">
+          {/* Everything else follows underneath in reduced size. */}
+          <span className="mt-1 block leading-[0.9] text-brand-green sm:mt-2">
+            <span className="text-[min(10.5cqw,15vh)]">IN&nbsp;</span>
             <WordCycle
-              words={["EDUCATION", "EXCELLENCE", "LEADERSHIP", "CHARACTER"]}
+              words={["EDUCATION", "LEADERSHIP", "CHARACTER", "DISCIPLINE"]}
               heavy
-              fitWords
-              fitBasis={95.3}
+              className="text-[min(10.5cqw,15vh)]"
               tracking={-0.02}
-              fitMax="var(--cap)"
             />
           </span>
         </h1>
