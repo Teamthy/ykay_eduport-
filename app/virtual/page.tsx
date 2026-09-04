@@ -83,12 +83,12 @@ export default function VirtualPage() {
                     <div className="mt-6 flex flex-wrap items-center gap-4">
                       <a
                         href="/admissions"
-                        className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 font-body text-xs font-bold uppercase tracking-[0.15em] text-brand-navy transition-all duration-300 hover:scale-[1.03] hover:bg-brand-orange-dark active:scale-[0.97]"
+                        className="inline-flex items-center gap-2 rounded-full bg-[#ff6e00] px-6 py-3 font-body text-xs font-bold uppercase tracking-[0.15em] text-[#0c1824] transition-all duration-300 hover:scale-[1.03] hover:bg-[#e65f00] active:scale-[0.97]"
                       >
                         Apply to the college <ArrowRight size={13} />
                       </a>
                       <span className="font-body text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
-                        ykaycollege.com
+                        ykaycollege.edu.ng
                       </span>
                     </div>
                   </div>
@@ -129,7 +129,7 @@ export default function VirtualPage() {
                         href={VIRTUAL_URL}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 font-body text-xs font-bold uppercase tracking-[0.15em] text-brand-navy transition-all duration-300 hover:scale-[1.03] hover:bg-brand-green-dark active:scale-[0.97]"
+                        className="inline-flex items-center gap-2 rounded-full bg-[#4ec54d] px-6 py-3 font-body text-xs font-bold uppercase tracking-[0.15em] text-[#0c1824] transition-all duration-300 hover:scale-[1.03] hover:bg-[#3aa93a] active:scale-[0.97]"
                       >
                         Continue to Ykay Virtual <ArrowUpRight size={13} />
                       </a>

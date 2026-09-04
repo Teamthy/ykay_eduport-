@@ -153,19 +153,19 @@ export default function EduOsLanding() {
               </span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
-              <a href="#services" className="text-white/40 text-sm hover:text-white">
+              <a href="#services" className="text-white/70 text-sm hover:text-white">
                 Services
               </a>
-              <a href="#schools" className="text-white/40 text-sm hover:text-white">
+              <a href="#schools" className="text-white/70 text-sm hover:text-white">
                 Schools
               </a>
-              <a href="#pillars" className="text-white/40 text-sm hover:text-white">
+              <a href="#pillars" className="text-white/70 text-sm hover:text-white">
                 About
               </a>
-              <a href="#contact" className="text-white/40 text-sm hover:text-white">
+              <a href="#contact" className="text-white/70 text-sm hover:text-white">
                 Contact
               </a>
-              <Link href="/login" className="text-white/50 text-sm hover:text-white">
+              <Link href="/login" className="text-white/75 text-sm hover:text-white">
                 Sign In
               </Link>
               <Link
@@ -190,7 +190,7 @@ export default function EduOsLanding() {
                 className={`text-center ${i < 3 ? "md:border-r border-white/5" : ""}`}
               >
                 <div className="font-bold text-3xl md:text-4xl mb-1">{s.value}</div>
-                <div className="text-xs text-white/25 uppercase tracking-widest">{s.label}</div>
+                <div className="text-xs text-white/50 uppercase tracking-widest">{s.label}</div>
               </div>
             ))}
           </div>
@@ -206,18 +206,18 @@ export default function EduOsLanding() {
               <h2 className="font-bold text-3xl md:text-4xl mb-6 leading-tight">
                 One platform that runs your entire school
               </h2>
-              <p className="text-white/40 text-base leading-relaxed mb-4">
+              <p className="text-white/60 text-base leading-relaxed mb-4">
                 EDUos is a cloud-based school management system built for African schools. It
                 replaces paper registers, manual receipts, and WhatsApp groups with a single portal
                 that works on any device.
               </p>
-              <p className="text-white/40 text-base leading-relaxed mb-8">
+              <p className="text-white/60 text-base leading-relaxed mb-8">
                 From admissions to graduation, from fee collection to exam results — every process
                 is digitised, automated, and secure.
               </p>
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 text-[#2840E8] font-bold text-sm"
+                className="inline-flex items-center gap-2 text-[#8FA0FF] font-bold text-sm"
               >
                 Get Started <ArrowRight size={14} />
               </Link>
@@ -283,7 +283,7 @@ export default function EduOsLanding() {
                       EDUos School
                     </div>
                     <h3 className="font-bold text-lg">{sch.name}</h3>
-                    <p className="text-white/40 text-xs flex items-center gap-1 mt-1">
+                    <p className="text-white/55 text-xs flex items-center gap-1 mt-1">
                       <MapPin size={10} /> {sch.loc}
                     </p>
                   </div>
@@ -376,67 +376,67 @@ export default function EduOsLanding() {
                 </p>
               </div>
               <div>
-                <h4 className="font-bold text-xs uppercase tracking-widest text-white/40 mb-4">
+                <h4 className="font-bold text-xs uppercase tracking-widest text-white/60 mb-4">
                   Platform
                 </h4>
                 <ul className="space-y-2.5">
                   <li>
-                    <Link href="/signup" className="text-white/25 text-xs hover:text-white/60">
+                    <Link href="/signup" className="text-white/60 text-xs hover:text-white">
                       Get Started
                     </Link>
                   </li>
                   <li>
-                    <Link href="/login" className="text-white/25 text-xs hover:text-white/60">
+                    <Link href="/login" className="text-white/60 text-xs hover:text-white">
                       Sign In
                     </Link>
                   </li>
                   <li>
-                    <a href="#services" className="text-white/25 text-xs hover:text-white/60">
+                    <a href="#services" className="text-white/60 text-xs hover:text-white">
                       Features
                     </a>
                   </li>
                   <li>
-                    <a href="#schools" className="text-white/25 text-xs hover:text-white/60">
+                    <a href="#schools" className="text-white/60 text-xs hover:text-white">
                       Schools
                     </a>
                   </li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-bold text-xs uppercase tracking-widest text-white/40 mb-4">
+                <h4 className="font-bold text-xs uppercase tracking-widest text-white/60 mb-4">
                   Solutions
                 </h4>
                 <ul className="space-y-2.5">
                   <li>
-                    <a href="#services" className="text-white/25 text-xs hover:text-white/60">
+                    <a href="#services" className="text-white/60 text-xs hover:text-white">
                       Admissions
                     </a>
                   </li>
                   <li>
-                    <a href="#services" className="text-white/25 text-xs hover:text-white/60">
+                    <a href="#services" className="text-white/60 text-xs hover:text-white">
                       Fees & Payments
                     </a>
                   </li>
                   <li>
-                    <a href="#services" className="text-white/25 text-xs hover:text-white/60">
+                    <a href="#services" className="text-white/60 text-xs hover:text-white">
                       Exams & CBT
                     </a>
                   </li>
                   <li>
-                    <a href="#services" className="text-white/25 text-xs hover:text-white/60">
+                    <a href="#services" className="text-white/60 text-xs hover:text-white">
                       Attendance
                     </a>
                   </li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-bold text-xs uppercase tracking-widest text-white/40 mb-4">
+                <h4 className="font-bold text-xs uppercase tracking-widest text-white/60 mb-4">
                   Contact
                 </h4>
                 <ul className="space-y-2.5">
-                  <li className="text-white/25 text-xs">hello@eduos.app</li>
-                  <li className="text-white/25 text-xs">+234 800 EDUos</li>
-                  <li className="text-white/25 text-xs">Lagos, Nigeria</li>
+                  <li className="text-white/55 text-xs">hello@eduos.app</li>
+                  <li className="text-white/55 text-xs">+234 800 EDUos</li>
+                  <li className="text-white/55 text-xs">Lagos, Nigeria</li>
                 </ul>
               </div>
             </div>

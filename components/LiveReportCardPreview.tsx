@@ -202,7 +202,7 @@ export default function LiveReportCardPreview({
         <div className="flex items-center gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${encodeURIComponent(`${typeof window !== "undefined" ? window.location.origin : "https://ykaycollege.com"}/verify/report/${encodeURIComponent(reportNumber)}`)}`}
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${encodeURIComponent(`${typeof window !== "undefined" ? window.location.origin : "https://ykaycollege.edu.ng"}/verify/report/${encodeURIComponent(reportNumber)}`)}`}
             alt="Report verification QR code"
             width={72}
             height={72}

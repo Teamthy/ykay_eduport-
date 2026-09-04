@@ -54,7 +54,7 @@ export async function brandCard({
   eyebrow,
   title,
   subtitle,
-  footer = "ykaycollege.com",
+  footer = "ykaycollege.edu.ng",
 }: {
   eyebrow: string;
   title: string;

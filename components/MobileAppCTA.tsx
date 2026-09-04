@@ -1,15 +1,12 @@
 import { Download, QrCode, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
-import { apkQrUrl, apkSizeLabel, apkUrl as resolveApkUrl } from "@/lib/apk";
+import { apkQrUrl, requestOrigin } from "@/lib/apk";
 
-export default function MobileAppCTA() {
-  const apkUrl = resolveApkUrl();
-  const sizeLabel = apkSizeLabel();
-  const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.com").replace(/\/$/, "");
-  // QR encodes the INSTALL PAGE, not the file — it works for iPhone users too
-  // and outlives any one APK release.
-  const qr = apkQrUrl(`${site}/download`);
+export default async function MobileAppCTA() {
+  // QR encodes the INSTALL PAGE on the origin the visitor is actually on —
+  // preview deploys, custom domains and production all scan correctly.
+  const qr = apkQrUrl(`${await requestOrigin()}/download`);
 
   return (
     <section
@@ -53,21 +50,13 @@ export default function MobileAppCTA() {
                     will stop there. */}
                 <Link
                   href="/download"
-                  className="inline-flex items-center gap-3 rounded-full bg-brand-green px-8 py-4 font-body text-sm font-bold uppercase tracking-[0.15em] text-brand-navy transition-all duration-300 hover:scale-[1.03] hover:bg-brand-green-dark active:scale-[0.97] shadow-lg shadow-black/30"
+                  className="inline-flex items-center gap-3 rounded-full bg-[#4ec54d] px-8 py-4 font-body text-sm font-bold uppercase tracking-[0.15em] text-[#0c1824] transition-all duration-300 hover:scale-[1.03] hover:bg-[#3aa93a] active:scale-[0.97] shadow-lg shadow-black/30"
                 >
                   <Download size={18} /> Install the app
                   <span className="font-normal normal-case tracking-normal opacity-80">
                     iPhone · Android
                   </span>
                 </Link>
-                {apkUrl && (
-                  <a
-                    href="/download"
-                    className="text-xs font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white"
-                  >
-                    or the Android APK{sizeLabel ? ` (${sizeLabel})` : ""} ↗
-                  </a>
-                )}
               </div>
               <p className="mt-5 flex items-start gap-2 font-body text-xs leading-relaxed text-white/50">
                 <ShieldCheck size={14} className="mt-0.5 shrink-0 text-brand-green" />

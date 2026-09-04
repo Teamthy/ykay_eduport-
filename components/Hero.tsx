@@ -97,6 +97,16 @@ export default function Hero() {
           className="h-full w-full object-cover opacity-25"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-brand-navy-dark/85 via-brand-navy-dark/70 to-brand-navy-dark" />
+        {/* Slight brand-tinted gradient wash + the school mark, centred as
+            foreground art behind the type. */}
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-green/10 via-transparent to-brand-orange/10" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/ykay-logo.png"
+          alt=""
+          aria-hidden="true"
+          className="absolute left-1/2 top-1/2 w-[min(52vw,30rem)] -translate-x-1/2 -translate-y-1/2 rounded-[2rem] bg-white/5 p-4 opacity-[0.07] backdrop-blur-[2px] object-contain"
+        />
       </div>
 
       <motion.div
@@ -198,7 +208,7 @@ export default function Hero() {
               source" warning and still works before the URL is configured. */}
           <a
             href="/download"
-            className="inline-flex items-center justify-center gap-3 rounded-full bg-brand-orange px-6 py-3.5 font-body text-xs font-bold uppercase tracking-[0.15em] text-brand-navy shadow-lg shadow-black/30 transition-all duration-300 hover:scale-[1.03] hover:bg-brand-orange-dark active:scale-[0.97] sm:px-8 sm:py-4 sm:text-sm"
+            className="inline-flex items-center justify-center gap-3 rounded-full bg-[#ff6e00] px-6 py-3.5 font-body text-xs font-bold uppercase tracking-[0.15em] text-[#0c1824] shadow-lg shadow-black/30 transition-all duration-300 hover:scale-[1.03] hover:bg-[#e65f00] active:scale-[0.97] sm:px-8 sm:py-4 sm:text-sm"
           >
             <Download size={18} /> Download Mobile App
           </a>

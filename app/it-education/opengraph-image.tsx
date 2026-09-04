@@ -9,6 +9,6 @@ export default function OgImage() {
     eyebrow: "Flagship programme",
     title: "IT EDUCATION FOR THE NEXT GENERATION.",
     subtitle: "Python · AI · Cybersecurity · Microsoft Office",
-    footer: "ykaycollege.com/it-education",
+    footer: "ykaycollege.edu.ng/it-education",
   });
 }

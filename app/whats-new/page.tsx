@@ -33,7 +33,7 @@ const CHANGES = [
     version: "v1.0",
     title: "Foundation",
     items: [
-      { type: "feature", text: "Initial launch of ykaycollege.com" },
+      { type: "feature", text: "Initial launch of ykaycollege.edu.ng" },
       { type: "feature", text: "Online admission application" },
       { type: "feature", text: "Contact and enquiry system" },
     ],

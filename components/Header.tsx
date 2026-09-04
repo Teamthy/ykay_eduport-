@@ -34,6 +34,7 @@ const navLinks = [
   { label: "News", href: "/news-events" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
+  { label: "CBT", href: "/cbt" },
   { label: "Virtual", href: "/virtual" },
   { label: "Portal", href: "/portal" },
 ];

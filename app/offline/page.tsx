@@ -27,7 +27,7 @@ export default function OfflinePage() {
         </p>
         <Link
           href="/"
-          className="mt-8 inline-flex items-center justify-center rounded-full bg-brand-green px-7 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-brand-navy transition-all duration-300 hover:scale-[1.03] hover:bg-brand-green-dark active:scale-[0.97]"
+          className="mt-8 inline-flex items-center justify-center rounded-full bg-[#4ec54d] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-[#0c1824] transition-all duration-300 hover:scale-[1.03] hover:bg-[#3aa93a] active:scale-[0.97]"
         >
           Back to home
         </Link>

@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   // Derived from env so a preview deployment does not advertise production
   // URLs. The literal was ykaycollege.com — a domain the school does not own,
   // which made every canonical link and social card point at the wrong site.
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng"),
   title: {
     default: "Ykay College & Leadership Academy — Excellence in Education",
     template: "%s | Ykay College",
@@ -74,7 +74,7 @@ export const metadata: Metadata = {
     siteName: "Ykay College",
     locale: "en_NG",
     type: "website",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.com",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng",
     images: [{ url: "/ykay-logo.png", width: 800, height: 800, alt: "Ykay College Logo" }],
   },
   twitter: {
@@ -183,8 +183,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               alternateName: "Ykay College",
               description:
                 "Premium day secondary school (JSS1 to SS3) in Sango Ota, Ogun State — NERDC-aligned academics, IT education and leadership training.",
-              url: process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.com",
-              logo: `${(process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.com").replace(/\/$/, "")}/ykay-logo.png`,
+              url: process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng",
+              logo: `${(process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng").replace(/\/$/, "")}/ykay-logo.png`,
               address: {
                 "@type": "PostalAddress",
                 streetAddress: "Km 38, Lagos-Abeokuta Expressway",

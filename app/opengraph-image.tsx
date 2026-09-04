@@ -9,6 +9,6 @@ export default function OgImage() {
     eyebrow: "Sango Ota · Ogun State",
     title: "EXCELLENCE IN EDUCATION.",
     subtitle: "Premium day secondary school · JSS1 to SS3",
-    footer: "ykaycollege.com",
+    footer: "ykaycollege.edu.ng",
   });
 }

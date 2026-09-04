@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 /**
  * Where the Android APK lives.
  *
@@ -14,6 +15,25 @@
  */
 
 /** Public URL of the current APK, or null when not configured. */
+/**
+ * The origin this request actually arrived on — env override first, then the
+ * live host. QR codes built from a hardcoded fallback domain redirect to a
+ * site the school may not own yet (exactly what happened on preview deploys).
+ * Async because headers() is a Promise in Next 15+.
+ */
+export async function requestOrigin(): Promise<string> {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL;
+  if (configured) return configured.replace(/\/$/, "");
+  try {
+    const h = await headers();
+    const host = h.get("x-forwarded-host") || h.get("host") || "localhost:3000";
+    const proto = h.get("x-forwarded-proto") || (host.startsWith("localhost") ? "http" : "https");
+    return `${proto}://${host}`;
+  } catch {
+    return "https://ykaycollege.edu.ng";
+  }
+}
+
 export function apkUrl(): string | null {
   const value = process.env.NEXT_PUBLIC_APK_URL || process.env.MOBILE_APK_URL || "";
   return value.trim() || null;

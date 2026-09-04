@@ -9,6 +9,6 @@ export default function OgImage() {
     eyebrow: "Admissions",
     title: "ADMISSIONS OPEN.",
     subtitle: "JSS1 to SS3 · Apply online and track your application",
-    footer: "ykaycollege.com/admissions",
+    footer: "ykaycollege.edu.ng/admissions",
   });
 }

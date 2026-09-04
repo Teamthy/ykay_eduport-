@@ -9,6 +9,6 @@ export default function OgImage() {
     eyebrow: "Get the app",
     title: "THE SCHOOL IN YOUR POCKET.",
     subtitle: "Install instantly from the website — no app store needed",
-    footer: "ykaycollege.com/download",
+    footer: "ykaycollege.edu.ng/download",
   });
 }

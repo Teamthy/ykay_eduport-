@@ -51,7 +51,7 @@ export default function VirtualBridge() {
               href={VIRTUAL_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-7 py-3.5 font-body text-xs font-bold uppercase tracking-[0.15em] text-brand-navy shadow-lg transition-all duration-300 hover:scale-[1.03] hover:bg-brand-green-dark active:scale-[0.97]"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#4ec54d] px-7 py-3.5 font-body text-xs font-bold uppercase tracking-[0.15em] text-[#0c1824] shadow-lg transition-all duration-300 hover:scale-[1.03] hover:bg-[#3aa93a] active:scale-[0.97]"
             >
               Visit Ykay Virtual <ArrowRight size={14} />
             </a>

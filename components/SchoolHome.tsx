@@ -24,13 +24,13 @@ export default function SchoolHome() {
       <Header />
       <main className="flex flex-col">
         <Hero />
-        <Reveal>
+        <Reveal variant="up">
           <ServiceInfo />
         </Reveal>
-        <Reveal delay={60}>
+        <Reveal variant="left" delay={60}>
           <ITFlagshipSection />
         </Reveal>
-        <Reveal delay={60}>
+        <Reveal variant="right" delay={60}>
           <AdmissionsBanner />
         </Reveal>
         <Marquee
@@ -46,17 +46,17 @@ export default function SchoolHome() {
           duration={32}
         />
 
-        <Reveal>
+        <Reveal variant="zoom">
           <Services />
         </Reveal>
-        <Reveal delay={60}>
+        <Reveal variant="blur" delay={60}>
           <Groups />
         </Reveal>
         <MobileAppCTA />
-        <Reveal delay={60}>
+        <Reveal variant="left" delay={60}>
           <VirtualBridge />
         </Reveal>
-        <Reveal delay={60}>
+        <Reveal variant="right" delay={60}>
           <FindUs />
         </Reveal>
       </main>

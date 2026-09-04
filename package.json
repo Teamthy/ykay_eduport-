@@ -57,7 +57,8 @@
     "db:restore-drill": "tsx scripts/restore-drill.ts",
     "cleanup:artifacts": "tsx scripts/cleanup-artifacts.ts",
     "audit:routes": "tsx scripts/e2e-smoke.ts --list-only",
-    "check:tenant-coverage": "tsx scripts/check-tenant-route-coverage.ts"
+    "check:tenant-coverage": "tsx scripts/check-tenant-route-coverage.ts",
+    "cbt:seed": "tsx prisma/cbt-seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",

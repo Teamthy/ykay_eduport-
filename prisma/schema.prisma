@@ -1737,3 +1737,65 @@ model TimetableSlot {
   @@index([classId, dayOfWeek])
   @@index([schoolId])
 }
+
+// ── CBT practice (Computer-Based Testing) ─────────────────────────────────
+// Real exam-style practice for students: a curated question bank per subject
+// and class level, JAMB/WAEC-style runner (practice + timed exam modes), and
+// stored attempts so progress is visible. See CBT-PRACTICE-PLAN.md.
+
+model CbtSubject {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  name        String
+  /// jss1 | jss2 | jss3 | ss1 | ss2 | ss3
+  classLevel  String
+  /// junior | science | arts | commercial | general
+  department  String         @default("general")
+  questions   CbtQuestion[]
+  attempts    CbtAttempt[]
+  createdAt   DateTime       @default(now())
+
+  @@index([classLevel])
+}
+
+model CbtQuestion {
+  id           String     @id @default(cuid())
+  subjectId    String
+  topic        String
+  /// 1 easy · 2 medium · 3 hard
+  difficulty   Int        @default(2)
+  stem         String
+  /// JSON array of exactly 4 option strings
+  options      Json
+  /// 0-3 index into options
+  correctIndex Int
+  explanation  String
+  /// curriculum | waec-style | neco-style | jamb-style
+  source       String     @default("curriculum")
+  /// draft | reviewed | published
+  status       String     @default("published")
+  createdAt    DateTime   @default(now())
+  subject      CbtSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([subjectId, status])
+}
+
+model CbtAttempt {
+  id              String     @id @default(cuid())
+  subjectId       String
+  /// practice | exam
+  mode            String
+  total           Int
+  correct         Int
+  skipped         Int
+  scorePct        Int
+  durationSeconds Int
+  studentName     String?
+  studentEmail    String?
+  /// JSON array of { questionId, selectedIndex|null }
+  answers         Json
+  createdAt       DateTime   @default(now())
+  subject         CbtSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([subjectId, createdAt])
+}

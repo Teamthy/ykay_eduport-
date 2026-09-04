@@ -9,6 +9,6 @@ export default function OgImage() {
     eyebrow: "The Ykay family",
     title: "TWO SCHOOLS. ONE FAMILY.",
     subtitle: "Ykay Virtual: live classes, 1-on-1 tuition, exam prep — online",
-    footer: "ykaycollege.com/virtual",
+    footer: "ykaycollege.edu.ng/virtual",
   });
 }

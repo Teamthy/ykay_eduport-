@@ -32,7 +32,7 @@ export default function FindUs() {
                 address; Google geocodes it and centres the pin. */}
             <div className="mb-6 aspect-[4/3] overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-lg">
               <iframe
-                src="https://maps.google.com/maps?q=Km%2038%2C%20Lagos-Abeokuta%20Expressway%2C%20Sango%20Ota%2C%20Ogun%20State&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                src="https://maps.google.com/maps?q=Lagos-Abeokuta%20Expressway%2C%20Sango%20Ota%2C%20Ogun%20State&t=&z=14&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -59,7 +59,7 @@ export default function FindUs() {
                     Sango Ota, Ogun State
                   </div>
                   <a
-                    href="https://www.google.com/maps/search/Km+38,+Lagos-Abeokuta+Expressway,+Sango+Ota,+Ogun+State"
+                    href="https://www.google.com/maps/search/Lagos-Abeokuta+Expressway,+Sango+Ota,+Ogun+State"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 mt-3 text-sm text-brand-green font-bold hover:underline"
@@ -99,7 +99,7 @@ export default function FindUs() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 {/* Play button */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:scale-110 group-hover:bg-brand-green transition-all">
+                  <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:scale-110 group-hover:bg-[#4ec54d] transition-all">
                     <Play size={24} className="text-white ml-1" fill="white" />
                   </div>
                 </div>

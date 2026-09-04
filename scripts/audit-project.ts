@@ -64,6 +64,7 @@ const corpus = allSource.map(read).join("\n");
 
 /** Domains that are legitimately literal. */
 const URL_ALLOW = [
+  "virtual.ykaycollege.com", // the YK-Virtual site's own canonical domain (sister property)
   "images.unsplash.com", // stock imagery on marketing pages
   "api.paystack.co", // the payment gateway's fixed endpoint
   "exp.host", // Expo push gateway
@@ -235,6 +236,14 @@ const PUBLIC_ROUTES = [
   // personal data. Unauthenticated on purpose — it is the shop window that
   // the marketing pages render.
   "/api/it/catalog",
+  // CBT (computer-based testing) is a public practice tool: anyone can browse
+  // subjects, pull a randomized quiz (answers never leave the server), check
+  // one question, or submit an attempt for SERVER-SIDE grading. No personal
+  // data is stored unless the caller chooses to include a name.
+  "/api/cbt/subjects",
+  "/api/cbt/quiz",
+  "/api/cbt/check",
+  "/api/cbt/attempts",
 ];
 const unguarded: string[] = [];
 for (const file of routeFiles) {

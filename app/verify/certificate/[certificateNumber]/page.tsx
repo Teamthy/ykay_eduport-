@@ -111,7 +111,7 @@ export default async function VerifyCertificatePage({
 
             <p className="mt-8 text-center text-xs text-[var(--text-muted)]">
               Verifying a report card instead?{" "}
-              <Link href="/verify/report" className="text-brand-green hover:underline">
+              <Link href="/verify" className="text-brand-green hover:underline">
                 Use the report verifier
               </Link>
               .
