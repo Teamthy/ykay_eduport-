@@ -1,8 +1,8 @@
 "use client";
 
-// Reveal — subtle premium scroll-reveal for marketing sections.
-// Fades + lifts once when entering the viewport; honours the user's
-// reduced-motion preference (renders immediately, no transform).
+// Reveal — energetic scroll-reveal for marketing sections.
+// Spring physics give a lively little pop as each section lands; honours the
+// user's reduced-motion preference (renders immediately, no transform).
 // `delay` is in milliseconds.
 
 import { motion, useReducedMotion } from "framer-motion";
@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 export function Reveal({
   children,
   delay = 0,
-  y = 24,
+  y = 36,
   className,
 }: {
   children: ReactNode;
@@ -24,10 +24,10 @@ export function Reveal({
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y, scale: 0.97 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.6, delay: delay / 1000, ease: [0.21, 0.47, 0.32, 0.98] }}
+      transition={{ type: "spring", stiffness: 120, damping: 14, mass: 0.9, delay: delay / 1000 }}
     >
       {children}
     </motion.div>

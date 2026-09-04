@@ -14,15 +14,78 @@ const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"] as const;
 
 /** Per level: a cycle of subjects with a start period and 40-min blocks. */
 const SUBJECTS_BY_LEVEL: Record<string, string[]> = {
-  JSS1: ["Mathematics", "English Language", "Basic Science", "Social Studies", "Computer Studies", "Civic Education", "Creative Arts", "Physical Education"],
-  JSS2: ["Mathematics", "English Language", "Basic Science", "Social Studies", "Computer Studies", "Civic Education", "Creative Arts", "Physical Education"],
-  JSS3: ["Mathematics", "English Language", "Basic Science", "Social Studies", "Computer Studies", "Civic Education", "Creative Arts", "Physical Education"],
-  SS1: ["Mathematics", "English Language", "Physics", "Chemistry", "Biology", "Economics", "Computer Science", "Literature"],
-  SS2: ["Mathematics", "English Language", "Physics", "Chemistry", "Biology", "Economics", "Computer Science", "Literature"],
-  SS3: ["Mathematics", "English Language", "Physics", "Chemistry", "Biology", "Economics", "Computer Science", "Literature"],
+  JSS1: [
+    "Mathematics",
+    "English Language",
+    "Basic Science",
+    "Social Studies",
+    "Computer Studies",
+    "Civic Education",
+    "Creative Arts",
+    "Physical Education",
+  ],
+  JSS2: [
+    "Mathematics",
+    "English Language",
+    "Basic Science",
+    "Social Studies",
+    "Computer Studies",
+    "Civic Education",
+    "Creative Arts",
+    "Physical Education",
+  ],
+  JSS3: [
+    "Mathematics",
+    "English Language",
+    "Basic Science",
+    "Social Studies",
+    "Computer Studies",
+    "Civic Education",
+    "Creative Arts",
+    "Physical Education",
+  ],
+  SS1: [
+    "Mathematics",
+    "English Language",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Economics",
+    "Computer Science",
+    "Literature",
+  ],
+  SS2: [
+    "Mathematics",
+    "English Language",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Economics",
+    "Computer Science",
+    "Literature",
+  ],
+  SS3: [
+    "Mathematics",
+    "English Language",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Economics",
+    "Computer Science",
+    "Literature",
+  ],
 };
 
-const PERIOD_STARTS = ["08:00", "08:45", "09:40", "10:25", "11:20", "12:05", "13:00", "13:45"] as const;
+const PERIOD_STARTS = [
+  "08:00",
+  "08:45",
+  "09:40",
+  "10:25",
+  "11:20",
+  "12:05",
+  "13:00",
+  "13:45",
+] as const;
 
 async function main() {
   const schools = await prisma.school.findMany({ include: { classes: true } });

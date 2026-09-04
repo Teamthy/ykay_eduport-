@@ -1,12 +1,24 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 import { Download } from "lucide-react";
 import { HeroCanvas } from "@/components/three/HeroCanvas";
 
 export default function Hero() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, 120]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0.1]);
+
   return (
-    <section className="relative w-full min-h-[88vh] md:min-h-[92vh] bg-brand-navy-dark overflow-hidden flex items-center">
+    <section
+      ref={sectionRef}
+      className="relative w-full min-h-[88vh] md:min-h-[92vh] bg-brand-navy-dark overflow-hidden flex items-center"
+    >
       {/* 3D knowledge constellation (gated, decorative) */}
       <HeroCanvas className="absolute inset-0 z-[1] overflow-hidden" />
 
@@ -23,12 +35,15 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-brand-navy-dark via-transparent to-brand-navy-dark/40" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 md:py-36 w-full">
+      <motion.div
+        style={{ y: contentY, opacity: contentOpacity }}
+        className="relative z-10 mx-auto max-w-7xl px-6 py-24 md:py-36 w-full"
+      >
         <div className="max-w-4xl">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            transition={{ type: "spring", stiffness: 110, damping: 15, delay: 0.15 }}
             className="font-body text-xs md:text-sm font-bold tracking-[0.25em] uppercase text-brand-green mb-4 md:mb-6"
           >
             YKAY COLLEGE &amp; LEADERSHIP ACADEMY
@@ -37,7 +52,7 @@ export default function Hero() {
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+            transition={{ type: "spring", stiffness: 90, damping: 14, delay: 0.3 }}
             className="font-display text-[52px] md:text-[96px] lg:text-[130px] leading-[0.85] tracking-[3px] md:tracking-[6px] text-white mb-6 md:mb-8"
           >
             EXCELLENCE IN
@@ -58,7 +73,7 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.9 }}
+            transition={{ type: "spring", stiffness: 120, damping: 14, delay: 0.6 }}
             className="flex flex-wrap items-center gap-6 md:gap-10 text-white font-body text-sm md:text-base"
           >
             <div>
@@ -105,7 +120,7 @@ export default function Hero() {
             </a>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -555,7 +555,9 @@ async function main() {
   for (let i = 0; i < STUDENTS.length; i++) {
     const s = STUDENTS[i];
     const email = `student${i + 1}@ykaycollege.com`;
-    console.log(`   │ ${`${s.firstName} ${s.lastName}`.padEnd(35)} │ ${email.padEnd(28)} │ STUDENT         │`);
+    console.log(
+      `   │ ${`${s.firstName} ${s.lastName}`.padEnd(35)} │ ${email.padEnd(28)} │ STUDENT         │`,
+    );
   }
   // Parents
   for (const email of parentEmails) {

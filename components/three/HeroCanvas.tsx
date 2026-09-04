@@ -71,7 +71,7 @@ export function HeroCanvas({ className }: { className?: string }) {
 
   return (
     <div ref={hostRef} className={className} aria-hidden="true">
-      <Scene paused={paused} speed={mode === "static" ? 0 : 1} count={smallScreen ? 450 : 1100} />
+      <Scene paused={paused} speed={mode === "static" ? 0 : 1} count={smallScreen ? 700 : 1600} />
     </div>
   );
 }

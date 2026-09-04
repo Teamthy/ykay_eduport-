@@ -133,9 +133,7 @@ describe("session lifetime", () => {
 
     const { payload } = await jwtVerify(
       token,
-      new TextEncoder().encode(
-        "test-secret-that-is-at-least-32-characters-long-for-testing",
-      ),
+      new TextEncoder().encode("test-secret-that-is-at-least-32-characters-long-for-testing"),
     );
     expect(typeof payload.exp).toBe("number");
     const remaining = (payload.exp as number) - Math.floor(Date.now() / 1000);
