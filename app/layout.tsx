@@ -12,6 +12,7 @@ import { MotionProvider } from "@/components/MotionProvider";
 import { AmbientBackdrop } from "@/components/AmbientBackdrop";
 import { RegisterSW } from "@/components/RegisterSW";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { Analytics } from "@/components/Analytics";
 
 /**
  * Fonts are self-hosted, not fetched from Google at build time.
@@ -213,6 +214,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <OfflineIndicator />
               <InstallPrompt />
               <RegisterSW />
+              <Analytics />
             </ToastProvider>
           </AuthProvider>
         </ThemeProvider>
