@@ -1,0 +1,53 @@
+# Render Blueprint — Ykay College EduPortal (production web service).
+#
+# The database is NOT managed by Render: it runs on Oracle Cloud Always Free
+# (see /home/user/DEPLOY-PRODUCTION.md — oracle-postgres-setup.sh). Create the
+# blueprint once, then set DATABASE_URL in the dashboard (sync: false here
+# means Render never overwrites it on redeploys).
+#
+# Boot flow (docker-entrypoint.sh): prisma migrate deploy → optional CBT bank
+# seed (idempotent, SEED_CBT_ON_BOOT=true) → optional super-admin ensure →
+# node server.js. /api/health gates traffic.
+
+services:
+  - type: web
+    name: ykay-college
+    runtime: docker
+    repo: https://github.com/<your-org>/ykay-college # ← REPLACE with your actual Git remote
+    plan: starter # free sleeps after 15 min idle; starter ($7/mo) stays warm
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      # ── Data (Oracle OCI Postgres — set once in the dashboard) ───────────
+      - key: DATABASE_URL
+        sync: false # postgresql://ykay_college:<password>@<oci-ip>:5432/ykay_college?sslmode=require
+      # ── Boot behaviour ───────────────────────────────────────────────────
+      - key: SEED_CBT_ON_BOOT
+        value: "true" # idempotent: skips stems that already exist
+      - key: SUPER_ADMIN_EMAIL
+        sync: false # set to provision the first super admin at boot
+      - key: SUPER_ADMIN_PASSWORD
+        sync: false # required with SUPER_ADMIN_EMAIL (generate + store safely)
+      - key: SUPER_ADMIN_NAME
+        sync: false
+      # ── App ──────────────────────────────────────────────────────────────
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: APP_URL
+        sync: false # https://<your-college-domain> (or the onrender.com URL)
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
+      # Email (transactional) — required for password resets/invites.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      # ── Secrets that may exist already (never overwritten) ───────────────
+      - key: SESSION_SECRET
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      # File uploads land on the container disk (ephemeral on redeploy) —
+      # fine to start; move to S3-compatible storage before heavy use.
