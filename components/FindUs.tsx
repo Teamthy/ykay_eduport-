@@ -20,10 +20,10 @@ export default function FindUs() {
             <span className="font-body text-[10px] font-bold tracking-[0.25em] uppercase text-brand-green mb-4 block">
               FIND US
             </span>
-            <h2 className="font-display text-4xl md:text-6xl leading-[0.95] tracking-[2px] text-[var(--text-primary)] mb-8">
-              <AnimatedText text="YKAY" delay={0.0} />
-              <span className="text-brand-green">
-                <AnimatedText text="COLLEGE" delay={0.1} />
+            <h2 className="font-display text-[clamp(2.25rem,6.5vw,5.5rem)] leading-[0.86] tracking-[-0.015em] text-[var(--text-primary)] mb-8">
+              <AnimatedText heavy stagger={0.03} text="YKAY" delay={0.0} className="block" />
+              <span className="block text-brand-green">
+                <AnimatedText heavy stagger={0.03} text="COLLEGE" delay={0.1} />
               </span>
             </h2>
 
@@ -77,10 +77,10 @@ export default function FindUs() {
             <span className="font-body text-[10px] font-bold tracking-[0.25em] uppercase text-brand-green mb-4 block">
               FEATURED NEWS
             </span>
-            <h2 className="font-display text-4xl md:text-6xl leading-[0.95] tracking-[2px] text-[var(--text-primary)] mb-8">
-              <AnimatedText text="LATEST FROM" delay={0.0} />
-              <span className="text-brand-green">
-                <AnimatedText text="THE SCHOOL" delay={0.275} />
+            <h2 className="font-display text-[clamp(2.25rem,6.5vw,5.5rem)] leading-[0.86] tracking-[-0.015em] text-[var(--text-primary)] mb-8">
+              <AnimatedText heavy stagger={0.03} text="LATEST FROM" delay={0.0} className="block" />
+              <span className="block text-brand-green">
+                <AnimatedText heavy stagger={0.03} text="THE SCHOOL" delay={0.275} />
               </span>
             </h2>
 
@@ -105,7 +105,7 @@ export default function FindUs() {
                 <div className="text-[10px] uppercase tracking-widest text-[var(--text-accent)] font-bold mb-2">
                   Admissions News · March 15, 2025
                 </div>
-                <h3 className="font-display text-2xl md:text-3xl text-[var(--text-primary)] mb-3 tracking-[1px] group-hover:text-[var(--text-accent)] transition-colors">
+                <h3 className="font-display text-[clamp(1.5rem,2.4vw,2.25rem)] leading-[0.95] tracking-[-0.01em] text-[var(--text-primary)] mb-3 group-hover:text-[var(--text-accent)] transition-colors">
                   Ykay College Opens 2025 / 2026 Admissions
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">

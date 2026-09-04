@@ -58,7 +58,9 @@ export default function Clubs() {
             </span>
             <AnimatedText
               as="h2"
-              className="font-display text-[32px] md:text-[48px] leading-[0.9] tracking-[2px] md:tracking-[4px] text-white"
+              heavy
+              stagger={0.03}
+              className="font-display text-[clamp(2.25rem,6.5vw,5.5rem)] leading-[0.86] tracking-[-0.015em] text-white"
               text="CAMPUS LIFE"
             />
           </div>
@@ -86,7 +88,7 @@ export default function Clubs() {
                 <span className="font-body text-[10px] font-bold tracking-[0.2em] uppercase text-white/30 mb-2">
                   {club.subtitle}
                 </span>
-                <h3 className="font-display text-2xl md:text-[28px] tracking-[2px] text-white mb-3 group-hover:text-white/90 transition-colors">
+                <h3 className="font-display text-[clamp(1.5rem,2.4vw,2.25rem)] leading-[0.95] tracking-[-0.01em] text-white mb-3 group-hover:text-white/90 transition-colors">
                   {club.title}
                 </h3>
                 <p className="font-body text-sm text-white/50 leading-relaxed mb-5 max-w-xl">

@@ -1,6 +1,7 @@
 import LoadingScreen from "@/components/LoadingScreen";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import { Marquee } from "@/components/AnimatedText";
 import ServiceInfo from "@/components/ServiceInfo";
 import ITFlagshipSection from "@/components/ITFlagshipSection";
 import AdmissionsBanner from "@/components/AdmissionsBanner";
@@ -31,6 +32,19 @@ export default function SchoolHome() {
         <Reveal delay={60}>
           <AdmissionsBanner />
         </Reveal>
+        <Marquee
+          items={[
+            "JSS1 — SS3",
+            "NERDC CURRICULUM",
+            "STEM & DIGITAL LITERACY",
+            "LEADERSHIP TRAINING",
+            "CHARACTER FORMATION",
+          ]}
+          className="border-y border-[var(--border-subtle)] bg-[var(--bg-secondary)] py-3 md:py-4"
+          itemClassName="font-display text-[clamp(1rem,2.2vw,1.9rem)] tracking-[-0.01em] text-[var(--text-accent)]"
+          duration={32}
+        />
+
         <Reveal>
           <Services />
         </Reveal>

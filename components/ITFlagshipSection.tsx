@@ -59,10 +59,16 @@ export default function ITFlagshipSection() {
             <span className="inline-flex items-center gap-2 rounded-full border border-brand-green/40 bg-brand-green/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">
               <Sparkles size={12} /> Flagship programme
             </span>
-            <h2 className="mt-4 font-display text-4xl tracking-widest text-[var(--text-primary)] md:text-5xl">
-              <AnimatedText text="IT EDUCATION FOR THE" delay={0.0} />
-              <span className="text-brand-green">
-                <AnimatedText text="NEXT GENERATION" delay={0.5} />
+            <h2 className="mt-4 font-display text-[clamp(2.25rem,6.5vw,5.5rem)] leading-[0.86] tracking-[-0.015em] text-[var(--text-primary)]">
+              <AnimatedText
+                heavy
+                stagger={0.03}
+                text="IT EDUCATION FOR THE"
+                delay={0.0}
+                className="block"
+              />
+              <span className="block text-brand-green">
+                <AnimatedText heavy stagger={0.03} text="NEXT GENERATION" delay={0.5} />
               </span>
             </h2>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--text-secondary)]">

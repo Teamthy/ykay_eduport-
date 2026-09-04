@@ -9,8 +9,8 @@ export default function ServiceInfo() {
       <div className="bg-[var(--surface-card)] border border-[var(--border-subtle)] rounded-[2rem] p-8 md:p-10 shadow-[var(--card-shadow-hover)] backdrop-blur-md theme-transition">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div className="flex-1">
-            <h2 className="font-display text-2xl md:text-3xl tracking-[4px] text-[var(--text-primary)] mb-1">
-              <AnimatedText text="School Hours & Location" delay={0.0} />
+            <h2 className="font-display text-[clamp(1.5rem,2.4vw,2.25rem)] leading-[0.95] tracking-[-0.01em] text-[var(--text-primary)] mb-1">
+              <AnimatedText heavy stagger={0.03} text="School Hours & Location" delay={0.0} />
             </h2>
             <p className="font-body text-sm text-[var(--text-muted)]">
               Ykay College &amp; Leadership Academy — Sango Ota, Ogun State

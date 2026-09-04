@@ -5,127 +5,156 @@ import { useRef } from "react";
 import { Download } from "lucide-react";
 import { AnimatedText, WordCycle, Marquee } from "@/components/AnimatedText";
 
+/**
+ * Editorial hero.
+ *
+ * The headline is the layout: two lines of Anton set edge-to-edge with
+ * `clamp()` so the type always touches both gutters, whatever the screen.
+ * Line 1 is fixed ("EXCELLENCE IN"), line 2 cycles through the four words.
+ * Under it sits a hairline rule and a meta row of small labelled columns,
+ * then the CTAs and the marquee band.
+ */
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, 120]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0.1]);
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, 110]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0.12]);
 
   return (
     <section
       ref={sectionRef}
-      className="relative w-full min-h-[88vh] md:min-h-[92vh] bg-brand-navy-dark overflow-hidden flex items-center"
+      className="relative flex w-full flex-col overflow-hidden bg-brand-navy-dark pt-24 pb-14 sm:pt-28 md:min-h-screen md:justify-center md:pt-32 md:pb-20"
     >
-      {/* Background image with overlay */}
+      {/* Background photograph, dimmed so the type stays dominant */}
       <div className="absolute inset-0 z-0">
         <img
           src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1920&q=80"
-          alt="Students in modern classroom"
-          className="w-full h-full object-cover opacity-45"
+          alt=""
+          aria-hidden="true"
+          className="h-full w-full object-cover opacity-25"
         />
-        {/* Left-to-right darkening for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-dark via-brand-navy-dark/80 to-brand-navy-dark/30" />
-        {/* Top-to-bottom vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy-dark via-transparent to-brand-navy-dark/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-navy-dark/85 via-brand-navy-dark/70 to-brand-navy-dark" />
       </div>
 
       <motion.div
         style={{ y: contentY, opacity: contentOpacity }}
-        className="relative z-10 mx-auto max-w-7xl px-6 py-24 md:py-36 w-full"
+        className="relative z-10 w-full px-4 sm:px-6 lg:px-8"
       >
-        <div className="max-w-6xl">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 110, damping: 15, delay: 0.15 }}
-            className="font-body text-xs md:text-sm font-bold tracking-[0.25em] uppercase text-brand-green mb-4 md:mb-6"
-          >
-            YKAY COLLEGE &amp; LEADERSHIP ACADEMY
-          </motion.p>
+        {/* Eyebrow */}
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 110, damping: 15, delay: 0.1 }}
+          className="mb-3 font-body text-[10px] font-bold uppercase tracking-[0.25em] text-brand-green sm:text-xs md:mb-5"
+        >
+          Ykay College &amp; Leadership Academy
+        </motion.p>
 
-          <h1 className="font-display text-[clamp(3.25rem,13vw,11.5rem)] leading-[0.82] tracking-[-0.01em] text-white mb-6 md:mb-8">
-            <AnimatedText
-              text="EXCELLENCE IN"
-              className="block"
-              animateOnLoad
+        {/* The headline IS the layout: both lines are sized to span the full
+            width, so the type always touches both gutters. Sizes come from
+            Anton's cap advance width rather than a fixed vw, because the
+            cycling words have different letter counts. */}
+        <h1 className="font-display leading-[0.78] tracking-[-0.02em] text-white [container-type:inline-size] [--cap:30vh] md:[--cap:34vh]">
+          <AnimatedText
+            text="EXCELLENCE IN"
+            className="block whitespace-nowrap text-[min(18.55cqw,var(--cap))]"
+            animateOnLoad
+            heavy
+            delay={0.12}
+            stagger={0.034}
+          />
+          <span className="mt-0.5 block text-brand-green sm:mt-1">
+            <WordCycle
+              words={["EDUCATION", "EXCELLENCE", "LEADERSHIP", "CHARACTER"]}
               heavy
-              delay={0.15}
-              stagger={0.038}
+              fitWords
+              fitBasis={95.3}
+              tracking={-0.02}
+              fitMax="var(--cap)"
             />
-            <span className="block text-brand-green">
-              <WordCycle words={["EDUCATION", "EXCELLENCE", "LEADERSHIP", "CHARACTER"]} heavy />
-            </span>
-          </h1>
+          </span>
+        </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.7 }}
-            className="font-body text-base md:text-xl text-white max-w-xl mb-8 md:mb-10 leading-relaxed drop-shadow"
-          >
-            A premium day secondary school in Sango Ota, Ogun State — raising role models through
-            rigorous academics, leadership training, and character formation. JSS1 to SS3.
-          </motion.p>
+        {/* Hairline rule, straight off the reference layout */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 0.9, delay: 0.75, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-5 h-px w-full origin-left bg-white/25 sm:mt-7"
+        />
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ type: "spring", stiffness: 120, damping: 14, delay: 0.6 }}
-            className="flex flex-wrap items-center gap-6 md:gap-10 text-white font-body text-sm md:text-base"
-          >
-            <div>
-              <span className="block text-xs uppercase tracking-[0.15em] text-brand-green font-bold mb-1">
-                Location
-              </span>
-              <span className="font-medium text-white/95">Sango Ota, Ogun State</span>
-            </div>
-            <div className="w-px h-10 bg-white/20 hidden sm:block" />
-            <div>
-              <span className="block text-xs uppercase tracking-[0.15em] text-brand-green font-bold mb-1">
-                Programmes
-              </span>
-              <span className="font-medium text-white/95">Junior &amp; Senior Secondary</span>
-            </div>
-            <div className="w-px h-10 bg-white/20 hidden sm:block" />
-            <div>
-              <span className="block text-xs uppercase tracking-[0.15em] text-brand-green font-bold mb-1">
-                Session
-              </span>
-              <span className="font-medium text-white/95">2025 / 2026</span>
-            </div>
-          </motion.div>
+        {/* Meta row: small caps labels over short values */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
+          className="mt-5 grid grid-cols-2 gap-x-6 gap-y-6 sm:mt-7 md:grid-cols-4 md:gap-x-8"
+        >
+          <div>
+            <p className="font-body text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">
+              School
+            </p>
+            <p className="mt-1.5 font-body text-xs leading-relaxed text-white/85 sm:text-sm">
+              Premium day secondary school, JSS1 to SS3.
+            </p>
+          </div>
+          <div>
+            <p className="font-body text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">
+              Why
+            </p>
+            <p className="mt-1.5 font-body text-xs leading-relaxed text-white/85 sm:text-sm">
+              Rigorous academics, leadership training and character formation.
+            </p>
+          </div>
+          <div>
+            <p className="font-body text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">
+              Location
+            </p>
+            <p className="mt-1.5 font-body text-xs leading-relaxed text-white/85 sm:text-sm">
+              Sango Ota, Ogun State
+            </p>
+          </div>
+          <div>
+            <p className="font-body text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">
+              Session
+            </p>
+            <p className="mt-1.5 font-body text-xs leading-relaxed text-white/85 sm:text-sm">
+              2025 / 2026
+            </p>
+          </div>
+        </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1.1 }}
-            className="flex flex-wrap gap-4 mt-10 md:mt-14"
+        {/* Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 1.05 }}
+          className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 md:mt-9"
+        >
+          {/* /download, not the raw .apk: it explains Android's "unknown
+              source" warning and still works before the URL is configured. */}
+          <a
+            href="/download"
+            className="inline-flex items-center justify-center gap-3 rounded-full bg-brand-orange px-6 py-3.5 font-body text-xs font-bold uppercase tracking-[0.15em] text-brand-navy shadow-lg shadow-black/30 transition-all duration-300 hover:scale-[1.03] hover:bg-brand-orange-dark active:scale-[0.97] sm:px-8 sm:py-4 sm:text-sm"
           >
-            {/* /download, not the raw .apk: it explains Android's "unknown
-                source" warning and still works before the URL is configured. */}
-            <a
-              href="/download"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-brand-orange text-brand-navy font-body text-sm font-bold tracking-[0.15em] uppercase hover:bg-brand-orange-dark transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] shadow-lg shadow-black/30"
-            >
-              <Download size={18} /> Download Mobile App
-            </a>
-            <a
-              href="/portal"
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white/15 border border-white/30 text-white border border-white/25 font-body text-sm font-bold tracking-[0.15em] uppercase hover:bg-white/20 hover:border-white/40 transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] backdrop-blur-sm"
-            >
-              Student Portal
-            </a>
-          </motion.div>
-        </div>
+            <Download size={18} /> Download Mobile App
+          </a>
+          <a
+            href="/portal"
+            className="inline-flex items-center justify-center gap-3 rounded-full border border-white/30 bg-white/15 px-6 py-3.5 font-body text-xs font-bold uppercase tracking-[0.15em] text-white backdrop-blur-sm transition-all duration-300 hover:scale-[1.03] hover:border-white/40 hover:bg-white/20 active:scale-[0.97] sm:px-8 sm:py-4 sm:text-sm"
+          >
+            Student Portal
+          </a>
+        </motion.div>
       </motion.div>
 
       <Marquee
         items={["ADMISSIONS OPEN", "WAEC", "NECO", "JAMB", "IT ACADEMY"]}
-        className="absolute bottom-0 left-0 right-0 z-10 border-t border-white/15 bg-brand-navy-dark/70 py-3 backdrop-blur-sm"
-        itemClassName="font-body text-xs md:text-sm font-bold tracking-[0.25em] uppercase text-brand-green"
+        className="relative z-10 mt-10 border-y border-white/15 bg-brand-navy-dark/70 py-3 backdrop-blur-sm md:absolute md:inset-x-0 md:bottom-0 md:mt-0 md:border-b-0"
+        itemClassName="font-body text-[10px] sm:text-xs md:text-sm font-bold tracking-[0.25em] uppercase text-brand-green"
       />
     </section>
   );

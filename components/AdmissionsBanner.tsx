@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { AnimatedText } from "@/components/AnimatedText";
 import { ArrowRight, FileCheck2, CreditCard, CalendarClock } from "lucide-react";
 
 const HIGHLIGHTS = [
@@ -50,10 +51,12 @@ export default function AdmissionsBanner() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="mt-5 font-display text-4xl md:text-6xl lg:text-7xl leading-[0.9] tracking-[3px] md:tracking-[5px] text-white"
+                className="mt-5 font-display text-[clamp(2.25rem,6.5vw,5.5rem)] leading-[0.86] tracking-[-0.015em] text-white"
               >
-                BEGIN THE <br />
-                <span className="text-brand-green">JOURNEY</span>
+                <AnimatedText heavy stagger={0.03} text="BEGIN THE" className="block" />
+                <span className="block text-brand-green">
+                  <AnimatedText heavy stagger={0.03} text="JOURNEY" delay={0.2} />
+                </span>
               </motion.h2>
 
               <motion.p

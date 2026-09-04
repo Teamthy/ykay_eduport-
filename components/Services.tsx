@@ -58,10 +58,10 @@ export default function Services() {
           <span className="text-brand-green text-[10px] font-bold tracking-widest uppercase mb-3 block">
             Programmes & Services
           </span>
-          <h2 className="font-display text-4xl md:text-6xl text-[var(--text-primary)] tracking-[2px]">
-            <AnimatedText text="WHAT WE" delay={0.0} />
-            <span className="text-brand-green">
-              <AnimatedText text="OFFER" delay={0.175} />
+          <h2 className="font-display text-[clamp(2.25rem,6.5vw,5.5rem)] leading-[0.86] tracking-[-0.015em] text-[var(--text-primary)]">
+            <AnimatedText heavy stagger={0.03} text="WHAT WE" delay={0.0} className="block" />
+            <span className="block text-brand-green">
+              <AnimatedText heavy stagger={0.03} text="OFFER" delay={0.175} />
             </span>
           </h2>
         </div>
@@ -85,7 +85,7 @@ export default function Services() {
                 <div className="text-[10px] font-bold uppercase tracking-widest text-brand-green mb-2">
                   {s.subtitle}
                 </div>
-                <h3 className="font-display text-2xl text-[var(--text-primary)] tracking-[1px] mb-3">
+                <h3 className="font-display text-[clamp(1.5rem,2.4vw,2.25rem)] leading-[0.95] tracking-[-0.01em] text-[var(--text-primary)] mb-3">
                   {s.title}
                 </h3>
                 <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6">
