@@ -1,7 +1,47 @@
 -- EDUos: Postgres Row-Level Security (RLS) for tenant isolation.
 --
--- This is the DB-level backstop that guarantees one school can NEVER see
--- another school's data, even if the application has a bug in a WHERE clause.
+-- ⚠️ ACCURACY CORRECTION (2026-09-07, post-launch-readiness audit) ⚠️
+--
+-- The line below originally claimed this is "the DB-level backstop that
+-- GUARANTEES one school can NEVER see another school's data". As shipped, that
+-- claim is FALSE, and leaving it here is more dangerous than having no RLS at
+-- all — it invites the next engineer to trust a guarantee that does not exist.
+--
+-- The truth, measured by `npm run check:tenant-coverage`:
+--
+--     Tenant-model routes:                     110
+--     RLS-scoped (actually call withSchool):     1   <- app/api/push/register
+--     App-level schoolId filter present:        91
+--     UNCOVERED (neither):                      18
+--
+-- Two reasons the policy enforces nothing today:
+--
+--   1. It is FAIL-OPEN by construction. The RESTRICTIVE clause passes whenever
+--      app.current_school_id is unset/empty, which is the default state of
+--      every pooled connection. See the `NULLIF(...) IS NULL OR ...` predicate
+--      in 20260802000000_eduos_rls_empty_context_fix.
+--   2. withSchool() — the only thing that sets the variable — is called from
+--      exactly three places (app/api/push/register/route.ts and lib/push.ts),
+--      all of them DeviceToken queries. Every other route uses the plain
+--      Prisma client, so the variable is never set and the policy is inert.
+--
+-- Consequence: tenant isolation on this system is APPLICATION-LEVEL ONLY.
+-- Every route must filter by schoolId itself. A route that forgets the filter
+-- is a silent cross-tenant hole — no error, no log, wrong school's rows.
+--
+-- Status: the EDUos multi-tenant SaaS layer is ON HOLD; Ykay College is
+-- currently the only school, so no live cross-tenant exposure exists today.
+-- This MUST be resolved before a second school is onboarded.
+--
+-- Path to a real guarantee (see docs/TENANCY_RLS_STATUS.md):
+--   1. Drive `npm run check:tenant-coverage` UNCOVERED list to zero.
+--   2. Route those accesses through withSchool().
+--   3. Re-apply the policy with the fail-open arm REMOVED, via the helper
+--      left in place for exactly this purpose:
+--          SELECT eduos_apply_tenant_rls('<table>');
+--   4. Add `-- --strict` to the CI step so coverage cannot regress.
+--
+-- ── Original design notes (retained for history) ─────────────────────────
 --
 -- Design (incremental, backward-compatible):
 --   1. PERMISSIVE policy  → USING (true) — always passes.

@@ -21,19 +21,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install mobile dependencies
-        # tests/mobile/*.test.ts import from mobile/ (e.g. mobile/lib/practiceBank.ts,
-        # mobile/src/theme/colors.ts). mobile/tsconfig.json "extends":
-        # "expo/tsconfig.base", which cannot resolve until mobile/node_modules
-        # exists — so without this step vitest fails to transform those two
-        # suites and the whole job goes red on a fresh checkout.
-        #
-        # These tests cannot move to the `mobile` job: that job has no vitest
-        # (mobile/package.json ships no test runner), and the suites are part of
-        # the root `npx vitest run` invocation below.
-        working-directory: mobile
-        run: npm ci
-
       - name: Audit dependencies
         # Blocking. The previous exemption ("only fixes are toolchain majors")
         # was stale — the outstanding brace-expansion and undici advisories
@@ -133,12 +120,7 @@ jobs:
         # which rely on app-level schoolId filters, and which have neither.
         # The policy stays fail-open until this list is empty — then flip the
         # RLS policies to fail-closed and add --strict here.
-        #
-        # The `--max-uncovered 18` ratchet IS enforcing: it fails if a new
-        # tenant route lands without a schoolId filter, so the list can only
-        # shrink. Baseline measured 2026-09-07 at commit a222c48. Lower it as
-        # routes are fixed. See docs/TENANCY_RLS_STATUS.md.
-        run: npm run check:tenant-coverage -- --max-uncovered 18
+        run: npm run check:tenant-coverage
 
       - name: Verify admissions operations loop
         run: npm run verify:admissions

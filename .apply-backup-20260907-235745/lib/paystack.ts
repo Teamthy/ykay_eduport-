@@ -44,34 +44,6 @@ export function toPrismaJson(value: unknown): Prisma.InputJsonValue {
   return JSON.parse(JSON.stringify(value ?? null)) as Prisma.InputJsonValue;
 }
 
-/**
- * Outcome of a Paystack verify call, split so callers can tell "this payment
- * did not happen" from "we could not find out".
- *
- * `definite` means Paystack answered authoritatively: the transaction is
- * unpaid, or its amount/currency/payer do not match the attempt. The attempt
- * can safely be recorded as FAILED and a fresh checkout started.
- *
- * `!definite` means the verification itself did not complete — a network
- * error, a timeout, a 429, or a malformed response. The payment may well have
- * gone through. Recording FAILED here strands real money: the parent is
- * charged, the invoice still shows a balance, and the bursary sees an
- * "abandoned" attempt that was actually paid.
- */
-export class PaystackVerificationError extends Error {
-  readonly definite: boolean;
-
-  constructor(message: string, options?: { definite?: boolean; cause?: unknown }) {
-    super(message);
-    this.name = "PaystackVerificationError";
-    this.definite = options?.definite ?? false;
-    this.cause = options?.cause;
-  }
-}
-
-const PAYMENT_UNVERIFIED_MESSAGE =
-  "We could not verify this payment. Please contact the bursary if your account was charged.";
-
 export async function initializePaystackTransaction(input: {
   email: string;
   amount: number;
@@ -109,59 +81,32 @@ export async function verifyPaystackTransaction(
   expectedAmountKobo: number,
   expectedEmail: string,
 ): Promise<Prisma.InputJsonObject> {
-  // Resolve configuration BEFORE the try block. A missing secret key is a
-  // deployment fault, not an inconclusive verification, and must surface as
-  // itself — swallowed into a PaystackVerificationError it would look like a
-  // flaky provider while every fee payment silently failed to verify.
-  const secretKey = getPaystackSecretKey();
-
-  let response: Response;
-  try {
-    response = await fetch(`${PAYSTACK_URL}/transaction/verify/${encodeURIComponent(reference)}`, {
+  const response = await fetch(
+    `${PAYSTACK_URL}/transaction/verify/${encodeURIComponent(reference)}`,
+    {
       headers: {
-        Authorization: `Bearer ${secretKey}`,
+        Authorization: `Bearer ${getPaystackSecretKey()}`,
         Accept: "application/json",
       },
       cache: "no-store",
-    });
-  } catch (cause) {
-    // fetch threw: DNS failure, TLS error, connection reset, timeout. Nothing
-    // is known about the payment either way.
-    throw new PaystackVerificationError(PAYMENT_UNVERIFIED_MESSAGE, { cause });
-  }
+    },
+  );
 
-  let payload: PaystackVerificationResponse;
-  try {
-    payload = (await response.json()) as PaystackVerificationResponse;
-  } catch (cause) {
-    // A gateway or proxy answered with a non-JSON body. Still inconclusive.
-    throw new PaystackVerificationError(PAYMENT_UNVERIFIED_MESSAGE, { cause });
-  }
+  const payload = (await response.json()) as PaystackVerificationResponse;
+  const email = payload.data?.customer?.email?.trim().toLowerCase();
 
-  // Inconclusive: the provider did not give us a usable answer.
-  if (!response.ok || !payload.status || !payload.data) {
-    throw new PaystackVerificationError(PAYMENT_UNVERIFIED_MESSAGE, {
-      cause: { httpStatus: response.status, message: payload.message ?? null },
-    });
-  }
-
-  // Definitive: Paystack has the transaction and told us its real state. Only
-  // from here may a caller record the attempt as FAILED.
-  const email = payload.data.customer?.email?.trim().toLowerCase();
   if (
+    !response.ok ||
+    !payload.status ||
+    !payload.data ||
     payload.data.status !== "success" ||
     payload.data.amount !== expectedAmountKobo ||
     payload.data.currency !== "NGN" ||
     email !== expectedEmail.trim().toLowerCase()
   ) {
-    throw new PaystackVerificationError(PAYMENT_UNVERIFIED_MESSAGE, {
-      definite: true,
-      cause: {
-        transactionStatus: payload.data.status,
-        amount: payload.data.amount,
-        currency: payload.data.currency,
-      },
-    });
+    throw new Error(
+      "We could not verify this payment. Please contact the bursary if your account was charged.",
+    );
   }
 
   return toPrismaJson({

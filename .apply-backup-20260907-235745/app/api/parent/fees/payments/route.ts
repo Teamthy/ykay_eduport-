@@ -5,8 +5,7 @@ import { getParentFinanceContext } from "@/lib/finance";
 import { assertNotImpersonating } from "@/lib/session";
 import { postCompletedFeePayment } from "@/lib/fee-payment-service";
 import { prisma } from "@/lib/prisma";
-import { logger } from "@/lib/logger";
-import { PaystackVerificationError, verifyPaystackTransaction } from "@/lib/paystack";
+import { verifyPaystackTransaction } from "@/lib/paystack";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 
 export const runtime = "nodejs";
@@ -141,32 +140,12 @@ export async function POST(request: NextRequest) {
       replay: result.replay,
     });
   } catch (error) {
-    // Only a DEFINITIVE "no" from Paystack may fail the attempt. An
-    // inconclusive verification — network error, timeout, 429, malformed
-    // response — leaves the attempt PENDING so the parent can retry and the
-    // charge.success webhook can still reconcile it. Marking those FAILED
-    // strands real money: the parent is charged, the invoice still shows a
-    // balance, and the bursary is left with an "abandoned" attempt that was
-    // actually paid.
-    const definite = error instanceof PaystackVerificationError && error.definite;
-
-    if (definite) {
-      await prisma.feePaymentAttempt.updateMany({
-        where: { id: attempt.id, status: PaymentStatus.PENDING },
-        data: { status: PaymentStatus.FAILED },
-      });
-    } else {
-      logger.warn("Fee payment verification inconclusive; attempt left pending", {
-        reference: attempt.reference,
-        schoolId: attempt.schoolId,
-        invoiceId: attempt.invoiceId,
-        attemptId: attempt.id,
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-
+    await prisma.feePaymentAttempt.updateMany({
+      where: { id: attempt.id, status: PaymentStatus.PENDING },
+      data: { status: PaymentStatus.FAILED },
+    });
     const message = error instanceof Error ? error.message : "Unable to verify fee payment.";
-    return jsonNoStore({ error: message }, { status: definite ? 400 : 503 });
+    return jsonNoStore({ error: message }, { status: 400 });
   }
 }
 

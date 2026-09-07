@@ -18,20 +18,9 @@ const SCHOOL_ID_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9_-]{0,62}[A-Za-z0-9])?$/;
  * Run database operations with Postgres Row-Level Security enforcement.
  *
  * Sets `app.current_school_id` for the duration of a transaction so the RLS
- * policies restrict every statement to that school.
- *
- * ⚠️ THIS IS CURRENTLY AN OPT-IN MECHANISM, NOT A GUARANTEE. ⚠️
- *
- * The RLS policy is deliberately FAIL-OPEN: when app.current_school_id is
- * unset — which is the state of every connection that did not come through
- * this function — the RESTRICTIVE policy passes everything. Since only three
- * call sites exist (app/api/push/register/route.ts and lib/push.ts, both
- * DeviceToken queries), the policy is inert for the other ~109 tenant routes.
- *
- * So do not read this file and conclude the database is protecting you. Tenant
- * isolation today is application-level: every route must filter by schoolId.
- * Measured by `npm run check:tenant-coverage`. Full status and the path to a
- * real guarantee: docs/TENANCY_RLS_STATUS.md.
+ * policies restrict every statement to that school — a DB-level guarantee that
+ * one school can never read or write another's rows, even if the application
+ * has a bug in a WHERE clause.
  *
  * Usage (opt-in — routes that don't use this still work, just without the
  * DB-level isolation):

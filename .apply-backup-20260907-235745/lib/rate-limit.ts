@@ -17,49 +17,12 @@ if (!redis && process.env.NODE_ENV === "production") {
 // ── In-memory fallback for when Redis is unavailable ────────────
 const memoryStore = new Map<string, { count: number; resetAt: number }>();
 
-/**
- * Bound on the fallback store.
- *
- * Entries used to be inserted and never removed: the only "expiry" was a
- * timestamp check on read, so a key that was never requested again stayed in
- * the Map for the lifetime of the process. The keys are attacker-influenced
- * (client IP, submitted email), so an unauthenticated endpoint on the fallback
- * path could grow this without limit. Auth-critical kinds fail closed instead
- * of reaching here (see DISTRIBUTED_REQUIRED), but the bulk-communication kinds
- * do not, so the bound is still needed.
- *
- * Opportunistic sweep rather than a timer: a serverless instance should not
- * hold a long-lived interval, and the cost is paid at most once per window.
- */
-const MEMORY_STORE_MAX_ENTRIES = 10_000;
-
-function sweepExpiredEntries(now: number): void {
-  for (const [key, entry] of memoryStore) {
-    if (now > entry.resetAt) memoryStore.delete(key);
-  }
-}
-
 function inMemoryCheck(
   key: string,
   maxRequests: number,
   windowMs: number,
 ): { success: boolean; retryAfterSeconds: number } {
   const now = Date.now();
-
-  if (memoryStore.size >= MEMORY_STORE_MAX_ENTRIES) {
-    sweepExpiredEntries(now);
-    // Still full after dropping everything expired: every remaining key is
-    // inside a live window, which for an IP-keyed limit means a genuinely
-    // large burst. Drop the oldest insertions so the store cannot exceed the
-    // bound. This weakens the limit under attack, which is the correct
-    // trade — losing a rate-limit budget is better than losing the process.
-    while (memoryStore.size >= MEMORY_STORE_MAX_ENTRIES) {
-      const oldest = memoryStore.keys().next();
-      if (oldest.done) break;
-      memoryStore.delete(oldest.value);
-    }
-  }
-
   const entry = memoryStore.get(key);
 
   if (!entry || now > entry.resetAt) {

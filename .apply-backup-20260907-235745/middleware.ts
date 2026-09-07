@@ -123,16 +123,7 @@ export async function middleware(request: NextRequest) {
     pathname !== "/api/super-admin/impersonate" &&
     pathname !== "/api/auth/logout"
   ) {
-    // Read the session from EITHER transport. getRawSession() in lib/session.ts
-    // accepts a signed cookie (web) or `Authorization: Bearer <same JWT>`
-    // (mobile / API clients), so an impersonation guard that only inspects the
-    // cookie leaves the Bearer path open: a super-admin who lifts the
-    // impersonation JWT out of the response and replays it as a Bearer token
-    // reaches every route except the handful that also call
-    // assertNotImpersonating(). Checking both closes that.
-    const authHeader = request.headers.get("authorization") || "";
-    const bearer = authHeader.toLowerCase().startsWith("bearer ") ? authHeader.slice(7).trim() : "";
-    const impToken = request.cookies.get("ykay_session")?.value || bearer;
+    const impToken = request.cookies.get("ykay_session")?.value;
     const impSecret = process.env.AUTH_SECRET;
     if (impToken && impSecret && impSecret.length >= 32) {
       try {
