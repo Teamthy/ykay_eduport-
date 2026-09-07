@@ -103,3 +103,11 @@ ykay-*.cmd
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# --- added by CLEANUP_COMMITTED_CRUFT.ps1 ---
+# Applier-script backups (never commit these)
+.apply-backup-*/
+apply-backup-*/
+
+# Git bundles used to transfer work between machines
+*.bundle
