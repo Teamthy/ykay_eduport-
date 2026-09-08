@@ -7,15 +7,15 @@ import { ArrowLeft, ArrowRight, Check, Clock, Flag, ListChecks, RotateCcw, X } f
 import type { PublicQuestion } from "@/lib/cbt";
 
 /**
- * The CBT engine â€” one component, three phases:
+ * The CBT engine — one component, three phases:
  *
- *   menu    â†’ choose practice (instant feedback) or exam (timed, JAMB-style)
- *   running â†’ answer questions; exam mode shows the navigation grid + timer
- *   done    â†’ score, topic breakdown, full review with explanations
+ *   menu    → choose practice (instant feedback) or exam (timed, JAMB-style)
+ *   running → answer questions; exam mode shows the navigation grid + timer
+ *   done    → score, topic breakdown, full review with explanations
  *
  * Practice answers are checked one at a time by the server (/api/cbt/check);
  * exam papers are graded server-side at submit. The answer key never ships
- * to the browser. Keyboard: Aâ€“D or 1â€“4 to pick, â† â†’ to move, F to flag.
+ * to the browser. Keyboard: A–D or 1–4 to pick, ← → to move, F to flag.
  */
 
 type Phase = "menu" | "running" | "done";
@@ -172,7 +172,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
     }
   }, [answers, elapsed, mode, questions, subject.name, subject.slug]);
 
-  // Timed countdown (auto-submit at zero) â€” exam mode always, practice if a duration was set.
+  // Timed countdown (auto-submit at zero) — exam mode always, practice if a duration was set.
   useEffect(() => {
     const timed = mode === "exam" || durationMin > 0;
     if (phase !== "running" || !timed || !current) return;
@@ -243,13 +243,13 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
     return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
   }, [mode, secondsLeft, elapsed, durationMin]);
 
-  /* â”€â”€ MENU â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── MENU ─────────────────────────────────────────────────────────── */
   if (phase === "menu") {
     return (
       <div className="mx-auto w-full max-w-3xl">
         <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow-hover)] md:p-10">
           <p className="font-body text-[10px] font-bold uppercase tracking-[0.25em] text-brand-green">
-            CBT Practice Â· {subject.name}
+            CBT Practice · {subject.name}
           </p>
           <h2 className="mt-3 font-display text-3xl tracking-wide text-[var(--text-primary)] md:text-4xl">
             CHOOSE YOUR MODE
@@ -345,8 +345,8 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
                 Exam mode
               </h3>
               <p className="mt-1.5 font-body text-xs leading-relaxed text-[var(--text-muted)]">
-                Timed like JAMB/WAEC CBT â€” 45 seconds per question, flag questions for review,
-                jump with the grid, auto-submit when time ends.
+                Timed like JAMB/WAEC CBT — 45 seconds per question, flag questions for review, jump
+                with the grid, auto-submit when time ends.
               </p>
             </button>
           </div>
@@ -360,7 +360,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
     );
   }
 
-  /* â”€â”€ DONE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── DONE ─────────────────────────────────────────────────────────── */
   if (phase === "done" && result) {
     const r = result.result;
     return (
@@ -369,7 +369,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="font-body text-[10px] font-bold uppercase tracking-[0.25em] text-brand-green">
-                {mode === "exam" ? "Exam finished" : "Practice finished"} Â· {subject.name}
+                {mode === "exam" ? "Exam finished" : "Practice finished"} · {subject.name}
               </p>
               <p className="mt-2 font-display text-6xl leading-none text-[var(--text-primary)]">
                 {r.scorePct}
@@ -498,7 +498,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
     );
   }
 
-  /* â”€â”€ RUNNING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* ── RUNNING ──────────────────────────────────────────────────────── */
   if (!current) return null;
   const check = checks[current.id];
   const selected = answers[current.id];
@@ -509,7 +509,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
       <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)] md:p-8">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-4">
           <p className="font-body text-xs font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">
-            Question {index + 1} of {questions.length} Â· {current.topic}
+            Question {index + 1} of {questions.length} · {current.topic}
           </p>
           <div className="flex items-center gap-3">
             <button
@@ -595,7 +595,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
             <b className="text-[var(--text-primary)]">
               {check.correct
                 ? "Correct!"
-                : `Not quite â€” the answer is ${LETTERS[check.correctIndex]}.`}
+                : `Not quite — the answer is ${LETTERS[check.correctIndex]}.`}
             </b>{" "}
             <span className="whitespace-pre-line">{check.explanation}</span>
           </motion.div>
@@ -625,7 +625,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
               disabled={submitting}
               className="inline-flex items-center gap-2 rounded-full bg-[#4ec54d] px-5 py-2.5 font-body text-xs font-bold uppercase tracking-wider text-[#0c1824] transition-colors hover:bg-[#3aa93a] disabled:opacity-50"
             >
-              <Check size={13} /> {submitting ? "Submittingâ€¦" : "Submit"}
+              <Check size={13} /> {submitting ? "Submitting…" : "Submit"}
             </button>
           )}
         </div>
@@ -680,7 +680,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
             disabled={submitting}
             className="mt-5 w-full rounded-full bg-[#4ec54d] px-4 py-3 font-body text-xs font-bold uppercase tracking-wider text-[#0c1824] transition-colors hover:bg-[#3aa93a] disabled:opacity-50"
           >
-            {submitting ? "Submittingâ€¦" : `Submit (${answeredCount}/${questions.length})`}
+            {submitting ? "Submitting…" : `Submit (${answeredCount}/${questions.length})`}
           </button>
         </AnimatePresence>
       </aside>

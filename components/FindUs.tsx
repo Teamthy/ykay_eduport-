@@ -27,12 +27,12 @@ export default function FindUs() {
               </span>
             </h2>
 
-            {/* Map â€” plain place embed (no API key, no signed pb token that
+            {/* Map — plain place embed (no API key, no signed pb token that
                 expires or points at the wrong place). q= is the campus
                 address; Google geocodes it and centres the pin. */}
             <div className="mb-6 aspect-[4/3] overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-lg">
               <iframe
-                src="https://maps.google.com/maps?q=Lagos-Abeokuta%20Expressway%2C%20Sango%20Ota%2C%20Ogun%20State&t=&z=14&ie=UTF8&iwloc=&output=embed"
+                src="https://maps.google.com/maps?q=Ykay%20College%2C%20Km%2038%20Lagos-Abeokuta%20Expressway%2C%20Sango%20Ota%2C%20Ogun%20State&t=&z=16&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -59,7 +59,7 @@ export default function FindUs() {
                     Sango Ota, Ogun State
                   </div>
                   <a
-                    href="https://www.google.com/maps/search/Lagos-Abeokuta+Expressway,+Sango+Ota,+Ogun+State"
+                    href="https://www.google.com/maps/search/?api=1&query=Ykay+College+Km+38+Lagos-Abeokuta+Expressway+Sango+Ota+Ogun+State"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 mt-3 text-sm text-brand-green font-bold hover:underline"
@@ -107,7 +107,7 @@ export default function FindUs() {
 
               <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)] group-hover:border-brand-green transition-all">
                 <div className="text-[10px] uppercase tracking-widest text-[var(--text-accent)] font-bold mb-2">
-                  Admissions News Â· March 15, 2025
+                  Admissions News · March 15, 2025
                 </div>
                 <h3 className="font-display text-[clamp(1.5rem,2.4vw,2.25rem)] leading-[0.95] tracking-[-0.01em] text-[var(--text-primary)] mb-3 group-hover:text-[var(--text-accent)] transition-colors">
                   Ykay College Opens 2025 / 2026 Admissions

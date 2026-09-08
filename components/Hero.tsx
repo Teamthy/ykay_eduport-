@@ -5,7 +5,7 @@ import { Download } from "lucide-react";
 import { Marquee } from "@/components/AnimatedText";
 
 /**
- * College home hero â€” full-bleed navy band, prebuiltui-style copy on the left,
+ * College home hero — full-bleed navy band, prebuiltui-style copy on the left,
  * Ykay student identity photograph on the right.
  */
 export default function Hero() {
@@ -44,7 +44,7 @@ export default function Hero() {
             className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 font-body text-[11px] font-semibold text-white/90 backdrop-blur-sm"
           >
             <span className="h-2 w-2 rounded-full bg-brand-orange" />
-            Raising Role Models Â· Est. 2021
+            Raising Role Models · Est. 2021
           </motion.span>
 
           <motion.h1
@@ -63,7 +63,7 @@ export default function Hero() {
             transition={{ delay: 0.18 }}
             className="mt-5 max-w-xl font-body text-base leading-relaxed text-white/80 md:text-lg"
           >
-            A premium day secondary school in Sango Ota, Ogun State â€” JSS1 to SS3 with science
+            A premium day secondary school in Sango Ota, Ogun State — JSS1 to SS3 with science
             laboratories, sports, clubs and a full IT academy built into the timetable.
           </motion.p>
 
@@ -94,7 +94,7 @@ export default function Hero() {
           </motion.div>
 
           <p className="mt-7 font-body text-sm text-white/70">
-            WAEC Â· NECO Â· JAMB Â· NERDC curriculum
+            WAEC · NECO · JAMB · NERDC curriculum
           </p>
         </div>
 
