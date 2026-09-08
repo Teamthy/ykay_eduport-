@@ -1145,6 +1145,18 @@ a {
   color: var(--btn-ghost-text);
 }
 
+/* Mint/orange fills fail WCAG with white type — force navy ink. */
+.bg-brand-green.text-white,
+a.bg-brand-green,
+button.bg-brand-green {
+  color: #0c1824;
+}
+.bg-brand-orange.text-white,
+a.bg-brand-orange,
+button.bg-brand-orange {
+  color: #0c1824;
+}
+
 /* Solid buttons: navy ink on brand fills (green/orange fail WCAG with white). */
 .btn-primary,
 .btn-primary:hover,

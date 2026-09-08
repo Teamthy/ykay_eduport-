@@ -16,6 +16,7 @@ import {
   CalendarClock,
   Lock,
   XCircle,
+  Search,
 } from "lucide-react";
 
 /** "Mon 14 Sep, 9:00 am" — a student needs the day and the time, not an ISO string. */
@@ -109,9 +110,22 @@ export default function StudentExamsPage() {
               MY <span className="text-brand-green">EXAMS</span>
             </h1>
             <p className="mt-3 max-w-2xl font-body text-sm text-white/60">
-              Take published tests for your class. Your answers save automatically, and the timer
-              submits for you when time runs out.
+              Sit a published paper for your class, submit, and get your score. Search by subject or
+              title. Your answers save automatically, and the timer submits when time runs out.
             </p>
+            <label className="relative mt-6 block max-w-md">
+              <Search
+                size={14}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/40"
+              />
+              <input
+                type="search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search by subject or paper title…"
+                className="w-full rounded-full border border-white/15 bg-white/10 py-3 pl-10 pr-4 text-sm text-white outline-none placeholder:text-white/40 focus:border-brand-green"
+              />
+            </label>
           </div>
         </section>
 
@@ -133,115 +147,125 @@ export default function StudentExamsPage() {
             ) : null}
 
             {!loading && data
-              ? data.exams.map((exam) => (
-                  <div
-                    key={exam.id}
-                    className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-display text-xl text-[var(--text-primary)]">
-                            {exam.title}
-                          </h3>
-                          <span className="rounded-full bg-brand-green/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-green">
-                            {exam.examType}
-                          </span>
-                          {exam.status === "CLOSED" ? (
-                            <span className="rounded-full bg-red-500/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-red-500">
-                              Closed
+              ? data.exams
+                  .filter((exam) => {
+                    const needle = q.trim().toLowerCase();
+                    if (!needle) return true;
+                    return (
+                      exam.title.toLowerCase().includes(needle) ||
+                      exam.subjectName.toLowerCase().includes(needle) ||
+                      exam.teacherName.toLowerCase().includes(needle)
+                    );
+                  })
+                  .map((exam) => (
+                    <div
+                      key={exam.id}
+                      className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-display text-xl text-[var(--text-primary)]">
+                              {exam.title}
+                            </h3>
+                            <span className="rounded-full bg-brand-green/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-green">
+                              {exam.examType}
                             </span>
+                            {exam.status === "CLOSED" ? (
+                              <span className="rounded-full bg-red-500/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-red-500">
+                                Closed
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                            <span className="inline-flex items-center gap-1">
+                              <BookOpen size={11} /> {exam.subjectName} · {exam.teacherName}
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <Clock size={11} /> {exam.durationMinutes} min
+                            </span>
+                            <span>
+                              {exam.questionCount} questions · {exam.totalMarks} marks · pass{" "}
+                              {exam.passMark}%
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <Shield size={11} /> Auto-save · Auto-submit
+                              {exam.hasEssay ? " · Essay included" : ""}
+                            </span>
+                          </div>
+                          {/* When to sit it — the whole point of the list. */}
+                          {whenLabel(exam.scheduledFor) ? (
+                            <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
+                              <CalendarClock size={12} className="text-brand-green" />
+                              {exam.availability === "UPCOMING" ? "Opens" : "Scheduled"}{" "}
+                              {whenLabel(exam.scheduledFor)}
+                              {whenLabel(exam.availableUntil)
+                                ? ` — closes ${whenLabel(exam.availableUntil)}`
+                                : ""}
+                            </p>
+                          ) : null}
+                          {exam.theoryMinutes > 0 ? (
+                            <p className="mt-1 text-xs text-[var(--text-muted)]">
+                              {exam.durationMinutes} min objective + {exam.theoryMinutes} min theory
+                            </p>
+                          ) : null}
+                          {exam.instructions ? (
+                            <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                              {exam.instructions}
+                            </p>
                           ) : null}
                         </div>
-                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                          <span className="inline-flex items-center gap-1">
-                            <BookOpen size={11} /> {exam.subjectName} · {exam.teacherName}
-                          </span>
-                          <span className="inline-flex items-center gap-1">
-                            <Clock size={11} /> {exam.durationMinutes} min
-                          </span>
-                          <span>
-                            {exam.questionCount} questions · {exam.totalMarks} marks · pass{" "}
-                            {exam.passMark}%
-                          </span>
-                          <span className="inline-flex items-center gap-1">
-                            <Shield size={11} /> Auto-save · Auto-submit
-                            {exam.hasEssay ? " · Essay included" : ""}
-                          </span>
-                        </div>
-                        {/* When to sit it — the whole point of the list. */}
-                        {whenLabel(exam.scheduledFor) ? (
-                          <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
-                            <CalendarClock size={12} className="text-brand-green" />
-                            {exam.availability === "UPCOMING" ? "Opens" : "Scheduled"}{" "}
-                            {whenLabel(exam.scheduledFor)}
-                            {whenLabel(exam.availableUntil)
-                              ? ` — closes ${whenLabel(exam.availableUntil)}`
-                              : ""}
-                          </p>
-                        ) : null}
-                        {exam.theoryMinutes > 0 ? (
-                          <p className="mt-1 text-xs text-[var(--text-muted)]">
-                            {exam.durationMinutes} min objective + {exam.theoryMinutes} min theory
-                          </p>
-                        ) : null}
-                        {exam.instructions ? (
-                          <p className="mt-2 text-xs text-[var(--text-secondary)]">
-                            {exam.instructions}
-                          </p>
-                        ) : null}
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        {exam.attempt?.scoreVisible ? (
-                          <div className="text-right">
-                            <div
-                              className={`font-display text-3xl ${exam.attempt.percent !== null && exam.attempt.percent >= exam.passMark ? "text-brand-green" : "text-red-500"}`}
-                            >
-                              {exam.attempt.percent}%
+                        <div className="flex flex-col items-end gap-2">
+                          {exam.attempt?.scoreVisible ? (
+                            <div className="text-right">
+                              <div
+                                className={`font-display text-3xl ${exam.attempt.percent !== null && exam.attempt.percent >= exam.passMark ? "text-brand-green" : "text-red-500"}`}
+                              >
+                                {exam.attempt.percent}%
+                              </div>
+                              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                {exam.attempt.totalScore}/{exam.totalMarks} marks
+                              </div>
                             </div>
-                            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                              {exam.attempt.totalScore}/{exam.totalMarks} marks
-                            </div>
-                          </div>
-                        ) : exam.attempt && exam.attempt.status !== "IN_PROGRESS" ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
-                            <CheckCircle2 size={12} /> Submitted — awaiting results
-                          </span>
-                        ) : null}
-                        {/* Why there is no button. Previously an exam that
+                          ) : exam.attempt && exam.attempt.status !== "IN_PROGRESS" ? (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
+                              <CheckCircle2 size={12} /> Submitted — awaiting results
+                            </span>
+                          ) : null}
+                          {/* Why there is no button. Previously an exam that
                             could not be started showed nothing at all — no
                             button, no reason — so a student stared at a card
                             that appeared broken. */}
-                        {!exam.canResume && !exam.canStart ? (
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest ${
-                              AVAILABILITY_STYLE[exam.availability]?.chip ??
-                              "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
-                            }`}
-                          >
-                            {exam.feeLocked ? <Lock size={12} /> : null}
-                            {exam.feeLocked ? "Fees outstanding" : exam.availabilityLabel}
-                          </span>
-                        ) : null}
-                        {exam.canResume ? (
-                          <Link
-                            href={`/student/exams/${exam.id}`}
-                            className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-orange-dark"
-                          >
-                            <RotateCcw size={13} /> Resume Exam
-                          </Link>
-                        ) : exam.canStart ? (
-                          <Link
-                            href={`/student/exams/${exam.id}`}
-                            className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark"
-                          >
-                            <PlayCircle size={13} /> Start Exam
-                          </Link>
-                        ) : null}
+                          {!exam.canResume && !exam.canStart ? (
+                            <span
+                              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest ${
+                                AVAILABILITY_STYLE[exam.availability]?.chip ??
+                                "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
+                              }`}
+                            >
+                              {exam.feeLocked ? <Lock size={12} /> : null}
+                              {exam.feeLocked ? "Fees outstanding" : exam.availabilityLabel}
+                            </span>
+                          ) : null}
+                          {exam.canResume ? (
+                            <Link
+                              href={`/student/exams/${exam.id}`}
+                              className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-orange-dark"
+                            >
+                              <RotateCcw size={13} /> Resume Exam
+                            </Link>
+                          ) : exam.canStart ? (
+                            <Link
+                              href={`/student/exams/${exam.id}`}
+                              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark"
+                            >
+                              <PlayCircle size={13} /> Start Exam
+                            </Link>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  ))
               : null}
 
             {!loading && data && !data.exams.length ? (

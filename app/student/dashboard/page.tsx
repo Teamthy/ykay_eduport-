@@ -24,6 +24,7 @@ import {
   XCircle,
   Clock,
   MonitorSmartphone,
+  CircleHelp,
 } from "lucide-react";
 
 const SIDEBAR_ITEMS = [
@@ -254,6 +255,60 @@ export default function StudentDashboardPage() {
                       </div>
                     </div>
                   )}
+
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    {[
+                      {
+                        title: "Have a question?",
+                        body: "The office can help with fees, attendance and your timetable.",
+                        href: "/contact",
+                        link: "Contact support →",
+                        icon: CircleHelp,
+                        image: "/home/college-classroom.jpg",
+                      },
+                      {
+                        title: "CBT Practice",
+                        body: "Sit a paper, submit, and get your score. Search by subject in Exams.",
+                        href: "/student/exams",
+                        link: "Open exams →",
+                        icon: ClipboardCheck,
+                        image: "/home/college-science.jpg",
+                      },
+                      {
+                        title: "Messages",
+                        body: "Talk to teachers and the school office from your inbox.",
+                        href: "/student/messages",
+                        link: "Open inbox →",
+                        icon: MessageCircle,
+                        image: "/home/college-assembly.jpg",
+                      },
+                    ].map((card) => (
+                      <Link
+                        key={card.title}
+                        href={card.href}
+                        className="group relative isolate min-h-[210px] overflow-hidden rounded-[2rem] shadow-[var(--card-shadow)] transition-all hover:-translate-y-1 hover:shadow-[var(--card-shadow-hover)]"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={card.image}
+                          alt=""
+                          aria-hidden="true"
+                          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/80 to-brand-navy/25" />
+                        <div className="relative z-10 flex h-full flex-col justify-end p-5 text-white">
+                          <div className="mb-3 grid size-10 place-items-center rounded-full bg-brand-green text-brand-navy">
+                            <card.icon size={18} />
+                          </div>
+                          <h3 className="font-display text-xl tracking-wide">{card.title}</h3>
+                          <p className="mt-1 text-sm text-white/75">{card.body}</p>
+                          <span className="mt-3 text-sm font-bold text-brand-green">
+                            {card.link}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
 
                   <div className="grid gap-6 lg:grid-cols-2">
                     {/* Recent attendance */}
