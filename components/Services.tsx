@@ -52,7 +52,7 @@ const SERVICES = [
 
 export default function Services() {
   return (
-    <section className="w-full bg-[var(--bg-primary)] py-16 md:py-24 theme-transition">
+    <section className="backdrop-brand-navy w-full bg-[var(--bg-primary)] py-16 md:py-24 theme-transition">
       <div className="mx-auto max-w-7xl px-6">
         <div className="text-center mb-12">
           <span className="text-brand-green text-[10px] font-bold tracking-widest uppercase mb-3 block">

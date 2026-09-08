@@ -52,21 +52,14 @@ type DashboardData = {
 type Tab = "all" | "in-progress" | "completed" | "not-started";
 
 const COURSE_IMAGES: Record<string, string> = {
-  python:
-    "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=480&q=80",
-  ai: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=480&q=80",
-  cybersecurity:
-    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=480&q=80",
-  "digital-literacy":
-    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=480&q=80",
-  "microsoft-word":
-    "https://images.unsplash.com/photo-1589810264340-0ce27bfbf751?auto=format&fit=crop&w=480&q=80",
-  "microsoft-excel":
-    "https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=480&q=80",
-  "microsoft-powerpoint":
-    "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=480&q=80",
-  "excel-expert":
-    "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=480&q=80",
+  python: "/python-hero.jpg",
+  ai: "/ai-hero.jpg",
+  cybersecurity: "/cybersecurity-hero.jpg",
+  "digital-literacy": "/it-hub-classroom.jpg",
+  "microsoft-word": "/microsoft-word-hero.jpg",
+  "microsoft-excel": "/home/debate.jpg",
+  "microsoft-powerpoint": "/it-hub-3.jpg",
+  "excel-expert": "/excel-expert-hero.jpg",
 };
 
 export default function ItPortalDashboard() {

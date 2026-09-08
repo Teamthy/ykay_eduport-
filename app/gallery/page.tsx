@@ -6,32 +6,32 @@ import { AnimatedText } from "@/components/AnimatedText";
 export default function GalleryPage() {
   const images = [
     {
-      src: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80",
+      src: "/home/students-class.jpg",
       caption: "Classroom Learning",
       category: "Academics",
     },
     {
-      src: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80",
+      src: "/home/leadership.jpg",
       caption: "Student Collaboration",
       category: "Campus Life",
     },
     {
-      src: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80",
+      src: "/home/students-class.jpg",
       caption: "Modern Facilities",
       category: "Campus",
     },
     {
-      src: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80",
+      src: "/home/sports.jpg",
       caption: "Sports Day",
       category: "Sports",
     },
     {
-      src: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
+      src: "/home/arts.jpg",
       caption: "Arts & Music",
       category: "Arts",
     },
     {
-      src: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80",
+      src: "/it-hub-classroom.jpg",
       caption: "STEM Club",
       category: "Academics",
     },

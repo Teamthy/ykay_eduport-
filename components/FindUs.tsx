@@ -8,7 +8,7 @@ import { AnimatedText } from "@/components/AnimatedText";
 export default function FindUs() {
   return (
     <section id="find-us" className="w-full bg-[var(--bg-primary)] py-16 md:py-24 theme-transition">
-      <div className="mx-auto max-w-7xl px-6">
+      <div className="mx-auto w-full px-6 md:px-10">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
           {/* Find Us */}
           <motion.div
@@ -27,7 +27,7 @@ export default function FindUs() {
               </span>
             </h2>
 
-            {/* Map — plain place embed (no API key, no signed pb token that
+            {/* Map â€” plain place embed (no API key, no signed pb token that
                 expires or points at the wrong place). q= is the campus
                 address; Google geocodes it and centres the pin. */}
             <div className="mb-6 aspect-[4/3] overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-lg">
@@ -92,7 +92,7 @@ export default function FindUs() {
             <Link href="/news-events" className="block group">
               <div className="relative rounded-3xl overflow-hidden aspect-[16/10] mb-4 shadow-lg">
                 <img
-                  src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80"
+                  src="/home/ykay-students.png"
                   alt="School event"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
@@ -107,7 +107,7 @@ export default function FindUs() {
 
               <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)] group-hover:border-brand-green transition-all">
                 <div className="text-[10px] uppercase tracking-widest text-[var(--text-accent)] font-bold mb-2">
-                  Admissions News · March 15, 2025
+                  Admissions News Â· March 15, 2025
                 </div>
                 <h3 className="font-display text-[clamp(1.5rem,2.4vw,2.25rem)] leading-[0.95] tracking-[-0.01em] text-[var(--text-primary)] mb-3 group-hover:text-[var(--text-accent)] transition-colors">
                   Ykay College Opens 2025 / 2026 Admissions

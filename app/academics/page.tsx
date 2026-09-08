@@ -49,7 +49,7 @@ export default function AcademicsPage() {
           <section className="relative overflow-hidden pt-32 pb-14 md:pt-40 md:pb-16">
             <div className="absolute inset-0">
               <img
-                src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1920&q=80"
+                src="/home/students-class.jpg"
                 alt="Classroom"
                 className="h-full w-full object-cover opacity-30"
               />

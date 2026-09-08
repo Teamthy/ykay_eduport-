@@ -9,49 +9,43 @@ const TRACKS = [
     title: "Python",
     href: "/it-education/python",
     blurb: "Programming foundations to automation",
-    image:
-      "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=800&q=80",
+    image: "/python-hero.jpg",
   },
   {
     title: "Artificial Intelligence",
     href: "/it-education/ai",
     blurb: "Practical AI literacy for students",
-    image:
-      "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=800&q=80",
+    image: "/ai-hero.jpg",
   },
   {
     title: "Cybersecurity",
     href: "/it-education/cybersecurity",
     blurb: "Defend systems and data",
-    image:
-      "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
+    image: "/cybersecurity-hero.jpg",
   },
   {
     title: "Microsoft Office",
     href: "/it-education/microsoft-excel",
     blurb: "Word, Excel, PowerPoint pathways",
-    image:
-      "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=800&q=80",
+    image: "/microsoft-excel-hero.jpg",
   },
   {
     title: "Digital Literacy",
     href: "/it-education/digital-literacy",
     blurb: "Essential computing for every learner",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+    image: "/digital-literacy-hero.jpg",
   },
   {
     title: "Excel Expert",
     href: "/it-education/excel-expert",
     blurb: "Advanced analysis and dashboards",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+    image: "/excel-expert-hero.jpg",
   },
 ];
 
 export default function ITFlagshipSection() {
   return (
-    <section className="home-section relative overflow-hidden bg-[var(--bg-primary)]">
+    <section className="home-section relative w-full overflow-hidden bg-[var(--bg-primary)]">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-green/10 via-transparent to-brand-orange/5" />
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="grid items-center gap-10 lg:grid-cols-2">

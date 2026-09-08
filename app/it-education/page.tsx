@@ -35,10 +35,10 @@ type CatalogCourse = {
 };
 
 const HERO_IMAGES = [
-  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1920&q=80",
-  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1920&q=80",
-  "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1920&q=80",
-  "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1920&q=80",
+  "/it-hub-classroom.jpg",
+  "/it-hub-classroom.jpg",
+  "/home/hero-campus.jpg",
+  "/cybersecurity-hero.jpg",
 ];
 
 const FALLBACK: CatalogCourse[] = [
@@ -101,21 +101,14 @@ const FALLBACK: CatalogCourse[] = [
 ];
 
 const IMAGES: Record<string, string> = {
-  python:
-    "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=900&q=80",
-  ai: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=900&q=80",
-  cybersecurity:
-    "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=900&q=80",
-  "digital-literacy":
-    "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
-  "microsoft-word":
-    "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80",
-  "microsoft-excel":
-    "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=900&q=80",
-  "microsoft-powerpoint":
-    "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=900&q=80",
-  "excel-expert":
-    "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80",
+  python: "/python-hero.jpg",
+  ai: "/ai-hero.jpg",
+  cybersecurity: "/cybersecurity-hero.jpg",
+  "digital-literacy": "/it-hub-classroom.jpg",
+  "microsoft-word": "/microsoft-excel-hero.jpg",
+  "microsoft-excel": "/microsoft-excel-hero.jpg",
+  "microsoft-powerpoint": "/it-hub-3.jpg",
+  "excel-expert": "/excel-expert-hero.jpg",
 };
 
 const ICONS: Record<string, typeof Code> = {

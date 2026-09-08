@@ -14,7 +14,7 @@ import { AnimatedText } from "@/components/AnimatedText";
  */
 export default function ServiceInfo() {
   return (
-    <section className="relative w-full border-y border-[var(--border-subtle)] bg-[var(--bg-secondary)] py-14 md:py-20 theme-transition">
+    <section className="relative w-full border-y border-[var(--border-subtle)] bg-[var(--bg-secondary)] backdrop-edu-light py-14 md:py-20 theme-transition">
       <div className="mx-auto w-full max-w-7xl px-6 md:px-10">
         <div className="grid gap-10 lg:grid-cols-[1.05fr_2fr] lg:items-center">
           {/* Best-fit campus photo — the info band gets a visual anchor. */}

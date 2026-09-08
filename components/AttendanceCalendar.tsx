@@ -29,7 +29,7 @@ export default function AttendanceCalendar({
   const statusColor = (status: string) => {
     switch (status) {
       case "Present":
-        return "bg-brand-green text-white";
+        return "bg-brand-green text-brand-navy-dark";
       case "Absent":
         return "bg-red-500 text-white";
       case "Late":

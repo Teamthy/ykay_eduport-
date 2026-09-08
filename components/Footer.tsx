@@ -61,13 +61,13 @@ export default function Footer() {
             <div className="flex gap-3">
               <a
                 href="#"
-                className="w-9 h-9 rounded-full bg-white/5 hover:bg-brand-green text-white flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-full bg-white/5 hover:bg-brand-green text-brand-navy-dark flex items-center justify-center transition-colors"
               >
                 <Facebook size={16} />
               </a>
               <a
                 href="#"
-                className="w-9 h-9 rounded-full bg-white/5 hover:bg-brand-green text-white flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-full bg-white/5 hover:bg-brand-green text-brand-navy-dark flex items-center justify-center transition-colors"
               >
                 <Instagram size={16} />
               </a>

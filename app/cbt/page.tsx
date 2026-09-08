@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 
 export const metadata: Metadata = {
-  title: "CBT Practice — real exam-style questions",
+  title: "CBT Practice â€” real exam-style questions",
   description:
     "Free computer-based testing practice for Ykay students: timed JAMB/WAEC-style exams and instant-feedback practice across JSS and SS subjects.",
 };
@@ -16,15 +16,19 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const LEVEL_LABELS: Record<string, string> = {
-  jss1: "Junior — JSS1",
-  jss2: "Junior — JSS2",
-  jss3: "Junior — JSS3",
-  ss1: "Senior — SS1",
-  ss2: "Senior — SS2",
-  ss3: "Senior — SS3",
+  jss1: "Junior â€” JSS1",
+  jss2: "Junior â€” JSS2",
+  jss3: "Junior â€” JSS3",
+  bece: "BECE",
+  ss1: "Senior â€” SS1",
+  ss2: "Senior â€” SS2",
+  ss3: "Senior â€” SS3",
+  waec: "WAEC",
+  neco: "NECO",
+  jamb: "JAMB UTME",
 };
 
-/** /cbt — the subject picker. Counts are live from the question bank. */
+/** /cbt â€” the subject picker. Counts are live from the question bank. */
 export default async function CbtPage() {
   const subjects = await prisma.cbtSubject.findMany({
     where: { questions: { some: { status: "published" } } },
@@ -60,9 +64,10 @@ export default async function CbtPage() {
               <span className="block text-brand-green">IT'S THE EXAM.</span>
             </h1>
             <p className="mt-5 max-w-2xl font-body text-base leading-relaxed text-[var(--text-secondary)]">
-              {total} curriculum questions and counting — timed JAMB/WAEC-style papers with the
-              navigation grid and flag-for-review, or calm practice with an explanation after every
-              answer. Free for every Ykay student.
+              {total.toLocaleString()} NERDC-aligned questions â€” JSS1 to SS3 plus BECE, WAEC, NECO
+              and JAMB. Pick a topic, question count, difficulty and time. Timed papers use the
+              navigation grid and flag-for-review; practice explains every answer. Free for every
+              Ykay student.
             </p>
             <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 font-body text-xs font-semibold text-[var(--text-muted)]">
               <span className="inline-flex items-center gap-2">

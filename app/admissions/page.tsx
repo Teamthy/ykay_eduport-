@@ -32,7 +32,7 @@ export default function AdmissionsPage() {
           <section className="relative overflow-hidden pb-16 pt-32 md:pb-20 md:pt-40">
             <div className="absolute inset-0">
               <img
-                src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1920&q=80"
+                src="/home/lab.jpg"
                 alt="Students learning together"
                 className="h-full w-full object-cover"
               />

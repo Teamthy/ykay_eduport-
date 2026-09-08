@@ -441,7 +441,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
                   }
                   className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all ${
                     flagged.has(question.id)
-                      ? "bg-brand-orange text-white"
+                      ? "bg-brand-orange text-brand-navy"
                       : "bg-[var(--surface-disabled)] text-[var(--text-muted)] hover:text-brand-orange"
                   }`}
                 >
