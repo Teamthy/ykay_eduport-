@@ -138,8 +138,8 @@ export default function PortalPage() {
                       href={portal.href}
                       className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all ${
                         portal.accent
-                          ? "bg-brand-orange text-white hover:bg-brand-orange-dark shadow-[var(--btn-secondary-shadow)]"
-                          : "bg-brand-green text-white hover:bg-brand-green-dark shadow-[var(--btn-primary-shadow)]"
+                          ? "bg-brand-orange text-brand-navy hover:bg-brand-orange-dark shadow-[var(--btn-secondary-shadow)]"
+                          : "bg-brand-green text-brand-navy hover:bg-brand-green-dark shadow-[var(--btn-primary-shadow)]"
                       }`}
                     >
                       {portal.cta} <ArrowRight size={14} />
