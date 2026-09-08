@@ -7,7 +7,7 @@ import { shuffled, type PublicQuestion } from "@/lib/cbt";
  *
  * Query: subject (slug), limit (1-100), difficulty (0 mixed / 1-3), topic.
  *
- * SECURITY: the response NEVER contains correctIndex or explanation â€”
+ * SECURITY: the response NEVER contains correctIndex or explanation —
  * practice answers are checked one at a time via /api/cbt/check, and exam
  * papers are graded server-side at submit. The client cannot read the key.
  */

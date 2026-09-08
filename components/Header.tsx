@@ -34,7 +34,7 @@ const navLinks = [
   { label: "News", href: "/news-events" },
   { label: "FAQ", href: "/faq" },
   { label: "Contact", href: "/contact" },
-  { label: "CBT", href: "/cbt" },
+  { label: "CBT", href: "/login?portal=student&next=/cbt" },
   { label: "Virtual", href: "/virtual" },
   { label: "Portal", href: "/portal" },
 ];
@@ -55,7 +55,7 @@ export default function Header() {
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled ? "bg-[var(--nav-bg-scrolled)] backdrop-blur-md border-b border-[var(--nav-border)] shadow-sm" : "bg-[var(--nav-bg)] border-b border-transparent"}`}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
+      <nav className="mx-auto flex w-full items-center justify-between gap-4 px-6 py-3 md:px-10">
         <Link href="/" className="shrink-0 flex items-center gap-3">
           <Image
             src="/ykay-logo.png"

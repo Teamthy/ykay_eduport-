@@ -23,11 +23,11 @@ export async function getSchool() {
       subdomain: schoolSlug,
       customDomain,
       name: process.env.SCHOOL_NAME || "Ykay College & Leadership Academy",
-      address: process.env.SCHOOL_ADDRESS || "Sango Ota, Ogun State, Nigeria",
+      address:
+        process.env.SCHOOL_ADDRESS ||
+        "Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State, Nigeria",
       phone: process.env.SCHOOL_PHONE || "+2347015374411",
       email: process.env.SCHOOL_EMAIL || "info@ykaycollege.com",
-      // Form-verified motto (Section B): the leading ellipsis is treated as a
-      // truncation of a longer phrase we were not given.
       motto: process.env.SCHOOL_MOTTO || "Raising Role Models",
     },
   });

@@ -48,10 +48,10 @@ export default function AboutPage() {
                       students who will transform their communities.
                     </p>
                     <p>
-                      Located in Sango Ota â€” a vibrant educational corridor along the
-                      Lagos-Abeokuta Expressway â€” the school serves families across Ogun State and
-                      beyond. Our campus is designed to support both rigorous academic work and
-                      holistic personal development.
+                      Located in Sango Ota — a vibrant educational corridor along the Lagos-Abeokuta
+                      Expressway — the school serves families across Ogun State and beyond. Our
+                      campus is designed to support both rigorous academic work and holistic
+                      personal development.
                     </p>
                     <p>
                       Every student at Ykay College is seen not just as a learner, but as a future
@@ -77,7 +77,7 @@ export default function AboutPage() {
                   { value: "2012", label: "Year Founded" },
                   { value: "420+", label: "Students Enrolled" },
                   { value: "85%", label: "WAEC Pass Rate" },
-                  { value: "JSS1â€“SS3", label: "Programmes Offered" },
+                  { value: "JSS1–SS3", label: "Programmes Offered" },
                 ].map((stat) => (
                   <div
                     key={stat.label}
@@ -102,7 +102,7 @@ export default function AboutPage() {
                   },
                   {
                     title: "Mission",
-                    desc: "To provide a rigorous, technology-enhanced education that develops intellectual capacity, moral integrity, and leadership skills â€” preparing every student for university success and civic responsibility.",
+                    desc: "To provide a rigorous, technology-enhanced education that develops intellectual capacity, moral integrity, and leadership skills — preparing every student for university success and civic responsibility.",
                   },
                   {
                     title: "Values",

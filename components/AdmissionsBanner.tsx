@@ -6,7 +6,7 @@ import { ArrowRight, FileCheck2, CreditCard, CalendarClock } from "lucide-react"
 
 const HIGHLIGHTS = [
   { icon: FileCheck2, label: "Online application" },
-  { icon: CalendarClock, label: "JSS1 â€” SS3 Â· 2025/2026" },
+  { icon: CalendarClock, label: "JSS1 — SS3 · 2025/2026" },
   { icon: CreditCard, label: "Secure Paystack fees" },
 ];
 
@@ -31,7 +31,7 @@ export default function AdmissionsBanner() {
             viewport={{ once: true }}
             className="inline-flex items-center gap-2 rounded-full bg-brand-green/20 px-4 py-1.5 font-body text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green ring-1 ring-brand-green/40 backdrop-blur-sm"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-brand-green" /> Admissions Open Â· 2025 /
+            <span className="h-1.5 w-1.5 rounded-full bg-brand-green" /> Admissions Open · 2025 /
             2026
           </motion.span>
 
@@ -95,7 +95,7 @@ export default function AdmissionsBanner() {
               href="/admissions/status"
               className="font-body text-sm font-bold uppercase tracking-[0.15em] text-white transition-colors hover:text-brand-green"
             >
-              Check application status â†’
+              Check application status →
             </a>
           </motion.div>
         </div>

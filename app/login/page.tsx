@@ -85,7 +85,7 @@ function LoginForm() {
             href="/portal"
             className="text-xs font-bold uppercase tracking-widest text-brand-green"
           >
-            â† All Portals
+            ← All Portals
           </Link>
           <ContextIcon className="mt-14 text-brand-green" size={42} />
           <h1 className="mt-5 font-display text-4xl tracking-widest">
@@ -100,7 +100,7 @@ function LoginForm() {
           {/*
             There is deliberately no "Sign up" on this form: staff, student and
             parent accounts are created by the school, never self-registered.
-            Prospective families DO have a self-service route â€” admissions â€”
+            Prospective families DO have a self-service route — admissions —
             and without signposting it here they land on a sign-in page with no
             credentials and no obvious next step.
           */}
@@ -109,7 +109,7 @@ function LoginForm() {
             <Link href="/admissions" className="font-bold text-brand-orange hover:underline">
               Apply for admission
             </Link>{" "}
-            â€” no account needed. Already applied?{" "}
+            — no account needed. Already applied?{" "}
             <Link href="/admissions/status" className="font-bold text-brand-orange hover:underline">
               Track your application
             </Link>{" "}
@@ -120,7 +120,7 @@ function LoginForm() {
             <Link href="/sso/virtual" className="font-bold text-brand-green hover:underline">
               continue to YK-Virtual
             </Link>{" "}
-            â€” or tap â€œContinue with Ykay Collegeâ€ on the Virtual login page.
+            — or tap “Continue with Ykay College” on the Virtual login page.
           </p>
           <p className="mt-4 max-w-sm rounded-2xl border border-white/10 bg-white/5 p-4 text-xs leading-6 text-white/55">
             Looking for IT Education courses?{" "}

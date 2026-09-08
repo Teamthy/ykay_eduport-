@@ -1,7 +1,7 @@
 /**
- * CBT seed â€” the shared question bank (cbt-bank.csv).
+ * CBT seed — the shared question bank (cbt-bank.csv).
  *
- * 5,000+ NERDC-aligned questions (JSS1â€“SS3 + BECE/WAEC/NECO/JAMB),
+ * 5,000+ NERDC-aligned questions (JSS1–SS3 + BECE/WAEC/NECO/JAMB),
  * single source of truth for BOTH sites: this file and the Go seed in the
  * YK-Virtual repo read the same CSV layout, so both banks stay in sync.
  *
@@ -73,10 +73,10 @@ function parseCsv(text: string): Row[] {
 async function main() {
   const csv = await readFile(join(__dirname, "cbt-bank.csv"), "utf8");
   const rows = parseCsv(csv);
-  console.log(`cbt:seed â€” ${rows.length} rows in the shared bank`);
+  console.log(`cbt:seed — ${rows.length} rows in the shared bank`);
 
   if (process.env.CBT_RESET === "1") {
-    console.log("CBT_RESET=1 â€” wiping existing CBT questions/subjects/attempts");
+    console.log("CBT_RESET=1 — wiping existing CBT questions/subjects/attempts");
     await prisma.cbtAttempt.deleteMany();
     await prisma.cbtQuestion.deleteMany();
     await prisma.cbtSubject.deleteMany();
@@ -145,7 +145,7 @@ async function main() {
       `  ${slug.padEnd(22)} ${String(list.length).padStart(4)} seeded (bank now ${total})`,
     );
   }
-  console.log(`done â€” ${created} new questions inserted (existing stems skipped).`);
+  console.log(`done — ${created} new questions inserted (existing stems skipped).`);
 }
 
 main()

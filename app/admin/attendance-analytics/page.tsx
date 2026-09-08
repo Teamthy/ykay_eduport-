@@ -230,7 +230,7 @@ export default function AdminAttendanceAnalyticsPage() {
                     {filteredClassLabel}
                   </div>
                   <div className="mt-1 text-xs text-[var(--text-muted)]">
-                    {data ? `${data.filters.monthLabel} ${data.filters.year}` : "Loadingâ€¦"}
+                    {data ? `${data.filters.monthLabel} ${data.filters.year}` : "Loading…"}
                   </div>
                 </div>
               </div>
