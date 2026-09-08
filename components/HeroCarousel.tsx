@@ -6,31 +6,31 @@ import { ArrowRight } from "lucide-react";
 
 const SLIDES = [
   {
-    img: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1920&q=80",
+    img: "/home/hero-campus.jpg",
     title: "The Operating System",
     highlight: "for African Schools",
     sub: "Admissions, fees, exams, attendance — all in one branded portal.",
   },
   {
-    img: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1920&q=80",
+    img: "/home/students-class.jpg",
     title: "Run Your Classroom",
     highlight: "Digitally",
     sub: "Daily registers, gradebook, report cards — no more paper or Excel.",
   },
   {
-    img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1920&q=80",
+    img: "/it-hub-classroom.jpg",
     title: "Collect Fees",
     highlight: "Online",
     sub: "Paystack integration. Parents pay with cards, USSD, or transfer.",
   },
   {
-    img: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1920&q=80",
+    img: "/home/lab.jpg",
     title: "Exam Results",
     highlight: "In Real Time",
     sub: "Computer-based tests with auto-grading and instant parent SMS.",
   },
   {
-    img: "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&w=1920&q=80",
+    img: "/home/leadership.jpg",
     title: "Built for",
     highlight: "Every School",
     sub: "From 50 students to 5,000. Free to start. No credit card required.",

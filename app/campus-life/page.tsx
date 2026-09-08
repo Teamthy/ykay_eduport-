@@ -93,7 +93,7 @@ export default function CampusLifePage() {
               {/* Facilities banner with image */}
               <div className="rounded-[2rem] overflow-hidden relative shadow-[var(--card-shadow-hover)]">
                 <img
-                  src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1920&q=80"
+                  src="/home/leadership.jpg"
                   alt="Students collaborating"
                   className="w-full h-[400px] md:h-[500px] object-cover"
                 />

@@ -45,7 +45,7 @@ export default function FeeCalculator() {
                 onClick={() => setSelectedClass(cls)}
                 className={`p-3 rounded-xl text-sm font-bold transition-all ${
                   selectedClass === cls
-                    ? "bg-brand-green text-white shadow-md"
+                    ? "bg-brand-green text-brand-navy-dark shadow-md"
                     : "bg-[var(--surface-disabled)] text-[var(--text-secondary)] hover:bg-brand-green/10"
                 }`}
               >

@@ -101,7 +101,7 @@ export default function VirtualPage() {
               <div className="group relative flex min-h-[26rem] flex-col justify-end overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1600&q=80"
+                  src="/home/hero-campus.jpg"
                   alt="A student learning online on a laptop"
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />

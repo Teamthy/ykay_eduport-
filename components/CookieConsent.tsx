@@ -40,7 +40,7 @@ export default function CookieConsent() {
             <h3 className="font-display text-base tracking-[2px] text-white mb-1">
               Cookie Preferences
             </h3>
-            <p className="font-body text-xs text-white/30 leading-relaxed max-w-xl">
+            <p className="font-body text-xs text-white/60 leading-relaxed max-w-xl">
               We use cookies to enhance your experience, remember preferences, and analyze site
               traffic. Essential cookies are always active. You can manage analytics and preference
               cookies below.
@@ -65,7 +65,7 @@ export default function CookieConsent() {
         <div className="flex gap-3 shrink-0">
           <button
             onClick={handleReject}
-            className="rounded-full px-5 py-2.5 bg-white/[0.05] border border-white/10 text-white/40 font-body text-xs font-bold hover:bg-white/[0.08] hover:text-white transition-all"
+            className="rounded-full px-5 py-2.5 bg-white/[0.05] border border-white/10 text-white/70 font-body text-xs font-bold hover:bg-white/[0.08] hover:text-white transition-all"
           >
             Reject Optional
           </button>

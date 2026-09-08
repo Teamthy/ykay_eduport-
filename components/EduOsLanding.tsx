@@ -55,32 +55,32 @@ const SCHOOLS = [
   {
     name: "Ykay College",
     loc: "Sango Ota, Ogun",
-    img: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&q=80",
+    img: "/home/hero-campus.jpg",
   },
   {
     name: "Greenfield Academy",
     loc: "Lekki, Lagos",
-    img: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=600&q=80",
+    img: "/home/hero-campus.jpg",
   },
   {
     name: "Faith Heights School",
     loc: "Ikeja, Lagos",
-    img: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=600&q=80",
+    img: "/home/hero-campus.jpg",
   },
   {
     name: "Crestwood College",
     loc: "Abuja, FCT",
-    img: "https://images.unsplash.com/photo-1607237138185-eedd9c632b0b?auto=format&fit=crop&w=600&q=80",
+    img: "/it-hub-1.jpg",
   },
   {
     name: "Royal Crown School",
     loc: "Port Harcourt",
-    img: "https://images.unsplash.com/photo-1497486751825-1233686d5d80?auto=format&fit=crop&w=600&q=80",
+    img: "/home/students-class.jpg",
   },
   {
     name: "Bright Future Academy",
     loc: "Ibadan, Oyo",
-    img: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=600&q=80",
+    img: "/home/leadership.jpg",
   },
 ];
 
@@ -89,25 +89,25 @@ const PILLARS = [
     icon: Eye,
     title: "Vision",
     desc: "Every African school — regardless of size or budget — running on a world-class digital platform that empowers administrators, teachers, parents, and students.",
-    img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80",
+    img: "/it-hub-classroom.jpg",
   },
   {
     icon: Target,
     title: "Mission",
     desc: "Eliminate paperwork, spreadsheets, and WhatsApp chaos from school management. One platform, every feature, every device.",
-    img: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80",
+    img: "/home/leadership.jpg",
   },
   {
     icon: AlertCircle,
     title: "The Problem",
     desc: "Schools drown in manual processes — paper registers, hand-written receipts, exam scripts, WhatsApp groups, and Excel sheets that crash. Parents left in the dark.",
-    img: "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?auto=format&fit=crop&w=800&q=80",
+    img: "/it-hub-4.jpg",
   },
   {
     icon: Lightbulb,
     title: "The Solution",
     desc: "EDUos brings everything into one cloud platform — branded for each school, accessible from any device, with zero installation required.",
-    img: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80",
+    img: "/home/lab.jpg",
   },
 ];
 
@@ -224,7 +224,7 @@ export default function EduOsLanding() {
             </div>
             <div className="relative">
               <img
-                src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80"
+                src="/home/lab.jpg"
                 alt="Students learning"
                 className="rounded-2xl w-full h-[420px] object-cover"
               />

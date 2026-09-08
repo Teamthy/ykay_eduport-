@@ -9,51 +9,46 @@ const clubs = [
     title: "Science & Technology Club",
     subtitle: "STEM Leadership",
     desc: "A community of students passionate about science, engineering, and technology. Through hands-on experiments, robotics, coding challenges, and science fairs, members develop the skills to lead Nigeria's future innovation economy.",
-    image:
-      "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80",
+    image: "/home/lab.jpg",
     href: "/campus-life",
   },
   {
     title: "Debate & Public Speaking",
     subtitle: "Leadership & Communication",
     desc: "Students train in structured debate, persuasive speaking, and critical reasoning. Our debaters compete at regional and national levels, developing the communication skills essential for leadership in any field.",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80",
+    image: "/home/debate.jpg",
     href: "/campus-life",
   },
   {
     title: "Sports & Athletics",
     subtitle: "Physical Excellence",
     desc: "Football, basketball, athletics, table tennis, volleyball — our sports program builds discipline, teamwork, and resilience. Students compete in inter-house tournaments and external competitions across Ogun State.",
-    image:
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=800&q=80",
+    image: "/home/sports.jpg",
     href: "/campus-life",
   },
   {
     title: "Music & Creative Arts",
     subtitle: "Arts & Expression",
-    desc: "A vibrant community for students passionate about music, drama, visual arts, and creative writing. Students prepare for NAFDAC arts competitions, school productions, and cultural festivals throughout the year.",
-    image:
-      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80",
+    desc: "A vibrant community for students passionate about music, drama, visual arts, and creative writing. Students prepare for arts competitions, school productions, and cultural festivals throughout the year.",
+    image: "/home/arts.jpg",
     href: "/campus-life",
   },
   {
     title: "Leadership Council",
     subtitle: "Student Governance",
     desc: "An elected student government that represents student interests, organizes school-wide events, promotes positive school culture, and develops leadership capacity in a structured, mentored environment.",
-    image:
-      "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80",
+    image: "/home/leadership.jpg",
     href: "/campus-life",
   },
 ];
 
 export default function Clubs() {
   return (
-    <section id="clubs" className="w-full bg-[#0D0D0D] pt-12 md:pt-16 pb-16 md:pb-24">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12 md:mb-16">
+    <section id="clubs" className="w-full bg-brand-navy-dark py-16 md:py-24">
+      <div className="mx-auto max-w-7xl px-6 md:px-10">
+        <div className="mb-12 flex flex-col gap-4 md:mb-16 md:flex-row md:items-end md:justify-between">
           <div>
-            <span className="font-body text-[10px] font-bold tracking-[0.25em] uppercase text-white/30 mb-3 block">
+            <span className="mb-3 block font-body text-[10px] font-bold uppercase tracking-[0.25em] text-brand-green">
               CLUBS &amp; SOCIETIES
             </span>
             <AnimatedText
@@ -72,33 +67,35 @@ export default function Clubs() {
               key={club.title}
               href={club.href}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="group flex flex-col md:flex-row gap-6 md:gap-10 rounded-[2rem] overflow-hidden bg-card-bg border border-white/5 hover:border-white/15 transition-all duration-300 hover:-translate-y-0.5"
+              className="group flex flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-green/40 md:flex-row md:gap-10"
             >
-              <div className="relative w-full md:w-[320px] lg:w-[380px] shrink-0 aspect-[16/10] md:aspect-auto md:h-[260px] overflow-hidden">
+              <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden md:aspect-auto md:h-[260px] md:w-[320px] lg:w-[380px]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={club.image}
                   alt={club.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0D0D0D]/60 md:bg-gradient-to-t md:from-transparent md:to-[#0D0D0D]/30" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-brand-navy-dark/50" />
               </div>
-              <div className="p-6 md:p-8 md:py-8 flex flex-col justify-center">
-                <span className="font-body text-[10px] font-bold tracking-[0.2em] uppercase text-white/30 mb-2">
+              <div className="flex flex-col justify-center p-6 md:p-8">
+                <span className="mb-2 font-body text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">
                   {club.subtitle}
                 </span>
-                <h3 className="font-display text-[clamp(1.5rem,2.4vw,2.25rem)] leading-[0.95] tracking-[-0.01em] text-white mb-3 group-hover:text-white/90 transition-colors">
+                <h3 className="mb-3 font-display text-[clamp(1.5rem,2.4vw,2.25rem)] leading-[0.95] tracking-[-0.01em] text-white">
                   {club.title}
                 </h3>
-                <p className="font-body text-sm text-white/50 leading-relaxed mb-5 max-w-xl">
+                <p className="mb-5 max-w-xl font-body text-sm leading-relaxed text-white/80">
                   {club.desc}
                 </p>
-                <span className="inline-flex items-center gap-2 font-body text-xs font-bold tracking-[0.15em] uppercase text-white/70 group-hover:text-white transition-colors w-fit">
+                <span className="inline-flex w-fit items-center gap-2 font-body text-xs font-bold uppercase tracking-[0.15em] text-white transition-colors group-hover:text-brand-green">
                   Learn More{" "}
                   <ArrowRight
                     size={12}
-                    className="group-hover:translate-x-1 transition-transform"
+                    className="transition-transform group-hover:translate-x-1"
                   />
                 </span>
               </div>

@@ -26,7 +26,9 @@ export async function getSchool() {
       address: process.env.SCHOOL_ADDRESS || "Sango Ota, Ogun State, Nigeria",
       phone: process.env.SCHOOL_PHONE || "+2347015374411",
       email: process.env.SCHOOL_EMAIL || "info@ykaycollege.com",
-      motto: process.env.SCHOOL_MOTTO || "Excellence in Education",
+      // Form-verified motto (Section B): the leading ellipsis is treated as a
+      // truncation of a longer phrase we were not given.
+      motto: process.env.SCHOOL_MOTTO || "Raising Role Models",
     },
   });
 }

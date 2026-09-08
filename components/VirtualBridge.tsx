@@ -17,7 +17,7 @@ const VIRTUAL_URL = process.env.NEXT_PUBLIC_VIRTUAL_URL || "https://virtual.ykay
  */
 export default function VirtualBridge() {
   return (
-    <section className="relative w-full overflow-hidden bg-brand-navy-dark py-16 md:py-24">
+    <section className="backdrop-brand-dark relative w-full overflow-hidden bg-brand-navy-dark py-16 md:py-24">
       {/* Soft brand glows */}
       <div
         aria-hidden="true"

@@ -12,10 +12,7 @@ export const IT_COURSES: Record<string, ITCourseContent> = {
     heroTagline: "Master the world's most popular programming language",
     heroDescription:
       "From basics to real projects \u2014 prepare for the IT Specialist Python credential.",
-    heroImages: [
-      "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=1600&q=80",
-      "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1600&q=80",
-    ],
+    heroImages: ["/python-hero.jpg", "/home/hero-campus.jpg"],
     overview:
       "This comprehensive Python programming course takes you from beginner to confident developer. You will learn syntax, data structures, OOP, files, and practical projects that prepare you for the IT Specialist \u2013 Python exam.",
     learningObjectives: [
@@ -135,10 +132,7 @@ export const IT_COURSES: Record<string, ITCourseContent> = {
     category: "Programming & AI",
     heroTagline: "Build real skill in Artificial Intelligence",
     heroDescription: "A practical, project-driven pathway toward IT Specialist \u2013 AI.",
-    heroImages: [
-      "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=1600&q=80",
-      "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1600&q=80",
-    ],
+    heroImages: ["/ai-hero.jpg", "/home/hero-campus.jpg"],
     overview:
       "This Artificial Intelligence track is designed for secondary students and external learners who want practical, certification-aligned skills. Lessons combine theory, labs, and portfolio tasks.",
     certificationDetails: {
@@ -218,10 +212,7 @@ export const IT_COURSES: Record<string, ITCourseContent> = {
     heroTagline: "Build real skill in Cybersecurity",
     heroDescription:
       "A practical, project-driven pathway toward IT Specialist \u2013 Cybersecurity.",
-    heroImages: [
-      "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1600&q=80",
-      "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1600&q=80",
-    ],
+    heroImages: ["/cybersecurity-hero.jpg", "/home/hero-campus.jpg"],
     overview:
       "This Cybersecurity track is designed for secondary students and external learners who want practical, certification-aligned skills. Lessons combine theory, labs, and portfolio tasks.",
     certificationDetails: {
@@ -301,10 +292,7 @@ export const IT_COURSES: Record<string, ITCourseContent> = {
     heroTagline: "Build real skill in Digital Literacy",
     heroDescription:
       "A practical, project-driven pathway toward Ykay Digital Literacy Certificate.",
-    heroImages: [
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80",
-      "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1600&q=80",
-    ],
+    heroImages: ["/it-hub-classroom.jpg", "/home/hero-campus.jpg"],
     overview:
       "This Digital Literacy track is designed for secondary students and external learners who want practical, certification-aligned skills. Lessons combine theory, labs, and portfolio tasks.",
     certificationDetails: {
@@ -383,10 +371,7 @@ export const IT_COURSES: Record<string, ITCourseContent> = {
     category: "Office",
     heroTagline: "Build real skill in Microsoft Word",
     heroDescription: "A practical, project-driven pathway toward Microsoft Office Specialist.",
-    heroImages: [
-      "https://images.unsplash.com/photo-1588345921523-c2dcdb7f1dcd?auto=format&fit=crop&w=1600&q=80",
-      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1600&q=80",
-    ],
+    heroImages: ["/home/hero-campus.jpg", "/microsoft-excel-hero.jpg"],
     overview:
       "This Microsoft Word track is designed for secondary students and external learners who want practical, certification-aligned skills. Lessons combine theory, labs, and portfolio tasks.",
     certificationDetails: {
@@ -465,10 +450,7 @@ export const IT_COURSES: Record<string, ITCourseContent> = {
     category: "Office",
     heroTagline: "Build real skill in Microsoft Excel",
     heroDescription: "A practical, project-driven pathway toward Microsoft Office Specialist.",
-    heroImages: [
-      "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&w=1600&q=80",
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80",
-    ],
+    heroImages: ["/microsoft-excel-hero.jpg", "/excel-expert-hero.jpg"],
     overview:
       "This Microsoft Excel track is designed for secondary students and external learners who want practical, certification-aligned skills. Lessons combine theory, labs, and portfolio tasks.",
     certificationDetails: {
@@ -547,10 +529,7 @@ export const IT_COURSES: Record<string, ITCourseContent> = {
     category: "Office",
     heroTagline: "Build real skill in Microsoft PowerPoint",
     heroDescription: "A practical, project-driven pathway toward Microsoft Office Specialist.",
-    heroImages: [
-      "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1600&q=80",
-      "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1600&q=80",
-    ],
+    heroImages: ["/it-hub-3.jpg", "/home/hero-campus.jpg"],
     overview:
       "This Microsoft PowerPoint track is designed for secondary students and external learners who want practical, certification-aligned skills. Lessons combine theory, labs, and portfolio tasks.",
     certificationDetails: {
@@ -629,10 +608,7 @@ export const IT_COURSES: Record<string, ITCourseContent> = {
     category: "Office",
     heroTagline: "Build real skill in Excel Expert",
     heroDescription: "A practical, project-driven pathway toward Microsoft Office Expert.",
-    heroImages: [
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1600&q=80",
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1600&q=80",
-    ],
+    heroImages: ["/excel-expert-hero.jpg", "/excel-expert-hero.jpg"],
     overview:
       "This Excel Expert track is designed for secondary students and external learners who want practical, certification-aligned skills. Lessons combine theory, labs, and portfolio tasks.",
     certificationDetails: {

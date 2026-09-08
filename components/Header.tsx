@@ -146,7 +146,7 @@ export default function Header() {
 
           <Link
             href="/admissions"
-            className="hidden md:inline-flex items-center justify-center rounded-full px-4 py-2 font-body text-[10px] font-bold tracking-[0.15em] uppercase transition-all hover:scale-[1.03] bg-[var(--btn-secondary-bg)] text-white hover:bg-[var(--btn-secondary-bg-hover)] shadow-[var(--btn-secondary-shadow)] whitespace-nowrap"
+            className="hidden md:inline-flex items-center justify-center rounded-full px-4 py-2 font-body text-[10px] font-bold tracking-[0.15em] uppercase transition-all hover:scale-[1.03] bg-[var(--btn-secondary-bg)] text-[var(--btn-secondary-text)] hover:bg-[var(--btn-secondary-bg-hover)] shadow-[var(--btn-secondary-shadow)] whitespace-nowrap"
           >
             Apply Now
           </Link>
@@ -198,7 +198,7 @@ export default function Header() {
               <Link
                 href="/admissions"
                 onClick={() => setMobileOpen(false)}
-                className="mt-4 inline-flex items-center justify-center rounded-full px-6 py-3 font-body text-sm font-bold tracking-widest uppercase bg-[var(--btn-secondary-bg)] text-white shadow-[var(--btn-secondary-shadow)]"
+                className="mt-4 inline-flex items-center justify-center rounded-full px-6 py-3 font-body text-sm font-bold tracking-widest uppercase bg-[var(--btn-secondary-bg)] text-[var(--btn-secondary-text)] shadow-[var(--btn-secondary-shadow)]"
               >
                 Apply Now
               </Link>
