@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refresh = async () => {
     try {
-      const r = await fetch("/api/auth/me", { cache: "no-store" });
+      const r = await fetch("/api/auth/me", { cache: "no-store", credentials: "include" });
       setUser(r.ok ? (await r.json()).user : null);
     } finally {
       setLoading(false);
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logoutImmediately = useCallback(async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     } catch {
       // The cookie is cleared server-side on a best-effort basis; if the
       // request never lands we still send the user to /login rather than

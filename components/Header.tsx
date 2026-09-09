@@ -131,8 +131,10 @@ export default function Header() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          <LiveClock />
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span className="hidden md:inline-flex">
+            <LiveClock />
+          </span>
           <CommandSearch />
           <NotificationBell />
 

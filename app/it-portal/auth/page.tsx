@@ -37,6 +37,7 @@ export default function ItPortalAuthPage() {
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
       const body = await response.json();
@@ -139,6 +140,7 @@ export default function ItPortalAuthPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  autoComplete="name"
                   placeholder="e.g. Adaeze Okafor"
                   className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] outline-none focus:border-[var(--input-border-focus)] focus:ring-4 focus:ring-brand-green/15"
                 />
@@ -151,6 +153,7 @@ export default function ItPortalAuthPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
                 placeholder="you@example.com"
                 className="mt-2 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] outline-none focus:border-[var(--input-border-focus)] focus:ring-4 focus:ring-brand-green/15"
               />
