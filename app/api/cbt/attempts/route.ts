@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { gradeAttempt, type CbtAnswer } from "@/lib/cbt";
+import { getClientIp, jsonNoStore } from "@/lib/requests";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /**
  * Public: submit a finished attempt.
@@ -10,6 +12,16 @@ import { gradeAttempt, type CbtAnswer } from "@/lib/cbt";
  * answers alone (the key never left the server).
  */
 export async function POST(req: NextRequest) {
+  const limit = await enforceRateLimit("cbt", getClientIp(req));
+  if (!limit.success) {
+    return jsonNoStore(
+      { error: "Too many practice requests. Please slow down and try again." },
+      {
+        status: limit.configurationError ? 503 : 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
+    );
+  }
   const body = (await req.json()) as {
     subjectSlug?: string;
     mode?: "practice" | "exam";

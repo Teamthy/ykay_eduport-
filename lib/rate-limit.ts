@@ -102,6 +102,11 @@ const limiterConfig = {
   newsPost: { maxRequests: 30, windowMs: 3_600_000, prefix: "ykay:admin:news" },
   message: { maxRequests: 60, windowMs: 3_600_000, prefix: "ykay:messages" },
   broadcast: { maxRequests: 20, windowMs: 3_600_000, prefix: "ykay:super-admin:broadcast" },
+  // Public practice-CBT funnel (quiz draw, per-question check, attempt save).
+  // Deliberately generous for a legitimate practice session; non-critical so
+  // the public page keeps working on the in-memory fallback, but it bounds
+  // question-bank enumeration and spam attempts rows.
+  cbt: { maxRequests: 240, windowMs: 3_600_000, prefix: "ykay:cbt" },
 } as const;
 
 const redisLimiters: Record<string, Ratelimit | null> = redis
@@ -180,6 +185,11 @@ const redisLimiters: Record<string, Ratelimit | null> = redis
         redis,
         limiter: Ratelimit.slidingWindow(20, "1 h"),
         prefix: "ykay:super-admin:broadcast",
+      }),
+      cbt: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(240, "1 h"),
+        prefix: "ykay:cbt",
       }),
     }
   : {};
