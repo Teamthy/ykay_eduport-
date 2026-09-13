@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { shuffled, type PublicQuestion } from "@/lib/cbt";
+import { getClientIp, jsonNoStore } from "@/lib/requests";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /**
  * Public: fetch a randomized set of published questions for a subject.
@@ -12,6 +14,16 @@ import { shuffled, type PublicQuestion } from "@/lib/cbt";
  * papers are graded server-side at submit. The client cannot read the key.
  */
 export async function GET(req: NextRequest) {
+  const limit = await enforceRateLimit("cbt", getClientIp(req));
+  if (!limit.success) {
+    return jsonNoStore(
+      { error: "Too many practice requests. Please slow down and try again." },
+      {
+        status: limit.configurationError ? 503 : 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
+    );
+  }
   const slug = req.nextUrl.searchParams.get("subject") ?? "";
   const limit = Math.min(
     Math.max(Number(req.nextUrl.searchParams.get("limit") ?? 30) || 30, 1),

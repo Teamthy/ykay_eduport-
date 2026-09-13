@@ -3,7 +3,8 @@ import { UserRole } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { getClientIp } from "@/lib/requests";
+import { getClientIp, jsonNoStore } from "@/lib/requests";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import { getSchool } from "@/lib/school";
 import { sessionCookie, signSession } from "@/lib/session";
 
@@ -20,6 +21,27 @@ const schema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Public, unauthenticated account creation: throttle per IP like the other
+  // signup path (lib/rate-limit.ts "signup" kind). Without this, the endpoint
+  // allowed unlimited automated IT_STUDENT account creation. This kind is in
+  // DISTRIBUTED_REQUIRED, so production without a shared Redis store fails
+  // closed (503) rather than silently dropping the limit.
+  const ip = getClientIp(request);
+  const limit = await enforceRateLimit("signup", ip);
+  if (!limit.success) {
+    return jsonNoStore(
+      {
+        error: limit.configurationError
+          ? "Sign-up is temporarily unavailable. Please try again shortly."
+          : "Too many sign-up attempts. Please wait and try again.",
+      },
+      {
+        status: limit.configurationError ? 503 : 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
+    );
+  }
+
   let payload: z.infer<typeof schema>;
   try {
     payload = schema.parse(await request.json());
@@ -61,7 +83,7 @@ export async function POST(request: NextRequest) {
       action: "IT_STUDENT_SIGNED_UP",
       entityType: "User",
       entityId: user.id,
-      ipAddress: getClientIp(request),
+      ipAddress: ip,
     },
   });
 

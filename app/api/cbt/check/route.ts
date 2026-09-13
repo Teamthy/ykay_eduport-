@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getClientIp, jsonNoStore } from "@/lib/requests";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /**
  * Public: practice-mode answer check for ONE question. Reveals the correct
@@ -7,6 +9,16 @@ import { prisma } from "@/lib/prisma";
  * whole paper is never exposed.
  */
 export async function POST(req: NextRequest) {
+  const limit = await enforceRateLimit("cbt", getClientIp(req));
+  if (!limit.success) {
+    return jsonNoStore(
+      { error: "Too many practice requests. Please slow down and try again." },
+      {
+        status: limit.configurationError ? 503 : 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
+    );
+  }
   const { questionId, selectedIndex } = (await req.json()) as {
     questionId?: string;
     selectedIndex?: number;
