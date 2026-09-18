@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import { CheckCircle2, LoaderCircle, ShieldAlert, XCircle } from "lucide-react";
 
@@ -189,7 +188,6 @@ export default function AdminAttendanceCorrectionsPage() {
           </div>
         </section>
       </main>
-      <Footer />
 
       {selected ? (
         <div className="fixed inset-0 z-[200] grid place-items-center bg-black/60 p-5">

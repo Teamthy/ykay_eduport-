@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useApi } from "@/lib/useApi";
 import { useToast } from "@/components/Toast";
@@ -124,7 +123,7 @@ export default function ClassReportCardsPage() {
                     Form Class {teacher.formClass} — Report Cards
                   </h3>
                   <p className="text-xs text-[var(--text-muted)]">
-                    First Term 2025/2026 · Add class teacher remarks before submission
+                    First Term 2026/2027 · Add class teacher remarks before submission
                   </p>
                 </div>
 
@@ -206,7 +205,6 @@ export default function ClassReportCardsPage() {
           </div>
         </section>
       </main>
-      <Footer />
 
       {/* Remark Modal */}
       {showRemarkModal && selectedStudent && (

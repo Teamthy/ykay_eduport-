@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import { useToast } from "@/components/Toast";
 import { AlertCircle, LoaderCircle, Plus, Receipt, Save, Trash2, Wallet } from "lucide-react";
@@ -381,7 +380,6 @@ export default function FeeStructuresPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

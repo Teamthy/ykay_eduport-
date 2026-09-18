@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useApi } from "@/lib/useApi";
 import {
@@ -89,7 +88,7 @@ export default function TeacherAnalyticsPage() {
                   ))}
                 </select>
                 <select className="px-5 py-2.5 rounded-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] text-sm focus:outline-none focus:border-brand-green">
-                  <option>First Term 2025/2026</option>
+                  <option>First Term 2026/2027</option>
                   <option>Full Session</option>
                 </select>
                 <button className="ml-auto inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-green text-brand-navy text-sm font-bold hover:bg-brand-green-dark transition-all">
@@ -377,7 +376,6 @@ export default function TeacherAnalyticsPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import AttendanceCalendar, { type AttendanceDay } from "@/components/AttendanceCalendar";
 import {
@@ -254,7 +253,6 @@ export default function StudentAttendancePage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

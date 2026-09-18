@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import { useToast } from "@/components/Toast";
 import { AlertCircle, BookOpen, LoaderCircle, Plus, Sparkles, Trash2, Users } from "lucide-react";
@@ -307,7 +306,6 @@ export default function AdminSubjectsPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

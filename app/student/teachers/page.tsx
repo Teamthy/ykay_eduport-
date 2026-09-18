@@ -1,7 +1,6 @@
 "use client";
 
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import { useApi } from "@/lib/useApi";
 import { EmptyState, LoadingState } from "@/components/DataStates";
@@ -149,7 +148,6 @@ export default function TeachersDirectoryPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

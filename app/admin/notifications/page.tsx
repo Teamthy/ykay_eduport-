@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import { useToast } from "@/components/Toast";
 import {
@@ -352,7 +351,6 @@ export default function AdminNotificationsPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useToast } from "@/components/Toast";
 import { cacheGet, cacheSet, queueWrite, getQueueCount } from "@/lib/offline/db";
@@ -704,7 +703,6 @@ export default function ClassAttendancePage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

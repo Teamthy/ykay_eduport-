@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import {
   MessageCircle,
@@ -363,7 +362,6 @@ export default function ExamPracticePage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

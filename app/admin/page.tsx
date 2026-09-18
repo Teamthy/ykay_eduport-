@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import {
   Users,
@@ -431,7 +430,6 @@ export default function AdminDashboardPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

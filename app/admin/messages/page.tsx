@@ -1,7 +1,6 @@
 "use client";
 
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import MessagesInbox from "@/components/MessagesInbox";
 import { MessageCircle } from "lucide-react";
@@ -48,7 +47,6 @@ export default function AdminMessagesPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

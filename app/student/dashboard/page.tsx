@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { cacheGet, cacheSet } from "@/lib/offline/db";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import {
   MessageCircle,
@@ -479,20 +478,6 @@ export default function StudentDashboardPage() {
           </div>
         </section>
       </main>
-      <Footer
-        contact={
-          data?.schoolContact
-            ? {
-                address: data.schoolContact.address,
-                phone: data.schoolContact.phone,
-                email: data.schoolContact.email,
-              }
-            : // Still loading (no data yet): render no contact rows rather
-              // than flashing the platform default school's details on
-              // another tenant's portal (AUD-F5).
-              { address: "", phone: "", email: "" }
-        }
-      />
     </>
   );
 }

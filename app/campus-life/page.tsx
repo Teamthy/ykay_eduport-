@@ -110,9 +110,10 @@ export default function CampusLifePage() {
                       text="CAMPUS FACILITIES"
                     />
                     <p className="font-body text-sm md:text-base text-white/90 leading-relaxed mb-6">
-                      Modern science laboratories, a fully equipped library with digital resources,
-                      dedicated sports fields, a 360° virtual campus tour, and technology-enhanced
-                      classrooms across our day school campus in Sango Ota.
+                      A well-equipped computer laboratory, modern science laboratories, a fully
+                      equipped library with digital resources, dedicated sports fields, a 360°
+                      virtual campus tour, and technology-enhanced classrooms across our day school
+                      campus in Sango Ota.
                     </p>
                     <a
                       href="/contact"

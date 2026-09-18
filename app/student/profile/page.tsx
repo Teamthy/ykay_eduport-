@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import {
   MessageCircle,
@@ -269,7 +268,6 @@ export default function StudentProfilePage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

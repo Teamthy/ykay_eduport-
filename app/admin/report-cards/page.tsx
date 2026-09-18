@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import LiveReportCardPreview from "@/components/LiveReportCardPreview";
 import { CheckCircle2, Clock, FileText, LoaderCircle, Mail } from "lucide-react";
@@ -322,7 +321,6 @@ export default function AdminReportCardsPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

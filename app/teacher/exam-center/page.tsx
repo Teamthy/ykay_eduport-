@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useToast } from "@/components/Toast";
 import {
@@ -755,8 +754,6 @@ export default function ExamCenterPage() {
           </div>
         </div>
       ) : null}
-
-      <Footer />
     </>
   );
 }

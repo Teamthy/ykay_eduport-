@@ -60,7 +60,7 @@ export default function Footer({ contact = {} }: { contact?: FooterContact }) {
   return (
     <footer className="w-full bg-[var(--footer-bg)] border-t border-[var(--footer-border)] pt-16 pb-8">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-8 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-12">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-16 h-16 rounded-2xl bg-white p-2 flex items-center justify-center">

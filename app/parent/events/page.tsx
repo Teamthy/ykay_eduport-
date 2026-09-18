@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import {
   LayoutDashboard,
@@ -140,7 +139,6 @@ export default function ParentEventsPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

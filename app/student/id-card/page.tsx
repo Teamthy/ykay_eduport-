@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import { useToast } from "@/components/Toast";
 import Image from "next/image";
@@ -145,7 +144,7 @@ export default function IDCardPage() {
                       </div>
                       <div className="p-2 rounded-lg bg-gray-50">
                         <div className="text-[9px] text-gray-600 uppercase">Session</div>
-                        <div className="font-bold text-brand-navy">2025/2026</div>
+                        <div className="font-bold text-brand-navy">2026/2027</div>
                       </div>
                     </div>
 
@@ -197,7 +196,6 @@ export default function IDCardPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

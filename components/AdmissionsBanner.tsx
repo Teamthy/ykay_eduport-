@@ -6,7 +6,7 @@ import { ArrowRight, FileCheck2, CreditCard, CalendarClock } from "lucide-react"
 
 const HIGHLIGHTS = [
   { icon: FileCheck2, label: "Online application" },
-  { icon: CalendarClock, label: "JSS1 — SS3 · 2025/2026" },
+  { icon: CalendarClock, label: "JSS1 — SS3 · 2026/2027" },
   { icon: CreditCard, label: "Secure Paystack fees" },
 ];
 

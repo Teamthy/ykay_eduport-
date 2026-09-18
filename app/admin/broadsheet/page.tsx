@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import { FileSpreadsheet, LoaderCircle, Printer, TrendingUp } from "lucide-react";
 
@@ -260,9 +259,7 @@ export default function AdminBroadsheetPage() {
           </div>
         </section>
       </main>
-      <div className="no-print">
-        <Footer />
-      </div>
+      <div className="no-print"></div>
     </>
   );
 }

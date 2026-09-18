@@ -1,7 +1,6 @@
 "use client";
 
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import MessagesInbox from "@/components/MessagesInbox";
 import {
@@ -72,7 +71,6 @@ export default function StudentMessagesPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

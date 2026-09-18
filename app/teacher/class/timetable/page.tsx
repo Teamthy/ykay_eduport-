@@ -1,7 +1,6 @@
 "use client";
 
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useApi } from "@/lib/useApi";
 import { School, Clock, MapPin, User } from "lucide-react";
@@ -159,7 +158,6 @@ export default function ClassTimetablePage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

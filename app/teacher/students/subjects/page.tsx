@@ -4,7 +4,6 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useToast } from "@/components/Toast";
 import { AlertCircle, ArrowLeft, BookOpen, Check, LoaderCircle, Lock, Save } from "lucide-react";
@@ -261,7 +260,6 @@ function Inner() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

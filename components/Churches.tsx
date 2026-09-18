@@ -40,8 +40,8 @@ const departments = [
     href: "/campus-life",
   },
   {
-    name: "Science Laboratories",
-    desc: "Fully equipped biology, chemistry, and physics laboratories.",
+    name: "Computer Laboratory",
+    desc: "Well-equipped computer laboratory with modern workstations and internet access for ICT, Data Processing and CBT practice.",
     href: "/campus-life",
   },
   {

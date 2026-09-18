@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import MessagesInbox from "@/components/MessagesInbox";
 import { MessageCircle, Plus } from "lucide-react";
@@ -56,7 +55,6 @@ export default function TeacherMessagesPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

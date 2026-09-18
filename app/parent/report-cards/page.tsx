@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { cacheGet, cacheSet } from "@/lib/offline/db";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import PortalSidebar from "@/components/PortalSidebar";
 import LiveReportCardPreview from "@/components/LiveReportCardPreview";
 import {
@@ -333,7 +332,6 @@ export default function ParentReportCardsPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

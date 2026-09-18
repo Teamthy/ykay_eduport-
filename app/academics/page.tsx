@@ -12,7 +12,7 @@ const programmes = [
     subtitle: "JSS1 — JSS3",
     desc: "Foundational Nigerian curriculum with digital literacy, continuous assessment, and BECE preparation.",
     extra: "BECE Ready",
-    href: "/admissions",
+    href: "/academics/junior-secondary",
   },
   {
     icon: Award,
@@ -20,7 +20,7 @@ const programmes = [
     subtitle: "Science track",
     desc: "Physics, Chemistry, Biology, Mathematics and Further Maths for medicine, engineering and technology.",
     extra: "WAEC / JAMB",
-    href: "/admissions",
+    href: "/academics/ss-science",
   },
   {
     icon: GraduationCap,
@@ -28,7 +28,7 @@ const programmes = [
     subtitle: "Humanities track",
     desc: "Literature, Government, History, CRS, Fine Arts and French for creative and social-science pathways.",
     extra: "Humanities",
-    href: "/admissions",
+    href: "/academics/ss-arts",
   },
   {
     icon: FlaskConical,
@@ -36,7 +36,7 @@ const programmes = [
     subtitle: "Business track",
     desc: "Economics, Commerce, Accounting and Business Studies for finance and entrepreneurship.",
     extra: "Business skills",
-    href: "/it-education",
+    href: "/academics/ss-commercial",
   },
 ];
 

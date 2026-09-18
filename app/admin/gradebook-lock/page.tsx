@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useToast } from "@/components/Toast";
@@ -433,7 +432,6 @@ export default function AdminGradebookLockPage() {
           </div>
         </section>
       </main>
-      <Footer />
 
       <ConfirmDialog
         open={Boolean(pendingAction)}

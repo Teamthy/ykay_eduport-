@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import { useToast } from "@/components/Toast";
 import { CalendarDays, LoaderCircle, Plus, Trash2, Clock, MapPin } from "lucide-react";
@@ -315,7 +314,6 @@ export default function AdminTimetablePage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import {
   Activity,
@@ -710,7 +709,6 @@ export default function AdminAttendanceAnalyticsPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

@@ -3,7 +3,6 @@
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import {
   AlertCircle,
@@ -358,7 +357,6 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

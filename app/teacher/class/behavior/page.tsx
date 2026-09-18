@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useApi } from "@/lib/useApi";
@@ -381,7 +380,6 @@ export default function BehaviorRecordsPage() {
           </div>
         </section>
       </main>
-      <Footer />
 
       <ConfirmDialog
         open={!!pendingDelete}

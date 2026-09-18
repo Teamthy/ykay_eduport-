@@ -13,7 +13,7 @@ const FAQS = [
     items: [
       {
         q: "When does admissions open?",
-        a: "Admissions for the 2025/2026 session are currently open. Applications close on 31st August 2025.",
+        a: "Admissions for the 2026/2027 session are currently open. Applications close on 31st August 2026.",
       },
       {
         q: "What is the application fee?",
@@ -76,7 +76,7 @@ const FAQS = [
     items: [
       {
         q: "When does the portal launch?",
-        a: "The full EduPortal launches with the 2025/2026 academic session. Login credentials will be issued at resumption.",
+        a: "The full EduPortal launches with the 2026/2027 academic session. Login credentials will be issued at resumption.",
       },
       {
         q: "Can parents track attendance in real-time?",

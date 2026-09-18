@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { BarChart3, Calendar, Check, Clock, FileWarning, LoaderCircle, X } from "lucide-react";
 
@@ -317,7 +316,6 @@ export default function AttendanceHistoryPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

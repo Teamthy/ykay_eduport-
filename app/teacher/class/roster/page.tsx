@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useApi } from "@/lib/useApi";
 import { EmptyState, LoadingState } from "@/components/DataStates";
@@ -292,7 +291,6 @@ export default function ClassRosterPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

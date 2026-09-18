@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useToast } from "@/components/Toast";
 import { AlertCircle, BarChart3, CheckCircle2, LoaderCircle, Lock, Save } from "lucide-react";
@@ -433,7 +432,6 @@ export default function PerformanceRecordsPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

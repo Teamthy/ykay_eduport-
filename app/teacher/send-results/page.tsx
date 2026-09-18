@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useApi } from "@/lib/useApi";
 import { useToast } from "@/components/Toast";
@@ -718,7 +717,6 @@ export default function SendResultsPage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }

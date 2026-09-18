@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/AdminSidebar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useApi } from "@/lib/useApi";
@@ -381,7 +380,6 @@ export default function PromotionPage() {
           </div>
         </section>
       </main>
-      <Footer />
 
       <ConfirmDialog
         open={confirming}

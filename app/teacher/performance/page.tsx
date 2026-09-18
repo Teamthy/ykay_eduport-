@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
-import Footer from "@/components/Footer";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useApi } from "@/lib/useApi";
 import {
@@ -129,7 +128,7 @@ export default function PerformancePage() {
   const { data, loading: _apiLoading, error: _apiError } = useApi<any>("/api/teacher/profile");
   const teacher = data?.teacher || ({} as any);
   const [expandedClass, setExpandedClass] = useState<string | null>("SS2A");
-  const [term] = useState("First Term 2025/2026");
+  const [term] = useState("First Term 2026/2027");
 
   return (
     <>
@@ -180,9 +179,9 @@ export default function PerformancePage() {
                   <Download size={14} /> Export Excel
                 </button>
                 <select className="ml-auto px-4 py-2.5 rounded-full bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--input-text)] text-sm focus:outline-none focus:border-brand-green">
-                  <option>First Term 2025/2026</option>
-                  <option>Second Term 2025/2026</option>
-                  <option>Third Term 2025/2026</option>
+                  <option>First Term 2026/2027</option>
+                  <option>Second Term 2026/2027</option>
+                  <option>Third Term 2026/2027</option>
                 </select>
               </div>
 
@@ -345,7 +344,6 @@ export default function PerformancePage() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   );
 }
