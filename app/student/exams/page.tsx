@@ -81,6 +81,7 @@ export default function StudentExamsPage() {
   const [data, setData] = useState<Response | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [q, setQ] = useState("");
 
   useEffect(() => {
     (async () => {

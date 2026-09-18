@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-const DEFAULT_SLUG = process.env.SCHOOL_SLUG || "ykay-college";
+export const DEFAULT_SLUG = process.env.SCHOOL_SLUG || "ykay-college";
 /** Platform base domain, e.g. "eduos.app" — `<slug>.eduos.app` resolves to a tenant. */
 const PLATFORM_DOMAIN = (process.env.PLATFORM_BASE_DOMAIN || "").toLowerCase();
 

@@ -22,7 +22,12 @@ export default function SchoolHome() {
     <>
       <LoadingScreen />
       <Header />
-      <main className="flex flex-col">
+      {/* overflow-x-clip: the Reveal scroll animations hold sections at
+          translateX(±48px) until they enter the viewport; without this the
+          translated boxes inflate the body's scroll extent past the viewport
+          (audit finding AUD-F6 — clipped globally by html/body overflow-x,
+          but better never to escape the page container). */}
+      <main className="flex flex-col overflow-x-clip">
         <Hero />
         <Reveal variant="up">
           <ServiceInfo />

@@ -66,12 +66,24 @@ export async function GET() {
     status: entry.status,
   }));
 
+  // AUD-F5: the portal footer used to hardcode YKAY College's contact on
+  // every tenant. Expose this school's public contact so the dashboard can
+  // render the tenant's own details (a missing email is "" — the footer hides
+  // the row rather than showing another school's address).
+  const school = await prisma.school.findUnique({
+    where: { id: user.schoolId },
+    select: { address: true, phone: true, email: true },
+  });
+
   return NextResponse.json({
     student: {
       displayName: profile.displayName,
       studentId: profile.studentId,
       className: profile.currentClass.displayName,
     },
+    schoolContact: school
+      ? { address: school.address, phone: school.phone, email: school.email ?? "" }
+      : null,
     stats: {
       attendanceRate,
       averageScore: latestReport?.overallAverage ?? null,

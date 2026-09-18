@@ -110,6 +110,8 @@ import { headers } from "next/headers";
 import { getSession } from "@/lib/session";
 import { resolveTenantFromHost } from "@/lib/tenant";
 import { getTenantBranding, DEFAULT_BRANDING } from "@/lib/branding";
+import { prisma } from "@/lib/prisma";
+import { DEFAULT_SLUG } from "@/lib/tenant";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // ── EDUos: resolve branding ──
@@ -130,6 +132,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   const branding = schoolId ? await getTenantBranding(schoolId) : null;
+
+  // AUD-F5: the schema.org structured-data block below used to hardcode YKAY
+  // College's identity on EVERY tenant's pages — in the HTML itself and fed
+  // to search engines. Describe the resolved school instead; the YKAY values
+  // remain the platform defaults for the default/unmatched case so tenant A's
+  // markup is unchanged.
+  const school = schoolId
+    ? await prisma.school.findUnique({
+        where: { id: schoolId },
+        select: { slug: true, name: true, address: true, phone: true, email: true },
+      })
+    : null;
+  const isPlatformDefaultSchool = !school || school.slug === DEFAULT_SLUG;
+  const schoolName = school?.name ?? "Ykay College & Leadership Academy";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng";
 
   const primary = branding?.primaryColor ?? DEFAULT_BRANDING.primaryColor;
   const secondary = branding?.secondaryColor ?? DEFAULT_BRANDING.secondaryColor;
@@ -179,23 +196,34 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "School",
-              name: "Ykay College & Leadership Academy",
-              alternateName: "Ykay College",
-              description:
-                "Premium day secondary school (JSS1 to SS3) in Sango Ota, Ogun State — NERDC-aligned academics, IT education and leadership training.",
-              url: process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng",
-              logo: `${(process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng").replace(/\/$/, "")}/ykay-logo.png`,
-              address: {
-                "@type": "PostalAddress",
-                streetAddress: "Km 38, Lagos-Abeokuta Expressway",
-                addressLocality: "Sango Ota",
-                addressRegion: "Ogun State",
-                addressCountry: "NG",
-              },
-              telephone: "+2347015374411",
-              email: "info@ykaycollege.com",
-              openingHours: "Mo-Fr 07:30-14:30",
-              sameAs: ["https://virtual.ykaycollege.com"],
+              name: schoolName,
+              alternateName: schoolName.split("&")[0].trim(),
+              description: isPlatformDefaultSchool
+                ? "Premium day secondary school (JSS1 to SS3) in Sango Ota, Ogun State — NERDC-aligned academics, IT education and leadership training."
+                : `${schoolName} — school portal powered by YKAY EDUportal.`,
+              url: siteUrl,
+              logo: `${siteUrl.replace(/\/$/, "")}/ykay-logo.png`,
+              address: school
+                ? { "@type": "PostalAddress", streetAddress: school.address }
+                : {
+                    "@type": "PostalAddress",
+                    streetAddress: "Km 38, Lagos-Abeokuta Expressway",
+                    addressLocality: "Sango Ota",
+                    addressRegion: "Ogun State",
+                    addressCountry: "NG",
+                  },
+              telephone: school?.phone ?? "+2347015374411",
+              // AUD-F5: never publish another school's email — omit the field
+              // when this school has none.
+              ...(school?.email
+                ? { email: school.email }
+                : isPlatformDefaultSchool
+                  ? { email: "info@ykaycollege.com" }
+                  : {}),
+              // Platform-default extras (no per-tenant source for these).
+              ...(isPlatformDefaultSchool
+                ? { openingHours: "Mo-Fr 07:30-14:30", sameAs: ["https://virtual.ykaycollege.com"] }
+                : {}),
             }),
           }}
         />

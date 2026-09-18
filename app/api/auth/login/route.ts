@@ -6,7 +6,7 @@ import { getClientIp } from "@/lib/requests";
 import { sessionCookie, signSession } from "@/lib/session";
 import { resolveTenantFromHost } from "@/lib/tenant";
 import { recordSecurityEvent, getUserAgent } from "@/lib/forensics";
-import { enforceRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit, checkRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
 const schema = z.object({
@@ -40,8 +40,12 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = schema.parse(await request.json());
 
-    // ── Per-email rate limit (3 failures per 15 min) ───────────
-    const emailLimit = await enforceRateLimit("loginStrict", email);
+    // ── Per-email rate limit (3 FAILURES per 15 min) ───────────
+    // AUD-F3: this used to enforceRateLimit() on every attempt, so three
+    // SUCCESSFUL sign-ins locked the account out for 15 minutes. Peek at the
+    // budget without consuming it; only the credential-failure paths below
+    // record a failure.
+    const emailLimit = await checkRateLimit("loginStrict", email);
     if (!emailLimit.success) {
       await recordSecurityEvent({
         eventType: "LOGIN_FAILED_BAD_PASSWORD",
@@ -66,6 +70,7 @@ export async function POST(request: NextRequest) {
     // is identical whether the account exists or not.
     if (!user) {
       await bcrypt.compare(password, DUMMY_HASH); // dummy compare
+      await enforceRateLimit("loginStrict", email); // AUD-F3: count the failure, not the attempt
       await recordSecurityEvent({
         eventType: "LOGIN_FAILED_ACCOUNT_NOT_FOUND",
         userEmail: email,
@@ -109,6 +114,7 @@ export async function POST(request: NextRequest) {
     // ── Password check ────────────────────────────────────────
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
+      await enforceRateLimit("loginStrict", email); // AUD-F3: count the failure, not the attempt
       await recordSecurityEvent({
         eventType: "LOGIN_FAILED_BAD_PASSWORD",
         schoolId: user.schoolId,

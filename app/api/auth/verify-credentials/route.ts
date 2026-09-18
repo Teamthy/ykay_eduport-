@@ -51,13 +51,20 @@ export async function POST(request: NextRequest) {
     return jsonNoStore({ error: "Forbidden" }, { status: 403 });
   }
 
-  const limit = await enforceRateLimit("login", getClientIp(request));
-  if (!limit.success) {
+  // AUD-F8: this used to enforce the per-IP "login" bucket — the SAME budget
+  // as the human login page. In production every federated sign-in arrives
+  // from YK-Virtual's backend IP, so ~10 College SSO sign-ins per 15 min
+  // (mixed with any direct logins from that IP) starved the flagship
+  // integration and locked every College user out. Use a dedicated wide
+  // per-IP ceiling for the machine caller here, plus a per-College-user
+  // budget after the payload is parsed below.
+  const ipLimit = await enforceRateLimit("collegeAuthIp", getClientIp(request));
+  if (!ipLimit.success) {
     return jsonNoStore(
-      { error: limit.configurationError ? "Temporarily unavailable." : "Too many requests." },
+      { error: ipLimit.configurationError ? "Temporarily unavailable." : "Too many requests." },
       {
-        status: limit.configurationError ? 503 : 429,
-        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+        status: ipLimit.configurationError ? 503 : 429,
+        headers: { "Retry-After": String(ipLimit.retryAfterSeconds) },
       },
     );
   }
@@ -67,6 +74,19 @@ export async function POST(request: NextRequest) {
     payload = requestSchema.parse(await request.json());
   } catch {
     return jsonNoStore({ error: "Email and password are required." }, { status: 400 });
+  }
+
+  // AUD-F8 (cont.): per College user — brute-force / stuffing protection for
+  // the federated credential check without a shared outage budget.
+  const userLimit = await enforceRateLimit("collegeAuth", payload.email);
+  if (!userLimit.success) {
+    return jsonNoStore(
+      { error: userLimit.configurationError ? "Temporarily unavailable." : "Too many requests." },
+      {
+        status: userLimit.configurationError ? 503 : 429,
+        headers: { "Retry-After": String(userLimit.retryAfterSeconds) },
+      },
+    );
   }
 
   const { tenant } = await resolveTenantFromHost(request.headers.get("host"));

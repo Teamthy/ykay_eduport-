@@ -25,7 +25,9 @@ export async function GET(req: NextRequest) {
     );
   }
   const slug = req.nextUrl.searchParams.get("subject") ?? "";
-  const limit = Math.min(
+  // Page size (questions to return). Named questionCount, not limit — the
+  // rate-limit result above already owns that name in this scope.
+  const questionCount = Math.min(
     Math.max(Number(req.nextUrl.searchParams.get("limit") ?? 30) || 30, 1),
     100,
   );
@@ -46,7 +48,7 @@ export async function GET(req: NextRequest) {
   });
 
   const questions: PublicQuestion[] = shuffled(rows)
-    .slice(0, limit)
+    .slice(0, questionCount)
     .map((q) => ({
       id: q.id,
       topic: q.topic,

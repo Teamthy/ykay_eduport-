@@ -85,7 +85,16 @@ const limiterConfig = {
   status: { maxRequests: 30, windowMs: 600_000, prefix: "ykay:admissions:status" },
   // Authentication — brute-force / credential-stuffing protection
   login: { maxRequests: 10, windowMs: 900_000, prefix: "ykay:auth:login" }, // 10 attempts per 15 min
-  loginStrict: { maxRequests: 3, windowMs: 900_000, prefix: "ykay:auth:login-strict" }, // 3 failures per 15 min (per email)
+  loginStrict: { maxRequests: 3, windowMs: 900_000, prefix: "ykay:auth:login-strict" }, // 3 failures per 15 min (per email — FAILURES only, see checkRateLimit)
+  // Federated College SSO (YK-Virtual → /api/auth/verify-credentials). This
+  // is a server-to-server call: in production EVERY federated sign-in arrives
+  // from YK-Virtual's backend IP, so sharing the per-IP "login" bucket with
+  // the human login page capped the whole integration at ~10 sign-ins per
+  // 15 min (audit finding AUD-F8 — one classroom could take College SSO
+  // down). Budget per College user instead, with a wide per-IP ceiling for
+  // the machine caller.
+  collegeAuth: { maxRequests: 30, windowMs: 900_000, prefix: "ykay:auth:college-user" }, // 30 federated sign-ins per College user per 15 min
+  collegeAuthIp: { maxRequests: 120, windowMs: 900_000, prefix: "ykay:auth:college-ip" }, // blanket per calling IP (the Virtual backend)
   passwordReset: { maxRequests: 3, windowMs: 3_600_000, prefix: "ykay:auth:pw-reset" }, // 3 resets per hour
   changePassword: { maxRequests: 5, windowMs: 3_600_000, prefix: "ykay:auth:pw-change" }, // 5 changes per hour
   signup: { maxRequests: 5, windowMs: 3_600_000, prefix: "ykay:signup" }, // 5 signups per hour
@@ -140,6 +149,16 @@ const redisLimiters: Record<string, Ratelimit | null> = redis
         redis,
         limiter: Ratelimit.slidingWindow(3, "15 m"),
         prefix: "ykay:auth:login-strict",
+      }),
+      collegeAuth: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(30, "15 m"),
+        prefix: "ykay:auth:college-user",
+      }),
+      collegeAuthIp: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(120, "15 m"),
+        prefix: "ykay:auth:college-ip",
       }),
       passwordReset: new Ratelimit({
         redis,
@@ -210,6 +229,8 @@ export type RateLimitKind = keyof typeof limiterConfig;
 const DISTRIBUTED_REQUIRED: ReadonlySet<RateLimitKind> = new Set<RateLimitKind>([
   "login",
   "loginStrict",
+  "collegeAuth",
+  "collegeAuthIp",
   "passwordReset",
   "changePassword",
   "signup",
@@ -286,4 +307,72 @@ export async function enforceRateLimit(kind: RateLimitKind, identifier: string) 
   const { success, retryAfterSeconds } = inMemoryCheck(key, config.maxRequests, config.windowMs);
 
   return { success, retryAfterSeconds, configurationError: false as const };
+}
+
+/**
+ * PEEK at a limiter without consuming budget.
+ *
+ * enforceRateLimit counts every call — correct for attempt-bounded endpoints,
+ * wrong for kinds that must count FAILURES only. loginStrict's documented
+ * contract is "3 failures per 15 min (per email)", but the login route used
+ * to call enforceRateLimit on every attempt, so three SUCCESSFUL sign-ins
+ * locked the account for 15 minutes (audit finding AUD-F3 — a real lockout
+ * for multi-device families). The correct pattern:
+ *
+ *   const peek = await checkRateLimit("loginStrict", email);
+ *   if (!peek.success) return tooManyRequests(peek);
+ *   …verify credentials…
+ *   if (failed) await enforceRateLimit("loginStrict", email); // record it
+ *
+ * Same fail-closed rules as enforceRateLimit for DISTRIBUTED_REQUIRED kinds.
+ */
+export async function checkRateLimit(kind: RateLimitKind, identifier: string) {
+  const production = process.env.NODE_ENV === "production";
+  const critical = DISTRIBUTED_REQUIRED.has(kind) && !ALLOW_MEMORY_RATE_LIMITS;
+
+  if (!redis) {
+    if (production && critical) {
+      return failClosed(
+        kind,
+        "no distributed store configured (UPSTASH_REDIS_REST_URL/TOKEN missing)",
+      );
+    }
+  } else {
+    const redisLimiter = redisLimiters[kind];
+    if (redisLimiter) {
+      try {
+        const { remaining, reset } = await redisLimiter.getRemaining(identifier);
+        if (remaining <= 0) {
+          return {
+            success: false,
+            retryAfterSeconds: Math.max(1, Math.ceil((reset - Date.now()) / 1000)),
+            configurationError: false as const,
+          };
+        }
+        return { success: true, retryAfterSeconds: 0, configurationError: false as const };
+      } catch (err) {
+        logger.error("Redis rate limit check failed", { error: String(err), kind });
+        if (production && critical) {
+          return failClosed(kind, "the configured Redis store errored");
+        }
+      }
+    }
+  }
+
+  // ── In-memory peek: read the window WITHOUT counting this call ──
+  const config = limiterConfig[kind];
+  const key = `${config.prefix}:${identifier}`;
+  const now = Date.now();
+  const entry = memoryStore.get(key);
+  if (!entry || now > entry.resetAt) {
+    return { success: true, retryAfterSeconds: 0, configurationError: false as const };
+  }
+  if (entry.count >= config.maxRequests) {
+    return {
+      success: false,
+      retryAfterSeconds: Math.max(1, Math.ceil((entry.resetAt - now) / 1000)),
+      configurationError: false as const,
+    };
+  }
+  return { success: true, retryAfterSeconds: 0, configurationError: false as const };
 }

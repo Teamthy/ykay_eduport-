@@ -1,11 +1,23 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { jsonNoStore } from "@/lib/requests";
+import { getSession } from "@/lib/session";
 import { getParentPortalProfile, getStudentAttendanceMonth } from "@/lib/attendance-portal";
 
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
+  // AUD-F4: an unauthenticated call used to fall through to the profile
+  // lookup and answer 404 ("No live parent profile is linked…"), which is
+  // indistinguishable from a genuinely unlinked account — the mobile app
+  // would tell a signed-out parent "no children linked" instead of prompting
+  // re-authentication. Gate on the session first: 401 = re-authenticate,
+  // 404 = authenticated but no parent profile linked yet.
+  const session = await getSession();
+  if (!session) {
+    return jsonNoStore({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const context = await getParentPortalProfile();
   if (!context) {
     return jsonNoStore(

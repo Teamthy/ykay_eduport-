@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -31,7 +31,32 @@ const linkGroups = {
   ],
 };
 
-export default function Footer() {
+// Tenant contact for the footer. Callers that have a resolved School pass
+// its values; when `contact` is omitted every field falls back to the
+// platform defaults (YKAY College) so existing pages render identically.
+// An explicitly EMPTY string hides the row — a school without a public
+// email address must never be shown another school's (audit finding AUD-F5:
+// every tenant's footer used to hardcode YKAY College's contact details).
+const DEFAULT_CONTACT = {
+  address: "Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State",
+  phone: "0701 537 4411",
+  phoneHref: "+2347015374411",
+  email: "info@ykaycollege.com",
+} as const;
+
+export type FooterContact = {
+  address?: string;
+  phone?: string;
+  /** tel: href — defaults to the display phone. */
+  phoneHref?: string;
+  email?: string;
+};
+
+export default function Footer({ contact = {} }: { contact?: FooterContact }) {
+  const address = contact.address ?? DEFAULT_CONTACT.address;
+  const phone = contact.phone ?? DEFAULT_CONTACT.phone;
+  const phoneHref = contact.phoneHref ?? phone ?? DEFAULT_CONTACT.phoneHref;
+  const email = contact.email ?? DEFAULT_CONTACT.email;
   return (
     <footer className="w-full bg-[var(--footer-bg)] border-t border-[var(--footer-border)] pt-16 pb-8">
       <div className="mx-auto max-w-7xl px-6">
@@ -94,36 +119,43 @@ export default function Footer() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 py-8 border-t border-[var(--footer-border)]">
-          <div className="flex items-start gap-3">
-            <MapPin size={18} className="text-brand-green shrink-0 mt-0.5" />
-            <div>
-              <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Address</div>
-              <div className="text-sm text-white/80">
-                Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State
+          {address ? (
+            <div className="flex items-start gap-3">
+              <MapPin size={18} className="text-brand-green shrink-0 mt-0.5" />
+              <div>
+                <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Address</div>
+                <div className="text-sm text-white/80">{address}</div>
               </div>
             </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Phone size={18} className="text-brand-green shrink-0 mt-0.5" />
-            <div>
-              <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Phone</div>
-              <a href="tel:+2347015374411" className="text-sm text-white/80 hover:text-brand-green">
-                0701 537 4411
-              </a>
+          ) : null}
+          {phone ? (
+            <div className="flex items-start gap-3">
+              <Phone size={18} className="text-brand-green shrink-0 mt-0.5" />
+              <div>
+                <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Phone</div>
+                <a
+                  href={`tel:${phoneHref}`}
+                  className="text-sm text-white/80 hover:text-brand-green"
+                >
+                  {phone}
+                </a>
+              </div>
             </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Mail size={18} className="text-brand-green shrink-0 mt-0.5" />
-            <div>
-              <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Email</div>
-              <a
-                href="mailto:info@ykaycollege.com"
-                className="text-sm text-white/80 hover:text-brand-green"
-              >
-                info@ykaycollege.com
-              </a>
+          ) : null}
+          {email ? (
+            <div className="flex items-start gap-3">
+              <Mail size={18} className="text-brand-green shrink-0 mt-0.5" />
+              <div>
+                <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Email</div>
+                <a
+                  href={`mailto:${email}`}
+                  className="text-sm text-white/80 hover:text-brand-green"
+                >
+                  {email}
+                </a>
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-[var(--footer-border)]">

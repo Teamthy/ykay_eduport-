@@ -41,6 +41,7 @@ const SIDEBAR_ITEMS = [
 
 type DashboardResponse = {
   student: { displayName: string; studentId: string; className: string };
+  schoolContact: { address: string; phone: string; email: string } | null;
   stats: {
     attendanceRate: number | null;
     averageScore: number | null;
@@ -478,7 +479,20 @@ export default function StudentDashboardPage() {
           </div>
         </section>
       </main>
-      <Footer />
+      <Footer
+        contact={
+          data?.schoolContact
+            ? {
+                address: data.schoolContact.address,
+                phone: data.schoolContact.phone,
+                email: data.schoolContact.email,
+              }
+            : // Still loading (no data yet): render no contact rows rather
+              // than flashing the platform default school's details on
+              // another tenant's portal (AUD-F5).
+              { address: "", phone: "", email: "" }
+        }
+      />
     </>
   );
 }
