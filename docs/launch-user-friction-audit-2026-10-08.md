@@ -43,7 +43,7 @@ Seven blockers, eight high-severity items, plus configuration prerequisites (sec
 | Scripted user journeys | Anonymous visitor, admissions family, first sign-in and every sign-in path, teacher, student, parent, IT student, school admin, platform super admin. About 85 steps in total. |
 | Targeted verifications | CSP for uploads and Sentry, rate limits (per-IP and spoofed), open redirect, impersonation guard, fee lock on a live exam, QR third-party requests, computed contrast. |
 
-**Personas** (one account per role, all from the UAT seed): platform super admin; school admin; head of school (first login, forced password change); director; bursar; coordinator; HOD; two teachers (one class teacher, SS2A); two students (one linked to a profile with a fee balance, one account with no linked profile); two parents (one with two children); IT student; anonymous visitor. Director, bursar and coordinator were not run through journeys, only through the page crawl (same admin area).
+**Personas** (one account per role, all from the UAT seed): platform super admin; school admin; head of school (first login, forced password change); director; bursar; coordinator; HOD; two teachers (one class teacher, SS2A); two students (one linked to a profile with a fee balance, one account with no linked profile); two parents (one with two children); IT student; anonymous visitor. Director, bursar and coordinator were **not** crawled or journeyed separately. They pass the same admin middleware gate as the admin account, so the admin persona stood in for the admin area; role-specific differences for those three accounts are untested.
 
 **How the environment was built (sandbox only, never committed):**
 - Production build (`next build`), run as the standalone bundle, same boot path as `npm start` and the Dockerfile.
@@ -238,8 +238,8 @@ Seven blockers, eight high-severity items, plus configuration prerequisites (sec
 - **Fix:** keep the copy button, add a "resend link" action, and state clearly what to do if the email does not arrive.
 
 ### M12 — The app download depends on configuration (Medium)
-- `[browser]` `/download` shows an "unavailable" state, because `NEXT_PUBLIC_APK_URL` is unset in this build.
-- `[code]` `app/download/apk/route.ts` redirects using `NEXT_PUBLIC_SITE_URL`, which falls back to `localhost:3000`. A misconfigured site URL sends parents to localhost.
+- `[API]` `/download/apk` answers `302 → /download?error=unavailable` while `NEXT_PUBLIC_APK_URL` is unset in this build. I did not confirm how the `/download` page presents that error, because my check selected the wrong link.
+- `[code]` `app/download/apk/route.ts` builds that redirect from `NEXT_PUBLIC_SITE_URL`, which falls back to `localhost:3000`. In this build the redirect pointed at localhost. A misconfigured site URL sends parents to localhost.
 - **Fix:** set the APK URL and the public site URL before launch, and test the download from a phone.
 
 ### M13 — Parent timetable is missing from the web portal (Medium)
@@ -256,7 +256,7 @@ Seven blockers, eight high-severity items, plus configuration prerequisites (sec
 
 ### 5.2 Duplicate or dead surfaces
 - **L3** `/admissions/status` and `/application-status` are duplicate pages.
-- **L4** Admin and Director can open teacher pages that error, because they have no teacher profile (middleware allows it).
+- **L4** Admin can open teacher pages that error, because the admin has no teacher profile (middleware allows it; the same rule covers Director, which I did not crawl).
 - **L5** `components/cbt/CbtRunner.tsx` is unused; `/cbt` only redirects.
 
 ### 5.3 Policy questions and smaller UX gaps
