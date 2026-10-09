@@ -66,7 +66,7 @@ export default function Services() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
-          {SERVICES.map((s, i) => (
+          {SERVICES.map((s) => (
             <div key={s.title}>
               <Link
                 href={s.href}

@@ -61,7 +61,7 @@ export default function Clubs() {
         </div>
 
         <div className="space-y-6 md:space-y-8">
-          {clubs.map((club, i) => (
+          {clubs.map((club) => (
             <a
               key={club.title}
               href={club.href}
