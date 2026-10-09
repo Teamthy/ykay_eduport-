@@ -1,3 +1,5 @@
+import QrImage from "@/components/QrImage";
+
 type SubjectRow = {
   id?: string;
   subject: string;
@@ -200,13 +202,11 @@ export default function LiveReportCardPreview({
       </div>
       <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border-subtle)] px-8 py-6">
         <div className="flex items-center gap-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=${encodeURIComponent(`${typeof window !== "undefined" ? window.location.origin : "https://ykaycollege.edu.ng"}/verify/report/${encodeURIComponent(reportNumber)}`)}`}
+          <QrImage
+            value={`${typeof window !== "undefined" ? window.location.origin : "https://ykaycollege.edu.ng"}/verify/report/${encodeURIComponent(reportNumber)}`}
+            size={96}
             alt="Report verification QR code"
-            width={72}
-            height={72}
-            className="rounded-lg border border-[var(--border-subtle)] bg-white p-1"
+            className="h-[72px] w-[72px] rounded-lg border border-[var(--border-subtle)] bg-white p-1"
           />
           <div>
             <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">

@@ -83,6 +83,7 @@ const limiterConfig = {
   upload: { maxRequests: 40, windowMs: 3_600_000, prefix: "ykay:admissions:upload" },
   payment: { maxRequests: 8, windowMs: 3_600_000, prefix: "ykay:admissions:payment" },
   status: { maxRequests: 30, windowMs: 600_000, prefix: "ykay:admissions:status" },
+  contact: { maxRequests: 5, windowMs: 3_600_000, prefix: "ykay:contact" },
   // Authentication — brute-force / credential-stuffing protection
   login: { maxRequests: 10, windowMs: 900_000, prefix: "ykay:auth:login" }, // 10 attempts per 15 min
   loginStrict: { maxRequests: 3, windowMs: 900_000, prefix: "ykay:auth:login-strict" }, // 3 failures per 15 min (per email — FAILURES only, see checkRateLimit)
@@ -139,6 +140,11 @@ const redisLimiters: Record<string, Ratelimit | null> = redis
         redis,
         limiter: Ratelimit.slidingWindow(30, "10 m"),
         prefix: "ykay:admissions:status",
+      }),
+      contact: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(5, "1 h"),
+        prefix: "ykay:contact",
       }),
       login: new Ratelimit({
         redis,

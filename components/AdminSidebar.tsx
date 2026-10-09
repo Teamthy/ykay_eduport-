@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  MessageCircle,
   BarChart3,
   BookOpen,
   CalendarDays,
@@ -16,6 +15,8 @@ import {
   LayoutDashboard,
   Lock,
   LogOut,
+  MapPin,
+  MessageCircle,
   School,
   Send,
   Shield,
@@ -53,6 +54,7 @@ const ADMIN_NAV = [
   { label: "ID Cards", href: "/admin/id-cards", icon: IdCard },
   { label: "Post & News", href: "/admin/news", icon: Send },
   { label: "Notifications", href: "/admin/notifications", icon: Send },
+  { label: "School Profile", href: "/admin/school-profile", icon: MapPin },
   { label: "View Questions", href: "/admin/questions", icon: HelpCircle },
 ];
 

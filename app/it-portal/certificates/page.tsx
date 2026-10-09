@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useToast } from "@/components/Toast";
 import { generateCertificatePDF } from "@/lib/branded-pdf";
+import { useSchoolProfile } from "@/components/SchoolProfileContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import {
@@ -51,6 +52,7 @@ type CertData = {
 };
 
 export default function CertificatesPage() {
+  const { address } = useSchoolProfile();
   const { toast } = useToast();
   const [data, setData] = useState<CertData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,6 +75,7 @@ export default function CertificatesPage() {
 
   function downloadCertificate(cert: Certificate) {
     generateCertificatePDF({
+      schoolAddress: address,
       studentName: data!.user.name,
       courseTitle: cert.course.title,
       certification: cert.course.certification,

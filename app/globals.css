@@ -1333,3 +1333,17 @@ button:disabled {
     page-break-inside: avoid;
   }
 }
+
+/* Sign-in fields (app/login/page.tsx). The card is white, so each field needs its own
+   visible boundary. The base `*` rule sets every border to the dark theme's faint line,
+   and it wins over Tailwind utilities because it is not in a layer, so this selector
+   is scoped to beat it. Contrast of the border against white is about 4.8:1. */
+.login-field {
+  border: 1px solid #64748b;
+  background-color: #ffffff;
+  color: #0c1824;
+}
+
+.login-field:focus {
+  border-color: #166534;
+}

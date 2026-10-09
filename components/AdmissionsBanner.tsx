@@ -55,9 +55,9 @@ export default function AdmissionsBanner() {
             transition={{ delay: 0.2 }}
             className="mt-5 max-w-lg font-body text-sm leading-relaxed text-white/85 md:text-base"
           >
-            A premium day secondary school in Sango Ota raising role models through rigorous
-            academics, leadership and character formation. Apply online and track your application
-            in real time.
+            A premium day secondary school raising role models through rigorous academics,
+            leadership and character formation. Apply online and track your application in real
+            time.
           </motion.p>
 
           <motion.div

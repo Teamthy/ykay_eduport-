@@ -5,7 +5,7 @@ import { scanStoredDocumentSafe } from "@/lib/malware";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
-import { verifyStoredDocument } from "@/lib/storage";
+import { StorageNotConfiguredError, verifyStoredDocument } from "@/lib/storage";
 import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
@@ -100,6 +100,18 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     if (error instanceof Error && "issues" in error) {
       return jsonNoStore({ error: "Please check the file and try again." }, { status: 422 });
+    }
+    if (error instanceof StorageNotConfiguredError) {
+      logger.error("Admission document confirmation skipped: object storage is not configured", {
+        error: error.message,
+      });
+      return jsonNoStore(
+        {
+          error:
+            "Document uploads are temporarily unavailable. Please try again later, or contact the school office.",
+        },
+        { status: 503 },
+      );
     }
     logger.error("Admission document confirmation failed", {
       error: error instanceof Error ? error.message : String(error),

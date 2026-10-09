@@ -1,6 +1,7 @@
 import { jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 import { resolveAllowedOrigin } from "@/lib/cors";
+import { buildContentSecurityPolicy, storageUploadOrigin } from "@/lib/csp";
 
 const protectedPrefixes = [
   "/admin",
@@ -90,7 +91,7 @@ function applyCors(response: NextResponse, request: NextRequest): NextResponse {
   return response;
 }
 
-export async function middleware(request: NextRequest) {
+async function routeRequest(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const method = request.method;
   const isApi = pathname.startsWith("/api/");
@@ -234,17 +235,26 @@ function redirectToLogin(request: NextRequest) {
   return NextResponse.redirect(url);
 }
 
+/**
+ * Every response carries the Content-Security-Policy. It is built here, per request,
+ * because the admissions upload origin comes from runtime settings.
+ */
+export async function middleware(request: NextRequest) {
+  const response = await routeRequest(request);
+  response.headers.set(
+    "Content-Security-Policy",
+    buildContentSecurityPolicy({
+      isProduction: process.env.NODE_ENV === "production",
+      plausible: Boolean(process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN),
+      storageOrigin: storageUploadOrigin(process.env),
+    }),
+  );
+  return response;
+}
+
 export const config = {
   matcher: [
-    "/api/:path*",
-    "/admin/:path*",
-    "/admin-admissions/:path*",
-    "/teacher/:path*",
-    "/student/:path*",
-    "/parent/:path*",
-    "/it-portal/:path*",
-    "/super-admin/:path*",
-    "/staff/:path*",
-    "/change-password",
+    // Every page and API route. Only build assets and image optimisation are skipped.
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };

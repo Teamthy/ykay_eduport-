@@ -4,6 +4,7 @@ import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import { useToast } from "@/components/Toast";
+import EnrolButton from "@/components/it/EnrolButton";
 import {
   ArrowLeft,
   ArrowRight,
@@ -82,9 +83,11 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
   const prevModule = currentIdx > 0 ? modules[currentIdx - 1] : null;
   const nextModule = currentIdx < modules.length - 1 ? modules[currentIdx + 1] : null;
   const allComplete = modules.length > 0 && modules.every((m) => m.completed);
+  // Progress can only be recorded by an enrolled learner; the server answers 409 otherwise.
+  const enrolled = data?.course.enrolled ?? false;
 
   async function markComplete() {
-    if (!activeModule || completing) return;
+    if (!activeModule || completing || !enrolled) return;
     setCompleting(true);
     try {
       const r = await fetch(`/api/it/progress`, {
@@ -98,7 +101,9 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
         // Auto-advance to next module
         if (nextModule) setActiveModuleId(nextModule.id);
       } else {
-        toast("Could not save progress.", "error");
+        // The API explains the refusal (for example, not enrolled). Show that, not a generic line.
+        const failure = (await r.json().catch(() => null)) as { error?: string } | null;
+        toast(failure?.error || "Could not save progress. Please try again.", "error");
       }
     } catch {
       toast("Network error.", "error");
@@ -265,6 +270,27 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
         <main className="flex-1 overflow-y-auto">
           {activeModule ? (
             <div className="mx-auto max-w-4xl px-6 py-8 lg:px-12">
+              {data && !enrolled && (
+                <div
+                  role="status"
+                  className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-brand-orange/40 bg-brand-orange/10 p-5"
+                >
+                  <div>
+                    <p className="text-sm font-bold text-white">
+                      You are not enrolled in this course yet.
+                    </p>
+                    <p className="mt-1 text-xs text-white/70">
+                      You can read the lessons, but progress is saved only after you enroll.
+                    </p>
+                  </div>
+                  <EnrolButton
+                    courseId={data.course.id}
+                    slug={slug}
+                    variant="solid"
+                    onEnrolled={() => void load()}
+                  />
+                </div>
+              )}
               {/* Module header */}
               <div className="mb-8">
                 <div className="mb-2 flex items-center gap-2 text-xs text-white/40">
@@ -322,7 +348,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
                 {!activeModule.completed ? (
                   <button
                     onClick={() => void markComplete()}
-                    disabled={completing}
+                    disabled={completing || !enrolled}
                     className="flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-sm font-bold text-brand-navy shadow-lg shadow-brand-green/20 transition hover:bg-brand-green/90 disabled:opacity-50"
                   >
                     {completing ? (
@@ -330,7 +356,11 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
                     ) : (
                       <CheckCircle2 size={16} />
                     )}
-                    {completing ? "Saving..." : "Mark as Complete"}
+                    {completing
+                      ? "Saving..."
+                      : enrolled
+                        ? "Mark as Complete"
+                        : "Enroll to save progress"}
                   </button>
                 ) : (
                   <span className="flex items-center gap-2 rounded-full bg-brand-green/10 px-5 py-2.5 text-sm font-bold text-brand-green">

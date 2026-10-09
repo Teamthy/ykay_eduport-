@@ -1,7 +1,7 @@
 {
   "name": "Ykay College & Leadership Academy",
   "short_name": "Ykay College",
-  "description": "Premium day secondary school in Sango Ota, Ogun State — JSS1 to SS3, IT education, leadership training. Check results, attendance, fees and school notices.",
+  "description": "Premium day secondary school — JSS1 to SS3, IT education, leadership training. Check results, attendance, fees and school notices.",
   "start_url": "/portal",
   "scope": "/",
   "display": "standalone",

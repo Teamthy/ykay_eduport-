@@ -3,6 +3,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ToastProvider } from "@/components/Toast";
+import { SchoolProfileProvider } from "@/components/SchoolProfileContext";
+import { confirmedSchoolAddress } from "@/lib/school-address";
 import { AuthProvider } from "@/components/AuthProvider";
 import CookieConsent from "@/components/CookieConsent";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
@@ -66,8 +68,8 @@ export const metadata: Metadata = {
     template: "%s | Ykay College",
   },
   description:
-    "A premium day secondary school (JSS1–SS3) in Sango Ota, Ogun State. NERDC-aligned curriculum, digital learning, leadership development.",
-  keywords: "Ykay College, secondary school, Sango Ota, Ogun State, NERDC, WAEC, BECE, JSS, SS",
+    "A premium day secondary school (JSS1–SS3). NERDC-aligned curriculum, digital learning, leadership development.",
+  keywords: "Ykay College, secondary school, NERDC, WAEC, BECE, JSS, SS",
   openGraph: {
     title: "Ykay College & Leadership Academy",
     description: "Excellence in education for JSS1 to SS3.",
@@ -145,6 +147,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       })
     : null;
   const isPlatformDefaultSchool = !school || school.slug === DEFAULT_SLUG;
+  // Empty until the school confirms its address (School profile in the admin area).
+  const publicAddress = confirmedSchoolAddress(school?.address);
   const schoolName = school?.name ?? "Ykay College & Leadership Academy";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng";
 
@@ -199,19 +203,20 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               name: schoolName,
               alternateName: schoolName.split("&")[0].trim(),
               description: isPlatformDefaultSchool
-                ? "Premium day secondary school (JSS1 to SS3) in Sango Ota, Ogun State — NERDC-aligned academics, IT education and leadership training."
+                ? "Premium day secondary school (JSS1 to SS3) — NERDC-aligned academics, IT education and leadership training."
                 : `${schoolName} — school portal powered by YKAY EDUportal.`,
               url: siteUrl,
               logo: `${siteUrl.replace(/\/$/, "")}/ykay-logo.png`,
-              address: school
-                ? { "@type": "PostalAddress", streetAddress: school.address }
-                : {
-                    "@type": "PostalAddress",
-                    streetAddress: "Km 38, Lagos-Abeokuta Expressway",
-                    addressLocality: "Sango Ota",
-                    addressRegion: "Ogun State",
-                    addressCountry: "NG",
-                  },
+              // Published only once the school has confirmed its address.
+              ...(publicAddress
+                ? {
+                    address: {
+                      "@type": "PostalAddress",
+                      streetAddress: publicAddress,
+                      addressCountry: "NG",
+                    },
+                  }
+                : {}),
               telephone: school?.phone ?? "+2347015374411",
               // AUD-F5: never publish another school's email — omit the field
               // when this school has none.
@@ -234,7 +239,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ToastProvider>
               <AmbientBackdrop />
               <MotionProvider>
-                <div className="relative z-10">{children}</div>
+                <SchoolProfileProvider value={{ name: schoolName, address: publicAddress }}>
+                  <div className="relative z-10">{children}</div>
+                </SchoolProfileProvider>
               </MotionProvider>
               <CookieConsent />
               <WhatsAppFloat />

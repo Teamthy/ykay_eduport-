@@ -9,6 +9,7 @@ import {
   shareReceiptNative,
 } from "@/lib/receipt";
 import { useToast } from "./Toast";
+import { useSchoolProfile } from "@/components/SchoolProfileContext";
 
 interface Props {
   open: boolean;
@@ -18,21 +19,24 @@ interface Props {
 
 export default function ReceiptModal({ open, data, onClose }: Props) {
   const { toast } = useToast();
+  const { address } = useSchoolProfile();
 
   if (!data) return null;
 
+  const receipt: ReceiptData = { ...data, schoolAddress: address };
+
   const handleDownload = () => {
-    downloadReceipt(data);
+    downloadReceipt(receipt);
     toast("Receipt downloaded to your device", "success");
   };
 
   const handleWhatsApp = () => {
-    shareReceiptWhatsApp(data, data.parentPhone);
+    shareReceiptWhatsApp(receipt, receipt.parentPhone);
     toast("Opening WhatsApp...", "info");
   };
 
   const handleShare = async () => {
-    await shareReceiptNative(data);
+    await shareReceiptNative(receipt);
   };
 
   const handlePrint = () => {

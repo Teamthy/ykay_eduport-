@@ -3,7 +3,9 @@ import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
 
 import { AnimatedText } from "@/components/AnimatedText";
-export default function AboutPage() {
+import { getPublicSchoolAddress } from "@/lib/school";
+export default async function AboutPage() {
+  const address = await getPublicSchoolAddress();
   return (
     <>
       <Header />
@@ -48,10 +50,9 @@ export default function AboutPage() {
                       students who will transform their communities.
                     </p>
                     <p>
-                      Located in Sango Ota — a vibrant educational corridor along the Lagos-Abeokuta
-                      Expressway — the school serves families across Ogun State and beyond. Our
-                      campus is designed to support both rigorous academic work and holistic
-                      personal development.
+                      {address ? `Located at ${address}. ` : null}The school serves families across
+                      Ogun State and beyond. Our campus is designed to support both rigorous
+                      academic work and holistic personal development.
                     </p>
                     <p>
                       Every student at Ykay College is seen not just as a learner, but as a future

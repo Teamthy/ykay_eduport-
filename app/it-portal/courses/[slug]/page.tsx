@@ -3,6 +3,7 @@
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
+import EnrolButton from "@/components/it/EnrolButton";
 import Footer from "@/components/Footer";
 import { useToast } from "@/components/Toast";
 import {
@@ -179,15 +180,12 @@ export default function ItCoursePage({ params }: { params: Promise<{ slug: strin
                   You are not enrolled yet
                 </h2>
                 <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-secondary)]">
-                  Enroll from your IT dashboard to unlock the modules and start earning your
+                  Enroll in this course to unlock the modules, save your progress and earn your
                   certificate.
                 </p>
-                <Link
-                  href="/it-portal/dashboard"
-                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy hover:bg-brand-orange-dark"
-                >
-                  Go to Dashboard
-                </Link>
+                <div className="mt-5 flex justify-center">
+                  <EnrolButton courseId={course.id} slug={course.slug} variant="solid" />
+                </div>
               </div>
             ) : null}
 

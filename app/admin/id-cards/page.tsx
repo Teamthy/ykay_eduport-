@@ -5,6 +5,7 @@ import { Download, IdCard, LoaderCircle, Printer, Search } from "lucide-react";
 import AdminSidebar from "@/components/AdminSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
 import { useToast } from "@/components/Toast";
+import QrImage from "@/components/QrImage";
 
 type Student = {
   id: string;
@@ -74,17 +75,14 @@ export default function AdminIDCardsPage() {
     else setSelected(filtered.map((s) => s.id));
   }
 
-  function qrUrl(student: Student) {
-    const payload = encodeURIComponent(
-      JSON.stringify({
-        v: 1,
-        school: "YKAY",
-        sid: student.studentId,
-        n: student.displayName,
-        c: student.className,
-      }),
-    );
-    return `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${payload}`;
+  function qrPayload(student: Student) {
+    return JSON.stringify({
+      v: 1,
+      school: "YKAY",
+      sid: student.studentId,
+      n: student.displayName,
+      c: student.className,
+    });
   }
 
   async function exportPdf() {
@@ -234,9 +232,9 @@ export default function AdminIDCardsPage() {
                   <div className="mt-3 font-display text-xl tracking-wide">{s.displayName}</div>
                   <div className="mt-1 font-mono text-xs text-white/70">{s.studentId}</div>
                   <div className="mt-1 text-xs text-white/60">{s.className}</div>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={qrUrl(s)}
+                  <QrImage
+                    value={qrPayload(s)}
+                    size={140}
                     alt={`QR ${s.studentId}`}
                     className="absolute bottom-3 right-3 h-16 w-16 rounded-md bg-white p-1"
                   />
@@ -265,8 +263,12 @@ export default function AdminIDCardsPage() {
                 <div className="mt-3 text-lg font-bold">{s.displayName}</div>
                 <div className="font-mono text-sm">{s.studentId}</div>
                 <div className="text-sm">{s.className}</div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={qrUrl(s)} alt="" className="absolute bottom-3 right-3 h-20 w-20" />
+                <QrImage
+                  value={qrPayload(s)}
+                  size={140}
+                  alt=""
+                  className="absolute bottom-3 right-3 h-20 w-20"
+                />
               </div>
             ))}
           </div>

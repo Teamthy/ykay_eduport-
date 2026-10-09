@@ -16,6 +16,11 @@ const BRAND = {
 /**
  * Generate a branded Ykay College IT Certificate PDF
  */
+/** Header line under the school name. The address is included only once the school has confirmed it. */
+function schoolTagline(address?: string | null) {
+  return address ? `Leadership Academy · ${address}` : "Leadership Academy";
+}
+
 export function generateCertificatePDF(data: {
   studentName: string;
   courseTitle: string;
@@ -23,6 +28,7 @@ export function generateCertificatePDF(data: {
   certificateNumber: string;
   issuedAt: string;
   level: string;
+  schoolAddress?: string | null;
 }) {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const W = 297,
@@ -56,9 +62,9 @@ export function generateCertificatePDF(data: {
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...BRAND.gray);
-  doc.text("Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State, Nigeria", W / 2, 42, {
-    align: "center",
-  });
+  if (data.schoolAddress) {
+    doc.text(data.schoolAddress, W / 2, 42, { align: "center" });
+  }
 
   // Green divider
   doc.setDrawColor(...BRAND.green);
@@ -152,6 +158,7 @@ export function generateCertificatePDF(data: {
  * Generate a branded Ykay College Report Card PDF
  */
 export function generateReportCardPDF(data: {
+  schoolAddress?: string | null;
   studentName: string;
   studentClass: string;
   studentId: string;
@@ -191,7 +198,7 @@ export function generateReportCardPDF(data: {
   doc.text("YKAY COLLEGE", W / 2, 15, { align: "center" });
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("Leadership Academy · Sango Ota, Ogun State", W / 2, 21, { align: "center" });
+  doc.text(schoolTagline(data.schoolAddress), W / 2, 21, { align: "center" });
 
   // Green badge
   doc.setFillColor(78, 197, 77, 0.2);
@@ -352,6 +359,7 @@ export function generateReportCardPDF(data: {
  * Generate a branded Ykay College Payment Receipt PDF
  */
 export function generateReceiptPDF(data: {
+  schoolAddress?: string | null;
   receiptNo: string;
   date: string;
   studentName: string;
@@ -377,7 +385,7 @@ export function generateReceiptPDF(data: {
   doc.text("YKAY COLLEGE", W / 2, 18, { align: "center" });
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("Leadership Academy · Sango Ota, Ogun State", W / 2, 25, { align: "center" });
+  doc.text(schoolTagline(data.schoolAddress), W / 2, 25, { align: "center" });
 
   // Green badge
   doc.setFillColor(78, 197, 77, 0.2);

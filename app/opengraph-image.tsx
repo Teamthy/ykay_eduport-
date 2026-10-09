@@ -6,7 +6,7 @@ export const contentType = OG_CONTENT_TYPE;
 
 export default function OgImage() {
   return brandCard({
-    eyebrow: "Sango Ota · Ogun State",
+    eyebrow: "Ykay College & Leadership Academy",
     title: "EXCELLENCE IN EDUCATION.",
     subtitle: "Premium day secondary school · JSS1 to SS3",
     footer: "ykaycollege.edu.ng",

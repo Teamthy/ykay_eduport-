@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { apkDownloadPath, apkFallbackUrl, apkQrUrl, apkSizeLabel, apkUrl } from "@/lib/apk";
+import { apkDownloadPath, apkFallbackUrl, apkQrDataUrl, apkSizeLabel, apkUrl } from "@/lib/apk";
 
 /**
  * APK download URL resolution.
@@ -78,13 +78,11 @@ describe("apkFallbackUrl and apkSizeLabel", () => {
   });
 });
 
-describe("apkQrUrl", () => {
-  it("encodes the target so query strings survive", () => {
-    const qr = apkQrUrl("https://example.com/a.apk?v=1&x=2");
-    expect(qr).toContain(encodeURIComponent("https://example.com/a.apk?v=1&x=2"));
-    // The ampersand from the target must not leak into the QR service's own
-    // query string, or the QR encodes a truncated URL.
-    expect(qr.split("data=")[1]).not.toContain("&");
+describe("apkQrDataUrl", () => {
+  it("renders the download link as a local PNG, not through a third-party service", async () => {
+    const qr = await apkQrDataUrl("https://example.com/a.apk?v=1&x=2");
+    expect(qr.startsWith("data:image/png;base64,")).toBe(true);
+    expect(qr).not.toContain("qrserver");
   });
 });
 

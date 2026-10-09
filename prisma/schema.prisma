@@ -211,6 +211,7 @@ model School {
   terms                   Term[]
   studentEnrolments       StudentEnrolment[]
   timetableSlots          TimetableSlot[]
+  contactEnquiries        ContactEnquiry[]
 }
 
 model User {
@@ -1798,4 +1799,21 @@ model CbtAttempt {
   subject         CbtSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@index([subjectId, createdAt])
+}
+
+/// An enquiry sent through the public contact form. It is stored so the school office
+/// can answer it, and the visitor sees success only after this row is written.
+model ContactEnquiry {
+  id        String   @id @default(cuid())
+  schoolId  String
+  name      String
+  email     String
+  phone     String?
+  message   String
+  status    String   @default("NEW")
+  createdAt DateTime @default(now())
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, createdAt])
 }

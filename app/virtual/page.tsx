@@ -77,8 +77,8 @@ export default function VirtualPage() {
                       <span className="block text-brand-orange">COLLEGE</span>
                     </h2>
                     <p className="mt-3 max-w-md font-body text-sm leading-relaxed text-white/80">
-                      The campus school in Sango Ota — JSS1 to SS3, science laboratories, sports,
-                      clubs and a full IT academy in the timetable.
+                      The campus school — JSS1 to SS3, science laboratories, sports, clubs and a
+                      full IT academy in the timetable.
                     </p>
                     <div className="mt-6 flex flex-wrap items-center gap-4">
                       <a
