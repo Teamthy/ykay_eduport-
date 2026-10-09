@@ -113,7 +113,7 @@ export default function CampusLifePage() {
                       A well-equipped computer laboratory, modern science laboratories, a fully
                       equipped library with digital resources, dedicated sports fields, a 360°
                       virtual campus tour, and technology-enhanced classrooms across our day school
-                      campus in Sango Ota.
+                      campus.
                     </p>
                     <a
                       href="/contact"

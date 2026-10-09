@@ -93,3 +93,38 @@ export async function sendStaffInviteEmail(input: {
     html: `<p>Hello ${input.name},</p><p>You've been invited to join the Ykay College EduPortal as <strong>${roleLabel}</strong>.</p><p>Activate your account and set a password using the link below. The invitation expires in 7 days.</p><p><a href="${url}">Activate my account</a></p><p>If you weren't expecting this invitation, you can safely ignore this email.</p>`,
   });
 }
+
+const ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+/** Tells the school office that a visitor sent an enquiry. Reply-to is the visitor, so the office can answer directly. */
+export async function sendContactEnquiryEmail(input: {
+  to: string;
+  schoolName: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  message: string;
+}) {
+  const esc = (value: string) => value.replace(/[&<>"']/g, (char) => ESCAPES[char] ?? char);
+  const subjectName = input.name.replace(/[\r\n]+/g, " ");
+  await client().emails.send({
+    from: from(),
+    to: input.to,
+    replyTo: input.email,
+    subject: `New enquiry from ${subjectName} (${input.schoolName})`,
+    html: [
+      "<p>A new enquiry came through the contact form.</p>",
+      `<p><strong>Name:</strong> ${esc(input.name)}<br/>`,
+      `<strong>Email:</strong> ${esc(input.email)}<br/>`,
+      `<strong>Phone:</strong> ${esc(input.phone || "not given")}</p>`,
+      `<p>${esc(input.message).replace(/\n/g, "<br/>")}</p>`,
+      "<p>It is also listed under Notifications in the EduPortal admin area.</p>",
+    ].join("\n"),
+  });
+}

@@ -54,7 +54,7 @@ const SERVICES = [
 const SCHOOLS = [
   {
     name: "Ykay College",
-    loc: "Sango Ota, Ogun",
+    loc: "Nigeria",
     img: "/home/hero-campus.jpg",
   },
   {

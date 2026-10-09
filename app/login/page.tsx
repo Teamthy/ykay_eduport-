@@ -3,6 +3,7 @@
 import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { safeNextPath } from "@/lib/safe-redirect";
 import { LockKeyhole, ShieldCheck, AlertCircle, GraduationCap, User, Users } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 
@@ -69,8 +70,9 @@ function LoginForm() {
       const body = await response.json();
       if (!response.ok) throw new Error(body.error);
       await refresh();
-      const next = searchParams.get("next");
-      router.replace(next && next.startsWith("/") ? next : destinations[body.user.role] || "/");
+      // Only same-site paths are honoured; anything else falls back to the role's home page.
+      const next = safeNextPath(searchParams.get("next"), window.location.origin);
+      router.replace(next ?? destinations[body.user.role] ?? "/");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Unable to sign in.");
     } finally {
@@ -132,7 +134,7 @@ function LoginForm() {
           </div>
         </section>
 
-        <section className="bg-white p-9 md:p-12">
+        <section data-theme="light" className="bg-white p-9 md:p-12">
           <Link
             href="/portal"
             className="mb-8 inline-block text-xs font-bold uppercase tracking-widest text-green-800 md:hidden"
@@ -160,7 +162,7 @@ function LoginForm() {
                 autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-brand-navy outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green/30"
+                className="login-field mt-2 w-full rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-green/30"
               />
             </label>
             <label className="block text-xs font-bold uppercase tracking-widest text-green-800">
@@ -171,7 +173,7 @@ function LoginForm() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-brand-navy outline-none focus:border-brand-green focus:ring-2 focus:ring-brand-green/30"
+                className="login-field mt-2 w-full rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-green/30"
               />
             </label>
             <button

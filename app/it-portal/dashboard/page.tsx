@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useToast } from "@/components/Toast";
+import EnrolButton from "@/components/it/EnrolButton";
 import {
   Award,
   BookOpen,
@@ -385,13 +386,16 @@ export default function ItPortalDashboard() {
 function CourseCard({ course, view }: { course: Course; view: "grid" | "list" }) {
   const img = COURSE_IMAGES[course.slug] || COURSE_IMAGES["digital-literacy"];
   const isComplete = course.status === "COMPLETED";
+  const detailHref = `/it-portal/courses/${course.slug}`;
+  const learnHref = `${detailHref}/learn`;
 
+  // An enrolled card is one link into the player. A card the student has not
+  // joined cannot be a link too: its Enroll control is a real button, and a
+  // button inside an <a> is invalid HTML. So the card body links to the course
+  // page and the button sits beside it.
   if (view === "list") {
-    return (
-      <Link
-        href={`/it-portal/courses/${course.slug}${course.enrolled ? "/learn" : ""}`}
-        className="group flex gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)] transition hover:border-brand-green/30"
-      >
+    const listBody = (
+      <>
         <div className="h-20 w-32 flex-shrink-0 overflow-hidden rounded-xl">
           <img src={img} alt={course.title} className="h-full w-full object-cover" />
         </div>
@@ -423,87 +427,126 @@ function CourseCard({ course, view }: { course: Course; view: "grid" | "list" })
             </div>
           )}
         </div>
-      </Link>
+      </>
+    );
+    const listSurface =
+      "group flex gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)] transition hover:border-brand-green/30";
+    if (course.enrolled) {
+      return (
+        <Link href={learnHref} className={listSurface}>
+          {listBody}
+        </Link>
+      );
+    }
+    return (
+      <div className={listSurface}>
+        <Link href={detailHref} className="flex min-w-0 flex-1 gap-4">
+          {listBody}
+        </Link>
+        <div className="flex flex-shrink-0 items-center">
+          <EnrolButton courseId={course.id} slug={course.slug} />
+        </div>
+      </div>
+    );
+  }
+
+  const media = (
+    <div className="relative aspect-video overflow-hidden">
+      <img
+        src={img}
+        alt={course.title}
+        className="h-full w-full object-cover transition group-hover:scale-105"
+      />
+      {isComplete && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          <div className="flex items-center gap-1.5 rounded-full bg-brand-green px-3 py-1.5 text-xs font-bold text-brand-navy">
+            <Trophy size={14} /> Completed
+          </div>
+        </div>
+      )}
+      <div className="absolute bottom-2 left-2">
+        <span className="rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+          {course.level}
+        </span>
+      </div>
+      {course.enrolled && course.progressPercent > 0 && !isComplete && (
+        <div className="absolute bottom-0 left-0 right-0">
+          <div className="h-1.5 bg-black/20">
+            <div
+              className="h-full bg-brand-green"
+              style={{ width: `${course.progressPercent}%` }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const meta = (
+    <>
+      <h3 className="mb-1 text-sm font-bold text-[var(--text-primary)] line-clamp-2 group-hover:text-brand-green">
+        {course.title}
+      </h3>
+      <p className="mb-3 text-xs text-[var(--text-muted)] line-clamp-1">{course.tagline}</p>
+      {course.enrolled && (
+        <div className="mb-3 flex items-center gap-2">
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--surface-disabled)]">
+            <div
+              className="h-full rounded-full bg-brand-green transition-all"
+              style={{ width: `${course.progressPercent}%` }}
+            />
+          </div>
+          <span className="text-xs font-bold text-[var(--text-muted)]">
+            {course.progressPercent}%
+          </span>
+        </div>
+      )}
+      <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+        <span className="flex items-center gap-1">
+          <BookOpen size={11} /> {course.moduleCount} modules
+        </span>
+        <span className="flex items-center gap-1">
+          <Clock size={11} /> {course.durationWeeks} weeks
+        </span>
+      </div>
+    </>
+  );
+
+  const gridSurface =
+    "overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)] transition hover:border-brand-green/30 hover:shadow-lg";
+
+  if (!course.enrolled) {
+    return (
+      <div className={`group ${gridSurface}`}>
+        <Link href={detailHref} className="block">
+          {media}
+          <div className="p-4 pb-0">{meta}</div>
+        </Link>
+        <div className="p-4">
+          <EnrolButton courseId={course.id} slug={course.slug} fullWidth />
+        </div>
+      </div>
     );
   }
 
   return (
-    <Link
-      href={`/it-portal/courses/${course.slug}${course.enrolled ? "/learn" : ""}`}
-      className="group"
-    >
-      <div className="overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)] transition hover:border-brand-green/30 hover:shadow-lg">
-        <div className="relative aspect-video overflow-hidden">
-          <img
-            src={img}
-            alt={course.title}
-            className="h-full w-full object-cover transition group-hover:scale-105"
-          />
-          {isComplete && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-              <div className="flex items-center gap-1.5 rounded-full bg-brand-green px-3 py-1.5 text-xs font-bold text-brand-navy">
-                <Trophy size={14} /> Completed
-              </div>
-            </div>
-          )}
-          <div className="absolute bottom-2 left-2">
-            <span className="rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold uppercase text-white">
-              {course.level}
-            </span>
-          </div>
-          {course.enrolled && course.progressPercent > 0 && !isComplete && (
-            <div className="absolute bottom-0 left-0 right-0">
-              <div className="h-1.5 bg-black/20">
-                <div
-                  className="h-full bg-brand-green"
-                  style={{ width: `${course.progressPercent}%` }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+    <Link href={learnHref} className="group">
+      <div className={gridSurface}>
+        {media}
         <div className="p-4">
-          <h3 className="mb-1 text-sm font-bold text-[var(--text-primary)] line-clamp-2 group-hover:text-brand-green">
-            {course.title}
-          </h3>
-          <p className="mb-3 text-xs text-[var(--text-muted)] line-clamp-1">{course.tagline}</p>
-          {course.enrolled && (
-            <div className="mb-3 flex items-center gap-2">
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--surface-disabled)]">
-                <div
-                  className="h-full rounded-full bg-brand-green transition-all"
-                  style={{ width: `${course.progressPercent}%` }}
-                />
-              </div>
-              <span className="text-xs font-bold text-[var(--text-muted)]">
-                {course.progressPercent}%
-              </span>
-            </div>
-          )}
-          <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
-            <span className="flex items-center gap-1">
-              <BookOpen size={11} /> {course.moduleCount} modules
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock size={11} /> {course.durationWeeks} weeks
-            </span>
-          </div>
+          {meta}
           <div className="mt-3">
             {isComplete ? (
               <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-green/10 py-2.5 text-xs font-bold text-brand-green">
                 <Award size={14} /> View Certificate
               </span>
-            ) : course.enrolled && course.progressPercent > 0 ? (
+            ) : course.progressPercent > 0 ? (
               <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-green py-2.5 text-xs font-bold text-brand-navy group-hover:bg-brand-green-dark">
                 <PlayCircle size={14} /> Continue Learning
               </span>
-            ) : course.enrolled ? (
+            ) : (
               <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand-green py-2.5 text-xs font-bold text-brand-navy group-hover:bg-brand-green-dark">
                 <PlayCircle size={14} /> Start Course
-              </span>
-            ) : (
-              <span className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-brand-green bg-transparent py-2.5 text-xs font-bold text-brand-green group-hover:bg-brand-green group-hover:text-brand-navy">
-                Enroll Now — Free
               </span>
             )}
           </div>

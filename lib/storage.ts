@@ -8,6 +8,19 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { AdmissionDocumentType } from "@/lib/admissions";
 import { safeFileName } from "@/lib/security";
 
+/**
+ * Thrown when the S3 settings are missing. That is an operator problem, not something
+ * the family did, so routes map it to a 503 with a clear message instead of a 500.
+ */
+export class StorageNotConfiguredError extends Error {
+  constructor() {
+    super(
+      "Secure document storage is not configured (S3_BUCKET, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY).",
+    );
+    this.name = "StorageNotConfiguredError";
+  }
+}
+
 function getStorageConfig() {
   const bucket = process.env.S3_BUCKET;
   const region = process.env.S3_REGION || "us-east-1";
@@ -15,7 +28,7 @@ function getStorageConfig() {
   const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
 
   if (!bucket || !accessKeyId || !secretAccessKey) {
-    throw new Error("Secure document storage is not configured.");
+    throw new StorageNotConfiguredError();
   }
 
   return {

@@ -1,4 +1,7 @@
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { confirmedSchoolAddress } from "@/lib/school-address";
+import { resolveTenantFromHost } from "@/lib/tenant";
 
 const schoolSlug = process.env.SCHOOL_SLUG || "ykay-college";
 
@@ -23,12 +26,26 @@ export async function getSchool() {
       subdomain: schoolSlug,
       customDomain,
       name: process.env.SCHOOL_NAME || "Ykay College & Leadership Academy",
-      address:
-        process.env.SCHOOL_ADDRESS ||
-        "Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State, Nigeria",
+      // Empty until the school confirms it (School profile). Nothing is printed meanwhile.
+      address: process.env.SCHOOL_ADDRESS?.trim() || "",
       phone: process.env.SCHOOL_PHONE || "+2347015374411",
       email: process.env.SCHOOL_EMAIL || "info@ykaycollege.com",
       motto: process.env.SCHOOL_MOTTO || "Raising Role Models",
     },
   });
+}
+
+/**
+ * The confirmed address of the school this request is for, for server-rendered pages.
+ * Reads only, never writes. Null while the school has not set one.
+ */
+export async function getPublicSchoolAddress(): Promise<string | null> {
+  const host = (await headers()).get("host");
+  const { tenant } = await resolveTenantFromHost(host);
+  if (!tenant) return null;
+  const school = await prisma.school.findUnique({
+    where: { id: tenant.id },
+    select: { address: true },
+  });
+  return confirmedSchoolAddress(school?.address);
 }

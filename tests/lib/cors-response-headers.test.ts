@@ -60,7 +60,13 @@ describe("CORS headers are owned in exactly one place", () => {
   });
 
   it("middleware still runs on /api/*", () => {
-    expect(middleware).toMatch(/"\/api\/:path\*"/);
+    // The matcher skips only build assets and image optimisation, so every API route is covered.
+    const found = middleware.match(/"\/\(\(\?!([^)]+)\)\.\*\)"/);
+    expect(found, "matcher pattern not found in middleware.ts").not.toBeNull();
+    const matcher = new RegExp(`^/((?!${found?.[1]}).*)$`);
+    expect(matcher.test("/api/contact")).toBe(true);
+    expect(matcher.test("/api/admissions/upload-url")).toBe(true);
+    expect(matcher.test("/_next/static/chunk.js")).toBe(false);
   });
 
   /**

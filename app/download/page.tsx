@@ -4,7 +4,7 @@ import { Check, GraduationCap, QrCode, Share, Smartphone, WifiOff } from "lucide
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { apkQrUrl, requestOrigin } from "@/lib/apk";
+import { apkQrDataUrl, requestOrigin } from "@/lib/apk";
 
 export const metadata: Metadata = {
   title: "Install the Ykay College app — iPhone & Android",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default async function DownloadPage() {
   // QR encodes this page ON THE ORIGIN THE VISITOR IS USING — preview deploys
   // and the production domain both scan to the right place.
-  const qr = apkQrUrl(`${await requestOrigin()}/download`);
+  const qr = await apkQrDataUrl(`${await requestOrigin()}/download`);
 
   return (
     <>

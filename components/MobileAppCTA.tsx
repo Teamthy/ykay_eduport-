@@ -1,12 +1,12 @@
 import { Download, QrCode, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
-import { apkQrUrl, requestOrigin } from "@/lib/apk";
+import { apkQrDataUrl, requestOrigin } from "@/lib/apk";
 
 export default async function MobileAppCTA() {
   // QR encodes the INSTALL PAGE on the origin the visitor is actually on —
   // preview deploys, custom domains and production all scan correctly.
-  const qr = apkQrUrl(`${await requestOrigin()}/download`);
+  const qr = await apkQrDataUrl(`${await requestOrigin()}/download`);
 
   return (
     <section

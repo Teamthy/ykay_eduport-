@@ -1,3 +1,4 @@
+import { qrDataUrl } from "@/lib/qr";
 import { headers } from "next/headers";
 /**
  * Where the Android APK lives.
@@ -73,7 +74,7 @@ export function apkDownloadPath(): string {
   return "/download/apk";
 }
 
-/** QR image for the download URL, so a parent on a laptop can scan it. */
-export function apkQrUrl(url: string): string {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=${encodeURIComponent(url)}`;
+/** QR image (PNG data URL) for the download URL, so a parent on a laptop can scan it. Generated here, not by a third party. */
+export function apkQrDataUrl(url: string): Promise<string> {
+  return qrDataUrl(url, 220);
 }

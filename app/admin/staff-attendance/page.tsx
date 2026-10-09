@@ -17,6 +17,7 @@ import AdminSidebar from "@/components/AdminSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
 import StaffQrScanner from "@/components/StaffQrScanner";
 import { useToast } from "@/components/Toast";
+import QrImage from "@/components/QrImage";
 
 type Row = {
   teacherProfileId: string;
@@ -54,10 +55,6 @@ type Overview = {
     staff: { displayName: string };
   }>;
 };
-
-function qrImg(payload: string) {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(payload)}`;
-}
 
 export default function AdminStaffAttendancePage() {
   const { toast } = useToast();
@@ -457,9 +454,9 @@ export default function AdminStaffAttendancePage() {
                       </div>
                       <div className="mt-4 flex items-end justify-between gap-3">
                         <div className="font-mono text-xs text-white/80">{b.badgeCode}</div>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={qrImg(b.qrPayload)}
+                        <QrImage
+                          value={b.qrPayload}
+                          size={160}
                           alt={b.badgeCode}
                           className="h-24 w-24 rounded-md bg-white p-1"
                         />

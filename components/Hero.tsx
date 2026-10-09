@@ -63,8 +63,8 @@ export default function Hero() {
             transition={{ delay: 0.18 }}
             className="mt-5 max-w-xl font-body text-base leading-relaxed text-white/80 md:text-lg"
           >
-            A premium day secondary school in Sango Ota, Ogun State — JSS1 to SS3 with science
-            laboratories, sports, clubs and a full IT academy built into the timetable.
+            A premium day secondary school — JSS1 to SS3 with science laboratories, sports, clubs
+            and a full IT academy built into the timetable.
           </motion.p>
 
           <motion.div

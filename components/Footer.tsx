@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUp, Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
+import { useSchoolProfile } from "@/components/SchoolProfileContext";
 
 const linkGroups = {
   School: [
@@ -38,7 +39,6 @@ const linkGroups = {
 // email address must never be shown another school's (audit finding AUD-F5:
 // every tenant's footer used to hardcode YKAY College's contact details).
 const DEFAULT_CONTACT = {
-  address: "Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State",
   phone: "0701 537 4411",
   phoneHref: "+2347015374411",
   email: "info@ykaycollege.com",
@@ -53,7 +53,9 @@ export type FooterContact = {
 };
 
 export default function Footer({ contact = {} }: { contact?: FooterContact }) {
-  const address = contact.address ?? DEFAULT_CONTACT.address;
+  // The school's confirmed address (School profile). Empty until the school sets it.
+  const profile = useSchoolProfile();
+  const address = contact.address ?? profile.address ?? "";
   const phone = contact.phone ?? DEFAULT_CONTACT.phone;
   const phoneHref = contact.phoneHref ?? phone ?? DEFAULT_CONTACT.phoneHref;
   const email = contact.email ?? DEFAULT_CONTACT.email;
@@ -80,8 +82,8 @@ export default function Footer({ contact = {} }: { contact?: FooterContact }) {
               </div>
             </div>
             <p className="text-sm text-[var(--footer-text-body)] leading-relaxed mb-6">
-              A premium day secondary school in Sango Ota, Ogun State. Raising future leaders
-              through excellence in education.
+              A premium day secondary school. Raising future leaders through excellence in
+              education.
             </p>
             <div className="flex gap-3">
               <a

@@ -122,13 +122,20 @@ function loadPaystack() {
   });
 }
 
+/** An error whose message was written for the family by the server, so it can be shown as is. */
+class ApiMessageError extends Error {}
+
+const UPLOAD_FAILED_MESSAGE =
+  "We could not upload this file. Check your internet connection and try again. If it keeps failing, contact the school office.";
+
 async function requestJson<T>(url: string, options: RequestInit) {
   const response = await fetch(url, {
     ...options,
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
   });
   const body = (await response.json().catch(() => ({}))) as T & { error?: string };
-  if (!response.ok) throw new Error(body.error || "Something went wrong. Please try again.");
+  if (!response.ok)
+    throw new ApiMessageError(body.error || "Something went wrong. Please try again.");
   return body;
 }
 
@@ -315,8 +322,10 @@ export default function AdmissionApplicationForm() {
         headers: { "Content-Type": file.type },
         body: file,
       });
-      if (!fileUpload.ok)
-        throw new Error("The file could not be uploaded securely. Please try again.");
+      if (!fileUpload.ok) {
+        console.error("Admission document rejected by storage", { status: fileUpload.status });
+        throw new Error(UPLOAD_FAILED_MESSAGE);
+      }
 
       await requestJson<{ ok: true }>("/api/admissions/documents/confirm", {
         method: "POST",
@@ -335,11 +344,11 @@ export default function AdmissionApplicationForm() {
         [documentType]: { fileName: file.name, sizeBytes: file.size },
       }));
     } catch (error) {
+      // The technical reason goes to the console for support. The family gets a sentence
+      // they can act on. Browser and network errors such as "Failed to fetch" never reach them.
+      console.error("Admission document upload failed", error);
       setErrors({
-        form:
-          error instanceof Error
-            ? error.message
-            : "The document could not be uploaded. Please try again.",
+        form: error instanceof ApiMessageError ? error.message : UPLOAD_FAILED_MESSAGE,
       });
     } finally {
       setUploadingDocument(null);

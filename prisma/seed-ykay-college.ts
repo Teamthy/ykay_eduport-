@@ -51,9 +51,10 @@ const SCHOOL = {
   phone: "+2347015374411",
   email: "info@ykaycollege.com",
   // Section B: full address, LGA and State were left blank on the form; only
-  // the landmark was supplied. This is a PLACEHOLDER pending confirmation —
-  // see docs/ONBOARDING-GAPS.md.
-  address: "Alishiba Junction, Nigeria",
+  // the landmark was supplied. Not confirmed, so it is left empty: nothing is
+  // printed until the school sets it under Admin > School profile.
+  // See docs/ONBOARDING-GAPS.md.
+  address: "",
   establishedYear: 2021,
   schoolType: "Inclusive Day Secondary School",
   ownership: "Sole ownership",

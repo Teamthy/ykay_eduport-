@@ -6,6 +6,7 @@ import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
 import LiveReportCardPreview from "@/components/LiveReportCardPreview";
 import { generateReportCardPDF } from "@/lib/branded-pdf";
+import { useSchoolProfile } from "@/components/SchoolProfileContext";
 import {
   MessageCircle,
   CalendarDays,
@@ -75,6 +76,7 @@ type Response = {
 };
 
 export default function StudentReportCardsPage() {
+  const { address } = useSchoolProfile();
   const [data, setData] = useState<Response | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -127,6 +129,7 @@ export default function StudentReportCardsPage() {
   const downloadSelected = () => {
     if (!selected || !data) return;
     generateReportCardPDF({
+      schoolAddress: address,
       studentName: data.student.displayName,
       studentClass: selected.classNameSnapshot,
       studentId: data.student.id,

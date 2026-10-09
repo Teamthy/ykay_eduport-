@@ -19,6 +19,7 @@ import {
   Printer,
 } from "lucide-react";
 import { generateReportCardPDF } from "@/lib/branded-pdf";
+import { useSchoolProfile } from "@/components/SchoolProfileContext";
 
 const SIDEBAR_ITEMS = [
   { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
@@ -85,6 +86,7 @@ type Response = {
 };
 
 export default function ParentReportCardsPage() {
+  const { address } = useSchoolProfile();
   const [data, setData] = useState<Response | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -139,6 +141,7 @@ export default function ParentReportCardsPage() {
     child?: { displayName?: string; studentId?: string } | null,
   ) => {
     generateReportCardPDF({
+      schoolAddress: address,
       studentName: child?.displayName || data?.selectedChild?.displayName || "Student",
       studentClass: report.classNameSnapshot,
       studentId: child?.studentId || data?.selectedChild?.studentId || "",

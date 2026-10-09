@@ -419,7 +419,7 @@ Step 2 — School Profile Setup
 The Director fills in:
 
  School name: Ykay College & Leadership Academy
- School address: Sango Ota, Ogun State
+ School address: the postal address the school has confirmed (leave blank if not yet confirmed; it is set later under Admin > School profile)
  School phone number
  School email
  School logo (upload)

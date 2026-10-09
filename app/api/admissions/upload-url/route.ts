@@ -3,7 +3,7 @@ import { DOCUMENT_RULES, uploadUrlSchema } from "@/lib/admissions";
 import { findAuthorizedApplication } from "@/lib/admission-service";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
-import { createSecureUploadUrl } from "@/lib/storage";
+import { createSecureUploadUrl, StorageNotConfiguredError } from "@/lib/storage";
 import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
@@ -53,11 +53,23 @@ export async function POST(request: NextRequest) {
         { status: 422 },
       );
     }
+    if (error instanceof StorageNotConfiguredError) {
+      logger.error("Admission uploads unavailable: object storage is not configured", {
+        error: error.message,
+      });
+      return jsonNoStore(
+        {
+          error:
+            "Document uploads are temporarily unavailable. Please try again later, or contact the school office.",
+        },
+        { status: 503 },
+      );
+    }
     logger.error("Admission upload URL failed", {
       error: error instanceof Error ? error.message : String(error),
     });
     return jsonNoStore(
-      { error: "We could not prepare a secure upload. Please try again." },
+      { error: "We could not prepare your upload. Please try again." },
       { status: 500 },
     );
   }

@@ -14,6 +14,8 @@ export interface ReceiptData {
   paymentMethod: string;
   paymentReference: string;
   term: string;
+  /** The school's confirmed address. Left off the receipt when empty. */
+  schoolAddress?: string | null;
 }
 
 export function generateReceiptPDF(data: ReceiptData): jsPDF {
@@ -36,9 +38,9 @@ export function generateReceiptPDF(data: ReceiptData): jsPDF {
   doc.text("& LEADERSHIP ACADEMY", pageWidth / 2, 27, { align: "center" });
 
   doc.setFontSize(8);
-  doc.text("Km 38, Lagos-Abeokuta Expressway, Sango Ota, Ogun State", pageWidth / 2, 34, {
-    align: "center",
-  });
+  if (data.schoolAddress) {
+    doc.text(data.schoolAddress, pageWidth / 2, 34, { align: "center" });
+  }
   doc.text("Tel: 0701 537 4411  |  info@ykaycollege.com", pageWidth / 2, 39, { align: "center" });
 
   // Green accent line

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
 import { useToast } from "@/components/Toast";
+import QrImage from "@/components/QrImage";
+import { useSchoolProfile } from "@/components/SchoolProfileContext";
 import Image from "next/image";
 import {
   MessageCircle,
@@ -35,6 +37,7 @@ type Profile = {
 };
 
 export default function IDCardPage() {
+  const { address } = useSchoolProfile();
   const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,11 +70,7 @@ export default function IDCardPage() {
     .slice(0, 2)
     .join("")
     .toUpperCase();
-  const qr = profile?.studentId
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-        `YKAY|${profile.studentId}|${name}`,
-      )}`
-    : null;
+  const qrPayload = profile?.studentId ? `YKAY|${profile.studentId}|${name}` : null;
 
   return (
     <>
@@ -111,9 +110,7 @@ export default function IDCardPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="text-[9px] text-white/60">
-                      Km 38, Lagos-Abeokuta Expressway, Sango Ota
-                    </div>
+                    {address ? <div className="text-[9px] text-white/60">{address}</div> : null}
                   </div>
 
                   <div className="bg-white p-6 text-center">
@@ -149,10 +146,10 @@ export default function IDCardPage() {
                     </div>
 
                     <div className="w-24 h-24 mx-auto rounded-lg bg-brand-navy/10 border border-brand-navy/20 flex items-center justify-center mb-2 overflow-hidden">
-                      {qr ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={qr}
+                      {qrPayload ? (
+                        <QrImage
+                          value={qrPayload}
+                          size={180}
                           alt="Verification QR"
                           className="h-full w-full object-contain"
                         />

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, Clock3, LoaderCircle, LogIn, LogOut, QrCode } from "lucide-react";
 import PortalTopbar from "@/components/PortalTopbar";
 import { useToast } from "@/components/Toast";
+import QrImage from "@/components/QrImage";
 
 type MeResponse = {
   supported: boolean;
@@ -31,10 +32,6 @@ type MeResponse = {
     }>;
   };
 };
-
-function qrImg(payload: string) {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(payload)}`;
-}
 
 export default function StaffSelfAttendancePage() {
   const { toast } = useToast();
@@ -157,9 +154,9 @@ export default function StaffSelfAttendancePage() {
                 </div>
                 {data.staff?.qrPayload && (
                   <div className="text-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={qrImg(data.staff.qrPayload)}
+                    <QrImage
+                      value={data.staff.qrPayload}
+                      size={200}
                       alt="Staff badge QR"
                       className="mx-auto h-40 w-40 rounded-xl border border-[var(--border-subtle)] bg-white p-2"
                     />

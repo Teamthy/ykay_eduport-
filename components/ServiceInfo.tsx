@@ -3,6 +3,7 @@
 import { Clock, MapPin } from "lucide-react";
 
 import { AnimatedText } from "@/components/AnimatedText";
+import { useSchoolProfile } from "@/components/SchoolProfileContext";
 
 /**
  * Full-bleed school information band.
@@ -13,6 +14,7 @@ import { AnimatedText } from "@/components/AnimatedText";
  * section before or after it.
  */
 export default function ServiceInfo() {
+  const { address } = useSchoolProfile();
   return (
     <section className="relative w-full border-y border-[var(--border-subtle)] bg-[var(--bg-secondary)] backdrop-edu-light py-14 md:py-20 theme-transition">
       <div className="mx-auto w-full max-w-7xl px-6 md:px-10">
@@ -28,7 +30,7 @@ export default function ServiceInfo() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-brand-navy-dark/70 via-transparent to-transparent" />
             <p className="absolute bottom-4 left-5 font-body text-[10px] font-bold uppercase tracking-[0.25em] text-white">
-              The campus · Sango Ota
+              The campus
             </p>
           </div>
           <div className="grid gap-10 md:grid-cols-3 md:items-center md:gap-8">
@@ -49,7 +51,7 @@ export default function ServiceInfo() {
                 </span>
               </h2>
               <p className="mt-3 font-body text-sm text-[var(--text-muted)]">
-                Ykay College &amp; Leadership Academy — Sango Ota, Ogun State
+                Ykay College &amp; Leadership Academy
               </p>
             </div>
 
@@ -76,14 +78,20 @@ export default function ServiceInfo() {
                 <p className="mb-1 font-body text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--accent-primary)]">
                   Location
                 </p>
-                <a
-                  href="https://www.google.com/maps/search/Lagos-Abeokuta+Expressway,+Sango+Ota,+Ogun+State"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-body text-sm text-[var(--text-primary)] underline decoration-[var(--border-default)] underline-offset-4 transition-colors hover:text-[var(--accent-primary)] hover:decoration-[var(--accent-primary)]"
-                >
-                  Km 38, Lagos-Abeokuta Expressway, Sango Ota
-                </a>
+                {address ? (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-body text-sm text-[var(--text-primary)] underline decoration-[var(--border-default)] underline-offset-4 transition-colors hover:text-[var(--accent-primary)] hover:decoration-[var(--accent-primary)]"
+                  >
+                    {address}
+                  </a>
+                ) : (
+                  <p className="font-body text-sm text-[var(--text-primary)]">
+                    Call or email the school office for directions.
+                  </p>
+                )}
               </div>
             </div>
           </div>

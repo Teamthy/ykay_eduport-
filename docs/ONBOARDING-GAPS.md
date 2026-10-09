@@ -26,7 +26,7 @@ is a first-login credential only.
 
 | Field | Form said | Currently seeded as | Risk |
 |---|---|---|---|
-| **Full address** | blank | `"Alishiba Junction, Nigeria"` — **placeholder** | Printed on report cards, receipts and ID cards. Wrong address on an official document. |
+| **Full address** | blank | empty (unconfirmed) | Printed on report cards, receipts and ID cards only once the school sets it under Admin > School profile. Until then nothing is printed. |
 | **LGA** | blank | — | Needed for WAEC/NECO registration and any state filing. |
 | **State** | blank | — | Same. Also drives the "nearest centre" logic if that is ever built. |
 | **School category** | blank | not stored | Minor. |
@@ -34,10 +34,12 @@ is a first-login credential only.
 | **Alternate phone** | blank | — | Minor. |
 | **Custom domain** | blank | not set | Portal stays on the default host. |
 
-> `lib/school.ts` previously defaulted the address to `"Sango Ota, Ogun State,
-> Nigeria"`. That was a guess from an earlier draft and is **not** confirmed by
-> this form. The seed now writes the landmark-based placeholder instead, and
-> logs a warning. Confirm the real address before printing anything.
+> Earlier builds defaulted the address to a guessed location, and the seed used a
+> landmark-based placeholder. Neither is confirmed by this form, so neither is used any
+> more. The stored address starts empty, migration `20261009130000_clear_unconfirmed_school_address`
+> clears those known values, and documents and public pages show no address until the
+> school enters its own under **Admin > School profile**. Confirm the real address there
+> before it is printed anywhere.
 
 ---
 
