@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
@@ -31,10 +32,16 @@ export default function AdmissionsPage() {
         <Reveal>
           <section className="relative overflow-hidden pb-16 pt-32 md:pb-20 md:pt-40">
             <div className="absolute inset-0">
-              <img
+              {/* The hero photograph is this page's LCP element — priority +
+                  next/image so it preloads and arrives as a right-sized WebP. */}
+              <Image
                 src="/home/lab.jpg"
                 alt="Students learning together"
-                className="h-full w-full object-cover"
+                fill
+                priority
+                fetchPriority="high"
+                sizes="100vw"
+                className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-brand-navy via-brand-navy/90 to-brand-navy/70" />
               <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-transparent to-brand-navy/50" />

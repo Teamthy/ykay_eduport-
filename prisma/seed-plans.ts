@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma";
 import { logger } from "@/lib/logger";
 
 /**
- * Seed the EDUos plan tiers. Run with: npm run db:seed-plans
+ * Seed the platform plan tiers. Run with: npm run db:seed-plans
  * Idempotent (upsert by tier).
  */
 const PLANS: {

@@ -111,3 +111,6 @@ apply-backup-*/
 
 # Git bundles used to transfer work between machines
 *.bundle
+
+# Local Lighthouse CI scratch (autorun output)
+.lighthouseci/

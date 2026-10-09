@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { AnimatedText } from "@/components/AnimatedText";
 import { ArrowRight, FileCheck2, CreditCard, CalendarClock } from "lucide-react";
 
@@ -18,6 +18,8 @@ export default function AdmissionsBanner() {
         src="/home/ykay-students.png"
         alt=""
         aria-hidden="true"
+        loading="lazy"
+        decoding="async"
         className="absolute inset-0 h-full w-full object-cover"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-dark via-brand-navy-dark/90 to-brand-navy-dark/45" />
@@ -25,7 +27,7 @@ export default function AdmissionsBanner() {
 
       <div className="relative z-10 mx-auto w-full px-6 py-16 md:px-10 md:py-24">
         <div className="max-w-2xl">
-          <motion.span
+          <m.span
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -33,9 +35,9 @@ export default function AdmissionsBanner() {
           >
             <span className="h-1.5 w-1.5 rounded-full bg-brand-green" /> Admissions Open · 2025 /
             2026
-          </motion.span>
+          </m.span>
 
-          <motion.h2
+          <m.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -46,9 +48,9 @@ export default function AdmissionsBanner() {
             <span className="block text-brand-green">
               <AnimatedText heavy stagger={0.03} text="JOURNEY" delay={0.2} />
             </span>
-          </motion.h2>
+          </m.h2>
 
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -58,9 +60,9 @@ export default function AdmissionsBanner() {
             A premium day secondary school raising role models through rigorous academics,
             leadership and character formation. Apply online and track your application in real
             time.
-          </motion.p>
+          </m.p>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -76,9 +78,9 @@ export default function AdmissionsBanner() {
                 {h.label}
               </div>
             ))}
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -97,7 +99,7 @@ export default function AdmissionsBanner() {
             >
               Check application status →
             </a>
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </section>

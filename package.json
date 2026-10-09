@@ -47,6 +47,7 @@
     "check:readiness": "tsx scripts/check-term-readiness.ts",
     "check:mobile": "tsx scripts/check-mobile-parity.ts",
     "audit": "tsx scripts/audit-project.ts",
+    "audit:deps": "node scripts/audit-deps.mjs",
     "reconcile:labels": "tsx scripts/reconcile-labels.ts",
     "diagnose:db": "tsx scripts/diagnose-db.ts",
     "probe:db": "tsx scripts/probe-db-path.ts",

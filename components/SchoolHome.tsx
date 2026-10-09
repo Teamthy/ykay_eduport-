@@ -2,20 +2,17 @@ import LoadingScreen from "@/components/LoadingScreen";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import { Marquee } from "@/components/AnimatedText";
-import ServiceInfo from "@/components/ServiceInfo";
-import ITFlagshipSection from "@/components/ITFlagshipSection";
-import AdmissionsBanner from "@/components/AdmissionsBanner";
-import Services from "@/components/Services";
+import { HomeSectionsTop, HomeSectionsBottom } from "@/components/HomeSections";
 import MobileAppCTA from "@/components/MobileAppCTA";
-import Groups from "@/components/Groups";
-import VirtualBridge from "@/components/VirtualBridge";
-import FindUs from "@/components/FindUs";
 import Footer from "@/components/Footer";
-import { Reveal } from "@/components/Reveal";
 
 /**
  * A school's public home page (tenant portal landing).
  * Shown when a specific school is resolved from the hostname.
+ *
+ * Only the hero (the first viewport on mobile) is in the initial load; the
+ * sections below it arrive as async chunks via HomeSections so they never
+ * delay the first paint.
  */
 export default function SchoolHome() {
   return (
@@ -29,15 +26,7 @@ export default function SchoolHome() {
           but better never to escape the page container). */}
       <main className="flex flex-col overflow-x-clip">
         <Hero />
-        <Reveal variant="up">
-          <ServiceInfo />
-        </Reveal>
-        <Reveal variant="left" delay={60}>
-          <ITFlagshipSection />
-        </Reveal>
-        <Reveal variant="right" delay={60}>
-          <AdmissionsBanner />
-        </Reveal>
+        <HomeSectionsTop />
         <Marquee
           items={[
             "JSS1 — SS3",
@@ -51,19 +40,9 @@ export default function SchoolHome() {
           duration={32}
         />
 
-        <Reveal variant="zoom">
-          <Services />
-        </Reveal>
-        <Reveal variant="blur" delay={60}>
-          <Groups />
-        </Reveal>
-        <MobileAppCTA />
-        <Reveal variant="left" delay={60}>
-          <VirtualBridge />
-        </Reveal>
-        <Reveal variant="right" delay={60}>
-          <FindUs />
-        </Reveal>
+        <HomeSectionsBottom>
+          <MobileAppCTA />
+        </HomeSectionsBottom>
       </main>
       <Footer />
     </>

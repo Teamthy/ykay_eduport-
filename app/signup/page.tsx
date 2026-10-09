@@ -41,7 +41,7 @@ export default function SchoolSignupPage() {
     <div className="min-h-screen bg-[var(--color-brand-navy)] flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
-          <h1 className="font-display text-3xl text-white tracking-widest mb-2">EDUos</h1>
+          <h1 className="font-display text-3xl text-white tracking-widest mb-2">Ykay Platform</h1>
           <p className="text-white/50 text-sm">
             Education Operating System — start your school in minutes
           </p>
@@ -77,7 +77,7 @@ export default function SchoolSignupPage() {
                 placeholder="greenfield"
                 className="w-full px-4 py-3 rounded-l-xl focus:outline-none"
               />
-              <span className="px-3 py-3 text-gray-400 text-sm whitespace-nowrap">.eduos.app</span>
+              <span className="px-3 py-3 text-gray-400 text-sm whitespace-nowrap">.ykay.app</span>
             </div>
           </div>
 

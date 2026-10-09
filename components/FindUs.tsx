@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import Link from "next/link";
 import { MapPin, ArrowRight, Play } from "lucide-react";
 
@@ -13,7 +13,7 @@ export default function FindUs() {
       <div className="mx-auto w-full px-6 md:px-10">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
           {/* Find Us */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -80,10 +80,10 @@ export default function FindUs() {
                 </p>
               </div>
             )}
-          </motion.div>
+          </m.div>
 
           {/* Latest News */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -105,6 +105,8 @@ export default function FindUs() {
                 <img
                   src="/home/ykay-students.png"
                   alt="School event"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -139,7 +141,7 @@ export default function FindUs() {
             >
               View All News <ArrowRight size={14} />
             </Link>
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </section>

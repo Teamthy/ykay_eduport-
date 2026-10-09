@@ -1,12 +1,12 @@
 import { headers } from "next/headers";
 import { resolveTenantFromHost } from "@/lib/tenant";
 import SchoolHome from "@/components/SchoolHome";
-import EduOsLanding from "@/components/EduOsLanding";
+import PlatformLanding from "@/components/PlatformLanding";
 
 /**
  * Root page — for this single-tenant Ykay College deployment, the Ykay portal
  * home page is shown by default on every host (production, preview, branch,
- * localhost). The generic EDUos platform landing is only shown when
+ * localhost). The generic Ykay Platform landing is only shown when
  * PLATFORM_MODE=true is explicitly set (future multi-tenant SaaS use).
  *
  * Tenant/branding resolution still runs so authenticated users get their own
@@ -22,8 +22,8 @@ export default async function HomePage() {
   const platformMode = process.env.PLATFORM_MODE === "true";
 
   if (platformMode && !matched) {
-    // Platform context — show the EDUos landing page
-    return <EduOsLanding />;
+    // Platform context — show the Ykay Platform landing page
+    return <PlatformLanding />;
   }
 
   // Ykay College portal (default for this deployment)

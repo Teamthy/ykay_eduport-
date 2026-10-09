@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { type ModuleKey } from "@/lib/modules";
 
 /**
- * EDUos billing / plan-gating service.
+ * Platform (Ykay family) billing / plan-gating service.
  *
  * Each school has a Subscription linked to a Plan. The plan determines:
  * - studentLimit: maximum active students

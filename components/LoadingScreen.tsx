@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 
 export default function LoadingScreen() {
   const [isVisible, setIsVisible] = useState(true);
@@ -17,7 +17,7 @@ export default function LoadingScreen() {
   return (
     <AnimatePresence>
       {isVisible && (
-        <motion.div
+        <m.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
@@ -50,7 +50,7 @@ export default function LoadingScreen() {
               </div>
 
               {/* Logo in center */}
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.3, type: "spring", stiffness: 100 }}
@@ -64,11 +64,11 @@ export default function LoadingScreen() {
                   className="w-24 h-24 md:w-32 md:h-32 object-contain"
                   priority
                 />
-              </motion.div>
+              </m.div>
             </div>
 
             {/* Reveal text (properly aligned below) */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1 }}
@@ -80,24 +80,24 @@ export default function LoadingScreen() {
               <div className="font-body text-[11px] tracking-[4px] text-brand-green font-bold">
                 LEADERSHIP · CHARACTER · KNOWLEDGE
               </div>
-            </motion.div>
+            </m.div>
 
             {/* Progress bar */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.5 }}
               className="w-48 h-1 rounded-full bg-white/10 overflow-hidden"
             >
-              <motion.div
+              <m.div
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
                 transition={{ duration: 1.5, delay: 1.5, ease: "easeInOut" }}
                 className="h-full bg-gradient-to-r from-brand-green to-brand-orange"
               />
-            </motion.div>
+            </m.div>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

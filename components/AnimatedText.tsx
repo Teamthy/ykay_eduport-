@@ -13,7 +13,7 @@
 // inline-block span and only splitting letters inside it, so a long headline
 // breaks between words like normal text and never mid-word.
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -64,7 +64,7 @@ export function AnimatedText({
 
   return (
     <Tag className={className}>
-      <motion.span initial="hidden" {...motionProps} style={{ display: "inline" }}>
+      <m.span initial="hidden" {...motionProps} style={{ display: "inline" }}>
         {words.map((word, w) => (
           <span
             key={`${word}-${w}`}
@@ -74,7 +74,7 @@ export function AnimatedText({
             {Array.from(word).map((char, c) => {
               const i = index++;
               return (
-                <motion.span
+                <m.span
                   key={`${char}-${c}`}
                   style={{ display: "inline-block", willChange: "transform" }}
                   variants={
@@ -109,13 +109,13 @@ export function AnimatedText({
                   }
                 >
                   {char}
-                </motion.span>
+                </m.span>
               );
             })}
             {w < words.length - 1 ? "\u00A0" : null}
           </span>
         ))}
-      </motion.span>
+      </m.span>
     </Tag>
   );
 }
@@ -225,7 +225,7 @@ export function WordCycle({
       }}
     >
       {words.map((word, idx) => (
-        <motion.span
+        <m.span
           key={word}
           aria-hidden={idx === i ? undefined : "true"}
           style={{
@@ -250,7 +250,7 @@ export function WordCycle({
           }
         >
           {word}
-        </motion.span>
+        </m.span>
       ))}
     </span>
   );
@@ -295,14 +295,14 @@ export function Marquee({
 
   return (
     <div className={className} aria-hidden="true" style={{ overflow: "hidden" }}>
-      <motion.div
+      <m.div
         style={{ display: "inline-flex", whiteSpace: "nowrap", willChange: "transform" }}
         animate={{ x: ["0%", "-50%"] }}
         transition={{ duration, ease: "linear", repeat: Infinity }}
       >
         {row}
         {row}
-      </motion.div>
+      </m.div>
     </div>
   );
 }

@@ -88,22 +88,24 @@ export default function Footer({ contact = {} }: { contact?: FooterContact }) {
             <div className="flex gap-3">
               <a
                 href="#"
+                aria-label="Ykay College on Facebook"
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-brand-green text-brand-navy-dark flex items-center justify-center transition-colors"
               >
-                <Facebook size={16} />
+                <Facebook size={16} aria-hidden="true" />
               </a>
               <a
                 href="#"
+                aria-label="Ykay College on Instagram"
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-brand-green text-brand-navy-dark flex items-center justify-center transition-colors"
               >
-                <Instagram size={16} />
+                <Instagram size={16} aria-hidden="true" />
               </a>
             </div>
           </div>
 
           {Object.entries(linkGroups).map(([title, links]) => (
             <div key={title}>
-              <h4 className="font-display text-sm text-white mb-4 tracking-widest">{title}</h4>
+              <h3 className="font-display text-sm text-white mb-4 tracking-widest">{title}</h3>
               <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link.href}>
@@ -125,7 +127,7 @@ export default function Footer({ contact = {} }: { contact?: FooterContact }) {
             <div className="flex items-start gap-3">
               <MapPin size={18} className="text-brand-green shrink-0 mt-0.5" />
               <div>
-                <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Address</div>
+                <div className="text-xs uppercase tracking-widest text-white/70 mb-1">Address</div>
                 <div className="text-sm text-white/80">{address}</div>
               </div>
             </div>
@@ -134,7 +136,7 @@ export default function Footer({ contact = {} }: { contact?: FooterContact }) {
             <div className="flex items-start gap-3">
               <Phone size={18} className="text-brand-green shrink-0 mt-0.5" />
               <div>
-                <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Phone</div>
+                <div className="text-xs uppercase tracking-widest text-white/70 mb-1">Phone</div>
                 <a
                   href={`tel:${phoneHref}`}
                   className="text-sm text-white/80 hover:text-brand-green"
@@ -148,7 +150,7 @@ export default function Footer({ contact = {} }: { contact?: FooterContact }) {
             <div className="flex items-start gap-3">
               <Mail size={18} className="text-brand-green shrink-0 mt-0.5" />
               <div>
-                <div className="text-xs uppercase tracking-widest text-white/40 mb-1">Email</div>
+                <div className="text-xs uppercase tracking-widest text-white/70 mb-1">Email</div>
                 <a
                   href={`mailto:${email}`}
                   className="text-sm text-white/80 hover:text-brand-green"
@@ -167,7 +169,7 @@ export default function Footer({ contact = {} }: { contact?: FooterContact }) {
           </p>
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/40 hover:text-brand-green transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-white/70 hover:text-brand-green transition-colors"
           >
             Back to Top <ArrowUp size={14} />
           </button>

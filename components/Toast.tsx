@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback } from "react";
 import { CheckCircle2, XCircle, Info, AlertTriangle, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 
 type ToastType = "success" | "error" | "info" | "warning";
 interface Toast {
@@ -48,7 +48,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           {toasts.map((t) => {
             const Icon = icons[t.type];
             return (
-              <motion.div
+              <m.div
                 key={t.id}
                 initial={{ opacity: 0, x: 100, scale: 0.95 }}
                 animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -63,7 +63,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 >
                   <X size={14} />
                 </button>
-              </motion.div>
+              </m.div>
             );
           })}
         </AnimatePresence>

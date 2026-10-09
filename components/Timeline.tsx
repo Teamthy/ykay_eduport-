@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
 const MILESTONES = [
   {
@@ -40,9 +40,9 @@ export default function Timeline() {
     <div className="relative">
       <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-brand-green/20 md:-translate-x-1/2" />
       <div className="space-y-12">
-        {MILESTONES.map((m, i) => (
-          <motion.div
-            key={m.year}
+        {MILESTONES.map((milestone, i) => (
+          <m.div
+            key={milestone.year}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -56,9 +56,13 @@ export default function Timeline() {
             >
               {i % 2 === 0 && (
                 <>
-                  <div className="font-display text-4xl text-brand-green mb-2">{m.year}</div>
-                  <h3 className="font-bold text-lg text-[var(--text-primary)] mb-2">{m.title}</h3>
-                  <p className="text-sm text-[var(--text-secondary)]">{m.desc}</p>
+                  <div className="font-display text-4xl text-brand-green mb-2">
+                    {milestone.year}
+                  </div>
+                  <h3 className="font-bold text-lg text-[var(--text-primary)] mb-2">
+                    {milestone.title}
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)]">{milestone.desc}</p>
                 </>
               )}
             </div>
@@ -68,13 +72,17 @@ export default function Timeline() {
             >
               {i % 2 === 1 && (
                 <>
-                  <div className="font-display text-4xl text-brand-green mb-2">{m.year}</div>
-                  <h3 className="font-bold text-lg text-[var(--text-primary)] mb-2">{m.title}</h3>
-                  <p className="text-sm text-[var(--text-secondary)]">{m.desc}</p>
+                  <div className="font-display text-4xl text-brand-green mb-2">
+                    {milestone.year}
+                  </div>
+                  <h3 className="font-bold text-lg text-[var(--text-primary)] mb-2">
+                    {milestone.title}
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)]">{milestone.desc}</p>
                 </>
               )}
             </div>
-          </motion.div>
+          </m.div>
         ))}
       </div>
     </div>

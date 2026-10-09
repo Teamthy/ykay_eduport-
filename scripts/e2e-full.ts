@@ -71,7 +71,7 @@ const PUBLIC_EXCEPTIONS = new Set(["/it-portal/auth", "/staff/activate"]);
 /**
  * Public by design. Verified individually:
  *   /portal          - sign-in hub, titled "EduPortal - Sign In"
- *   /onboarding      - EduOS school self-signup
+ *   /onboarding      - platform school self-signup
  *   /api/it/catalog  - public IT course catalogue (feeds marketing pages)
  *   /login, /signup  - auth entry points
  */

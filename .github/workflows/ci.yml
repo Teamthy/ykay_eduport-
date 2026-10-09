@@ -38,9 +38,12 @@ jobs:
         # Blocking. The previous exemption ("only fixes are toolchain majors")
         # was stale — the outstanding brace-expansion and undici advisories
         # were both fixable in-place via the lockfile with no API change.
-        # If a future advisory genuinely has no safe fix, add a scoped, dated
-        # `--exclude` here with a comment rather than silencing the whole step.
-        run: npm audit --audit-level=high
+        # Runs through scripts/audit-deps.mjs: npm has no per-advisory ignore
+        # flag, so the script filters the audit report and enforces the
+        # scoped, dated exclusions listed there (each with a reason and a
+        # review date). If a future advisory genuinely has no safe fix, add
+        # it there — never silence the whole step.
+        run: npm run audit:deps
 
       - name: Generate Prisma client
         run: npx prisma generate

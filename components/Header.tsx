@@ -4,11 +4,23 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, Sun, Moon, ChevronDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { useTheme } from "./ThemeProvider";
-import CommandSearch from "./CommandSearch";
-import NotificationBell from "./NotificationBell";
 import LiveClock from "./LiveClock";
+import dynamic from "next/dynamic";
+import { afterLoad } from "@/lib/after-lcp";
+
+// Interactive header widgets (search palette, notifications). No visitor
+// needs them in the first viewport, so they load after the LCP paint —
+// their chunks stay off the critical path of every page's first paint.
+const CommandSearch = dynamic(
+  afterLoad(() => import("./CommandSearch")),
+  { ssr: false },
+);
+const NotificationBell = dynamic(
+  afterLoad(() => import("./NotificationBell")),
+  { ssr: false },
+);
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -94,7 +106,7 @@ export default function Header() {
                   </button>
                   <AnimatePresence>
                     {activeDropdown === link.label && (
-                      <motion.div
+                      <m.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
@@ -115,7 +127,7 @@ export default function Header() {
                             </Link>
                           ))}
                         </div>
-                      </motion.div>
+                      </m.div>
                     )}
                   </AnimatePresence>
                 </>
@@ -165,7 +177,7 @@ export default function Header() {
 
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
+          <m.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -205,7 +217,7 @@ export default function Header() {
                 Apply Now
               </Link>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </header>

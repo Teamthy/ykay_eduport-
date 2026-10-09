@@ -1423,7 +1423,7 @@ model SystemFlags {
   updatedByUserId    String?
 }
 
-// ── EDUos multi-tenancy ────────────────────────────────────────────
+// ── Multi-tenancy (Ykay platform) ──────────────────────────────────
 enum SchoolStatus {
   ACTIVE
   SUSPENDED
