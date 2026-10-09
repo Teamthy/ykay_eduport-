@@ -1,23 +1,26 @@
 "use client";
 
-// MotionProvider — global framer-motion config.
+// MotionProvider — global framer-motion config for the below-the-fold and
+// portal surfaces that still use `m` (Reveal sections, dialogs, the CBT
+// runner).
 //
-// LazyMotion loads only the domAnimation feature bundle (animate, exit,
-// whileInView, hover/tap/focus gestures) instead of the full framer-motion
-// build. That keeps the animation library out of the critical path as a
-// full-size chunk: the public pages hydrate faster, which is what the
-// Lighthouse LCP budget measures. Components use the `m` component (instead
-// of `motion`) so they render through this bundle.
+// The domAnimation feature bundle is loaded ASYNC so it never lands in the
+// initial render-blocking chunks: the public pages' first paint (which the
+// Lighthouse budget in lighthouserc.json measures) ships no animation
+// library at all — those components use the CSS utilities in globals.css.
+// `m` components simply animate once the features arrive.
 //
 // reducedMotion="user" makes every motion component respect the OS
 // reduced-motion setting app-wide.
 
-import { LazyMotion, MotionConfig, domAnimation } from "framer-motion";
+import { LazyMotion, MotionConfig } from "framer-motion";
 import type { ReactNode } from "react";
+
+const loadFeatures = () => import("framer-motion").then((m) => m.domAnimation);
 
 export function MotionProvider({ children }: { children: ReactNode }) {
   return (
-    <LazyMotion features={domAnimation}>
+    <LazyMotion features={loadFeatures}>
       <MotionConfig reducedMotion="user">{children}</MotionConfig>
     </LazyMotion>
   );

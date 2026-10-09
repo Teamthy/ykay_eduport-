@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-import { m } from "framer-motion";
 import { Download } from "lucide-react";
 import { Marquee } from "@/components/AnimatedText";
 
@@ -14,19 +12,20 @@ export default function Hero() {
     <section className="relative w-full overflow-hidden bg-brand-navy-dark">
       <div className="absolute inset-0 z-0">
         {/* This full-bleed backdrop is the largest in-viewport image, so it
-            is the LCP element — priority + a small WebP via next/image so
-            it paints as early as possible (354 KB as a JPEG would push the
-            LCP past budget on a throttled mobile connection). */}
-        <Image
-          src="/home/hero-campus.jpg"
+            is the LCP element. Served as a pre-built WebP (no on-demand
+            /_next/image conversion — a cold optimizer cache on a fresh
+            server would delay the LCP paint) with fetchpriority=high so it
+            wins the connection. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/home/hero-campus-750.webp"
+          srcSet="/home/hero-campus-750.webp 750w, /home/hero-campus-1200.webp 1200w"
+          sizes="100vw"
           alt=""
           aria-hidden="true"
-          fill
-          priority
           fetchPriority="high"
-          sizes="100vw"
-          quality={60}
-          className="object-cover opacity-20"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover opacity-20"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-dark via-brand-navy-dark/92 to-brand-navy-dark/70" />
         <div
@@ -41,40 +40,30 @@ export default function Hero() {
 
       <div className="relative z-10 mx-auto grid w-full max-w-none items-center gap-10 px-6 pb-10 pt-28 sm:px-8 md:grid-cols-2 md:px-12 md:pb-14 md:pt-32 lg:px-16">
         <div>
-          <m.span
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 font-body text-[11px] font-semibold text-white/90 backdrop-blur-sm"
-          >
+          <span className="anim-rise inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 font-body text-[11px] font-semibold text-white/90 backdrop-blur-sm">
             <span className="h-2 w-2 rounded-full bg-brand-orange" />
             Raising Role Models · Est. 2021
-          </m.span>
+          </span>
 
-          <m.h1
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 }}
-            className="mt-7 font-display text-[clamp(2.4rem,6.5vw,5.2rem)] leading-[0.92] tracking-[-0.02em] text-white"
+          <h1
+            className="anim-rise mt-7 font-display text-[clamp(2.4rem,6.5vw,5.2rem)] leading-[0.92] tracking-[-0.02em] text-white"
+            style={{ animationDelay: "0.08s" }}
           >
             Excellence in Education.
             <span className="mt-1 block text-brand-green">Leadership. Character.</span>
-          </m.h1>
+          </h1>
 
-          <m.p
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18 }}
-            className="mt-5 max-w-xl font-body text-base leading-relaxed text-white/80 md:text-lg"
+          <p
+            className="anim-rise mt-5 max-w-xl font-body text-base leading-relaxed text-white/80 md:text-lg"
+            style={{ animationDelay: "0.18s" }}
           >
             A premium day secondary school — JSS1 to SS3 with science laboratories, sports, clubs
             and a full IT academy built into the timetable.
-          </m.p>
+          </p>
 
-          <m.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.28 }}
-            className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center"
+          <div
+            className="anim-rise mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center"
+            style={{ animationDelay: "0.28s" }}
           >
             <a
               href="/admissions"
@@ -94,19 +83,14 @@ export default function Hero() {
             >
               <Download size={16} /> Get the app
             </a>
-          </m.div>
+          </div>
 
           <p className="mt-7 font-body text-sm text-white/70">
             WAEC · NECO · JAMB · NERDC curriculum
           </p>
         </div>
 
-        <m.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="relative"
-        >
+        <div className="anim-rise relative" style={{ animationDelay: "0.2s" }}>
           <div
             aria-hidden="true"
             className="absolute -inset-3 rounded-[2rem] border border-brand-green/30"
@@ -114,17 +98,19 @@ export default function Hero() {
           {/* The identity photograph is the LCP element on mobile — mark it
               priority so it is preloaded and fetched ahead of everything
               else, and let next/image serve a right-sized WebP. */}
-          <Image
-            src="/home/ykay-students.png"
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/home/ykay-students-750.webp"
+            srcSet="/home/ykay-students-750.webp 750w, /home/ykay-students-1080.webp 1080w"
+            sizes="(max-width: 768px) 100vw, 50vw"
             alt="Ykay College students in school uniform"
+            fetchPriority="high"
+            decoding="async"
             width={533}
             height={408}
-            priority
-            fetchPriority="high"
-            sizes="(max-width: 768px) 100vw, 50vw"
             className="relative aspect-[4/3] w-full rounded-[1.75rem] object-cover object-[center_20%] shadow-2xl"
           />
-        </m.div>
+        </div>
       </div>
 
       <div className="relative z-10 border-t border-dashed border-white/20">

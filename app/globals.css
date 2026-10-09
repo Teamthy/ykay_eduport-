@@ -1347,3 +1347,220 @@ button:disabled {
 .login-field:focus {
   border-color: #166534;
 }
+
+/* ============================================================
+   FIRST-PAINT ANIMATIONS (CSS-only)
+   The initial bundle must not ship an animation library: these
+   utilities replace framer-motion on every component that renders
+   in the first viewport (Hero, Header, LoadingScreen, Marquee,
+   AnimatedText, Toast). Below-the-fold sections keep framer-motion
+   through LazyMotion and load it after the LCP paint.
+   ============================================================ */
+@keyframes char-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em) rotate(-8deg) scale(0.8);
+    filter: blur(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes char-in-heavy {
+  from {
+    opacity: 0;
+    transform: translateY(1.05em) rotate(-14deg) scale(0.62);
+    filter: blur(9px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.anim-rise {
+  animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-char {
+  display: inline-block;
+  will-change: transform;
+  animation: char-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.anim-char-heavy {
+  display: inline-block;
+  will-change: transform;
+  animation: char-in-heavy 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.anim-marquee {
+  display: inline-flex;
+  white-space: nowrap;
+  will-change: transform;
+  animation: marquee-x var(--marquee-duration, 26s) linear infinite;
+}
+
+.anim-pop {
+  animation: pop-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.anim-slide-down {
+  animation: slide-down 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-toast-in {
+  animation: toast-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-fade-out {
+  animation: fadeIn 0.8s ease-in-out reverse both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-rise,
+  .anim-char,
+  .anim-char-heavy,
+  .anim-marquee,
+  .anim-pop,
+  .anim-slide-down,
+  .anim-toast-in,
+  .anim-fade-out {
+    animation: none;
+  }
+}
+
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.anim-progress {
+  animation: progress-fill 1.5s ease-in-out 1.5s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-progress {
+    animation: none;
+    width: 100%;
+  }
+}
+
+/* Scroll-reveal (components/Reveal.tsx) — CSS transitions, no library. */
+.reveal-up,
+.reveal-left,
+.reveal-right,
+.reveal-zoom,
+.reveal-blur {
+  opacity: 0;
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-up {
+  transform: translateY(36px);
+}
+
+.reveal-left {
+  transform: translateX(-48px);
+}
+
+.reveal-right {
+  transform: translateX(48px);
+}
+
+.reveal-zoom {
+  transform: scale(0.88);
+}
+
+.reveal-blur {
+  transform: translateY(24px);
+  filter: blur(10px);
+}
+
+.reveal-shown {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-up,
+  .reveal-left,
+  .reveal-right,
+  .reveal-zoom,
+  .reveal-blur {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
+/* Below-the-fold sections: content-visibility defers rendering AND lazy
+   image fetches until the user approaches the section, so offscreen bytes
+   never compete with (or get simulated as blocking) the LCP image.
+   contain-intrinsic-size keeps the scrollbar stable. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}

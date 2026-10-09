@@ -31,13 +31,13 @@ const FindUs = dynamic(afterLoad(() => import("@/components/FindUs")));
 export function HomeSectionsTop() {
   return (
     <>
-      <Reveal variant="up">
+      <Reveal variant="up" className="cv-auto">
         <ServiceInfo />
       </Reveal>
-      <Reveal variant="left" delay={60}>
+      <Reveal variant="left" delay={60} className="cv-auto">
         <ITFlagshipSection />
       </Reveal>
-      <Reveal variant="right" delay={60}>
+      <Reveal variant="right" delay={60} className="cv-auto">
         <AdmissionsBanner />
       </Reveal>
     </>
@@ -50,17 +50,17 @@ export function HomeSectionsTop() {
 export function HomeSectionsBottom({ children }: { children: ReactNode }) {
   return (
     <>
-      <Reveal variant="zoom">
+      <Reveal variant="zoom" className="cv-auto">
         <Services />
       </Reveal>
-      <Reveal variant="blur" delay={60}>
+      <Reveal variant="blur" delay={60} className="cv-auto">
         <Groups />
       </Reveal>
       {children}
-      <Reveal variant="left" delay={60}>
+      <Reveal variant="left" delay={60} className="cv-auto">
         <VirtualBridge />
       </Reveal>
-      <Reveal variant="right" delay={60}>
+      <Reveal variant="right" delay={60} className="cv-auto">
         <FindUs />
       </Reveal>
     </>

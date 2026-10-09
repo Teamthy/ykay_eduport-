@@ -60,3 +60,11 @@ jobs:
           LHCI_NAME: ykay-college
         # lighthouserc.json points at the seeded standalone server via
         # e2e-server.mjs, so budgets measure the real production artefact.
+
+      - name: Upload Lighthouse reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 7
