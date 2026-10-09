@@ -15,7 +15,13 @@ export default async function MobileAppCTA() {
     >
       <div className="absolute inset-0">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/home/mobile.jpg" alt="" className="h-full w-full object-cover opacity-30" />
+        <img
+          src="/home/mobile.jpg"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover opacity-30"
+        />
         <div className="absolute inset-0 bg-brand-navy/80" />
       </div>
       <div className="pointer-events-none absolute -left-24 top-1/3 h-72 w-72 rounded-full bg-brand-green/20 blur-3xl" />

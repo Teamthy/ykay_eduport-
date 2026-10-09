@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Reveal } from "@/components/Reveal";
@@ -55,11 +56,16 @@ export default function VirtualPage() {
             {/* 01 — the campus school (you are here) */}
             <Reveal>
               <div className="group relative flex min-h-[26rem] flex-col justify-end overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-lg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                {/* First card — in the initial viewport on mobile, so it is the
+                    LCP element: priority + next/image (right-sized WebP). */}
+                <Image
                   src="/it-hub-classroom.jpg"
                   alt="Students working in the Ykay College IT hub"
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  fill
+                  priority
+                  fetchPriority="high"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-navy-dark via-brand-navy-dark/55 to-brand-navy-dark/10" />
 
@@ -99,11 +105,15 @@ export default function VirtualPage() {
             {/* 02 — the online school (destination) */}
             <Reveal delay={80}>
               <div className="group relative flex min-h-[26rem] flex-col justify-end overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-lg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                {/* Second card — below the fold on mobile, so it must not
+                    compete with the LCP image for the connection. */}
+                <Image
                   src="/home/hero-campus.jpg"
                   alt="A student learning online on a laptop"
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  fill
+                  loading="lazy"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-navy-dark via-brand-navy-dark/55 to-brand-navy-dark/10" />
 

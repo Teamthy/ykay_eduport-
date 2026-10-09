@@ -5,7 +5,7 @@
 // user's reduced-motion preference (renders immediately, no transform).
 // `delay` is in milliseconds.
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 
 const VARIANTS = {
@@ -35,7 +35,7 @@ export function Reveal({
   if (reduce) return <div className={className}>{children}</div>;
   const v = VARIANTS[variant];
   return (
-    <motion.div
+    <m.div
       className={className}
       initial={v.initial}
       whileInView={v.target}
@@ -43,6 +43,6 @@ export function Reveal({
       transition={{ type: "spring", stiffness: 120, damping: 16, mass: 0.9, delay: delay / 1000 }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }

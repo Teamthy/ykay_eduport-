@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { X, ExternalLink, LoaderCircle, ShieldCheck } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 
 interface Props {
   open: boolean;
@@ -42,14 +42,14 @@ export default function PaystackModal({
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[150] flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm"
           onClick={busy || leaving ? undefined : onClose}
         >
-          <motion.div
+          <m.div
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0.95 }}
@@ -110,8 +110,8 @@ export default function PaystackModal({
                 Cancel
               </button>
             </div>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

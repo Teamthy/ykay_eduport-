@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 
 const SEARCHABLE = [
   { title: "Homepage", desc: "Ykay College main page", url: "/", type: "Page" },
@@ -89,7 +89,7 @@ export default function CommandSearch() {
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -100,7 +100,7 @@ export default function CommandSearch() {
             <div className="fixed inset-0 bg-black/90 backdrop-blur-md" />
 
             {/* Modal — on top of backdrop */}
-            <motion.div
+            <m.div
               initial={{ scale: 0.95, y: -20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: -20 }}
@@ -163,8 +163,8 @@ export default function CommandSearch() {
                   <span className="ml-1">to open</span>
                 </span>
               </div>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

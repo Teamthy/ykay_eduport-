@@ -116,7 +116,7 @@ import { prisma } from "@/lib/prisma";
 import { DEFAULT_SLUG } from "@/lib/tenant";
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // ── EDUos: resolve branding ──
+  // ── Resolve branding (per tenant) ──
   // For AUTHENTICATED users, use THEIR school's branding (from the session's
   // schoolId — so a new school's colours show immediately after signup, even
   // on localhost where host resolution falls back to the default school).
@@ -167,7 +167,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <link rel="icon" href={faviconUrl} type="image/png" />
         <link rel="apple-touch-icon" href={faviconUrl} />
-        {/* EDUos: inject per-tenant brand palette as CSS variable overrides.
+        {/* Inject per-tenant brand palette as CSS variable overrides.
             Only navy / navy-light / green are driven by tenant branding so the
             nuanced green-dark/light + full orange shades in globals.css are
             preserved (gives Ykay its proper depth, not flat blue). */}

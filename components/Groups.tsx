@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 import { AnimatedText } from "@/components/AnimatedText";
@@ -63,7 +63,7 @@ export default function Clubs() {
 
         <div className="space-y-6 md:space-y-8">
           {clubs.map((club, i) => (
-            <motion.a
+            <m.a
               key={club.title}
               href={club.href}
               initial={{ opacity: 0, y: 20 }}
@@ -77,6 +77,8 @@ export default function Clubs() {
                 <img
                   src={club.image}
                   alt={club.title}
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-brand-navy-dark/50" />
@@ -99,7 +101,7 @@ export default function Clubs() {
                   />
                 </span>
               </div>
-            </motion.a>
+            </m.a>
           ))}
         </div>
       </div>

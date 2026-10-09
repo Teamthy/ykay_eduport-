@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
 export const DEFAULT_SLUG = process.env.SCHOOL_SLUG || "ykay-college";
-/** Platform base domain, e.g. "eduos.app" — `<slug>.eduos.app` resolves to a tenant. */
+/** Platform base domain, e.g. "ykay.app" — `<slug>.ykay.app` resolves to a tenant. */
 const PLATFORM_DOMAIN = (process.env.PLATFORM_BASE_DOMAIN || "").toLowerCase();
 
 export type ResolvedTenant = {
@@ -34,7 +34,7 @@ const TENANT_SELECT = {
  * Order: exact `customDomain` → subdomain of the platform domain → default school.
  *
  * Returns { tenant, matched }. When `matched` is false, the caller is on the
- * platform domain (or localhost) and should show the EDUos landing — not a
+ * platform domain (or localhost) and should show the platform landing — not a
  * specific school portal.
  *
  * Runs in the Node runtime (uses Prisma) — call from API routes / server
@@ -51,7 +51,7 @@ export async function resolveTenantFromHost(host: string | null): Promise<Tenant
     });
     if (byCustom) return { tenant: byCustom, matched: true };
 
-    // 2) Subdomain of the platform domain (e.g. stmarys.eduos.app)
+    // 2) Subdomain of the platform domain (e.g. stmarys.ykay.app)
     if (PLATFORM_DOMAIN && clean.endsWith(`.${PLATFORM_DOMAIN}`)) {
       const sub = clean.slice(0, clean.length - PLATFORM_DOMAIN.length - 1);
       if (sub && sub !== "www" && !sub.includes(".")) {

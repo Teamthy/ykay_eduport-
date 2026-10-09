@@ -106,7 +106,7 @@ const PILLARS = [
   {
     icon: Lightbulb,
     title: "The Solution",
-    desc: "EDUos brings everything into one cloud platform — branded for each school, accessible from any device, with zero installation required.",
+    desc: "The Ykay Platform brings everything into one cloud system — branded for each school, accessible from any device, with zero installation required.",
     img: "/home/lab.jpg",
   },
 ];
@@ -118,7 +118,7 @@ const STATS = [
   { value: "99.9%", label: "Uptime" },
 ];
 
-export default function EduOsLanding() {
+export default function PlatformLanding() {
   return (
     <>
       {/* Kill all green — override CSS vars for the entire landing page */}
@@ -133,7 +133,7 @@ export default function EduOsLanding() {
         <div className="overflow-hidden py-3 border-b border-white/5">
           <div className="flex gap-8 whitespace-nowrap animate-[marquee_25s_linear_infinite]">
             {Array(10)
-              .fill("EDUos · EDUCATION OPERATING SYSTEM ·")
+              .fill("YKAY PLATFORM · EDUCATION OPERATING SYSTEM ·")
               .map((t, i) => (
                 <span key={i} className="text-xs font-bold tracking-[0.3em] text-[#123499]">
                   {t}
@@ -147,7 +147,7 @@ export default function EduOsLanding() {
         <nav className="sticky top-0 z-50 bg-[#00072D]/95 border-b border-white/5">
           <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
             <Link href="/" className="flex items-center gap-2">
-              <img src="/eduos-logo-new.png" alt="EDUos" className="w-8 h-8 rounded-lg" />
+              <img src="/ykay-logo.png" alt="Ykay Platform" className="w-8 h-8 rounded-lg" />
               <span className="font-bold text-lg tracking-wider">
                 EDU<span className="text-[#123499]">os</span>
               </span>
@@ -201,15 +201,15 @@ export default function EduOsLanding() {
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#123499] mb-4">
-                About EDUos
+                About the Ykay Platform
               </p>
               <h2 className="font-bold text-3xl md:text-4xl mb-6 leading-tight">
                 One platform that runs your entire school
               </h2>
               <p className="text-white/60 text-base leading-relaxed mb-4">
-                EDUos is a cloud-based school management system built for African schools. It
-                replaces paper registers, manual receipts, and WhatsApp groups with a single portal
-                that works on any device.
+                The Ykay Platform is a cloud-based school management system built for African
+                schools. It replaces paper registers, manual receipts, and WhatsApp groups with a
+                single portal that works on any device.
               </p>
               <p className="text-white/60 text-base leading-relaxed mb-8">
                 From admissions to graduation, from fee collection to exam results — every process
@@ -263,10 +263,10 @@ export default function EduOsLanding() {
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#123499] mb-4">
                 Our Community
               </p>
-              <h2 className="font-bold text-3xl md:text-4xl mb-4">Schools Using EDUos</h2>
+              <h2 className="font-bold text-3xl md:text-4xl mb-4">Schools on the Ykay Platform</h2>
               <p className="text-white/30 text-sm max-w-lg">
-                Join hundreds of schools and colleges running on EDUos. Each one branded,
-                customised, and thriving.
+                Join hundreds of schools and colleges running on the Ykay Platform. Each one
+                branded, customised, and thriving.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -280,7 +280,7 @@ export default function EduOsLanding() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#00072D] to-transparent" />
                   <div className="absolute bottom-0 p-5">
                     <div className="text-[10px] text-[#123499] font-bold uppercase tracking-widest mb-1">
-                      EDUos School
+                      Ykay Platform School
                     </div>
                     <h3 className="font-bold text-lg">{sch.name}</h3>
                     <p className="text-white/55 text-xs flex items-center gap-1 mt-1">
@@ -298,7 +298,7 @@ export default function EduOsLanding() {
           <div className="max-w-7xl mx-auto">
             <div className="mb-16">
               <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#123499] mb-4">
-                Why EDUos
+                Why the Ykay Platform
               </p>
               <h2 className="font-bold text-3xl md:text-4xl">Our Foundation</h2>
             </div>
@@ -337,12 +337,12 @@ export default function EduOsLanding() {
               <div className="bg-[#051650] rounded-xl p-5 text-center">
                 <Mail className="mx-auto mb-2 text-[#123499]" size={20} />
                 <div className="text-xs text-white/30 mb-0.5">Email</div>
-                <div className="text-sm font-medium">hello@eduos.app</div>
+                <div className="text-sm font-medium">hello@ykaycollege.com</div>
               </div>
               <div className="bg-[#051650] rounded-xl p-5 text-center">
                 <Phone className="mx-auto mb-2 text-[#123499]" size={20} />
                 <div className="text-xs text-white/30 mb-0.5">Phone</div>
-                <div className="text-sm font-medium">+234 800 EDUos</div>
+                <div className="text-sm font-medium">+234 800 YKAY</div>
               </div>
               <div className="bg-[#051650] rounded-xl p-5 text-center">
                 <MapPin className="mx-auto mb-2 text-[#123499]" size={20} />
@@ -365,7 +365,7 @@ export default function EduOsLanding() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
               <div className="col-span-2 md:col-span-1">
                 <Link href="/" className="flex items-center gap-2 mb-4">
-                  <img src="/eduos-logo-new.png" alt="EDUos" className="w-7 h-7 rounded" />
+                  <img src="/ykay-logo.png" alt="Ykay Platform" className="w-7 h-7 rounded" />
                   <span className="font-bold text-sm">
                     EDU<span className="text-[#123499]">os</span>
                   </span>
@@ -434,15 +434,15 @@ export default function EduOsLanding() {
                   Contact
                 </h4>
                 <ul className="space-y-2.5">
-                  <li className="text-white/55 text-xs">hello@eduos.app</li>
-                  <li className="text-white/55 text-xs">+234 800 EDUos</li>
+                  <li className="text-white/55 text-xs">hello@ykaycollege.com</li>
+                  <li className="text-white/55 text-xs">+234 800 YKAY</li>
                   <li className="text-white/55 text-xs">Lagos, Nigeria</li>
                 </ul>
               </div>
             </div>
             <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-3">
               <p className="text-white/15 text-[11px]">
-                © 2026 EDUos — Education Operating System. All rights reserved.
+                © 2026 Ykay Platform — Education Operating System. All rights reserved.
               </p>
               <div className="flex gap-5 text-[11px] text-white/15">
                 <a href="#" className="hover:text-white/30">

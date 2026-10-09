@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import Link from "next/link";
 import { AnimatedText } from "@/components/AnimatedText";
 import {
@@ -68,7 +68,7 @@ export default function Services() {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
           {SERVICES.map((s, i) => (
-            <motion.div
+            <m.div
               key={s.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -95,7 +95,7 @@ export default function Services() {
                   Learn More <ArrowRight size={12} />
                 </span>
               </Link>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

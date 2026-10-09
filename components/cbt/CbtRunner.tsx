@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, Clock, Flag, ListChecks, RotateCcw, X } from "lucide-react";
 
 import type { PublicQuestion } from "@/lib/cbt";
@@ -583,7 +583,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
         </div>
 
         {mode === "practice" && check ? (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             className={`mt-5 rounded-2xl border p-4 font-body text-xs leading-relaxed ${
@@ -598,7 +598,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
                 : `Not quite — the answer is ${LETTERS[check.correctIndex]}.`}
             </b>{" "}
             <span className="whitespace-pre-line">{check.explanation}</span>
-          </motion.div>
+          </m.div>
         ) : null}
 
         <div className="mt-7 flex items-center justify-between">

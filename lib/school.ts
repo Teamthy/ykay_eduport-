@@ -7,11 +7,11 @@ const schoolSlug = process.env.SCHOOL_SLUG || "ykay-college";
 
 /**
  * Returns (and auto-creates/updates) the default school for single-tenant
- * deployments. For EDUos multi-tenant, each school is created via onboarding.
+ * deployments. For multi-tenancy, each school is created via onboarding.
  *
  * When SCHOOL_CUSTOM_DOMAIN is set (e.g. "portal.ykaycollege.edu.ng"), the
  * school's customDomain is kept in sync so that resolveTenantFromHost finds
- * this school directly — even before EDUos has a platform domain.
+ * this school directly — even before the platform has a domain.
  */
 export async function getSchool() {
   const customDomain = process.env.SCHOOL_CUSTOM_DOMAIN?.trim() || undefined;

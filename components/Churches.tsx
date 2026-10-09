@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
 const departments = [
@@ -74,7 +74,7 @@ export default function Departments() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {departments.map((dept, i) => (
-            <motion.a
+            <m.a
               key={dept.name}
               href={dept.href}
               initial={{ opacity: 0, y: 20 }}
@@ -94,7 +94,7 @@ export default function Departments() {
                 size={18}
                 className="text-[var(--text-muted)] group-hover:text-[var(--accent-primary)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0"
               />
-            </motion.a>
+            </m.a>
           ))}
         </div>
       </div>

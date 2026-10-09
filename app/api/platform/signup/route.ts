@@ -23,11 +23,11 @@ const schema = z.object({
 });
 
 /**
- * POST /api/platform/signup — self-serve school onboarding for EDUos.
+ * POST /api/platform/signup — self-serve school onboarding for the Ykay Platform.
  * Creates a School + an ADMIN user (the school's super admin) + a FREE/trial
  * Subscription. The admin is signed in immediately.
  *
- * C-011: this is the EDUos SaaS surface. A deployment that is a single
+ * C-011: this is the platform SaaS surface. A deployment that is a single
  * school's portal (e.g. Ykay College itself) must NOT allow the public to
  * mint tenants and admin accounts, so the endpoint is disabled unless
  * ENABLE_PLATFORM_SIGNUP=true is set explicitly.
