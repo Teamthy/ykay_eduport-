@@ -2,42 +2,39 @@
 
 // HomeSections — the below-the-fold marketing sections of the home page.
 //
-// Each section is a separate, asynchronously loaded chunk (next/dynamic),
-// and the chunk request is held back until the page has fully loaded (see
-// afterLoad below). On a mobile connection the hero fills the whole first
-// viewport, so this code is not needed for the first paint: keeping it out
-// of the initial render-blocking load is what lets the LCP image paint in
-// time (the Lighthouse budget in lighthouserc.json measures exactly that).
+// Each section is its own async chunk (next/dynamic, ssr kept so the markup
+// is in the server HTML for SEO and no-JS visitors). They carry no animation
+// library and their images sit behind content-visibility:auto (see the Reveal
+// classNames), so the chunks and bytes stay off the LCP critical path
+// measured by lighthouserc.json.
 //
-// ssr stays on (the default), so the section markup is still in the
-// server-rendered HTML — search engines and no-JS visitors see the full
-// page, and hydration simply attaches once the chunk arrives while the
-// server HTML stays on screen.
+// NOTE: do not gate these loaders client-side (e.g. "load after LCP") — a
+// loader that resolves on the server but suspends on the client breaks
+// hydration and blanks the page. Gating is only safe with ssr:false.
 
 import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 import { Reveal } from "@/components/Reveal";
-import { afterLoad } from "@/lib/after-lcp";
 
-const ServiceInfo = dynamic(afterLoad(() => import("@/components/ServiceInfo")));
-const ITFlagshipSection = dynamic(afterLoad(() => import("@/components/ITFlagshipSection")));
-const AdmissionsBanner = dynamic(afterLoad(() => import("@/components/AdmissionsBanner")));
-const Services = dynamic(afterLoad(() => import("@/components/Services")));
-const Groups = dynamic(afterLoad(() => import("@/components/Groups")));
-const VirtualBridge = dynamic(afterLoad(() => import("@/components/VirtualBridge")));
-const FindUs = dynamic(afterLoad(() => import("@/components/FindUs")));
+const ServiceInfo = dynamic(() => import("@/components/ServiceInfo"));
+const ITFlagshipSection = dynamic(() => import("@/components/ITFlagshipSection"));
+const AdmissionsBanner = dynamic(() => import("@/components/AdmissionsBanner"));
+const Services = dynamic(() => import("@/components/Services"));
+const Groups = dynamic(() => import("@/components/Groups"));
+const VirtualBridge = dynamic(() => import("@/components/VirtualBridge"));
+const FindUs = dynamic(() => import("@/components/FindUs"));
 
 /** Sections between the hero and the marquee. */
 export function HomeSectionsTop() {
   return (
     <>
-      <Reveal variant="up">
+      <Reveal variant="up" className="cv-auto">
         <ServiceInfo />
       </Reveal>
-      <Reveal variant="left" delay={60}>
+      <Reveal variant="left" delay={60} className="cv-auto">
         <ITFlagshipSection />
       </Reveal>
-      <Reveal variant="right" delay={60}>
+      <Reveal variant="right" delay={60} className="cv-auto">
         <AdmissionsBanner />
       </Reveal>
     </>
@@ -50,17 +47,17 @@ export function HomeSectionsTop() {
 export function HomeSectionsBottom({ children }: { children: ReactNode }) {
   return (
     <>
-      <Reveal variant="zoom">
+      <Reveal variant="zoom" className="cv-auto">
         <Services />
       </Reveal>
-      <Reveal variant="blur" delay={60}>
+      <Reveal variant="blur" delay={60} className="cv-auto">
         <Groups />
       </Reveal>
       {children}
-      <Reveal variant="left" delay={60}>
+      <Reveal variant="left" delay={60} className="cv-auto">
         <VirtualBridge />
       </Reveal>
-      <Reveal variant="right" delay={60}>
+      <Reveal variant="right" delay={60} className="cv-auto">
         <FindUs />
       </Reveal>
     </>

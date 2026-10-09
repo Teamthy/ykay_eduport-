@@ -1,6 +1,5 @@
 "use client";
 
-import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 import { AnimatedText } from "@/components/AnimatedText";
@@ -62,14 +61,10 @@ export default function Clubs() {
         </div>
 
         <div className="space-y-6 md:space-y-8">
-          {clubs.map((club, i) => (
-            <m.a
+          {clubs.map((club) => (
+            <a
               key={club.title}
               href={club.href}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
               className="group flex flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-green/40 md:flex-row md:gap-10"
             >
               <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden md:aspect-auto md:h-[260px] md:w-[320px] lg:w-[380px]">
@@ -101,7 +96,7 @@ export default function Clubs() {
                   />
                 </span>
               </div>
-            </m.a>
+            </a>
           ))}
         </div>
       </div>

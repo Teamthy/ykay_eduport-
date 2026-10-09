@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, Sun, Moon, ChevronDown } from "lucide-react";
-import { m, AnimatePresence } from "framer-motion";
 import { useTheme } from "./ThemeProvider";
 import LiveClock from "./LiveClock";
 import dynamic from "next/dynamic";
@@ -104,32 +103,27 @@ export default function Header() {
                       className={`transition-transform ${activeDropdown === link.label ? "rotate-180" : ""}`}
                     />
                   </button>
-                  <AnimatePresence>
-                    {activeDropdown === link.label && (
-                      <m.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full left-1/2 -translate-x-1/2 pt-4"
-                        style={{ zIndex: 60 }}
+                  {activeDropdown === link.label && (
+                    <div
+                      className="anim-slide-down absolute top-full left-1/2 -translate-x-1/2 pt-4"
+                      style={{ zIndex: 60 }}
+                    >
+                      <div
+                        className="w-56 rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+                        style={{ backgroundColor: "#0C1824" }}
                       >
-                        <div
-                          className="w-56 rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-                          style={{ backgroundColor: "#0C1824" }}
-                        >
-                          {link.dropdown.map((item) => (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              className="block px-5 py-3 font-body text-sm text-white hover:bg-brand-green/10 hover:text-brand-green transition-colors"
-                            >
-                              {item.label}
-                            </Link>
-                          ))}
-                        </div>
-                      </m.div>
-                    )}
-                  </AnimatePresence>
+                        {link.dropdown.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className="block px-5 py-3 font-body text-sm text-white hover:bg-brand-green/10 hover:text-brand-green transition-colors"
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </>
               ) : (
                 <Link
@@ -175,51 +169,44 @@ export default function Header() {
         </div>
       </nav>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <m.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="lg:hidden overflow-hidden bg-[var(--nav-mobile-bg)] border-t border-[var(--nav-border)]"
-          >
-            <div className="flex flex-col px-6 py-6 gap-3">
-              {navLinks.map((link) => (
-                <div key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="font-body text-base text-[var(--nav-text)] hover:text-[var(--nav-text-active)] py-2 uppercase tracking-wide block"
-                  >
-                    {link.label}
-                  </Link>
-                  {link.dropdown && (
-                    <div className="pl-4 space-y-2 mt-1">
-                      {link.dropdown.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setMobileOpen(false)}
-                          className="font-body text-sm text-[var(--text-muted)] hover:text-[var(--accent-primary)] py-1 block"
-                        >
-                          — {item.label}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-              <Link
-                href="/admissions"
-                onClick={() => setMobileOpen(false)}
-                className="mt-4 inline-flex items-center justify-center rounded-full px-6 py-3 font-body text-sm font-bold tracking-widest uppercase bg-[var(--btn-secondary-bg)] text-[var(--btn-secondary-text)] shadow-[var(--btn-secondary-shadow)]"
-              >
-                Apply Now
-              </Link>
-            </div>
-          </m.div>
-        )}
-      </AnimatePresence>
+      {mobileOpen && (
+        <div className="anim-slide-down lg:hidden overflow-hidden bg-[var(--nav-mobile-bg)] border-t border-[var(--nav-border)]">
+          <div className="flex flex-col px-6 py-6 gap-3">
+            {navLinks.map((link) => (
+              <div key={link.href}>
+                <Link
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="font-body text-base text-[var(--nav-text)] hover:text-[var(--nav-text-active)] py-2 uppercase tracking-wide block"
+                >
+                  {link.label}
+                </Link>
+                {link.dropdown && (
+                  <div className="pl-4 space-y-2 mt-1">
+                    {link.dropdown.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="font-body text-sm text-[var(--text-muted)] hover:text-[var(--accent-primary)] py-1 block"
+                      >
+                        — {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            <Link
+              href="/admissions"
+              onClick={() => setMobileOpen(false)}
+              className="mt-4 inline-flex items-center justify-center rounded-full px-6 py-3 font-body text-sm font-bold tracking-widest uppercase bg-[var(--btn-secondary-bg)] text-[var(--btn-secondary-text)] shadow-[var(--btn-secondary-shadow)]"
+            >
+              Apply Now
+            </Link>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

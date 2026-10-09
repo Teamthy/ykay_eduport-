@@ -1,30 +1,42 @@
 "use client";
 
-// AnimatedText — typographic motion system for Ykay College.
+// AnimatedText — typographic motion system for Ykay College (CSS-only).
 //
 // Three pieces:
 //   AnimatedText — splits text into per-letter spans and springs each one in
 //                  with a small rotate/scale overshoot (the "jumpy" feel).
-//   WordCycle    — one word at a time from a list, springing in and out.
+//   WordCycle    — one word at a time from a list, animating in and out.
 //   Marquee      — an infinite horizontal band of repeated text.
 //
-// All three honour prefers-reduced-motion: they render plain, static text with
-// no transforms. Word wrapping is preserved by wrapping each WORD in an
-// inline-block span and only splitting letters inside it, so a long headline
-// breaks between words like normal text and never mid-word.
+// The animations are plain CSS keyframes (app/globals.css) so this module —
+// which renders in the first viewport on the home and virtual pages — ships
+// no animation library on the critical path. Below-the-fold sections keep
+// framer-motion through LazyMotion and load it after the LCP paint.
+//
+// All three honour prefers-reduced-motion via the CSS media query (the
+// animations switch off; WordCycle also stops cycling). Word wrapping is
+// preserved by wrapping each WORD in an inline-block span and only splitting
+// letters inside it, so a long headline breaks between words like normal
+// text and never mid-word.
 
-import { m, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 /** Elements this component may render as. Kept concrete so the JSX children
  * type stays sound under React 19's stricter intrinsic-element typing. */
 type TextTag = "span" | "div" | "p" | "h1" | "h2" | "h3" | "h4";
 
-const SPRING = { type: "spring", stiffness: 300, damping: 14, mass: 0.6 } as const;
-
-/** Heavier, slower-settling spring used by the big editorial headlines. */
-const SPRING_HEAVY = { type: "spring", stiffness: 220, damping: 11, mass: 1.05 } as const;
+function usePrefersReducedMotion(): boolean {
+  const [reduce, setReduce] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduce(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReduce(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return reduce;
+}
 
 /** Per-letter springy reveal. Splits on spaces so words never break apart. */
 export function AnimatedText({
@@ -34,8 +46,8 @@ export function AnimatedText({
   delay = 0,
   stagger = 0.025,
   heavy = false,
-  once = true,
-  animateOnLoad = false,
+  once: _once = true,
+  animateOnLoad: _animateOnLoad = false,
 }: {
   text: string;
   className?: string;
@@ -51,20 +63,12 @@ export function AnimatedText({
   /** Animate immediately on mount instead of when scrolled into view. */
   animateOnLoad?: boolean;
 }) {
-  const reduce = useReducedMotion();
-
-  if (reduce) return <Tag className={className}>{text}</Tag>;
-
   const words = text.split(" ");
   let index = 0;
 
-  const motionProps = animateOnLoad
-    ? { animate: "show" as const }
-    : { whileInView: "show" as const, viewport: { once, margin: "-40px" } };
-
   return (
     <Tag className={className}>
-      <m.span initial="hidden" {...motionProps} style={{ display: "inline" }}>
+      <span style={{ display: "inline" }}>
         {words.map((word, w) => (
           <span
             key={`${word}-${w}`}
@@ -74,58 +78,31 @@ export function AnimatedText({
             {Array.from(word).map((char, c) => {
               const i = index++;
               return (
-                <m.span
+                <span
                   key={`${char}-${c}`}
-                  style={{ display: "inline-block", willChange: "transform" }}
-                  variants={
-                    heavy
-                      ? {
-                          hidden: {
-                            opacity: 0,
-                            y: "1.05em",
-                            rotate: -14,
-                            scale: 0.62,
-                            filter: "blur(9px)",
-                          },
-                          show: {
-                            opacity: 1,
-                            y: 0,
-                            rotate: 0,
-                            scale: 1,
-                            filter: "blur(0px)",
-                            transition: { ...SPRING_HEAVY, delay: delay + i * stagger },
-                          },
-                        }
-                      : {
-                          hidden: { opacity: 0, y: "0.5em", rotate: -8, scale: 0.8 },
-                          show: {
-                            opacity: 1,
-                            y: 0,
-                            rotate: 0,
-                            scale: 1,
-                            transition: { ...SPRING, delay: delay + i * stagger },
-                          },
-                        }
-                  }
+                  className={heavy ? "anim-char-heavy" : "anim-char"}
+                  style={{ animationDelay: `${(delay + i * stagger).toFixed(3)}s` }}
                 >
                   {char}
-                </m.span>
+                </span>
               );
             })}
-            {w < words.length - 1 ? "\u00A0" : null}
+            {w < words.length - 1 ? " " : null}
           </span>
         ))}
-      </m.span>
+      </span>
+      {/* Screen readers get the plain text once, not letter by letter. */}
+      <span className="sr-only">{text}</span>
     </Tag>
   );
 }
 
-/** Rotating word — springs the old word out and the next one in. */
+/** Rotating word — animates the current word in; previous word swaps out. */
 export function WordCycle({
   words,
   className,
   interval = 2200,
-  heavy = false,
+  heavy: _heavy = false,
   smooth = false,
   fitWords = false,
   fitBasis = 100,
@@ -136,13 +113,9 @@ export function WordCycle({
   className?: string;
   /** Milliseconds each word stays on screen. */
   interval?: number;
-  /** Heavier swap: bigger travel, more overshoot, blur on the outgoing word. */
+  /** Kept for API compatibility — CSS uses one springy reveal. */
   heavy?: boolean;
-  /**
-   * Calm swap for inline running text: a plain crossfade with a short eased
-   * slide. No spring physics, no rotation, no blur, no per-word resizing —
-   * nothing bounces and nothing reflows, so surrounding text stays put.
-   */
+  /** Calm swap: plain crossfade with a short eased slide. */
   smooth?: boolean;
   /**
    * Size each word individually so every one spans the same width, however
@@ -157,7 +130,7 @@ export function WordCycle({
   /** Letter-spacing applied by the caller, in em, so fitting can account for it. */
   tracking?: number;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
   const [i, setI] = useState(0);
   const count = words.length;
 
@@ -221,36 +194,23 @@ export function WordCycle({
       style={{
         display: "inline-grid",
         verticalAlign: "bottom",
-        ...(fitWords ? { containerType: "inline-size", width: "100%" } : null),
+        ...(fitWords ? { containerType: "inline-size" as const, width: "100%" } : null),
       }}
     >
       {words.map((word, idx) => (
-        <m.span
+        <span
           key={word}
           aria-hidden={idx === i ? undefined : "true"}
+          className={idx === i ? (smooth ? "anim-rise" : "anim-char") : undefined}
           style={{
             gridArea: "1 / 1",
             display: "inline-block",
-            ...(fitWords ? { fontSize: fitSize(word), whiteSpace: "nowrap" } : null),
+            visibility: idx === i ? "visible" : "hidden",
+            ...(fitWords ? { fontSize: fitSize(word), whiteSpace: "nowrap" as const } : null),
           }}
-          initial={false}
-          animate={
-            idx === i
-              ? smooth
-                ? { opacity: 1, y: 0 }
-                : { opacity: 1, y: 0, rotate: 0, scale: 1, filter: "blur(0px)" }
-              : heavy
-                ? { opacity: 0, y: "-0.9em", rotate: 10, scale: 0.7, filter: "blur(10px)" }
-                : smooth
-                  ? { opacity: 0, y: "0.35em" }
-                  : { opacity: 0, y: "-0.45em", rotate: 5, scale: 0.85, filter: "blur(0px)" }
-          }
-          transition={
-            smooth ? { duration: 0.55, ease: [0.22, 1, 0.36, 1] } : heavy ? SPRING_HEAVY : SPRING
-          }
         >
           {word}
-        </m.span>
+        </span>
       ))}
     </span>
   );
@@ -262,7 +222,7 @@ export function Marquee({
   className,
   itemClassName,
   duration = 26,
-  separator = "\u00B7",
+  separator = "·",
 }: {
   items: string[];
   className?: string;
@@ -271,7 +231,6 @@ export function Marquee({
   duration?: number;
   separator?: ReactNode;
 }) {
-  const reduce = useReducedMotion();
   const run = [...items, ...items];
 
   const row = (
@@ -285,24 +244,15 @@ export function Marquee({
     </span>
   );
 
-  if (reduce) {
-    return (
-      <div className={className} aria-hidden="true" style={{ overflow: "hidden" }}>
-        <span style={{ display: "inline-flex", whiteSpace: "nowrap" }}>{row}</span>
-      </div>
-    );
-  }
-
   return (
     <div className={className} aria-hidden="true" style={{ overflow: "hidden" }}>
-      <m.div
-        style={{ display: "inline-flex", whiteSpace: "nowrap", willChange: "transform" }}
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration, ease: "linear", repeat: Infinity }}
+      <div
+        className="anim-marquee"
+        style={{ "--marquee-duration": `${duration}s` } as CSSProperties}
       >
         {row}
         {row}
-      </m.div>
+      </div>
     </div>
   );
 }

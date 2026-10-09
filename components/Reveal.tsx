@@ -1,22 +1,24 @@
 "use client";
 
-// Reveal — energetic scroll-reveal for marketing sections.
-// Spring physics give a lively little pop as each section lands; honours the
-// user's reduced-motion preference (renders immediately, no transform).
-// `delay` is in milliseconds.
+// Reveal — energetic scroll-reveal for marketing sections (CSS-only).
+//
+// An IntersectionObserver adds a class when the section enters the viewport;
+// the spring-like rise/zoom/blur comes from CSS (app/globals.css), so this
+// component — which wraps every below-the-fold section on the public pages —
+// ships no animation library on the critical path.
+//
+// Honours the user's reduced-motion preference (renders immediately, no
+// transform). `delay` is in milliseconds.
 
-import { m, useReducedMotion } from "framer-motion";
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
-const VARIANTS = {
-  up: { initial: { opacity: 0, y: 36 }, target: { opacity: 1, y: 0 } },
-  left: { initial: { opacity: 0, x: -48 }, target: { opacity: 1, x: 0 } },
-  right: { initial: { opacity: 0, x: 48 }, target: { opacity: 1, x: 0 } },
-  zoom: { initial: { opacity: 0, scale: 0.88 }, target: { opacity: 1, scale: 1 } },
-  blur: {
-    initial: { opacity: 0, y: 24, filter: "blur(10px)" },
-    target: { opacity: 1, y: 0, filter: "blur(0px)" },
-  },
+const CLASSES = {
+  up: "reveal-up",
+  left: "reveal-left",
+  right: "reveal-right",
+  zoom: "reveal-zoom",
+  blur: "reveal-blur",
 } as const;
 
 export function Reveal({
@@ -28,21 +30,44 @@ export function Reveal({
   children: ReactNode;
   delay?: number;
   /** Motion personality — vary per section so the page never feels uniform. */
-  variant?: keyof typeof VARIANTS;
+  variant?: keyof typeof CLASSES;
   className?: string;
 }) {
-  const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
-  const v = VARIANTS[variant];
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setShown(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setShown(true);
+            io.disconnect();
+          }
+        }
+      },
+      // Slightly before the section scrolls into view, like the old margin.
+      { rootMargin: "-60px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const style: CSSProperties | undefined = delay ? { transitionDelay: `${delay}ms` } : undefined;
+
   return (
-    <m.div
-      className={className}
-      initial={v.initial}
-      whileInView={v.target}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ type: "spring", stiffness: 120, damping: 16, mass: 0.9, delay: delay / 1000 }}
+    <div
+      ref={ref}
+      className={`${CLASSES[variant]} ${shown ? "reveal-shown" : ""} ${className ?? ""}`}
+      style={style}
     >
       {children}
-    </m.div>
+    </div>
   );
 }

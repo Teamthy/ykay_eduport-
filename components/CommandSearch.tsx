@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
-import { m, AnimatePresence } from "framer-motion";
 
 const SEARCHABLE = [
   { title: "Homepage", desc: "Ykay College main page", url: "/", type: "Page" },
@@ -87,86 +86,78 @@ export default function CommandSearch() {
         <Search size={18} />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <m.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex items-start justify-center pt-24 px-6"
-            onClick={() => setOpen(false)}
+      {open && (
+        <div
+          className="animate-fade-in fixed inset-0 z-[9999] flex items-start justify-center pt-24 px-6"
+          onClick={() => setOpen(false)}
+        >
+          {/* SOLID BACKDROP — blocks everything underneath */}
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md" />
+
+          {/* Modal — on top of backdrop */}
+          <div
+            className="relative w-full max-w-2xl bg-brand-navy border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+            style={{ zIndex: 10000, animation: "scaleIn 0.25s ease-out both" }}
           >
-            {/* SOLID BACKDROP — blocks everything underneath */}
-            <div className="fixed inset-0 bg-black/90 backdrop-blur-md" />
+            {/* Search Input */}
+            <div className="flex items-center gap-3 p-4 border-b border-white/10 bg-brand-navy">
+              <Search size={18} className="text-brand-green shrink-0" />
+              <input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search pages, portals, features..."
+                className="flex-1 bg-transparent outline-none text-white placeholder:text-white/50 text-base"
+              />
+              <button
+                onClick={() => setOpen(false)}
+                className="text-white/60 hover:text-white transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
 
-            {/* Modal — on top of backdrop */}
-            <m.div
-              initial={{ scale: 0.95, y: -20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: -20 }}
-              className="relative w-full max-w-2xl bg-brand-navy border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-              style={{ zIndex: 10000 }}
-            >
-              {/* Search Input */}
-              <div className="flex items-center gap-3 p-4 border-b border-white/10 bg-brand-navy">
-                <Search size={18} className="text-brand-green shrink-0" />
-                <input
-                  autoFocus
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search pages, portals, features..."
-                  className="flex-1 bg-transparent outline-none text-white placeholder:text-white/50 text-base"
-                />
-                <button
-                  onClick={() => setOpen(false)}
-                  className="text-white/60 hover:text-white transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* Results — SOLID background */}
-              <div className="max-h-[400px] overflow-y-auto bg-brand-navy p-2">
-                {filtered.length > 0 ? (
-                  filtered.map((item) => (
-                    <button
-                      key={item.url}
-                      onClick={() => handleSelect(item.url)}
-                      className="w-full text-left p-3 rounded-lg hover:bg-brand-green/10 transition-colors group flex items-center justify-between gap-4"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-bold text-white group-hover:text-brand-green transition-colors">
-                          {item.title}
-                        </div>
-                        <div className="text-xs text-white/60 mt-0.5">{item.desc}</div>
+            {/* Results — SOLID background */}
+            <div className="max-h-[400px] overflow-y-auto bg-brand-navy p-2">
+              {filtered.length > 0 ? (
+                filtered.map((item) => (
+                  <button
+                    key={item.url}
+                    onClick={() => handleSelect(item.url)}
+                    className="w-full text-left p-3 rounded-lg hover:bg-brand-green/10 transition-colors group flex items-center justify-between gap-4"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-bold text-white group-hover:text-brand-green transition-colors">
+                        {item.title}
                       </div>
-                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-white/60 uppercase tracking-wider font-bold shrink-0">
-                        {item.type}
-                      </span>
-                    </button>
-                  ))
-                ) : (
-                  <div className="p-8 text-center text-white/60">
-                    No results found for &ldquo;{query}&rdquo;
-                  </div>
-                )}
-              </div>
+                      <div className="text-xs text-white/60 mt-0.5">{item.desc}</div>
+                    </div>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/10 text-white/60 uppercase tracking-wider font-bold shrink-0">
+                      {item.type}
+                    </span>
+                  </button>
+                ))
+              ) : (
+                <div className="p-8 text-center text-white/60">
+                  No results found for &ldquo;{query}&rdquo;
+                </div>
+              )}
+            </div>
 
-              {/* Footer */}
-              <div className="p-3 border-t border-white/10 text-[10px] text-white/60 flex justify-between items-center bg-brand-navy">
-                <span>Search anything on Ykay College</span>
-                <span className="flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white/60 font-mono">⌘</kbd>
-                  <span>+</span>
-                  <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white/60 font-mono">K</kbd>
-                  <span className="ml-1">to open</span>
-                </span>
-              </div>
-            </m.div>
-          </m.div>
-        )}
-      </AnimatePresence>
+            {/* Footer */}
+            <div className="p-3 border-t border-white/10 text-[10px] text-white/60 flex justify-between items-center bg-brand-navy">
+              <span>Search anything on Ykay College</span>
+              <span className="flex items-center gap-1">
+                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white/60 font-mono">⌘</kbd>
+                <span>+</span>
+                <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white/60 font-mono">K</kbd>
+                <span className="ml-1">to open</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

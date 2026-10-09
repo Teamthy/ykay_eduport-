@@ -1,6 +1,5 @@
 "use client";
 
-import { m } from "framer-motion";
 import { AnimatedText } from "@/components/AnimatedText";
 import { ArrowRight, FileCheck2, CreditCard, CalendarClock } from "lucide-react";
 
@@ -27,48 +26,25 @@ export default function AdmissionsBanner() {
 
       <div className="relative z-10 mx-auto w-full px-6 py-16 md:px-10 md:py-24">
         <div className="max-w-2xl">
-          <m.span
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-2 rounded-full bg-brand-green/20 px-4 py-1.5 font-body text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green ring-1 ring-brand-green/40 backdrop-blur-sm"
-          >
+          <span className="inline-flex items-center gap-2 rounded-full bg-brand-green/20 px-4 py-1.5 font-body text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green ring-1 ring-brand-green/40 backdrop-blur-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-brand-green" /> Admissions Open · 2025 /
             2026
-          </m.span>
+          </span>
 
-          <m.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="mt-5 font-display text-[clamp(2.25rem,6.5vw,5.5rem)] leading-[0.86] tracking-[-0.015em] text-white"
-          >
+          <h2 className="mt-5 font-display text-[clamp(2.25rem,6.5vw,5.5rem)] leading-[0.86] tracking-[-0.015em] text-white">
             <AnimatedText heavy stagger={0.03} text="BEGIN THE" className="block" />
             <span className="block text-brand-green">
               <AnimatedText heavy stagger={0.03} text="JOURNEY" delay={0.2} />
             </span>
-          </m.h2>
+          </h2>
 
-          <m.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="mt-5 max-w-lg font-body text-sm leading-relaxed text-white/85 md:text-base"
-          >
+          <p className="mt-5 max-w-lg font-body text-sm leading-relaxed text-white/85 md:text-base">
             A premium day secondary school raising role models through rigorous academics,
             leadership and character formation. Apply online and track your application in real
             time.
-          </m.p>
+          </p>
 
-          <m.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="mt-7 flex flex-wrap gap-x-6 gap-y-3"
-          >
+          <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3">
             {HIGHLIGHTS.map((h) => (
               <div
                 key={h.label}
@@ -78,15 +54,9 @@ export default function AdmissionsBanner() {
                 {h.label}
               </div>
             ))}
-          </m.div>
+          </div>
 
-          <m.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
-            className="mt-9 flex flex-wrap items-center gap-4"
-          >
+          <div className="mt-9 flex flex-wrap items-center gap-4">
             <a
               href="/admissions"
               className="inline-flex items-center gap-3 rounded-full bg-brand-orange px-8 py-4 font-body text-sm font-bold uppercase tracking-[0.15em] text-brand-navy shadow-lg shadow-black/30 transition-all duration-300 hover:scale-[1.04] hover:bg-brand-orange-dark active:scale-[0.97]"
@@ -99,7 +69,7 @@ export default function AdmissionsBanner() {
             >
               Check application status →
             </a>
-          </m.div>
+          </div>
         </div>
       </div>
     </section>

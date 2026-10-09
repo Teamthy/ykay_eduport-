@@ -1,6 +1,5 @@
 "use client";
 
-import { m } from "framer-motion";
 import Link from "next/link";
 import { AnimatedText } from "@/components/AnimatedText";
 import {
@@ -67,14 +66,8 @@ export default function Services() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
-          {SERVICES.map((s, i) => (
-            <m.div
-              key={s.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-            >
+          {SERVICES.map((s) => (
+            <div key={s.title}>
               <Link
                 href={s.href}
                 className="group block h-full rounded-[1.75rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)] hover:border-brand-green hover:shadow-[var(--card-shadow-hover)] hover:-translate-y-1 transition-all duration-300"
@@ -95,7 +88,7 @@ export default function Services() {
                   Learn More <ArrowRight size={12} />
                 </span>
               </Link>
-            </m.div>
+            </div>
           ))}
         </div>
       </div>

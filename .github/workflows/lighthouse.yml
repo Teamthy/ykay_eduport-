@@ -55,8 +55,24 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Run Lighthouse CI
-        run: npx --yes @lhci/cli@0.14.x autorun
+        run: |
+          set +e
+          npx --yes @lhci/cli@0.14.x autorun
+          code=$?
+          set -e
+          # Surface the numbers where they can always be read back (run
+          # annotations), because raw step logs are easy to lose track of.
+          node scripts/lighthouse-report-summary.mjs || true
+          exit $code
         env:
           LHCI_NAME: ykay-college
         # lighthouserc.json points at the seeded standalone server via
         # e2e-server.mjs, so budgets measure the real production artefact.
+
+      - name: Upload Lighthouse reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 7

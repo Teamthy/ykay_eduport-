@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useCallback } from "react";
 import { CheckCircle2, XCircle, Info, AlertTriangle, X } from "lucide-react";
-import { m, AnimatePresence } from "framer-motion";
 
 type ToastType = "success" | "error" | "info" | "warning";
 interface Toast {
@@ -44,29 +43,24 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ toast }}>
       {children}
       <div className="fixed top-6 right-6 z-[200] space-y-2 pointer-events-none">
-        <AnimatePresence>
-          {toasts.map((t) => {
-            const Icon = icons[t.type];
-            return (
-              <m.div
-                key={t.id}
-                initial={{ opacity: 0, x: 100, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 100, scale: 0.95 }}
-                className={`${colors[t.type]} pointer-events-auto rounded-2xl px-5 py-4 shadow-2xl flex items-center gap-3 min-w-[280px] max-w-md`}
+        {toasts.map((t) => {
+          const Icon = icons[t.type];
+          return (
+            <div
+              key={t.id}
+              className={`anim-toast-in ${colors[t.type]} pointer-events-auto rounded-2xl px-5 py-4 shadow-2xl flex items-center gap-3 min-w-[280px] max-w-md`}
+            >
+              <Icon size={18} strokeWidth={2.5} />
+              <span className="text-sm font-medium flex-1">{t.message}</span>
+              <button
+                onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
+                className="opacity-70 hover:opacity-100"
               >
-                <Icon size={18} strokeWidth={2.5} />
-                <span className="text-sm font-medium flex-1">{t.message}</span>
-                <button
-                  onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
-                  className="opacity-70 hover:opacity-100"
-                >
-                  <X size={14} />
-                </button>
-              </m.div>
-            );
-          })}
-        </AnimatePresence>
+                <X size={14} />
+              </button>
+            </div>
+          );
+        })}
       </div>
     </ToastContext.Provider>
   );

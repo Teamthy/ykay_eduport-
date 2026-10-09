@@ -1,6 +1,5 @@
 "use client";
 
-import { m } from "framer-motion";
 import Link from "next/link";
 import { MapPin, ArrowRight, Play } from "lucide-react";
 
@@ -13,12 +12,7 @@ export default function FindUs() {
       <div className="mx-auto w-full px-6 md:px-10">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
           {/* Find Us */}
-          <m.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
+          <div>
             <span className="font-body text-[10px] font-bold tracking-[0.25em] uppercase text-brand-green mb-4 block">
               FIND US
             </span>
@@ -80,15 +74,10 @@ export default function FindUs() {
                 </p>
               </div>
             )}
-          </m.div>
+          </div>
 
           {/* Latest News */}
-          <m.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-          >
+          <div>
             <span className="font-body text-[10px] font-bold tracking-[0.25em] uppercase text-brand-green mb-4 block">
               FEATURED NEWS
             </span>
@@ -141,7 +130,7 @@ export default function FindUs() {
             >
               View All News <ArrowRight size={14} />
             </Link>
-          </m.div>
+          </div>
         </div>
       </div>
     </section>
