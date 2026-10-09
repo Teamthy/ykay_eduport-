@@ -4,6 +4,8 @@
 **Scope:** YKAY College as the main product (EDUos treated as later; YKAY as a tenant).
 **Method:** a production build run as a real user in a headless browser across every role, scripted user journeys (including the assessment, fee and messaging cycles), plus API probing of every route handler.
 
+**Status (2026-10-09):** blockers B1–B7 are fixed in [PR #24](https://github.com/Teamthy/ykay_eduport-/pull/24). High, medium and low items are still open. See section 11.
+
 ---
 
 ## 1. Verdict
@@ -442,3 +444,38 @@ These are not code defects. The server reports them at boot, and each one disabl
 7. H3–H8 (show the fee-lock reason, invoice titles, payment messages, Sentry, the public CBT API, the YK-Virtual link).
 
 Re-run the journeys after each group (for example `j-exam-cycle.mjs`, `j-fees-reject.mjs`, `j-superadmin-ui.mjs` and `j-admissions3.mjs`).
+
+---
+
+## 11. Blocker status (2026-10-09)
+
+**Pull request:** [PR #24](https://github.com/Teamthy/ykay_eduport-/pull/24), branch `arena/8ce3ce03-ykay-eduport`, fix commit `94e38b0`.
+
+| ID | Blocker | Status | Where the fix is | Verified |
+|---|---|---|---|---|
+| B1 | IT students cannot enrol | Fixed | `components/it/EnrolButton.tsx`, used on the course page, dashboard and learn page | `[browser]` enrol returns 200; the learn page updates after enrolling from its banner; Mark as Complete is enabled; progress is refused with a readable message until enrolment |
+| B2 | Contact form discards enquiries | Fixed | `app/api/contact/route.ts`, `ContactEnquiry` model, migration `20261009120000_add_contact_enquiry`, `app/contact/page.tsx` | `[browser]` success shown only after 201; office alerted in-app. `[DB]` RLS checked as a non-superuser role |
+| B3 | Upload blocked by the CSP | Fixed. Production needs storage configured | `lib/csp.ts`, `middleware.ts`, `next.config.ts`; upload routes return 503 when storage is unset | `[browser]` storage unset: 503 with plain text. Storage configured: exact origin allowed, PUT attempted, no CSP violation |
+| B4 | Sign-in heading and fields nearly invisible | Fixed | `app/login/page.tsx`, `.login-field` in `app/globals.css` | `[browser]` four portal variants: heading 17.9:1, field border 4.76:1 |
+| B5 | Open redirect after sign-in | Fixed | `lib/safe-redirect.ts`, `app/login/page.tsx` | `[browser]` external, protocol-relative and backslash values land on the role home page |
+| B6 | QR codes sent to a third party | Fixed | `lib/qr.ts`, `components/QrImage.tsx`, `lib/apk.ts`. The qrserver URLs are removed | `[browser]` QR images are local `data:` URLs; no QR request leaves the site |
+| B7 | Unconfirmed school address printed | Fixed. Owner decision open | `lib/school-address.ts`, `/admin/school-profile`, migration `20261009130000_clear_unconfirmed_school_address` | `[browser]` address absent until set, shown everywhere once set, removed when cleared |
+
+**Open decisions**
+
+- **B7, who may set the address.** The PR allows ADMIN, DIRECTOR and SUPER_ADMIN. The school has not yet confirmed this.
+- **B3, production configuration.** Uploads need `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` and the bucket CORS rule in `docs/S3_ADMISSIONS_CORS.json`. Without them, an admissions application cannot be submitted.
+- **B2, delivery.** The office is always alerted in-app. Email is sent only when `RESEND_API_KEY` is set. Without Redis, the contact limit is per instance.
+
+**Found while verifying B1–B7, not fixed in this PR** (admissions form; severity to be assigned)
+
+- Step 1 silently refuses to continue. `bloodGroup` and `genotype` start as `undefined`, and `admissionDraftSchema` rejects that, but the errors are not rendered. Workaround: pick the blank option in both selects.
+- Step 2: the optional WhatsApp field fails with "Required" when left untouched (`whatsappPhone`). The form cannot continue until a number is entered.
+- The documents step needs all four uploads, so the payment step cannot be reached while storage is unavailable.
+
+**Verification of the fixes**
+
+- Production build, Prettier, lint (no errors), typecheck, unit tests (736 pass; the two `tests/mobile` suites need `mobile/node_modules`), Playwright E2E (53 of 53 pass), dead-UI, orphan-page, client-boundary and tenant-coverage checks, `verify:admissions` (14 of 14), and RLS coverage (42 of 42 tenant tables).
+- Not run in the sandbox: `check:drift`, `verify:rls` and `verify:rls:coverage`, because the sandbox cannot run the Prisma schema engine or the datasource override these scripts use. CI runs them.
+
+**Still open:** High items H1–H12, Medium items M1–M14 and the low items in sections 4 and 5.
