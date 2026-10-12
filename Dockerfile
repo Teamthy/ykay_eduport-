@@ -6,10 +6,18 @@
 # Stage 1: Dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci --only=production && \
-    cp -R node_modules /app/prod_modules && \
-    npm ci
+# Keep the project's npm peer-dependency policy with the lockfile; Render's
+# npm ci runs inside this image layer, not at the repository root.
+COPY package.json package-lock.json .npmrc ./
+# Generate Prisma's client during npm ci/postinstall from the schema, without
+# copying the entire application into this dependency-cache layer.
+COPY prisma/schema.prisma ./prisma/schema.prisma
+# The builder needs dev tools such as Prisma CLI, TypeScript and esbuild.
+# Install the lockfile once with dev dependencies; Next's standalone output
+# traces only the runtime dependencies into the final image. A separate
+# --only=production install here makes npm resolve optional peers against a
+# different tree and can fail on build-only TypeScript peer ranges.
+RUN npm ci --include=dev
 
 # Stage 2: Build
 FROM node:20-alpine AS builder

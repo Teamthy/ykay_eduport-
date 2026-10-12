@@ -537,8 +537,11 @@ async function main() {
   // ── Summary ──────────────────────────────────────────────────
   console.log("═══════════════════════════════════════════════════════");
   console.log("✅ Seed complete!\n");
-  console.log("📋 Login Credentials (all passwords are the same):\n");
-  console.log(`   Password: ${DEFAULT_PASSWORD}\n`);
+  console.log("📋 Test Login Directory (password value is not printed):\n");
+  console.log("   Password: the operator-supplied SEED_PASSWORD (same for all seeded accounts)\n");
+  console.log(
+    "   ⚠️ Demo only: this shared password also opens SUPER_ADMIN. Use only on an isolated test database; do not distribute it with privileged account emails.\n",
+  );
   console.log(
     "   ┌─────────────────────────────────────┬──────────────────────────────┬─────────────────┐",
   );

@@ -175,6 +175,7 @@ npm run android   # or: npm run ios / npm run web
 
 ## Documentation
 
+- [Portal UAT tester pack](docs/portal-uat-tester-pack.md)
 - [Deployment Guide](docs/deployment.md)
 - [Backend Development](docs/backend-development-document.md)
 - [Frontend Development](docs/frontend-development-document.md)

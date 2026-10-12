@@ -261,6 +261,14 @@ describe("no hardcoded seed credentials", () => {
     expect(seed).toContain("process.exit(1)");
   });
 
+  it("does not print the shared seed password into logs", () => {
+    const seed = readFileSync("prisma/seed-all.ts", "utf8");
+    const summary = seed.slice(seed.indexOf("// ── Summary"));
+    expect(summary).not.toContain("DEFAULT_PASSWORD");
+    expect(summary).toMatch(/password value is not printed/i);
+    expect(summary).toMatch(/isolated test database/i);
+  });
+
   it("make-student-login has no fallback password", () => {
     const script = readFileSync("scripts/make-student-login.ts", "utf8");
     expect(script).not.toContain(LEAKED);
