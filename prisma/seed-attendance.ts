@@ -42,6 +42,11 @@ function generatedPassword(prefix: string) {
   return `${prefix}-${crypto.randomBytes(10).toString("base64url")}`;
 }
 
+// Keep attendance bootstrap profiles separate from the sequential IDs used by
+// seed-all. The old YKC/YYYY/001-006 IDs overwrote the core demo students when
+// the two seeds were run together, unlinking their login accounts.
+const FIXTURE_YEAR = new Date().getFullYear();
+
 async function upsertPortalUser(config: SeedUserConfig, schoolId: string): Promise<SeedUserResult> {
   const existing = await prisma.user.findFirst({ where: { email: config.email, schoolId } });
   const providedPassword = config.passwordEnv ? optionalEnv(config.passwordEnv) : null;
@@ -209,7 +214,7 @@ async function main() {
 
   const studentConfigs = [
     {
-      studentId: "YKC/2026/001",
+      studentId: `YKC/${FIXTURE_YEAR}/ATT-001`,
       firstName: "Emmanuel",
       lastName: "Adebayo",
       displayName: "Emmanuel Adebayo",
@@ -220,7 +225,7 @@ async function main() {
       userId: studentUser.id,
     },
     {
-      studentId: "YKC/2026/002",
+      studentId: `YKC/${FIXTURE_YEAR}/ATT-002`,
       firstName: "Fatima",
       lastName: "Yusuf",
       displayName: "Fatima Yusuf",
@@ -231,7 +236,7 @@ async function main() {
       userId: null,
     },
     {
-      studentId: "YKC/2026/003",
+      studentId: `YKC/${FIXTURE_YEAR}/ATT-003`,
       firstName: "Blessing",
       lastName: "Eze",
       displayName: "Blessing Eze",
@@ -242,7 +247,7 @@ async function main() {
       userId: null,
     },
     {
-      studentId: "YKC/2026/004",
+      studentId: `YKC/${FIXTURE_YEAR}/ATT-004`,
       firstName: "Chinedu",
       lastName: "Okoro",
       displayName: "Chinedu Okoro",
@@ -253,7 +258,7 @@ async function main() {
       userId: null,
     },
     {
-      studentId: "YKC/2026/005",
+      studentId: `YKC/${FIXTURE_YEAR}/ATT-005`,
       firstName: "Aisha",
       lastName: "Ibrahim",
       displayName: "Aisha Ibrahim",
@@ -264,7 +269,7 @@ async function main() {
       userId: null,
     },
     {
-      studentId: "YKC/2026/006",
+      studentId: `YKC/${FIXTURE_YEAR}/ATT-006`,
       firstName: "David",
       lastName: "Okoye",
       displayName: "David Okoye",
@@ -275,6 +280,18 @@ async function main() {
       userId: null,
     },
   ];
+
+  const fixtureStudentIds = studentConfigs.map((student) => student.studentId);
+  // If an older version of this seed linked the demo login to a core-seed
+  // profile, release that stale relation before linking the dedicated fixture.
+  await prisma.studentProfile.updateMany({
+    where: {
+      schoolId: school.id,
+      userId: studentUser.id,
+      studentId: { notIn: fixtureStudentIds },
+    },
+    data: { userId: null },
+  });
 
   const studentProfiles = [] as Awaited<ReturnType<typeof prisma.studentProfile.upsert>>[];
   for (const config of studentConfigs) {
@@ -309,6 +326,15 @@ async function main() {
     });
     studentProfiles.push(profile);
   }
+
+  // Keep the dedicated bootstrap parent linked only to its fixture children.
+  // This also cleans stale links from the old colliding student IDs.
+  await prisma.parentStudentLink.deleteMany({
+    where: {
+      parentProfileId: parentProfile.id,
+      studentProfileId: { notIn: studentProfiles.map((student) => student.id) },
+    },
+  });
 
   await prisma.parentStudentLink.upsert({
     where: {
