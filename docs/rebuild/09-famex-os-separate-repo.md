@@ -26,6 +26,16 @@ written log, and shared-core files tagged `// SHARED-CORE: ykay@<sha>`.
 
 ## Where the work now lives
 
+**Which product is being rebuilt (clarified 2026-10-13).** This repo contains two
+products: the **Ykay College** school OS and **EDUos**, the multi-tenant SaaS
+platform layer (tenant resolution by host, plans/subscriptions, super-admin
+console, platform landing, RLS enforcement). **Famex OS rebuilds Ykay College
+only** — the EDUos layer is stripped or frozen, and `Subscriptions` becomes the
+school's own licence/usage page. Famex is therefore a **single-school install**,
+which supersedes the "SaaS / database per school" framing in
+`01-approach.md §2` (D1). The exact strip list is in
+`docs/famex/07-master-build-prompt.md §2` of the Famex repo.
+
 - **Famex OS repo (local checkout):** `/home/user/Famex-Os` — full base platform
   imported as a fresh single commit on `main`, plus `docs/famex/`:
   `00-README.md` (surface, decisions FP-1…FP-8, phases), `01-module-map.md`
