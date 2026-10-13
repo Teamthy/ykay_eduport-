@@ -61,6 +61,8 @@
     "cleanup:artifacts": "tsx scripts/cleanup-artifacts.ts",
     "audit:routes": "tsx scripts/e2e-smoke.ts --list-only",
     "check:tenant-coverage": "tsx scripts/check-tenant-route-coverage.ts",
+    "check:features": "tsx scripts/check-feature-catalogue.ts",
+    "cost:model": "tsx scripts/cost-model.ts",
     "cbt:seed": "tsx prisma/cbt-seed.ts"
   },
   "dependencies": {
