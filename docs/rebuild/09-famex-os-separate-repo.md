@@ -49,6 +49,12 @@ which supersedes the "SaaS / database per school" framing in
   git remote add origin https://github.com/Teamthy/Famex-Os.git
   git push -u origin main
   ```
+- **Cloning this repo for the next school:** use `scripts/new-school-clone.sh`
+  rather than hand-typed git commands. It clones code-only, starts a fresh
+  history, points `origin` at the new repo, adds this repo as a *read-only*
+  `upstream` (push URL disabled), scans for secrets and writes a `.env` with the
+  previous school's identity blanked. Guards refuse nesting, `origin == source`
+  and a non-empty destination. Verified end-to-end, including all five guards.
 - **This repo (Ykay):** untouched except for this note. It remains the reference
   implementation and the source of shared-core fixes.
 
