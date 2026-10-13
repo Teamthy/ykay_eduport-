@@ -35,6 +35,8 @@
  *     ₦1.2M–2.5M+/month.
  */
 
+export type CloudProfile = "generic" | "oci-budget" | "oci-resilient";
+
 export type Profile = {
   students: number;
   families: number;
@@ -45,6 +47,8 @@ export type Profile = {
   fx: number;
   /** Marketing-category WhatsApp messages per year (see the warning in W4). */
   marketingMessages: number;
+  /** Where the backend runs. `oci-*` prices Oracle Cloud + Cloudflare (see 10). */
+  cloud: CloudProfile;
 };
 
 export const DEFAULT_PROFILE: Profile = {
@@ -57,6 +61,7 @@ export const DEFAULT_PROFILE: Profile = {
   fx: 1500,
   /** Marketing-category WhatsApp messages per year (see the warning in W4). */
   marketingMessages: 9000,
+  cloud: "generic",
 };
 
 /* ── rate card ─────────────────────────────────────────────────────────── */
@@ -124,6 +129,140 @@ export const RATES = {
   },
 } as const;
 
+/* ── Oracle Cloud Infrastructure + Cloudflare ──────────────────────────── */
+
+/**
+ * OCI public list prices, USD, verified 2026-10-13.
+ *
+ * Two facts drive the whole design:
+ *   1. **Block storage, not compute, is what a school database costs.** The
+ *      managed PostgreSQL service lists at $273.18/month for the smallest
+ *      shape (4 vCPU / 32 GB / 500 GB) — more than every other line combined.
+ *      Self-managed PostgreSQL on an Ampere A1 VM is ~$32/month.
+ *   2. **OCI gives 10 TB of internet egress free every month**, then $0.0085/GB
+ *      — roughly 10× cheaper than AWS. A 3,000-user school will not approach it.
+ *
+ * The Always Free tier is deliberately *not* used for production: Oracle halved
+ * it on 2026-06-15 (4→2 OCPU, 24→12 GB) and reclaims instances that stay under
+ * 20% CPU/network/memory for a 7-day window. It is used for staging, where a
+ * reclaim is an inconvenience rather than an outage.
+ */
+export const OCI_RATES = {
+  compute: {
+    /** Ampere A1 (Arm): cheapest shape, and Go/Node both build for arm64. */
+    a1OcpuHour: 0.01,
+    a1GbHour: 0.0015,
+    /** x86 equivalent, for comparison. */
+    e5OcpuHour: 0.03,
+    e5GbHour: 0.002,
+  },
+  /** Balanced tier: $0.0255/GB capacity + $0.017/GB for the default 10 VPUs. */
+  blockVolumeGbMonth: 0.0425,
+  objectStorageGbMonth: 0.0255,
+  infrequentAccessGbMonth: 0.015,
+  archiveGbMonth: 0.0026,
+  freeEgressTbPerMonth: 10,
+  egressPerGbAfterFree: 0.0085,
+  /** Flexible 10 Mbps minimum; not needed when Cloudflare Tunnel is the ingress. */
+  loadBalancerHour: 0.01,
+  /** OCI Database with PostgreSQL, smallest listed shape (4 vCPU / 32 GB). */
+  managedPostgresSmallMonth: 273.18,
+  /** Compute will be billed for ~730 hours in an average month. */
+  hoursPerMonth: 730,
+} as const;
+
+export const CLOUDFLARE_RATES = {
+  /** Pro moved from $20 to $25 per domain in early 2026. */
+  proMonth: 25,
+  freeMonth: 0,
+  /** R2: zero egress. Kept in the card in case media outgrows OCI Object Storage. */
+  r2StorageGbMonth: 0.015,
+  r2ClassAMillion: 4.5,
+  r2ClassBMillion: 0.36,
+  /** Zero Trust / Access: free to 50 seats, then $7/user/month. */
+  zeroTrustFreeSeats: 50,
+  zeroTrustPerUserMonth: 7,
+  /** Tunnel connectors, Turnstile and the Workers free tier carry no charge here. */
+  tunnelMonth: 0,
+  turnstileMonth: 0,
+  workersFreeRequestsPerDay: 100_000,
+} as const;
+
+/** Shape of each cloud profile, so the trade-off is a table rather than an opinion. */
+export const OCI_SHAPES = {
+  "oci-budget": {
+    label: "OCI budget",
+    app: { count: 1, ocpu: 2, gb: 12 },
+    db: { count: 1, ocpu: 2, gb: 16 },
+    blockGb: 150,
+    objectGb: 300,
+    cloudflarePro: false,
+    note: "One app VM (Go + Next.js + Valkey) and one database VM. No standby: a database failure means a restore, RTO 30–60 minutes. Right for development through the first phase of the money build.",
+  },
+  "oci-resilient": {
+    label: "OCI resilient",
+    app: { count: 1, ocpu: 4, gb: 16 },
+    db: { count: 2, ocpu: 2, gb: 16 },
+    blockGb: 300,
+    objectGb: 500,
+    cloudflarePro: true,
+    note: "Bigger app VM with room for blue/green, database hot standby with sub-2-minute failover, Cloudflare Pro for the full WAF ruleset and 20-second analytics. The configuration the school should be on before fees and results go live.",
+  },
+} as const;
+
+export type OciProfileId = keyof typeof OCI_SHAPES;
+
+/** Monthly USD for one compute instance. */
+export function ociComputeMonth(ocpu: number, gb: number, shape: "a1" | "e5" = "a1"): number {
+  const { compute, hoursPerMonth } = OCI_RATES;
+  const ocpuRate = shape === "a1" ? compute.a1OcpuHour : compute.e5OcpuHour;
+  const gbRate = shape === "a1" ? compute.a1GbHour : compute.e5GbHour;
+  return (ocpu * ocpuRate + gb * gbRate) * hoursPerMonth;
+}
+
+export function ociInfraProfile(id: OciProfileId) {
+  const shape = OCI_SHAPES[id];
+  const appCompute = ociComputeMonth(shape.app.ocpu, shape.app.gb) * shape.app.count;
+  const dbCompute = ociComputeMonth(shape.db.ocpu, shape.db.gb) * shape.db.count;
+  const block = shape.blockGb * OCI_RATES.blockVolumeGbMonth;
+  const object = shape.objectGb * OCI_RATES.objectStorageGbMonth;
+  const cloudflare = shape.cloudflarePro ? CLOUDFLARE_RATES.proMonth : CLOUDFLARE_RATES.freeMonth;
+
+  const lines = [
+    {
+      label: `App compute (${shape.app.count} × ${shape.app.ocpu} OCPU / ${shape.app.gb} GB, Ampere A1)`,
+      usd: appCompute,
+    },
+    {
+      label: `Database compute (${shape.db.count} × ${shape.db.ocpu} OCPU / ${shape.db.gb} GB, Ampere A1)`,
+      usd: dbCompute,
+    },
+    { label: `Block storage (${shape.blockGb} GB balanced)`, usd: block },
+    { label: `Object storage (${shape.objectGb} GB standard)`, usd: object },
+    { label: `Cloudflare (${shape.cloudflarePro ? "Pro" : "Free"})`, usd: cloudflare },
+  ];
+
+  return {
+    id,
+    label: shape.label,
+    note: shape.note,
+    lines,
+    /** Fixed: it runs whether or not anyone uses the system. */
+    fixedUsd: appCompute + dbCompute + cloudflare,
+    /** Usage-scaled: storage grows with the school's documents and history. */
+    usageUsd: block + object,
+    monthlyUsd: appCompute + dbCompute + block + object + cloudflare,
+  };
+}
+
+/** The unchanged part of the bill: mail and the domain, whichever cloud runs the app. */
+export function sharedInfraMonth(): { label: string; usd: number }[] {
+  return [
+    { label: "Transactional email", usd: RATES.infra.email },
+    { label: "Domain registration", usd: RATES.infra.domain },
+  ];
+}
+
 /* ── message volumes ───────────────────────────────────────────────────── */
 
 /** What the school sends in a year at the default profile. */
@@ -176,6 +315,28 @@ export function infraAnnualNgn(fx: number): number {
   return naira(infraMonthlyUsd() * 12, fx);
 }
 
+export function ociProfileId(profile: Profile): OciProfileId {
+  return profile.cloud === "oci-resilient" ? "oci-resilient" : "oci-budget";
+}
+
+/** Monthly USD for infrastructure, whichever cloud the profile selects. */
+export function resolveInfraMonthlyUsd(profile: Profile = DEFAULT_PROFILE): number {
+  if (profile.cloud === "generic") return infraMonthlyUsd();
+  const oci = ociInfraProfile(ociProfileId(profile)).monthlyUsd;
+  const shared = sharedInfraMonth().reduce((sum, line) => sum + line.usd, 0);
+  return oci + shared;
+}
+
+/** The full monthly infrastructure bill, itemised. */
+export function infraBreakdown(
+  profile: Profile = DEFAULT_PROFILE,
+): { label: string; usd: number }[] {
+  if (profile.cloud === "generic") {
+    return Object.entries(RATES.infra).map(([key, usd]) => ({ label: key, usd }));
+  }
+  return [...ociInfraProfile(ociProfileId(profile)).lines, ...sharedInfraMonth()];
+}
+
 /** Fixed infrastructure = the lines that do not move with usage. */
 export function fixedMonthlyUsd(): number {
   const { appHosting, postgres, redis, email, domain } = RATES.infra;
@@ -214,7 +375,13 @@ export function computeRecurring(profile: Profile = DEFAULT_PROFILE) {
   const ai = aiCostUsd();
   const fx = profile.fx;
 
-  const infra = infraAnnualNgn(fx);
+  const infraMonthlyUsd = resolveInfraMonthlyUsd(profile);
+  const infra = naira(infraMonthlyUsd * 12, fx);
+
+  const fixedMonthly =
+    profile.cloud === "generic"
+      ? fixedMonthlyUsd()
+      : ociInfraProfile(ociProfileId(profile)).fixedUsd + RATES.infra.email + RATES.infra.domain;
   const whatsappNgn = naira(whatsapp.totalUsd, fx);
   const sms = smsCostNgn();
   const aiNgn = naira(ai.totalUsd, fx);
@@ -222,12 +389,12 @@ export function computeRecurring(profile: Profile = DEFAULT_PROFILE) {
 
   const annualNgn = infra + whatsappNgn + sms + aiNgn;
   const paidApisNgn = whatsappNgn + gateway + aiNgn + sms;
-  const fixedNgn = naira(fixedMonthlyUsd() * 12, fx);
+  const fixedNgn = naira(fixedMonthly * 12, fx);
 
   return {
     profile,
-    infraMonthlyUsd: infraMonthlyUsd(),
-    fixedMonthlyUsd: fixedMonthlyUsd(),
+    infraMonthlyUsd,
+    fixedMonthlyUsd: fixedMonthly,
     infra,
     whatsappNgn,
     whatsappDetail: whatsapp,
@@ -330,6 +497,9 @@ function usage() {
   --teachers <n>          Teacher count (default ${DEFAULT_PROFILE.teachers})
   --marketing <n>         WhatsApp marketing messages per year (default ${DEFAULT_PROFILE.marketingMessages})
   --lab-computers <n>     Machines in the offline exam lab (default ${DEFAULT_PROFILE.labComputers})
+  --cloud <id>            generic | oci-budget | oci-resilient (default generic)
+                            oci-* prices Oracle Cloud Infrastructure + Cloudflare:
+                            the Go/Next.js deployment target
   --breakdown             Show every line item
   --json                  Machine-readable output
   -h, --help              This message`);
@@ -370,6 +540,18 @@ export function parseArgs(argv: string[]) {
       case "--lab-computers":
         profile.labComputers = Number(next());
         break;
+      case "--cloud": {
+        const value = next();
+        if (value === "generic" || value === "oci-budget" || value === "oci-resilient") {
+          profile.cloud = value;
+        } else {
+          console.error(
+            `unknown --cloud '${value}' (expected generic, oci-budget or oci-resilient)`,
+          );
+          process.exit(2);
+        }
+        break;
+      }
       case "--breakdown":
         breakdown = true;
         break;
@@ -439,7 +621,8 @@ function main() {
   console.log(
     `  Profile            ${n(profile.students)} students · ${n(profile.families)} families · ${n(profile.teachers)} teachers · ${n(profile.staff)} staff`,
   );
-  console.log(`  FX                 ₦${n(profile.fx)} / $1\n`);
+  console.log(`  FX                 ₦${n(profile.fx)} / $1`);
+  console.log(`  Cloud              ${profile.cloud}\n`);
 
   console.log(`  Annual running     ${nairaFmt(r.annualNgn)}`);
   console.log(`    Infrastructure   ${nairaFmt(r.infra)}   (${usdFmt(r.infraMonthlyUsd)}/month)`);
@@ -457,9 +640,22 @@ function main() {
   );
 
   if (breakdown) {
-    console.log(`\n  — infrastructure —`);
-    for (const [key, value] of Object.entries(RATES.infra)) {
-      console.log(`    ${key.padEnd(18)} $${value}/month`);
+    console.log(`\n  — infrastructure (${profile.cloud}) —`);
+    for (const line of infraBreakdown(profile)) {
+      console.log(`    ${line.label.padEnd(52)} $${line.usd.toFixed(2)}/month`);
+    }
+    if (profile.cloud !== "generic") {
+      const shape = OCI_SHAPES[ociProfileId(profile)];
+      const perDb = ociComputeMonth(shape.db.ocpu, shape.db.gb);
+      console.log(
+        `    ${"managed PostgreSQL on OCI:".padEnd(52)} $${OCI_RATES.managedPostgresSmallMonth.toFixed(2)}/month`,
+      );
+      console.log(
+        `    ${"  = this self-managed database VM ×".padEnd(52)} ${(OCI_RATES.managedPostgresSmallMonth / perDb).toFixed(1)}×`,
+      );
+      console.log(
+        `    ${"Cloudflare Tunnel, Turnstile, Zero Trust ≤50 seats:".padEnd(52)} $0.00/month`,
+      );
     }
     console.log(`\n  — messages —`);
     console.log(

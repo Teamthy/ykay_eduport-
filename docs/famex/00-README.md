@@ -29,10 +29,19 @@ implementation.
 | 06 | [`06-quotation.md`](./06-quotation.md) | **The quotation**: line items, totals, payment schedule, assumptions and exclusions — ready to send to the school |
 | 07 | [`07-master-build-prompt.md`](./07-master-build-prompt.md) | **The master build prompt**: scope boundary (Ykay College, *not* EDUos), engineering rules, workstreams W1–W12 with exit criteria, verification gates, banned moves, definition of done |
 | 08 | [`08-feature-catalogue.md`](./08-feature-catalogue.md) | **Every feature the product will have** — 331 ID-tagged rows (`F0-01`…`F24-03`) across 25 sections, each marked ✅ in base / 🔧 extend / 🆕 new / ✂️ strip / ⏸ v2. Verified by `npm run check:features` |
+| 09 | [`09-master-build-prompt-go.md`](./09-master-build-prompt-go.md) | **The master build prompt, Go edition** — Next.js 16.4 + Go 1.27 on OCI behind Cloudflare: architecture, repo layout, the strangler migration of 142 API routes, twenty-five engineering rules, phases P0–P5 (80 dev-weeks), **the real-user simulation test strategy**, CI/CD, gates, and the honest schedule/cost impact |
+| 10 | [`10-oci-cloudflare-runbook.md`](./10-oci-cloudflare-runbook.md) | **Deployment runbook** — region choice, sizing and cost, Terraform layout, network and access, Cloudflare configuration, self-managed PostgreSQL, backups and DR, blue/green deploys, observability, incident runbooks, cutover checklist, NDPA notes |
 
 > **Start here for scope.** `08-feature-catalogue.md` is the authoritative list of
 > what gets built — 331 features, 97 of them already working in the base. Every
 > ticket, PR and QA pass should cite a feature ID from it.
+>
+> **Start here for the build.** `09-master-build-prompt-go.md` supersedes `07` on
+> stack, phases, tests and gates. The stack is **Next.js 16.4 for everything a
+> human sees, Go 1.27 for every write, calculation and integration**, PostgreSQL 17
+> as the only source of truth, on **Oracle Cloud Infrastructure behind Cloudflare**
+> (`10-oci-cloudflare-runbook.md`). `07` remains authoritative on the EDUos scope
+> boundary and the seven standing rules that survive the stack change.
 
 The shared engineering pack from the Ykay rebuild (`docs/rebuild/`) travels with
 this repo and still applies: finance ledger (`05`), GPS attendance (`03`), CBT at
@@ -93,6 +102,14 @@ revisited mid-build without a written reason.
 
 ## 3. Phases
 
+> **Superseded by `09`.** The table below is the original 67-week plan from
+> `07`. The Go backend, OCI deployment and real-user test strategy in `09` add
+> **+13 developer-weeks** — **80 in total, ≈8.5 months** — because a second
+> runtime, its test harness and its infrastructure are real work. `09 §14`
+> itemises the delta and the two options (full Go core, or Go for auth/ledger/
+> messaging/CBT only at 74 weeks). The phase *shape* below is unchanged; only the
+> content and the length of each phase move.
+
 The build runs to **67 developer-weeks** across twelve workstreams
 (`07-master-build-prompt.md §5`). The phases below are the delivery view of the
 same plan.
@@ -121,7 +138,9 @@ EDUos platform layer are held as **schedule contingency**, not spent upfront.
 | Base import | Fresh root commit, code-only clone of Ykay College — no Ykay history |
 | Remotes | `origin` → Famex-OS, `upstream` → Ykay (push URL disabled) |
 | Design pack | `docs/famex/00–08`, mirrored on the Ykay `arena/4897ad52-ykay-eduport` branch until Famex-OS accepts pushes from the build environment |
-| Tooling | `npm run check:features` (scope guard), `npm run cost:model` (running-cost calculator) |
+| Tooling | `npm run check:features` (scope guard), `npm run cost:model` (running-cost calculator, `--cloud oci-budget\|oci-resilient`) |
+| Stack | Next.js 16.4 / React 19.3 (UI) · Go 1.27 (all writes, calculations, integrations) · PostgreSQL 17 |
+| Hosting | OCI Ampere A1, European region · Cloudflare edge (Lagos PoP), Tunnel, WAF, Turnstile, Access |
 
 > **Why the pack is mirrored.** The build environment's GitHub connection is
 > scoped to selected repositories and did not include `Teamthy/Famex-OS` at

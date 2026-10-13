@@ -6,6 +6,7 @@ import {
   RATES,
   RECURRING_DETAIL,
   buildRoutes,
+  CLOUDFLARE_RATES,
   computeContentCost,
   computeExamLab,
   computeOneOff,
@@ -14,8 +15,14 @@ import {
   fixedMonthlyUsd,
   gatewayFeesNgn,
   infraAnnualNgn,
+  infraBreakdown,
   infraMonthlyUsd,
+  OCI_RATES,
+  OCI_SHAPES,
+  ociComputeMonth,
+  ociInfraProfile,
   parseArgs,
+  resolveInfraMonthlyUsd,
   smsCostNgn,
   whatsappCost,
 } from "../../scripts/cost-model";
@@ -250,5 +257,107 @@ describe("cost model — CLI", () => {
       RECURRING_DETAIL.whatsappServiceMessages,
     );
     expect(RECURRING_DETAIL.smsMessages).toBeGreaterThan(0);
+  });
+});
+
+describe("cost model — Oracle Cloud + Cloudflare", () => {
+  it("prices an Ampere A1 instance at OCI list rates", () => {
+    // 2 OCPU × $0.01 + 16 GB × $0.0015 = $0.044/hour × 730
+    expect(ociComputeMonth(2, 16)).toBeCloseTo(32.12, 2);
+    expect(ociComputeMonth(4, 16)).toBeCloseTo(46.72, 2);
+    expect(ociComputeMonth(4, 16, "e5")).toBeGreaterThan(ociComputeMonth(4, 16, "a1"));
+  });
+
+  it("bills nothing for egress up to 10 TB a month, which a school never reaches", () => {
+    expect(OCI_RATES.freeEgressTbPerMonth).toBe(10);
+    expect(OCI_RATES.egressPerGbAfterFree).toBeLessThan(0.01);
+  });
+
+  it("shows that managed PostgreSQL is the expensive way to run a school database", () => {
+    const managed = OCI_RATES.managedPostgresSmallMonth;
+    const selfManaged = ociComputeMonth(2, 16);
+    expect(managed / selfManaged).toBeGreaterThan(8);
+  });
+
+  it("costs under $100 a month for the budget profile", () => {
+    const budget = ociInfraProfile("oci-budget");
+    expect(budget.monthlyUsd + RATES.infra.email + RATES.infra.domain).toBeCloseTo(99.89, 2);
+    expect(budget.usageUsd).toBeGreaterThan(0);
+    expect(budget.fixedUsd).toBeLessThan(budget.monthlyUsd);
+  });
+
+  it("costs under $200 a month for the resilient profile, standby included", () => {
+    const resilient = ociInfraProfile("oci-resilient");
+    expect(resilient.monthlyUsd + RATES.infra.email + RATES.infra.domain).toBeCloseTo(187.46, 2);
+    expect(OCI_SHAPES["oci-resilient"].db.count).toBe(2); // hot standby
+    expect(resilient.monthlyUsd).toBeGreaterThan(ociInfraProfile("oci-budget").monthlyUsd);
+  });
+
+  it("prices Cloudflare Pro at the 2026 rate, not the old $20", () => {
+    expect(CLOUDFLARE_RATES.proMonth).toBe(25);
+    expect(OCI_SHAPES["oci-budget"].cloudflarePro).toBe(false);
+    expect(OCI_SHAPES["oci-resilient"].cloudflarePro).toBe(true);
+  });
+
+  it("keeps the zero-cost Cloudflare products zero-cost", () => {
+    expect(CLOUDFLARE_RATES.tunnelMonth).toBe(0);
+    expect(CLOUDFLARE_RATES.turnstileMonth).toBe(0);
+    expect(CLOUDFLARE_RATES.zeroTrustFreeSeats).toBe(50);
+  });
+
+  it("resolves the infrastructure line from the selected cloud", () => {
+    expect(resolveInfraMonthlyUsd({ ...DEFAULT_PROFILE, cloud: "generic" })).toBe(96);
+    expect(resolveInfraMonthlyUsd({ ...DEFAULT_PROFILE, cloud: "oci-budget" })).toBeCloseTo(
+      99.89,
+      2,
+    );
+    expect(resolveInfraMonthlyUsd({ ...DEFAULT_PROFILE, cloud: "oci-resilient" })).toBeCloseTo(
+      187.46,
+      2,
+    );
+  });
+
+  it("itemises the infrastructure bill per cloud", () => {
+    const oci = infraBreakdown({ ...DEFAULT_PROFILE, cloud: "oci-resilient" });
+    expect(oci.map((line) => line.label)).toContain("Cloudflare (Pro)");
+    expect(oci.map((line) => line.label)).toContain("Transactional email");
+    expect(oci.reduce((sum, line) => sum + line.usd, 0)).toBeCloseTo(187.46, 2);
+
+    const generic = infraBreakdown(DEFAULT_PROFILE);
+    expect(generic).toHaveLength(Object.keys(RATES.infra).length);
+  });
+
+  it("carries the cloud choice into the school's year", () => {
+    const budget = computeRecurring({ ...DEFAULT_PROFILE, cloud: "oci-budget" });
+    const resilient = computeRecurring({ ...DEFAULT_PROFILE, cloud: "oci-resilient" });
+
+    expect(budget.annualNgn).toBe(3_116_280);
+    expect(resilient.annualNgn).toBe(4_692_630);
+    expect(budget.annualNgn).toBeLessThan(resilient.annualNgn);
+    // WhatsApp, SMS and AI are unchanged by where the server runs.
+    expect(budget.whatsappNgn).toBe(DEFAULT.whatsappNgn);
+    expect(budget.aiNgn).toBe(DEFAULT.aiNgn);
+    expect(resilient.sms).toBe(DEFAULT.sms);
+  });
+
+  it("reports a per-student cost for each cloud", () => {
+    const budget = computeRecurring({ ...DEFAULT_PROFILE, cloud: "oci-budget" });
+    const resilient = computeRecurring({ ...DEFAULT_PROFILE, cloud: "oci-resilient" });
+    expect(budget.perStudentYearNgn).toBe(1355);
+    expect(resilient.perStudentYearNgn).toBe(2040);
+  });
+
+  it("stays usage-scaled in both cloud profiles", () => {
+    for (const cloud of ["oci-budget", "oci-resilient"] as const) {
+      const r = computeRecurring({ ...DEFAULT_PROFILE, cloud });
+      expect(r.fixedShare).toBeGreaterThan(0.4);
+      expect(r.fixedShare).toBeLessThan(0.7);
+      expect(r.usageScaledNgn).toBe(r.annualNgn - r.fixedNgn);
+    }
+  });
+
+  it("accepts --cloud and refuses an unknown cloud", () => {
+    expect(parseArgs(["--cloud", "oci-resilient"]).profile.cloud).toBe("oci-resilient");
+    expect(parseArgs([]).profile.cloud).toBe("generic");
   });
 });
