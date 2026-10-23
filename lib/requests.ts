@@ -33,12 +33,7 @@ function validIpv4(value: string): boolean {
 }
 
 function validIpv6(value: string): boolean {
-  if (
-    !value.includes(":") ||
-    value.includes("%") ||
-    value.includes("[") ||
-    value.includes(":::")
-  )
+  if (!value.includes(":") || value.includes("%") || value.includes("[") || value.includes(":::"))
     return false;
   let address = value.toLowerCase();
   // IPv4-mapped/embedded IPv6 (e.g. ::ffff:192.0.2.1) counts the final

@@ -52,6 +52,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
   const [phase, setPhase] = useState<Phase>("menu");
   const [mode, setMode] = useState<Mode>("practice");
   const [questions, setQuestions] = useState<PublicQuestion[]>([]);
+  const [drawToken, setDrawToken] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [checks, setChecks] = useState<Record<string, CheckResult>>({});
   const [flags, setFlags] = useState<Set<string>>(new Set());
@@ -89,6 +90,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
   const start = useCallback(
     async (chosen: Mode) => {
       setError(null);
+      setDrawToken(null);
       setMode(chosen);
       setPhase("running");
       setSubmitting(true);
@@ -101,9 +103,11 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
         if (topic) qs.set("topic", topic);
         const res = await fetch(`/api/cbt/quiz?${qs}`);
         if (!res.ok) throw new Error("Could not load questions");
-        const data = (await res.json()) as { questions: PublicQuestion[] };
+        const data = (await res.json()) as { questions: PublicQuestion[]; drawToken: string };
         if (data.questions.length === 0) throw new Error("No questions available yet");
+        if (!data.drawToken) throw new Error("The practice paper could not be verified.");
         setQuestions(data.questions);
+        setDrawToken(data.drawToken);
         setAnswers({});
         setChecks({});
         setFlags(new Set());
@@ -126,12 +130,17 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
 
   const submit = useCallback(async () => {
     if (submittedRef.current) return;
+    if (!drawToken) {
+      setError("This paper could not be verified. Please start a new paper.");
+      return;
+    }
     submittedRef.current = true;
     setSubmitting(true);
     try {
       const payload = {
         subjectSlug: subject.slug,
         mode,
+        drawToken,
         durationSeconds: elapsed,
         answers: questions.map((q) => ({
           questionId: q.id,
@@ -170,7 +179,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
     } finally {
       setSubmitting(false);
     }
-  }, [answers, elapsed, mode, questions, subject.name, subject.slug]);
+  }, [answers, drawToken, elapsed, mode, questions, subject.name, subject.slug]);
 
   // Timed countdown (auto-submit at zero) — exam mode always, practice if a duration was set.
   useEffect(() => {
@@ -194,6 +203,10 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
     async (optionIndex: number) => {
       if (!current) return;
       if (mode === "practice" && checks[current.id]) return; // locked after check
+      if (mode === "practice" && !drawToken) {
+        setError("This paper could not be verified. Please start a new paper.");
+        return;
+      }
       setAnswers((a) => ({ ...a, [current.id]: optionIndex }));
       if (mode === "practice") {
         try {
@@ -214,7 +227,7 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
         }
       }
     },
-    [checks, current, mode],
+    [checks, current, drawToken, mode],
   );
 
   // Keyboard control.

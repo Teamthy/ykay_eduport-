@@ -32,10 +32,9 @@ describe("clientIpFromHeaders", () => {
   });
 
   it("returns unknown instead of trusting an incomplete chain", () => {
-    const ip = clientIpFromHeaders(
-      headers({ "x-forwarded-for": "1.2.3.4" }),
-      { TRUSTED_PROXY_HOPS: "2" },
-    );
+    const ip = clientIpFromHeaders(headers({ "x-forwarded-for": "1.2.3.4" }), {
+      TRUSTED_PROXY_HOPS: "2",
+    });
     expect(ip).toBe("unknown");
   });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useToast } from "@/components/Toast";

@@ -18,7 +18,9 @@ if (!base) {
   process.exit(1);
 }
 if (!secret || secret.length < 16) {
-  console.error("JOBS_SECRET (at least 16 characters) is required for the notification dispatcher.");
+  console.error(
+    "JOBS_SECRET (at least 16 characters) is required for the notification dispatcher.",
+  );
   process.exit(1);
 }
 
@@ -48,7 +50,11 @@ try {
     process.exit(1);
   }
 
-  const body = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+  const parsedBody = await response.json().catch(() => ({}));
+  const body =
+    typeof parsedBody === "object" && parsedBody !== null && !Array.isArray(parsedBody)
+      ? parsedBody
+      : {};
   const summary = Object.fromEntries(
     ["bridgedAttendanceAlerts", "processed", "sent", "failed", "retried", "skipped"]
       .filter((key) => typeof body[key] === "number")

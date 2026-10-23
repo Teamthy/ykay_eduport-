@@ -341,7 +341,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: mobile/package-lock.json
 
@@ -349,11 +349,25 @@ jobs:
         # mobile/package-lock.json is committed, so use a deterministic `npm ci`.
         run: npm ci
 
+      - name: Audit mobile dependencies
+        # Fail closed on critical advisories; known Expo SDK upstream high/moderate
+        # advisories are documented in the production-readiness audit.
+        run: npm audit --audit-level=critical
+
       - name: Type check (Expo)
         # The root tsc config excludes mobile/, so mobile TypeScript is only
         # checked here. Must stay green — a mobile type regression must block CI.
         run: npm run typecheck
 
+      - name: Resolve Expo config
+        # Validate the app config and resolve all config plugins locally.
+        run: npx expo config --json --full > /dev/null
+
       - name: Validate Expo project (expo-doctor)
-        # Verifies Expo SDK / package compatibility + app.json config.
-        run: npx --yes expo-doctor@latest
+        # Pin the checker. Its schema check queries Expo's API; allow only
+        # network-only failures to warn. Skip the separate RN Directory lookup
+        # because it is an external metadata service unavailable in some CI networks.
+        run: npx --yes expo-doctor@1.21.5
+        env:
+          EXPO_DOCTOR_WARN_ON_NETWORK_ERRORS: "1"
+          EXPO_DOCTOR_ENABLE_DIRECTORY_CHECK: "0"

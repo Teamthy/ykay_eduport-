@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { PaymentProvider, PaymentStatus } from "@prisma/client";
+import { PaymentProvider, PaymentStatus, Prisma } from "@prisma/client";
 import { z } from "zod";
 import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
@@ -378,7 +378,7 @@ export async function POST(request: NextRequest) {
                 payerEmail: context.profile.user.email,
                 transferDate: null,
                 transferNarration: null,
-                providerData: null,
+                providerData: Prisma.DbNull,
                 reviewedByUserId: null,
                 reviewedAt: null,
               },

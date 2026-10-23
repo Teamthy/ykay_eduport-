@@ -26,7 +26,7 @@ Missing evidence is never converted into a pass.
 
 **Strongest areas (verified in code, not README).** Payments are the best-engineered part of the system: server-side Paystack verification with amount/currency/payer matching, HMAC-SHA512 webhook signatures with `timingSafeEqual`, atomic idempotency reservations with leases, deterministic payment references, optimistic invoice reservation, and a deliberate "inconclusive verification never marks FAILED" rule that prevents stranded money. Authentication is similarly serious: bcrypt(12), timing-oracle dummy compares, per-IP + per-email (failures-only) limiters, fail-closed DB-backed revocation on every request (`tokenVersion` + `isActive`/`isSuspended`), impersonation write-blocking in middleware on both cookie and Bearer transports, and security-event forensics. The codebase is unusually honest with itself — `docs/TENANCY_RLS_STATUS.md` correctly documents that RLS enforces nothing today.
 
-**Weakest areas.** (1) The dependency gate is **red today**: `npm audit` reports 3 critical advisories including Next.js RCEs against the pinned `next@16.4.0`; CI at merge time predates them. (2) **No production environment evidence exists** — four different deployment paths are documented (Vercel, Render, OCI, docker-compose) and none is proven; Docker Publish is failing on `main`; the app *fails closed* (login/admissions return 503) if Upstash/S3 are unset, so an unproven config is a day-one outage. (3) Twelve High findings from the 2026-10-08 browser audit (H1–H12) are still open in code — several re-verified here (spoofable client IP, public CBT answer-key endpoints, `/sso/virtual` 404 on the login page, invisible bank-transfer claims, impersonation UX/session issues, Sentry blocked by CSP). (4) Tenant isolation is application-level only — acceptable for one school, disqualifying for a second.
+**Weakest areas at baseline commit `87190fd` (pre-remediation).** (1) The root dependency gate was **red**: `npm audit` reported 3 critical advisories including Next.js RCEs against pinned `next@16.4.0`; CI at merge time predated them. (2) **No production environment evidence existed** — four deployment paths were documented (Vercel, Render, OCI, docker-compose) and none was proven; the app *fails closed* if required Upstash/S3 settings are absent. (3) Twelve High findings from the 2026-10-08 browser audit (H1–H12) were still open at baseline. (4) Tenant isolation was application-level only. For current post-remediation dependency, code, and operational status, use §K; the RLS limitation remains.
 
 **Launch decision:**
 
@@ -36,7 +36,9 @@ Missing evidence is never converted into a pass.
 
 This is not "the project looks unfinished." The core is launch-grade. It is "the exact release cannot yet be *operated* safely because its security gate is red, its production configuration is unproven, and several money/role paths still mislead real users."
 
-### What is safe / not safe / unknown
+### What was safe / not safe / unknown at baseline
+
+The following table records the original assessment at `87190fd`; see §K for current post-remediation status.
 
 | | |
 |---|---|
@@ -47,9 +49,9 @@ This is not "the project looks unfinished." The core is launch-grade. It is "the
 
 ---
 
-## B. Production readiness scorecard
+## B. Production readiness scorecard (baseline snapshot)
 
-Statuses: PASS / FAIL / BLOCKED (could not verify here) / NOT VERIFIED / N-A. Scores are for **Ykay College single-tenant** unless noted.
+This table records the original audit state at baseline commit `87190fd`; current post-remediation status is in §K. Statuses: PASS / FAIL / BLOCKED (could not verify here) / NOT VERIFIED / N-A. Scores are for **Ykay College single-tenant** unless noted.
 
 | Domain | /10 | Status | Evidence | Blocking? |
 |---|---|---|---|---|
@@ -253,11 +255,12 @@ Attack surface: anonymous (admissions, contact w/ honeypot, CBT practice, status
 
 ## K. Remediation status — 2026-10-23
 
-This section supersedes the pre-remediation status and counts in §§A/H/J where they differ. The audit commit `d4777a0` is the baseline; the source changes described below are the current remediation worktree. No live or staging environment was available for this remediation pass.
+This section supersedes the pre-remediation status and counts in §§A/B/H/J where they differ. The audit commit `d4777a0` is the baseline; the source changes described below are the current remediation worktree. No live or staging environment was available for this remediation pass.
 
 ### Code remediations
 
-- **Dependency/security baseline — PASS (dependency audit):** updated the affected framework/security packages and removed the stale audit exclusion. `npm run audit:deps` now reports **0 high, 0 critical, 0 moderate and 0 low** advisories.
+- **Web dependency/security baseline — PASS (root audit only):** updated the affected framework/security packages and removed the stale audit exclusion. `npm run audit:deps` reports **0 high, 0 critical, 0 moderate and 0 low** advisories for the root/web dependency tree.
+- **Mobile dependency/security baseline — PARTIAL / NOT CLEAR:** ran `npm audit fix` in `mobile/`, applying compatible lockfile updates and removing the critical `shell-quote` advisory. The current mobile audit reports **8 advisories (5 high, 3 moderate, 0 critical)** through Expo 54 CLI/Updates and Expo Router 6, including `node-forge@1.4.0` and `decode-uri-component`. The registry's latest `node-forge` remains 1.4.0; `npm audit fix --force` proposes incompatible Expo/Router major changes. No unsafe downgrade, major upgrade, or speculative override was applied. Do not treat native mobile security as cleared; review upstream fixes before distributing the app.
 - **Client IP / proxy trust — ADDRESSED IN CODE:** resolve the client address from the right-hand trusted proxy hops, validate IPv4/IPv6, reject incomplete/malformed chains, and do not trust standalone `X-Real-IP`. Configure `TRUSTED_PROXY_HOPS` for the actual production proxy chain.
 - **Practice CBT API — ADDRESSED IN CODE:** authenticated student-only access, distributed per-account limiting, HMAC-signed user/subject/question-bound draws with expiry, and server-side answer/question-count validation. Focused regression tests pass; live exam use and deployment settings remain unverified.
 - **Fee-transfer visibility and races (MNY-01) — ADDRESSED IN CODE:** parent fees now show pending/processing/rejected attempts and review notes; unresolved attempts suppress a second payment action; transfer decisions use a pending-state compare-and-set; invoice attempts serialize under a row lock; approval/rejection and payment/audit writes are transactional; parents are notified in-app and queued for email. Parent retries reuse an idempotency key in the current page session. Provider behavior and the end-to-end payment journey still require staging evidence.
@@ -268,24 +271,28 @@ This section supersedes the pre-remediation status and counts in §§A/H/J where
 - **Deployment/release controls — ADDED, NOT DEPLOYED:** Render Docker Blueprint/runbook and Cron dispatch mode, corrected GHCR naming, seeded Lighthouse CI database, and a tenant-route coverage ratchet. These changes do not prove a Render service exists or that the workflows are green on the release commit.
 - **Tenant coverage — PASS AS A RATCHET ONLY:** `check:tenant-coverage -- --max-uncovered 0` reports 114 routes: 1 RLS-scoped, 96 app-filtered, 17 reviewed exemptions, 0 unexplained. PostgreSQL RLS is still fail-open without tenant context; this is not multi-tenant certification.
 - **Paystack intent recovery — HARDENED IN CODE:** compare invoice balance under the invoice row lock for both methods; allow only the same parent's own reference-bound pending/failed Paystack attempt to resume; keep other active attempts blocking; fail an init attempt only while its idempotency lease is still owned; and do not mark a successfully initialized checkout failed just because the replay-cache write failed. The Paystack provider's duplicate-initialization semantics and the full path still need isolated staging tests.
+- **CI-discovered source/build failures — FIXED IN CODE, CI RERUN PENDING:** added the signed CBT draw token to answer checks and submissions, imported the missing teacher-page `useRef`, cleared nullable Prisma JSON with `Prisma.DbNull`, and removed a TypeScript-only assertion from the `.mjs` notification dispatcher. Full Prettier checking exposed and corrected three formatting issues. These fixes have local focused/static checks; the release workflow has not rerun yet.
 
 ### Verification executed in this remediation pass
 
-- `npm run audit:deps` — **PASS**, 0 advisories in all reported severities.
-- `npm run lint` — **PASS**, exit 0, 0 errors and 102 existing warnings.
-- Focused regression suite — **PASS**, 16 files / 134 tests, including fee-posting compare-and-set, Paystack verification/webhook behavior, idempotency, rate-limit fail-closed, CBT draws/auth, client IP, parent fee states, sessions/impersonation, CSP and environment guards.
+- Root `npm run audit:deps` — **PASS**, 0 advisories in all reported severities.
+- Mobile `npm audit` after compatible lockfile remediation — **PARTIAL**, 8 advisories remain (5 high, 3 moderate, 0 critical); `npm audit --audit-level=critical` exits 0. The full audit is not clean; see the mobile dependency finding above.
+- `npm run lint` — **PASS**, exit 0, 0 errors and 102 warnings.
+- Focused regression suite — **PASS**, prior run 16 files / 134 tests; latest targeted CBT/payment/client-IP run 6 files / 64 tests passed.
+- Mobile `npm ci` and `npm run typecheck` — **PASS** with the updated lockfile. `npx expo config --json --full` — **PASS**. Pinned `expo-doctor@1.21.5` — 16/17 checks passed locally; its remaining app-config schema check could not reach Expo's API from this sandbox. CI now warns only on network-only schema failures and disables the separate React Native Directory metadata lookup because that external service is not reliably reachable; neither outcome is reported as full remote validation.
 - `check:tenant-coverage -- --max-uncovered 0` — **PASS**, 0 unexplained routes; RLS limitation above remains.
 - `check:dead-ui` — **PASS**, 95 portal pages; `check:orphans` — **PASS**, 85 portal pages reachable; `check:boundary` — **PASS**, 168 client components checked.
-- Prettier check on the touched payment/security paths and `git diff --check` — **PASS**.
-- **NOT CERTIFIED:** full `tsc`, full Vitest, production build and browser E2E. Prisma client generation cannot download its engine from `binaries.prisma.sh` in this sandbox, leaving the generated client absent. The full suite's observed failures are generated-Prisma-client/Expo-config module errors, not demonstrated assertion failures; this is an environment limitation, not a green result. CI must rerun these checks on the release commit with a generated client.
+- Full `npx prettier --check .`, `git diff --check`, and `node --check scripts/dispatch-notifications.mjs` — **PASS**.
+- **NOT CERTIFIED:** root `tsc`, full Vitest, production build, and browser E2E have not passed on the release commit. Prisma client generation cannot download its engine from `binaries.prisma.sh` in this sandbox, so local root typecheck/build remains blocked. The previous PR CI run identified concrete compile/runtime errors, now fixed in source, but CI and Vercel checks must rerun on the updated commit. No staging or production evidence is available.
 
 ### Residual launch blockers — NOT VERIFIED
 
 1. Provision the selected Render topology and prove secrets, domain/TLS, health, migrations, Redis, S3, scanner-or-risk-acceptance, Resend and Sentry settings.
 2. Obtain green CI for the exact release commit: Prisma generation, typecheck, full test suite and production build. Browser-test admissions and the payment/exam journeys on isolated staging.
-3. Prove Paystack test-mode initiation, verification, duplicate webhook/retry, transfer approve/reject, notification delivery and reconciliation without charging a real account during tests. Conduct any controlled live-value check only with school approval.
-4. Run the scheduled notification Cron and prove dispatch; receive test Sentry events; rehearse backup restore and record RPO/RTO; run the agreed isolated 1K-DAU test.
-5. Verify required branch protection/checks. The earlier GitHub branch-protection query returned 403, so this remains NOT VERIFIED.
-6. Keep platform signup and second-tenant onboarding off until RLS is made fail-closed and separately certified. YK-Virtual, Famex-OS and actual Virtual SSO remain outside the provided repository/scope.
+3. Before distributing the native mobile app, review the remaining 5 high / 3 moderate Expo-chain advisories and record an explicit risk decision or wait for upstream patched releases. Do not apply the incompatible `npm audit fix --force` recommendations.
+4. Prove Paystack test-mode initiation, verification, duplicate webhook/retry, transfer approve/reject, notification delivery and reconciliation without charging a real account during tests. Conduct any controlled live-value check only with school approval.
+5. Run the scheduled notification Cron and prove dispatch; receive test Sentry events; rehearse backup restore and record RPO/RTO; run the agreed isolated 1K-DAU test.
+6. Verify required branch protection/checks. The earlier GitHub branch-protection query returned 403, so this remains NOT VERIFIED.
+7. Keep platform signup and second-tenant onboarding off until RLS is made fail-closed and separately certified. YK-Virtual, Famex-OS and actual Virtual SSO remain outside the provided repository/scope.
 
 **Decision from available evidence: NO-GO for production certification.** The code-side launch blockers listed as addressed above have focused source/static/regression evidence, but production readiness requires the operational and CI evidence in `docs/launch-deployment-runbook.md` and the remaining checklist. The original Ykay College single-tenant scope is preserved; this does not certify EduOS multi-tenancy.
