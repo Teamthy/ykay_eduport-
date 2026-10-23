@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isResponse, requireCbtUser } from "@/lib/cbt-auth";
 
-/** Public: subjects with published question counts, for the /cbt picker. */
+/** Signed-in: subjects with published question counts, for the /cbt picker (SEC-02). */
 export async function GET() {
+  const user = await requireCbtUser();
+  if (isResponse(user)) return user;
+
   const subjects = await prisma.cbtSubject.findMany({
     orderBy: [{ classLevel: "asc" }, { name: "asc" }],
     select: {

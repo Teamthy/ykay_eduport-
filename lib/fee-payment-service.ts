@@ -1,10 +1,5 @@
-import {
-  FeeInvoiceStatus,
-  FeePaymentMethod,
-  FeePaymentStatus,
-  PaymentStatus,
-  Prisma,
-} from "@prisma/client";
+import { FeeInvoiceStatus, FeePaymentStatus, PaymentStatus } from "@prisma/client";
+import type { FeePaymentMethod, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { computeInvoiceStatus, generateUniqueReceiptNumber } from "@/lib/finance";
 
@@ -25,6 +20,14 @@ export async function postCompletedFeePayment(input: {
   reference: string;
   providerData?: Prisma.InputJsonValue;
   actorUserId?: string | null;
+  /**
+   * For a bursar-approved bank transfer, claim the attempt only if it is
+   * still PENDING, in the same transaction as invoice/payment posting. This
+   * prevents a concurrent reject/approve race from leaving money posted but
+   * the attempt marked FAILED (or the inverse).
+   */
+  requirePendingAttempt?: boolean;
+  reviewedByUserId?: string | null;
 }) {
   if (!Number.isInteger(input.amount) || input.amount <= 0) {
     throw new Error("Payment amount must be a positive integer (kobo/naira units as stored).");
@@ -34,6 +37,29 @@ export async function postCompletedFeePayment(input: {
     const existing = await tx.feePayment.findUnique({ where: { reference: input.reference } });
     if (existing) {
       return { payment: existing, replay: true as const };
+    }
+
+    if (input.requirePendingAttempt) {
+      if (!input.attemptId) throw new Error("A payment attempt is required for bursar review.");
+      const claimed = await tx.feePaymentAttempt.updateMany({
+        where: {
+          id: input.attemptId,
+          schoolId: input.schoolId,
+          invoiceId: input.invoiceId,
+          amount: input.amount,
+          reference: input.reference,
+          status: PaymentStatus.PENDING,
+        },
+        data: {
+          status: PaymentStatus.PAID,
+          providerData: input.providerData,
+          reviewedByUserId: input.reviewedByUserId ?? null,
+          reviewedAt: new Date(),
+        },
+      });
+      if (claimed.count !== 1) {
+        throw new Error("This transfer has already been reviewed. Refresh the transfer list.");
+      }
     }
 
     const reserved = await tx.feeInvoice.updateMany({
@@ -76,7 +102,7 @@ export async function postCompletedFeePayment(input: {
       },
     });
 
-    if (input.attemptId) {
+    if (input.attemptId && !input.requirePendingAttempt) {
       await tx.feePaymentAttempt.update({
         where: { id: input.attemptId },
         data: {

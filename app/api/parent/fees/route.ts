@@ -2,6 +2,7 @@ import { FeePaymentStatus } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { getParentFinanceContext } from "@/lib/finance";
 import { prisma } from "@/lib/prisma";
+import { serializePaymentAttempts } from "@/lib/parent-fees";
 import { jsonNoStore } from "@/lib/requests";
 
 export const runtime = "nodejs";
@@ -36,6 +37,7 @@ export async function GET(request: NextRequest) {
       selectedInvoice: null,
       invoices: [],
       payments: [],
+      paymentAttempts: [],
       summary: { totalBilled: 0, totalPaid: 0, totalOutstanding: 0 },
     });
   }
@@ -62,6 +64,33 @@ export async function GET(request: NextRequest) {
   const selectedInvoice =
     invoices.find((invoice) => invoice.id === selectedInvoiceId) || invoices[0] || null;
   const payments = selectedInvoice?.payments || [];
+
+  // MNY-01: parents must see payment attempts that have NOT (yet) become
+  // payments — a bank transfer awaiting bursar review, or one that was
+  // rejected. Returning only COMPLETED payments made both states invisible
+  // and invited double payment. Scoped to this child's invoices and this
+  // school, newest first.
+  const paymentAttempts = invoices.length
+    ? await prisma.feePaymentAttempt.findMany({
+        where: {
+          schoolId: context.user.schoolId,
+          invoiceId: { in: invoices.map((invoice) => invoice.id) },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        select: {
+          id: true,
+          invoiceId: true,
+          provider: true,
+          status: true,
+          amount: true,
+          reference: true,
+          transferNarration: true,
+          reviewedAt: true,
+          createdAt: true,
+        },
+      })
+    : [];
 
   return jsonNoStore({
     parent: {
@@ -112,6 +141,7 @@ export async function GET(request: NextRequest) {
       receiptNumber: payment.receiptNumber,
       paidAt: payment.paidAt.toISOString(),
     })),
+    paymentAttempts: serializePaymentAttempts(paymentAttempts),
     summary: {
       totalBilled: invoices.reduce((sum, invoice) => sum + invoice.totalAmount, 0),
       totalPaid: invoices.reduce((sum, invoice) => sum + invoice.amountPaid, 0),

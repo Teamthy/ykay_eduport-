@@ -32,21 +32,21 @@ const baseSchema = z.object({
  *   PAYSTACK_SECRET_KEY   — webhook signature verification. Missing means
  *                           unverified payment callbacks, which is a money bug
  *
- * ── Why this list is short ─────────────────────────────────────────────────
- * An earlier version of this file also demanded RESEND_API_KEY and EMAIL_FROM
- * here, and instrumentation.ts turns any failure into a thrown error at boot.
- * The result: a deploy without an email key did not degrade email — it
- * refused to start the server at all, and every page returned 500.
- *
- * That is strictly worse than the problem it was meant to prevent. A school
- * whose welcome emails are silently not sending still has a working portal;
- * a school whose portal will not boot has nothing. Anything that only breaks
- * one feature belongs in the warning list below, however loudly.
+ * Email remains a warning (rather than taking down the whole portal) because
+ * the site can still serve and parents can use in-app notifications while the
+ * mail provider is repaired. Security-critical rate limiting, live-payment
+ * key mode, private document storage, and the malware-scan decision are
+ * launch prerequisites: the app must not accept production traffic when
+ * those dependencies are absent or unsafe.
  */
 const productionSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url("NEXT_PUBLIC_SITE_URL must be a full URL in production."),
-  PAYSTACK_PUBLIC_KEY: z.string().min(8, "PAYSTACK_PUBLIC_KEY is required in production."),
-  PAYSTACK_SECRET_KEY: z.string().min(8, "PAYSTACK_SECRET_KEY is required in production."),
+  PAYSTACK_PUBLIC_KEY: z
+    .string()
+    .startsWith("pk_live_", "Production must use a live pk_live_ Paystack key."),
+  PAYSTACK_SECRET_KEY: z
+    .string()
+    .startsWith("sk_live_", "Production must use a live sk_live_ Paystack key."),
 });
 
 export type ValidatedEnv = z.infer<typeof baseSchema>;
@@ -82,9 +82,8 @@ export function checkEnv(source: NodeJS.ProcessEnv = process.env): EnvValidation
       }
     }
 
-    // Degraded, not fatal. Each of these disables a real feature and deserves
-    // a loud warning on every boot — but refusing to serve the site is worse
-    // than serving it without email, so none of them throws.
+    // Email remains degraded/not fatal: core pages can still serve and the
+    // in-app notification remains durable while the provider is repaired.
     if (!source.RESEND_API_KEY) {
       warnings.push(
         "RESEND_API_KEY is not set — parent welcome emails, staff invitations and " +
@@ -97,22 +96,37 @@ export function checkEnv(source: NodeJS.ProcessEnv = process.env): EnvValidation
       );
     }
     if (!source.UPSTASH_REDIS_REST_URL || !source.UPSTASH_REDIS_REST_TOKEN) {
-      warnings.push(
-        "Redis is not configured — rate limiting falls back to per-instance memory, " +
-          "which does not throttle across serverless invocations.",
+      if (source.ALLOW_MEMORY_RATE_LIMITS === "true") {
+        warnings.push(
+          "ALLOW_MEMORY_RATE_LIMITS=true explicitly accepts per-instance rate limits; " +
+            "this is unsafe on serverless/multi-instance deployments and must be single-instance only.",
+        );
+      } else {
+        errors.push(
+          "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production. " +
+            "They may be omitted only with ALLOW_MEMORY_RATE_LIMITS=true for an accepted, single-instance deployment.",
+        );
+      }
+    }
+    if (!source.S3_BUCKET || !source.S3_ACCESS_KEY_ID || !source.S3_SECRET_ACCESS_KEY) {
+      errors.push(
+        "S3_BUCKET, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY are required in production; " +
+          "without them, real admission documents cannot be uploaded.",
       );
     }
-    if (!source.S3_BUCKET) {
-      warnings.push("S3_BUCKET is not set — admission document uploads will fail.");
-    }
-    if (!source.JOBS_SECRET && !source.CRON_SECRET) {
+    if (!source.MALWARE_SCANNER_URL && source.ALLOW_UNSCANNED_ADMISSION_DOCS !== "true") {
+      errors.push(
+        "MALWARE_SCANNER_URL is required in production, or set ALLOW_UNSCANNED_ADMISSION_DOCS=true to explicitly accept the admission-document scanning risk.",
+      );
+    } else if (!source.MALWARE_SCANNER_URL) {
       warnings.push(
-        "Neither JOBS_SECRET nor CRON_SECRET is set — the notification dispatch cron " +
-          "cannot authenticate and alerts will not be delivered.",
+        "ALLOW_UNSCANNED_ADMISSION_DOCS=true: admission documents are accepted without a malware scan (owner risk acceptance).",
       );
     }
-    if (source.PAYSTACK_SECRET_KEY?.startsWith("sk_test_")) {
-      warnings.push("PAYSTACK_SECRET_KEY is a TEST key but NODE_ENV is production.");
+    if (!source.JOBS_SECRET || source.JOBS_SECRET.length < 16) {
+      errors.push(
+        "JOBS_SECRET (at least 16 characters) is required in production for the Render notification dispatcher.",
+      );
     }
   }
 

@@ -200,9 +200,14 @@ export function CbtRunner({ subject }: { subject: { slug: string; name: string }
           const res = await fetch("/api/cbt/check", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ questionId: current.id, selectedIndex: optionIndex }),
+            body: JSON.stringify({
+              questionId: current.id,
+              selectedIndex: optionIndex,
+              drawToken,
+            }),
           });
-          const data = (await res.json()) as CheckResult;
+          const data = (await res.json()) as CheckResult & { error?: string };
+          if (!res.ok) throw new Error(data.error || "Could not check this answer.");
           setChecks((c) => ({ ...c, [current.id]: data }));
         } catch {
           /* offline: leave unchecked; answer still recorded */

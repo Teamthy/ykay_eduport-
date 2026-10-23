@@ -1,5 +1,12 @@
 # Ykay College EduPortal — Deployment Guide
 
+> **Launch scope:** use the Render Docker Blueprint in `render.yaml` as the one
+> supported Ykay College production path for now. Vercel, OCI and Compose files
+> remain alternatives that have not been launch-certified. The checklist in
+> [`launch-deployment-runbook.md`](./launch-deployment-runbook.md) is the
+> required operational gate; the existence of a config file is not deployment
+> evidence.
+
 ## Prerequisites
 
 - Node.js 20+
@@ -27,13 +34,16 @@ cp .env.example .env
 | `PAYSTACK_PUBLIC_KEY` | Paystack public key |
 | `PAYSTACK_SECRET_KEY` | Paystack secret key |
 
-### Optional variables
+### Production dependencies (not optional for the launch target)
 
-| Variable | Description |
-|----------|-------------|
-| `RESEND_API_KEY` | For transactional emails |
-| `S3_BUCKET`, `S3_REGION`, etc. | For document storage |
-| `UPSTASH_REDIS_REST_URL` + `TOKEN` | For rate limiting |
+| Variable | Production requirement |
+|----------|------------------------|
+| `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` | Required for distributed auth/admissions rate limits. Memory fallback is an explicit single-instance risk acceptance only. |
+| `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Required for private admissions-document storage. |
+| `MALWARE_SCANNER_URL` | Required, unless the owner explicitly records risk acceptance and sets `ALLOW_UNSCANNED_ADMISSION_DOCS=true`. |
+| `JOBS_SECRET` | Required for the Render notification Cron to authenticate to the web service. |
+| `RESEND_API_KEY`, `EMAIL_FROM` | Strongly required for account recovery, invitations and queued parent email; currently warned at boot rather than fatal. |
+| `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | Configure to receive server/browser faults; browser CSP allows only the configured DSN origin. |
 
 ## Database Setup
 
@@ -120,13 +130,14 @@ Expected response:
 }
 ```
 
-## Vercel Deployment (Recommended)
+## Alternative deployment files (not launch-certified)
 
-1. Connect your GitHub repo to Vercel
-2. Add all environment variables in Vercel dashboard
-3. Set build command: `npx prisma generate && npx next build`
-4. Set output directory: `.next`
-5. Deploy
+Vercel, OCI and local Compose examples are retained for development or future
+review, but they are **not** the supported Ykay College launch target until
+separately rehearsed. In particular, the committed Vercel cron cadence and
+serverless Redis/storage configuration must not be assumed to satisfy the
+Render runbook. Do not select a different target for production without
+updating the environment-specific secrets, cron, proxy-hop and rollback plan.
 
 ## Docker / Container Deployment
 

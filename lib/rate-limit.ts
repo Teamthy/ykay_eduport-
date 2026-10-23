@@ -246,6 +246,10 @@ const DISTRIBUTED_REQUIRED: ReadonlySet<RateLimitKind> = new Set<RateLimitKind>(
   "upload",
   "payment",
   "status",
+  // Signed-in CBT still protects the published question bank from automated
+  // answer harvesting; if Redis is down in production, fail closed rather
+  // than multiplying the per-student budget across serverless instances.
+  "cbt",
 ]);
 
 const ALLOW_MEMORY_RATE_LIMITS = process.env.ALLOW_MEMORY_RATE_LIMITS === "true";

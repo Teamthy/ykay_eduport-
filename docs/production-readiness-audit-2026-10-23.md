@@ -250,3 +250,42 @@ Attack surface: anonymous (admissions, contact w/ honeypot, CBT practice, status
 - **DEFERRED:** YK-Virtual, Famex-OS, EduOS multi-tenant onboarding — separate certifications required.
 
 *This report distinguishes repository evidence from production evidence throughout. A green build was never treated as a working deployment, a configured health endpoint was never treated as a healthy system, and a documented backup was never treated as a proven restore.*
+
+## K. Remediation status — 2026-10-23
+
+This section supersedes the pre-remediation status and counts in §§A/H/J where they differ. The audit commit `d4777a0` is the baseline; the source changes described below are the current remediation worktree. No live or staging environment was available for this remediation pass.
+
+### Code remediations
+
+- **Dependency/security baseline — PASS (dependency audit):** updated the affected framework/security packages and removed the stale audit exclusion. `npm run audit:deps` now reports **0 high, 0 critical, 0 moderate and 0 low** advisories.
+- **Client IP / proxy trust — ADDRESSED IN CODE:** resolve the client address from the right-hand trusted proxy hops, validate IPv4/IPv6, reject incomplete/malformed chains, and do not trust standalone `X-Real-IP`. Configure `TRUSTED_PROXY_HOPS` for the actual production proxy chain.
+- **Practice CBT API — ADDRESSED IN CODE:** authenticated student-only access, distributed per-account limiting, HMAC-signed user/subject/question-bound draws with expiry, and server-side answer/question-count validation. Focused regression tests pass; live exam use and deployment settings remain unverified.
+- **Fee-transfer visibility and races (MNY-01) — ADDRESSED IN CODE:** parent fees now show pending/processing/rejected attempts and review notes; unresolved attempts suppress a second payment action; transfer decisions use a pending-state compare-and-set; invoice attempts serialize under a row lock; approval/rejection and payment/audit writes are transactional; parents are notified in-app and queued for email. Parent retries reuse an idempotency key in the current page session. Provider behavior and the end-to-end payment journey still require staging evidence.
+- **Impersonation — ADDRESSED IN CODE:** impersonation JWT expiry is 60 minutes, the exit banner is portal-wide, and ending impersonation clears the operator cookie without revoking the victim's sessions.
+- **CSP / rendered content — ADDRESSED IN CODE:** CSP permits only the configured Sentry DSN origin; the IT-course raw-HTML path was removed; tenant CSS colors are validated and JSON-LD is escaped. A received production Sentry event is NOT VERIFIED.
+- **Navigation / links — ADDRESSED IN CODE:** role-aware admin navigation, a working grade-exam destination, and `/sso/virtual` as a safe external redirect. This is not a College↔Virtual federation implementation.
+- **Production configuration — ADDRESSED IN CODE:** production boot validates live Paystack key prefixes, distributed Redis unless explicit single-instance acceptance is recorded, S3 credentials, malware scanner or explicit risk acceptance, and the notification-job secret.
+- **Deployment/release controls — ADDED, NOT DEPLOYED:** Render Docker Blueprint/runbook and Cron dispatch mode, corrected GHCR naming, seeded Lighthouse CI database, and a tenant-route coverage ratchet. These changes do not prove a Render service exists or that the workflows are green on the release commit.
+- **Tenant coverage — PASS AS A RATCHET ONLY:** `check:tenant-coverage -- --max-uncovered 0` reports 114 routes: 1 RLS-scoped, 96 app-filtered, 17 reviewed exemptions, 0 unexplained. PostgreSQL RLS is still fail-open without tenant context; this is not multi-tenant certification.
+- **Paystack intent recovery — HARDENED IN CODE:** compare invoice balance under the invoice row lock for both methods; allow only the same parent's own reference-bound pending/failed Paystack attempt to resume; keep other active attempts blocking; fail an init attempt only while its idempotency lease is still owned; and do not mark a successfully initialized checkout failed just because the replay-cache write failed. The Paystack provider's duplicate-initialization semantics and the full path still need isolated staging tests.
+
+### Verification executed in this remediation pass
+
+- `npm run audit:deps` — **PASS**, 0 advisories in all reported severities.
+- `npm run lint` — **PASS**, exit 0, 0 errors and 102 existing warnings.
+- Focused regression suite — **PASS**, 16 files / 134 tests, including fee-posting compare-and-set, Paystack verification/webhook behavior, idempotency, rate-limit fail-closed, CBT draws/auth, client IP, parent fee states, sessions/impersonation, CSP and environment guards.
+- `check:tenant-coverage -- --max-uncovered 0` — **PASS**, 0 unexplained routes; RLS limitation above remains.
+- `check:dead-ui` — **PASS**, 95 portal pages; `check:orphans` — **PASS**, 85 portal pages reachable; `check:boundary` — **PASS**, 168 client components checked.
+- Prettier check on the touched payment/security paths and `git diff --check` — **PASS**.
+- **NOT CERTIFIED:** full `tsc`, full Vitest, production build and browser E2E. Prisma client generation cannot download its engine from `binaries.prisma.sh` in this sandbox, leaving the generated client absent. The full suite's observed failures are generated-Prisma-client/Expo-config module errors, not demonstrated assertion failures; this is an environment limitation, not a green result. CI must rerun these checks on the release commit with a generated client.
+
+### Residual launch blockers — NOT VERIFIED
+
+1. Provision the selected Render topology and prove secrets, domain/TLS, health, migrations, Redis, S3, scanner-or-risk-acceptance, Resend and Sentry settings.
+2. Obtain green CI for the exact release commit: Prisma generation, typecheck, full test suite and production build. Browser-test admissions and the payment/exam journeys on isolated staging.
+3. Prove Paystack test-mode initiation, verification, duplicate webhook/retry, transfer approve/reject, notification delivery and reconciliation without charging a real account during tests. Conduct any controlled live-value check only with school approval.
+4. Run the scheduled notification Cron and prove dispatch; receive test Sentry events; rehearse backup restore and record RPO/RTO; run the agreed isolated 1K-DAU test.
+5. Verify required branch protection/checks. The earlier GitHub branch-protection query returned 403, so this remains NOT VERIFIED.
+6. Keep platform signup and second-tenant onboarding off until RLS is made fail-closed and separately certified. YK-Virtual, Famex-OS and actual Virtual SSO remain outside the provided repository/scope.
+
+**Decision from available evidence: NO-GO for production certification.** The code-side launch blockers listed as addressed above have focused source/static/regression evidence, but production readiness requires the operational and CI evidence in `docs/launch-deployment-runbook.md` and the remaining checklist. The original Ykay College single-tenant scope is preserved; this does not certify EduOS multi-tenancy.

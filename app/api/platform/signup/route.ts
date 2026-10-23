@@ -7,6 +7,7 @@ import { sessionCookie, signSession } from "@/lib/session";
 
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { getClientIp } from "@/lib/requests";
 export const dynamic = "force-dynamic";
 
 const schema = z.object({
@@ -40,10 +41,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const ipLimit = await enforceRateLimit(
-    "signup",
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown",
-  );
+  const ipLimit = await enforceRateLimit("signup", getClientIp(request));
   if (!ipLimit.success) {
     return NextResponse.json(
       {

@@ -42,7 +42,7 @@ describe("enforceRateLimit — production fail-closed policy (C-005)", () => {
     vi.stubEnv("NODE_ENV", "production");
     const { enforceRateLimit } = await freshLimiter();
 
-    for (const kind of ["payment", "draft", "signup", "staffActivate"] as const) {
+    for (const kind of ["payment", "draft", "signup", "staffActivate", "cbt"] as const) {
       const result = await enforceRateLimit(kind, "203.0.113.9");
       expect(result.configurationError, kind).toBe(true);
       expect(result.success, kind).toBe(false);

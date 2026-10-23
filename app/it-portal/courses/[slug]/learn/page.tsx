@@ -314,14 +314,23 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
                 <p className="mt-3 text-sm leading-relaxed text-white/60">{activeModule.summary}</p>
               </div>
 
-              {/* Lesson content */}
+              {/* Lesson content. Rendered as plain text paragraphs — course
+                  content is authored as text (see prisma/seed-it-courses.ts),
+                  and injecting it as HTML was a stored-XSS vector (XSS-01)
+                  for anyone who could write module content. If rich HTML
+                  lessons are ever needed, sanitize with DOMPurify first. */}
               <div className="rounded-2xl border border-white/10 bg-[var(--surface-card)]/5 p-8">
-                <div
-                  className="prose prose-invert prose-sm max-w-none prose-headings:text-white prose-p:text-white/70 prose-strong:text-white prose-a:text-brand-green prose-li:text-white/70"
-                  dangerouslySetInnerHTML={{
-                    __html: activeModule.content.replace(/\n/g, "<br/>"),
-                  }}
-                />
+                <div className="prose prose-invert prose-sm max-w-none prose-headings:text-white prose-p:text-white/70 prose-strong:text-white prose-a:text-brand-green prose-li:text-white/70">
+                  {activeModule.content
+                    .split(/\n{2,}/)
+                    .map((paragraph) => paragraph.trim())
+                    .filter(Boolean)
+                    .map((paragraph, index) => (
+                      <p key={index} className="whitespace-pre-line">
+                        {paragraph}
+                      </p>
+                    ))}
+                </div>
               </div>
 
               {/* Actions */}

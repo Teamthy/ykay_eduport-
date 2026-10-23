@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com" }],
+    // DEP-01 defence in depth: keep SVG OUT of the image optimizer. SVG is
+    // scriptable XML; the optimizer's SVG handling was the precondition for
+    // a 2026 Next.js RCE advisory chain. Explicit false (the default) so a
+    // future "just enable SVG logos" edit has to argue with this comment.
+    dangerouslyAllowSVG: false,
   },
 
   // ── Security headers applied to every response ──────────────

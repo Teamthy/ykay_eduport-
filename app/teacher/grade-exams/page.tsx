@@ -129,12 +129,25 @@ export default function GradeExamsPage() {
                       <td className="p-4 text-xs">{e.statusLabel || e.status}</td>
                       <td className="p-4 text-right">
                         {e.submittedCount > 0 ? (
-                          <Link
-                            href={`/teacher/test-results?exam=${e.id}`}
-                            className="rounded-full bg-brand-green px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-navy"
-                          >
-                            Review {e.submittedCount}
-                          </Link>
+                          // H10: grading controls live in the CBT Centre's
+                          // results view — test-results is read-only, so the
+                          // primary action deep-links where essays are graded
+                          // and results released; the read-only summary stays
+                          // one click away.
+                          <span className="inline-flex items-center gap-2">
+                            <Link
+                              href={`/teacher/cbt-center?exam=${e.id}`}
+                              className="rounded-full bg-brand-green px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-navy"
+                            >
+                              Grade {e.submittedCount}
+                            </Link>
+                            <Link
+                              href={`/teacher/test-results?exam=${e.id}`}
+                              className="rounded-full border border-[var(--border-subtle)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] hover:text-brand-green"
+                            >
+                              View
+                            </Link>
+                          </span>
                         ) : (
                           <span className="text-xs text-[var(--text-muted)]">No submissions</span>
                         )}
