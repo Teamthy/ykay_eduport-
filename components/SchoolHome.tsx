@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import { Marquee } from "@/components/AnimatedText";
+import { Marquee } from "@/components/Marquee";
 import { HomeSectionsTop, HomeSectionsBottom } from "@/components/HomeSections";
 import MobileAppCTA from "@/components/MobileAppCTA";
 import Footer from "@/components/Footer";

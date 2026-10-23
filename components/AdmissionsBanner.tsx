@@ -1,6 +1,4 @@
-"use client";
-
-import { AnimatedText } from "@/components/AnimatedText";
+import { AnimatedText } from "@/components/AnimatedTextStatic";
 import { ArrowRight, FileCheck2, CreditCard, CalendarClock } from "lucide-react";
 
 const HIGHLIGHTS = [

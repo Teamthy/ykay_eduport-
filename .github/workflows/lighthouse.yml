@@ -73,12 +73,14 @@ jobs:
         run: |
           set +e
           npx --yes @lhci/cli@0.14.x autorun
-          code=$?
+          lhci_code=$?
+          # Surface the numbers as annotations and enforce the median budget
+          # independently for each route so a strong page cannot mask a weak one.
+          node scripts/lighthouse-report-summary.mjs
+          summary_code=$?
           set -e
-          # Surface the numbers where they can always be read back (run
-          # annotations), because raw step logs are easy to lose track of.
-          node scripts/lighthouse-report-summary.mjs || true
-          exit $code
+          if [ "$lhci_code" -ne 0 ]; then exit "$lhci_code"; fi
+          exit "$summary_code"
         env:
           LHCI_NAME: ykay-college
         # lighthouserc.json points at the seeded standalone server via

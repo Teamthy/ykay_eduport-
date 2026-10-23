@@ -1,7 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { AnimatedText } from "@/components/AnimatedText";
+import { AnimatedText } from "@/components/AnimatedTextStatic";
 import {
   GraduationCap,
   ClipboardCheck,

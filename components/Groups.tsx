@@ -1,8 +1,6 @@
-"use client";
-
 import { ArrowRight } from "lucide-react";
 
-import { AnimatedText } from "@/components/AnimatedText";
+import { AnimatedText } from "@/components/AnimatedTextStatic";
 const clubs = [
   {
     title: "Science & Technology Club",

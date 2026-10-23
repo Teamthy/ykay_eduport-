@@ -2,7 +2,7 @@
 
 import { Clock, MapPin } from "lucide-react";
 
-import { AnimatedText } from "@/components/AnimatedText";
+import { AnimatedText } from "@/components/AnimatedTextStatic";
 import { useSchoolProfile } from "@/components/SchoolProfileContext";
 
 /**

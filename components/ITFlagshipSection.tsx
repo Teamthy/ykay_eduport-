@@ -1,9 +1,7 @@
-"use client";
-
 import Link from "next/link";
 import { ArrowRight, Award, Code2, Shield, Sparkles } from "lucide-react";
 
-import { AnimatedText } from "@/components/AnimatedText";
+import { AnimatedText } from "@/components/AnimatedTextStatic";
 const TRACKS = [
   {
     title: "Python",

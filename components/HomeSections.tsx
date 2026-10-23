@@ -1,28 +1,16 @@
-"use client";
+// Server-render the public marketing sections. Only the few sections that
+// consume client context remain client components; static copy, links, and
+// icon markup do not need hydration just because they appear below the hero.
 
-// HomeSections — the below-the-fold marketing sections of the home page.
-//
-// Each section is its own async chunk (next/dynamic, ssr kept so the markup
-// is in the server HTML for SEO and no-JS visitors). They carry no animation
-// library and their images sit behind content-visibility:auto (see the Reveal
-// classNames), so the chunks and bytes stay off the LCP critical path
-// measured by lighthouserc.json.
-//
-// NOTE: do not gate these loaders client-side (e.g. "load after LCP") — a
-// loader that resolves on the server but suspends on the client breaks
-// hydration and blanks the page. Gating is only safe with ssr:false.
-
-import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 import { Reveal } from "@/components/Reveal";
-
-const ServiceInfo = dynamic(() => import("@/components/ServiceInfo"));
-const ITFlagshipSection = dynamic(() => import("@/components/ITFlagshipSection"));
-const AdmissionsBanner = dynamic(() => import("@/components/AdmissionsBanner"));
-const Services = dynamic(() => import("@/components/Services"));
-const Groups = dynamic(() => import("@/components/Groups"));
-const VirtualBridge = dynamic(() => import("@/components/VirtualBridge"));
-const FindUs = dynamic(() => import("@/components/FindUs"));
+import ServiceInfo from "@/components/ServiceInfo";
+import ITFlagshipSection from "@/components/ITFlagshipSection";
+import AdmissionsBanner from "@/components/AdmissionsBanner";
+import Services from "@/components/Services";
+import Groups from "@/components/Groups";
+import VirtualBridge from "@/components/VirtualBridge";
+import FindUs from "@/components/FindUs";
 
 /** Sections between the hero and the marquee. */
 export function HomeSectionsTop() {
