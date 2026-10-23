@@ -1,18 +1,5 @@
+import { preload } from "react-dom";
 import { headers } from "next/headers";
-
-// Preload the home hero backdrop — the LCP element — as its exact static
-// WebP so the browser can start it with the document response, before it
-// parses the hero markup.
-export const metadata = {
-  other: [
-    {
-      rel: "preload",
-      as: "image",
-      href: "/home/hero-campus-750.webp",
-      fetchpriority: "high",
-    },
-  ],
-};
 import { resolveTenantFromHost } from "@/lib/tenant";
 import SchoolHome from "@/components/SchoolHome";
 import PlatformLanding from "@/components/PlatformLanding";
@@ -27,6 +14,13 @@ import PlatformLanding from "@/components/PlatformLanding";
  * school's palette — but the *landing* is always Ykay here.
  */
 export default async function HomePage() {
+  // Preload the responsive hero backdrop before its markup is parsed.
+  preload("/home/hero-campus-750.webp", {
+    as: "image",
+    imageSrcSet: "/home/hero-campus-750.webp 750w, /home/hero-campus-1200.webp 1200w",
+    imageSizes: "100vw",
+    fetchPriority: "high",
+  });
   const host = (await headers()).get("host");
   const { matched } = await resolveTenantFromHost(host);
 

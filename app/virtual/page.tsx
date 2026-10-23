@@ -1,3 +1,4 @@
+import { preload } from "react-dom";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -21,6 +22,13 @@ export const metadata = {
  * editorial header. The reference language: madeinevolve.com case cards.
  */
 export default function VirtualPage() {
+  preload("/it-hub-classroom-750.webp", {
+    as: "image",
+    imageSrcSet: "/it-hub-classroom-750.webp 750w, /it-hub-classroom-1200.webp 1200w",
+    imageSizes: "(max-width: 768px) 100vw, 50vw",
+    fetchPriority: "high",
+  });
+
   return (
     <>
       <Header />
@@ -54,54 +62,52 @@ export default function VirtualPage() {
         <section className="w-full px-6 py-10 md:px-10 md:py-14">
           <div className="mx-auto grid w-full max-w-7xl gap-6 md:grid-cols-2">
             {/* 01 — the campus school (you are here) */}
-            <Reveal>
-              <div className="group relative flex min-h-[26rem] flex-col justify-end overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-lg">
-                {/* First card — in the initial viewport on mobile, so it is the
+            <div className="group relative flex min-h-[26rem] flex-col justify-end overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-lg">
+              {/* First card — in the initial viewport on mobile, so it is the
                     LCP element: pre-built WebP, fetchpriority=high. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/it-hub-classroom-750.webp"
-                  srcSet="/it-hub-classroom-750.webp 750w, /it-hub-classroom-1200.webp 1200w"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  alt="Students working in the Ykay College IT hub"
-                  fetchPriority="high"
-                  decoding="async"
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-navy-dark via-brand-navy-dark/55 to-brand-navy-dark/10" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/it-hub-classroom-750.webp"
+                srcSet="/it-hub-classroom-750.webp 750w, /it-hub-classroom-1200.webp 1200w"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                alt="Students working in the Ykay College IT hub"
+                fetchPriority="high"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-brand-navy-dark via-brand-navy-dark/55 to-brand-navy-dark/10" />
 
-                <div className="relative flex h-full flex-col justify-between p-7 md:p-9">
-                  <div className="flex items-start justify-between">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-3 py-1 font-body text-[10px] font-bold uppercase tracking-[0.2em] text-white backdrop-blur-sm">
-                      <MapPin size={11} className="text-brand-orange" /> You are here
+              <div className="relative flex h-full flex-col justify-between p-7 md:p-9">
+                <div className="flex items-start justify-between">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/30 px-3 py-1 font-body text-[10px] font-bold uppercase tracking-[0.2em] text-white backdrop-blur-sm">
+                    <MapPin size={11} className="text-brand-orange" /> You are here
+                  </span>
+                  <span className="font-display text-xl tracking-widest text-white/50">(01)</span>
+                </div>
+
+                <div>
+                  <h2 className="font-display text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.88] tracking-[-0.01em] text-white">
+                    YKAY
+                    <span className="block text-brand-orange">COLLEGE</span>
+                  </h2>
+                  <p className="mt-3 max-w-md font-body text-sm leading-relaxed text-white/80">
+                    The campus school — JSS1 to SS3, science laboratories, sports, clubs and a full
+                    IT academy in the timetable.
+                  </p>
+                  <div className="mt-6 flex flex-wrap items-center gap-4">
+                    <a
+                      href="/admissions"
+                      className="inline-flex items-center gap-2 rounded-full bg-[#ff6e00] px-6 py-3 font-body text-xs font-bold uppercase tracking-[0.15em] text-[#0c1824] transition-all duration-300 hover:scale-[1.03] hover:bg-[#e65f00] active:scale-[0.97]"
+                    >
+                      Apply to the college <ArrowRight size={13} />
+                    </a>
+                    <span className="font-body text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
+                      ykaycollege.edu.ng
                     </span>
-                    <span className="font-display text-xl tracking-widest text-white/50">(01)</span>
-                  </div>
-
-                  <div>
-                    <h2 className="font-display text-[clamp(2.25rem,5vw,4.25rem)] leading-[0.88] tracking-[-0.01em] text-white">
-                      YKAY
-                      <span className="block text-brand-orange">COLLEGE</span>
-                    </h2>
-                    <p className="mt-3 max-w-md font-body text-sm leading-relaxed text-white/80">
-                      The campus school — JSS1 to SS3, science laboratories, sports, clubs and a
-                      full IT academy in the timetable.
-                    </p>
-                    <div className="mt-6 flex flex-wrap items-center gap-4">
-                      <a
-                        href="/admissions"
-                        className="inline-flex items-center gap-2 rounded-full bg-[#ff6e00] px-6 py-3 font-body text-xs font-bold uppercase tracking-[0.15em] text-[#0c1824] transition-all duration-300 hover:scale-[1.03] hover:bg-[#e65f00] active:scale-[0.97]"
-                      >
-                        Apply to the college <ArrowRight size={13} />
-                      </a>
-                      <span className="font-body text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
-                        ykaycollege.edu.ng
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
-            </Reveal>
+            </div>
 
             {/* 02 — the online school (destination) */}
             <Reveal delay={80} className="cv-auto">

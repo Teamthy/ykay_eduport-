@@ -1352,8 +1352,8 @@ button:disabled {
    FIRST-PAINT ANIMATIONS (CSS-only)
    The initial bundle must not ship an animation library: these
    utilities replace framer-motion on every component that renders
-   in the first viewport (Hero, Header, LoadingScreen, Marquee,
-   AnimatedText, Toast). Below-the-fold sections keep framer-motion
+   in the first viewport (Hero, Header, Marquee, AnimatedText,
+   Toast). Below-the-fold sections keep framer-motion
    through LazyMotion and load it after the LCP paint.
    ============================================================ */
 @keyframes char-in {
