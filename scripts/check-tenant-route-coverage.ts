@@ -60,12 +60,57 @@ function delegateName(model: string): string {
   return model.charAt(0).toLowerCase() + model.slice(1);
 }
 
+/**
+ * REVIEWED EXEMPTIONS (audit TEN-01, reviewed line-by-line 2026-10-23).
+ *
+ * These routes touch tenant models without a literal `schoolId` filter, but
+ * each was verified to derive its scope from something equally binding:
+ * a globally-unique owner id (userId / teacherProfileId), a single-use
+ * token, the internal shared secret, or deliberate platform scope
+ * (SUPER_ADMIN console). They are listed explicitly — NOT silently skipped —
+ * so the ratchet still fails on any NEW unscoped route, and an exemption
+ * whose file later gains a real schoolId filter is reported as stale.
+ *
+ * An exemption is a reviewed judgement, not a backstop: before a second
+ * school is onboarded, every entry here must be re-verified, and the RLS
+ * policies still cannot flip fail-closed while only 1 of 114 routes sets
+ * the tenant GUC (see docs/TENANCY_RLS_STATUS.md).
+ */
+const REVIEWED_EXEMPTIONS = new Map<string, string>([
+  // Pre-auth, authorized by applicationId + upload token (findAuthorizedApplication).
+  ["app/api/admissions/payments/start/route.ts", "token-scoped application lookup"],
+  // Pre-auth, single-use hashed reset token resolves to exactly one userId.
+  ["app/api/auth/password-reset/confirm/route.ts", "token-scoped to record.userId"],
+  // Server-to-server ingestion behind a constant-time shared-secret check.
+  ["app/api/internal/security-event/route.ts", "internal shared-secret endpoint"],
+  // Owner-scoped by the session user's globally unique id.
+  ["app/api/it/certificates/route.ts", "owner-scoped by userId"],
+  ["app/api/it/profile/route.ts", "owner-scoped by userId"],
+  ["app/api/parent/events/route.ts", "owner-scoped by userId"],
+  ["app/api/parent/messages/route.ts", "owner-scoped by userId"],
+  ["app/api/student/announcements/route.ts", "owner-scoped by userId"],
+  ["app/api/teacher/class/announcements/route.ts", "owner-scoped by userId"],
+  ["app/api/teacher/messages/route.ts", "owner-scoped by userId"],
+  // Scoped by teacherProfileId, which belongs to exactly one school.
+  ["app/api/teacher/analytics/route.ts", "teacherProfileId-scoped"],
+  ["app/api/teacher/exams/[id]/results/route.ts", "teacherProfileId-scoped"],
+  ["app/api/teacher/my-records/route.ts", "teacherProfileId-scoped"],
+  ["app/api/teacher/performance/route.ts", "teacherProfileId-scoped"],
+  // Platform console: cross-tenant by design, SUPER_ADMIN only.
+  ["app/api/super-admin/finance/route.ts", "SUPER_ADMIN platform scope"],
+  ["app/api/super-admin/logs/route.ts", "SUPER_ADMIN platform scope"],
+  ["app/api/super-admin/overview/route.ts", "SUPER_ADMIN platform scope"],
+]);
+
 const models = tenantModels();
 const routes = listRouteFiles(API_DIR);
 
 let rlsScoped = 0;
 let appFiltered = 0;
 const uncovered: string[] = [];
+const exempted: string[] = [];
+const staleExemptions: string[] = [];
+const matchedExemptions = new Set<string>();
 
 const delegateCall = (model: string) =>
   new RegExp(
@@ -76,52 +121,87 @@ const delegateCall = (model: string) =>
 
 for (const route of routes) {
   const source = readFileSync(route, "utf8");
+  const relRoute = relative(ROOT, route);
   const touched = [...models].filter((model) => delegateCall(model).test(source));
   if (touched.length === 0) continue;
 
   if (/withSchool\s*\(/.test(source)) {
     rlsScoped += 1;
+    if (REVIEWED_EXEMPTIONS.has(relRoute)) {
+      matchedExemptions.add(relRoute);
+      staleExemptions.push(relRoute);
+    }
     continue;
   }
   if (/schoolId/.test(source)) {
     appFiltered += 1;
+    if (REVIEWED_EXEMPTIONS.has(relRoute)) {
+      matchedExemptions.add(relRoute);
+      staleExemptions.push(relRoute);
+    }
+    continue;
+  }
+  const exemption = REVIEWED_EXEMPTIONS.get(relRoute);
+  if (exemption) {
+    matchedExemptions.add(relRoute);
+    exempted.push(`${relRoute}  (${exemption})`);
     continue;
   }
   uncovered.push(
-    `${relative(ROOT, route)}  (models: ${touched.slice(0, 4).join(", ")}${touched.length > 4 ? ", …" : ""})`,
+    `${relRoute}  (models: ${touched.slice(0, 4).join(", ")}${touched.length > 4 ? ", …" : ""})`,
   );
 }
 
-console.log(`Tenant-model routes: ${rlsScoped + appFiltered + uncovered.length}`);
+for (const route of REVIEWED_EXEMPTIONS.keys()) {
+  if (!matchedExemptions.has(route)) staleExemptions.push(route);
+}
+
+console.log(`Tenant-model routes: ${rlsScoped + appFiltered + exempted.length + uncovered.length}`);
 console.log(`  RLS-scoped (withSchool): ${rlsScoped}`);
 console.log(`  App-level schoolId filter present: ${appFiltered}`);
-console.log(`  UNCOVERED (no withSchool, no schoolId mention): ${uncovered.length}`);
+console.log(`  Reviewed owner/token/platform exemptions: ${exempted.length}`);
+console.log(`  UNCOVERED (no scope and no current exemption): ${uncovered.length}`);
+console.log("  Note: app filters/exemptions do NOT set the DB tenant GUC; RLS remains fail-open.");
+if (exempted.length) {
+  console.log("\nReviewed exemptions (see REVIEWED_EXEMPTIONS in this script):");
+  for (const line of exempted) console.log(`  - ${line}`);
+}
+if (staleExemptions.length) {
+  console.error(
+    "\nERROR: reviewed exemptions are stale (route disappeared, stopped touching a tenant model, or gained an explicit scope); remove/re-review them:",
+  );
+  for (const line of staleExemptions) console.error(`  - ${line}`);
+}
 if (uncovered.length) {
   console.log("\nUNCOVERED routes (go verify each — imported helpers may filter internally):");
   for (const line of uncovered) console.log(`  - ${line}`);
 }
 
 if (process.argv.includes("--strict")) {
-  if (uncovered.length) {
+  if (uncovered.length || staleExemptions.length) {
     console.error(
-      `\n--strict: ${uncovered.length} uncovered tenant route(s). Fix or scope them before enabling.`,
+      `\n--strict: ${uncovered.length} unexplained route(s), ${staleExemptions.length} stale exemption(s). Review before continuing.`,
     );
     process.exit(1);
   }
-  console.log("\n--strict: no uncovered tenant routes. The policy can move to fail-closed.");
+  console.log(
+    "\n--strict: no unexplained routes; note this checks source coverage, not DB RLS/GUC fail-closed readiness.",
+  );
 }
 
 /**
  * --max-uncovered <n> — a RATCHET, for CI.
  *
- * --strict is the end state (zero uncovered) and cannot be turned on until the
- * list is empty, so today it would simply fail on every commit and get ignored.
- * This flag instead fails only when coverage gets WORSE than a recorded
- * baseline, which is enforceable now: it stops new tenant routes landing
- * without a schoolId filter while the existing 18 are worked down.
+ * Reviewed exemptions above are part of the baseline; they are printed and
+ * stale entries fail. Set the CI limit to zero once every current route is
+ * either explicitly filtered, wrapped in withSchool(), or has a reviewed,
+ * owner/token/platform-scope exemption. This prevents a new unexplained route
+ * from silently increasing the list.
  *
- * When the count drops below the baseline the check still passes, but nags you
- * to lower the number so the improvement is locked in.
+ * IMPORTANT: this is not a green multi-tenant certificate. App-level filters
+ * do not set the RLS tenant GUC; the DB policy remains fail-open until every
+ * tenant query is routed through `withSchool()` and `verify:rls` proves the
+ * actual database denies missing/incorrect tenant context.
  */
 const maxFlagIndex = process.argv.indexOf("--max-uncovered");
 if (maxFlagIndex !== -1) {
@@ -132,22 +212,16 @@ if (maxFlagIndex !== -1) {
   }
   if (uncovered.length > limit) {
     console.error(
-      `\nRATCHET FAILED: ${uncovered.length} uncovered tenant route(s) exceeds the baseline of ${limit}.`,
+      `\nRATCHET FAILED: ${uncovered.length} unexplained tenant route(s) exceeds the baseline of ${limit}.`,
     );
     console.error(
-      "A tenant-model route was added (or lost its schoolId filter) without being scoped.",
-    );
-    console.error(
-      "Filter it by schoolId, or better, route it through withSchool() — see docs/TENANCY_RLS_STATUS.md.",
+      "Add a real schoolId/withSchool scope or a new explicitly reviewed exemption after verifying its owner/token/platform scope.",
     );
     process.exit(1);
   }
-  if (uncovered.length < limit) {
-    console.log(
-      `\nRATCHET: coverage improved to ${uncovered.length} (baseline ${limit}). ` +
-        `Lower --max-uncovered to ${uncovered.length} to lock the gain in.`,
-    );
-  } else {
-    console.log(`\nRATCHET: ${uncovered.length} uncovered, baseline ${limit} — no regression.`);
+  if (staleExemptions.length > 0) {
+    console.error("\nRATCHET FAILED: remove or re-review stale exemptions listed above.");
+    process.exit(1);
   }
+  console.log(`\nRATCHET: ${uncovered.length} unexplained, baseline ${limit} — no regression.`);
 }

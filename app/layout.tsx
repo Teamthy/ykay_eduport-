@@ -10,6 +10,7 @@ import CookieConsent from "@/components/CookieConsent";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import DemoIndicator from "@/components/DemoIndicator";
 import OfflineIndicator from "@/components/OfflineIndicator";
+import ImpersonationBanner from "@/components/ImpersonationBanner";
 import { MotionProvider } from "@/components/MotionProvider";
 import { AmbientBackdrop } from "@/components/AmbientBackdrop";
 import { RegisterSW } from "@/components/RegisterSW";
@@ -152,9 +153,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const schoolName = school?.name ?? "Ykay College & Leadership Academy";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng";
 
-  const primary = branding?.primaryColor ?? DEFAULT_BRANDING.primaryColor;
-  const secondary = branding?.secondaryColor ?? DEFAULT_BRANDING.secondaryColor;
-  const accent = branding?.accentColor ?? DEFAULT_BRANDING.accentColor;
+  // Branding colours are interpolated into a <style> block below, so only
+  // accept plain hex values — anything else (a typo, or a hostile value
+  // written through a future branding form) falls back to the default
+  // instead of breaking out of the CSS declaration.
+  const safeColor = (value: string | null | undefined, fallback: string) =>
+    value && /^#[0-9a-fA-F]{3,8}$/.test(value.trim()) ? value.trim() : fallback;
+  const primary = safeColor(branding?.primaryColor, DEFAULT_BRANDING.primaryColor);
+  const secondary = safeColor(branding?.secondaryColor, DEFAULT_BRANDING.secondaryColor);
+  const accent = safeColor(branding?.accentColor, DEFAULT_BRANDING.accentColor);
   const faviconUrl = branding?.faviconUrl ?? "/ykay-logo.png";
 
   return (
@@ -197,6 +204,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
+            // Escape HTML-significant characters after JSON serialization.
+            // Tenant-controlled school names can contain `</script>`; raw
+            // JSON in a script element must not let that terminate the block.
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "School",
@@ -229,7 +239,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               ...(isPlatformDefaultSchool
                 ? { openingHours: "Mo-Fr 07:30-14:30", sameAs: ["https://virtual.ykaycollege.com"] }
                 : {}),
-            }),
+            })
+              .replace(/</g, "\\u003c")
+              .replace(/>/g, "\\u003e")
+              .replace(/&/g, "\\u0026"),
           }}
         />
       </head>
@@ -243,6 +256,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <div className="relative z-10">{children}</div>
                 </SchoolProfileProvider>
               </MotionProvider>
+              <ImpersonationBanner />
               <CookieConsent />
               <WhatsAppFloat />
               <DemoIndicator />

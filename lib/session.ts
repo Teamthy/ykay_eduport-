@@ -29,6 +29,18 @@ export const SESSION_COOKIE = "ykay_session";
 export const SESSION_TTL_JOSE = "30d";
 export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
 
+/**
+ * Impersonation sessions expire in the JWT itself after one hour
+ * (audit AUTH-01). Shortening only the cookie's maxAge — the old behaviour —
+ * left a 30-day Bearer token that could be lifted out of the browser and
+ * replayed against the API long after the "1 hour" window. `signSession`
+ * applies this TTL automatically whenever the claims carry
+ * `impersonatedBy`, so no caller can mint a long-lived impersonation token
+ * by forgetting an option.
+ */
+export const IMPERSONATION_TTL_JOSE = "60m";
+export const IMPERSONATION_TTL_SECONDS = 60 * 60;
+
 const encoder = new TextEncoder();
 
 function secret() {
@@ -50,6 +62,7 @@ export type SessionUser = {
 
 export async function signSession(
   user: SessionUser & { impersonatedBy?: string; tokenVersion?: number },
+  options?: { expiresIn?: string },
 ) {
   const claims: Record<string, unknown> = {
     schoolId: user.schoolId,
@@ -63,11 +76,16 @@ export async function signSession(
     claims.impersonatedBy = user.impersonatedBy;
   }
 
+  // AUTH-01: impersonation tokens always get the short TTL in the JWT
+  // itself, regardless of caller options being forgotten.
+  const expiresIn =
+    options?.expiresIn ?? (user.impersonatedBy ? IMPERSONATION_TTL_JOSE : SESSION_TTL_JOSE);
+
   return new SignJWT(claims)
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
     .setIssuedAt()
-    .setExpirationTime(SESSION_TTL_JOSE)
+    .setExpirationTime(expiresIn)
     .sign(secret());
 }
 

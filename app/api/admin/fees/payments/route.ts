@@ -1,4 +1,4 @@
-import { FeePaymentMethod, PaymentStatus } from "@prisma/client";
+import { AlertChannel, FeePaymentMethod, NotificationKind, PaymentStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -6,6 +6,8 @@ import { getAdminFinanceContext, generatePaymentReference } from "@/lib/finance"
 import { assertNotImpersonating } from "@/lib/session";
 import { postCompletedFeePayment } from "@/lib/fee-payment-service";
 import { getClientIp } from "@/lib/requests";
+import { createInAppNotification, queueNotificationJob } from "@/lib/notifications";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -22,6 +24,101 @@ const reviewSchema = z.object({
   attemptId: z.string().min(1),
   note: z.string().trim().max(500).optional(),
 });
+
+/**
+ * MNY-01: reflect bursar decisions to the parent. The in-app notification is
+ * durable immediately; an email job is also queued when the account has an
+ * email. Provider/queue failure is isolated from a payment that has already
+ * committed, and the parent fees API remains the source of truth.
+ */
+async function notifyParentOfPayment(input: {
+  schoolId: string;
+  parentProfileId: string | null;
+  invoiceId: string;
+  title: string;
+  body: string;
+  dedupeKey: string;
+  reference: string;
+  amount: number;
+}) {
+  try {
+    let parentProfileId = input.parentProfileId;
+    if (!parentProfileId) {
+      const invoice = await prisma.feeInvoice.findFirst({
+        where: { id: input.invoiceId, schoolId: input.schoolId },
+        select: { parentProfileId: true },
+      });
+      parentProfileId = invoice?.parentProfileId ?? null;
+    }
+    if (!parentProfileId) return;
+
+    const parent = await prisma.parentProfile.findFirst({
+      where: { id: parentProfileId, schoolId: input.schoolId },
+      select: {
+        userId: true,
+        displayName: true,
+        phone: true,
+        user: { select: { email: true } },
+      },
+    });
+    if (!parent) return;
+
+    try {
+      await createInAppNotification({
+        schoolId: input.schoolId,
+        userId: parent.userId,
+        kind: NotificationKind.FEE_REMINDER,
+        title: input.title,
+        body: input.body,
+        link: "/parent/fees",
+      });
+    } catch (error) {
+      logger.error("fee review in-app notification failed", {
+        invoiceId: input.invoiceId,
+        reference: input.reference,
+        error: String(error),
+      });
+    }
+
+    if (parent.user.email) {
+      try {
+        await queueNotificationJob({
+          schoolId: input.schoolId,
+          kind: NotificationKind.FEE_REMINDER,
+          channel: AlertChannel.EMAIL,
+          subject: input.title,
+          body: input.body,
+          recipientName: parent.displayName,
+          recipientEmail: parent.user.email,
+          recipientPhone: parent.phone,
+          recipientUserId: parent.userId,
+          dedupeKey: input.dedupeKey,
+          metadata: {
+            invoiceId: input.invoiceId,
+            reference: input.reference,
+            amount: input.amount,
+          },
+        });
+      } catch (error) {
+        logger.error("fee review email notification could not be queued", {
+          invoiceId: input.invoiceId,
+          reference: input.reference,
+          error: String(error),
+        });
+      }
+    }
+  } catch (error) {
+    logger.error("fee review parent lookup failed", {
+      invoiceId: input.invoiceId,
+      reference: input.reference,
+      error: String(error),
+    });
+  }
+}
+
+function naira(amount: number) {
+  return `₦${amount.toLocaleString("en-NG")}`;
+}
 
 export async function GET() {
   const context = await getAdminFinanceContext();
@@ -87,17 +184,40 @@ export async function POST(request: NextRequest) {
         actorUserId: context.user.id,
       });
 
-      await prisma.auditLog.create({
-        data: {
+      try {
+        await prisma.auditLog.create({
+          data: {
+            schoolId: context.user.schoolId,
+            actorUserId: context.user.id,
+            action: "CASH_PAYMENT_RECORDED",
+            entityType: "FeePayment",
+            entityId: result.payment.id,
+            ipAddress: getClientIp(request),
+            metadata: { reference, amount: input.amount, replay: result.replay },
+          },
+        });
+      } catch (error) {
+        // postCompletedFeePayment already wrote the atomic FEE_PAYMENT_POSTED
+        // audit row. This extra action label is useful but must not make a
+        // committed payment look like a failed request.
+        logger.error("cash-payment detail audit failed after payment commit", {
+          paymentId: result.payment.id,
+          error: String(error),
+        });
+      }
+
+      if (!result.replay) {
+        await notifyParentOfPayment({
           schoolId: context.user.schoolId,
-          actorUserId: context.user.id,
-          action: "CASH_PAYMENT_RECORDED",
-          entityType: "FeePayment",
-          entityId: result.payment.id,
-          ipAddress: getClientIp(request),
-          metadata: { reference, amount: input.amount, replay: result.replay },
-        },
-      });
+          parentProfileId: invoice.parentProfileId,
+          invoiceId: invoice.id,
+          title: "Cash payment recorded",
+          body: `A cash payment of ${naira(input.amount)} has been recorded against invoice ${invoice.invoiceNumber}. Your updated balance is on the Fees page.`,
+          dedupeKey: `fee-cash-recorded:${result.payment.id}`,
+          reference,
+          amount: input.amount,
+        });
+      }
 
       return NextResponse.json({ payment: result.payment, replay: result.replay });
     }
@@ -119,30 +239,58 @@ export async function POST(request: NextRequest) {
     }
 
     if (input.action === "REJECT_TRANSFER") {
-      await prisma.feePaymentAttempt.update({
-        where: { id: attempt.id },
-        data: {
-          status: PaymentStatus.FAILED,
-          reviewedByUserId: context.user.id,
-          reviewedAt: new Date(),
-          transferNarration: [
-            attempt.transferNarration,
-            input.note ? `Review: ${input.note}` : null,
-          ]
-            .filter(Boolean)
-            .join("\n"),
-        },
+      // Claim the pending attempt atomically. Approval uses the matching
+      // PENDING→PAID compare-and-set inside postCompletedFeePayment; only one
+      // side of a simultaneous approve/reject can win (MNY-01 money safety).
+      const rejected = await prisma.$transaction(async (tx) => {
+        const result = await tx.feePaymentAttempt.updateMany({
+          where: {
+            id: attempt.id,
+            schoolId: context.user.schoolId,
+            provider: "BANK_TRANSFER",
+            status: PaymentStatus.PENDING,
+          },
+          data: {
+            status: PaymentStatus.FAILED,
+            reviewedByUserId: context.user.id,
+            reviewedAt: new Date(),
+            transferNarration: [
+              attempt.transferNarration,
+              input.note ? `Review: ${input.note}` : null,
+            ]
+              .filter(Boolean)
+              .join("\n"),
+          },
+        });
+        if (result.count !== 1) return false;
+        await tx.auditLog.create({
+          data: {
+            schoolId: context.user.schoolId,
+            actorUserId: context.user.id,
+            action: "BANK_TRANSFER_REJECTED",
+            entityType: "FeePaymentAttempt",
+            entityId: attempt.id,
+            ipAddress: getClientIp(request),
+            metadata: { reference: attempt.reference, note: input.note || null },
+          },
+        });
+        return true;
       });
-      await prisma.auditLog.create({
-        data: {
-          schoolId: context.user.schoolId,
-          actorUserId: context.user.id,
-          action: "BANK_TRANSFER_REJECTED",
-          entityType: "FeePaymentAttempt",
-          entityId: attempt.id,
-          ipAddress: getClientIp(request),
-          metadata: { reference: attempt.reference, note: input.note || null },
-        },
+      if (!rejected) {
+        return NextResponse.json(
+          { error: "Transfer was already reviewed. Refresh the transfer list." },
+          { status: 409 },
+        );
+      }
+      await notifyParentOfPayment({
+        schoolId: context.user.schoolId,
+        parentProfileId: attempt.parentProfileId,
+        invoiceId: attempt.invoiceId,
+        title: "Bank transfer not confirmed",
+        body: `We could not confirm your bank transfer of ${naira(attempt.amount)} (reference ${attempt.reference}), so it has not been applied to your fees.${input.note ? ` Bursary note: ${input.note}` : ""} Please check the Fees page and contact the bursary if the money left your account.`,
+        dedupeKey: `fee-transfer-rejected:${attempt.id}`,
+        reference: attempt.reference,
+        amount: attempt.amount,
       });
       return NextResponse.json({ ok: true });
     }
@@ -158,35 +306,55 @@ export async function POST(request: NextRequest) {
       reference: attempt.reference,
       providerData: { verifiedBy: context.user.id, note: input.note || null },
       actorUserId: context.user.id,
+      requirePendingAttempt: true,
+      reviewedByUserId: context.user.id,
     });
 
-    await prisma.feePaymentAttempt.update({
-      where: { id: attempt.id },
-      data: { reviewedByUserId: context.user.id, reviewedAt: new Date() },
-    });
-
-    await prisma.auditLog.create({
-      data: {
-        schoolId: context.user.schoolId,
-        actorUserId: context.user.id,
-        action: "BANK_TRANSFER_APPROVED",
-        entityType: "FeePaymentAttempt",
-        entityId: attempt.id,
-        ipAddress: getClientIp(request),
-        metadata: {
-          reference: attempt.reference,
-          amount: attempt.amount,
-          paymentId: result.payment.id,
-          replay: result.replay,
+    try {
+      await prisma.auditLog.create({
+        data: {
+          schoolId: context.user.schoolId,
+          actorUserId: context.user.id,
+          action: "BANK_TRANSFER_APPROVED",
+          entityType: "FeePaymentAttempt",
+          entityId: attempt.id,
+          ipAddress: getClientIp(request),
+          metadata: {
+            reference: attempt.reference,
+            amount: attempt.amount,
+            paymentId: result.payment.id,
+            replay: result.replay,
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      // The payment transaction already atomically wrote FEE_PAYMENT_POSTED
+      // with this actor and reference. Do not return an error after money has
+      // committed merely because this supplemental review label failed.
+      logger.error("bank-transfer approval detail audit failed after payment commit", {
+        attemptId: attempt.id,
+        paymentId: result.payment.id,
+        error: String(error),
+      });
+    }
+
+    if (!result.replay) {
+      await notifyParentOfPayment({
+        schoolId: context.user.schoolId,
+        parentProfileId: attempt.parentProfileId,
+        invoiceId: attempt.invoiceId,
+        title: "Bank transfer confirmed",
+        body: `Your bank transfer of ${naira(attempt.amount)} (reference ${attempt.reference}) has been confirmed by the bursary and applied to your fees. Receipt ${result.payment.receiptNumber} is available on the Fees page.`,
+        dedupeKey: `fee-transfer-approved:${attempt.id}`,
+        reference: attempt.reference,
+        amount: attempt.amount,
+      });
+    }
 
     return NextResponse.json({ payment: result.payment, replay: result.replay });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to process payment." },
-      { status: 400 },
-    );
+    const message = error instanceof Error ? error.message : "Unable to process payment.";
+    const status = /already been reviewed|already reviewed/i.test(message) ? 409 : 400;
+    return NextResponse.json({ error: message }, { status });
   }
 }

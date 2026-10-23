@@ -28,22 +28,9 @@ const GATE_SEVERITIES = new Set(["high", "critical"]);
  * @type {Array<{ advisory: string, module: string, until: string, reason: string }>}
  */
 const EXCLUSIONS = [
-  {
-    // GHSA-vfj7-8cjw-p6xm — braces stack-exhaustion DoS. Every published
-    // braces version (<= 3.0.3) is vulnerable and upstream has published no
-    // patched release, so no version bump can fix it. The vulnerable code is
-    // reached only via micromatch <- fast-glob <- @next/eslint-plugin-next:
-    // the ESLint toolchain, which is dev-only and never shipped to users.
-    // The brace patterns are compiled from the plugin's own internal glob
-    // lists, not from attacker-controlled input, so the DoS is not
-    // reachable in production. The only remediation npm offers downgrades
-    // eslint-config-next 16.x -> 14.x, which breaks linting for Next 16.
-    advisory: "GHSA-vfj7-8cjw-p6xm",
-    module: "braces",
-    until: "2027-01-09",
-    reason:
-      "No upstream fix exists (all braces <= 3.0.3 vulnerable); dev-only ESLint toolchain path with non-attacker-controlled patterns. npm's only fix downgrades eslint-config-next to 14.x (breaking).",
-  },
+  // No active exclusions. (GHSA-vfj7-8cjw-p6xm / braces was excluded while it
+  // had no upstream fix; it no longer appears in the audit after the
+  // eslint-config-next 16.4.3 bump, so the entry was removed 2026-10-23.)
 ];
 
 const GHSA_RE = /GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}/g;

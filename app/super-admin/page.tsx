@@ -28,7 +28,6 @@ import {
   Clock,
   Globe,
   XCircle,
-  LogOut,
 } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────────────
@@ -253,11 +252,6 @@ export default function SuperAdminPage() {
   const [creating, setCreating] = useState(false);
 
   // Impersonation state
-  const [impersonating, setImpersonating] = useState<{
-    name: string;
-    email: string;
-    role: string;
-  } | null>(null);
 
   // Payments state
   const [payments, setPayments] = useState<{
@@ -390,7 +384,6 @@ export default function SuperAdminPage() {
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || "Impersonation failed.");
-      setImpersonating(j.impersonating);
       toast(`Now viewing as ${j.impersonating.name} (read-only).`, "success");
       // Route to the impersonated user's portal dashboard
       const dest: Record<string, string> = {
@@ -409,23 +402,6 @@ export default function SuperAdminPage() {
       }, 600);
     } catch (e) {
       toast(e instanceof Error ? e.message : "Impersonation failed.", "error");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function endImpersonation() {
-    setBusy(true);
-    try {
-      const r = await fetch("/api/super-admin/impersonate", { method: "DELETE" });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "Failed to end impersonation.");
-      setImpersonating(null);
-      toast(`Restored to ${j.restored.email}.`, "success");
-      // Reload the page to reset all state
-      window.location.href = "/super-admin";
-    } catch (e) {
-      toast(e instanceof Error ? e.message : "Failed to end impersonation.", "error");
     } finally {
       setBusy(false);
     }
@@ -491,26 +467,9 @@ export default function SuperAdminPage() {
     <>
       <Header />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
-        {/* Impersonation banner */}
-        {impersonating && (
-          <div className="fixed top-0 right-0 left-0 z-[200] flex items-center justify-between bg-indigo-600 px-6 py-2.5 text-white shadow-lg">
-            <div className="flex items-center gap-2 text-sm">
-              <Eye size={16} />
-              <span className="font-bold">READ-ONLY IMPERSONATION:</span>
-              <span>
-                Viewing as {impersonating.name} ({impersonating.role})
-              </span>
-            </div>
-            <button
-              onClick={() => void endImpersonation()}
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wider hover:bg-white/30"
-            >
-              <LogOut size={13} /> End Session
-            </button>
-          </div>
-        )}
-
-        <section className={`bg-brand-navy px-6 pb-14 ${impersonating ? "pt-38" : "pt-28"}`}>
+        {/* Persistent impersonation banner lives in app/layout.tsx so it stays
+            visible across every portal and survives page reloads (AUTH-01). */}
+        <section className="bg-brand-navy px-6 pt-28 pb-14">
           <div className="mx-auto max-w-7xl">
             <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
               <TerminalSquare size={11} /> Developer Console

@@ -2,6 +2,7 @@ import { jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 import { resolveAllowedOrigin } from "@/lib/cors";
 import { buildContentSecurityPolicy, storageUploadOrigin } from "@/lib/csp";
+import { getClientIp } from "@/lib/requests";
 
 const protectedPrefixes = [
   "/admin",
@@ -169,10 +170,9 @@ async function routeRequest(request: NextRequest) {
 
   const token = request.cookies.get("ykay_session")?.value;
   const secret = process.env.AUTH_SECRET;
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown";
+  // Trusted-proxy-aware resolution (SEC-01): never the raw first XFF entry,
+  // which the client controls. See lib/requests.ts.
+  const ip = getClientIp(request);
 
   if (!token || !secret || secret.length < 32) {
     logDenial("AUTH_DENIED_SESSION_INVALID", pathname, undefined, "No valid session cookie.", ip);
@@ -247,6 +247,7 @@ export async function middleware(request: NextRequest) {
       isProduction: process.env.NODE_ENV === "production",
       plausible: Boolean(process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN),
       storageOrigin: storageUploadOrigin(process.env),
+      sentryDsn: process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN,
     }),
   );
   return response;

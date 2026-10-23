@@ -1,6 +1,14 @@
-# YKAY GO-LIVE CHECKLIST (both systems)
+# YKAY GO-LIVE CHECKLIST (legacy ecosystem checklist)
 
-Use as the launch gate. Every item needs an owner, evidence, and a date.
+> **Ykay College scope correction:** this older checklist covers both the College
+> portal and Virtual/OCI components. For the current single-tenant Ykay College
+> launch, use [`production-readiness-audit-2026-10-23.md`](./production-readiness-audit-2026-10-23.md)
+> and [`launch-deployment-runbook.md`](./launch-deployment-runbook.md) as the
+> current scope. Render Docker is the recommended target in this repository;
+> the OCI/Vercel rows below are not evidence that either path is deployed or
+> validated. YK-Virtual and multi-tenant onboarding remain separate gates.
+
+Use as an ecosystem checklist only. Every applicable item needs an owner, evidence, and a date.
 No production DNS until **every** Critical item is green.
 
 Legend: 🔴 critical (blocks) · 🟠 required before public traffic · 🟢 verify within week 1

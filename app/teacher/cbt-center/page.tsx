@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useToast } from "@/components/Toast";
@@ -204,6 +204,23 @@ export default function TeacherCbtCenterPage() {
       setResultsLoading(false);
     }
   }
+
+  // H10: honour deep links from Grade Exams / Exam Centre
+  // (/teacher/cbt-center?exam=<id>) by opening that exam's results — where
+  // essays are graded — as soon as the exam list has loaded. Read from
+  // window.location to avoid a Suspense boundary around the whole page.
+  const deepLinkedExamRef = useRef(false);
+  useEffect(() => {
+    if (!data || deepLinkedExamRef.current) return;
+    const examId = new URLSearchParams(window.location.search).get("exam");
+    if (!examId) return;
+    deepLinkedExamRef.current = true;
+    if (data.exams.some((exam) => exam.id === examId)) {
+      void openResults(examId);
+    }
+    // openResults is a stable page-level helper; data is the trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   async function gradeEssay(examId: string, answerId: string, marks: number) {
     setBusy(true);

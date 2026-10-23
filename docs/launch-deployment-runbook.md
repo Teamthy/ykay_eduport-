@@ -1,0 +1,77 @@
+# Ykay College — single-tenant launch deployment runbook
+
+**Canonical launch target:** Render Docker Blueprint in `render.yaml`, with Render PostgreSQL, Upstash Redis, private S3-compatible storage, a malware scanner (or a recorded risk acceptance), and the Render Cron notification dispatcher. The repository still contains Vercel, OCI and docker-compose examples; they are **alternative/unverified paths, not launch-supported targets**. This is a code/documentation choice, not evidence that a production Render environment exists or is ready.
+
+**Scope:** one Ykay College school only. Do not enable platform self-signup or onboard another school on this runbook; database RLS is still fail-open for missing tenant context.
+
+## 1. Provision the dependencies
+
+1. Create Render PostgreSQL in the same region as the web service. Use its **Internal Database URL** for the web service's `DATABASE_URL`.
+2. Create an Upstash Redis database and set both `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. Do not set `ALLOW_MEMORY_RATE_LIMITS=true` on the multi-instance web service.
+3. Create a private S3/R2 bucket for admissions documents. Set `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, and `S3_SECRET_ACCESS_KEY`; set `S3_ENDPOINT` and `S3_FORCE_PATH_STYLE` only as required by the provider. Keep bucket CORS limited to the exact public College origin. Do not expose the bucket publicly.
+4. Configure `MALWARE_SCANNER_URL` to an authenticated/restricted scanner reachable from the web service. If the school knowingly launches without scanning, an owner must set `ALLOW_UNSCANNED_ADMISSION_DOCS=true` after recording that decision; startup logs a warning. The default is fail-closed at startup.
+5. Configure Resend (`RESEND_API_KEY`, verified `EMAIL_FROM`) for password resets, invitations and queued parent notifications. Configure Sentry (`SENTRY_DSN` and/or `NEXT_PUBLIC_SENTRY_DSN`) and send a test event.
+6. Create **live** Paystack keys. Production startup requires `pk_live_…` and `sk_live_…`; `pk_test_…` / `sk_test_…` are rejected. Configure Paystack's webhook URL to the production `/api/payments/paystack/webhook` endpoint.
+7. Generate a unique 32+ character `AUTH_SECRET`. Generate a separate, high-entropy `JOBS_SECRET` (at least 16 characters) and use the exact same value on the web and Cron services. Never reuse `AUTH_SECRET` for this.
+
+The Render Blueprint includes `sync:false` entries for secrets. Add them privately in Render; never commit real values. Configure `TRUSTED_PROXY_HOPS=1` for the single Render proxy hop unless the actual proxy chain differs. Keep `ENABLE_PLATFORM_SIGNUP=false`.
+
+## 2. Configure the notification Cron service
+
+`render.yaml` defines `ykay-notification-dispatch`, a one-shot service using the same image. In `EDUPORTAL_CRON_MODE=true`, the container skips web startup, DB migrations and seed steps, then calls the web service's authenticated `/api/jobs/dispatch-notifications` route. The Cron process requires:
+
+- `EDUPORTAL_BASE_URL`: the web service's HTTPS origin (no path), e.g. `https://ykay-college.onrender.com` or the configured custom domain.
+- `JOBS_SECRET`: the exact web-service secret.
+
+The committed schedule is every five minutes. Verify the first run manually in Render logs and confirm a due notification is dispatched. If the school requires a shorter delivery SLA, change the schedule only after checking the platform's supported Cron frequency and capacity.
+
+## 3. First deployment and environment gate
+
+1. Create the Render Blueprint from the reviewed release commit.
+2. Set all mandatory variables before the web service starts. `instrumentation.ts` calls `assertEnv()` and production boot is refused for missing database/auth/site/Paystack configuration, missing shared rate limiting (unless explicit single-instance acceptance), missing S3 credentials, missing scanner without written acceptance, or missing job secret.
+3. Wait for the Docker build and health check. The image applies Prisma migrations before starting the web process. Confirm `/api/health` reports the database and Redis correctly; check Render logs for warnings and errors.
+4. Confirm a production error reaches Sentry and the browser CSP permits the **exact DSN origin** (not a broad wildcard).
+5. Verify that `/api/platform/signup` remains disabled (404) and `ENABLE_PLATFORM_SIGNUP` is not true.
+
+## 4. Release gate (staging first)
+
+On the exact release commit, with generated Prisma client and an isolated staging database:
+
+```bash
+npm ci
+npx prisma generate
+npm run audit:deps
+npm run lint
+npx tsc --noEmit
+npx vitest run
+npm run check:tenant-coverage -- --max-uncovered 0
+npm run check:dead-ui
+npm run check:orphans
+npm run verify:rls
+npm run test:e2e:browser
+npm run build
+```
+
+Do not turn a sandbox/network failure into a pass. The tenant-route ratchet blocks new unexplained routes, but it does **not** make PostgreSQL RLS fail-closed or certify a second tenant.
+
+Before a public cutover, rehearse all of the following on staging with Paystack test credentials (then a controlled live-value check with school approval):
+
+- parent account: Paystack initiation → provider verification/webhook → one fee ledger entry and receipt; retry and concurrent callback do not double-post;
+- transfer claim: pending state appears immediately, bursar approval/rejection updates parent state and queues a notification; concurrent approve/reject permits one outcome only;
+- admissions: upload clean documents, rejected MIME/oversize/expired presign, scanner clean/infected/unavailable, review and enrollment;
+- CBT: anonymous/non-student calls return 401/403, question answers are never bulk-returned, the student's signed draw is required, expired/tampered/foreign draws fail;
+- restore a production-like backup into an isolated scratch database and record measured RPO/RTO;
+- results-day concurrency test at the agreed 1K-DAU profile; record p95/p99, database connection headroom and failure rate.
+
+Never run destructive, brute-force, provider-charge, or load tests against the live production database or Paystack account.
+
+## 5. Rollback and incident controls
+
+- Deploy the prior immutable image/tag only after checking migration compatibility; do not run `prisma db push` or reverse migrations as a rollback shortcut.
+- Keep the database backup and restore path independent from the app image. Rehearse a point-in-time restore before launch.
+- If payment state is uncertain, preserve PENDING attempts and reconcile against Paystack before any manual adjustment; never mark a provider transaction failed solely because the client timed out.
+- On an S3, Redis, DB, mail, scanner, or Cron outage, stop new public admissions/payment traffic as appropriate, preserve audit records, and use the incident contact/runbook. Do not silently replace distributed rate limiting with memory on a multi-instance service.
+
+## 6. What this runbook does not certify
+
+No production Render service, secret configuration, domain/TLS state, Paystack live transaction, malware scanner, scheduled Cron run, backup restore or 1K-DAU load test was available to this coding session. All of those remain **NOT VERIFIED** until the operator attaches the resulting logs, screenshots, provider references (redacted), and measured test results to the release record. YK-Virtual's service-side SSO remains separate; the College `/sso/virtual` route is only a safe redirect, not proof of federated sign-in.

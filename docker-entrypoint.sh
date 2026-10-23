@@ -8,6 +8,14 @@
 # 4. starts the Next.js standalone server
 set -e
 
+# Render Cron uses the same image with a small HTTP client mode. Exit before
+# database migrations or seeding: the long-running web service owns all DB
+# work, while this one-shot process simply asks it to dispatch due jobs.
+if [ "$EDUPORTAL_CRON_MODE" = "true" ]; then
+  echo "[entrypoint] running one-shot notification dispatcher…"
+  exec node scripts/dispatch-notifications.mjs
+fi
+
 echo "[entrypoint] applying prisma migrations…"
 node node_modules/prisma/build/index.js migrate deploy --schema prisma/schema.prisma
 

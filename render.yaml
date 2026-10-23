@@ -60,5 +60,62 @@ services:
         sync: false
       - key: NEXTAUTH_SECRET
         sync: false
-      # File uploads on container disk are ephemeral; configure S3-compatible
-      # storage before handling real admission documents.
+      # Trusted proxy chain and tenant SaaS switch. Platform signup stays off
+      # for the Ykay College single-tenant launch.
+      - key: TRUSTED_PROXY_HOPS
+        value: "1"
+      - key: ENABLE_PLATFORM_SIGNUP
+        value: "false"
+      - key: ALLOW_MEMORY_RATE_LIMITS
+        value: "false"
+      # S3-compatible private bucket is mandatory for admissions documents.
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_REGION
+        value: us-east-1
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_FORCE_PATH_STYLE
+        value: "false"
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_ADMISSIONS_PREFIX
+        value: admissions
+      # Document scanning is mandatory unless the owner explicitly records
+      # and accepts the unscanned-documents risk.
+      - key: MALWARE_SCANNER_URL
+        sync: false
+      - key: ALLOW_UNSCANNED_ADMISSION_DOCS
+        sync: false
+      # Notification dispatcher: a managed cron/worker must call the job URL.
+      - key: JOBS_SECRET
+        sync: false
+      # Observability and Virtual are optional integrations; SSO remains
+      # disabled until the separate Virtual service is configured and tested.
+      - key: SENTRY_DSN
+        sync: false
+      - key: NEXT_PUBLIC_SENTRY_DSN
+        sync: false
+      - key: NEXT_PUBLIC_VIRTUAL_URL
+        value: https://virtual.ykaycollege.com
+      - key: COLLEGE_SSO_SECRET
+        sync: false
+
+  # Same-image one-shot worker. This is the documented notification cadence
+  # for the Render launch target; the web service continues to own DB writes.
+  - type: cron
+    name: ykay-notification-dispatch
+    runtime: docker
+    repo: https://github.com/Teamthy/ykay_eduport-
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    schedule: "*/5 * * * *"
+    envVars:
+      - key: EDUPORTAL_CRON_MODE
+        value: "true"
+      - key: EDUPORTAL_BASE_URL
+        sync: false # HTTPS origin of the ykay-college web service/custom domain
+      - key: JOBS_SECRET
+        sync: false # must match the web service's JOBS_SECRET exactly

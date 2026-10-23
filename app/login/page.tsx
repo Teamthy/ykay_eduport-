@@ -124,11 +124,12 @@ function LoginForm() {
                 with your Application ID.
               </p>
               <p className="mt-4 max-w-sm rounded-2xl border border-white/15 bg-black/35 p-4 text-xs leading-6 text-white/85">
-                YK-Virtual uses these same College credentials. After you sign in here,{" "}
+                YK-Virtual is a separate service. If your account is enabled there, you can{" "}
                 <Link href="/sso/virtual" className="font-bold text-brand-green hover:underline">
-                  continue to YK-Virtual
+                  open YK-Virtual
                 </Link>{" "}
-                — or tap “Continue with Ykay College” on the Virtual login page.
+                and sign in using the options available on its login page. College single sign-on
+                depends on the Virtual service configuration.
               </p>
             </div>
           </div>

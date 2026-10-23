@@ -13,22 +13,44 @@ export type CspOptions = {
   plausible: boolean;
   /** Origin the browser uploads admission documents to. See storageUploadOrigin. */
   storageOrigin: string | null;
+  /**
+   * Sentry DSN configured for browser error reporting. Only its parsed
+   * origin is added to connect-src (not a broad Sentry wildcard), including
+   * region-specific ingest origins such as `o123.ingest.us.sentry.io`.
+   */
+  sentryDsn?: string | null;
 };
 
 export function buildContentSecurityPolicy({
   isProduction,
   plausible,
   storageOrigin,
+  sentryDsn,
 }: CspOptions): string {
   const plausibleOrigin = plausible ? " https://plausible.io" : "";
   const storage = storageOrigin ? ` ${storageOrigin}` : "";
+  let sentryOrigin = "";
+  if (sentryDsn) {
+    try {
+      const dsnUrl = new URL(sentryDsn);
+      const localDevelopment =
+        !isProduction &&
+        dsnUrl.protocol === "http:" &&
+        (dsnUrl.hostname === "localhost" || dsnUrl.hostname === "127.0.0.1");
+      if (dsnUrl.protocol === "https:" || localDevelopment) {
+        sentryOrigin = ` ${dsnUrl.origin}`;
+      }
+    } catch {
+      // Invalid or unset DSN: omit the origin rather than loosening CSP.
+    }
+  }
   return [
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline'${isProduction ? "" : " 'unsafe-eval'"}${plausibleOrigin}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self' data:",
-    `connect-src 'self' https://api.paystack.co https://*.upstash.io https://*.neon.tech${plausibleOrigin}${storage}`,
+    `connect-src 'self' https://api.paystack.co https://*.upstash.io https://*.neon.tech${plausibleOrigin}${storage}${sentryOrigin}`,
     // frame-ancestors blocks this site from being embedded anywhere
     // (same goal as X-Frame-Options, understood by modern browsers).
     "frame-ancestors 'none'",

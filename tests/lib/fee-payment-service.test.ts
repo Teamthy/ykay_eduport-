@@ -1,6 +1,28 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mockPrisma } from "../setup";
 
+// The sandbox cannot download Prisma's native engines. This suite uses the
+// repository's mocked Prisma delegates and only needs the enum values below;
+// CI generates the real client before running the complete suite.
+vi.mock("@prisma/client", () => ({
+  FeeInvoiceStatus: {
+    UNPAID: "UNPAID",
+    PARTIAL: "PARTIAL",
+    OVERDUE: "OVERDUE",
+    PAID: "PAID",
+  },
+  FeePaymentMethod: {
+    PAYSTACK: "PAYSTACK",
+    BANK_TRANSFER: "BANK_TRANSFER",
+    CASH: "CASH",
+    CARD: "CARD",
+    USSD: "USSD",
+  },
+  FeePaymentStatus: { COMPLETED: "COMPLETED" },
+  PaymentStatus: { PENDING: "PENDING", PAID: "PAID", FAILED: "FAILED", ABANDONED: "ABANDONED" },
+  UserRole: { ADMIN: "ADMIN", DIRECTOR: "DIRECTOR", BURSAR: "BURSAR", COORDINATOR: "COORDINATOR" },
+}));
+
 /**
  * postCompletedFeePayment — the single place a school-fee payment is committed.
  *
@@ -227,6 +249,54 @@ describe("postCompletedFeePayment — successful post", () => {
         data: expect.objectContaining({ status: "PAID" }),
       }),
     );
+  });
+
+  it("atomically claims a pending bursar transfer before posting the invoice", async () => {
+    primeSuccessfulPost();
+    mockPrisma.feePaymentAttempt.updateMany.mockResolvedValue({ count: 1 });
+    const { postCompletedFeePayment } = await import("@/lib/fee-payment-service");
+    await postCompletedFeePayment({
+      ...baseInput,
+      method: "BANK_TRANSFER",
+      attemptId: "attempt_1",
+      requirePendingAttempt: true,
+      reviewedByUserId: "bursar_1",
+    });
+
+    expect(mockPrisma.feePaymentAttempt.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: "attempt_1",
+        schoolId: "school_1",
+        invoiceId: "inv_1",
+        amount: 25_000,
+        reference: baseInput.reference,
+        status: "PENDING",
+      },
+      data: expect.objectContaining({
+        status: "PAID",
+        reviewedByUserId: "bursar_1",
+        reviewedAt: expect.any(Date),
+      }),
+    });
+    expect(mockPrisma.feePaymentAttempt.update).not.toHaveBeenCalled();
+    expect(mockPrisma.feeInvoice.updateMany).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not post when a transfer was concurrently rejected/reviewed", async () => {
+    mockPrisma.feePayment.findUnique.mockResolvedValue(null);
+    mockPrisma.feePaymentAttempt.updateMany.mockResolvedValue({ count: 0 });
+    const { postCompletedFeePayment } = await import("@/lib/fee-payment-service");
+
+    await expect(
+      postCompletedFeePayment({
+        ...baseInput,
+        method: "BANK_TRANSFER",
+        attemptId: "attempt_1",
+        requirePendingAttempt: true,
+      }),
+    ).rejects.toThrow(/already been reviewed/i);
+    expect(mockPrisma.feeInvoice.updateMany).not.toHaveBeenCalled();
+    expect(mockPrisma.feePayment.create).not.toHaveBeenCalled();
   });
 
   it("skips the attempt update for bursar-entered offline payments", async () => {

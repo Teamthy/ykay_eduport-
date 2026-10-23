@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { MapPin, ArrowRight, Play } from "lucide-react";
 
-import { AnimatedText } from "@/components/AnimatedText";
+import { AnimatedText } from "@/components/AnimatedTextStatic";
 import { useSchoolProfile } from "@/components/SchoolProfileContext";
 export default function FindUs() {
   const { address } = useSchoolProfile();

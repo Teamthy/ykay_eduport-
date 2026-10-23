@@ -94,6 +94,9 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /prisma-cli-deps ./node_modules
 COPY --from=builder /out-seeds ./prisma
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
+# The small Render Cron mode invokes the app's authenticated dispatch route;
+# it does not need Prisma or the web server process.
+COPY scripts/dispatch-notifications.mjs ./scripts/dispatch-notifications.mjs
 
 # Fail the BUILD, not the boot, when the CLI's module graph is incomplete here.
 # Asserts every closure package is present, every dependency edge resolves to

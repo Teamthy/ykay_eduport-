@@ -47,7 +47,7 @@ export async function PATCH(request: NextRequest) {
 
   if (payload.markAll) {
     await prisma.userNotification.updateMany({
-      where: { userId: user.id, readAt: null },
+      where: { userId: user.id, schoolId: user.schoolId, readAt: null },
       data: { readAt: new Date() },
     });
     return NextResponse.json({ ok: true });
@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest) {
 
   if (payload.notificationId) {
     await prisma.userNotification.updateMany({
-      where: { id: payload.notificationId, userId: user.id },
+      where: { id: payload.notificationId, userId: user.id, schoolId: user.schoolId },
       data: { readAt: new Date() },
     });
     return NextResponse.json({ ok: true });

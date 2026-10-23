@@ -613,8 +613,10 @@ export default function ExamCenterPage() {
                               >
                                 <Upload size={12} /> Questions
                               </Link>
+                              {/* H10: land directly on this exam's results in
+                                  the CBT Centre, where grading happens. */}
                               <Link
-                                href={`/teacher/grade-exams?examId=${encodeURIComponent(exam.id)}`}
+                                href={`/teacher/cbt-center?exam=${encodeURIComponent(exam.id)}`}
                                 className="inline-flex items-center gap-1.5 rounded-full bg-[var(--surface-card-hover)] px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:text-brand-green"
                               >
                                 <FileText size={12} /> Results

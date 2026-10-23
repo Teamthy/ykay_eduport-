@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useSearchParams } from "next/navigation";
 import { CreditCard, LoaderCircle, Receipt as ReceiptIcon, Building2 } from "lucide-react";
@@ -54,6 +54,19 @@ type FeesResponse = {
     receiptNumber: string;
     paidAt: string;
   }>;
+  // MNY-01: transfers/attempts that have not (yet) become receipts, so a
+  // parent can see "awaiting review" or a rejection instead of silence.
+  paymentAttempts?: Array<{
+    id: string;
+    invoiceId: string;
+    provider: string;
+    state: "AWAITING_REVIEW" | "PROCESSING" | "REJECTED" | "CONFIRMED";
+    amount: number;
+    reference: string;
+    submittedAt: string;
+    reviewedAt: string | null;
+    reviewNote: string | null;
+  }>;
   summary: { totalBilled: number; totalPaid: number; totalOutstanding: number };
 };
 
@@ -86,6 +99,21 @@ export default function ParentFeesPage() {
   const [transferNote, setTransferNote] = useState("");
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
+  const paymentRequestKeys = useRef(new Map<string, { fingerprint: string; key: string }>());
+
+  function idempotencyKey(method: string, invoiceId: string, payload: unknown) {
+    const scope = `${method}:${invoiceId}`;
+    const fingerprint = JSON.stringify(payload);
+    const existing = paymentRequestKeys.current.get(scope);
+    if (existing?.fingerprint === fingerprint) return existing.key;
+    const key = crypto.randomUUID();
+    paymentRequestKeys.current.set(scope, { fingerprint, key });
+    return key;
+  }
+
+  function clearIdempotencyKey(method: string, invoiceId: string) {
+    paymentRequestKeys.current.delete(`${method}:${invoiceId}`);
+  }
 
   const load = useCallback(async (sid?: string, iid?: string) => {
     setLoading(true);
@@ -161,56 +189,100 @@ export default function ParentFeesPage() {
   }, [searchParams]);
 
   const remaining = data?.selectedInvoice?.balanceDue || 0;
+  const selectedInvoiceId = data?.selectedInvoice?.id;
+  const selectedAttempts = useMemo(
+    () =>
+      (data?.paymentAttempts || []).filter(
+        (attempt) => attempt.invoiceId === selectedInvoiceId && attempt.state !== "CONFIRMED",
+      ),
+    [data?.paymentAttempts, selectedInvoiceId],
+  );
+  // Prevent a second card charge or duplicate transfer while the bursar or
+  // Paystack is still confirming a previous payment (MNY-01).
+  const hasUnresolvedAttempt = selectedAttempts.some(
+    (attempt) => attempt.state === "AWAITING_REVIEW" || attempt.state === "PROCESSING",
+  );
 
   async function startPaystack() {
-    if (!data?.selectedInvoice) return;
+    const invoice = data?.selectedInvoice;
+    if (!invoice) return;
     setInitBusy(true);
     setAuthUrl(null);
+    const payload = { invoiceId: invoice.id, amount: remaining, method: "PAYSTACK" };
+    const key = idempotencyKey("PAYSTACK", invoice.id, payload);
     try {
       const r = await fetch("/api/parent/fees/payment-intents", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-idempotency-key": crypto.randomUUID() },
-        body: JSON.stringify({
-          invoiceId: data.selectedInvoice.id,
-          amount: remaining,
-          method: "PAYSTACK",
-        }),
+        headers: { "Content-Type": "application/json", "x-idempotency-key": key },
+        body: JSON.stringify(payload),
       });
       const body = await r.json();
       if (!r.ok) throw new Error(body.error || "Unable to start payment.");
+      clearIdempotencyKey("PAYSTACK", invoice.id);
       setAuthUrl(body.authorizationUrl);
       setShowPaystack(true);
     } catch (e) {
       toast(e instanceof Error ? e.message : "Unable to start payment.", "error");
+      // The request may have committed even when its response was lost. Keep
+      // the exact idempotency key for a retry and refresh server-owned state.
+      await load(studentId, invoice.id);
     } finally {
       setInitBusy(false);
     }
   }
 
   async function submitTransfer() {
-    if (!data?.selectedInvoice) return;
+    const invoice = data?.selectedInvoice;
+    if (!invoice) return;
     setInitBusy(true);
+    const payload = {
+      invoiceId: invoice.id,
+      amount: remaining,
+      method: "BANK_TRANSFER",
+      transferReference: transferRef,
+      narration: transferNote,
+    };
+    const key = idempotencyKey("BANK_TRANSFER", invoice.id, payload);
     try {
       const r = await fetch("/api/parent/fees/payment-intents", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-idempotency-key": crypto.randomUUID() },
-        body: JSON.stringify({
-          invoiceId: data.selectedInvoice.id,
-          amount: remaining,
-          method: "BANK_TRANSFER",
-          transferReference: transferRef,
-          narration: transferNote,
-        }),
+        headers: { "Content-Type": "application/json", "x-idempotency-key": key },
+        body: JSON.stringify(payload),
       });
       const body = await r.json();
       if (!r.ok) throw new Error(body.error || "Unable to submit transfer.");
+      clearIdempotencyKey("BANK_TRANSFER", invoice.id);
       toast(body.message || "Transfer submitted for bursar review.", "success");
       setTransferRef("");
       setTransferNote("");
+      await load(studentId, invoice.id);
     } catch (e) {
       toast(e instanceof Error ? e.message : "Unable to submit transfer.", "error");
+      await load(studentId, invoice.id);
     } finally {
       setInitBusy(false);
+    }
+  }
+
+  async function checkPaystackAttempt(reference: string) {
+    setVerifyBusy(true);
+    try {
+      const response = await fetch("/api/parent/fees/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reference }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "Unable to check payment status.");
+      toast("Paystack payment confirmed. Your receipt is available below.", "success");
+    } catch (cause) {
+      // A definite Paystack decline is marked FAILED by the server; an
+      // inconclusive provider response remains PENDING. Refresh either way
+      // so the parent sees the authoritative server state before retrying.
+      toast(cause instanceof Error ? cause.message : "Unable to check payment status.", "warning");
+    } finally {
+      await load(studentId, invoiceId);
+      setVerifyBusy(false);
     }
   }
 
@@ -345,7 +417,19 @@ export default function ParentFeesPage() {
                       <b className="text-brand-orange">₦{remaining.toLocaleString()}</b>
                     </div>
 
-                    {remaining > 0 && (
+                    {hasUnresolvedAttempt && (
+                      <div
+                        role="status"
+                        className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-200"
+                      >
+                        <b>Payment confirmation is still pending.</b> Your balance will update when
+                        the school confirms the transfer or Paystack reports its result. Do not make
+                        another payment yet; contact the bursary if the confirmation is taking too
+                        long.
+                      </div>
+                    )}
+
+                    {remaining > 0 && !hasUnresolvedAttempt && (
                       <button
                         onClick={() => void startPaystack()}
                         disabled={initBusy}
@@ -362,7 +446,79 @@ export default function ParentFeesPage() {
                   </div>
 
                   <div className="space-y-4 lg:col-span-2">
-                    {remaining > 0 && (
+                    {selectedAttempts.length > 0 && (
+                      <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
+                        <div className="mb-3 flex items-center gap-2">
+                          <Building2 size={18} className="text-[var(--text-accent-warm)]" />
+                          <h3 className="font-display text-xl">PAYMENT SUBMISSIONS</h3>
+                        </div>
+                        <ul className="space-y-3">
+                          {selectedAttempts.map((attempt) => (
+                            <li
+                              key={attempt.id}
+                              className="rounded-2xl bg-[var(--surface-disabled)] p-3 text-sm"
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <b>₦{attempt.amount.toLocaleString()}</b>
+                                <span
+                                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                                    attempt.state === "REJECTED"
+                                      ? "bg-red-500/10 text-red-500"
+                                      : attempt.state === "AWAITING_REVIEW"
+                                        ? "bg-amber-500/10 text-amber-600"
+                                        : "bg-sky-500/10 text-sky-500"
+                                  }`}
+                                >
+                                  {attempt.state === "AWAITING_REVIEW"
+                                    ? "Awaiting bursar review"
+                                    : attempt.state === "REJECTED"
+                                      ? "Not confirmed"
+                                      : "Payment processing"}
+                                </span>
+                              </div>
+                              <div className="mt-1 text-xs text-[var(--text-muted)]">
+                                {new Date(attempt.submittedAt).toLocaleDateString()} · Ref{" "}
+                                {attempt.reference}
+                              </div>
+                              {attempt.state === "AWAITING_REVIEW" && (
+                                <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                                  The bursar is verifying this transfer. Your balance updates once
+                                  it is confirmed. Do not pay again while this is pending.
+                                </p>
+                              )}
+                              {attempt.state === "PROCESSING" && (
+                                <div className="mt-2 space-y-2">
+                                  <p className="text-xs text-[var(--text-secondary)]">
+                                    We are confirming this Paystack payment. Do not retry or pay by
+                                    another method until the result is shown here.
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() => void checkPaystackAttempt(attempt.reference)}
+                                    disabled={verifyBusy}
+                                    className="rounded-full border border-brand-green/40 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-brand-green disabled:opacity-50"
+                                  >
+                                    {verifyBusy ? "Checking…" : "Check Paystack status"}
+                                  </button>
+                                </div>
+                              )}
+                              {attempt.state === "REJECTED" && (
+                                <p className="mt-2 text-xs text-red-500">
+                                  {attempt.reviewNote
+                                    ? `Bursary note: ${attempt.reviewNote} `
+                                    : attempt.provider === "BANK_TRANSFER"
+                                      ? "This transfer could not be confirmed. "
+                                      : "This payment did not complete. "}
+                                  If money left your account, contact the bursary with the reference
+                                  above before paying again.
+                                </p>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {remaining > 0 && !hasUnresolvedAttempt && (
                       <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
                         <div className="mb-3 flex items-center gap-2 text-[var(--text-accent-warm)]">
                           <Building2 size={18} />

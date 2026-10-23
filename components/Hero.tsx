@@ -1,7 +1,5 @@
-"use client";
-
 import { Download } from "lucide-react";
-import { Marquee } from "@/components/AnimatedText";
+import { Marquee } from "@/components/Marquee";
 
 /**
  * College home hero — full-bleed navy band, prebuiltui-style copy on the left,

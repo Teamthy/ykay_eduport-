@@ -1,9 +1,7 @@
-"use client";
-
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import { AnimatedText } from "@/components/AnimatedText";
+import { AnimatedText } from "@/components/AnimatedTextStatic";
 import { Reveal } from "@/components/Reveal";
 
 const VIRTUAL_URL = process.env.NEXT_PUBLIC_VIRTUAL_URL || "https://virtual.ykaycollege.com";

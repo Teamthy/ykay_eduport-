@@ -1,4 +1,10 @@
-# EduPortal deployment — Vercel + OCI (production)
+# Alternative EduPortal deployment — Vercel + OCI (NOT launch-certified)
+
+> This is a retained alternative, not the canonical Ykay College launch path.
+> Use `docs/launch-deployment-runbook.md` (Render Docker Blueprint) unless the
+> Vercel/OCI path is separately reviewed, rehearsed and signed off. Several
+> values below describe the older multi-system architecture and must not be
+> mistaken for live deployment evidence.
 
 EduPortal is a **Next.js monolith**: pages and `/api/*` deploy together. On
 Vercel the whole Node app runs in serverless functions; OCI hosts the
