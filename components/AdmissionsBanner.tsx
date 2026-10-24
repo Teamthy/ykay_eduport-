@@ -9,10 +9,9 @@ const HIGHLIGHTS = [
 
 export default function AdmissionsBanner() {
   return (
-    <section className="relative w-full overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+    <section className="relative w-full overflow-hidden bg-brand-navy-dark">
       <img
-        src="/home/ykay-students.png"
+        src="/home/ykay-students-750.webp"
         alt=""
         aria-hidden="true"
         loading="lazy"

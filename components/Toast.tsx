@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { createContext, useContext, useState, useCallback } from "react";
 import { CheckCircle2, XCircle, Info, AlertTriangle, X } from "lucide-react";
@@ -36,7 +36,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     success: "bg-brand-green text-brand-navy-dark",
     error: "bg-red-500 text-white",
     info: "bg-brand-navy text-white",
-    warning: "bg-brand-orange text-white",
+    warning: "bg-brand-orange text-brand-navy",
   };
 
   return (

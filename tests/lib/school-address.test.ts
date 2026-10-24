@@ -11,6 +11,9 @@ describe("confirmedSchoolAddress", () => {
     expect(confirmedSchoolAddress(null)).toBeNull();
     expect(confirmedSchoolAddress("")).toBeNull();
     expect(confirmedSchoolAddress("   \n\t ")).toBeNull();
+    expect(confirmedSchoolAddress("—")).toBeNull();
+    expect(confirmedSchoolAddress("N/A")).toBeNull();
+    expect(confirmedSchoolAddress("TBD")).toBeNull();
   });
 
   it("returns the address with spacing tidied", () => {

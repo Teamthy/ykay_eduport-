@@ -14,19 +14,31 @@ import { useSchoolProfile } from "@/components/SchoolProfileContext";
  * section before or after it.
  */
 export default function ServiceInfo() {
-  const { address } = useSchoolProfile();
+  const { address, campusLatitude, campusLongitude } = useSchoolProfile();
+  const hasCoordinates =
+    campusLatitude !== null &&
+    campusLongitude !== null &&
+    Number.isFinite(campusLatitude) &&
+    campusLatitude >= -90 &&
+    campusLatitude <= 90 &&
+    Number.isFinite(campusLongitude) &&
+    campusLongitude >= -180 &&
+    campusLongitude <= 180;
+  const campusQuery = hasCoordinates ? `${campusLatitude},${campusLongitude}` : address;
   return (
     <section className="relative w-full border-y border-[var(--border-subtle)] bg-[var(--bg-secondary)] backdrop-edu-light py-14 md:py-20 theme-transition">
       <div className="mx-auto w-full max-w-7xl px-6 md:px-10">
         <div className="grid gap-10 lg:grid-cols-[1.05fr_2fr] lg:items-center">
           {/* Best-fit campus photo — the info band gets a visual anchor. */}
           <div className="relative overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-lg">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/it-hub-classroom.jpg"
+              src="/it-hub-classroom-750.webp"
+              srcSet="/it-hub-classroom-750.webp 750w, /it-hub-classroom-1200.webp 1200w"
+              sizes="(max-width: 1024px) 100vw, 500px"
               alt="Students working in the Ykay College IT hub"
               className="h-56 w-full object-cover md:h-72 lg:h-full"
               loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-brand-navy-dark/70 via-transparent to-transparent" />
             <p className="absolute bottom-4 left-5 font-body text-[10px] font-bold uppercase tracking-[0.25em] text-white">
@@ -80,12 +92,21 @@ export default function ServiceInfo() {
                 </p>
                 {address ? (
                   <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(campusQuery || address)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-body text-sm text-[var(--text-primary)] underline decoration-[var(--border-default)] underline-offset-4 transition-colors hover:text-[var(--accent-primary)] hover:decoration-[var(--accent-primary)]"
                   >
                     {address}
+                  </a>
+                ) : campusQuery ? (
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(campusQuery)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-body text-sm text-[var(--text-primary)] underline decoration-[var(--border-default)] underline-offset-4 transition-colors hover:text-[var(--accent-primary)] hover:decoration-[var(--accent-primary)]"
+                  >
+                    View campus map and directions
                   </a>
                 ) : (
                   <p className="font-body text-sm text-[var(--text-primary)]">

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import { LogOut } from "lucide-react";
 import { useAuth } from "./AuthProvider";
+import ResponsiveSidebar from "@/components/ResponsiveSidebar";
 
 interface SidebarItem {
   label: string;
@@ -32,14 +33,14 @@ export default function PortalSidebar({ portalName, portalType, items }: PortalS
   const handleLogout = logout;
 
   return (
-    <aside className="lg:w-[280px] shrink-0">
-      <div className="sticky top-24 space-y-4">
+    <ResponsiveSidebar label={portalName}>
+      <div className="space-y-4">
         <div className="rounded-2xl border border-white/10 bg-brand-navy p-4">
           <span className="text-[9px] font-bold uppercase tracking-widest text-brand-green">
             Active workspace
           </span>
           <div className="mt-1 font-display text-sm tracking-[1px] text-white">{portalName}</div>
-          <div className="mt-1 text-[10px] uppercase tracking-widest text-white/50">
+          <div className="mt-1 text-[10px] uppercase tracking-widest text-white/75">
             {portalType}
           </div>
         </div>
@@ -56,14 +57,15 @@ export default function PortalSidebar({ portalName, portalType, items }: PortalS
           </div>
         )}
 
-        <nav className="space-y-1">
+        <nav aria-label={`${portalName} pages`} className="space-y-1">
           {items.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+                aria-current={isActive ? "page" : undefined}
+                className={`flex min-h-11 w-full items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
                   isActive
                     ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
                     : "border-transparent text-[var(--text-muted)] hover:bg-[var(--surface-disabled)] hover:text-[var(--text-primary)]"
@@ -84,13 +86,13 @@ export default function PortalSidebar({ portalName, portalType, items }: PortalS
         <div className="space-y-1 border-t border-[var(--border-subtle)] pt-3">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-xs text-[var(--text-muted)] transition-colors hover:text-red-500"
+            className="flex min-h-11 w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-[var(--text-muted)] transition-colors hover:text-red-500"
           >
             <LogOut size={14} />
             <span>Sign out</span>
           </button>
         </div>
       </div>
-    </aside>
+    </ResponsiveSidebar>
   );
 }

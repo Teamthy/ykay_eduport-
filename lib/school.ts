@@ -32,6 +32,7 @@ export async function getSchool() {
       email: process.env.SCHOOL_EMAIL || "info@ykaycollege.com",
       motto: process.env.SCHOOL_MOTTO || "Raising Role Models",
     },
+    select: { id: true },
   });
 }
 

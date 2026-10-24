@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -79,9 +79,11 @@ export default function CommandSearch() {
   return (
     <>
       <button
+        type="button"
         onClick={() => setOpen(true)}
-        className="p-2 rounded-full text-[var(--nav-text)] hover:bg-[var(--surface-card-hover)] hover:text-brand-green transition-all"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-[var(--nav-text)] transition-all hover:bg-[var(--surface-card-hover)] hover:text-brand-green"
         title="Search (Cmd+K)"
+        aria-label="Open search"
       >
         <Search size={18} />
       </button>

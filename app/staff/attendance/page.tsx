@@ -1,7 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CheckCircle2, Clock3, LoaderCircle, LogIn, LogOut, QrCode } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock3,
+  LoaderCircle,
+  LogIn,
+  LogOut,
+  MapPin,
+  QrCode,
+  ShieldCheck,
+} from "lucide-react";
 import PortalTopbar from "@/components/PortalTopbar";
 import { useToast } from "@/components/Toast";
 import QrImage from "@/components/QrImage";
@@ -11,6 +20,11 @@ type MeResponse = {
   message?: string;
   date?: string;
   lateCutoff?: string;
+  geofence?: {
+    enabled: boolean;
+    configured: boolean;
+    radiusMeters: number;
+  };
   staff?: {
     id: string;
     displayName: string;
@@ -29,25 +43,69 @@ type MeResponse = {
       scannedAt: string;
       isLate: boolean;
       lateMinutes: number;
+      source: string;
+      geofenceVerified: boolean | null;
+      distanceFromCampusMeters: number | null;
+      locationAccuracyMeters: number | null;
     }>;
   };
 };
+
+type BrowserLocation = {
+  latitude: number;
+  longitude: number;
+  accuracyMeters: number;
+};
+
+function getBrowserLocation(): Promise<BrowserLocation> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(
+        new Error("This browser does not support GPS. Contact the school office to check in."),
+      );
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) =>
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracyMeters: position.coords.accuracy,
+        }),
+      (error) => {
+        if (error.code === 1) {
+          reject(new Error("Location permission was denied. Allow location access and try again."));
+        } else if (error.code === 3) {
+          reject(new Error("GPS timed out. Move to an open area and try again."));
+        } else {
+          reject(new Error("Your device could not determine its location. Try again outdoors."));
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15_000, maximumAge: 0 },
+    );
+  });
+}
 
 export default function StaffSelfAttendancePage() {
   const { toast } = useToast();
   const [data, setData] = useState<MeResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadingError(null);
     try {
-      const r = await fetch("/api/staff/attendance/me", { cache: "no-store" });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "Unable to load attendance.");
-      setData(j);
-    } catch (e) {
-      toast(e instanceof Error ? e.message : "Unable to load attendance.", "error");
+      const response = await fetch("/api/staff/attendance/me", { cache: "no-store" });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "Unable to load attendance.");
+      setData(body);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to load attendance.";
+      setLoadingError(message);
+      toast(message, "error");
     } finally {
       setLoading(false);
     }
@@ -60,59 +118,108 @@ export default function StaffSelfAttendancePage() {
   async function act(action: "CHECK_IN" | "CHECK_OUT") {
     setBusy(true);
     try {
-      const r = await fetch("/api/staff/attendance/me", {
+      const payload: { action: "CHECK_IN" | "CHECK_OUT"; location?: BrowserLocation } = { action };
+      if (data?.geofence?.enabled) {
+        if (!data.geofence.configured) {
+          throw new Error("The school GPS boundary is not configured. Contact an administrator.");
+        }
+        payload.location = await getBrowserLocation();
+      }
+
+      const response = await fetch("/api/staff/attendance/me", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify(payload),
       });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "Action failed.");
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "Action failed.");
       toast(
-        `${action === "CHECK_IN" ? "Checked in" : "Checked out"}${j.event?.isLate ? ` · late +${j.event.lateMinutes}m` : ""}`,
-        j.event?.isLate ? "info" : "success",
+        `${action === "CHECK_IN" ? "Checked in" : "Checked out"}${body.event?.isLate ? ` · late +${body.event.lateMinutes}m` : ""}`,
+        body.event?.isLate ? "info" : "success",
       );
       await load();
-    } catch (e) {
-      toast(e instanceof Error ? e.message : "Action failed.", "error");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Action failed.", "error");
     } finally {
       setBusy(false);
     }
   }
 
+  const geofenceBlocked = Boolean(data?.geofence?.enabled && !data.geofence.configured);
+
   return (
     <>
       <PortalTopbar title="My attendance" />
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
+      <main className="mx-auto max-w-3xl px-4 py-5 sm:px-6 sm:py-8">
+        <div className="rounded-[1.5rem] bg-brand-navy p-5 text-white sm:rounded-[2rem] sm:p-7">
           <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
             Staff self-service
           </p>
-          <h1 className="mt-2 font-display text-4xl tracking-widest">
+          <h1 className="mt-2 font-display text-3xl tracking-widest sm:text-4xl">
             MY <span className="text-brand-green">ATTENDANCE</span>
           </h1>
-          <p className="mt-3 text-sm text-white/65">
-            Check in / out here, or present your badge QR at the admin scanner. Late after{" "}
+          <p className="mt-3 text-sm leading-relaxed text-white/85">
+            Check in or out here, or present your badge QR at the admin scanner. Late after{" "}
             {data?.lateCutoff || "08:00"}.
           </p>
         </div>
 
-        {loading || !data ? (
-          <div className="mt-8 flex items-center gap-2 text-[var(--text-muted)]">
-            <LoaderCircle className="animate-spin" /> Loading…
+        {loading ? (
+          <div className="mt-8 flex items-center gap-2 text-[var(--text-muted)]" role="status">
+            <LoaderCircle className="animate-spin" /> Loading attendance…
+          </div>
+        ) : !data ? (
+          <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5">
+            <p className="text-sm font-semibold text-[var(--text-primary)]">
+              Attendance could not be loaded.
+            </p>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">{loadingError}</p>
+            <button
+              type="button"
+              onClick={() => void load()}
+              className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border-default)] px-4 text-sm font-semibold text-[var(--text-primary)]"
+            >
+              Try again
+            </button>
           </div>
         ) : !data.supported ? (
-          <p className="mt-8 rounded-2xl border border-[var(--border-subtle)] p-6 text-sm text-[var(--text-muted)]">
+          <p className="mt-6 rounded-2xl border border-[var(--border-subtle)] p-5 text-sm text-[var(--text-secondary)]">
             {data.message || "Not available for this account."}
           </p>
         ) : (
-          <div className="mt-8 space-y-6">
-            <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
+          <div className="mt-5 space-y-5 sm:mt-8 sm:space-y-6">
+            {data.geofence?.enabled && (
+              <div className="rounded-2xl border border-brand-green/30 bg-brand-green/10 p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 rounded-xl bg-brand-green/15 p-2 text-brand-green">
+                    <MapPin size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-[var(--text-primary)]">
+                      GPS campus boundary is on
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-[var(--text-secondary)]">
+                      {data.geofence.configured
+                        ? `Allow location access while checking in or out. Your reported position must be within ${data.geofence.radiusMeters} m of campus with sufficient GPS accuracy.`
+                        : "The school has enabled GPS attendance but has not configured a campus pin. Check-in is unavailable until an administrator fixes the settings."}
+                    </p>
+                    <p className="mt-2 text-xs leading-relaxed text-[var(--text-muted)]">
+                      The server calculates the distance. Exact coordinates are not retained;
+                      successful records keep only rounded distance and reported accuracy. Browser
+                      GPS can be spoofed, so it is a location safeguard rather than identity proof.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 sm:p-6">
+              <div className="flex flex-col gap-5 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+                <div className="min-w-0 flex-1">
                   <div className="text-xs uppercase tracking-widest text-[var(--text-muted)]">
                     Today · {data.date}
                   </div>
-                  <h2 className="mt-1 font-display text-3xl tracking-widest">
+                  <h2 className="mt-1 break-words font-display text-2xl tracking-widest sm:text-3xl">
                     {data.staff?.displayName}
                   </h2>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -121,7 +228,7 @@ export default function StaffSelfAttendancePage() {
                         data.today?.status === "IN"
                           ? "bg-brand-green/15 text-brand-green"
                           : data.today?.status === "OUT"
-                            ? "bg-blue-500/15 text-blue-500"
+                            ? "bg-blue-500/15 text-blue-700 dark:text-blue-300"
                             : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
                       }`}
                     >
@@ -134,17 +241,17 @@ export default function StaffSelfAttendancePage() {
                     )}
                   </div>
                   <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
-                    <div>
+                    <div className="text-[var(--text-secondary)]">
                       Check-in:{" "}
-                      <b>
+                      <b className="text-[var(--text-primary)]">
                         {data.today?.checkInAt
                           ? new Date(data.today.checkInAt).toLocaleTimeString()
                           : "—"}
                       </b>
                     </div>
-                    <div>
+                    <div className="text-[var(--text-secondary)]">
                       Check-out:{" "}
-                      <b>
+                      <b className="text-[var(--text-primary)]">
                         {data.today?.checkOutAt
                           ? new Date(data.today.checkOutAt).toLocaleTimeString()
                           : "—"}
@@ -153,62 +260,83 @@ export default function StaffSelfAttendancePage() {
                   </div>
                 </div>
                 {data.staff?.qrPayload && (
-                  <div className="text-center">
+                  <div className="self-start text-center sm:mx-auto sm:self-start md:ml-0">
                     <QrImage
                       value={data.staff.qrPayload}
                       size={200}
                       alt="Staff badge QR"
-                      className="mx-auto h-40 w-40 rounded-xl border border-[var(--border-subtle)] bg-white p-2"
+                      className="mx-auto h-36 w-36 rounded-xl border border-[var(--border-subtle)] bg-white p-2 sm:h-40 sm:w-40"
                     />
-                    <div className="mt-2 font-mono text-xs text-[var(--text-muted)]">
+                    <div className="mt-2 break-all font-mono text-xs text-[var(--text-muted)]">
                       {data.staff.badgeCode}
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <button
-                  disabled={busy || data.today?.status === "IN"}
+                  type="button"
+                  disabled={busy || data.today?.status === "IN" || geofenceBlocked}
                   onClick={() => void act("CHECK_IN")}
-                  className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-40"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 text-sm font-bold uppercase tracking-widest text-brand-navy disabled:opacity-40"
                 >
                   {busy ? <LoaderCircle className="animate-spin" size={16} /> : <LogIn size={16} />}
-                  Check in
+                  {busy && data.geofence?.enabled ? "Checking GPS…" : "Check in"}
                 </button>
                 <button
-                  disabled={busy || data.today?.status !== "IN"}
+                  type="button"
+                  disabled={busy || data.today?.status !== "IN" || geofenceBlocked}
                   onClick={() => void act("CHECK_OUT")}
-                  className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-3 text-xs font-bold uppercase tracking-widest text-white disabled:opacity-40"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand-navy px-5 py-3 text-sm font-bold uppercase tracking-widest text-white disabled:opacity-40"
                 >
-                  <LogOut size={16} /> Check out
+                  {busy ? (
+                    <LoaderCircle className="animate-spin" size={16} />
+                  ) : (
+                    <LogOut size={16} />
+                  )}
+                  {busy && data.geofence?.enabled ? "Checking GPS…" : "Check out"}
                 </button>
               </div>
+              {geofenceBlocked && (
+                <p className="mt-3 text-sm font-medium text-amber-700 dark:text-amber-300">
+                  Contact an administrator before attempting attendance.
+                </p>
+              )}
             </div>
 
-            <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+            <div className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 sm:p-5">
               <h3 className="flex items-center gap-2 font-display text-xl tracking-widest">
                 <QrCode size={18} className="text-brand-green" /> TODAY&apos;S EVENTS
               </h3>
-              <ul className="mt-4 space-y-2">
-                {(data.today?.events || []).map((ev) => (
-                  <li key={ev.id} className="flex items-center justify-between text-sm">
-                    <span className="inline-flex items-center gap-2">
-                      {ev.eventType === "CHECK_IN" ? (
+              <ul className="mt-4 space-y-3">
+                {(data.today?.events || []).map((event) => (
+                  <li
+                    key={event.id}
+                    className="flex flex-col gap-1 border-t border-[var(--border-subtle)] pt-3 text-sm sm:flex-row sm:items-start sm:justify-between"
+                  >
+                    <span className="inline-flex flex-wrap items-center gap-2 text-[var(--text-primary)]">
+                      {event.eventType === "CHECK_IN" ? (
                         <CheckCircle2 className="text-brand-green" size={14} />
                       ) : (
-                        <LogOut className="text-blue-500" size={14} />
+                        <LogOut className="text-blue-600 dark:text-blue-400" size={14} />
                       )}
-                      {ev.eventType.replace("_", " ")}
-                      {ev.isLate ? ` · late +${ev.lateMinutes}m` : ""}
+                      {event.eventType.replace("_", " ")}
+                      {event.isLate ? ` · late +${event.lateMinutes}m` : ""}
+                      {event.geofenceVerified && (
+                        <span className="inline-flex items-center gap-1 text-xs text-[var(--text-secondary)]">
+                          <ShieldCheck size={13} className="text-[var(--text-accent)]" />
+                          GPS verified · {event.distanceFromCampusMeters ?? "—"} m from campus
+                        </span>
+                      )}
                     </span>
-                    <span className="text-xs text-[var(--text-muted)]">
-                      {new Date(ev.scannedAt).toLocaleTimeString()}
+                    <span className="text-xs text-[var(--text-muted)] sm:shrink-0">
+                      {new Date(event.scannedAt).toLocaleTimeString()}
                     </span>
                   </li>
                 ))}
                 {!data.today?.events?.length && (
-                  <p className="text-sm text-[var(--text-muted)]">No events yet today.</p>
+                  <p className="text-sm text-[var(--text-secondary)]">No events yet today.</p>
                 )}
               </ul>
             </div>

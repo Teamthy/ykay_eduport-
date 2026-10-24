@@ -1,6 +1,7 @@
 import { AttendanceStatus, ReportCardStatus, UserRole } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { confirmedSchoolAddress } from "@/lib/school-address";
 import { requireRole } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -82,7 +83,11 @@ export async function GET() {
       className: profile.currentClass.displayName,
     },
     schoolContact: school
-      ? { address: school.address, phone: school.phone, email: school.email ?? "" }
+      ? {
+          address: confirmedSchoolAddress(school.address) ?? "",
+          phone: school.phone,
+          email: school.email ?? "",
+        }
       : null,
     stats: {
       attendanceRate,

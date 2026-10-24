@@ -53,6 +53,7 @@ const navLinks = [
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileExpandedGroup, setMobileExpandedGroup] = useState<string | null>(null);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { resolvedTheme, toggleTheme } = useTheme();
 
@@ -62,11 +63,20 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [mobileOpen]);
+
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled ? "bg-[var(--nav-bg-scrolled)] backdrop-blur-md border-b border-[var(--nav-border)] shadow-sm" : "bg-[var(--nav-bg)] border-b border-transparent"}`}
     >
-      <nav className="mx-auto flex w-full items-center justify-between gap-4 px-6 py-3 md:px-10">
+      <nav className="mx-auto flex w-full items-center justify-between gap-2 px-3 py-2.5 sm:gap-4 sm:px-6 sm:py-3 md:px-10">
         <Link href="/" className="shrink-0 flex items-center gap-3">
           <Image
             src="/ykay-logo.png"
@@ -76,11 +86,14 @@ export default function Header() {
             className="h-12 w-12 object-contain"
             priority
           />
-          <div className="hidden sm:block leading-tight">
-            <div className="font-display text-lg md:text-xl tracking-[2px] text-[var(--nav-text)]">
+          <span className="font-display text-sm tracking-[1px] text-[var(--nav-text)] sm:hidden">
+            YKAY
+          </span>
+          <div className="hidden leading-tight sm:block">
+            <div className="font-display text-lg tracking-[2px] text-[var(--nav-text)] md:text-xl">
               YKAY COLLEGE
             </div>
-            <div className="text-[9px] tracking-widest text-brand-green font-bold">
+            <div className="text-[9px] font-bold tracking-widest text-brand-green">
               & LEADERSHIP ACADEMY
             </div>
           </div>
@@ -96,7 +109,14 @@ export default function Header() {
             >
               {link.dropdown ? (
                 <>
-                  <button className="flex items-center gap-1 font-body text-xs xl:text-sm text-[var(--nav-text)] hover:text-[var(--nav-text-active)] transition-colors tracking-wide uppercase">
+                  <button
+                    type="button"
+                    aria-expanded={activeDropdown === link.label}
+                    onClick={() =>
+                      setActiveDropdown((current) => (current === link.label ? null : link.label))
+                    }
+                    className="flex items-center gap-1 font-body text-xs uppercase tracking-wide text-[var(--nav-text)] transition-colors hover:text-[var(--nav-text-active)] xl:text-sm"
+                  >
                     {link.label}
                     <ChevronDown
                       size={12}
@@ -108,10 +128,7 @@ export default function Header() {
                       className="anim-slide-down absolute top-full left-1/2 -translate-x-1/2 pt-4"
                       style={{ zIndex: 60 }}
                     >
-                      <div
-                        className="w-56 rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-                        style={{ backgroundColor: "#0C1824" }}
-                      >
+                      <div className="w-56 overflow-hidden rounded-2xl border border-white/10 bg-brand-navy shadow-2xl">
                         {link.dropdown.map((item) => (
                           <Link
                             key={item.href}
@@ -137,7 +154,7 @@ export default function Header() {
           ))}
         </ul>
 
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
           <span className="hidden md:inline-flex">
             <LiveClock />
           </span>
@@ -147,7 +164,7 @@ export default function Header() {
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="p-2 rounded-full text-[var(--nav-text)] hover:bg-[var(--surface-card-hover)] hover:text-[var(--nav-text-active)] transition-all"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-[var(--nav-text)] transition-all hover:bg-[var(--surface-card-hover)] hover:text-[var(--nav-text-active)]"
           >
             {resolvedTheme === "light" ? <Moon size={18} /> : <Sun size={18} />}
           </button>
@@ -160,53 +177,97 @@ export default function Header() {
           </Link>
 
           <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-[var(--nav-text)]"
-            aria-label="Menu"
+            type="button"
+            onClick={() => {
+              setMobileOpen((open) => !open);
+              setMobileExpandedGroup(null);
+            }}
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-[var(--nav-text)] transition hover:bg-[var(--surface-card-hover)] hover:text-[var(--nav-text-active)] lg:hidden"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
           >
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileOpen ? <X size={23} /> : <Menu size={23} />}
           </button>
         </div>
       </nav>
 
-      {mobileOpen && (
-        <div className="anim-slide-down lg:hidden overflow-hidden bg-[var(--nav-mobile-bg)] border-t border-[var(--nav-border)]">
-          <div className="flex flex-col px-6 py-6 gap-3">
-            {navLinks.map((link) => (
-              <div key={link.href}>
-                <Link
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="font-body text-base text-[var(--nav-text)] hover:text-[var(--nav-text-active)] py-2 uppercase tracking-wide block"
-                >
-                  {link.label}
-                </Link>
-                {link.dropdown && (
-                  <div className="pl-4 space-y-2 mt-1">
+      <div
+        id="mobile-navigation"
+        hidden={!mobileOpen}
+        className="anim-slide-down max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-[var(--nav-border)] bg-[var(--nav-mobile-bg)] lg:hidden"
+      >
+        <nav
+          aria-label="Main navigation"
+          className="mx-auto flex max-w-3xl flex-col px-4 py-3 sm:px-6 sm:py-5"
+        >
+          {navLinks.map((link) => (
+            <div key={link.href} className="border-b border-[var(--nav-border)] last:border-b-0">
+              {link.dropdown ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex min-h-12 flex-1 items-center py-2 font-body text-base font-semibold uppercase tracking-wide text-[var(--nav-text)] transition-colors hover:text-[var(--nav-text-active)]"
+                    >
+                      {link.label}
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setMobileExpandedGroup((current) =>
+                          current === link.label ? null : link.label,
+                        )
+                      }
+                      aria-expanded={mobileExpandedGroup === link.label}
+                      aria-controls={`mobile-group-${link.label.toLowerCase()}`}
+                      aria-label={`${mobileExpandedGroup === link.label ? "Hide" : "Show"} ${link.label} links`}
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-[var(--nav-text)] hover:bg-[var(--surface-card-hover)]"
+                    >
+                      <ChevronDown
+                        size={18}
+                        className={`transition-transform ${mobileExpandedGroup === link.label ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                  </div>
+                  <div
+                    id={`mobile-group-${link.label.toLowerCase()}`}
+                    hidden={mobileExpandedGroup !== link.label}
+                    className="mb-3 ml-3 border-l-2 border-brand-green/40 pl-4"
+                  >
                     {link.dropdown.map((item) => (
                       <Link
                         key={item.href}
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
-                        className="font-body text-sm text-[var(--text-muted)] hover:text-[var(--accent-primary)] py-1 block"
+                        className="flex min-h-11 items-center py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-accent)]"
                       >
-                        — {item.label}
+                        {item.label}
                       </Link>
                     ))}
                   </div>
-                )}
-              </div>
-            ))}
-            <Link
-              href="/admissions"
-              onClick={() => setMobileOpen(false)}
-              className="mt-4 inline-flex items-center justify-center rounded-full px-6 py-3 font-body text-sm font-bold tracking-widest uppercase bg-[var(--btn-secondary-bg)] text-[var(--btn-secondary-text)] shadow-[var(--btn-secondary-shadow)]"
-            >
-              Apply Now
-            </Link>
-          </div>
-        </div>
-      )}
+                </>
+              ) : (
+                <Link
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex min-h-12 items-center py-2 font-body text-base font-semibold uppercase tracking-wide text-[var(--nav-text)] transition-colors hover:text-[var(--nav-text-active)]"
+                >
+                  {link.label}
+                </Link>
+              )}
+            </div>
+          ))}
+          <Link
+            href="/admissions"
+            onClick={() => setMobileOpen(false)}
+            className="mt-4 inline-flex min-h-12 items-center justify-center rounded-full bg-[var(--btn-secondary-bg)] px-6 py-3 font-body text-sm font-bold uppercase tracking-widest text-[var(--btn-secondary-text)] shadow-[var(--btn-secondary-shadow)] transition hover:bg-[var(--btn-secondary-bg-hover)]"
+          >
+            Apply Now
+          </Link>
+        </nav>
+      </div>
     </header>
   );
 }

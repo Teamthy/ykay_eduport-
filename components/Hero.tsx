@@ -36,7 +36,7 @@ export default function Hero() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-none items-center gap-10 px-6 pb-10 pt-28 sm:px-8 md:grid-cols-2 md:px-12 md:pb-14 md:pt-32 lg:px-16">
+      <div className="relative z-10 mx-auto grid w-full max-w-none items-center gap-7 px-4 pb-8 pt-8 sm:gap-8 sm:px-6 sm:pt-10 md:grid-cols-2 md:gap-10 md:px-12 md:pb-14 md:pt-24 lg:px-16">
         <div>
           <span className="anim-rise inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 font-body text-[11px] font-semibold text-white/90 backdrop-blur-sm">
             <span className="h-2 w-2 rounded-full bg-brand-orange" />
@@ -44,7 +44,7 @@ export default function Hero() {
           </span>
 
           <h1
-            className="anim-rise mt-7 font-display text-[clamp(2.4rem,6.5vw,5.2rem)] leading-[0.92] tracking-[-0.02em] text-white"
+            className="anim-rise mt-5 font-display text-[clamp(2.15rem,8.5vw,5.2rem)] leading-[0.94] tracking-[-0.02em] text-white sm:mt-7 sm:text-[clamp(2.4rem,6.5vw,5.2rem)]"
             style={{ animationDelay: "0.08s" }}
           >
             Excellence in Education.
@@ -52,7 +52,7 @@ export default function Hero() {
           </h1>
 
           <p
-            className="anim-rise mt-5 max-w-xl font-body text-base leading-relaxed text-white/80 md:text-lg"
+            className="anim-rise mt-4 max-w-xl font-body text-base leading-relaxed text-white/90 sm:mt-5 md:text-lg"
             style={{ animationDelay: "0.18s" }}
           >
             A premium day secondary school — JSS1 to SS3 with science laboratories, sports, clubs
@@ -60,24 +60,24 @@ export default function Hero() {
           </p>
 
           <div
-            className="anim-rise mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center"
+            className="anim-rise mt-6 flex flex-col items-stretch gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center"
             style={{ animationDelay: "0.28s" }}
           >
             <a
               href="/admissions"
-              className="inline-flex items-center justify-center rounded-full bg-white px-8 py-3.5 font-body text-sm font-bold uppercase tracking-[0.12em] text-brand-navy shadow-lg shadow-black/30 transition hover:scale-[1.03] hover:bg-white/90"
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3.5 font-body text-sm font-bold uppercase tracking-[0.12em] text-brand-navy sm:px-8 shadow-lg shadow-black/30 transition hover:scale-[1.03] hover:bg-white/90"
             >
               Apply Now
             </a>
             <a
               href="/portal"
-              className="inline-flex items-center justify-center rounded-full border border-white/35 bg-white/10 px-8 py-3.5 font-body text-sm font-bold uppercase tracking-[0.12em] text-white backdrop-blur-sm transition hover:bg-white/15"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/45 bg-white/10 px-6 py-3.5 font-body text-sm font-bold uppercase tracking-[0.12em] text-white sm:px-8 backdrop-blur-sm transition hover:bg-white/15"
             >
               Student Portal
             </a>
             <a
               href="/download"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand-orange px-8 py-3.5 font-body text-sm font-bold uppercase tracking-[0.12em] text-brand-navy shadow-lg transition hover:scale-[1.03] hover:bg-brand-orange-dark"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand-orange px-6 py-3.5 font-body text-sm font-bold uppercase tracking-[0.12em] text-brand-navy shadow-lg sm:px-8 transition hover:scale-[1.03] hover:bg-brand-orange-dark"
             >
               <Download size={16} /> Get the app
             </a>
@@ -112,7 +112,7 @@ export default function Hero() {
       </div>
 
       <div className="relative z-10 border-t border-dashed border-white/20">
-        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 px-6 py-7 font-body text-[11px] font-bold uppercase tracking-[0.22em] text-white/55">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 px-4 py-5 font-body text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 sm:gap-x-10 sm:px-6 sm:py-7 sm:tracking-[0.22em]">
           <span>NERDC</span>
           <span>STEM</span>
           <span>IT Academy</span>

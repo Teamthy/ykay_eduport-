@@ -9,7 +9,10 @@ export const dynamic = "force-dynamic";
 
 export default async function NewsArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const school = await prisma.school.findFirst({ orderBy: { createdAt: "asc" } });
+  const school = await prisma.school.findFirst({
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
   if (!school) notFound();
 
   const post = await prisma.newsPost.findFirst({

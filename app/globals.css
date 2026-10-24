@@ -108,6 +108,9 @@
   --text-accent: #62d35e;
   --text-accent-warm: #ff9133;
   --text-link-hover: #87dd84;
+  /* Foreground shades are separate from brand fill colors so links stay legible. */
+  --brand-green-ink: #62d35e;
+  --brand-orange-ink: #ff9133;
 
   /* Accents */
   --accent-primary: #62d35e;
@@ -265,14 +268,17 @@
   --text-muted: #64748b;
   --text-inverse: #f8fafc;
   --text-disabled: #94a3b8;
-  --text-link: #2b8a2b;
-  --text-accent: #2b8a2b;
-  --text-accent-warm: #c2410c;
+  --text-link: #23752a;
+  --text-accent: #23752a;
+  --text-accent-warm: #a63f00;
   --text-link-hover: #1f6d1f;
+  /* Dark, accessible foreground shades on white / pale surfaces. */
+  --brand-green-ink: #23752a;
+  --brand-orange-ink: #a63f00;
 
   /* Accents */
-  --accent-primary: #3aa73a;
-  --accent-secondary: #e65f00;
+  --accent-primary: #23752a;
+  --accent-secondary: #a63f00;
   --accent-navy: #0c1824;
 
   /* Buttons (navy text on brand fills — same accessible pairing as dark) */
@@ -301,8 +307,8 @@
   --nav-bg-scrolled: rgba(255, 255, 255, 0.92);
   --nav-border: rgba(12, 24, 36, 0.08);
   --nav-text: #0c1824;
-  --nav-text-active: #2b8a2b;
-  --nav-text-hover: #e65f00;
+  --nav-text-active: #23752a;
+  --nav-text-hover: #a63f00;
   --nav-mobile-bg: #ffffff;
 
   /* Footer stays dark by design in light mode */
@@ -1098,6 +1104,27 @@ svg {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 0.5rem;
+}
+
+/* Brand accent text needs different foreground shades on pale surfaces. When
+   the same components sit on the fixed dark workspace/hero panels, restore the
+   brighter inks so contrast remains strong in either theme. */
+[data-theme="light"] .bg-brand-navy,
+[data-theme="light"] .bg-brand-navy-dark,
+[data-theme="light"] .bg-brand-navy-light,
+[data-theme="light"] .brand-dark-surface {
+  --brand-green-ink: #62d35e;
+  --brand-orange-ink: #ff9133;
+}
+
+@layer utilities {
+  .text-brand-green {
+    color: var(--brand-green-ink, var(--color-brand-green));
+  }
+
+  .text-brand-orange {
+    color: var(--brand-orange-ink, var(--color-brand-orange));
+  }
 }
 
 /* ============================================================

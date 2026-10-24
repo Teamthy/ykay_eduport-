@@ -350,8 +350,7 @@ export default function SessionsPage() {
           onClick={() => !busy && setShowCreate(false)}
         >
           <div
-            className="rounded-3xl max-w-lg w-full p-8"
-            style={{ backgroundColor: "#0C1824" }}
+            className="rounded-3xl max-w-lg w-full p-8 bg-brand-navy"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">

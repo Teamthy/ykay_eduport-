@@ -66,7 +66,10 @@ export async function POST(request: NextRequest) {
   }
 
   // Check slug uniqueness (slug doubles as subdomain)
-  const existing = await prisma.school.findUnique({ where: { slug: input.slug } });
+  const existing = await prisma.school.findUnique({
+    where: { slug: input.slug },
+    select: { id: true },
+  });
   if (existing) {
     return NextResponse.json({ error: "This school ID is already taken." }, { status: 409 });
   }
@@ -85,10 +88,11 @@ export async function POST(request: NextRequest) {
           slug: input.slug,
           subdomain: input.slug,
           name: input.schoolName,
-          address: "—",
+          address: "",
           phone: "—",
           status: SchoolStatus.ACTIVE,
         },
+        select: { id: true, slug: true, name: true },
       });
 
       const admin = await tx.user.create({

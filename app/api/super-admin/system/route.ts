@@ -20,7 +20,10 @@ export async function GET() {
     prisma.notificationJob.count({
       where: { status: "SENT", sentAt: { gte: new Date(new Date().toDateString()) } },
     }),
-    prisma.school.findFirst({ orderBy: { createdAt: "asc" } }),
+    prisma.school.findFirst({
+      orderBy: { createdAt: "asc" },
+      select: { id: true, name: true, slug: true, email: true, phone: true },
+    }),
   ]);
 
   return NextResponse.json({

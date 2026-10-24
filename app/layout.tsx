@@ -141,15 +141,60 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // to search engines. Describe the resolved school instead; the YKAY values
   // remain the platform defaults for the default/unmatched case so tenant A's
   // markup is unchanged.
-  const school = schoolId
-    ? await prisma.school.findUnique({
+  type PublicSchool = {
+    slug: string;
+    name: string;
+    address: string;
+    phone: string;
+    email: string | null;
+    campusLatitude: number | null;
+    campusLongitude: number | null;
+  };
+  let school: PublicSchool | null = null;
+  if (schoolId) {
+    try {
+      school = await prisma.school.findUnique({
+        where: { id: schoolId },
+        select: {
+          slug: true,
+          name: true,
+          address: true,
+          phone: true,
+          email: true,
+          campusLatitude: true,
+          campusLongitude: true,
+        },
+      });
+    } catch {
+      // Keep the public site available during the manually controlled schema
+      // rollout. Until the campus-location migration is applied, the address
+      // still renders and the map pin stays unpublished.
+      const legacySchool = await prisma.school.findUnique({
         where: { id: schoolId },
         select: { slug: true, name: true, address: true, phone: true, email: true },
-      })
-    : null;
+      });
+      school = legacySchool
+        ? { ...legacySchool, campusLatitude: null, campusLongitude: null }
+        : null;
+    }
+  }
   const isPlatformDefaultSchool = !school || school.slug === DEFAULT_SLUG;
   // Empty until the school confirms its address (School profile in the admin area).
   const publicAddress = confirmedSchoolAddress(school?.address);
+  const publicCampusLatitude =
+    typeof school?.campusLatitude === "number" &&
+    Number.isFinite(school.campusLatitude) &&
+    school.campusLatitude >= -90 &&
+    school.campusLatitude <= 90
+      ? school.campusLatitude
+      : null;
+  const publicCampusLongitude =
+    typeof school?.campusLongitude === "number" &&
+    Number.isFinite(school.campusLongitude) &&
+    school.campusLongitude >= -180 &&
+    school.campusLongitude <= 180
+      ? school.campusLongitude
+      : null;
   const schoolName = school?.name ?? "Ykay College & Leadership Academy";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ykaycollege.edu.ng";
 
@@ -252,7 +297,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ToastProvider>
               <AmbientBackdrop />
               <MotionProvider>
-                <SchoolProfileProvider value={{ name: schoolName, address: publicAddress }}>
+                <SchoolProfileProvider
+                  value={{
+                    name: schoolName,
+                    address: publicAddress,
+                    campusLatitude: publicCampusLatitude,
+                    campusLongitude: publicCampusLongitude,
+                  }}
+                >
                   <div className="relative z-10">{children}</div>
                 </SchoolProfileProvider>
               </MotionProvider>

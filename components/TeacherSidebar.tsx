@@ -23,6 +23,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
+import ResponsiveSidebar from "@/components/ResponsiveSidebar";
 
 type Me = {
   displayName: string;
@@ -51,14 +52,15 @@ function NavBlock({
       <div className={`px-4 mb-2 text-[10px] font-bold uppercase tracking-widest ${color}`}>
         {title}
       </div>
-      <nav className="space-y-1">
+      <nav aria-label={`${title} pages`} className="space-y-1">
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex w-full items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
+              aria-current={active ? "page" : undefined}
+              className={`flex min-h-11 w-full items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
                 active
                   ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
                   : "border-transparent text-[var(--text-muted)] hover:bg-[var(--surface-disabled)] hover:text-[var(--text-primary)]"
@@ -176,8 +178,8 @@ export default function TeacherSidebar() {
   ];
 
   return (
-    <aside className="hidden w-[280px] shrink-0 lg:block">
-      <div className="sticky top-24 max-h-[calc(100vh-6rem)] space-y-4 overflow-y-auto pb-4">
+    <ResponsiveSidebar label="Teacher">
+      <div className="space-y-4 pb-4 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
         <div className="rounded-2xl border border-white/10 bg-brand-navy p-4">
           <div className="text-[9px] font-bold uppercase tracking-widest text-brand-green">
             Teaching workspace
@@ -233,11 +235,11 @@ export default function TeacherSidebar() {
 
         <button
           onClick={logout}
-          className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-xs text-[var(--text-muted)] hover:text-red-500"
+          className="flex min-h-11 w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-[var(--text-muted)] hover:text-red-500"
         >
           <LogOut size={14} /> Sign out
         </button>
       </div>
-    </aside>
+    </ResponsiveSidebar>
   );
 }

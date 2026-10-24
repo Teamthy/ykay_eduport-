@@ -55,6 +55,27 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        // Browser GPS is required only on the staff self-service attendance page.
+        source: "/staff/attendance",
+        headers: [
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(self)",
+          },
+        ],
+      },
+      {
+        // The school admin may explicitly capture the campus pin from a device
+        // physically at the school; no other admin page needs geolocation.
+        source: "/admin/school-profile",
+        headers: [
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(self)",
+          },
+        ],
+      },
     ];
   },
 

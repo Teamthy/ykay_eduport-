@@ -414,8 +414,7 @@ export default function BehaviorRecordsPage() {
           }}
         >
           <div
-            className="rounded-3xl max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto"
-            style={{ backgroundColor: "#0C1824" }}
+            className="rounded-3xl max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto bg-brand-navy"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
