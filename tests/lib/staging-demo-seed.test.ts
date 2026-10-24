@@ -37,15 +37,28 @@ describe("staging demo seed plan", () => {
 
 describe("staging-only database target guard", () => {
   const directStagingUrl = "postgresql://demo:unused@ep-staging.us-east-2.aws.neon.tech/neondb";
+  const stagingHost = "ep-staging.us-east-2.aws.neon.tech";
 
-  it("accepts only the configured direct staging Neon host", () => {
+  it("accepts the exact staging Neon host before Production is provisioned", () => {
     expect(
       validateStagingDemoTarget({
         databaseUrl: directStagingUrl,
-        stagingDatabaseHost: "ep-staging.us-east-2.aws.neon.tech",
+        stagingDatabaseHost: stagingHost,
+        productionDatabaseStatus: "NOT_PROVISIONED",
+        productionDatabaseHost: undefined,
+      }),
+    ).toBe(stagingHost);
+  });
+
+  it("accepts a distinct Production host after it is provisioned", () => {
+    expect(
+      validateStagingDemoTarget({
+        databaseUrl: directStagingUrl,
+        stagingDatabaseHost: stagingHost,
+        productionDatabaseStatus: "AVAILABLE",
         productionDatabaseHost: "prod-db.example.invalid",
       }),
-    ).toBe("ep-staging.us-east-2.aws.neon.tech");
+    ).toBe(stagingHost);
   });
 
   it("rejects pooled Neon endpoints", () => {
@@ -54,7 +67,8 @@ describe("staging-only database target guard", () => {
         databaseUrl:
           "postgresql://demo:unused@ep-staging-pooler.c-7.us-east-2.aws.neon.tech/neondb",
         stagingDatabaseHost: "ep-staging-pooler.c-7.us-east-2.aws.neon.tech",
-        productionDatabaseHost: "prod-db.example.invalid",
+        productionDatabaseStatus: "NOT_PROVISIONED",
+        productionDatabaseHost: undefined,
       }),
     ).toThrow(/direct, unpooled/);
   });
@@ -63,8 +77,9 @@ describe("staging-only database target guard", () => {
     expect(() =>
       validateStagingDemoTarget({
         databaseUrl: "https://ep-staging.us-east-2.aws.neon.tech/neondb",
-        stagingDatabaseHost: "ep-staging.us-east-2.aws.neon.tech",
-        productionDatabaseHost: "prod-db.example.invalid",
+        stagingDatabaseHost: stagingHost,
+        productionDatabaseStatus: "NOT_PROVISIONED",
+        productionDatabaseHost: undefined,
       }),
     ).toThrow(/PostgreSQL protocol/);
   });
@@ -74,28 +89,62 @@ describe("staging-only database target guard", () => {
       validateStagingDemoTarget({
         databaseUrl: directStagingUrl,
         stagingDatabaseHost: "another-staging.us-east-2.aws.neon.tech",
-        productionDatabaseHost: "prod-db.example.invalid",
+        productionDatabaseStatus: "NOT_PROVISIONED",
+        productionDatabaseHost: undefined,
       }),
     ).toThrow(/does not match STAGING_DATABASE_HOST/);
   });
 
-  it("rejects identical staging and production hosts", () => {
+  it("rejects a staging host equal to the available Production host", () => {
     expect(() =>
       validateStagingDemoTarget({
         databaseUrl: directStagingUrl,
-        stagingDatabaseHost: "ep-staging.us-east-2.aws.neon.tech",
-        productionDatabaseHost: "ep-staging.us-east-2.aws.neon.tech",
+        stagingDatabaseHost: stagingHost,
+        productionDatabaseStatus: "AVAILABLE",
+        productionDatabaseHost: stagingHost,
       }),
     ).toThrow(/must be different/);
   });
 
-  it("rejects missing or malformed host configuration", () => {
+  it("requires a Production hostname once Production is available", () => {
+    expect(() =>
+      validateStagingDemoTarget({
+        databaseUrl: directStagingUrl,
+        stagingDatabaseHost: stagingHost,
+        productionDatabaseStatus: "AVAILABLE",
+        productionDatabaseHost: undefined,
+      }),
+    ).toThrow(/PRODUCTION_DATABASE_HOST/);
+  });
+
+  it("does not accept a fake Production hostname in not-provisioned mode", () => {
+    expect(() =>
+      validateStagingDemoTarget({
+        databaseUrl: directStagingUrl,
+        stagingDatabaseHost: stagingHost,
+        productionDatabaseStatus: "NOT_PROVISIONED",
+        productionDatabaseHost: "placeholder.invalid",
+      }),
+    ).toThrow(/Leave PRODUCTION_DATABASE_HOST unset/);
+  });
+
+  it("rejects missing staging or Production status configuration", () => {
     expect(() =>
       validateStagingDemoTarget({
         databaseUrl: directStagingUrl,
         stagingDatabaseHost: undefined,
-        productionDatabaseHost: "prod-db.example.invalid",
+        productionDatabaseStatus: "NOT_PROVISIONED",
+        productionDatabaseHost: undefined,
       }),
     ).toThrow(/STAGING_DATABASE_HOST/);
+
+    expect(() =>
+      validateStagingDemoTarget({
+        databaseUrl: directStagingUrl,
+        stagingDatabaseHost: stagingHost,
+        productionDatabaseStatus: undefined,
+        productionDatabaseHost: undefined,
+      }),
+    ).toThrow(/PRODUCTION_DATABASE_STATUS/);
   });
 });

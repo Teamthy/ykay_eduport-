@@ -59,6 +59,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
           STAGING_DATABASE_HOST: ${{ vars.STAGING_DATABASE_HOST }}
+          PRODUCTION_DATABASE_STATUS: ${{ vars.PRODUCTION_DATABASE_STATUS }}
           PRODUCTION_DATABASE_HOST: ${{ vars.PRODUCTION_DATABASE_HOST }}
         run: |
           if [[ -z "$DATABASE_URL" ]]; then
@@ -80,6 +81,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
           STAGING_DATABASE_HOST: ${{ vars.STAGING_DATABASE_HOST }}
+          PRODUCTION_DATABASE_STATUS: ${{ vars.PRODUCTION_DATABASE_STATUS }}
           PRODUCTION_DATABASE_HOST: ${{ vars.PRODUCTION_DATABASE_HOST }}
           DEMO_SEED_PASSWORD: ${{ secrets.DEMO_SEED_PASSWORD }}
           DEMO_SEED_CONFIRMATION: ${{ inputs.confirmation }}
