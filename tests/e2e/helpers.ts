@@ -8,9 +8,9 @@ import { expect, type Page, type APIRequestContext, type BrowserContext } from "
  * seeded with — failing loudly here is much clearer than a redirect loop.
  *
  * ── Why sessions are cached ────────────────────────────────────────────────
- * /api/auth/login defaults to 10 attempts per 15 minutes PER IP; Vercel
- * Preview allows 30 for QA (lib/rate-limit.ts, `login`). This local suite uses
- * the 10-attempt budget. Every test runs from one IP, so a suite that
+ * /api/auth/login allows 20 attempts per IP in Production and 30 in Vercel
+ * Preview (lib/rate-limit.ts, `login`). This local suite uses the 10-attempt
+ * budget. Every test runs from one IP, so a suite that
  * signs in afresh for each test locks itself out around test 11 and then
  * reports a wall of misleading failures.
  *
