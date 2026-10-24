@@ -1,0 +1,81 @@
+name: Production database migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "status is read-only; deploy applies pending migrations"
+        required: true
+        type: choice
+        default: status
+        options:
+          - status
+          - deploy
+      confirmation:
+        description: "For deploy only, enter APPLY to confirm the Production schema change"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-database-migrations
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: ${{ inputs.operation == 'deploy' && 'Apply Production migrations' || 'Check Production migration status' }}
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production-migrations
+
+    steps:
+      - name: Require explicit confirmation for schema changes
+        if: inputs.operation == 'deploy'
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [[ "$CONFIRMATION" != "APPLY" ]]; then
+            echo "::error::For a Production migration, dispatch with confirmation=APPLY. No database changes were made."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check migration status (read-only)
+        if: inputs.operation == 'status'
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DIRECT_DATABASE_URL }}
+        run: |
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo "::error::Set NEON_DIRECT_DATABASE_URL in the protected production-migrations GitHub environment."
+            exit 1
+          fi
+          printf '::add-mask::%s\n' "$DATABASE_URL"
+          npx prisma migrate status --schema prisma/schema.prisma
+
+      - name: Apply pending migrations
+        if: inputs.operation == 'deploy' && inputs.confirmation == 'APPLY'
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DIRECT_DATABASE_URL }}
+        run: |
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo "::error::Set NEON_DIRECT_DATABASE_URL in the protected production-migrations GitHub environment."
+            exit 1
+          fi
+          printf '::add-mask::%s\n' "$DATABASE_URL"
+          npx prisma migrate deploy --schema prisma/schema.prisma
+          npx prisma migrate status --schema prisma/schema.prisma
