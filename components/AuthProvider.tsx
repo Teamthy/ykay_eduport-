@@ -43,15 +43,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logoutImmediately = useCallback(async () => {
+    // Keep the same-origin logout request alive if navigation happens first.
+    // A slow session-revocation write must not leave the user stuck on a
+    // "Signing out…" dialog indefinitely; after five seconds we still leave
+    // the portal while the request continues in the background.
+    let timeoutId: number | undefined;
+    const logoutRequest = Promise.resolve()
+      .then(() =>
+        fetch("/api/auth/logout", {
+          method: "POST",
+          credentials: "include",
+          cache: "no-store",
+          keepalive: true,
+        }),
+      )
+      .then(
+        () => undefined,
+        () => undefined,
+      );
+
     try {
-      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-    } catch {
-      // The cookie is cleared server-side on a best-effort basis; if the
-      // request never lands we still send the user to /login rather than
-      // stranding them on a page they can no longer use.
+      await Promise.race([
+        logoutRequest,
+        new Promise<void>((resolve) => {
+          timeoutId = window.setTimeout(resolve, 5_000);
+        }),
+      ]);
+    } finally {
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      setUser(null);
+      // Replace rather than push so Back does not reopen the protected page.
+      window.location.replace("/login");
     }
-    setUser(null);
-    window.location.assign("/login");
   }, []);
 
   // Confirmation lives here rather than in each sidebar so a new call site
@@ -74,6 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         confirmText={signingOut ? "Signing out…" : "Yes, sign me out"}
         cancelText="Stay signed in"
+        busy={signingOut}
         onCancel={() => {
           if (!signingOut) setConfirming(false);
         }}

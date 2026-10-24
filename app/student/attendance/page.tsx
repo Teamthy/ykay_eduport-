@@ -101,7 +101,7 @@ export default function StudentAttendancePage() {
       <PortalTopbar />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="px-6 pb-10 pt-24">
-          <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl md:p-12">
+          <div className="w-full rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl md:p-12">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-green/20 text-brand-green">
@@ -134,7 +134,7 @@ export default function StudentAttendancePage() {
         </section>
 
         <section className="px-6 pb-20">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+          <div className="w-full flex flex-col gap-8 lg:flex-row">
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 space-y-8">

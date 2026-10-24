@@ -168,7 +168,7 @@ export default function AdminAttendanceAnalyticsPage() {
       <PortalTopbar />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-6 pb-10 pt-24">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-green/30 bg-brand-green/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
               <BarChart3 size={12} /> Phase 3C · Attendance Analytics
             </div>
@@ -183,7 +183,7 @@ export default function AdminAttendanceAnalyticsPage() {
         </section>
 
         <section className="px-6 py-10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+          <div className="w-full flex flex-col gap-8 lg:flex-row">
             <AdminSidebar />
 
             <div className="flex-1 min-w-0 space-y-6">

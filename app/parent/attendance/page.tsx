@@ -114,7 +114,7 @@ export default function ParentAttendancePage() {
       <PortalTopbar />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="px-6 pb-10 pt-24">
-          <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/5 bg-brand-navy p-8 shadow-xl md:p-12">
+          <div className="w-full rounded-[2rem] border border-white/5 bg-brand-navy p-8 shadow-xl md:p-12">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="font-display text-[42px] tracking-[3px] text-white md:text-[64px]">
@@ -141,7 +141,7 @@ export default function ParentAttendancePage() {
         </section>
 
         <section className="px-6 pb-20">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+          <div className="w-full flex flex-col gap-8 lg:flex-row">
             <PortalSidebar portalName="Parent" portalType="parent" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 space-y-8">

@@ -173,7 +173,7 @@ export default function ParentReportCardsPage() {
       <PortalTopbar />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="no-print bg-brand-navy px-6 pb-10 pt-24">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <h1 className="font-display text-[42px] tracking-[3px] text-white md:text-[64px]">
               REPORT <span className="text-brand-green">CARDS</span>
             </h1>
@@ -184,7 +184,7 @@ export default function ParentReportCardsPage() {
         </section>
 
         <section className="px-6 py-10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+          <div className="w-full flex flex-col gap-8 lg:flex-row">
             <PortalSidebar portalName="Parent" portalType="parent" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 space-y-6">

@@ -319,7 +319,7 @@ export default function ClassAttendancePage() {
       <PortalTopbar />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-6 pb-10 pt-24">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <div className="mb-3 flex flex-wrap items-center gap-3">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
                 <Calendar size={11} /> Teacher attendance workflow
@@ -339,7 +339,7 @@ export default function ClassAttendancePage() {
         </section>
 
         <section className="px-6 py-10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+          <div className="w-full flex flex-col gap-8 lg:flex-row">
             <TeacherSidebar />
 
             <div className="flex-1 min-w-0 space-y-6">

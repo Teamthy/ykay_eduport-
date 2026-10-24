@@ -135,7 +135,7 @@ export default function PerformancePage() {
       <PortalTopbar />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-green/20 border border-brand-green/40 text-brand-green text-[10px] font-bold uppercase tracking-widest mb-3">
               <BookOpen size={11} /> Subject Teacher
             </span>
@@ -149,7 +149,7 @@ export default function PerformancePage() {
         </section>
 
         <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
+          <div className="w-full flex flex-col lg:flex-row gap-8">
             <TeacherSidebar />
 
             <div className="flex-1 min-w-0 space-y-6">

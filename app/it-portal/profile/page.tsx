@@ -152,7 +152,7 @@ export default function ProfilePage() {
       <Header />
       {/* Nav */}
       <header className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--surface-card)] shadow-[var(--card-shadow)]">
-        <div className="mx-auto flex h-[72px] max-w-[1340px] items-center gap-4 px-6">
+        <div className="mx-auto flex h-[72px] w-full items-center gap-4 px-6">
           <Link href="/it-portal/dashboard" className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0F1F2E]">
               <GraduationCap size={22} className="text-[#4EC54D]" />
@@ -177,7 +177,7 @@ export default function ProfilePage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1340px] px-6 py-8">
+      <main className="w-full px-6 py-8">
         <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
           {/* Left sidebar — profile card */}
           <div>

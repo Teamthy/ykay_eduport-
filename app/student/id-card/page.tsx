@@ -77,7 +77,7 @@ export default function IDCardPage() {
       <PortalTopbar title="ID card" />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
               STUDENT <span className="text-brand-green">ID CARD</span>
             </h1>
@@ -86,7 +86,7 @@ export default function IDCardPage() {
         </section>
 
         <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
+          <div className="w-full flex flex-col lg:flex-row gap-8">
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 flex flex-col items-center space-y-8">

@@ -57,7 +57,7 @@ export default function StudentAnnouncementsPage() {
       <PortalTopbar />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-32 pb-10 bg-brand-navy px-6">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <h1 className="font-display text-[42px] md:text-[56px] tracking-[3px] text-white mb-4">
               SCHOOL <span className="text-brand-green">ANNOUNCEMENTS</span>
             </h1>
@@ -66,7 +66,7 @@ export default function StudentAnnouncementsPage() {
         </section>
 
         <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
+          <div className="w-full flex flex-col lg:flex-row gap-8">
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 space-y-4">

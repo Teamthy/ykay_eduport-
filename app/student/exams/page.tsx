@@ -3,17 +3,27 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
+import PortalSidebar from "@/components/PortalSidebar";
 import {
   Award,
   BookOpen,
+  CalendarCheck,
+  CalendarClock,
+  CalendarDays,
   CheckCircle2,
   ClipboardCheck,
+  FileSpreadsheet,
+  GraduationCap,
+  IdCard,
+  LayoutDashboard,
+  Megaphone,
+  MessageSquare,
+  User,
   Clock,
   LoaderCircle,
   PlayCircle,
   RotateCcw,
   Shield,
-  CalendarClock,
   Lock,
   XCircle,
   Search,
@@ -40,6 +50,20 @@ const AVAILABILITY_STYLE: Record<string, { chip: string; icon: typeof Clock }> =
   CLOSED: { chip: "bg-red-500/10 text-red-500", icon: XCircle },
   COMPLETED: { chip: "bg-[var(--surface-disabled)] text-[var(--text-muted)]", icon: CheckCircle2 },
 };
+
+const STUDENT_NAV_ITEMS = [
+  { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
+  { label: "Attendance", href: "/student/attendance", icon: CalendarCheck },
+  { label: "Timetable", href: "/student/timetable", icon: CalendarDays },
+  { label: "CBT Tests", href: "/student/exams", icon: ClipboardCheck },
+  { label: "Report Cards", href: "/student/report-cards", icon: FileSpreadsheet },
+  { label: "Messages", href: "/student/messages", icon: MessageSquare },
+  { label: "Announcements", href: "/student/announcements", icon: Megaphone },
+  { label: "My Profile", href: "/student/profile", icon: User },
+  { label: "Teachers", href: "/student/teachers", icon: GraduationCap },
+  { label: "ID Card", href: "/student/id-card", icon: IdCard },
+  { label: "Exam Practice", href: "/student/waec-practice", icon: Award },
+];
 
 type ExamCard = {
   id: string;
@@ -101,9 +125,9 @@ export default function StudentExamsPage() {
   return (
     <>
       <PortalTopbar title="My exams" />
-      <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
-        <section className="bg-brand-navy px-6 pt-28 pb-14">
-          <div className="mx-auto max-w-6xl">
+      <main className="min-h-screen w-full bg-[var(--bg-primary)] theme-transition">
+        <section className="portal-hero px-4 py-10 sm:px-6 lg:py-12">
+          <div className="w-full">
             <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-brand-green/40 bg-brand-green/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
               <ClipboardCheck size={11} /> Computer-Based Tests
             </span>
@@ -130,153 +154,157 @@ export default function StudentExamsPage() {
           </div>
         </section>
 
-        <section className="px-6 py-10">
-          <div className="mx-auto max-w-6xl space-y-4">
-            {error ? (
-              <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
-                {error}
-              </div>
-            ) : null}
-
-            {loading ? (
-              <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
-                <div className="flex items-center gap-3 text-[var(--text-secondary)]">
-                  <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading your
-                  exams...
+        <section className="px-4 py-8 sm:px-6 xl:px-8">
+          <div className="portal-full-width flex flex-col gap-6 lg:flex-row xl:gap-8">
+            <PortalSidebar portalName="Student" portalType="student" items={STUDENT_NAV_ITEMS} />
+            <div className="min-w-0 flex-1 space-y-4">
+              {error ? (
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                  {error}
                 </div>
-              </div>
-            ) : null}
+              ) : null}
 
-            {!loading && data
-              ? data.exams
-                  .filter((exam) => {
-                    const needle = q.trim().toLowerCase();
-                    if (!needle) return true;
-                    return (
-                      exam.title.toLowerCase().includes(needle) ||
-                      exam.subjectName.toLowerCase().includes(needle) ||
-                      exam.teacherName.toLowerCase().includes(needle)
-                    );
-                  })
-                  .map((exam) => (
-                    <div
-                      key={exam.id}
-                      className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-4">
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-display text-xl text-[var(--text-primary)]">
-                              {exam.title}
-                            </h3>
-                            <span className="rounded-full bg-brand-green/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-green">
-                              {exam.examType}
-                            </span>
-                            {exam.status === "CLOSED" ? (
-                              <span className="rounded-full bg-red-500/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-red-500">
-                                Closed
+              {loading ? (
+                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
+                  <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    your exams...
+                  </div>
+                </div>
+              ) : null}
+
+              {!loading && data
+                ? data.exams
+                    .filter((exam) => {
+                      const needle = q.trim().toLowerCase();
+                      if (!needle) return true;
+                      return (
+                        exam.title.toLowerCase().includes(needle) ||
+                        exam.subjectName.toLowerCase().includes(needle) ||
+                        exam.teacherName.toLowerCase().includes(needle)
+                      );
+                    })
+                    .map((exam) => (
+                      <div
+                        key={exam.id}
+                        className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="font-display text-xl text-[var(--text-primary)]">
+                                {exam.title}
+                              </h3>
+                              <span className="rounded-full bg-brand-green/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-green">
+                                {exam.examType}
                               </span>
+                              {exam.status === "CLOSED" ? (
+                                <span className="rounded-full bg-red-500/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-red-500">
+                                  Closed
+                                </span>
+                              ) : null}
+                            </div>
+                            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                              <span className="inline-flex items-center gap-1">
+                                <BookOpen size={11} /> {exam.subjectName} · {exam.teacherName}
+                              </span>
+                              <span className="inline-flex items-center gap-1">
+                                <Clock size={11} /> {exam.durationMinutes} min
+                              </span>
+                              <span>
+                                {exam.questionCount} questions · {exam.totalMarks} marks · pass{" "}
+                                {exam.passMark}%
+                              </span>
+                              <span className="inline-flex items-center gap-1">
+                                <Shield size={11} /> Auto-save · Auto-submit
+                                {exam.hasEssay ? " · Essay included" : ""}
+                              </span>
+                            </div>
+                            {/* When to sit it — the whole point of the list. */}
+                            {whenLabel(exam.scheduledFor) ? (
+                              <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
+                                <CalendarClock size={12} className="text-brand-green" />
+                                {exam.availability === "UPCOMING" ? "Opens" : "Scheduled"}{" "}
+                                {whenLabel(exam.scheduledFor)}
+                                {whenLabel(exam.availableUntil)
+                                  ? ` — closes ${whenLabel(exam.availableUntil)}`
+                                  : ""}
+                              </p>
+                            ) : null}
+                            {exam.theoryMinutes > 0 ? (
+                              <p className="mt-1 text-xs text-[var(--text-muted)]">
+                                {exam.durationMinutes} min objective + {exam.theoryMinutes} min
+                                theory
+                              </p>
+                            ) : null}
+                            {exam.instructions ? (
+                              <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                                {exam.instructions}
+                              </p>
                             ) : null}
                           </div>
-                          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                            <span className="inline-flex items-center gap-1">
-                              <BookOpen size={11} /> {exam.subjectName} · {exam.teacherName}
-                            </span>
-                            <span className="inline-flex items-center gap-1">
-                              <Clock size={11} /> {exam.durationMinutes} min
-                            </span>
-                            <span>
-                              {exam.questionCount} questions · {exam.totalMarks} marks · pass{" "}
-                              {exam.passMark}%
-                            </span>
-                            <span className="inline-flex items-center gap-1">
-                              <Shield size={11} /> Auto-save · Auto-submit
-                              {exam.hasEssay ? " · Essay included" : ""}
-                            </span>
-                          </div>
-                          {/* When to sit it — the whole point of the list. */}
-                          {whenLabel(exam.scheduledFor) ? (
-                            <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
-                              <CalendarClock size={12} className="text-brand-green" />
-                              {exam.availability === "UPCOMING" ? "Opens" : "Scheduled"}{" "}
-                              {whenLabel(exam.scheduledFor)}
-                              {whenLabel(exam.availableUntil)
-                                ? ` — closes ${whenLabel(exam.availableUntil)}`
-                                : ""}
-                            </p>
-                          ) : null}
-                          {exam.theoryMinutes > 0 ? (
-                            <p className="mt-1 text-xs text-[var(--text-muted)]">
-                              {exam.durationMinutes} min objective + {exam.theoryMinutes} min theory
-                            </p>
-                          ) : null}
-                          {exam.instructions ? (
-                            <p className="mt-2 text-xs text-[var(--text-secondary)]">
-                              {exam.instructions}
-                            </p>
-                          ) : null}
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          {exam.attempt?.scoreVisible ? (
-                            <div className="text-right">
-                              <div
-                                className={`font-display text-3xl ${exam.attempt.percent !== null && exam.attempt.percent >= exam.passMark ? "text-brand-green" : "text-red-500"}`}
-                              >
-                                {exam.attempt.percent}%
+                          <div className="flex flex-col items-end gap-2">
+                            {exam.attempt?.scoreVisible ? (
+                              <div className="text-right">
+                                <div
+                                  className={`font-display text-3xl ${exam.attempt.percent !== null && exam.attempt.percent >= exam.passMark ? "text-brand-green" : "text-red-500"}`}
+                                >
+                                  {exam.attempt.percent}%
+                                </div>
+                                <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                  {exam.attempt.totalScore}/{exam.totalMarks} marks
+                                </div>
                               </div>
-                              <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-                                {exam.attempt.totalScore}/{exam.totalMarks} marks
-                              </div>
-                            </div>
-                          ) : exam.attempt && exam.attempt.status !== "IN_PROGRESS" ? (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
-                              <CheckCircle2 size={12} /> Submitted — awaiting results
-                            </span>
-                          ) : null}
-                          {/* Why there is no button. Previously an exam that
+                            ) : exam.attempt && exam.attempt.status !== "IN_PROGRESS" ? (
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
+                                <CheckCircle2 size={12} /> Submitted — awaiting results
+                              </span>
+                            ) : null}
+                            {/* Why there is no button. Previously an exam that
                             could not be started showed nothing at all — no
                             button, no reason — so a student stared at a card
                             that appeared broken. */}
-                          {!exam.canResume && !exam.canStart ? (
-                            <span
-                              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest ${
-                                AVAILABILITY_STYLE[exam.availability]?.chip ??
-                                "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
-                              }`}
-                            >
-                              {exam.feeLocked ? <Lock size={12} /> : null}
-                              {exam.feeLocked ? "Fees outstanding" : exam.availabilityLabel}
-                            </span>
-                          ) : null}
-                          {exam.canResume ? (
-                            <Link
-                              href={`/student/exams/${exam.id}`}
-                              className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-orange-dark"
-                            >
-                              <RotateCcw size={13} /> Resume Exam
-                            </Link>
-                          ) : exam.canStart ? (
-                            <Link
-                              href={`/student/exams/${exam.id}`}
-                              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark"
-                            >
-                              <PlayCircle size={13} /> Start Exam
-                            </Link>
-                          ) : null}
+                            {!exam.canResume && !exam.canStart ? (
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest ${
+                                  AVAILABILITY_STYLE[exam.availability]?.chip ??
+                                  "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
+                                }`}
+                              >
+                                {exam.feeLocked ? <Lock size={12} /> : null}
+                                {exam.feeLocked ? "Fees outstanding" : exam.availabilityLabel}
+                              </span>
+                            ) : null}
+                            {exam.canResume ? (
+                              <Link
+                                href={`/student/exams/${exam.id}`}
+                                className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-orange-dark"
+                              >
+                                <RotateCcw size={13} /> Resume Exam
+                              </Link>
+                            ) : exam.canStart ? (
+                              <Link
+                                href={`/student/exams/${exam.id}`}
+                                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark"
+                              >
+                                <PlayCircle size={13} /> Start Exam
+                              </Link>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
-              : null}
+                    ))
+                : null}
 
-            {!loading && data && !data.exams.length ? (
-              <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-12 text-center shadow-[var(--card-shadow)]">
-                <Award className="mx-auto mb-3 text-[var(--text-muted)]" size={32} />
-                <p className="text-sm text-[var(--text-muted)]">
-                  No exams have been published for your class yet.
-                </p>
-              </div>
-            ) : null}
+              {!loading && data && !data.exams.length ? (
+                <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-12 text-center shadow-[var(--card-shadow)]">
+                  <Award className="mx-auto mb-3 text-[var(--text-muted)]" size={32} />
+                  <p className="text-sm text-[var(--text-muted)]">
+                    No exams have been published for your class yet.
+                  </p>
+                </div>
+              ) : null}
+            </div>
           </div>
         </section>
       </main>

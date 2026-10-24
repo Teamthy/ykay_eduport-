@@ -100,7 +100,7 @@ export default function MyRecordsPage() {
       <PortalTopbar />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <h1 className="font-display text-4xl md:text-5xl tracking-widest text-white mb-2">
               MY <span className="text-brand-green">RECORDS</span>
             </h1>
@@ -111,7 +111,7 @@ export default function MyRecordsPage() {
         </section>
 
         <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
+          <div className="w-full flex flex-col lg:flex-row gap-8">
             <TeacherSidebar />
 
             <div className="flex-1 min-w-0 space-y-6">

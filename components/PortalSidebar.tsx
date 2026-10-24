@@ -3,9 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
-import { LogOut } from "lucide-react";
+import {
+  BookOpen,
+  BrainCircuit,
+  CalendarCheck,
+  CalendarClock,
+  CalendarDays,
+  ClipboardCheck,
+  CreditCard,
+  FileSpreadsheet,
+  GraduationCap,
+  IdCard,
+  LayoutDashboard,
+  LogOut,
+  Megaphone,
+  MessageSquare,
+  School,
+  User,
+  Users,
+} from "lucide-react";
 import { useAuth } from "./AuthProvider";
-import ResponsiveSidebar from "@/components/ResponsiveSidebar";
+import ResponsiveSidebar, { useResponsiveSidebar } from "@/components/ResponsiveSidebar";
 
 interface SidebarItem {
   label: string;
@@ -20,79 +38,150 @@ interface PortalSidebarProps {
   items: SidebarItem[];
 }
 
-/**
- * Role-locked portal nav. Cross-portal switcher removed for production hygiene.
- * Public site chrome (Header/Footer) should not wrap authenticated portal pages.
- */
-export default function PortalSidebar({ portalName, portalType, items }: PortalSidebarProps) {
+const STUDENT_ICON_BY_ROUTE: Record<string, LucideIcon> = {
+  "/student/dashboard": LayoutDashboard,
+  "/student/attendance": CalendarCheck,
+  "/student/timetable": CalendarClock,
+  "/student/exams": ClipboardCheck,
+  "/student/waec-practice": BrainCircuit,
+  "/student/report-cards": FileSpreadsheet,
+  "/student/messages": MessageSquare,
+  "/student/announcements": Megaphone,
+  "/student/profile": User,
+  "/student/teachers": GraduationCap,
+  "/student/id-card": IdCard,
+};
+
+const PARENT_ICON_BY_ROUTE: Record<string, LucideIcon> = {
+  "/parent/dashboard": LayoutDashboard,
+  "/parent/attendance": CalendarCheck,
+  "/parent/fees": CreditCard,
+  "/parent/report-cards": FileSpreadsheet,
+  "/parent/messages": MessageSquare,
+  "/parent/events": CalendarDays,
+};
+
+const PORTAL_MARK: Record<PortalSidebarProps["portalType"], LucideIcon> = {
+  admin: School,
+  teacher: BookOpen,
+  student: GraduationCap,
+  parent: Users,
+};
+
+function getInitials(name?: string | null) {
+  const initials = name
+    ?.trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+  return initials || "YK";
+}
+
+function PortalSidebarContent({ portalName, portalType, items }: PortalSidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-
-  // Confirmation is handled centrally in AuthProvider; announcing "logged out"
-  // here fired before the user had agreed to anything.
-  const handleLogout = logout;
+  const { collapsed } = useResponsiveSidebar();
+  const PortalIcon = PORTAL_MARK[portalType];
+  const iconByRoute = portalType === "student" ? STUDENT_ICON_BY_ROUTE : PARENT_ICON_BY_ROUTE;
 
   return (
-    <ResponsiveSidebar label={portalName}>
-      <div className="space-y-4">
-        <div className="rounded-2xl border border-white/10 bg-brand-navy p-4">
-          <span className="text-[9px] font-bold uppercase tracking-widest text-brand-green">
+    <div className="space-y-4 px-1 pb-2">
+      <div
+        className="portal-sidebar-brand flex items-center gap-3 rounded-2xl p-3"
+        title={collapsed ? `${portalName} workspace` : undefined}
+      >
+        <span className="portal-sidebar-user-avatar">
+          <PortalIcon size={19} strokeWidth={1.8} />
+        </span>
+        <span className="portal-sidebar-brandcopy min-w-0">
+          <span className="block text-[9px] font-extrabold uppercase tracking-[0.16em] text-brand-green">
             Active workspace
           </span>
-          <div className="mt-1 font-display text-sm tracking-[1px] text-white">{portalName}</div>
-          <div className="mt-1 text-[10px] uppercase tracking-widest text-white/75">
-            {portalType}
-          </div>
-        </div>
-
-        {user && (
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3">
-            <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-              Signed in
-            </div>
-            <div className="truncate text-sm font-bold text-[var(--text-primary)]">{user.name}</div>
-            <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-              {user.role?.replaceAll("_", " ")}
-            </div>
-          </div>
-        )}
-
-        <nav aria-label={`${portalName} pages`} className="space-y-1">
-          {items.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={isActive ? "page" : undefined}
-                className={`flex min-h-11 w-full items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
-                  isActive
-                    ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
-                    : "border-transparent text-[var(--text-muted)] hover:bg-[var(--surface-disabled)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                <item.icon size={16} />
-                <span className="flex-1 tracking-wide">{item.label}</span>
-                {item.badge && (
-                  <span className="rounded-full bg-brand-orange px-2 py-0.5 text-[9px] font-bold text-brand-navy">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="space-y-1 border-t border-[var(--border-subtle)] pt-3">
-          <button
-            onClick={handleLogout}
-            className="flex min-h-11 w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-[var(--text-muted)] transition-colors hover:text-red-500"
-          >
-            <LogOut size={14} />
-            <span>Sign out</span>
-          </button>
-        </div>
+          <span className="mt-0.5 block truncate font-display text-sm tracking-[1px] text-[var(--text-primary)]">
+            {portalName}
+          </span>
+          <span className="portal-sidebar-workspace-meta mt-0.5 block text-[9px] uppercase tracking-[0.14em] text-[var(--text-muted)]">
+            {portalType} portal
+          </span>
+        </span>
       </div>
+
+      {user ? (
+        <div
+          className="portal-sidebar-user flex items-center gap-3 rounded-xl px-3 py-2.5"
+          title={
+            collapsed ? `${user.name} · ${user.role?.replaceAll("_", " ") || "Account"}` : undefined
+          }
+        >
+          <span className="portal-sidebar-user-avatar" aria-hidden="true">
+            {getInitials(user.name)}
+          </span>
+          <span className="portal-sidebar-usercopy min-w-0">
+            <span className="block text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">
+              Signed in
+            </span>
+            <span className="block truncate text-xs font-bold text-[var(--text-primary)]">
+              {user.name}
+            </span>
+            <span className="block truncate text-[9px] uppercase tracking-[0.12em] text-[var(--text-muted)]">
+              {user.role?.replaceAll("_", " ")}
+            </span>
+          </span>
+        </div>
+      ) : null}
+
+      <nav aria-label={`${portalName} pages`} className="space-y-1">
+        {items.map((item) => {
+          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const Icon = iconByRoute[item.href] ?? item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-label={item.label}
+              aria-current={isActive ? "page" : undefined}
+              title={collapsed ? item.label : undefined}
+              className="portal-nav-link"
+            >
+              <span className="portal-nav-icon">
+                <Icon size={17} strokeWidth={1.85} />
+              </span>
+              <span className="portal-nav-label">{item.label}</span>
+              {item.badge ? (
+                <span className="portal-nav-badge rounded-full bg-brand-orange px-2 py-0.5 text-[9px] font-bold text-brand-navy">
+                  {item.badge}
+                </span>
+              ) : null}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="space-y-1 border-t border-[var(--border-subtle)] pt-3">
+        <button
+          type="button"
+          onClick={logout}
+          aria-label="Sign out"
+          title={collapsed ? "Sign out" : undefined}
+          className="portal-nav-link text-left hover:!border-red-500/15 hover:!bg-red-500/10 hover:!text-red-400"
+        >
+          <span className="portal-nav-icon">
+            <LogOut size={16} strokeWidth={1.85} />
+          </span>
+          <span className="portal-nav-label">Sign out</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Role-locked portal nav. Cross-portal switcher removed for production hygiene. */
+export default function PortalSidebar(props: PortalSidebarProps) {
+  return (
+    <ResponsiveSidebar label={props.portalName}>
+      <PortalSidebarContent {...props} />
     </ResponsiveSidebar>
   );
 }

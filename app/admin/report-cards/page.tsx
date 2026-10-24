@@ -137,7 +137,7 @@ export default function AdminReportCardsPage() {
       <PortalTopbar />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy pt-24 pb-14">
-          <div className="mx-auto max-w-7xl px-6">
+          <div className="w-full px-6">
             <h1 className="font-display text-[42px] md:text-[72px] text-white">
               REPORT <span className="text-brand-green">CARDS</span>
             </h1>
@@ -148,7 +148,7 @@ export default function AdminReportCardsPage() {
         </section>
 
         <section className="px-6 py-10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+          <div className="w-full flex flex-col gap-8 lg:flex-row">
             <AdminSidebar />
 
             <div className="flex-1 min-w-0 space-y-6">

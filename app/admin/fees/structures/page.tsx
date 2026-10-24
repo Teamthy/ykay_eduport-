@@ -140,7 +140,7 @@ export default function FeeStructuresPage() {
       <PortalTopbar title="Fee structures" />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-6 pt-28 pb-14">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-green/40 bg-brand-green/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
               <Wallet size={11} /> Bursary
             </span>
@@ -155,7 +155,7 @@ export default function FeeStructuresPage() {
         </section>
 
         <section className="px-6 py-10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+          <div className="w-full flex flex-col gap-8 lg:flex-row">
             <AdminSidebar />
 
             <div className="min-w-0 flex-1 space-y-6">

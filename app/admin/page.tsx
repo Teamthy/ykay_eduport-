@@ -127,11 +127,10 @@ export default function AdminDashboardPage() {
   return (
     <>
       <PortalTopbar />
-      <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
+      <main className="min-h-screen w-full bg-[var(--bg-primary)] theme-transition">
         {/* Hero */}
-        <section className="pt-24 pb-12 bg-brand-navy px-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-gradient-to-l from-brand-green to-transparent" />
-          <div className="mx-auto max-w-7xl relative z-10">
+        <section className="portal-hero px-4 py-10 sm:px-6 lg:py-12">
+          <div className="portal-full-width relative z-10">
             <span className="inline-block px-4 py-1.5 rounded-full bg-brand-green/10 border border-brand-green/30 text-brand-green text-[10px] font-bold tracking-[0.2em] uppercase mb-4">
               School Administration
             </span>
@@ -149,8 +148,8 @@ export default function AdminDashboardPage() {
           </div>
         </section>
 
-        <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
+        <section className="px-4 py-8 sm:px-6 xl:px-8">
+          <div className="portal-full-width flex flex-col gap-6 lg:flex-row xl:gap-8">
             <AdminSidebar />
 
             <div className="flex-1 min-w-0 space-y-8">

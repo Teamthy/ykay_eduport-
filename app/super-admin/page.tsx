@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import PortalTopbar from "@/components/PortalTopbar";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { useToast } from "@/components/Toast";
 import {
@@ -465,12 +464,12 @@ export default function SuperAdminPage() {
 
   return (
     <>
-      <Header />
-      <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
+      <PortalTopbar title="Platform overview" />
+      <main className="min-h-screen w-full bg-[var(--bg-primary)] theme-transition">
         {/* Persistent impersonation banner lives in app/layout.tsx so it stays
             visible across every portal and survives page reloads (AUTH-01). */}
-        <section className="bg-brand-navy px-6 pt-28 pb-14">
-          <div className="mx-auto max-w-7xl">
+        <section className="portal-hero px-4 py-10 sm:px-6 lg:py-12">
+          <div className="w-full">
             <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-brand-orange/40 bg-brand-orange/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
               <TerminalSquare size={11} /> Developer Console
             </span>
@@ -491,7 +490,7 @@ export default function SuperAdminPage() {
         </section>
 
         <section className="px-6 py-10">
-          <div className="mx-auto max-w-7xl space-y-6">
+          <div className="w-full space-y-6">
             {/* Tabs */}
             <div className="flex flex-wrap gap-2">
               {TABS.map((item) => (
@@ -1359,7 +1358,6 @@ export default function SuperAdminPage() {
           </div>
         </section>
       </main>
-      <Footer />
 
       {/* Confirm dialog */}
       <ConfirmDialog
