@@ -39,8 +39,13 @@ function catalogueRequest(search = "") {
 function practiceExam(overrides: Record<string, unknown> = {}) {
   return {
     id: "exam_prac",
+    classId: "cls_1",
     title: "WAEC Maths Practice",
     subjectName: "Mathematics",
+    practiceCategory: "WAEC",
+    classroom: { displayName: "JSS 1A" },
+    teacherProfile: { displayName: "Teacher One" },
+    term: null,
     durationMinutes: 30,
     passMark: 50,
     instructions: null,
@@ -87,7 +92,7 @@ describe("GET /api/student/practice — catalogue", () => {
     const where = mockPrisma.exam.findMany.mock.calls[0][0].where;
     expect(where.examType).toBe("PRACTICE");
     expect(where.schoolId).toBe("school_1");
-    expect(where.classId).toBe("cls_1");
+    expect(where.OR).toContainEqual({ classId: "cls_1" });
   });
 
   it("bounds the query so a big catalogue cannot blow up the request", async () => {
