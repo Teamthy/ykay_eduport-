@@ -62,8 +62,10 @@ The API cannot be split from the pages.
    ```
    The endpoint also accepts Vercel's `Authorization: Bearer $CRON_SECRET`.
 5. **Migrations** run from CI/gate (the `schema-drift` job proves the chain
-   applies cleanly). For production, run `prisma migrate deploy` from a
-   controlled step or the Docker image entrypoint — never `prisma db push`.
+   applies cleanly). For Vercel Production, use the manual, protected GitHub
+   Actions workflow documented in [`production-database-migrations.md`](production-database-migrations.md);
+   for containers, the Docker entrypoint runs `prisma migrate deploy`. Never
+   use `prisma db push` on Production.
 6. Vercel project settings: Root Directory = repo root, Framework Next.js;
    security headers/CSP ship from `next.config.ts` (review the
    `connect-src` list for your exact Upstash/Neon/S3 hostnames).
