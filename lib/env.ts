@@ -3,10 +3,10 @@
  *
  * Production is fail-closed by default (`APP_READINESS_MODE=final`). An
  * explicit `APP_READINESS_MODE=temporary` may be used while provisioning the
- * public site shell: Redis, private document storage, and malware scanning may
- * be absent, but routes that depend on them remain unavailable. Database,
- * authentication, site URL, live payment, and job-secret requirements are
- * never relaxed by temporary mode.
+ * public site shell: Redis, private document storage, malware scanning, and
+ * live Paystack credentials may be absent, but every route that depends on a
+ * missing service remains unavailable. Database, authentication, site URL,
+ * and job-secret requirements are never relaxed by temporary mode.
  */
 
 import { z } from "zod";
@@ -23,19 +23,14 @@ const baseSchema = z.object({
 /**
  * Fatal in production: the app cannot serve a correct response without these.
  *
- * Production mode also requires private admissions storage, shared rate limits,
- * a malware scanner, and the notification job secret. The three infrastructure
- * dependencies may be deferred only while APP_READINESS_MODE=temporary; their
- * dependent operations stay fail-closed until they are provisioned.
+ * Final production mode requires private admissions storage, shared rate
+ * limits, malware scanning, live Paystack keys, and the notification job
+ * secret. Temporary mode may defer Redis, storage, scanning, and Paystack only;
+ * the job secret remains required and deferred-service operations stay
+ * fail-closed until provisioned.
  */
 const productionSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url("NEXT_PUBLIC_SITE_URL must be a full URL in production."),
-  PAYSTACK_PUBLIC_KEY: z
-    .string()
-    .startsWith("pk_live_", "Production must use a live pk_live_ Paystack key."),
-  PAYSTACK_SECRET_KEY: z
-    .string()
-    .startsWith("sk_live_", "Production must use a live sk_live_ Paystack key."),
 });
 
 export type EnvValidationResult = {
@@ -46,6 +41,30 @@ export type EnvValidationResult = {
 
 export function getAppReadinessMode(source: NodeJS.ProcessEnv = process.env): AppReadinessMode {
   return source.APP_READINESS_MODE?.trim().toLowerCase() === "temporary" ? "temporary" : "final";
+}
+
+function paystackConfigurationErrors(source: NodeJS.ProcessEnv): string[] {
+  const errors: string[] = [];
+  if (!source.PAYSTACK_PUBLIC_KEY?.trim().startsWith("pk_live_")) {
+    errors.push("PAYSTACK_PUBLIC_KEY: Production must use a live pk_live_ Paystack key.");
+  }
+  if (!source.PAYSTACK_SECRET_KEY?.trim().startsWith("sk_live_")) {
+    errors.push("PAYSTACK_SECRET_KEY: Production must use a live sk_live_ Paystack key.");
+  }
+  return errors;
+}
+
+/**
+ * Payments are usable only when BOTH keys are present. Production requires
+ * real live-key prefixes; development/test can use sandbox credentials.
+ */
+export function isPaystackReady(source: NodeJS.ProcessEnv = process.env): boolean {
+  const publicKey = source.PAYSTACK_PUBLIC_KEY?.trim();
+  const secretKey = source.PAYSTACK_SECRET_KEY?.trim();
+  if (source.NODE_ENV === "production") {
+    return Boolean(publicKey?.startsWith("pk_live_") && secretKey?.startsWith("sk_live_"));
+  }
+  return Boolean(publicKey && secretKey);
 }
 
 /**
@@ -106,7 +125,7 @@ export function checkEnv(source: NodeJS.ProcessEnv = process.env): EnvValidation
   if (isProduction) {
     if (isTemporary) {
       warnings.push(
-        "APP_READINESS_MODE=temporary: this deployment is not launch-ready. Missing Redis, document storage, or malware scanning may be deferred, but affected operations remain unavailable until configured.",
+        "APP_READINESS_MODE=temporary: this deployment is not launch-ready. Missing Redis, document storage, malware scanning, or live Paystack credentials may be deferred, but affected operations remain unavailable until configured.",
       );
     }
 
@@ -114,6 +133,17 @@ export function checkEnv(source: NodeJS.ProcessEnv = process.env): EnvValidation
     if (!prod.success) {
       for (const [key, messages] of Object.entries(prod.error.flatten().fieldErrors)) {
         for (const message of messages ?? []) errors.push(`${key}: ${message}`);
+      }
+    }
+
+    const paystackErrors = paystackConfigurationErrors(source);
+    if (paystackErrors.length > 0) {
+      if (isTemporary) {
+        warnings.push(
+          `${paystackErrors.join(" ")} Temporary startup is allowed, but Paystack checkout, verification, and webhook processing return 503 until both live keys are configured.`,
+        );
+      } else {
+        errors.push(...paystackErrors);
       }
     }
 
@@ -194,8 +224,9 @@ export function checkEnv(source: NodeJS.ProcessEnv = process.env): EnvValidation
  * Validate and fail fast. Called from instrumentation.ts at server startup.
  *
  * A production deployment defaults to strict final readiness. Temporary mode
- * only defers the explicitly listed infrastructure dependencies above; it
- * never relaxes database, auth, site URL, Paystack, or job-secret validation.
+ * only defers Redis, private document storage, malware scanning, and Paystack
+ * availability; it never relaxes database, auth, site URL, or job-secret
+ * validation.
  */
 export function assertEnv(source: NodeJS.ProcessEnv = process.env): EnvValidationResult {
   const result = checkEnv(source);

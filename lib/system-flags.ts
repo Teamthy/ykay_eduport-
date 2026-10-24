@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { isPaystackReady } from "@/lib/env";
 
 export type SystemFlags = {
   maintenanceMode: boolean;
@@ -78,6 +79,7 @@ export function readPublicSystemConfig() {
     configured: {
       database: present("DATABASE_URL"),
       authSecret: present("AUTH_SECRET"),
+      paystack: isPaystackReady(),
       paystackPublic: present("PAYSTACK_PUBLIC_KEY"),
       paystackSecret: present("PAYSTACK_SECRET_KEY"),
       resend: present("RESEND_API_KEY"),

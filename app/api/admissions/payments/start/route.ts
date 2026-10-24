@@ -2,7 +2,8 @@ import { AdmissionDocumentType, PaymentProvider, PaymentStatus } from "@prisma/c
 import { NextRequest } from "next/server";
 import { APPLICATION_FEE_KOBO, startPaymentSchema } from "@/lib/admissions";
 import { findAuthorizedApplication } from "@/lib/admission-service";
-import { getPaystackPublicKey } from "@/lib/paystack";
+import { isPaystackReady } from "@/lib/env";
+import { getPaystackPublicKey, paystackUnavailableBody } from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -17,6 +18,10 @@ const requiredDocumentTypes: AdmissionDocumentType[] = [
 ];
 
 export async function POST(request: NextRequest) {
+  if (!isPaystackReady()) {
+    return jsonNoStore(paystackUnavailableBody(), { status: 503 });
+  }
+
   const ipAddress = getClientIp(request);
   const limit = await enforceRateLimit("payment", ipAddress);
   if (!limit.success) {

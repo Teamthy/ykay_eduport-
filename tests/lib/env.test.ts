@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { checkEnv, getAppReadinessMode, isAdmissionDocumentIntakeReady } from "@/lib/env";
+import {
+  checkEnv,
+  getAppReadinessMode,
+  isAdmissionDocumentIntakeReady,
+  isPaystackReady,
+} from "@/lib/env";
 
 const productionEnv: NodeJS.ProcessEnv = {
   NODE_ENV: "production",
@@ -25,6 +30,7 @@ describe("production environment guard", () => {
     expect(getAppReadinessMode(productionEnv)).toBe("final");
     expect(result.ok).toBe(true);
     expect(result.errors).toEqual([]);
+    expect(isPaystackReady(productionEnv)).toBe(true);
   });
 
   it("requires Upstash in final mode even if the memory fallback flag is set", () => {
@@ -53,7 +59,7 @@ describe("production environment guard", () => {
     expect(result.errors.join(" ")).toContain("mandatory in final mode");
   });
 
-  it("allows only Redis, storage and scanner to be deferred in temporary mode", () => {
+  it("allows the public shell to start without deferred dependencies or Paystack in temporary mode", () => {
     const {
       UPSTASH_REDIS_REST_URL: _url,
       UPSTASH_REDIS_REST_TOKEN: _token,
@@ -61,6 +67,8 @@ describe("production environment guard", () => {
       S3_ACCESS_KEY_ID: _access,
       S3_SECRET_ACCESS_KEY: _secret,
       MALWARE_SCANNER_URL: _scanner,
+      PAYSTACK_PUBLIC_KEY: _publicKey,
+      PAYSTACK_SECRET_KEY: _secretKey,
       ...env
     } = productionEnv;
 
@@ -72,25 +80,68 @@ describe("production environment guard", () => {
     expect(result.warnings.join(" ")).toContain("not launch-ready");
     expect(result.warnings.join(" ")).toContain("fail closed with 503");
     expect(result.warnings.join(" ")).toContain("unscanned files are not accepted");
+    expect(result.warnings.join(" ")).toContain("PAYSTACK_PUBLIC_KEY");
+    expect(result.warnings.join(" ")).toContain(
+      "Paystack checkout, verification, and webhook processing return 503",
+    );
     expect(getAppReadinessMode(temporaryEnv)).toBe("temporary");
     expect(isAdmissionDocumentIntakeReady(temporaryEnv)).toBe(false);
+    expect(isPaystackReady(temporaryEnv)).toBe(false);
   });
 
-  it("does not relax database, auth, Paystack or job-secret requirements in temporary mode", () => {
+  it("still requires database, auth, site URL and job secret in temporary mode", () => {
     const result = checkEnv({
       ...productionEnv,
       APP_READINESS_MODE: "temporary",
+      DATABASE_URL: "",
       AUTH_SECRET: "too-short",
+      NEXT_PUBLIC_SITE_URL: "not-a-url",
       JOBS_SECRET: "short",
       PAYSTACK_PUBLIC_KEY: "pk_test_ci",
       PAYSTACK_SECRET_KEY: "sk_test_ci",
     });
 
     expect(result.ok).toBe(false);
+    expect(result.errors.join(" ")).toContain("DATABASE_URL");
     expect(result.errors.join(" ")).toContain("AUTH_SECRET");
+    expect(result.errors.join(" ")).toContain("NEXT_PUBLIC_SITE_URL");
     expect(result.errors.join(" ")).toContain("JOBS_SECRET");
+    expect(result.errors.join(" ")).not.toContain("pk_live_");
+    expect(result.errors.join(" ")).not.toContain("sk_live_");
+    expect(result.warnings.join(" ")).toContain(
+      "Paystack checkout, verification, and webhook processing return 503",
+    );
+  });
+
+  it("still rejects non-live Paystack keys in final mode", () => {
+    const result = checkEnv({
+      ...productionEnv,
+      PAYSTACK_PUBLIC_KEY: "pk_test_ci",
+      PAYSTACK_SECRET_KEY: "sk_test_ci",
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.errors.join(" ")).toContain("PAYSTACK_PUBLIC_KEY");
     expect(result.errors.join(" ")).toContain("pk_live_");
+    expect(result.errors.join(" ")).toContain("PAYSTACK_SECRET_KEY");
     expect(result.errors.join(" ")).toContain("sk_live_");
+    expect(
+      isPaystackReady({
+        ...productionEnv,
+        PAYSTACK_PUBLIC_KEY: "pk_test_ci",
+        PAYSTACK_SECRET_KEY: "sk_test_ci",
+      }),
+    ).toBe(false);
+  });
+
+  it("accepts sandbox keys only outside production", () => {
+    expect(
+      isPaystackReady({
+        NODE_ENV: "test",
+        PAYSTACK_PUBLIC_KEY: "pk_test_ci",
+        PAYSTACK_SECRET_KEY: "sk_test_ci",
+      }),
+    ).toBe(true);
   });
 
   it("requires malware scanning in final mode; the old unscanned waiver is ignored", () => {

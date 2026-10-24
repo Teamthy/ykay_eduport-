@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAppReadinessMode } from "@/lib/env";
+import { getAppReadinessMode, isPaystackReady } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +14,7 @@ interface HealthStatus {
     redis: { status: "configured" | "not_configured" | "down" };
     admissionStorage: { configured: boolean };
     malwareScanner: { configured: boolean };
+    paystack: { configured: boolean };
   };
 }
 
@@ -25,11 +26,13 @@ export async function GET() {
     process.env.S3_SECRET_ACCESS_KEY?.trim(),
   );
   const scannerConfigured = Boolean(process.env.MALWARE_SCANNER_URL?.trim());
+  const paystackConfigured = isPaystackReady();
   const checks: HealthStatus["checks"] = {
     database: { status: "down", latencyMs: 0 },
     redis: { status: "not_configured" },
     admissionStorage: { configured: storageConfigured },
     malwareScanner: { configured: scannerConfigured },
+    paystack: { configured: paystackConfigured },
   };
 
   // ── Database check ─────────────────────────────────────────
@@ -61,7 +64,10 @@ export async function GET() {
   // The JSON body still reports degraded readiness, including temporary mode.
   const databaseUp = checks.database.status === "up";
   const dependenciesReady =
-    checks.redis.status === "configured" && storageConfigured && scannerConfigured;
+    checks.redis.status === "configured" &&
+    storageConfigured &&
+    scannerConfigured &&
+    paystackConfigured;
   const fullyReady = databaseUp && readinessMode === "final" && dependenciesReady;
 
   const status: HealthStatus["status"] = fullyReady

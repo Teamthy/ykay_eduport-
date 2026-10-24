@@ -5,7 +5,8 @@ import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { getParentFinanceContext } from "@/lib/finance";
 import { assertNotImpersonating } from "@/lib/session";
-import { initializePaystackTransaction } from "@/lib/paystack";
+import { isPaystackReady } from "@/lib/env";
+import { initializePaystackTransaction, paystackUnavailableBody } from "@/lib/paystack";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { logger } from "@/lib/logger";
 import { isRetryablePaystackAttempt } from "@/lib/parent-fees";
@@ -107,6 +108,14 @@ export async function POST(request: NextRequest) {
   } catch {
     return jsonNoStore({ error: "Invalid payment details." }, { status: 400 });
   }
+
+  // A Paystack attempt must not be reserved or written unless live payment
+  // processing is ready. Bank-transfer claims are independently reviewed and
+  // do not depend on Paystack credentials.
+  if (input.method === "PAYSTACK" && !isPaystackReady()) {
+    return jsonNoStore(paystackUnavailableBody(), { status: 503 });
+  }
+
   const requestHash = idempotencyRequestHash({
     method: requestMethodForIdempotency(request),
     path: requestPathForIdempotency(request, "/api/parent/fees/payment-intents"),

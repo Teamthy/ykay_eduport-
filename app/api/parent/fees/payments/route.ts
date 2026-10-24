@@ -6,7 +6,13 @@ import { assertNotImpersonating } from "@/lib/session";
 import { postCompletedFeePayment } from "@/lib/fee-payment-service";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
-import { PaystackVerificationError, verifyPaystackTransaction } from "@/lib/paystack";
+import { isPaystackReady } from "@/lib/env";
+import {
+  PAYSTACK_VERIFICATION_UNAVAILABLE_MESSAGE,
+  PaystackVerificationError,
+  paystackUnavailableBody,
+  verifyPaystackTransaction,
+} from "@/lib/paystack";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 
 export const runtime = "nodejs";
@@ -30,6 +36,12 @@ export async function POST(request: NextRequest) {
   }
   const impersonating = assertNotImpersonating(context.user);
   if (impersonating) return impersonating;
+
+  if (!isPaystackReady()) {
+    return jsonNoStore(paystackUnavailableBody(PAYSTACK_VERIFICATION_UNAVAILABLE_MESSAGE), {
+      status: 503,
+    });
+  }
 
   let input: z.infer<typeof schema>;
   try {

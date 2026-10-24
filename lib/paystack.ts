@@ -1,7 +1,33 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import type { Prisma } from "@prisma/client";
+import { isPaystackReady } from "@/lib/env";
 
 const PAYSTACK_URL = "https://api.paystack.co";
+
+export const PAYSTACK_UNAVAILABLE_CODE = "PAYSTACK_UNAVAILABLE";
+export const PAYSTACK_UNAVAILABLE_MESSAGE =
+  "Online Paystack payments are temporarily unavailable. Please contact the school office or bursary for alternatives.";
+export const PAYSTACK_VERIFICATION_UNAVAILABLE_MESSAGE =
+  "Paystack cannot verify this payment right now. Its status remains unconfirmed; do not pay again until the bursary confirms the result.";
+export const PAYSTACK_WEBHOOK_UNAVAILABLE_MESSAGE =
+  "Paystack webhook processing is temporarily unavailable.";
+
+export function paystackUnavailableBody(message = PAYSTACK_UNAVAILABLE_MESSAGE) {
+  return { code: PAYSTACK_UNAVAILABLE_CODE, error: message };
+}
+
+export class PaystackUnavailableError extends Error {
+  constructor() {
+    super("Paystack processing is unavailable until valid live credentials are configured.");
+    this.name = "PaystackUnavailableError";
+  }
+}
+
+function assertProductionPaystackReady() {
+  if (process.env.NODE_ENV === "production" && !isPaystackReady()) {
+    throw new PaystackUnavailableError();
+  }
+}
 
 interface PaystackVerificationResponse {
   status: boolean;
@@ -28,13 +54,15 @@ interface PaystackInitResponse {
 }
 
 export function getPaystackPublicKey() {
-  const key = process.env.PAYSTACK_PUBLIC_KEY;
+  assertProductionPaystackReady();
+  const key = process.env.PAYSTACK_PUBLIC_KEY?.trim();
   if (!key) throw new Error("PAYSTACK_PUBLIC_KEY is not configured.");
   return key;
 }
 
 function getPaystackSecretKey() {
-  const key = process.env.PAYSTACK_SECRET_KEY;
+  assertProductionPaystackReady();
+  const key = process.env.PAYSTACK_SECRET_KEY?.trim();
   if (!key) throw new Error("PAYSTACK_SECRET_KEY is not configured.");
   return key;
 }

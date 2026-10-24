@@ -5,13 +5,17 @@ import {
   getAdmissionDocumentScanReadiness,
   submitApplicationSchema,
 } from "@/lib/admissions";
-import { isAdmissionDocumentIntakeReady } from "@/lib/env";
+import { isAdmissionDocumentIntakeReady, isPaystackReady } from "@/lib/env";
 import {
   findAuthorizedApplication,
   markApplicationPaid,
   writeAdmissionAuditLog,
 } from "@/lib/admission-service";
-import { verifyPaystackTransaction } from "@/lib/paystack";
+import {
+  PAYSTACK_VERIFICATION_UNAVAILABLE_MESSAGE,
+  paystackUnavailableBody,
+  verifyPaystackTransaction,
+} from "@/lib/paystack";
 import { prisma } from "@/lib/prisma";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -26,6 +30,12 @@ const requiredDocumentTypes: AdmissionDocumentType[] = [
 ];
 
 export async function POST(request: NextRequest) {
+  if (!isPaystackReady()) {
+    return jsonNoStore(paystackUnavailableBody(PAYSTACK_VERIFICATION_UNAVAILABLE_MESSAGE), {
+      status: 503,
+    });
+  }
+
   if (!isAdmissionDocumentIntakeReady()) {
     return jsonNoStore(
       {
