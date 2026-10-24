@@ -29,13 +29,19 @@ The API cannot be split from the pages.
    Never set `ALLOW_MEMORY_RATE_LIMITS=true` on Vercel (each function is a
    separate instance; per-instance budgets are no control).
 3. **Vercel environment variables** (Production): see full list in
-   `.env.example`. Minimum to boot: `DATABASE_URL`, `DIRECT_URL`,
-   `AUTH_SECRET` (≥32 chars, unique), `NEXT_PUBLIC_SITE_URL` (https URL),
-   `PAYSTACK_PUBLIC_KEY`/`PAYSTACK_SECRET_KEY` (live), `JOBS_SECRET`
-   (= the timer's secret below), S3 (`S3_BUCKET`, `S3_REGION`,
-   `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, optional `S3_ENDPOINT`),
-   `RESEND_API_KEY`, `EMAIL_FROM`, Sentry DSN, and `COLLEGE_SSO_SECRET`
-   only if YK-Virtual federation is enabled (must match Virtual's value).
+   `.env.example`. Final mode is the default; set `APP_READINESS_MODE=final`
+   explicitly for launch. The runtime gate requires `DATABASE_URL`,
+   `AUTH_SECRET` (≥32 chars, unique), `NEXT_PUBLIC_SITE_URL`
+   (https URL), live Paystack keys, `JOBS_SECRET` (= the timer's secret below),
+   both Upstash credentials, private S3 credentials, and `MALWARE_SCANNER_URL`.
+   `RESEND_API_KEY`, `EMAIL_FROM`, Sentry DSN, and `COLLEGE_SSO_SECRET` (only
+   if YK-Virtual federation is enabled) are separately documented in
+   `.env.example`.
+   For a temporary site-shell deployment only, `APP_READINESS_MODE=temporary`
+   permits startup without Redis/storage/scanner; critical rate-limited routes
+   fail closed without Redis, and admissions upload, confirmation and submission
+   return 503 without storage and scanning. Health reports `degraded`. This is not a
+   launch-ready setting and must be changed back to `final` once provisioned.
 4. **Notifications cron** — Vercel Hobby plans run `vercel.json` crons once
    a day; the dispatcher expects a 60-second tick. Install the supplied
    timer on the OCI box instead:
@@ -76,8 +82,9 @@ docker run -d --name eduportal --restart unless-stopped \
 - Put Caddy in front for `*.ykaycollege.edu.ng` (same pattern as Virtual;
   the container entrypoint already runs `prisma migrate deploy` and seeds
   idempotently).
-- On a single instance you MAY set `ALLOW_MEMORY_RATE_LIMITS=true`
-  (documented risk acceptance) — but prefer Upstash anyway.
+- `ALLOW_MEMORY_RATE_LIMITS=true` is reserved for the isolated E2E test
+  harness. Critical production limiters fail closed without Upstash in both
+  readiness modes; final mode also refuses to start without the shared store.
 - `docker-compose.prod.yml` here includes Postgres, Redis, a 60s cron
   container and a daily backup container; it works directly on the VM.
 

@@ -32,6 +32,8 @@ services:
       # ── App ──────────────────────────────────────────────────────────────
       - key: NODE_ENV
         value: production
+      - key: APP_READINESS_MODE
+        value: final # temporary is only for an explicitly incomplete site shell
       - key: NEXT_TELEMETRY_DISABLED
         value: "1"
       - key: AUTH_SECRET
@@ -83,11 +85,9 @@ services:
         sync: false
       - key: S3_ADMISSIONS_PREFIX
         value: admissions
-      # Document scanning is mandatory unless the owner explicitly records
-      # and accepts the unscanned-documents risk.
+      # Required for final readiness. Temporary mode may boot without a
+      # scanner, but admissions document intake remains disabled until set.
       - key: MALWARE_SCANNER_URL
-        sync: false
-      - key: ALLOW_UNSCANNED_ADMISSION_DOCS
         sync: false
       # Notification dispatcher: a managed cron/worker must call the job URL.
       - key: JOBS_SECRET

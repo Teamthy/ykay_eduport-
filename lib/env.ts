@@ -1,21 +1,17 @@
 /**
  * Centralised environment validation.
  *
- * Called once from instrumentation.ts, which Next.js runs before any request
- * is served. A misconfigured production deploy fails at boot with a precise
- * message, instead of surfacing hours later as "emails aren't sending" or a
- * 500 on the first payment.
- *
- * ── Why this is not validated at import time ───────────────────────────────
- * The previous version ran `validate()` as a module side effect and required
- * live Paystack keys unconditionally. Nothing imported it — which is just as
- * well, because doing so would have failed every CI build and every local
- * `next build`, where those secrets legitimately do not exist. Requirements
- * are therefore split by environment: strict in production, permissive
- * elsewhere.
+ * Production is fail-closed by default (`APP_READINESS_MODE=final`). An
+ * explicit `APP_READINESS_MODE=temporary` may be used while provisioning the
+ * public site shell: Redis, private document storage, and malware scanning may
+ * be absent, but routes that depend on them remain unavailable. Database,
+ * authentication, site URL, live payment, and job-secret requirements are
+ * never relaxed by temporary mode.
  */
 
 import { z } from "zod";
+
+export type AppReadinessMode = "final" | "temporary";
 
 /** Always required — the app cannot function without these anywhere. */
 const baseSchema = z.object({
@@ -27,17 +23,10 @@ const baseSchema = z.object({
 /**
  * Fatal in production: the app cannot serve a correct response without these.
  *
- *   NEXT_PUBLIC_SITE_URL  — password-reset and staff-activation links are
- *                           built from it; a wrong value sends users nowhere
- *   PAYSTACK_SECRET_KEY   — webhook signature verification. Missing means
- *                           unverified payment callbacks, which is a money bug
- *
- * Email remains a warning (rather than taking down the whole portal) because
- * the site can still serve and parents can use in-app notifications while the
- * mail provider is repaired. Security-critical rate limiting, live-payment
- * key mode, private document storage, and the malware-scan decision are
- * launch prerequisites: the app must not accept production traffic when
- * those dependencies are absent or unsafe.
+ * Production mode also requires private admissions storage, shared rate limits,
+ * a malware scanner, and the notification job secret. The three infrastructure
+ * dependencies may be deferred only while APP_READINESS_MODE=temporary; their
+ * dependent operations stay fail-closed until they are provisioned.
  */
 const productionSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url("NEXT_PUBLIC_SITE_URL must be a full URL in production."),
@@ -49,13 +38,31 @@ const productionSchema = z.object({
     .startsWith("sk_live_", "Production must use a live sk_live_ Paystack key."),
 });
 
-export type ValidatedEnv = z.infer<typeof baseSchema>;
-
 export type EnvValidationResult = {
   ok: boolean;
   errors: string[];
   warnings: string[];
 };
+
+export function getAppReadinessMode(source: NodeJS.ProcessEnv = process.env): AppReadinessMode {
+  return source.APP_READINESS_MODE?.trim().toLowerCase() === "temporary" ? "temporary" : "final";
+}
+
+/**
+ * Admission document intake is available only when both private object storage
+ * and scanning are configured in production. The temporary mode must never
+ * accept unscanned files; local development may still exercise the flow.
+ */
+export function isAdmissionDocumentIntakeReady(source: NodeJS.ProcessEnv = process.env): boolean {
+  if (source.NODE_ENV !== "production") return true;
+
+  return Boolean(
+    source.S3_BUCKET?.trim() &&
+    source.S3_ACCESS_KEY_ID?.trim() &&
+    source.S3_SECRET_ACCESS_KEY?.trim() &&
+    source.MALWARE_SCANNER_URL?.trim(),
+  );
+}
 
 /**
  * Check the environment. Pure — returns findings rather than throwing, so it
@@ -64,6 +71,13 @@ export type EnvValidationResult = {
 export function checkEnv(source: NodeJS.ProcessEnv = process.env): EnvValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
+
+  const configuredReadinessMode = source.APP_READINESS_MODE?.trim().toLowerCase();
+  if (configuredReadinessMode && !["final", "temporary"].includes(configuredReadinessMode)) {
+    errors.push("APP_READINESS_MODE must be either 'final' or 'temporary'.");
+  }
+  const readinessMode = getAppReadinessMode(source);
+  const isTemporary = readinessMode === "temporary";
 
   const base = baseSchema.safeParse(source);
   if (!base.success) {
@@ -74,7 +88,28 @@ export function checkEnv(source: NodeJS.ProcessEnv = process.env): EnvValidation
 
   const isProduction = source.NODE_ENV === "production";
 
+  if (isProduction && source.E2E_TEST_MODE === "true") {
+    const isLocalTestOrigin = /^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(
+      source.NEXT_PUBLIC_SITE_URL?.trim() ?? "",
+    );
+    if (source.VERCEL === "1" || !isLocalTestOrigin) {
+      errors.push(
+        "E2E_TEST_MODE is reserved for localhost test runs and cannot be enabled for a public production deployment.",
+      );
+    } else {
+      warnings.push(
+        "E2E_TEST_MODE is enabled for an isolated localhost test runtime; never enable it for public traffic.",
+      );
+    }
+  }
+
   if (isProduction) {
+    if (isTemporary) {
+      warnings.push(
+        "APP_READINESS_MODE=temporary: this deployment is not launch-ready. Missing Redis, document storage, or malware scanning may be deferred, but affected operations remain unavailable until configured.",
+      );
+    }
+
     const prod = productionSchema.safeParse(source);
     if (!prod.success) {
       for (const [key, messages] of Object.entries(prod.error.flatten().fieldErrors)) {
@@ -82,8 +117,8 @@ export function checkEnv(source: NodeJS.ProcessEnv = process.env): EnvValidation
       }
     }
 
-    // Email remains degraded/not fatal: core pages can still serve and the
-    // in-app notification remains durable while the provider is repaired.
+    // Email remains a warning (rather than taking down the portal) because
+    // the site can still serve and in-app notifications remain durable.
     if (!source.RESEND_API_KEY) {
       warnings.push(
         "RESEND_API_KEY is not set — parent welcome emails, staff invitations and " +
@@ -95,37 +130,59 @@ export function checkEnv(source: NodeJS.ProcessEnv = process.env): EnvValidation
         "EMAIL_FROM is not set — outbound email has no verified sender address and will fail.",
       );
     }
-    if (!source.UPSTASH_REDIS_REST_URL || !source.UPSTASH_REDIS_REST_TOKEN) {
-      if (source.ALLOW_MEMORY_RATE_LIMITS === "true") {
+
+    if (!source.UPSTASH_REDIS_REST_URL?.trim() || !source.UPSTASH_REDIS_REST_TOKEN?.trim()) {
+      const message =
+        "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required for distributed rate limiting.";
+      if (isTemporary) {
         warnings.push(
-          "ALLOW_MEMORY_RATE_LIMITS=true explicitly accepts per-instance rate limits; " +
-            "this is unsafe on serverless/multi-instance deployments and must be single-instance only.",
+          `${message} Temporary startup is allowed, but security-critical rate-limited routes fail closed with 503 until Redis is configured.`,
         );
       } else {
         errors.push(
-          "UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production. " +
-            "They may be omitted only with ALLOW_MEMORY_RATE_LIMITS=true for an accepted, single-instance deployment.",
+          `${message} They are mandatory in final mode; ALLOW_MEMORY_RATE_LIMITS does not waive this requirement.`,
         );
       }
     }
-    if (!source.S3_BUCKET || !source.S3_ACCESS_KEY_ID || !source.S3_SECRET_ACCESS_KEY) {
-      errors.push(
-        "S3_BUCKET, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY are required in production; " +
-          "without them, real admission documents cannot be uploaded.",
-      );
+
+    if (
+      !source.S3_BUCKET?.trim() ||
+      !source.S3_ACCESS_KEY_ID?.trim() ||
+      !source.S3_SECRET_ACCESS_KEY?.trim()
+    ) {
+      const message =
+        "S3_BUCKET, S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY are required for private admissions-document storage.";
+      if (isTemporary) {
+        warnings.push(
+          `${message} Temporary startup is allowed, but document upload, confirmation, and submission routes return 503 until storage is configured.`,
+        );
+      } else {
+        errors.push(`${message} They are mandatory in final mode.`);
+      }
     }
-    if (!source.MALWARE_SCANNER_URL && source.ALLOW_UNSCANNED_ADMISSION_DOCS !== "true") {
-      errors.push(
-        "MALWARE_SCANNER_URL is required in production, or set ALLOW_UNSCANNED_ADMISSION_DOCS=true to explicitly accept the admission-document scanning risk.",
-      );
-    } else if (!source.MALWARE_SCANNER_URL) {
+
+    if (!source.MALWARE_SCANNER_URL?.trim()) {
+      const message = "MALWARE_SCANNER_URL is required to scan admission documents.";
+      if (isTemporary) {
+        warnings.push(
+          `${message} Temporary startup is allowed, but document intake remains disabled; unscanned files are not accepted.`,
+        );
+      } else {
+        errors.push(
+          `${message} It is mandatory in final mode; unscanned-document waivers are not supported.`,
+        );
+      }
+    }
+
+    if (source.ALLOW_UNSCANNED_ADMISSION_DOCS === "true") {
       warnings.push(
-        "ALLOW_UNSCANNED_ADMISSION_DOCS=true: admission documents are accepted without a malware scan (owner risk acceptance).",
+        "ALLOW_UNSCANNED_ADMISSION_DOCS is deprecated and ignored. Admission document scanning is required for final deployment.",
       );
     }
-    if (!source.JOBS_SECRET || source.JOBS_SECRET.length < 16) {
+
+    if (!source.JOBS_SECRET?.trim() || source.JOBS_SECRET.trim().length < 16) {
       errors.push(
-        "JOBS_SECRET (at least 16 characters) is required in production for the Render notification dispatcher.",
+        "JOBS_SECRET (at least 16 characters) is required in production for the notification dispatcher.",
       );
     }
   }
@@ -136,8 +193,9 @@ export function checkEnv(source: NodeJS.ProcessEnv = process.env): EnvValidation
 /**
  * Validate and fail fast. Called from instrumentation.ts at server startup.
  *
- * Throws only in production: a developer with a half-filled .env should get a
- * running app and a clear warning, not a wall.
+ * A production deployment defaults to strict final readiness. Temporary mode
+ * only defers the explicitly listed infrastructure dependencies above; it
+ * never relaxes database, auth, site URL, Paystack, or job-secret validation.
  */
 export function assertEnv(source: NodeJS.ProcessEnv = process.env): EnvValidationResult {
   const result = checkEnv(source);

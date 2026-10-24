@@ -174,14 +174,13 @@ jobs:
       DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
       AUTH_SECRET: "ci-e2e-secret-that-is-at-least-32-characters-long"
       NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3100"
+      APP_READINESS_MODE: "temporary"
       PAYSTACK_PUBLIC_KEY: "pk_live_ci"
       PAYSTACK_SECRET_KEY: "sk_live_ci"
       # Fake non-secret integration values for the disposable CI database/server.
       S3_BUCKET: "ci-admissions"
       S3_ACCESS_KEY_ID: "ci-not-a-real-access-key"
       S3_SECRET_ACCESS_KEY: "ci-not-a-real-secret"
-      ALLOW_MEMORY_RATE_LIMITS: "true"
-      ALLOW_UNSCANNED_ADMISSION_DOCS: "true"
       JOBS_SECRET: "ci-only-jobs-secret-never-used-outside-the-runner"
       # Not a real credential: it seeds a throwaway CI database that is
       # destroyed with the runner.
@@ -250,14 +249,13 @@ jobs:
       DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
       AUTH_SECRET: "ci-load-secret-that-is-at-least-32-characters-long"
       NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3100"
+      APP_READINESS_MODE: "temporary"
       PAYSTACK_PUBLIC_KEY: "pk_live_ci"
       PAYSTACK_SECRET_KEY: "sk_live_ci"
       # Fake non-secret integration values for the disposable CI database/server.
       S3_BUCKET: "ci-admissions"
       S3_ACCESS_KEY_ID: "ci-not-a-real-access-key"
       S3_SECRET_ACCESS_KEY: "ci-not-a-real-secret"
-      ALLOW_MEMORY_RATE_LIMITS: "true"
-      ALLOW_UNSCANNED_ADMISSION_DOCS: "true"
       JOBS_SECRET: "ci-only-jobs-secret-never-used-outside-the-runner"
       SEED_PASSWORD: "CiLoadPassword123!"
       BASE_URL: "http://127.0.0.1:3100"
@@ -320,14 +318,13 @@ jobs:
           DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
           AUTH_SECRET: "ci-test-secret-that-is-at-least-32-chars-long"
           NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
+          APP_READINESS_MODE: "temporary"
           PAYSTACK_PUBLIC_KEY: "pk_live_ci"
           PAYSTACK_SECRET_KEY: "sk_live_ci"
           # Fake non-secret integration values for the disposable CI database/server.
           S3_BUCKET: "ci-admissions"
           S3_ACCESS_KEY_ID: "ci-not-a-real-access-key"
           S3_SECRET_ACCESS_KEY: "ci-not-a-real-secret"
-          ALLOW_MEMORY_RATE_LIMITS: "true"
-          ALLOW_UNSCANNED_ADMISSION_DOCS: "true"
           JOBS_SECRET: "ci-only-jobs-secret-never-used-outside-the-runner"
 
   mobile:

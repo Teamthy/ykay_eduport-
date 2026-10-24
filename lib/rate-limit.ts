@@ -9,8 +9,8 @@ const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisTo
 
 if (!redis && process.env.NODE_ENV === "production") {
   logger.warn(
-    "Redis is not configured — rate limiting will use in-memory fallback. " +
-      "Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for production.",
+    "Redis is not configured — security-critical production rate limits fail closed. " +
+      "Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.",
   );
 }
 
@@ -112,10 +112,9 @@ const limiterConfig = {
   newsPost: { maxRequests: 30, windowMs: 3_600_000, prefix: "ykay:admin:news" },
   message: { maxRequests: 60, windowMs: 3_600_000, prefix: "ykay:messages" },
   broadcast: { maxRequests: 20, windowMs: 3_600_000, prefix: "ykay:super-admin:broadcast" },
-  // Public practice-CBT funnel (quiz draw, per-question check, attempt save).
-  // Deliberately generous for a legitimate practice session; non-critical so
-  // the public page keeps working on the in-memory fallback, but it bounds
-  // question-bank enumeration and spam attempts rows.
+  // Practice-CBT funnel (quiz draw, per-question check, attempt save).
+  // Deliberately generous for a legitimate practice session while still
+  // protecting the question bank; production requires the shared limiter.
   cbt: { maxRequests: 240, windowMs: 3_600_000, prefix: "ykay:cbt" },
 } as const;
 
@@ -228,9 +227,9 @@ export type RateLimitKind = keyof typeof limiterConfig;
  * fresh budget and multi-instance multiplies the budget by replica count.
  *
  * In production these kinds FAIL CLOSED (503 via configurationError) when no
- * distributed limiter is available. A genuinely single-instance deployment can
- * opt in to the memory fallback with ALLOW_MEMORY_RATE_LIMITS=true — that is
- * an explicit, documented risk acceptance, not a silent downgrade.
+ * distributed limiter is available, including in temporary readiness mode.
+ * The in-memory override exists only for the isolated E2E test server and is
+ * ignored on Vercel, where each function can have independent memory.
  */
 const DISTRIBUTED_REQUIRED: ReadonlySet<RateLimitKind> = new Set<RateLimitKind>([
   "login",
@@ -252,7 +251,15 @@ const DISTRIBUTED_REQUIRED: ReadonlySet<RateLimitKind> = new Set<RateLimitKind>(
   "cbt",
 ]);
 
-const ALLOW_MEMORY_RATE_LIMITS = process.env.ALLOW_MEMORY_RATE_LIMITS === "true";
+const isLocalE2ETestOrigin = /^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(
+  process.env.NEXT_PUBLIC_SITE_URL ?? "",
+);
+const ALLOW_MEMORY_RATE_LIMITS =
+  process.env.ALLOW_MEMORY_RATE_LIMITS === "true" &&
+  process.env.APP_READINESS_MODE === "temporary" &&
+  process.env.E2E_TEST_MODE === "true" &&
+  isLocalE2ETestOrigin &&
+  process.env.VERCEL !== "1";
 
 const failClosedWarned = new Set<string>();
 
@@ -261,8 +268,8 @@ function failClosed(kind: RateLimitKind, reason: string) {
     failClosedWarned.add(kind);
     logger.error(
       `Rate limiter for "${kind}" is FAILING CLOSED: ${reason}. ` +
-        "Configure UPSTASH_REDIS_REST_URL/TOKEN (or set ALLOW_MEMORY_RATE_LIMITS=true " +
-        "only for an accepted single-instance deployment).",
+        "Configure UPSTASH_REDIS_REST_URL/TOKEN. Critical production routes stay unavailable " +
+        "in both readiness modes until the shared store is configured.",
     );
   }
   return {
@@ -311,7 +318,7 @@ export async function enforceRateLimit(kind: RateLimitKind, identifier: string) 
     }
   }
 
-  // ── In-memory fallback (dev/test, non-critical kinds, or accepted risk) ──
+  // ── In-memory fallback (dev/test, non-critical kinds, or isolated E2E) ──
   const config = limiterConfig[kind];
   const key = `${config.prefix}:${identifier}`;
   const { success, retryAfterSeconds } = inMemoryCheck(key, config.maxRequests, config.windowMs);

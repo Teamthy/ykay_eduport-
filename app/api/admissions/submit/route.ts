@@ -1,6 +1,11 @@
 import { AdmissionDocumentType, ApplicationStatus } from "@prisma/client";
 import { NextRequest } from "next/server";
-import { APPLICATION_FEE_KOBO, submitApplicationSchema } from "@/lib/admissions";
+import {
+  APPLICATION_FEE_KOBO,
+  getAdmissionDocumentScanReadiness,
+  submitApplicationSchema,
+} from "@/lib/admissions";
+import { isAdmissionDocumentIntakeReady } from "@/lib/env";
 import {
   findAuthorizedApplication,
   markApplicationPaid,
@@ -21,12 +26,29 @@ const requiredDocumentTypes: AdmissionDocumentType[] = [
 ];
 
 export async function POST(request: NextRequest) {
+  if (!isAdmissionDocumentIntakeReady()) {
+    return jsonNoStore(
+      {
+        error:
+          "Application submission is temporarily unavailable until secure document storage and scanning are configured.",
+      },
+      { status: 503 },
+    );
+  }
+
   const ipAddress = getClientIp(request);
   const limit = await enforceRateLimit("payment", ipAddress);
   if (!limit.success) {
     return jsonNoStore(
-      { error: "Please wait before trying again." },
-      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+      {
+        error: limit.configurationError
+          ? "Application submission protection is temporarily unavailable."
+          : "Please wait before trying again.",
+      },
+      {
+        status: limit.configurationError ? 503 : 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
     );
   }
 
@@ -62,6 +84,20 @@ export async function POST(request: NextRequest) {
       return jsonNoStore(
         { error: "All required documents must be uploaded before you submit." },
         { status: 422 },
+      );
+    }
+
+    const scanReadiness = getAdmissionDocumentScanReadiness(
+      application.documents.map((document) => document.scanStatus),
+      process.env.NODE_ENV === "production",
+    );
+    if (scanReadiness === "infected") {
+      return jsonNoStore({ error: "A document did not pass the security scan." }, { status: 422 });
+    }
+    if (scanReadiness === "pending") {
+      return jsonNoStore(
+        { error: "All uploaded documents must pass security scanning before you submit." },
+        { status: 503 },
       );
     }
 

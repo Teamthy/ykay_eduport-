@@ -7,14 +7,12 @@ import { test, expect } from "@playwright/test";
  * on purpose, and the limiter's window is per-IP and process-wide, so running
  * it earlier locks every later sign-in out of the suite.
  *
- * Worth stating plainly: this passing locally does NOT mean production rate
- * limiting is unbounded-safe. lib/rate-limit.ts falls back to an in-process
- * Map when UPSTASH_REDIS_REST_URL is unset — that fallback is why this test
- * can pass at all (the e2e server sets ALLOW_MEMORY_RATE_LIMITS=true for its
- * single instance). In a real multi-instance/serverless deployment the same
- * fallback would give each instance its own budget, which is why production
- * now FAILS CLOSED for security-critical kinds unless Upstash is configured.
- * This proves the limiting logic; Redis is what makes it shared.
+ * Worth stating plainly: this passing locally does NOT prove production rate
+ * limiting is safe. The e2e server explicitly uses temporary readiness and an
+ * in-process Map for its isolated single-instance test runtime. Final mode
+ * always requires Upstash, and Vercel ignores the memory fallback because
+ * serverless instances do not share process state. This proves the limiter
+ * logic; Redis is what makes the production budget shared.
  */
 
 test.describe("login rate limiting", () => {

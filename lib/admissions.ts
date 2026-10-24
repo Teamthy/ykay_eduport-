@@ -12,6 +12,19 @@ export const DOCUMENT_TYPES = [
 
 export type AdmissionDocumentType = (typeof DOCUMENT_TYPES)[number];
 
+export type AdmissionDocumentScanReadiness = "clean" | "infected" | "pending";
+
+/** In production, every uploaded admission document must have a clean verdict. */
+export function getAdmissionDocumentScanReadiness(
+  scanStatuses: readonly string[],
+  isProduction: boolean,
+): AdmissionDocumentScanReadiness {
+  if (!isProduction) return "clean";
+  if (scanStatuses.includes("INFECTED")) return "infected";
+  if (scanStatuses.some((status) => status !== "CLEAN")) return "pending";
+  return "clean";
+}
+
 export const DOCUMENT_RULES: Record<
   AdmissionDocumentType,
   {

@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { confirmDocumentSchema, DOCUMENT_RULES } from "@/lib/admissions";
+import { isAdmissionDocumentIntakeReady } from "@/lib/env";
 import { findAuthorizedApplication } from "@/lib/admission-service";
 import { scanStoredDocumentSafe } from "@/lib/malware";
 import { prisma } from "@/lib/prisma";
@@ -11,12 +12,29 @@ import { logger } from "@/lib/logger";
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
+  if (!isAdmissionDocumentIntakeReady()) {
+    return jsonNoStore(
+      {
+        error:
+          "Document uploads are temporarily unavailable while secure storage and scanning are configured.",
+      },
+      { status: 503 },
+    );
+  }
+
   const ipAddress = getClientIp(request);
   const limit = await enforceRateLimit("upload", ipAddress);
   if (!limit.success) {
     return jsonNoStore(
-      { error: "Please wait before trying again." },
-      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+      {
+        error: limit.configurationError
+          ? "Document upload protection is temporarily unavailable."
+          : "Please wait before trying again.",
+      },
+      {
+        status: limit.configurationError ? 503 : 429,
+        headers: { "Retry-After": String(limit.retryAfterSeconds) },
+      },
     );
   }
 
@@ -93,6 +111,15 @@ export async function POST(request: NextRequest) {
       return jsonNoStore(
         { error: "This file did not pass our security scan. Please upload a clean copy." },
         { status: 422 },
+      );
+    }
+    if (scan.status === "PENDING") {
+      return jsonNoStore(
+        {
+          error:
+            "The security scan is temporarily unavailable. Your document is saved but cannot be confirmed yet.",
+        },
+        { status: 503 },
       );
     }
 
