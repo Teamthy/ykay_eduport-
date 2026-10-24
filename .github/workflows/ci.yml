@@ -211,7 +211,9 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=4096
 
-      - name: Run browser E2E
+      - name: Run authenticated browser, role-route, and API E2E
+        # Includes the seeded role/page census, read-only API route smoke,
+        # responsive portal layout, and browser-to-backend sign-out round trip.
         run: npx playwright test
         env:
           CI: "true"

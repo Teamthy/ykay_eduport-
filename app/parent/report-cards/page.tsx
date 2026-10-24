@@ -26,6 +26,7 @@ const SIDEBAR_ITEMS = [
   { label: "Attendance", href: "/parent/attendance", icon: CalendarDays },
   { label: "Fees", href: "/parent/fees", icon: CreditCard },
   { label: "Report Cards", href: "/parent/report-cards", icon: FileText },
+  { label: "Exam Results", href: "/parent/exam-results", icon: Award },
   { label: "Messages", href: "/parent/messages", icon: MessageCircle },
   { label: "Events", href: "/parent/events", icon: Calendar },
 ];

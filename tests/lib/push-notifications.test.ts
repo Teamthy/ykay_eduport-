@@ -49,6 +49,10 @@ describe("createInAppNotification — push delivery", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.userNotification.create.mockResolvedValue({ id: "n1" });
+    mockPrisma.userNotification.createMany.mockResolvedValue({ count: 1 } as never);
+    mockPrisma.userNotification.findUnique.mockResolvedValue({
+      id: "stable-result-notice",
+    } as never);
   });
 
   const input = {
@@ -156,6 +160,51 @@ describe("createInAppNotification — push delivery", () => {
     await flush(() => pushUser.mock.calls.length > 0);
 
     expect(pushUser.mock.calls[0]?.[1].data?.link).toBeNull();
+  });
+});
+
+describe("createInAppNotificationOnce", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockPrisma.userNotification.createMany.mockResolvedValue({ count: 1 } as never);
+    mockPrisma.userNotification.findUnique.mockResolvedValue({
+      id: "stable-result-notice",
+    } as never);
+  });
+
+  const resultNotice = {
+    id: "stable-result-notice",
+    schoolId: "school_1",
+    userId: "usr_parent",
+    kind: "REPORT_RELEASED" as const,
+    title: "Assessment result released",
+    body: "Student One scored 5/5.",
+    link: "/parent/exam-results",
+    push: false,
+  };
+
+  it("persists the deterministic ID and reports a newly created row", async () => {
+    const { createInAppNotificationOnce } = await import("@/lib/notifications");
+    const result = await createInAppNotificationOnce(resultNotice);
+
+    expect(mockPrisma.userNotification.createMany).toHaveBeenCalledWith({
+      data: [expect.objectContaining({ id: resultNotice.id, userId: resultNotice.userId })],
+      skipDuplicates: true,
+    });
+    expect(result).toMatchObject({ created: true, notification: { id: resultNotice.id } });
+    expect(pushUser).not.toHaveBeenCalled();
+  });
+
+  it("does not create a second row or push when a retry hits the same ID", async () => {
+    mockPrisma.userNotification.createMany.mockResolvedValue({ count: 0 } as never);
+    const { createInAppNotificationOnce } = await import("@/lib/notifications");
+    const result = await createInAppNotificationOnce(resultNotice);
+
+    expect(result.created).toBe(false);
+    expect(mockPrisma.userNotification.findUnique).toHaveBeenCalledWith({
+      where: { id: resultNotice.id },
+    });
+    expect(pushUser).not.toHaveBeenCalled();
   });
 });
 

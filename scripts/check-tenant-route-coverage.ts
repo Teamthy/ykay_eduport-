@@ -93,7 +93,6 @@ const REVIEWED_EXEMPTIONS = new Map<string, string>([
   ["app/api/teacher/messages/route.ts", "owner-scoped by userId"],
   // Scoped by teacherProfileId, which belongs to exactly one school.
   ["app/api/teacher/analytics/route.ts", "teacherProfileId-scoped"],
-  ["app/api/teacher/exams/[id]/results/route.ts", "teacherProfileId-scoped"],
   ["app/api/teacher/my-records/route.ts", "teacherProfileId-scoped"],
   ["app/api/teacher/performance/route.ts", "teacherProfileId-scoped"],
   // Platform console: cross-tenant by design, SUPER_ADMIN only.

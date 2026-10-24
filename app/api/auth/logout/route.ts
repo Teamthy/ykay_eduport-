@@ -3,6 +3,11 @@ import { SESSION_COOKIE, getSession, revokeAllSessions, type SessionUser } from 
 import { logger } from "@/lib/logger";
 
 export async function POST() {
+  // This log line is deliberately free of session tokens and personal data; it
+  // gives production operators a reliable signal that the browser reached the
+  // logout handler when diagnosing a reported sign-out failure.
+  logger.info("logout: request received");
+
   // AUD-F2: logout used to only clear the cookie, so a pre-logout JWT stayed
   // valid for up to 30 days — replaying it against /api/auth/me still
   // returned 200. EduPortal sessions are stateless JWTs keyed by
@@ -20,11 +25,14 @@ export async function POST() {
   // proper exit is "End impersonation" (DELETE /api/super-admin/impersonate),
   // which restores the super-admin session.
   let user: SessionUser | null = null;
+  let revocationConfirmed = true;
   try {
     user = await getSession();
   } catch (error) {
     // Identity lookup unavailable (e.g. DB blip): still clear the cookie
-    // below so this device signs out instead of trapping the user.
+    // below so this device signs out instead of trapping the user, but report
+    // the incomplete server-side revocation to the caller.
+    revocationConfirmed = false;
     logger.error("logout: session lookup failed; clearing cookie only", {
       error: String(error),
     });
@@ -36,7 +44,9 @@ export async function POST() {
       await revokeAllSessions(user.id);
     } catch (error) {
       // The cookie is still cleared below so THIS device signs out; a failed
-      // revoke must not keep the user signed in locally, but log it loudly.
+      // revoke must not keep the user signed in locally, but log it loudly and
+      // return a non-2xx so the browser does not silently claim sign-out worked.
+      revocationConfirmed = false;
       logger.error("logout: failed to revoke sessions", {
         userId: user.id,
         error: String(error),
@@ -49,7 +59,14 @@ export async function POST() {
     });
   }
 
-  const response = NextResponse.json({ ok: true, impersonationEnded });
+  const response = NextResponse.json(
+    {
+      ok: revocationConfirmed,
+      impersonationEnded,
+      ...(revocationConfirmed ? {} : { error: "Session revocation could not be confirmed." }),
+    },
+    { status: revocationConfirmed ? 200 : 503 },
+  );
   response.cookies.set(SESSION_COOKIE, "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

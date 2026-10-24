@@ -1,47 +1,133 @@
-import { NotificationKind } from "@prisma/client";
+import { ExamAttemptStatus, ExamStatus, NotificationKind, UserRole } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getExamTeacherContext } from "@/lib/exams";
+import { waecGrade } from "@/lib/gradebook";
+import { createInAppNotificationOnce } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Send assessment results to parents.
- *
- * `/teacher/send-results` was a four-step wizard with no send. It built a
- * recipient list, let a teacher review it, and had no POST anywhere in the
- * file — the "Send" button led nowhere. This is the endpoint it needed.
- *
- * Delivery is via the normal notification pipeline, which means it already
- * honours each parent's notification preferences and writes an in-app row
- * even when push is muted. Muting stops the interruption, not the record.
- */
-
 const sendSchema = z.object({
-  /** Free text so this works for a CA, a midterm or an end-of-term paper. */
-  assessmentLabel: z.string().trim().min(2).max(120),
-  subjectName: z.string().trim().min(1).max(80),
-  results: z
-    .array(
-      z.object({
-        studentProfileId: z.string().trim().min(1),
-        score: z.number().min(0).max(1000),
-        total: z.number().min(1).max(1000),
-        comment: z.string().trim().max(500).optional(),
-      }),
-    )
+  examId: z.string().trim().min(1),
+  studentProfileIds: z
+    .array(z.string().trim().min(1))
     .min(1)
-    .max(300),
+    .max(300)
+    .refine((ids) => new Set(ids).size === ids.length, "Student list must not contain duplicates."),
 });
+
+function assignedExamScope(
+  context: NonNullable<Awaited<ReturnType<typeof getExamTeacherContext>>>,
+) {
+  return context.teacherProfile.subjectAssignments.map((assignment) => ({
+    classId: assignment.classroom.id,
+    subjectName: assignment.subjectName,
+  }));
+}
+
+function releasedExamWhere(
+  schoolId: string,
+  scope: ReturnType<typeof assignedExamScope>,
+  examId?: string,
+) {
+  return {
+    ...(examId ? { id: examId } : {}),
+    schoolId,
+    status: ExamStatus.CLOSED,
+    resultsReleased: true,
+    examType: { not: "PRACTICE" },
+    OR: scope,
+  };
+}
+
+function totalMarksFor(exam: { questions: Array<{ marks: number }> }) {
+  return exam.questions.reduce((sum, question) => sum + question.marks, 0);
+}
+
+/**
+ * Return only closed, released exams in this teacher's assigned subject/class
+ * pairs. Scores and totals are computed from graded server-side attempts and
+ * persisted question marks; the browser never supplies result values.
+ */
+export async function GET() {
+  const context = await getExamTeacherContext();
+  if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const scope = assignedExamScope(context);
+  if (!scope.length) return NextResponse.json({ exams: [] });
+
+  const exams = await prisma.exam.findMany({
+    where: releasedExamWhere(context.user.schoolId, scope),
+    orderBy: { createdAt: "desc" },
+    take: 100,
+    include: {
+      classroom: { select: { displayName: true } },
+      term: { select: { label: true, session: { select: { label: true } } } },
+      questions: { select: { marks: true } },
+      attempts: {
+        where: { status: ExamAttemptStatus.GRADED },
+        orderBy: [{ submittedAt: "desc" }, { attemptNumber: "desc" }],
+        take: 1000,
+        include: {
+          studentProfile: { select: { id: true, studentId: true, displayName: true } },
+        },
+      },
+    },
+  });
+
+  const available = exams.flatMap((exam) => {
+    const totalMarks = totalMarksFor(exam);
+    if (totalMarks <= 0) return [];
+
+    const seenStudents = new Set<string>();
+    const students = exam.attempts.flatMap((attempt) => {
+      const studentId = attempt.studentProfile.id;
+      if (seenStudents.has(studentId)) return [];
+      seenStudents.add(studentId);
+      if (attempt.totalScore < 0 || attempt.totalScore > totalMarks) return [];
+
+      const percent = Math.round((attempt.totalScore / totalMarks) * 100);
+      return [
+        {
+          profileId: studentId,
+          studentId: attempt.studentProfile.studentId,
+          studentName: attempt.studentProfile.displayName,
+          score: attempt.totalScore,
+          total: totalMarks,
+          percent,
+          grade: waecGrade(percent),
+          attemptNumber: attempt.attemptNumber,
+          submittedAt: attempt.submittedAt?.toISOString() ?? null,
+        },
+      ];
+    });
+    if (!students.length) return [];
+
+    return [
+      {
+        id: exam.id,
+        title: exam.title,
+        subjectName: exam.subjectName,
+        examType: exam.examType,
+        className: exam.classroom.displayName,
+        termLabel: exam.term?.label ?? "Legacy term",
+        sessionLabel: exam.term?.session.label ?? "",
+        totalMarks,
+        students,
+      },
+    ];
+  });
+
+  return NextResponse.json({ exams: available });
+}
 
 export async function POST(request: NextRequest) {
   const context = await getExamTeacherContext();
   if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Throttle per teacher — a stuck retry loop must not spam every parent's inbox.
   const limit = await enforceRateLimit("sendResults", context.user.id);
   if (!limit.success) {
     return NextResponse.json(
@@ -55,76 +141,167 @@ export async function POST(request: NextRequest) {
     input = sendSchema.parse(await request.json());
   } catch {
     return NextResponse.json(
-      { error: "Provide the assessment, the subject and at least one result." },
+      { error: "Select a released assessment and at least one eligible student." },
       { status: 400 },
     );
   }
 
-  // Only students in classes this teacher is actually assigned to. The
-  // recipient list in the UI is not the control — a teacher must not be able
-  // to post a result for a child they do not teach by sending the id.
-  const classIds = [
-    ...new Set(context.teacherProfile.subjectAssignments.map((a) => a.classroom.id)),
-  ];
-  if (classIds.length === 0) {
-    return NextResponse.json({ error: "You are not assigned to any class." }, { status: 403 });
+  const scope = assignedExamScope(context);
+  if (!scope.length) {
+    return NextResponse.json(
+      { error: "You are not assigned to any subject or class." },
+      { status: 403 },
+    );
   }
 
-  const ids = input.results.map((r) => r.studentProfileId);
-  const students = await prisma.studentProfile.findMany({
-    where: {
-      id: { in: ids },
-      schoolId: context.user.schoolId,
-      currentClassId: { in: classIds },
-      isActive: true,
-    },
-    select: {
-      id: true,
-      displayName: true,
-      userId: true,
-      parentLinks: { select: { parentProfile: { select: { userId: true } } } },
+  const exam = await prisma.exam.findFirst({
+    where: releasedExamWhere(context.user.schoolId, scope, input.examId),
+    include: {
+      classroom: { select: { displayName: true } },
+      term: { select: { label: true, session: { select: { label: true } } } },
+      questions: { select: { marks: true } },
+      attempts: {
+        where: {
+          status: ExamAttemptStatus.GRADED,
+          studentProfileId: { in: input.studentProfileIds },
+        },
+        orderBy: [{ submittedAt: "desc" }, { attemptNumber: "desc" }],
+        include: {
+          studentProfile: {
+            select: {
+              id: true,
+              studentId: true,
+              displayName: true,
+              userId: true,
+              parentLinks: {
+                include: {
+                  parentProfile: {
+                    select: { id: true, schoolId: true, userId: true, isActive: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
-  const byId = new Map(students.map((s) => [s.id, s]));
+  if (!exam) {
+    return NextResponse.json(
+      { error: "Released results are not available for that assessment." },
+      { status: 404 },
+    );
+  }
 
-  const skipped = ids.filter((id) => !byId.has(id));
+  const totalMarks = totalMarksFor(exam);
+  if (totalMarks <= 0) {
+    return NextResponse.json(
+      { error: "This assessment has no valid question marks." },
+      { status: 409 },
+    );
+  }
 
-  let notified = 0;
+  // A student can have a permitted retake. Select the latest fully graded
+  // attempt once, using server ordering, and never accept a score from input.
+  const latestAttemptByStudent = new Map<string, (typeof exam.attempts)[number]>();
+  for (const attempt of exam.attempts) {
+    if (!latestAttemptByStudent.has(attempt.studentProfile.id)) {
+      latestAttemptByStudent.set(attempt.studentProfile.id, attempt);
+    }
+  }
+  if (input.studentProfileIds.some((id) => !latestAttemptByStudent.has(id))) {
+    return NextResponse.json(
+      { error: "One or more selected students no longer have a releasable graded result." },
+      { status: 409 },
+    );
+  }
+
+  const selectedAttempts = input.studentProfileIds.map((id) => latestAttemptByStudent.get(id)!);
+  if (
+    selectedAttempts.some((attempt) => attempt.totalScore < 0 || attempt.totalScore > totalMarks)
+  ) {
+    return NextResponse.json(
+      { error: "A stored result is outside this assessment's marks. Contact an administrator." },
+      { status: 409 },
+    );
+  }
+
+  const linkedParentIds = selectedAttempts.flatMap((attempt) =>
+    attempt.studentProfile.parentLinks
+      .filter(
+        (link) =>
+          link.parentProfile.schoolId === context.user.schoolId && link.parentProfile.isActive,
+      )
+      .map((link) => link.parentProfile.userId),
+  );
+  const possibleUserIds = [
+    ...selectedAttempts
+      .map((attempt) => attempt.studentProfile.userId)
+      .filter((id): id is string => Boolean(id)),
+    ...linkedParentIds,
+  ];
+  const activeUsers = possibleUserIds.length
+    ? await prisma.user.findMany({
+        where: {
+          id: { in: [...new Set(possibleUserIds)] },
+          schoolId: context.user.schoolId,
+          isActive: true,
+          isSuspended: false,
+          role: { in: [UserRole.PARENT, UserRole.STUDENT] },
+        },
+        select: { id: true, role: true },
+      })
+    : [];
+  const activeUserIds = new Set(activeUsers.map((user) => user.id));
+  const usersById = new Map(activeUsers.map((user) => [user.id, user]));
+
+  let notificationCount = 0;
   let withoutParent = 0;
-  const { createInAppNotification } = await import("@/lib/notifications");
+  let withoutPortalAccount = 0;
+  const resultLabel = `${exam.subjectName} — ${exam.title}`;
 
-  for (const result of input.results) {
-    const student = byId.get(result.studentProfileId);
-    if (!student) continue;
+  for (const attempt of selectedAttempts) {
+    const student = attempt.studentProfile;
+    const parentIds = new Set(
+      student.parentLinks
+        .filter(
+          (link) =>
+            link.parentProfile.schoolId === context.user.schoolId && link.parentProfile.isActive,
+        )
+        .map((link) => link.parentProfile.userId)
+        .filter((id) => activeUserIds.has(id) && usersById.get(id)?.role === UserRole.PARENT),
+    );
+    if (!parentIds.size) withoutParent += 1;
 
-    const percent = Math.round((result.score / result.total) * 100);
-    const title = `${input.subjectName} — ${input.assessmentLabel}`;
-    const body =
-      `${student.displayName} scored ${result.score}/${result.total} (${percent}%).` +
-      (result.comment ? ` ${result.comment}` : "");
-
-    const recipients = new Set<string>();
-    for (const link of student.parentLinks) {
-      if (link.parentProfile?.userId) recipients.add(link.parentProfile.userId);
+    const recipients = new Set(parentIds);
+    if (
+      student.userId &&
+      activeUserIds.has(student.userId) &&
+      usersById.get(student.userId)?.role === UserRole.STUDENT
+    ) {
+      recipients.add(student.userId);
     }
-    // The student sees their own result too — they are the person it is about.
-    if (student.userId) recipients.add(student.userId);
+    if (!recipients.size) withoutPortalAccount += 1;
 
-    if (recipients.size === 0) {
-      withoutParent += 1;
-      continue;
-    }
-
+    const percent = Math.round((attempt.totalScore / totalMarks) * 100);
+    const body = `${student.displayName} scored ${attempt.totalScore}/${totalMarks} (${percent}%) in ${resultLabel}${exam.term ? `, ${exam.term.session.label} ${exam.term.label}` : ""}.`;
     for (const userId of recipients) {
-      await createInAppNotification({
+      const isParent = usersById.get(userId)?.role === UserRole.PARENT;
+      const link = isParent
+        ? `/parent/exam-results?studentId=${encodeURIComponent(student.id)}`
+        : exam.examType === "CA"
+          ? "/student/ca-tests"
+          : "/student/exams";
+      const created = await createInAppNotificationOnce({
+        id: `exam-result-${attempt.id}-${userId}`,
         schoolId: context.user.schoolId,
         userId,
         kind: NotificationKind.REPORT_RELEASED,
-        title,
+        title: "Assessment result released",
         body,
-        link: "/parent/report-cards",
+        link,
       });
-      notified += 1;
+      if (created.created) notificationCount += 1;
     }
   }
 
@@ -133,12 +310,15 @@ export async function POST(request: NextRequest) {
       schoolId: context.user.schoolId,
       actorUserId: context.user.id,
       action: "RESULTS_SENT_TO_PARENTS",
-      entityType: "Assessment",
-      entityId: input.assessmentLabel.slice(0, 60),
+      entityType: "Exam",
+      entityId: exam.id,
       metadata: {
-        subject: input.subjectName,
-        students: students.length,
-        notifications: notified,
+        subject: exam.subjectName,
+        assessment: exam.title,
+        students: selectedAttempts.length,
+        notifications: notificationCount,
+        withoutParent,
+        withoutPortalAccount,
       },
       ipAddress: getClientIp(request),
     },
@@ -146,15 +326,13 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    sent: students.length,
-    notifications: notified,
-    // Reported rather than silently dropped: a teacher needs to know that
-    // three children have no contactable guardian on file.
+    sent: selectedAttempts.length,
+    notifications: notificationCount,
     withoutParent,
-    skipped: skipped.length,
+    withoutPortalAccount,
     message:
-      `Results sent for ${students.length} student(s).` +
-      (withoutParent ? ` ${withoutParent} had no linked parent or login.` : "") +
-      (skipped.length ? ` ${skipped.length} were not in your classes and were skipped.` : ""),
+      notificationCount > 0
+        ? `Portal result notifications created for ${selectedAttempts.length} student(s).`
+        : "These results were already announced to the selected accounts.",
   });
 }

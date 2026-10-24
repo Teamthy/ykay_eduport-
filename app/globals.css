@@ -1903,6 +1903,22 @@ html[data-portal-route="true"] main {
   width: 100%;
 }
 
+/*
+ * The portal sidebar is fixed and rendered inside page-specific sections.
+ * Offsetting only a neighbouring spacer therefore leaves heroes/topbars before
+ * that section underneath the sidebar. Apply one desktop content inset to every
+ * main on a portal page instead, independent of the sidebar's React position.
+ */
+@media (min-width: 1024px) {
+  html:has(aside[data-portal-sidebar="true"]) main {
+    padding-left: calc(272px + 1.5rem);
+  }
+
+  html:has(aside[data-portal-sidebar="true"][data-sidebar-collapsed="true"]) main {
+    padding-left: calc(80px + 1.5rem);
+  }
+}
+
 .portal-full-width {
   width: 100%;
   max-width: none;
@@ -1962,7 +1978,6 @@ html[data-portal-route="true"] main {
 
 @media (prefers-reduced-motion: reduce) {
   [data-sidebar-collapsed],
-  [data-sidebar-spacer],
   .portal-nav-link,
   .portal-topbar__action {
     transition: none !important;

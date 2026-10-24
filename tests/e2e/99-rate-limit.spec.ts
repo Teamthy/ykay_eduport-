@@ -25,6 +25,7 @@ test.describe("login rate limiting", () => {
     for (let i = 0; i < 15; i++) {
       attempts++;
       const res = await request.post("/api/auth/login", {
+        headers: { "x-forwarded-for": "192.0.2.150" },
         data: { email, password: `wrong-${i}` },
       });
 
@@ -49,6 +50,9 @@ test.describe("login rate limiting", () => {
 
     for (let i = 0; i < 6; i++) {
       const res = await request.post("/api/auth/login", {
+        // Separate IP bucket so this assertion proves the per-email failure
+        // cap, not the earlier test's per-IP ceiling.
+        headers: { "x-forwarded-for": "192.0.2.151" },
         data: { email, password: `wrong-${i}` },
       });
       statuses.push(res.status());

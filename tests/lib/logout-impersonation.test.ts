@@ -41,4 +41,20 @@ describe("POST /api/auth/logout during impersonation", () => {
     expect(response.status).toBe(200);
     expect(mocks.revokeAllSessions).toHaveBeenCalledWith("student_1");
   });
+
+  it("reports a failed revocation instead of returning a false success", async () => {
+    mocks.getSession.mockResolvedValue({ id: "student_1", role: "STUDENT" });
+    mocks.revokeAllSessions.mockRejectedValue(new Error("database unavailable"));
+    const { POST } = await import("@/app/api/auth/logout/route");
+    const response = await POST();
+
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({
+      ok: false,
+      impersonationEnded: false,
+      error: "Session revocation could not be confirmed.",
+    });
+    // Current browser still signs out even if a wider revocation needs retry.
+    expect(response.cookies.get("ykay_session")?.maxAge).toBe(0);
+  });
 });

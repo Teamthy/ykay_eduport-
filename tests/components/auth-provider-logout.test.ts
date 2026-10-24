@@ -82,4 +82,43 @@ describe("portal sign-out flow", () => {
     );
     expect(buttonNamed("Signing out…")?.hasAttribute("disabled")).toBe(true);
   });
+
+  it("does not claim sign-out when the backend cannot confirm revocation", async () => {
+    fetchMock.mockImplementation((input) => {
+      if (input === "/api/auth/me") {
+        return Promise.resolve({
+          ok: false,
+          status: 401,
+          json: async () => ({ user: null }),
+        } as Response);
+      }
+      if (input === "/api/auth/logout") {
+        return Promise.resolve({
+          ok: false,
+          status: 503,
+          json: async () => ({ ok: false }),
+        } as Response);
+      }
+      return Promise.reject(new Error(`Unexpected fetch: ${String(input)}`));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    container = document.createElement("div");
+    document.body.append(container);
+
+    await act(async () => {
+      root = createRoot(container!);
+      root.render(createElement(AuthProvider, null, createElement(SignOutButton)));
+    });
+    await act(async () => buttonNamed("Sign out")?.click());
+    await act(async () => buttonNamed("Yes, sign me out")?.click());
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/auth/logout",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+    expect(container.textContent).toContain(
+      "The server did not confirm that your session was revoked",
+    );
+    expect(buttonNamed("Yes, sign me out")?.disabled).toBe(false);
+  });
 });

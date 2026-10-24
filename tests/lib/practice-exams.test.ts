@@ -32,6 +32,10 @@ vi.mock("@/lib/exams", async (importOriginal) => {
   };
 });
 
+function catalogueRequest(search = "") {
+  return { nextUrl: new URL(`http://localhost/api/student/practice${search}`) } as never;
+}
+
 function practiceExam(overrides: Record<string, unknown> = {}) {
   return {
     id: "exam_prac",
@@ -72,12 +76,13 @@ function practiceExam(overrides: Record<string, unknown> = {}) {
 describe("GET /api/student/practice — catalogue", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPrisma.term.findMany.mockResolvedValue([] as never);
   });
 
   it("queries only PRACTICE exams, scoped to the student's class and school", async () => {
     mockPrisma.exam.findMany.mockResolvedValue([]);
     const { GET } = await import("@/app/api/student/practice/route");
-    await GET();
+    await GET(catalogueRequest());
 
     const where = mockPrisma.exam.findMany.mock.calls[0][0].where;
     expect(where.examType).toBe("PRACTICE");
@@ -88,15 +93,26 @@ describe("GET /api/student/practice — catalogue", () => {
   it("bounds the query so a big catalogue cannot blow up the request", async () => {
     mockPrisma.exam.findMany.mockResolvedValue([]);
     const { GET } = await import("@/app/api/student/practice/route");
-    await GET();
+    await GET(catalogueRequest());
 
     expect(mockPrisma.exam.findMany.mock.calls[0][0].take).toBe(200);
+  });
+
+  it("filters practice exams by selected category and term", async () => {
+    mockPrisma.exam.findMany.mockResolvedValue([]);
+    const { GET } = await import("@/app/api/student/practice/route");
+    await GET(catalogueRequest("?category=WAEC&termId=term_1"));
+
+    expect(mockPrisma.exam.findMany.mock.calls[0][0].where).toMatchObject({
+      practiceCategory: "WAEC",
+      termId: "term_1",
+    });
   });
 
   it("returns an empty catalogue cleanly when nothing is published", async () => {
     mockPrisma.exam.findMany.mockResolvedValue([]);
     const { GET } = await import("@/app/api/student/practice/route");
-    const body = await (await GET()).json();
+    const body = await (await GET(catalogueRequest())).json();
 
     expect(body.exams).toEqual([]);
     expect(body.subjects).toEqual([]);
@@ -114,7 +130,7 @@ describe("GET /api/student/practice — catalogue", () => {
       }),
     ]);
     const { GET } = await import("@/app/api/student/practice/route");
-    const body = await (await GET()).json();
+    const body = await (await GET(catalogueRequest())).json();
 
     // totalMarks = 2 → attempt scores of 1 and 2 are 50% and 100%.
     expect(body.exams[0].bestPercent).toBe(100);
@@ -132,7 +148,7 @@ describe("GET /api/student/practice — catalogue", () => {
       }),
     ]);
     const { GET } = await import("@/app/api/student/practice/route");
-    const body = await (await GET()).json();
+    const body = await (await GET(catalogueRequest())).json();
 
     expect(body.exams[0].attemptCount).toBe(1);
     expect(body.exams[0].bestPercent).toBe(100);
@@ -143,7 +159,7 @@ describe("GET /api/student/practice — catalogue", () => {
   it("cannot be started when the set has no questions", async () => {
     mockPrisma.exam.findMany.mockResolvedValue([practiceExam({ questions: [] })]);
     const { GET } = await import("@/app/api/student/practice/route");
-    const body = await (await GET()).json();
+    const body = await (await GET(catalogueRequest())).json();
 
     expect(body.exams[0].canStart).toBe(false);
   });
@@ -154,7 +170,7 @@ describe("GET /api/student/practice — catalogue", () => {
       practiceExam({ id: "exam_2", subjectName: "Physics", title: "Physics Practice" }),
     ]);
     const { GET } = await import("@/app/api/student/practice/route");
-    const body = await (await GET()).json();
+    const body = await (await GET(catalogueRequest())).json();
 
     expect(body.subjects.map((s: { name: string }) => s.name)).toEqual(["Mathematics", "Physics"]);
   });

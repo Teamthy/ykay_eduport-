@@ -1,18 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPrisma } from "../setup";
-
-/**
- * Sending assessment results to parents.
- *
- * `/teacher/send-results` was a complete four-step wizard with no send: it
- * built a recipient list, let the teacher review it, and contained no POST at
- * all. The button led nowhere.
- *
- * Now that it posts, the eligibility filter is the security boundary. The
- * recipient list rendered in the browser is not a control — a teacher must not
- * be able to publish a result for a child they do not teach by supplying the
- * id directly.
- */
 
 const teacherContext = {
   user: { id: "usr_t", schoolId: "school_1", role: "TEACHER" },
@@ -33,178 +20,206 @@ vi.mock("@/lib/exams", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/exams")>();
   return { ...actual, getExamTeacherContext: vi.fn(async () => teacherContext) };
 });
-
 vi.mock("@/lib/requests", () => ({ getClientIp: vi.fn(() => "127.0.0.1") }));
+vi.mock("@/lib/rate-limit", () => ({
+  enforceRateLimit: vi.fn(async () => ({ success: true, retryAfterSeconds: 0 })),
+}));
+vi.mock("@/lib/gradebook", () => ({
+  waecGrade: (percent: number) => (percent >= 75 ? "A1" : percent >= 50 ? "C6" : "F9"),
+}));
 
-const createInAppNotification = vi.fn<
-  (input: { userId: string; title: string; body: string }) => Promise<{ id: string }>
->(async () => ({ id: "n1" }));
-vi.mock("@/lib/notifications", () => ({ createInAppNotification }));
+type NoticeInput = {
+  id: string;
+  schoolId: string;
+  userId: string;
+  kind: "REPORT_RELEASED";
+  title: string;
+  body: string;
+  link: string;
+};
+const createInAppNotificationOnce = vi.fn(async (_input: NoticeInput) => ({
+  created: true,
+  notification: { id: "n1" },
+}));
+vi.mock("@/lib/notifications", () => ({ createInAppNotificationOnce }));
 
 function request(body: unknown) {
-  return { json: async () => body } as never;
+  return { json: async () => body, headers: new Headers() } as never;
 }
 
-function student(id: string, overrides: Record<string, unknown> = {}) {
+function gradedAttempt(overrides: Record<string, unknown> = {}) {
   return {
-    id,
-    displayName: `Student ${id}`,
-    userId: `usr_${id}`,
-    parentLinks: [{ parentProfile: { userId: `parent_${id}` } }],
+    id: "att_1",
+    attemptNumber: 1,
+    totalScore: 38,
+    submittedAt: new Date("2026-05-12T10:00:00Z"),
+    studentProfile: {
+      id: "stu_1",
+      studentId: "YK-001",
+      displayName: "Student One",
+      userId: "student_user_1",
+      parentLinks: [
+        {
+          parentProfile: {
+            id: "parent_profile_1",
+            schoolId: "school_1",
+            userId: "parent_user_1",
+            isActive: true,
+          },
+        },
+      ],
+    },
     ...overrides,
   };
 }
 
-const validBody = {
-  assessmentLabel: "Midterm Test",
-  subjectName: "Biology",
-  results: [{ studentProfileId: "stu_1", score: 38, total: 50 }],
-};
+function releasedExam(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "exam_1",
+    schoolId: "school_1",
+    title: "Midterm Biology",
+    subjectName: "Biology",
+    examType: "CA",
+    classroom: { displayName: "SS 2" },
+    term: { label: "Second Term", session: { label: "2025/2026" } },
+    questions: [{ marks: 50 }],
+    attempts: [gradedAttempt()],
+    ...overrides,
+  };
+}
 
-describe("POST /api/teacher/send-results", () => {
+const validBody = { examId: "exam_1", studentProfileIds: ["stu_1"] };
+
+describe("/api/teacher/send-results", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockPrisma.auditLog.create.mockResolvedValue({ id: "al" });
+    mockPrisma.auditLog.create.mockResolvedValue({ id: "audit_1" } as never);
+    mockPrisma.exam.findMany.mockResolvedValue([]);
+    mockPrisma.exam.findFirst.mockResolvedValue(releasedExam() as never);
+    mockPrisma.user.findMany.mockResolvedValue([
+      { id: "student_user_1", role: "STUDENT" },
+      { id: "parent_user_1", role: "PARENT" },
+    ] as never);
+    createInAppNotificationOnce.mockResolvedValue({ created: true, notification: { id: "n1" } });
   });
 
-  it("notifies the parent AND the student", async () => {
-    mockPrisma.studentProfile.findMany.mockResolvedValue([student("stu_1")]);
+  it("lists only closed, released assessments within assigned class/subject pairs", async () => {
+    mockPrisma.exam.findMany.mockResolvedValue([releasedExam() as never]);
+    const { GET } = await import("@/app/api/teacher/send-results/route");
 
+    const body = await (await GET()).json();
+    expect(body.exams).toHaveLength(1);
+    expect(body.exams[0].students[0]).toMatchObject({
+      profileId: "stu_1",
+      score: 38,
+      total: 50,
+      percent: 76,
+    });
+    const where = mockPrisma.exam.findMany.mock.calls[0][0].where;
+    expect(where.schoolId).toBe("school_1");
+    expect(where.status).toBe("CLOSED");
+    expect(where.resultsReleased).toBe(true);
+    expect(where.OR).toEqual([{ classId: "cls_1", subjectName: "Biology" }]);
+  });
+
+  it("derives notifications from persisted graded attempts and ignores browser-supplied scores", async () => {
     const { POST } = await import("@/app/api/teacher/send-results/route");
-    const body = await (await POST(request(validBody))).json();
+    const response = await POST(
+      request({
+        ...validBody,
+        results: [{ studentProfileId: "stu_1", score: 999, total: 1 }],
+        subjectName: "Forged subject",
+      }),
+    );
 
+    expect(response.status).toBe(200);
+    const body = await response.json();
     expect(body.sent).toBe(1);
     expect(body.notifications).toBe(2);
-    const recipients = createInAppNotification.mock.calls.map((c) => c[0].userId);
-    expect(recipients).toContain("parent_stu_1");
-    expect(recipients).toContain("usr_stu_1");
-  });
-
-  it("includes the score, total and percentage in the message", async () => {
-    mockPrisma.studentProfile.findMany.mockResolvedValue([student("stu_1")]);
-
-    const { POST } = await import("@/app/api/teacher/send-results/route");
-    await POST(request(validBody));
-
-    const first = createInAppNotification.mock.calls[0][0];
-    expect(first.title).toContain("Biology");
-    expect(first.title).toContain("Midterm Test");
-    expect(first.body).toContain("38/50");
-    expect(first.body).toContain("76%");
-  });
-
-  /**
-   * The boundary. A student id posted directly must be filtered out by the
-   * class query, not trusted because it appeared in the request.
-   */
-  it("silently skips a student the teacher does not teach", async () => {
-    // Only stu_1 comes back from the eligibility query.
-    mockPrisma.studentProfile.findMany.mockResolvedValue([student("stu_1")]);
-
-    const { POST } = await import("@/app/api/teacher/send-results/route");
-    const body = await (
-      await POST(
-        request({
-          ...validBody,
-          results: [
-            { studentProfileId: "stu_1", score: 40, total: 50 },
-            { studentProfileId: "stu_other_class", score: 10, total: 50 },
-          ],
-        }),
-      )
-    ).json();
-
-    expect(body.sent).toBe(1);
-    expect(body.skipped).toBe(1);
-    const recipients = createInAppNotification.mock.calls.map((c) => c[0].userId);
-    expect(recipients).not.toContain("parent_stu_other_class");
-  });
-
-  it("constrains the eligibility query to the teacher's classes and school", async () => {
-    mockPrisma.studentProfile.findMany.mockResolvedValue([]);
-
-    const { POST } = await import("@/app/api/teacher/send-results/route");
-    await POST(request(validBody));
-
-    const where = mockPrisma.studentProfile.findMany.mock.calls[0][0].where;
-    expect(where.currentClassId).toEqual({ in: ["cls_1"] });
-    expect(where.schoolId).toBe("school_1");
-    expect(where.isActive).toBe(true);
-  });
-
-  /**
-   * A silent drop here means a parent never learns their child's result and
-   * nobody finds out for a term.
-   */
-  it("reports students with no parent and no login rather than dropping them", async () => {
-    mockPrisma.studentProfile.findMany.mockResolvedValue([
-      student("stu_1", { parentLinks: [], userId: null }),
+    const recipientCalls = createInAppNotificationOnce.mock.calls.map(([input]) => input);
+    expect(recipientCalls.map((input) => input.userId)).toEqual([
+      "parent_user_1",
+      "student_user_1",
     ]);
-
-    const { POST } = await import("@/app/api/teacher/send-results/route");
-    const body = await (await POST(request(validBody))).json();
-
-    expect(body.withoutParent).toBe(1);
-    expect(body.notifications).toBe(0);
-    expect(body.message).toMatch(/no linked parent/i);
+    expect(recipientCalls[0].body).toContain("38/50 (76%)");
+    expect(recipientCalls[0].body).toContain("Biology — Midterm Biology");
+    expect(recipientCalls[0].id).toContain("att_1");
   });
 
-  it("still notifies the student when no parent is linked", async () => {
-    mockPrisma.studentProfile.findMany.mockResolvedValue([student("stu_1", { parentLinks: [] })]);
-
-    const { POST } = await import("@/app/api/teacher/send-results/route");
-    const body = await (await POST(request(validBody))).json();
-
-    expect(body.notifications).toBe(1);
-    expect(body.withoutParent).toBe(0);
-  });
-
-  it("deduplicates when two guardians share one login", async () => {
-    mockPrisma.studentProfile.findMany.mockResolvedValue([
-      student("stu_1", {
-        userId: null,
-        parentLinks: [
-          { parentProfile: { userId: "shared" } },
-          { parentProfile: { userId: "shared" } },
-        ],
-      }),
-    ]);
-
-    const { POST } = await import("@/app/api/teacher/send-results/route");
-    const body = await (await POST(request(validBody))).json();
-
-    expect(body.notifications).toBe(1);
-  });
-
-  it("rejects a teacher with no class assignments", async () => {
-    const { getExamTeacherContext } = await import("@/lib/exams");
-    vi.mocked(getExamTeacherContext).mockResolvedValueOnce({
-      ...teacherContext,
-      teacherProfile: { ...teacherContext.teacherProfile, subjectAssignments: [] },
-    } as never);
-
+  it("requires the assessment to be within the teacher's assigned scope and released", async () => {
+    mockPrisma.exam.findFirst.mockResolvedValue(null);
     const { POST } = await import("@/app/api/teacher/send-results/route");
     const response = await POST(request(validBody));
 
-    expect(response.status).toBe(403);
-    expect(createInAppNotification).not.toHaveBeenCalled();
+    expect(response.status).toBe(404);
+    expect(createInAppNotificationOnce).not.toHaveBeenCalled();
+    const where = mockPrisma.exam.findFirst.mock.calls[0][0].where;
+    expect(where.schoolId).toBe("school_1");
+    expect(where.status).toBe("CLOSED");
+    expect(where.resultsReleased).toBe(true);
+    expect(where.OR).toEqual([{ classId: "cls_1", subjectName: "Biology" }]);
   });
 
-  it("rejects an empty result set", async () => {
+  it("rejects a selected student without a fully graded attempt", async () => {
+    mockPrisma.exam.findFirst.mockResolvedValue(releasedExam({ attempts: [] }) as never);
     const { POST } = await import("@/app/api/teacher/send-results/route");
-    const response = await POST(request({ ...validBody, results: [] }));
+    const response = await POST(request(validBody));
 
-    expect(response.status).toBe(400);
+    expect(response.status).toBe(409);
+    expect(createInAppNotificationOnce).not.toHaveBeenCalled();
   });
 
-  it("writes an audit record", async () => {
-    mockPrisma.studentProfile.findMany.mockResolvedValue([student("stu_1")]);
+  it("rejects a stored result that exceeds the exam's server-side marks", async () => {
+    mockPrisma.exam.findFirst.mockResolvedValue(
+      releasedExam({ attempts: [gradedAttempt({ totalScore: 51 })] }) as never,
+    );
+    const { POST } = await import("@/app/api/teacher/send-results/route");
+    const response = await POST(request(validBody));
 
+    expect(response.status).toBe(409);
+    expect(createInAppNotificationOnce).not.toHaveBeenCalled();
+  });
+
+  it("rejects duplicate or empty recipient IDs", async () => {
+    const { POST } = await import("@/app/api/teacher/send-results/route");
+    const duplicate = await POST(
+      request({ examId: "exam_1", studentProfileIds: ["stu_1", "stu_1"] }),
+    );
+    const empty = await POST(request({ examId: "exam_1", studentProfileIds: [] }));
+
+    expect(duplicate.status).toBe(400);
+    expect(empty.status).toBe(400);
+  });
+
+  it("scopes recipient accounts to active parent/student users in the same school", async () => {
     const { POST } = await import("@/app/api/teacher/send-results/route");
     await POST(request(validBody));
+    const where = mockPrisma.user.findMany.mock.calls[0][0].where;
 
-    const data = mockPrisma.auditLog.create.mock.calls[0][0].data;
-    expect(data.action).toBe("RESULTS_SENT_TO_PARENTS");
-    expect(data.actorUserId).toBe("usr_t");
+    expect(where.schoolId).toBe("school_1");
+    expect(where.isActive).toBe(true);
+    expect(where.isSuspended).toBe(false);
+    expect(where.role.in).toEqual(["PARENT", "STUDENT"]);
+  });
+
+  it("is idempotent when result notices already exist", async () => {
+    createInAppNotificationOnce.mockResolvedValue({ created: false, notification: { id: "n1" } });
+    const { POST } = await import("@/app/api/teacher/send-results/route");
+    const response = await POST(request(validBody));
+
+    expect(response.status).toBe(200);
+    expect((await response.json()).notifications).toBe(0);
+    expect(createInAppNotificationOnce).toHaveBeenCalledTimes(2);
+  });
+
+  it("records an audit entry against the released exam", async () => {
+    const { POST } = await import("@/app/api/teacher/send-results/route");
+    await POST(request(validBody));
+    expect(mockPrisma.auditLog.create.mock.calls[0][0].data).toMatchObject({
+      action: "RESULTS_SENT_TO_PARENTS",
+      entityType: "Exam",
+      entityId: "exam_1",
+      actorUserId: "usr_t",
+    });
   });
 });

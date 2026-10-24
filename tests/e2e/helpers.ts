@@ -31,12 +31,16 @@ if (!PASSWORD) {
 }
 
 export const ACCOUNTS = {
+  superadmin: "superadmin@ykaycollege.com",
   admin: "admin@ykaycollege.com",
   director: "director@ykaycollege.com",
   bursar: "bursar@ykaycollege.com",
+  coordinator: "coordinator@ykaycollege.com",
+  hod: "hod@ykaycollege.com",
   teacher: "teacher1@ykaycollege.com",
   student: "student1@ykaycollege.com",
   parent: "parent1@ykaycollege.com",
+  itstudent: "itstudent@ykaycollege.com",
 } as const;
 
 export type Role = keyof typeof ACCOUNTS;
@@ -46,12 +50,16 @@ const sessionCache = new Map<Role, string>();
 
 /** The landing path each role should reach after signing in. */
 export const HOME_FOR: Record<Role, RegExp> = {
+  superadmin: /\/super-admin/,
   admin: /\/admin/,
   director: /\/admin/,
   bursar: /\/admin/,
+  coordinator: /\/admin/,
+  hod: /\/teacher/,
   teacher: /\/teacher/,
   student: /\/student/,
   parent: /\/parent/,
+  itstudent: /\/it-portal/,
 };
 
 /**
@@ -178,7 +186,11 @@ export async function useSession(context: BrowserContext, page: Page, role: Role
 }
 
 /** Sign in via the API and return the raw cookie header, for request-level tests. */
-export async function apiLogin(request: APIRequestContext, role: Role) {
+export async function apiLogin(
+  request: APIRequestContext,
+  role: Role,
+  options: { forwardedFor?: string } = {},
+) {
   const cached = sessionCache.get(role);
   if (cached) return `ykay_session=${cached}`;
 
@@ -187,6 +199,7 @@ export async function apiLogin(request: APIRequestContext, role: Role) {
 
   const res = await request.post("/api/auth/login", {
     data: { email: ACCOUNTS[role], password: PASSWORD },
+    ...(options.forwardedFor ? { headers: { "x-forwarded-for": options.forwardedFor } } : {}),
   });
 
   if (!res.ok()) {
