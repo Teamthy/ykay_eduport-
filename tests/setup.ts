@@ -122,6 +122,7 @@ const mockPrisma = {
     update: vi.fn(),
   },
   feeInvoice: {
+    findFirst: vi.fn(),
     findUnique: vi.fn(),
     findUniqueOrThrow: vi.fn(),
     findMany: vi.fn(),

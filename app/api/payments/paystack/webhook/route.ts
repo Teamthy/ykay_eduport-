@@ -1,10 +1,16 @@
 import { FeePaymentMethod, PaymentStatus } from "@prisma/client";
 import { NextRequest } from "next/server";
+import { isPaystackReady } from "@/lib/env";
 import { APPLICATION_FEE_KOBO } from "@/lib/admissions";
 import { markApplicationPaid } from "@/lib/admission-service";
 import { postCompletedFeePayment } from "@/lib/fee-payment-service";
 import { prisma } from "@/lib/prisma";
-import { toPrismaJson, verifyPaystackWebhookSignature } from "@/lib/paystack";
+import {
+  PAYSTACK_WEBHOOK_UNAVAILABLE_MESSAGE,
+  paystackUnavailableBody,
+  toPrismaJson,
+  verifyPaystackWebhookSignature,
+} from "@/lib/paystack";
 import { jsonNoStore } from "@/lib/requests";
 import { logger } from "@/lib/logger";
 
@@ -23,6 +29,12 @@ interface PaystackWebhookPayload {
 }
 
 export async function POST(request: NextRequest) {
+  if (!isPaystackReady()) {
+    return jsonNoStore(paystackUnavailableBody(PAYSTACK_WEBHOOK_UNAVAILABLE_MESSAGE), {
+      status: 503,
+    });
+  }
+
   const rawBody = await request.text();
 
   try {

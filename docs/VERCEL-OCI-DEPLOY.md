@@ -32,16 +32,18 @@ The API cannot be split from the pages.
    `.env.example`. Final mode is the default; set `APP_READINESS_MODE=final`
    explicitly for launch. The runtime gate requires `DATABASE_URL`,
    `AUTH_SECRET` (≥32 chars, unique), `NEXT_PUBLIC_SITE_URL`
-   (https URL), live Paystack keys, `JOBS_SECRET` (= the timer's secret below),
+   (https URL), genuine live Paystack keys, `JOBS_SECRET` (= the timer's secret below),
    both Upstash credentials, private S3 credentials, and `MALWARE_SCANNER_URL`.
    `RESEND_API_KEY`, `EMAIL_FROM`, Sentry DSN, and `COLLEGE_SSO_SECRET` (only
    if YK-Virtual federation is enabled) are separately documented in
    `.env.example`.
-   For a temporary site-shell deployment only, `APP_READINESS_MODE=temporary`
-   permits startup without Redis/storage/scanner; critical rate-limited routes
-   fail closed without Redis, and admissions upload, confirmation and submission
-   return 503 without storage and scanning. Health reports `degraded`. This is not a
-   launch-ready setting and must be changed back to `final` once provisioned.
+   For a temporary public site-shell deployment only, `APP_READINESS_MODE=temporary`
+   permits startup without Redis/storage/scanner or live Paystack keys; critical
+   rate-limited routes fail closed without Redis, admissions upload/confirmation/
+   submission return 503 without storage/scanning, and Paystack checkout/verification/
+   webhooks return 503 unless valid live keys are set. Manual bank-transfer claims
+   and bursar review remain available. Health reports `degraded`. This is not a
+   launch-ready setting; return to `final` after all dependencies are provisioned.
 4. **Notifications cron** — Vercel Hobby plans run `vercel.json` crons once
    a day; the dispatcher expects a 60-second tick. Install the supplied
    timer on the OCI box instead:

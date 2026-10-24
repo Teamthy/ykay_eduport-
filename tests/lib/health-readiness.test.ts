@@ -12,6 +12,8 @@ describe("GET /api/health readiness reporting", () => {
     vi.stubEnv("S3_ACCESS_KEY_ID", "");
     vi.stubEnv("S3_SECRET_ACCESS_KEY", "");
     vi.stubEnv("MALWARE_SCANNER_URL", "");
+    vi.stubEnv("PAYSTACK_PUBLIC_KEY", "");
+    vi.stubEnv("PAYSTACK_SECRET_KEY", "");
     mockPrisma.$queryRaw.mockResolvedValueOnce([{ ok: 1 }]);
   });
 
@@ -32,5 +34,6 @@ describe("GET /api/health readiness reporting", () => {
     expect(body.checks.redis.status).toBe("not_configured");
     expect(body.checks.admissionStorage.configured).toBe(false);
     expect(body.checks.malwareScanner.configured).toBe(false);
+    expect(body.checks.paystack.configured).toBe(false);
   });
 });

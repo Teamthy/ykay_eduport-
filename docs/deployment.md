@@ -31,14 +31,14 @@ cp .env.example .env
 | `DATABASE_URL` | PostgreSQL connection string |
 | `AUTH_SECRET` | 32+ character secret for JWT signing |
 | `NEXT_PUBLIC_SITE_URL` | Public URL of the deployed site |
-| `PAYSTACK_PUBLIC_KEY` | Paystack public key |
-| `PAYSTACK_SECRET_KEY` | Paystack secret key |
+| `PAYSTACK_PUBLIC_KEY` | Paystack public key; final Production requires a genuine `pk_live_` key. |
+| `PAYSTACK_SECRET_KEY` | Paystack secret key; final Production requires a genuine `sk_live_` key. |
 
 ### Production dependencies (not optional for the launch target)
 
 | Variable | Production requirement |
 |----------|------------------------|
-| `APP_READINESS_MODE` | Defaults to `final`. Set `temporary` only for an incomplete site shell; it defers Redis/storage/scanner startup requirements, not their dependent operations. |
+| `APP_READINESS_MODE` | Defaults to `final`. Set `temporary` only for an incomplete public site shell; it may defer Redis/storage/scanner and Paystack startup requirements, but dependent operations still fail closed. Paystack-dependent checkout, verification, and webhooks return 503 without valid live keys; manual bank-transfer claims and bursar review remain available. |
 | `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` | Required in final mode. Critical auth/admissions limiters fail closed without Redis in both readiness modes; `ALLOW_MEMORY_RATE_LIMITS` is test-harness-only and cannot waive production readiness. |
 | `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Required in final mode for private admissions-document storage; intake returns 503 until configured in temporary mode. |
 | `MALWARE_SCANNER_URL` | Required in final mode. Unscanned-document waivers are not supported; upload, confirmation and submission remain unavailable until configured. |
