@@ -104,7 +104,7 @@ async function main() {
 
   // Sign the virtual users in ONCE up front. Logging in per request would
   // measure the rate limiter rather than the app — /api/auth/login allows 10
-  // attempts per 15 min per IP normally (30 only on Vercel Preview).
+  // local, 20 in Production, and 30 in Vercel Preview per IP per 15 min.
   console.log("signing in...");
   const sessions: { cookie: string; paths: string[] }[] = [];
   for (const account of ACCOUNTS) {

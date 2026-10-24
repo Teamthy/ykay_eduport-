@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
   const ua = getUserAgent(request);
 
-  // ── IP limit (10 per 15 min normally; 30 in Vercel Preview for QA) ──
+  // ── IP limit (20 Production, 30 Preview, 10 local per 15 min) ──
   const ipLimit = await enforceRateLimit("login", ip);
   if (!ipLimit.success) {
     await recordSecurityEvent({

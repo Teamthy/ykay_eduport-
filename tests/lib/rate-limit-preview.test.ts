@@ -49,7 +49,7 @@ describe("login rate-limit budgets by deployment environment", () => {
     }
   });
 
-  it("keeps Production at 10 IP attempts per 15 minutes", async () => {
+  it("allows 20 IP attempts in Vercel Production per 15 minutes", async () => {
     const saved = saveEnvironment();
     try {
       // NODE_ENV=test keeps this unit test on the isolated in-memory store;
@@ -62,6 +62,28 @@ describe("login rate-limit budgets by deployment environment", () => {
 
       const { enforceRateLimit } = await import("@/lib/rate-limit");
       const ip = `production-config-${Date.now()}`;
+      for (let attempt = 0; attempt < 20; attempt += 1) {
+        expect((await enforceRateLimit("login", ip)).success).toBe(true);
+      }
+      expect((await enforceRateLimit("login", ip)).success).toBe(false);
+    } finally {
+      restoreEnvironment(saved);
+      vi.unstubAllEnvs();
+      vi.resetModules();
+    }
+  });
+
+  it("keeps local testing at 10 IP attempts per 15 minutes", async () => {
+    const saved = saveEnvironment();
+    try {
+      vi.stubEnv("NODE_ENV", "test");
+      delete process.env.VERCEL_ENV;
+      delete process.env.UPSTASH_REDIS_REST_URL;
+      delete process.env.UPSTASH_REDIS_REST_TOKEN;
+      vi.resetModules();
+
+      const { enforceRateLimit } = await import("@/lib/rate-limit");
+      const ip = `local-config-${Date.now()}`;
       for (let attempt = 0; attempt < 10; attempt += 1) {
         expect((await enforceRateLimit("login", ip)).success).toBe(true);
       }
