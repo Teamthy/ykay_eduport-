@@ -32,7 +32,9 @@ export async function getSchool() {
       email: process.env.SCHOOL_EMAIL || "info@ykaycollege.com",
       motto: process.env.SCHOOL_MOTTO || "Raising Role Models",
     },
-    select: { id: true },
+    // name and slug are legacy School fields used by seed output and remain
+    // available before the campus-location migration is applied.
+    select: { id: true, name: true, slug: true },
   });
 }
 
