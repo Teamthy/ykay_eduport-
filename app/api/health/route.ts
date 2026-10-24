@@ -1,22 +1,35 @@
 import { NextResponse } from "next/server";
+import { getAppReadinessMode } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 interface HealthStatus {
   status: "healthy" | "degraded" | "unhealthy";
+  readinessMode: "final" | "temporary";
   timestamp: string;
   uptime: number;
   checks: {
     database: { status: "up" | "down"; latencyMs: number };
     redis: { status: "configured" | "not_configured" | "down" };
+    admissionStorage: { configured: boolean };
+    malwareScanner: { configured: boolean };
   };
 }
 
 export async function GET() {
+  const readinessMode = getAppReadinessMode();
+  const storageConfigured = Boolean(
+    process.env.S3_BUCKET?.trim() &&
+    process.env.S3_ACCESS_KEY_ID?.trim() &&
+    process.env.S3_SECRET_ACCESS_KEY?.trim(),
+  );
+  const scannerConfigured = Boolean(process.env.MALWARE_SCANNER_URL?.trim());
   const checks: HealthStatus["checks"] = {
     database: { status: "down", latencyMs: 0 },
     redis: { status: "not_configured" },
+    admissionStorage: { configured: storageConfigured },
+    malwareScanner: { configured: scannerConfigured },
   };
 
   // ── Database check ─────────────────────────────────────────
@@ -43,20 +56,23 @@ export async function GET() {
   }
 
   // ── Overall status ─────────────────────────────────────────
-  // Only the DATABASE decides the HTTP status.
-  //
-  // This used to 503 whenever Redis was down, which meant a Redis blip made
-  // every otherwise-healthy instance look dead to the load balancer and got it
-  // pulled from rotation — turning a degraded-rate-limiting incident into an
-  // outage. Redis being down is real and still reported as "degraded" in the
-  // body, but the app can serve every request without it.
+  // Only the DATABASE decides the HTTP status, so a Redis or deferred
+  // dependency issue does not cause the platform to remove a serving instance.
+  // The JSON body still reports degraded readiness, including temporary mode.
   const databaseUp = checks.database.status === "up";
-  const allUp = databaseUp && checks.redis.status !== "down";
+  const dependenciesReady =
+    checks.redis.status === "configured" && storageConfigured && scannerConfigured;
+  const fullyReady = databaseUp && readinessMode === "final" && dependenciesReady;
 
-  const status: HealthStatus["status"] = allUp ? "healthy" : databaseUp ? "degraded" : "unhealthy";
+  const status: HealthStatus["status"] = fullyReady
+    ? "healthy"
+    : databaseUp
+      ? "degraded"
+      : "unhealthy";
 
   const body: HealthStatus = {
     status,
+    readinessMode,
     timestamp: new Date().toISOString(),
     uptime: Math.floor(process.uptime()),
     checks,

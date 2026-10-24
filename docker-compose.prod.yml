@@ -24,8 +24,8 @@ services:
     # provisioned for future queue/session use; distributed rate limiting is
     # enabled by setting UPSTASH_REDIS_REST_URL/TOKEN. Without them,
     # security-critical limiters (login, password reset, payments, admissions)
-    # fail closed unless ALLOW_MEMORY_RATE_LIMITS=true is set for an accepted
-    # single-instance deployment (one `app` container only).
+    # fail closed until a shared Upstash store is configured. A memory fallback
+    # is restricted to the isolated E2E test harness, not production.
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
@@ -42,6 +42,7 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: production
+      APP_READINESS_MODE: ${APP_READINESS_MODE:-final}
       DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-ykay}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-ykay_college}}
       AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?set NEXT_PUBLIC_SITE_URL}
@@ -52,8 +53,8 @@ services:
       JOBS_SECRET: ${JOBS_SECRET:?set JOBS_SECRET}
       UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL}
       UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN}
-      # Explicit risk acceptance for single-instance deployments: without
-      # Upstash, security-critical limiters fail closed unless this is "true".
+      # Legacy test-harness flag only. It does not bypass production fail-closed
+      # behavior or final readiness requirements.
       ALLOW_MEMORY_RATE_LIMITS: ${ALLOW_MEMORY_RATE_LIMITS:-false}
       S3_BUCKET: ${S3_BUCKET}
       S3_REGION: ${S3_REGION}
@@ -62,7 +63,8 @@ services:
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
       # C-006: admission-document malware scanning. Point at an HTTP scanner
       # (e.g. clamav-rest in front of ClamAV — see lib/malware.ts for the
-      # expected response contract). Unset uploads are marked scanStatus=SKIPPED.
+      # expected response contract). Final mode requires this endpoint; in
+      # temporary production mode, document intake remains disabled until set.
       MALWARE_SCANNER_URL: ${MALWARE_SCANNER_URL}
     healthcheck:
       test:

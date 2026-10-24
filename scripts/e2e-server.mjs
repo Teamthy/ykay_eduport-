@@ -53,11 +53,16 @@ const server = spawn(process.execPath, [join(STANDALONE, "server.js")], {
     ...process.env,
     PORT,
     HOSTNAME: process.env.HOSTNAME || "127.0.0.1",
-    // This is a deliberate, scoped acceptance of the in-memory rate-limit
-    // fallback: the e2e server is single-instance on one port, so a process-
-    // local limiter is a real control here. Production (Vercel/multi-instance
-    // Docker) must configure Upstash instead — see lib/rate-limit.ts.
-    ALLOW_MEMORY_RATE_LIMITS: process.env.ALLOW_MEMORY_RATE_LIMITS || "true",
+    // This isolated test server is intentionally temporary: its fixture
+    // environment does not provision Redis, private object storage, or a
+    // malware scanner. Admission document intake remains disabled, and the
+    // single-process test limiter may use memory. The rate-limit override is
+    // additionally scoped to this marked localhost E2E origin; production
+    // deployments must use APP_READINESS_MODE=final and provision dependencies.
+    APP_READINESS_MODE: "temporary",
+    E2E_TEST_MODE: "true",
+    NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${PORT}`,
+    ALLOW_MEMORY_RATE_LIMITS: "true",
   },
 });
 

@@ -13,9 +13,11 @@ Minimum production shape:
     is not yet used by the limiter.
   - Without Upstash configured, **security-critical limiters (login, password
     reset, payments, admissions) fail closed with 503** rather than silently
-    downgrading to a per-process budget. A single-instance deployment can
-    accept the memory fallback explicitly with `ALLOW_MEMORY_RATE_LIMITS=true`
-    — documented risk acceptance, one app container only.
+    downgrading to a per-process budget. Final readiness always requires both
+    Upstash credentials. The memory fallback is limited to development and the
+    isolated E2E test harness. `ALLOW_MEMORY_RATE_LIMITS` is ignored for
+    critical production routes in both readiness modes; it is never a
+    production waiver.
 - Authenticated cron/worker for `/api/jobs/dispatch-notifications`.
 - Object storage for admission documents.
 - Secret manager for `AUTH_SECRET`, Paystack keys, email keys, S3 keys and `JOBS_SECRET`.

@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { DOCUMENT_RULES, uploadUrlSchema } from "@/lib/admissions";
+import { isAdmissionDocumentIntakeReady } from "@/lib/env";
 import { findAuthorizedApplication } from "@/lib/admission-service";
 import { getClientIp, jsonNoStore } from "@/lib/requests";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -9,6 +10,16 @@ import { logger } from "@/lib/logger";
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
+  if (!isAdmissionDocumentIntakeReady()) {
+    return jsonNoStore(
+      {
+        error:
+          "Document uploads are temporarily unavailable while secure storage and scanning are configured.",
+      },
+      { status: 503 },
+    );
+  }
+
   const ipAddress = getClientIp(request);
   const limit = await enforceRateLimit("upload", ipAddress);
   if (!limit.success) {

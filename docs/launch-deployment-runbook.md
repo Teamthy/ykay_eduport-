@@ -1,20 +1,24 @@
 # Ykay College — single-tenant launch deployment runbook
 
-**Canonical launch target:** Render Docker Blueprint in `render.yaml`, with Render PostgreSQL, Upstash Redis, private S3-compatible storage, a malware scanner (or a recorded risk acceptance), and the Render Cron notification dispatcher. The repository still contains Vercel, OCI and docker-compose examples; they are **alternative/unverified paths, not launch-supported targets**. This is a code/documentation choice, not evidence that a production Render environment exists or is ready.
+**Canonical launch target:** Render Docker Blueprint in `render.yaml`, with Render PostgreSQL, Upstash Redis, private S3-compatible storage, a malware scanner, and the Render Cron notification dispatcher. The repository still contains Vercel, OCI and docker-compose examples; they are **alternative/unverified paths, not launch-supported targets**. This is a code/documentation choice, not evidence that a production Render environment exists or is ready.
 
 **Scope:** one Ykay College school only. Do not enable platform self-signup or onboard another school on this runbook; database RLS is still fail-open for missing tenant context.
 
 ## 1. Provision the dependencies
 
 1. Create Render PostgreSQL in the same region as the web service. Use its **Internal Database URL** for the web service's `DATABASE_URL`.
-2. Create an Upstash Redis database and set both `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. Do not set `ALLOW_MEMORY_RATE_LIMITS=true` on the multi-instance web service.
+2. Create an Upstash Redis database and set both `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`. Final mode requires the shared store; do not use a process-local memory limiter as a production substitute.
 3. Create a private S3/R2 bucket for admissions documents. Set `S3_BUCKET`, `S3_REGION`, `S3_ACCESS_KEY_ID`, and `S3_SECRET_ACCESS_KEY`; set `S3_ENDPOINT` and `S3_FORCE_PATH_STYLE` only as required by the provider. Keep bucket CORS limited to the exact public College origin. Do not expose the bucket publicly.
-4. Configure `MALWARE_SCANNER_URL` to an authenticated/restricted scanner reachable from the web service. If the school knowingly launches without scanning, an owner must set `ALLOW_UNSCANNED_ADMISSION_DOCS=true` after recording that decision; startup logs a warning. The default is fail-closed at startup.
+4. Configure `MALWARE_SCANNER_URL` to an authenticated/restricted scanner reachable from the web service. Final mode requires scanning; unscanned-document waivers are not supported.
 5. Configure Resend (`RESEND_API_KEY`, verified `EMAIL_FROM`) for password resets, invitations and queued parent notifications. Configure Sentry (`SENTRY_DSN` and/or `NEXT_PUBLIC_SENTRY_DSN`) and send a test event.
 6. Create **live** Paystack keys. Production startup requires `pk_live_…` and `sk_live_…`; `pk_test_…` / `sk_test_…` are rejected. Configure Paystack's webhook URL to the production `/api/payments/paystack/webhook` endpoint.
 7. Generate a unique 32+ character `AUTH_SECRET`. Generate a separate, high-entropy `JOBS_SECRET` (at least 16 characters) and use the exact same value on the web and Cron services. Never reuse `AUTH_SECRET` for this.
 
 The Render Blueprint includes `sync:false` entries for secrets. Add them privately in Render; never commit real values. Configure `TRUSTED_PROXY_HOPS=1` for the single Render proxy hop unless the actual proxy chain differs. Keep `ENABLE_PLATFORM_SIGNUP=false`.
+
+### Temporary site-shell mode (not launch-ready)
+
+`APP_READINESS_MODE=temporary` is an explicit, temporary exception for an incomplete deployment. It defers only Redis, S3-compatible document storage, and the malware scanner; database, auth, live Paystack, site URL, and `JOBS_SECRET` stay strict. The app may start and serve pages, but a missing Redis makes security-critical rate-limited operations fail closed with HTTP 503, and missing storage/scanning disables admissions document upload, confirmation, and submission with HTTP 503. `/api/health` reports `degraded` while temporary mode or dependencies are incomplete. Switch to `APP_READINESS_MODE=final` (or remove the variable) only after all three dependencies are configured; final mode refuses startup if any is absent. Do not treat temporary mode as a production launch approval.
 
 ## 2. Configure the notification Cron service
 
@@ -27,9 +31,9 @@ The committed schedule is every five minutes. Verify the first run manually in R
 
 ## 3. First deployment and environment gate
 
-1. Create the Render Blueprint from the reviewed release commit.
-2. Set all mandatory variables before the web service starts. `instrumentation.ts` calls `assertEnv()` and production boot is refused for missing database/auth/site/Paystack configuration, missing shared rate limiting (unless explicit single-instance acceptance), missing S3 credentials, missing scanner without written acceptance, or missing job secret.
-3. Wait for the Docker build and health check. The image applies Prisma migrations before starting the web process. Confirm `/api/health` reports the database and Redis correctly; check Render logs for warnings and errors.
+1. Create the Render Blueprint from the reviewed release commit. The Blueprint sets `APP_READINESS_MODE=final`.
+2. Set all mandatory variables before the web service starts. `instrumentation.ts` calls `assertEnv()` and production boot is refused for missing database/auth/site/Paystack configuration, Upstash credentials, S3 credentials, malware scanner, or job secret. Legacy memory-rate-limit and unscanned-document flags do not waive final-mode requirements.
+3. Wait for the Docker build and health check. The image applies Prisma migrations before starting the web process. Confirm `/api/health` reports the database and all readiness dependencies; check Render logs for warnings and errors.
 4. Confirm a production error reaches Sentry and the browser CSP permits the **exact DSN origin** (not a broad wildcard).
 5. Verify that `/api/platform/signup` remains disabled (404) and `ENABLE_PLATFORM_SIGNUP` is not true.
 

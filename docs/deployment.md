@@ -38,10 +38,11 @@ cp .env.example .env
 
 | Variable | Production requirement |
 |----------|------------------------|
-| `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` | Required for distributed auth/admissions rate limits. Memory fallback is an explicit single-instance risk acceptance only. |
-| `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Required for private admissions-document storage. |
-| `MALWARE_SCANNER_URL` | Required, unless the owner explicitly records risk acceptance and sets `ALLOW_UNSCANNED_ADMISSION_DOCS=true`. |
-| `JOBS_SECRET` | Required for the Render notification Cron to authenticate to the web service. |
+| `APP_READINESS_MODE` | Defaults to `final`. Set `temporary` only for an incomplete site shell; it defers Redis/storage/scanner startup requirements, not their dependent operations. |
+| `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` | Required in final mode. Critical auth/admissions limiters fail closed without Redis in both readiness modes; `ALLOW_MEMORY_RATE_LIMITS` is test-harness-only and cannot waive production readiness. |
+| `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Required in final mode for private admissions-document storage; intake returns 503 until configured in temporary mode. |
+| `MALWARE_SCANNER_URL` | Required in final mode. Unscanned-document waivers are not supported; upload, confirmation and submission remain unavailable until configured. |
+| `JOBS_SECRET` | Required in every production mode for the Render notification Cron to authenticate to the web service. |
 | `RESEND_API_KEY`, `EMAIL_FROM` | Strongly required for account recovery, invitations and queued parent email; currently warned at boot rather than fatal. |
 | `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` | Configure to receive server/browser faults; browser CSP allows only the configured DSN origin. |
 
