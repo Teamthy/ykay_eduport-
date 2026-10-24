@@ -117,7 +117,7 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
       <PortalTopbar title="Student profile" />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-6 pt-28 pb-14">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <Link
               href="/admin/students"
               className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-white/60 hover:text-brand-green"
@@ -146,7 +146,7 @@ export default function AdminStudentDetailPage({ params }: { params: Promise<{ i
         </section>
 
         <section className="px-6 py-10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+          <div className="w-full flex flex-col gap-8 lg:flex-row">
             <AdminSidebar />
 
             <div className="min-w-0 flex-1 space-y-5">

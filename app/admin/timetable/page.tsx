@@ -147,7 +147,7 @@ export default function AdminTimetablePage() {
       <PortalTopbar />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="px-6 pb-10 pt-24">
-          <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl">
+          <div className="w-full rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl">
             <h1 className="font-display text-[42px] tracking-[3px] text-white md:text-[56px]">
               CLASS <span className="text-brand-green">TIMETABLE</span>
             </h1>
@@ -159,7 +159,7 @@ export default function AdminTimetablePage() {
         </section>
 
         <section className="px-6 pb-20">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+          <div className="w-full flex flex-col gap-8 lg:flex-row">
             <AdminSidebar />
 
             <div className="flex-1 min-w-0 space-y-6">

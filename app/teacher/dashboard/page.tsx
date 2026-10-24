@@ -131,13 +131,13 @@ export default function TeacherDashboard() {
   return (
     <>
       <PortalTopbar title="Teacher dashboard" />
-      <div className="absolute right-4 top-4">
-        <DownloadForOffline role="teacher" />
-      </div>
-      <main className="mx-auto flex max-w-[1600px] gap-8 px-4 py-6 sm:px-6">
+      <main className="portal-full-width flex gap-6 px-4 py-6 sm:px-6 xl:gap-8 xl:px-8">
         <TeacherSidebar />
         <section className="min-w-0 flex-1 space-y-6">
-          <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
+          <div className="flex justify-end">
+            <DownloadForOffline role="teacher" />
+          </div>
+          <div className="portal-hero rounded-[1.7rem] p-6 text-white sm:p-8">
             <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
               Live teaching hub
             </p>

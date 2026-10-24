@@ -129,9 +129,9 @@ export default function ParentDashboardPage() {
   return (
     <>
       <PortalTopbar />{" "}
-      <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
-        <section className="px-6 pb-10 pt-24 md:pt-32">
-          <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/5 bg-gradient-to-br from-brand-navy to-brand-navy-light p-8 shadow-xl md:p-12">
+      <main className="min-h-screen w-full bg-[var(--bg-primary)] theme-transition">
+        <section className="portal-hero px-4 py-10 sm:px-6 lg:py-12">
+          <div className="portal-full-width relative z-10">
             <h1 className="font-display text-[36px] tracking-[3px] text-white md:text-[56px]">
               PARENT <span className="text-brand-green">DASHBOARD</span>
             </h1>
@@ -142,8 +142,8 @@ export default function ParentDashboardPage() {
           </div>
         </section>
 
-        <section className="px-6 pb-20">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+        <section className="px-4 pb-16 pt-8 sm:px-6 xl:px-8">
+          <div className="portal-full-width flex flex-col gap-6 lg:flex-row xl:gap-8">
             <PortalSidebar portalName="Parent" portalType="parent" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 space-y-8">

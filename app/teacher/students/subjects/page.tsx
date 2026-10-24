@@ -105,7 +105,7 @@ function Inner() {
       <PortalTopbar title="Student subjects" />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-6 pt-28 pb-14">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <Link
               href="/teacher/class/roster"
               className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand-green"
@@ -124,7 +124,7 @@ function Inner() {
         </section>
 
         <section className="px-6 py-10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:flex-row">
+          <div className="w-full flex flex-col gap-8 lg:flex-row">
             <TeacherSidebar />
 
             <div className="min-w-0 flex-1 space-y-6">

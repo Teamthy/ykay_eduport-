@@ -118,7 +118,7 @@ export default function ExamPracticePage() {
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 bg-gradient-to-l from-brand-orange to-transparent" />
-          <div className="mx-auto max-w-7xl relative z-10">
+          <div className="w-full relative z-10">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-orange/20 border border-brand-orange/40 text-brand-orange text-[10px] font-bold uppercase tracking-widest mb-3">
               <Award size={11} /> Exam Practice
             </span>
@@ -133,7 +133,7 @@ export default function ExamPracticePage() {
         </section>
 
         <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
+          <div className="w-full flex flex-col lg:flex-row gap-8">
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 space-y-6">

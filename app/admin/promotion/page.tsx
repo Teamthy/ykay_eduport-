@@ -157,7 +157,7 @@ export default function PromotionPage() {
       <PortalTopbar />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition">
         <section className="pt-24 pb-10 bg-brand-navy px-6">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-orange/20 border border-brand-orange/40 text-brand-orange text-[10px] font-bold uppercase tracking-widest mb-3">
               <GraduationCap size={11} /> End of Session
             </span>
@@ -171,7 +171,7 @@ export default function PromotionPage() {
         </section>
 
         <section className="py-10 px-6">
-          <div className="mx-auto max-w-7xl flex flex-col lg:flex-row gap-8">
+          <div className="w-full flex flex-col lg:flex-row gap-8">
             <AdminSidebar />
 
             <div className="flex-1 min-w-0 space-y-6">

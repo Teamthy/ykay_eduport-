@@ -92,7 +92,7 @@ export default function ItPortalDashboard() {
       <>
         <Header />
         <main className="min-h-screen bg-[var(--bg-primary)] pt-28">
-          <div className="mx-auto max-w-7xl px-6">
+          <div className="w-full px-6">
             <div className="h-10 w-72 rounded-lg bg-[var(--surface-disabled)] animate-pulse" />
             <div className="mt-4 h-5 w-96 rounded-lg bg-[var(--surface-disabled)] animate-pulse" />
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -174,7 +174,7 @@ export default function ItPortalDashboard() {
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         {/* Hero */}
         <section className="bg-brand-navy px-6 pt-28 pb-14">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <div className="flex items-center gap-3 mb-3">
               <img src="/ykay-logo.png" alt="Ykay" className="h-10 w-10 rounded-lg" />
               <span className="rounded-full bg-brand-green/20 border border-brand-green/40 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
@@ -194,7 +194,7 @@ export default function ItPortalDashboard() {
         </section>
 
         <section className="px-6 py-10">
-          <div className="mx-auto max-w-7xl space-y-6">
+          <div className="w-full space-y-6">
             {/* Stats */}
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {[

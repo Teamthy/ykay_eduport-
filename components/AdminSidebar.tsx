@@ -3,29 +3,40 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3,
+  Activity,
+  ArrowLeftRight,
+  Banknote,
+  Bell,
   BookOpen,
+  Building2,
+  CalendarCheck,
+  CalendarClock,
   CalendarDays,
-  ClipboardCheck,
+  Calculator,
   CreditCard,
-  FileText,
-  GraduationCap,
+  FilePlus2,
+  FileSpreadsheet,
+  Grid3X3,
   HelpCircle,
   IdCard,
+  Inbox,
   LayoutDashboard,
-  Lock,
+  ListChecks,
+  LockKeyhole,
   LogOut,
-  MapPin,
   MessageCircle,
+  Newspaper,
+  QrCode,
+  Receipt,
   School,
-  Send,
-  Shield,
+  TrendingUp,
   UserPlus,
   Users,
+  Wallet,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import Image from "next/image";
-import ResponsiveSidebar from "@/components/ResponsiveSidebar";
+import ResponsiveSidebar, { useResponsiveSidebar } from "@/components/ResponsiveSidebar";
 
 /**
  * Role-gated admin navigation (audit H9).
@@ -45,7 +56,7 @@ const ADMIN_NAV = [
   {
     label: "Admissions Queue",
     href: "/admin-admissions",
-    icon: ClipboardCheck,
+    icon: Inbox,
     roles: PEOPLE_ADMIN,
   },
   { label: "Student Records", href: "/admin/students", icon: Users, roles: PEOPLE_ADMIN },
@@ -53,133 +64,179 @@ const ADMIN_NAV = [
   {
     label: "Staff QR Attendance",
     href: "/admin/staff-attendance",
-    icon: ClipboardCheck,
+    icon: QrCode,
     roles: PEOPLE_ADMIN,
   },
   { label: "Class Manager", href: "/admin/class-manager", icon: School, roles: ACADEMIC_ADMIN },
-  { label: "Timetable", href: "/admin/timetable", icon: CalendarDays, roles: ACADEMIC_ADMIN },
+  { label: "Timetable", href: "/admin/timetable", icon: CalendarClock, roles: ACADEMIC_ADMIN },
   { label: "Subjects", href: "/admin/subjects", icon: BookOpen, roles: ACADEMIC_ADMIN },
   { label: "Messages", href: "/admin/messages", icon: MessageCircle, roles: ALL_ADMIN_AREA },
   { label: "Sessions & Terms", href: "/admin/sessions", icon: CalendarDays, roles: CORE_ADMIN },
-  { label: "Promotion", href: "/admin/promotion", icon: GraduationCap, roles: ACADEMIC_ADMIN },
+  { label: "Promotion", href: "/admin/promotion", icon: TrendingUp, roles: ACADEMIC_ADMIN },
   {
     label: "Staff Assignments",
     href: "/admin/staff-assignments",
-    icon: BookOpen,
+    icon: ListChecks,
     roles: ACADEMIC_ADMIN,
   },
   { label: "Fee Management", href: "/admin/fees", icon: CreditCard, roles: FINANCE_ADMIN },
   {
     label: "Fee Structures",
     href: "/admin/fees/structures",
-    icon: CreditCard,
+    icon: Receipt,
     roles: FINANCE_ADMIN,
   },
   {
     label: "Generate Invoices",
     href: "/admin/fees/generate",
-    icon: CreditCard,
+    icon: FilePlus2,
     roles: FINANCE_ADMIN,
   },
   {
     label: "Transfer Review",
     href: "/admin/fees/transfers",
-    icon: CreditCard,
+    icon: ArrowLeftRight,
     roles: FINANCE_ADMIN,
   },
-  { label: "Expenses", href: "/admin/expenses", icon: CreditCard, roles: FINANCE_ADMIN },
-  { label: "Budgets", href: "/admin/budgets", icon: CreditCard, roles: FINANCE_ADMIN },
-  { label: "Finances", href: "/admin/finances", icon: CreditCard, roles: FINANCE_ADMIN },
+  { label: "Expenses", href: "/admin/expenses", icon: Banknote, roles: FINANCE_ADMIN },
+  { label: "Budgets", href: "/admin/budgets", icon: Calculator, roles: FINANCE_ADMIN },
+  { label: "Finances", href: "/admin/finances", icon: Wallet, roles: FINANCE_ADMIN },
   {
     label: "Attendance Analytics",
     href: "/admin/attendance-analytics",
-    icon: BarChart3,
+    icon: Activity,
     roles: PEOPLE_ADMIN,
   },
   {
     label: "Attendance Corrections",
     href: "/admin/attendance-corrections",
-    icon: ClipboardCheck,
+    icon: CalendarCheck,
     roles: PEOPLE_ADMIN,
   },
-  { label: "Report Cards", href: "/admin/report-cards", icon: FileText, roles: ACADEMIC_ADMIN },
-  { label: "Gradebook Lock", href: "/admin/gradebook-lock", icon: Lock, roles: ACADEMIC_ADMIN },
-  { label: "Broadsheet", href: "/admin/broadsheet", icon: BarChart3, roles: ACADEMIC_ADMIN },
+  {
+    label: "Report Cards",
+    href: "/admin/report-cards",
+    icon: FileSpreadsheet,
+    roles: ACADEMIC_ADMIN,
+  },
+  {
+    label: "Gradebook Lock",
+    href: "/admin/gradebook-lock",
+    icon: LockKeyhole,
+    roles: ACADEMIC_ADMIN,
+  },
+  { label: "Broadsheet", href: "/admin/broadsheet", icon: Grid3X3, roles: ACADEMIC_ADMIN },
   { label: "ID Cards", href: "/admin/id-cards", icon: IdCard, roles: PEOPLE_ADMIN },
-  { label: "Post & News", href: "/admin/news", icon: Send, roles: PEOPLE_ADMIN },
-  { label: "Notifications", href: "/admin/notifications", icon: Send, roles: PEOPLE_ADMIN },
-  { label: "School Profile", href: "/admin/school-profile", icon: MapPin, roles: CORE_ADMIN },
+  { label: "Post & News", href: "/admin/news", icon: Newspaper, roles: PEOPLE_ADMIN },
+  { label: "Notifications", href: "/admin/notifications", icon: Bell, roles: PEOPLE_ADMIN },
+  { label: "School Profile", href: "/admin/school-profile", icon: Building2, roles: CORE_ADMIN },
   { label: "View Questions", href: "/admin/questions", icon: HelpCircle, roles: PEOPLE_ADMIN },
 ];
 
-export default function AdminSidebar() {
+function AdminSidebarContent() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { collapsed } = useResponsiveSidebar();
+  const initials =
+    user?.name
+      ?.trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "YK";
 
   return (
-    <ResponsiveSidebar label="Admin">
-      <div className="space-y-4">
-        <div className="rounded-2xl border border-white/10 bg-brand-navy p-4">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/ykay-logo.png"
-              alt="Ykay"
-              width={36}
-              height={36}
-              className="h-9 w-9 object-contain"
-            />
-            <div>
-              <div className="text-[9px] font-bold uppercase tracking-widest text-brand-green">
-                Admin workspace
-              </div>
-              <div className="font-display text-sm tracking-[1px] text-white">YKAY COLLEGE</div>
-            </div>
-          </div>
-        </div>
-
-        {user && (
-          <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-3">
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-              <Shield size={12} /> Signed in
-            </div>
-            <div className="truncate text-sm font-bold text-[var(--text-primary)]">{user.name}</div>
-            <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-              {user.role?.replaceAll("_", " ")}
-            </div>
-          </div>
-        )}
-
-        <nav aria-label="Admin pages" className="space-y-1">
-          {ADMIN_NAV.filter(
-            (item) => user?.role && (item.roles as readonly string[]).includes(user.role),
-          ).map((item) => {
-            const isActive =
-              pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={isActive ? "page" : undefined}
-                className={`flex min-h-11 items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
-                  isActive
-                    ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
-                    : "border-transparent text-[var(--text-muted)] hover:bg-[var(--surface-disabled)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                <item.icon size={16} />
-                <span className="tracking-wide">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <button
-          onClick={logout}
-          className="flex min-h-11 w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-[var(--text-muted)] hover:text-red-500"
-        >
-          <LogOut size={14} /> Sign out
-        </button>
+    <div className="space-y-4 px-1 pb-2">
+      <div
+        className="portal-sidebar-brand flex items-center gap-3 rounded-2xl p-3"
+        title={collapsed ? "Ykay College admin workspace" : undefined}
+      >
+        <Image
+          src="/ykay-logo.png"
+          alt="Ykay"
+          width={36}
+          height={36}
+          className="h-9 w-9 shrink-0 object-contain"
+        />
+        <span className="portal-sidebar-brandcopy min-w-0">
+          <span className="block text-[9px] font-bold uppercase tracking-widest text-brand-green">
+            Admin workspace
+          </span>
+          <span className="block truncate font-display text-sm tracking-[1px] text-[var(--text-primary)]">
+            YKAY COLLEGE
+          </span>
+        </span>
       </div>
+
+      {user ? (
+        <div
+          className="portal-sidebar-user flex items-center gap-2.5 rounded-xl px-3 py-2.5"
+          title={
+            collapsed ? `${user.name} · ${user.role?.replaceAll("_", " ") || "Account"}` : undefined
+          }
+        >
+          <span className="portal-sidebar-user-avatar" aria-hidden="true">
+            {initials}
+          </span>
+          <span className="portal-sidebar-usercopy min-w-0">
+            <span className="block text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+              Signed in
+            </span>
+            <span className="block truncate text-xs font-bold text-[var(--text-primary)]">
+              {user.name}
+            </span>
+            <span className="block truncate text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
+              {user.role?.replaceAll("_", " ")}
+            </span>
+          </span>
+        </div>
+      ) : null}
+
+      <nav aria-label="Admin pages" className="space-y-1">
+        {ADMIN_NAV.filter(
+          (item) => user?.role && (item.roles as readonly string[]).includes(user.role),
+        ).map((item) => {
+          const isActive =
+            pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-label={item.label}
+              aria-current={isActive ? "page" : undefined}
+              title={collapsed ? item.label : undefined}
+              className="portal-nav-link"
+            >
+              <span className="portal-nav-icon">
+                <item.icon size={17} strokeWidth={1.85} />
+              </span>
+              <span className="portal-nav-label">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      <button
+        type="button"
+        onClick={logout}
+        aria-label="Sign out"
+        title={collapsed ? "Sign out" : undefined}
+        className="portal-nav-link text-left hover:!border-red-500/15 hover:!bg-red-500/10 hover:!text-red-400"
+      >
+        <span className="portal-nav-icon">
+          <LogOut size={16} strokeWidth={1.85} />
+        </span>
+        <span className="portal-nav-label">Sign out</span>
+      </button>
+    </div>
+  );
+}
+
+export default function AdminSidebar() {
+  return (
+    <ResponsiveSidebar label="Admin">
+      <AdminSidebarContent />
     </ResponsiveSidebar>
   );
 }

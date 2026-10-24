@@ -175,7 +175,7 @@ export default function SchoolProfilePage() {
       <PortalTopbar title="School location" />
       <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
         <section className="bg-brand-navy px-4 pb-10 pt-24 text-white sm:px-6 sm:pb-14 sm:pt-28">
-          <div className="mx-auto max-w-7xl">
+          <div className="w-full">
             <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-brand-green/40 bg-brand-green/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
               <MapPin size={12} /> School profile
             </span>
@@ -190,7 +190,7 @@ export default function SchoolProfilePage() {
         </section>
 
         <section className="px-4 py-6 sm:px-6 sm:py-10">
-          <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:gap-8">
+          <div className="w-full flex flex-col gap-6 lg:flex-row lg:gap-8">
             <AdminSidebar />
 
             <div className="min-w-0 flex-1 space-y-6">

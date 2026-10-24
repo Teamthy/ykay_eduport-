@@ -82,7 +82,7 @@ export default function SuperAdminPortalsPage() {
   return (
     <>
       <PortalTopbar title="Portal navigation" />
-      <main className="mx-auto max-w-[1600px] px-6 py-8">
+      <main className="w-full px-6 py-8">
         <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
           <p className="text-xs font-bold uppercase tracking-widest text-brand-green">
             Cross-portal access

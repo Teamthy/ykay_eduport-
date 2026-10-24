@@ -153,7 +153,7 @@ export default function TeacherStudentsPage() {
   return (
     <>
       <PortalTopbar title="My students" />
-      <main className="mx-auto flex max-w-[1600px] gap-8 px-4 py-6 sm:px-6">
+      <main className="w-full flex gap-8 px-4 py-6 sm:px-6">
         <TeacherSidebar />
         <section className="min-w-0 flex-1 space-y-6">
           <div className="rounded-[2rem] bg-brand-navy p-7 text-white">

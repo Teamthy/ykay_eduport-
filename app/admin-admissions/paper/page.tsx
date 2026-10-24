@@ -125,7 +125,7 @@ export default function PaperIntakePage() {
     <>
       <PortalTopbar />
       <main className="bg-[var(--bg-primary)] min-h-screen theme-transition pt-20">
-        <div className="mx-auto max-w-7xl px-6 py-8 flex flex-col lg:flex-row gap-8">
+        <div className="w-full px-6 py-8 flex flex-col lg:flex-row gap-8">
           <AdminSidebar />
 
           <div className="flex-1 min-w-0 space-y-6">

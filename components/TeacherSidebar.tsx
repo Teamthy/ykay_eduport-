@@ -13,17 +13,20 @@ import {
   UserCheck,
   History,
   School,
-  Award,
   BarChart3,
+  CalendarCheck,
+  CalendarClock,
   LoaderCircle,
   Upload,
   Library,
   Send,
   Megaphone,
-  MessageCircle,
+  MessageSquare,
+  TrendingUp,
+  UserCog,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
-import ResponsiveSidebar from "@/components/ResponsiveSidebar";
+import ResponsiveSidebar, { useResponsiveSidebar } from "@/components/ResponsiveSidebar";
 
 type Me = {
   displayName: string;
@@ -47,11 +50,11 @@ function NavBlock({
   items: NavItem[];
   pathname: string;
 }) {
+  const { collapsed } = useResponsiveSidebar();
+
   return (
     <div>
-      <div className={`px-4 mb-2 text-[10px] font-bold uppercase tracking-widest ${color}`}>
-        {title}
-      </div>
+      <div className={`portal-nav-section-title ${color}`}>{title}</div>
       <nav aria-label={`${title} pages`} className="space-y-1">
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -59,17 +62,17 @@ function NavBlock({
             <Link
               key={item.href}
               href={item.href}
+              aria-label={item.label}
               aria-current={active ? "page" : undefined}
-              className={`flex min-h-11 w-full items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
-                active
-                  ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
-                  : "border-transparent text-[var(--text-muted)] hover:bg-[var(--surface-disabled)] hover:text-[var(--text-primary)]"
-              }`}
+              title={collapsed ? item.label : undefined}
+              className="portal-nav-link"
             >
-              <item.icon size={16} />
-              <span className="flex-1 tracking-wide">{item.label}</span>
+              <span className="portal-nav-icon">
+                <item.icon size={17} strokeWidth={1.85} />
+              </span>
+              <span className="portal-nav-label">{item.label}</span>
               {item.badge ? (
-                <span className="rounded-full bg-brand-orange px-2 py-0.5 text-[9px] font-bold text-brand-navy">
+                <span className="portal-nav-badge rounded-full bg-brand-orange px-2 py-0.5 text-[9px] font-bold text-brand-navy">
                   {item.badge}
                 </span>
               ) : null}
@@ -115,16 +118,16 @@ export default function TeacherSidebar() {
   const general: NavItem[] = [
     { label: "Dashboard", href: "/teacher/dashboard", icon: LayoutDashboard },
     { label: "My Students", href: "/teacher/students", icon: Users },
-    { label: "My Profile", href: "/teacher/profile", icon: Award },
-    { label: "My attendance", href: "/staff/attendance", icon: UserCheck },
+    { label: "My Profile", href: "/teacher/profile", icon: UserCog },
+    { label: "My attendance", href: "/staff/attendance", icon: CalendarCheck },
     { label: "My Records", href: "/teacher/my-records", icon: FileText },
     { label: "Announcements", href: "/teacher/announcements", icon: Megaphone },
-    { label: "Messages", href: "/teacher/messages", icon: MessageCircle },
+    { label: "Messages", href: "/teacher/messages", icon: MessageSquare },
   ];
 
   const subject: NavItem[] = [
     { label: "Gradebook", href: "/teacher/gradebook", icon: BookOpen },
-    { label: "Performance Records", href: "/teacher/performance-records", icon: BookOpen },
+    { label: "Performance Records", href: "/teacher/performance-records", icon: TrendingUp },
     { label: "Analytics", href: "/teacher/analytics", icon: BarChart3 },
   ];
 
@@ -174,36 +177,42 @@ export default function TeacherSidebar() {
     { label: "Attendance history", href: "/teacher/class/attendance-history", icon: History },
     { label: "Class report cards", href: "/teacher/class/report-cards", icon: FileText },
     { label: "Class parents", href: "/teacher/class/parents", icon: Users },
-    { label: "Class timetable", href: "/teacher/class/timetable", icon: History },
+    { label: "Class timetable", href: "/teacher/class/timetable", icon: CalendarClock },
   ];
 
   return (
     <ResponsiveSidebar label="Teacher">
-      <div className="space-y-4 pb-4 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
-        <div className="rounded-2xl border border-white/10 bg-brand-navy p-4">
-          <div className="text-[9px] font-bold uppercase tracking-widest text-brand-green">
-            Teaching workspace
-          </div>
-          <div className="mt-1 font-display text-sm tracking-[1px] text-white">
-            {loading ? "Loading…" : me?.displayName || user?.name || "Teacher"}
-          </div>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {isSubject && (
-              <span className="rounded-full bg-brand-green/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-green">
-                Subject
-              </span>
-            )}
-            {isForm && (
-              <span className="rounded-full bg-brand-orange/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-orange">
-                Form {me?.formClassName || ""}
-              </span>
-            )}
-          </div>
+      <div className="space-y-4 px-1 pb-2">
+        <div className="portal-sidebar-brand flex items-center gap-3 rounded-2xl p-3">
+          <span className="portal-sidebar-user-avatar" aria-hidden="true">
+            <School size={18} strokeWidth={1.8} />
+          </span>
+          <span className="portal-sidebar-brandcopy min-w-0">
+            <span className="block text-[9px] font-bold uppercase tracking-widest text-brand-green">
+              Teaching workspace
+            </span>
+            <span className="mt-0.5 block truncate font-display text-sm tracking-[1px] text-[var(--text-primary)]">
+              {loading ? "Loading…" : me?.displayName || user?.name || "Teacher"}
+            </span>
+            <span className="mt-2 flex flex-wrap gap-1.5">
+              {isSubject && (
+                <span className="rounded-full bg-brand-green/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-green">
+                  Subject
+                </span>
+              )}
+              {isForm && (
+                <span className="rounded-full bg-brand-orange/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-orange">
+                  Form {me?.formClassName || ""}
+                </span>
+              )}
+            </span>
+          </span>
         </div>
 
         {loading ? (
-          <div className="flex items-center gap-2 px-4 text-xs text-[var(--text-muted)]">
-            <LoaderCircle className="animate-spin" size={14} /> Syncing assignments…
+          <div className="flex items-center gap-2 px-3 text-xs text-[var(--text-muted)]">
+            <LoaderCircle className="animate-spin" size={14} />
+            <span className="portal-sidebar-brandcopy">Syncing assignments…</span>
           </div>
         ) : null}
 
@@ -234,10 +243,16 @@ export default function TeacherSidebar() {
         ) : null}
 
         <button
+          type="button"
           onClick={logout}
-          className="flex min-h-11 w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-[var(--text-muted)] hover:text-red-500"
+          aria-label="Sign out"
+          title="Sign out"
+          className="portal-nav-link text-left hover:!border-red-500/15 hover:!bg-red-500/10 hover:!text-red-400"
         >
-          <LogOut size={14} /> Sign out
+          <span className="portal-nav-icon">
+            <LogOut size={16} strokeWidth={1.85} />
+          </span>
+          <span className="portal-nav-label">Sign out</span>
         </button>
       </div>
     </ResponsiveSidebar>

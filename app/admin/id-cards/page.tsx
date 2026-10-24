@@ -140,7 +140,7 @@ export default function AdminIDCardsPage() {
   return (
     <>
       <PortalTopbar title="ID cards" />
-      <main className="mx-auto flex max-w-[1600px] gap-8 px-4 py-6 sm:px-6 print:block">
+      <main className="w-full flex gap-8 px-4 py-6 sm:px-6 print:block">
         <div className="print:hidden">
           <AdminSidebar />
         </div>

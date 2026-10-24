@@ -52,7 +52,7 @@ export default function SuperAdminHealthPage() {
   return (
     <>
       <PortalTopbar title="System health" />
-      <main className="mx-auto max-w-4xl px-6 py-8">
+      <main className="w-full px-4 py-8 sm:px-6 xl:px-8">
         <Link
           href="/super-admin/portals"
           className="mb-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-brand-green"

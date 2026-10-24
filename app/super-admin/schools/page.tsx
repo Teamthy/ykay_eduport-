@@ -62,7 +62,7 @@ export default function SuperAdminSchoolsPage() {
   return (
     <>
       <PortalTopbar title="Schools overview" />
-      <main className="mx-auto max-w-[1600px] px-6 py-8">
+      <main className="w-full px-6 py-8">
         <div className="rounded-[2rem] bg-brand-navy p-7 text-white">
           <Link
             href="/super-admin/portals"
