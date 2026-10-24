@@ -1,0 +1,89 @@
+name: Staging demo data seed
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "status is read-only; seed creates fictional role accounts and profiles"
+        required: true
+        type: choice
+        default: status
+        options:
+          - status
+          - seed
+      confirmation:
+        description: "For seed only, enter SEED STAGING DEMO"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-demo-seed
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    name: ${{ inputs.operation == 'seed' && 'Seed staging demo data' || 'Check staging database' }}
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging-demo
+
+    steps:
+      - name: Require explicit confirmation for demo data
+        if: inputs.operation == 'seed'
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [[ "$CONFIRMATION" != "SEED STAGING DEMO" ]]; then
+            echo "::error::For a staging demo seed, dispatch with confirmation=SEED STAGING DEMO. No database changes were made."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate isolated direct Neon target
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          STAGING_DATABASE_HOST: ${{ vars.STAGING_DATABASE_HOST }}
+          PRODUCTION_DATABASE_HOST: ${{ vars.PRODUCTION_DATABASE_HOST }}
+        run: |
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo "::error::Set STAGING_DIRECT_DATABASE_URL in the protected staging-demo environment."
+            exit 1
+          fi
+          printf '::add-mask::%s\n' "$DATABASE_URL"
+          npm run db:seed-staging-demo -- --check-target
+
+      - name: Check migration status (read-only)
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+        run: |
+          printf '::add-mask::%s\n' "$DATABASE_URL"
+          npx prisma migrate status --schema prisma/schema.prisma
+
+      - name: Seed fictional staging accounts and profiles
+        if: inputs.operation == 'seed'
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          STAGING_DATABASE_HOST: ${{ vars.STAGING_DATABASE_HOST }}
+          PRODUCTION_DATABASE_HOST: ${{ vars.PRODUCTION_DATABASE_HOST }}
+          DEMO_SEED_PASSWORD: ${{ secrets.DEMO_SEED_PASSWORD }}
+          DEMO_SEED_CONFIRMATION: ${{ inputs.confirmation }}
+          SCHOOL_SLUG: ykay-college
+        run: |
+          printf '::add-mask::%s\n' "$DATABASE_URL"
+          npm run db:seed-staging-demo
