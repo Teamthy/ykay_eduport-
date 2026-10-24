@@ -25,6 +25,12 @@ export async function POST(request: NextRequest) {
   // ── IP limit (20 Production, 30 Preview, 10 local per 15 min) ──
   const ipLimit = await enforceRateLimit("login", ip);
   if (!ipLimit.success) {
+    if (ipLimit.configurationError) {
+      return NextResponse.json(
+        { error: "Sign-in is temporarily unavailable. Please try again shortly." },
+        { status: 503, headers: { "Retry-After": String(ipLimit.retryAfterSeconds) } },
+      );
+    }
     await recordSecurityEvent({
       eventType: "LOGIN_FAILED_BAD_PASSWORD",
       ipAddress: ip,
@@ -47,6 +53,12 @@ export async function POST(request: NextRequest) {
     // record a failure.
     const emailLimit = await checkRateLimit("loginStrict", email);
     if (!emailLimit.success) {
+      if (emailLimit.configurationError) {
+        return NextResponse.json(
+          { error: "Sign-in is temporarily unavailable. Please try again shortly." },
+          { status: 503, headers: { "Retry-After": String(emailLimit.retryAfterSeconds) } },
+        );
+      }
       await recordSecurityEvent({
         eventType: "LOGIN_FAILED_BAD_PASSWORD",
         userEmail: email,
