@@ -158,19 +158,23 @@ enum StaffAttendanceEventType {
 }
 
 model School {
-  id           String       @id @default(cuid())
-  slug         String       @unique
-  name         String
-  address      String
-  phone        String
-  email        String?
-  motto        String?
-  subdomain    String?      @unique
-  customDomain String?      @unique
-  status       SchoolStatus @default(ACTIVE)
-  modules      Json?
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id                   String       @id @default(cuid())
+  slug                 String       @unique
+  name                 String
+  address              String
+  campusLatitude       Float?
+  campusLongitude      Float?
+  geofenceRadiusMeters Int          @default(150)
+  geofenceEnabled      Boolean      @default(false)
+  phone                String
+  email                String?
+  motto                String?
+  subdomain            String?      @unique
+  customDomain         String?      @unique
+  status               SchoolStatus @default(ACTIVE)
+  modules              Json?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 
   users                   User[]
   applications            AdmissionApplication[]
@@ -1351,18 +1355,21 @@ model Budget {
 }
 
 model StaffAttendanceEvent {
-  id               String                   @id @default(cuid())
-  schoolId         String
-  teacherProfileId String
-  eventType        StaffAttendanceEventType
-  scannedAt        DateTime                 @default(now())
-  isLate           Boolean                  @default(false)
-  lateMinutes      Int                      @default(0)
-  source           String                   @default("QR")
-  scannerUserId    String?
-  note             String?
-  workDate         DateTime                 @db.Date
-  createdAt        DateTime                 @default(now())
+  id                       String                   @id @default(cuid())
+  schoolId                 String
+  teacherProfileId         String
+  eventType                StaffAttendanceEventType
+  scannedAt                DateTime                 @default(now())
+  isLate                   Boolean                  @default(false)
+  lateMinutes              Int                      @default(0)
+  source                   String                   @default("QR")
+  scannerUserId            String?
+  note                     String?
+  geofenceVerified         Boolean?
+  distanceFromCampusMeters Int?
+  locationAccuracyMeters   Int?
+  workDate                 DateTime                 @db.Date
+  createdAt                DateTime                 @default(now())
 
   school         School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   teacherProfile TeacherProfile @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)

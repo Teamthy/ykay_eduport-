@@ -6,9 +6,17 @@ export type SchoolProfile = {
   name: string;
   /** The confirmed postal address, or null while the school has not set one. */
   address: string | null;
+  /** Public campus map pin; null until the school confirms coordinates. */
+  campusLatitude: number | null;
+  campusLongitude: number | null;
 };
 
-const SchoolProfileContext = createContext<SchoolProfile>({ name: "", address: null });
+const SchoolProfileContext = createContext<SchoolProfile>({
+  name: "",
+  address: null,
+  campusLatitude: null,
+  campusLongitude: null,
+});
 
 /** Supplies the resolved school to every page. The root layout reads it on the server. */
 export function SchoolProfileProvider({

@@ -126,9 +126,11 @@ export default function NotificationBell() {
   return (
     <div ref={ref} className="relative">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-full text-[var(--nav-text)] hover:bg-[var(--surface-card-hover)] hover:text-brand-green transition-all"
+        className="relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-[var(--nav-text)] transition-all hover:bg-[var(--surface-card-hover)] hover:text-brand-green"
         aria-label="Notifications"
+        aria-expanded={open}
       >
         <Bell size={18} />
         {unreadCount > 0 && (
@@ -140,8 +142,8 @@ export default function NotificationBell() {
 
       {open && (
         <div
-          className="absolute right-0 top-full mt-3 w-96 max-h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-          style={{ zIndex: 200, backgroundColor: "#0C1824" }}
+          className="absolute right-0 top-full mt-3 w-96 max-h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-brand-navy"
+          style={{ zIndex: 200 }}
         >
           <div className="p-4 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-2">

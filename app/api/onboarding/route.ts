@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
           ...(input.phone ? { phone: input.phone } : {}),
           ...(input.motto ? { motto: input.motto } : {}),
         },
+        select: { id: true },
       }),
       prisma.tenantBranding.upsert({
         where: { schoolId: user.schoolId },

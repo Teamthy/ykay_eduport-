@@ -42,6 +42,31 @@ test.describe("staff attendance + QR camera", () => {
     expect(policy).toMatch(/geolocation=\(\)/);
   });
 
+  test("staff self-service grants GPS only on its attendance route", async ({ page, context }) => {
+    await useSession(context, page, "teacher");
+    const response = await page.goto("/staff/attendance");
+    expect(response, "no response for /staff/attendance").toBeTruthy();
+    const policy = response!.headers()["permissions-policy"] || "";
+
+    expect(policy).toMatch(/geolocation=\(self\)/);
+    expect(policy).toMatch(/camera=\(\)/);
+    expect(policy).toMatch(/microphone=\(\)/);
+  });
+
+  test("only the school profile page grants GPS for setting a campus pin", async ({
+    page,
+    context,
+  }) => {
+    await useSession(context, page, "admin");
+    const response = await page.goto("/admin/school-profile");
+    expect(response, "no response for /admin/school-profile").toBeTruthy();
+    const policy = response!.headers()["permissions-policy"] || "";
+
+    expect(policy).toMatch(/geolocation=\(self\)/);
+    expect(policy).toMatch(/camera=\(\)/);
+    expect(policy).toMatch(/microphone=\(\)/);
+  });
+
   test("every other page still denies the camera", async ({ page, context }) => {
     await useSession(context, page, "admin");
     const response = await page.goto("/admin");

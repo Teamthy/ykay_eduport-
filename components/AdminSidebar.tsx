@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import Image from "next/image";
+import ResponsiveSidebar from "@/components/ResponsiveSidebar";
 
 /**
  * Role-gated admin navigation (audit H9).
@@ -116,8 +117,8 @@ export default function AdminSidebar() {
   const { user, logout } = useAuth();
 
   return (
-    <aside className="hidden w-[280px] shrink-0 lg:block">
-      <div className="sticky top-24 space-y-4">
+    <ResponsiveSidebar label="Admin">
+      <div className="space-y-4">
         <div className="rounded-2xl border border-white/10 bg-brand-navy p-4">
           <div className="flex items-center gap-3">
             <Image
@@ -148,7 +149,7 @@ export default function AdminSidebar() {
           </div>
         )}
 
-        <nav className="space-y-1">
+        <nav aria-label="Admin pages" className="space-y-1">
           {ADMIN_NAV.filter(
             (item) => user?.role && (item.roles as readonly string[]).includes(user.role),
           ).map((item) => {
@@ -158,7 +159,8 @@ export default function AdminSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
+                aria-current={isActive ? "page" : undefined}
+                className={`flex min-h-11 items-center gap-3 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
                   isActive
                     ? "border-brand-green/20 bg-brand-green/10 text-brand-green"
                     : "border-transparent text-[var(--text-muted)] hover:bg-[var(--surface-disabled)] hover:text-[var(--text-primary)]"
@@ -173,11 +175,11 @@ export default function AdminSidebar() {
 
         <button
           onClick={logout}
-          className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-xs text-[var(--text-muted)] hover:text-red-500"
+          className="flex min-h-11 w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-[var(--text-muted)] hover:text-red-500"
         >
           <LogOut size={14} /> Sign out
         </button>
       </div>
-    </aside>
+    </ResponsiveSidebar>
   );
 }

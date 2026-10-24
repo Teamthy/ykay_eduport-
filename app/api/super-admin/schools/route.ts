@@ -11,7 +11,16 @@ export async function GET() {
 
   const schools = await prisma.school.findMany({
     orderBy: { createdAt: "asc" },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      status: true,
+      email: true,
+      phone: true,
+      address: true,
+      customDomain: true,
+      createdAt: true,
       _count: {
         select: { studentProfiles: true, users: true, teacherProfiles: true, classes: true },
       },

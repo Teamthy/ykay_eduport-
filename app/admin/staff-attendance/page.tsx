@@ -345,8 +345,13 @@ export default function AdminStaffAttendancePage() {
                 </button>
               </div>
 
-              <div className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]">
-                <table className="w-full text-left text-sm">
+              <div
+                role="region"
+                aria-label="Staff attendance table; scroll horizontally for all columns"
+                tabIndex={0}
+                className="overflow-x-auto rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]"
+              >
+                <table className="w-full min-w-[620px] text-left text-sm">
                   <thead className="bg-[var(--surface-disabled)] text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                     <tr>
                       <th className="p-4">Staff</th>

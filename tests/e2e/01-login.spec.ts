@@ -9,8 +9,9 @@ import { loginViaForm, apiLogin, ACCOUNTS, PASSWORD, HOME_FOR } from "./helpers"
  * or middleware redirecting a legitimate user into a loop.
  *
  * ── A real constraint this suite has to respect ────────────────────────────
- * /api/auth/login allows 10 attempts per 15 minutes PER IP, and the in-memory
- * limiter is a process-level Map, so the window survives between test runs
+ * The local /api/auth/login budget is 10 attempts per 15 minutes PER IP
+ * (Vercel Preview has 30 for QA). The isolated E2E in-memory limiter is a
+ * process-level Map, so the window survives between test runs
  * until the server restarts. The whole suite shares one IP. Sign-ins are
  * therefore rationed: form logins happen only where the form itself is the
  * thing under test, and everything else reuses the issued cookie.

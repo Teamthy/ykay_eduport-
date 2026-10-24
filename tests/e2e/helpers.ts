@@ -8,8 +8,9 @@ import { expect, type Page, type APIRequestContext, type BrowserContext } from "
  * seeded with — failing loudly here is much clearer than a redirect loop.
  *
  * ── Why sessions are cached ────────────────────────────────────────────────
- * /api/auth/login is rate limited to 10 attempts per 15 minutes PER IP
- * (lib/rate-limit.ts, `login`). Every test runs from one IP, so a suite that
+ * /api/auth/login defaults to 10 attempts per 15 minutes PER IP; Vercel
+ * Preview allows 30 for QA (lib/rate-limit.ts, `login`). This local suite uses
+ * the 10-attempt budget. Every test runs from one IP, so a suite that
  * signs in afresh for each test locks itself out around test 11 and then
  * reports a wall of misleading failures.
  *
@@ -92,7 +93,8 @@ function diagnose(status: number, body: string): string {
   if (status === 429) {
     return (
       `Rate limited (429) before any test could sign in.\n\n` +
-      `  /api/auth/login allows 10 attempts per 15 min per IP, and the limiter\n` +
+      `  /api/auth/login allows 10 attempts per 15 min per IP in this local test\n` +
+      `  environment (30 on Vercel Preview), and the limiter\n` +
       `  lives in the server process. Restart the server to clear it.\n`
     );
   }
@@ -100,8 +102,8 @@ function diagnose(status: number, body: string): string {
 }
 
 /**
- * How many real sign-ins the suite has spent. The limiter allows 10 per 15
- * minutes per IP and its window is a process-level Map, so exceeding it
+ * How many real sign-ins the suite has spent. The local limiter allows 10 per
+ * 15 minutes per IP and its window is a process-level Map, so exceeding it
  * poisons every later test with a misleading failure. Counting here turns
  * that into one clear message instead.
  */
@@ -113,7 +115,8 @@ export async function loginViaForm(page: Page, role: Role) {
   if (realLogins > LOGIN_BUDGET) {
     throw new Error(
       `E2E login budget exhausted (${realLogins} > ${LOGIN_BUDGET}). /api/auth/login ` +
-        "allows 10 attempts per 15 min per IP. Use useSession() instead of signing " +
+        "allows 10 attempts per 15 min per IP in this local test environment " +
+        "(30 on Vercel Preview). Use useSession() instead of signing " +
         "in again, or restart the server to clear the in-memory limiter.",
     );
   }

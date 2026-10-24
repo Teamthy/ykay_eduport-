@@ -22,7 +22,7 @@ export default function LoadingScreen() {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden ${
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden bg-brand-navy-dark ${
         phase === "leaving" ? "anim-fade-out" : ""
       }`}
       style={{ backgroundColor: "#050C14" }}
@@ -60,7 +60,6 @@ export default function LoadingScreen() {
           >
             {/* Static WebP — no on-demand /_next/image conversion on a cold
                 server (the splash shows on first paint). */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/ykay-logo-280.webp"
               alt="Ykay College Logo"

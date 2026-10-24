@@ -1,135 +1,167 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, ArrowRight, Play } from "lucide-react";
-
+import { ArrowRight, BookOpen, MapPin, Newspaper, ShieldCheck } from "lucide-react";
 import { AnimatedText } from "@/components/AnimatedTextStatic";
 import { useSchoolProfile } from "@/components/SchoolProfileContext";
+
 export default function FindUs() {
-  const { address } = useSchoolProfile();
+  const { address, campusLatitude, campusLongitude } = useSchoolProfile();
+  const hasCoordinates =
+    campusLatitude !== null &&
+    campusLongitude !== null &&
+    Number.isFinite(campusLatitude) &&
+    campusLatitude >= -90 &&
+    campusLatitude <= 90 &&
+    Number.isFinite(campusLongitude) &&
+    campusLongitude >= -180 &&
+    campusLongitude <= 180;
+  const mapQuery = hasCoordinates ? `${campusLatitude},${campusLongitude}` : address;
+  const directionsUrl = mapQuery
+    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery)}`
+    : null;
+
   return (
-    <section id="find-us" className="w-full bg-[var(--bg-primary)] py-16 md:py-24 theme-transition">
-      <div className="mx-auto w-full px-6 md:px-10">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
-          {/* Find Us */}
-          <div>
-            <span className="font-body text-[10px] font-bold tracking-[0.25em] uppercase text-brand-green mb-4 block">
-              FIND US
+    <section
+      id="find-us"
+      className="w-full bg-[var(--bg-primary)] py-12 theme-transition sm:py-16 md:py-24"
+    >
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14 lg:px-10">
+        {/* A useful, timeless featured card instead of a dated hard-coded news item. */}
+        <div className="min-w-0">
+          <span className="mb-3 block font-body text-[10px] font-bold uppercase tracking-[0.25em] text-brand-green">
+            FEATURED AT YKAY
+          </span>
+          <h2 className="mb-6 font-display text-[clamp(2.1rem,6.5vw,5rem)] leading-[0.9] tracking-[-0.015em] text-[var(--text-primary)] sm:mb-8">
+            <AnimatedText heavy stagger={0.03} text="YOUR NEXT STEP" className="block" />
+            <span className="block text-brand-green">
+              <AnimatedText heavy stagger={0.03} text="STARTS HERE" delay={0.12} />
             </span>
-            <h2 className="font-display text-[clamp(2.25rem,6.5vw,5.5rem)] leading-[0.86] tracking-[-0.015em] text-[var(--text-primary)] mb-8">
-              <AnimatedText heavy stagger={0.03} text="YKAY" delay={0.0} className="block" />
-              <span className="block text-brand-green">
-                <AnimatedText heavy stagger={0.03} text="COLLEGE" delay={0.1} />
+          </h2>
+
+          <article className="group relative isolate flex min-h-[390px] flex-col justify-end overflow-hidden rounded-[1.5rem] border border-[var(--border-subtle)] bg-brand-navy-dark shadow-2xl sm:min-h-[440px] sm:rounded-[2rem]">
+            {/* A small pre-compressed WebP keeps this below-fold feature light on mobile data. */}
+            <img
+              src="/home/ykay-students-750.webp"
+              alt="Ykay College students learning together"
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 -z-10 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -z-10 bg-gradient-to-t from-brand-navy-dark via-brand-navy-dark/75 to-brand-navy-dark/10"
+            />
+
+            <div className="p-5 sm:p-8">
+              <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-brand-navy-dark/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white">
+                <ShieldCheck size={13} className="text-brand-green" /> A school for learning and
+                leadership
               </span>
-            </h2>
+              <h3 className="max-w-xl font-display text-3xl leading-[0.98] tracking-wide text-white sm:text-4xl md:text-5xl">
+                Find the right path for your learner.
+              </h3>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/90 sm:text-base">
+                Explore the school, learn about admissions, and keep up with what is happening at
+                Ykay College.
+              </p>
 
-            {address ? (
-              <>
-                {/* Map: a plain place embed (no API key). The query is the confirmed campus address. */}
-                <div className="mb-6 aspect-[4/3] overflow-hidden rounded-3xl border border-[var(--border-subtle)] shadow-lg">
-                  <iframe
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    referrerPolicy="no-referrer-when-downgrade"
-                    loading="lazy"
-                    title={`Map showing ${address}`}
-                  />
-                </div>
-
-                {/* Address Card */}
-                <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-brand-green/10 text-brand-green flex items-center justify-center shrink-0">
-                      <MapPin size={22} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-[10px] uppercase tracking-widest text-brand-green font-bold mb-1">
-                        Our Campus Address
-                      </div>
-                      <div className="text-[var(--text-primary)] font-medium leading-relaxed">
-                        {address}
-                      </div>
-                      <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 mt-3 text-sm text-brand-green font-bold hover:underline"
-                      >
-                        Get Directions <ArrowRight size={12} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)]">
-                <div className="text-[10px] uppercase tracking-widest text-brand-green font-bold mb-1">
-                  Visit Us
-                </div>
-                <p className="text-[var(--text-primary)] leading-relaxed">
-                  Call or email the school office and we will give you directions to the campus.
-                </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <Link
+                  href="/admissions"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand-orange px-5 py-3 text-sm font-bold text-brand-navy shadow-lg transition hover:bg-brand-orange-dark focus-visible:outline-white"
+                >
+                  Admissions <ArrowRight size={16} />
+                </Link>
+                <Link
+                  href="/academics"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/40 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/20"
+                >
+                  <BookOpen size={16} /> Explore academics
+                </Link>
               </div>
-            )}
-          </div>
+              <Link
+                href="/news-events"
+                className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-white underline decoration-white/60 underline-offset-4 transition hover:text-brand-green"
+              >
+                <Newspaper size={15} /> School news and events <ArrowRight size={14} />
+              </Link>
+            </div>
+          </article>
+        </div>
 
-          {/* Latest News */}
-          <div>
-            <span className="font-body text-[10px] font-bold tracking-[0.25em] uppercase text-brand-green mb-4 block">
-              FEATURED NEWS
+        {/* Campus location: use confirmed coordinates first, then the confirmed address. */}
+        <div className="min-w-0 lg:pt-2">
+          <span className="mb-3 block font-body text-[10px] font-bold uppercase tracking-[0.25em] text-brand-green">
+            FIND US
+          </span>
+          <h2 className="mb-6 font-display text-[clamp(2.1rem,6.5vw,5rem)] leading-[0.9] tracking-[-0.015em] text-[var(--text-primary)] sm:mb-8">
+            <AnimatedText heavy stagger={0.03} text="VISIT THE" className="block" />
+            <span className="block text-brand-green">
+              <AnimatedText heavy stagger={0.03} text="CAMPUS" delay={0.12} />
             </span>
-            <h2 className="font-display text-[clamp(2.25rem,6.5vw,5.5rem)] leading-[0.86] tracking-[-0.015em] text-[var(--text-primary)] mb-8">
-              <AnimatedText heavy stagger={0.03} text="LATEST FROM" delay={0.0} className="block" />
-              <span className="block text-brand-green">
-                <AnimatedText heavy stagger={0.03} text="THE SCHOOL" delay={0.275} />
-              </span>
-            </h2>
+          </h2>
 
-            {/* Featured News Card */}
-            <Link href="/news-events" className="block group">
-              <div className="relative rounded-3xl overflow-hidden aspect-[16/10] mb-4 shadow-lg">
-                <img
-                  src="/home/ykay-students.png"
-                  alt="School event"
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                {/* Play button */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:scale-110 group-hover:bg-[#4ec54d] transition-all">
-                    <Play size={24} className="text-white ml-1" fill="white" />
-                  </div>
-                </div>
+          {mapQuery ? (
+            <div className="mb-5 aspect-[4/3] overflow-hidden rounded-[1.5rem] border border-[var(--border-subtle)] bg-[var(--bg-secondary)] shadow-lg sm:rounded-[2rem]">
+              <iframe
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&z=16&output=embed`}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+                loading="lazy"
+                title={address ? `Map showing ${address}` : "Map showing Ykay College campus"}
+              />
+            </div>
+          ) : (
+            <div className="mb-5 flex aspect-[4/3] min-h-[280px] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-[var(--border-strong)] bg-[var(--bg-secondary)] px-6 text-center sm:rounded-[2rem]">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-green/10 text-brand-green">
+                <MapPin size={22} />
               </div>
+              <p className="font-semibold text-[var(--text-primary)]">
+                Campus map not configured yet
+              </p>
+              <p className="mt-2 max-w-sm text-sm leading-relaxed text-[var(--text-secondary)]">
+                The school has not published a confirmed campus address or map pin.
+              </p>
+              <Link
+                href="/contact"
+                className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--border-default)] px-4 py-2 text-sm font-semibold text-[var(--text-primary)] hover:border-brand-green hover:text-[var(--text-accent)]"
+              >
+                Contact the school <ArrowRight size={14} />
+              </Link>
+            </div>
+          )}
 
-              <div className="rounded-2xl bg-[var(--surface-card)] border border-[var(--border-subtle)] p-6 shadow-[var(--card-shadow)] group-hover:border-brand-green transition-all">
-                <div className="text-[10px] uppercase tracking-widest text-[var(--text-accent)] font-bold mb-2">
-                  Admissions News · March 15, 2025
+          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)] sm:p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-green/10 text-brand-green">
+                <MapPin size={22} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-[var(--text-accent)]">
+                  Our campus
                 </div>
-                <h3 className="font-display text-[clamp(1.5rem,2.4vw,2.25rem)] leading-[0.95] tracking-[-0.01em] text-[var(--text-primary)] mb-3 group-hover:text-[var(--text-accent)] transition-colors">
-                  Ykay College Opens 2025 / 2026 Admissions
-                </h3>
-                <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
-                  Applications are now open for JSS1 through SS3. Apply online and track your
-                  application status in real time.
+                <p className="break-words text-sm font-medium leading-relaxed text-[var(--text-primary)]">
+                  {address ||
+                    (hasCoordinates
+                      ? "Campus pin shown on the map."
+                      : "Location details are being set up.")}
                 </p>
-                <span className="inline-flex items-center gap-2 text-sm font-bold text-[var(--text-accent)] group-hover:gap-3 transition-all">
-                  Read More <ArrowRight size={14} />
-                </span>
+                {directionsUrl && (
+                  <a
+                    href={directionsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-[var(--text-accent)] underline decoration-[var(--border-default)] underline-offset-4 hover:decoration-[var(--text-accent)]"
+                  >
+                    Get directions <ArrowRight size={14} />
+                  </a>
+                )}
               </div>
-            </Link>
-
-            <Link
-              href="/news-events"
-              className="inline-flex items-center gap-2 mt-6 text-sm text-[var(--text-primary)] hover:text-brand-green transition-colors font-bold uppercase tracking-widest"
-            >
-              View All News <ArrowRight size={14} />
-            </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -119,6 +119,11 @@ export async function recordStaffScan(input: {
   scannerUserId?: string | null;
   source?: string;
   note?: string | null;
+  /** Rounded location metadata only; raw coordinates are deliberately discarded. */
+  geofence?: {
+    distanceFromCampusMeters: number;
+    locationAccuracyMeters: number;
+  } | null;
   force?: boolean;
 }) {
   const code = parseBadgeInput(input.badgeCode);
@@ -146,6 +151,15 @@ export async function recordStaffScan(input: {
       workDate,
     },
     orderBy: { scannedAt: "asc" },
+    // Explicit legacy fields keep QR attendance readable during the migration
+    // rollout; GPS-only columns are written only after geofence configuration
+    // is available.
+    select: {
+      eventType: true,
+      scannedAt: true,
+      isLate: true,
+      lateMinutes: true,
+    },
   });
 
   const last = todays[todays.length - 1] || null;
@@ -177,6 +191,21 @@ export async function recordStaffScan(input: {
       scannerUserId: input.scannerUserId || null,
       note: input.note || null,
       workDate,
+      ...(input.geofence
+        ? {
+            geofenceVerified: true,
+            distanceFromCampusMeters: input.geofence.distanceFromCampusMeters,
+            locationAccuracyMeters: input.geofence.locationAccuracyMeters,
+          }
+        : {}),
+    },
+    select: {
+      id: true,
+      eventType: true,
+      scannedAt: true,
+      isLate: true,
+      lateMinutes: true,
+      source: true,
     },
   });
 
@@ -194,6 +223,13 @@ export async function recordStaffScan(input: {
         lateMinutes: event.lateMinutes,
         workDate: todayKey,
         source: event.source,
+        ...(input.geofence
+          ? {
+              geofenceVerified: true,
+              distanceFromCampusMeters: input.geofence.distanceFromCampusMeters,
+              locationAccuracyMeters: input.geofence.locationAccuracyMeters,
+            }
+          : {}),
       },
     },
   });
@@ -207,6 +243,9 @@ export async function recordStaffScan(input: {
       lateMinutes: event.lateMinutes,
       workDate: todayKey,
       source: event.source,
+      geofenceVerified: input.geofence ? true : null,
+      distanceFromCampusMeters: input.geofence?.distanceFromCampusMeters ?? null,
+      locationAccuracyMeters: input.geofence?.locationAccuracyMeters ?? null,
     },
     staff: {
       id: teacher.id,

@@ -22,7 +22,7 @@ export default function PortalTopbar({ title = "Workspace" }: { title?: string }
           <Link
             href="/settings/notifications"
             aria-label="Notification settings"
-            className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--surface-card-hover)] hover:text-brand-green"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-[var(--text-muted)] hover:bg-[var(--surface-card-hover)] hover:text-brand-green"
           >
             <Bell size={18} />
           </Link>
@@ -34,7 +34,7 @@ export default function PortalTopbar({ title = "Workspace" }: { title?: string }
           </span>
           <button
             onClick={logout}
-            className="rounded-full p-2 text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-500"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-500"
             aria-label="Sign out"
           >
             <LogOut size={18} />

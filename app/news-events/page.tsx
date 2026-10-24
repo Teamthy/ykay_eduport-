@@ -10,7 +10,10 @@ export const dynamic = "force-dynamic";
 
 async function loadPosts() {
   try {
-    const school = await prisma.school.findFirst({ orderBy: { createdAt: "asc" } });
+    const school = await prisma.school.findFirst({
+      orderBy: { createdAt: "asc" },
+      select: { id: true },
+    });
     if (!school) return [];
     return prisma.newsPost.findMany({
       where: { schoolId: school.id, isPublished: true },

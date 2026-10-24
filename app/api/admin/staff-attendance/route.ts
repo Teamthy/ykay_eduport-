@@ -34,7 +34,16 @@ export async function GET(request: NextRequest) {
       take: 500,
       where: { schoolId: user.schoolId, workDate },
       orderBy: { scannedAt: "asc" },
-      include: {
+      // Keep QR attendance available during staged schema rollout. GPS metadata
+      // is read by the self-service route only after it confirms the migration.
+      select: {
+        id: true,
+        teacherProfileId: true,
+        eventType: true,
+        scannedAt: true,
+        isLate: true,
+        lateMinutes: true,
+        source: true,
         teacherProfile: {
           select: {
             id: true,
@@ -188,6 +197,7 @@ export async function POST(request: NextRequest) {
       const last = await prisma.staffAttendanceEvent.findFirst({
         where: { schoolId: user.schoolId, teacherProfileId: teacher.id, workDate },
         orderBy: { scannedAt: "desc" },
+        select: { eventType: true },
       });
       eventType =
         last?.eventType === StaffAttendanceEventType.CHECK_IN

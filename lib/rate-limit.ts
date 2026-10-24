@@ -77,6 +77,17 @@ function inMemoryCheck(
 }
 
 // ── Limiter configuration ────────────────────────────────────────
+// Give Vercel Preview deployments extra IP-level login headroom for QA, while
+// keeping the per-email failure cap unchanged. Preview uses separate Redis
+// prefixes so test traffic cannot consume a Production login bucket even if
+// both environments point at the same Redis database.
+const isVercelPreview = process.env.VERCEL_ENV === "preview";
+const loginIpMaxRequests = isVercelPreview ? 30 : 10;
+const loginIpPrefix = isVercelPreview ? "ykay:auth:login:preview" : "ykay:auth:login";
+const loginStrictPrefix = isVercelPreview
+  ? "ykay:auth:login-strict:preview"
+  : "ykay:auth:login-strict";
+
 const limiterConfig = {
   // Admissions
   draft: { maxRequests: 5, windowMs: 3_600_000, prefix: "ykay:admissions:draft" },
@@ -85,8 +96,8 @@ const limiterConfig = {
   status: { maxRequests: 30, windowMs: 600_000, prefix: "ykay:admissions:status" },
   contact: { maxRequests: 5, windowMs: 3_600_000, prefix: "ykay:contact" },
   // Authentication — brute-force / credential-stuffing protection
-  login: { maxRequests: 10, windowMs: 900_000, prefix: "ykay:auth:login" }, // 10 attempts per 15 min
-  loginStrict: { maxRequests: 3, windowMs: 900_000, prefix: "ykay:auth:login-strict" }, // 3 failures per 15 min (per email — FAILURES only, see checkRateLimit)
+  login: { maxRequests: loginIpMaxRequests, windowMs: 900_000, prefix: loginIpPrefix }, // 30 in Preview, 10 otherwise (per IP per 15 min)
+  loginStrict: { maxRequests: 3, windowMs: 900_000, prefix: loginStrictPrefix }, // 3 failures per 15 min (per email — FAILURES only, see checkRateLimit)
   // Federated College SSO (YK-Virtual → /api/auth/verify-credentials). This
   // is a server-to-server call: in production EVERY federated sign-in arrives
   // from YK-Virtual's backend IP, so sharing the per-IP "login" bucket with
@@ -147,13 +158,13 @@ const redisLimiters: Record<string, Ratelimit | null> = redis
       }),
       login: new Ratelimit({
         redis,
-        limiter: Ratelimit.slidingWindow(10, "15 m"),
-        prefix: "ykay:auth:login",
+        limiter: Ratelimit.slidingWindow(loginIpMaxRequests, "15 m"),
+        prefix: loginIpPrefix,
       }),
       loginStrict: new Ratelimit({
         redis,
         limiter: Ratelimit.slidingWindow(3, "15 m"),
-        prefix: "ykay:auth:login-strict",
+        prefix: loginStrictPrefix,
       }),
       collegeAuth: new Ratelimit({
         redis,

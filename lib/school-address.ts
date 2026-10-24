@@ -8,5 +8,6 @@
  */
 export function confirmedSchoolAddress(value: string | null | undefined): string | null {
   const address = (value ?? "").replace(/\s+/g, " ").trim();
-  return address.length > 0 ? address : null;
+  const placeholder = /^(?:[-–—]+|n\/?a|not set|unknown|tbd)$/i;
+  return address.length > 0 && !placeholder.test(address) ? address : null;
 }
