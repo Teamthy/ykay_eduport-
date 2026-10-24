@@ -1,6 +1,7 @@
 export type StagingTargetConfig = {
   databaseUrl: string | undefined;
   stagingDatabaseHost: string | undefined;
+  productionDatabaseStatus: string | undefined;
   productionDatabaseHost: string | undefined;
 };
 
@@ -13,9 +14,9 @@ function normalizeConfiguredHost(value: string | undefined, name: string): strin
 }
 
 /**
- * Fail closed unless DATABASE_URL is the exact, direct Neon staging host and
- * is distinct from the configured production host. Never include the URL in
- * an error or log: it contains credentials.
+ * Fail closed unless DATABASE_URL is the exact, direct Neon staging host. Once
+ * Production exists, also require and compare its hostname. Never include the
+ * URL in an error or log: it contains credentials.
  */
 export function validateStagingDemoTarget(config: StagingTargetConfig): string {
   if (!config.databaseUrl) {
@@ -23,13 +24,26 @@ export function validateStagingDemoTarget(config: StagingTargetConfig): string {
   }
 
   const stagingHost = normalizeConfiguredHost(config.stagingDatabaseHost, "STAGING_DATABASE_HOST");
-  const productionHost = normalizeConfiguredHost(
-    config.productionDatabaseHost,
-    "PRODUCTION_DATABASE_HOST",
-  );
+  const productionStatus = config.productionDatabaseStatus?.trim().toUpperCase();
+  if (productionStatus !== "AVAILABLE" && productionStatus !== "NOT_PROVISIONED") {
+    throw new Error(
+      "Set PRODUCTION_DATABASE_STATUS to AVAILABLE or NOT_PROVISIONED in the staging-demo environment.",
+    );
+  }
 
-  if (stagingHost === productionHost) {
-    throw new Error("The configured staging and production database hosts must be different.");
+  let productionHost: string | undefined;
+  if (productionStatus === "AVAILABLE") {
+    productionHost = normalizeConfiguredHost(
+      config.productionDatabaseHost,
+      "PRODUCTION_DATABASE_HOST",
+    );
+    if (stagingHost === productionHost) {
+      throw new Error("The configured staging and production database hosts must be different.");
+    }
+  } else if (config.productionDatabaseHost?.trim()) {
+    throw new Error(
+      "Leave PRODUCTION_DATABASE_HOST unset while PRODUCTION_DATABASE_STATUS is NOT_PROVISIONED; do not use a placeholder.",
+    );
   }
 
   let databaseHost: string;
@@ -53,7 +67,7 @@ export function validateStagingDemoTarget(config: StagingTargetConfig): string {
   if (databaseHost !== stagingHost) {
     throw new Error("DATABASE_URL does not match STAGING_DATABASE_HOST.");
   }
-  if (databaseHost === productionHost) {
+  if (productionHost && databaseHost === productionHost) {
     throw new Error("Refusing to seed the configured production database host.");
   }
 

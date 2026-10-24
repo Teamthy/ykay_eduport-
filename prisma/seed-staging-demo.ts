@@ -36,6 +36,7 @@ function validateInputs() {
   validateStagingDemoTarget({
     databaseUrl: process.env.DATABASE_URL,
     stagingDatabaseHost: process.env.STAGING_DATABASE_HOST,
+    productionDatabaseStatus: process.env.PRODUCTION_DATABASE_STATUS,
     productionDatabaseHost: process.env.PRODUCTION_DATABASE_HOST,
   });
 
@@ -113,6 +114,7 @@ async function main() {
     const host = validateStagingDemoTarget({
       databaseUrl: process.env.DATABASE_URL,
       stagingDatabaseHost: process.env.STAGING_DATABASE_HOST,
+      productionDatabaseStatus: process.env.PRODUCTION_DATABASE_STATUS,
       productionDatabaseHost: process.env.PRODUCTION_DATABASE_HOST,
     });
     console.log(`Staging database target validated (${host}). No database changes made.`);
