@@ -11,8 +11,11 @@ test.describe("mobile navigation", () => {
     const menu = page.getByRole("button", { name: "Open menu" });
     await expect(menu).toBeVisible();
     await menu.click();
-    await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Apply Now" })).toBeVisible();
+    const navigation = page.getByRole("navigation", { name: "Main navigation" });
+    await expect(navigation).toBeVisible();
+    // The desktop header also contains an Apply Now CTA. Scope to the opened
+    // mobile navigation so strict mode checks the intended, reachable action.
+    await expect(navigation.getByRole("link", { name: "Apply Now" })).toBeVisible();
 
     const aboutToggle = page.getByRole("button", { name: "Show About links" });
     await expect(page.getByRole("link", { name: "Our Story" })).toHaveCount(0);

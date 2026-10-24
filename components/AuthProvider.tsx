@@ -28,6 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
 
   const refresh = async () => {
     try {
@@ -43,37 +44,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logoutImmediately = useCallback(async () => {
-    // Keep the same-origin logout request alive if navigation happens first.
-    // A slow session-revocation write must not leave the user stuck on a
-    // "Signing out…" dialog indefinitely; after five seconds we still leave
-    // the portal while the request continues in the background.
+    setLogoutError("");
     let timeoutId: number | undefined;
-    const logoutRequest = Promise.resolve()
-      .then(() =>
+
+    try {
+      // Do not navigate away until the same-origin API has acknowledged the
+      // request. The previous fire-and-forget flow hid network/route failures,
+      // so the browser appeared signed out while its session cookie remained
+      // valid and the backend had never confirmed revocation.
+      const response = await Promise.race([
         fetch("/api/auth/logout", {
           method: "POST",
           credentials: "include",
           cache: "no-store",
           keepalive: true,
         }),
-      )
-      .then(
-        () => undefined,
-        () => undefined,
-      );
-
-    try {
-      await Promise.race([
-        logoutRequest,
-        new Promise<void>((resolve) => {
-          timeoutId = window.setTimeout(resolve, 5_000);
+        new Promise<never>((_, reject) => {
+          timeoutId = window.setTimeout(
+            () => reject(new Error("The server did not confirm sign-out in time.")),
+            10_000,
+          );
         }),
       ]);
-    } finally {
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`The server returned ${response.status} while signing out.`);
+      }
+
+      const result = (await response.json().catch(() => null)) as { ok?: boolean } | null;
+      if (result?.ok !== true) {
+        throw new Error("The server did not confirm sign-out.");
+      }
+
       setUser(null);
       // Replace rather than push so Back does not reopen the protected page.
       window.location.replace("/login");
+    } catch {
+      // Stay on the page and keep the retry action visible. Silently navigating
+      // away here would mask a request that never reached the backend.
+      setSigningOut(false);
+      setLogoutError(
+        "The server did not confirm that your session was revoked. Please retry before leaving this page; your session may still be active.",
+      );
+    } finally {
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     }
   }, []);
 
@@ -81,7 +95,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // cannot accidentally ship an unguarded sign-out. Previously four separate
   // components called logout() directly — one of them a bare icon button in
   // the topbar, one tap away on every portal page.
-  const logout = useCallback(() => setConfirming(true), []);
+  const logout = useCallback(() => {
+    setLogoutError("");
+    setConfirming(true);
+  }, []);
 
   return (
     <Context.Provider value={{ user, loading, refresh, logout, logoutImmediately }}>
@@ -91,9 +108,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         variant="danger"
         title="Sign out?"
         message={
-          user?.name
+          logoutError ||
+          (user?.name
             ? `You're signed in as ${user.name}. You'll need your email and password to sign back in.`
-            : "You'll need your email and password to sign back in."
+            : "You'll need your email and password to sign back in.")
         }
         confirmText={signingOut ? "Signing out…" : "Yes, sign me out"}
         cancelText="Stay signed in"

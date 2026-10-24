@@ -49,6 +49,7 @@ const mockPrisma = {
     findFirst: vi.fn(),
   },
   userNotification: {
+    findUnique: vi.fn(),
     findMany: vi.fn(),
     create: vi.fn(),
     createMany: vi.fn(),
@@ -154,6 +155,7 @@ const mockPrisma = {
     findMany: vi.fn(),
   },
   gradebookEntry: {
+    findUnique: vi.fn(),
     findMany: vi.fn(),
     createMany: vi.fn(),
     update: vi.fn(),
@@ -168,6 +170,7 @@ const mockPrisma = {
     update: vi.fn(),
   },
   examAnswer: {
+    findFirst: vi.fn(),
     findMany: vi.fn(),
     update: vi.fn(),
     updateMany: vi.fn(),
@@ -259,6 +262,13 @@ const mockPrisma = {
     findFirst: vi.fn(),
     findUnique: vi.fn(),
     create: vi.fn(),
+    update: vi.fn(),
+    updateMany: vi.fn(),
+  },
+  examGradebookSync: {
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    upsert: vi.fn(),
     update: vi.fn(),
   },
   examRetake: {

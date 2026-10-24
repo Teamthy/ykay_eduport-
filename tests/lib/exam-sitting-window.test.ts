@@ -114,6 +114,17 @@ describe("POST /api/student/exams/[id]/attempt — sitting window", () => {
     expect(mockPrisma.examAttempt.create).not.toHaveBeenCalled();
   });
 
+  it("refuses a direct start for a subject the student does not take", async () => {
+    mockPrisma.exam.findFirst.mockResolvedValue(scheduledExam({ subjectId: "subject_2" }) as never);
+    mockPrisma.studentSubject.findMany.mockResolvedValue([]);
+
+    const { POST } = await import("@/app/api/student/exams/[id]/attempt/route");
+    const response = await POST({} as never, params);
+
+    expect(response.status).toBe(404);
+    expect(mockPrisma.examAttempt.create).not.toHaveBeenCalled();
+  });
+
   it("allows a start inside the window", async () => {
     mockPrisma.exam.findFirst.mockResolvedValue(
       scheduledExam({

@@ -1,5 +1,5 @@
-import { ExamAttemptStatus, ExamStatus } from "@prisma/client";
-import { NextResponse } from "next/server";
+import { ExamAttemptStatus, ExamStatus, Prisma } from "@prisma/client";
+import { NextRequest, NextResponse } from "next/server";
 import { getStudentExamContext } from "@/lib/exams";
 import { getStudentFeeLock } from "@/lib/fee-lock";
 import { prisma } from "@/lib/prisma";
@@ -7,13 +7,29 @@ import { availabilityLabel, examAvailability, studentSubjectIds } from "@/lib/su
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const context = await getStudentExamContext();
   if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const [feeLock, mySubjectIds] = await Promise.all([
+  const section = request.nextUrl.searchParams.get("section");
+  const requestedTermId = request.nextUrl.searchParams.get("termId")?.trim() || "";
+  const examTypes =
+    section === "take" ? ["EXAM"] : section === "ca" ? ["CA", "MIDTERM"] : undefined;
+
+  const [feeLock, mySubjectIds, terms] = await Promise.all([
     getStudentFeeLock(context.user.schoolId, context.studentProfile.id),
     studentSubjectIds(context.studentProfile.id),
+    prisma.term.findMany({
+      where: { schoolId: context.user.schoolId },
+      orderBy: [{ session: { label: "desc" } }, { index: "asc" }],
+      select: {
+        id: true,
+        label: true,
+        index: true,
+        isCurrent: true,
+        session: { select: { label: true } },
+      },
+    }),
   ]);
 
   // Show exams for this class, but only for subjects this student actually
@@ -21,19 +37,34 @@ export async function GET() {
   // the whole class — removing those silently would hide real exams.
   const takenSubjects = new Set(mySubjectIds);
 
+  const currentClassScope: Prisma.ExamWhereInput = {
+    classId: context.studentProfile.currentClassId,
+    ...(mySubjectIds.length
+      ? { OR: [{ subjectId: null }, { subjectId: { in: mySubjectIds } }] }
+      : {}),
+  };
+
   const exams = await prisma.exam.findMany({
     where: {
-      classId: context.studentProfile.currentClassId,
+      schoolId: context.user.schoolId,
       status: { in: [ExamStatus.PUBLISHED, ExamStatus.CLOSED] },
-      ...(mySubjectIds.length
-        ? { OR: [{ subjectId: null }, { subjectId: { in: mySubjectIds } }] }
-        : {}),
+      ...(examTypes ? { examType: { in: examTypes } } : {}),
+      ...(requestedTermId ? { termId: requestedTermId } : {}),
+      // Current-class papers plus any earlier paper with this student's own
+      // attempt. Promotion changes currentClassId, not the identity of the
+      // student or the historical result.
+      OR: [
+        currentClassScope,
+        { attempts: { some: { studentProfileId: context.studentProfile.id } } },
+      ],
     },
     // Soonest first: a student wants to know what is next, not what was
     // created most recently.
     orderBy: [{ scheduledFor: "asc" }, { createdAt: "desc" }],
     include: {
       teacherProfile: { select: { displayName: true } },
+      classroom: { select: { displayName: true } },
+      term: { select: { id: true, label: true, session: { select: { label: true } } } },
       questions: { select: { id: true, marks: true, type: true } },
       attempts: {
         where: { studentProfileId: context.studentProfile.id },
@@ -49,6 +80,14 @@ export async function GET() {
       displayName: context.studentProfile.displayName,
       studentId: context.studentProfile.studentId,
     },
+    currentTermId: terms.find((term) => term.isCurrent)?.id ?? null,
+    terms: terms.map((term) => ({
+      id: term.id,
+      label: term.label,
+      sessionLabel: term.session.label,
+      index: term.index,
+      isCurrent: term.isCurrent,
+    })),
     exams: exams.map((exam) => {
       const latestAttempt = exam.attempts[0] || null;
       const retake = exam.retakes[0] || null;
@@ -65,7 +104,13 @@ export async function GET() {
         hasSubmitted: hasSubmitted && !hasUnusedRetake,
       });
 
+      const isCurrentClass = exam.classId === context.studentProfile.currentClassId;
+      const scoreVisible =
+        exam.status === ExamStatus.CLOSED &&
+        exam.resultsReleased &&
+        latestAttempt?.status === ExamAttemptStatus.GRADED;
       const canStart =
+        isCurrentClass &&
         exam.status === ExamStatus.PUBLISHED &&
         availability === "READY" &&
         (!latestAttempt ||
@@ -79,7 +124,13 @@ export async function GET() {
         title: exam.title,
         subjectName: exam.subjectName,
         teacherName: exam.teacherProfile.displayName,
+        className: exam.classroom.displayName,
         examType: exam.examType,
+        practiceCategory: exam.practiceCategory,
+        term: exam.term
+          ? { id: exam.term.id, label: exam.term.label, sessionLabel: exam.term.session.label }
+          : null,
+        isHistoricalClass: !isCurrentClass,
         durationMinutes: exam.durationMinutes,
         theoryMinutes: exam.theoryMinutes ?? 0,
         subjectId: exam.subjectId,
@@ -102,14 +153,11 @@ export async function GET() {
           ? {
               id: latestAttempt.id,
               status: latestAttempt.status,
-              totalScore: latestAttempt.totalScore,
+              totalScore: scoreVisible ? latestAttempt.totalScore : null,
               submittedAt: latestAttempt.submittedAt?.toISOString() || null,
-              scoreVisible:
-                exam.resultsReleased && latestAttempt.status === ExamAttemptStatus.GRADED,
+              scoreVisible,
               percent:
-                exam.resultsReleased &&
-                latestAttempt.status === ExamAttemptStatus.GRADED &&
-                totalMarks
+                scoreVisible && totalMarks
                   ? Math.round((latestAttempt.totalScore / totalMarks) * 100)
                   : null,
             }

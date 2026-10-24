@@ -6,13 +6,19 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+class ResultsAlreadyReleasedError extends Error {}
+
 export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const teacherContext = await getExamTeacherContext();
   if (!teacherContext) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await context.params;
   const exam = await prisma.exam.findFirst({
-    where: { id, teacherProfileId: teacherContext.teacherProfile.id },
+    where: {
+      id,
+      schoolId: teacherContext.user.schoolId,
+      teacherProfileId: teacherContext.teacherProfile.id,
+    },
     include: {
       classroom: { select: { displayName: true } },
       questions: { orderBy: { sortOrder: "asc" } },
@@ -91,44 +97,88 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   const answer = await prisma.examAnswer.findFirst({
     where: {
       id: payload.answerId,
-      attempt: { exam: { id, teacherProfileId: teacherContext.teacherProfile.id } },
+      attempt: {
+        exam: {
+          id,
+          schoolId: teacherContext.user.schoolId,
+          teacherProfileId: teacherContext.teacherProfile.id,
+        },
+      },
     },
     include: {
       question: { select: { type: true, marks: true } },
-      attempt: { select: { id: true } },
+      attempt: { select: { id: true, exam: { select: { resultsReleased: true } } } },
     },
   });
   if (!answer) return NextResponse.json({ error: "Answer not found." }, { status: 404 });
+  if (answer.attempt.exam.resultsReleased) {
+    return NextResponse.json(
+      {
+        error:
+          "Results are released. Hide results before changing a score, then release them again.",
+      },
+      { status: 409 },
+    );
+  }
   if (answer.question.type !== ExamQuestionType.ESSAY) {
     return NextResponse.json({ error: "Only essay answers are graded manually." }, { status: 409 });
   }
 
   const awarded = Math.min(payload.awardedMarks, answer.question.marks);
-  await prisma.examAnswer.update({
-    where: { id: answer.id },
-    data: { awardedMarks: awarded, isCorrect: awarded > 0 },
-  });
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Lock the same exam row that result release claims. This serializes an
+      // essay edit against release so a score cannot change after gradebook
+      // sync based on a concurrently-read older value.
+      const editClaim = await tx.exam.updateMany({
+        where: {
+          id,
+          schoolId: teacherContext.user.schoolId,
+          teacherProfileId: teacherContext.teacherProfile.id,
+          resultsReleased: false,
+        },
+        data: { updatedAt: new Date() },
+      });
+      if (editClaim.count !== 1) throw new ResultsAlreadyReleasedError();
 
-  // Recompute attempt totals; mark GRADED when no essay is left ungraded.
-  const attempt = await prisma.examAttempt.findUnique({
-    where: { id: answer.attempt.id },
-    include: { answers: { include: { question: { select: { type: true } } } } },
-  });
-  if (attempt) {
-    const essayScore = attempt.answers
-      .filter((entry) => entry.question.type === ExamQuestionType.ESSAY)
-      .reduce((sum, entry) => sum + (entry.awardedMarks || 0), 0);
-    const pending = attempt.answers.some(
-      (entry) => entry.question.type === ExamQuestionType.ESSAY && entry.awardedMarks === null,
-    );
-    await prisma.examAttempt.update({
-      where: { id: attempt.id },
-      data: {
-        essayScore,
-        totalScore: attempt.autoScore + essayScore,
-        status: pending ? ExamAttemptStatus.SUBMITTED : ExamAttemptStatus.GRADED,
-      },
+      await tx.examAnswer.update({
+        where: { id: answer.id },
+        data: { awardedMarks: awarded, isCorrect: awarded > 0 },
+      });
+
+      // Recompute attempt totals; mark GRADED when no essay is left ungraded.
+      const attempt = await tx.examAttempt.findUnique({
+        where: { id: answer.attempt.id },
+        include: { answers: { include: { question: { select: { type: true } } } } },
+      });
+      if (attempt) {
+        const essayScore = attempt.answers
+          .filter((entry) => entry.question.type === ExamQuestionType.ESSAY)
+          .reduce((sum, entry) => sum + (entry.awardedMarks || 0), 0);
+        const pending = attempt.answers.some(
+          (entry) => entry.question.type === ExamQuestionType.ESSAY && entry.awardedMarks === null,
+        );
+        await tx.examAttempt.update({
+          where: { id: attempt.id },
+          data: {
+            essayScore,
+            totalScore: attempt.autoScore + essayScore,
+            status: pending ? ExamAttemptStatus.SUBMITTED : ExamAttemptStatus.GRADED,
+          },
+        });
+      }
     });
+  } catch (gradeError) {
+    if (gradeError instanceof ResultsAlreadyReleasedError) {
+      return NextResponse.json(
+        {
+          error:
+            "Results were released while this score was being edited. Hide results before changing a score.",
+        },
+        { status: 409 },
+      );
+    }
+    throw gradeError;
   }
 
   return NextResponse.json({ ok: true, message: "Essay score saved." });

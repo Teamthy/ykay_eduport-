@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
+import StudentCbtNav from "@/components/student/StudentCbtNav";
 import {
   MessageCircle,
   LayoutDashboard,
@@ -25,8 +26,9 @@ import {
 
 const SIDEBAR_ITEMS = [
   { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
-  { label: "CBT Exams", href: "/student/exams", icon: ClipboardCheck },
-  { label: "Exam Practice", href: "/student/waec-practice", icon: Award },
+  { label: "Take Exams", href: "/student/exams", icon: ClipboardCheck },
+  { label: "CA Test", href: "/student/ca-tests", icon: ClipboardCheck },
+  { label: "Personal Practice", href: "/student/waec-practice", icon: Award },
   { label: "Attendance", href: "/student/attendance", icon: CalendarDays },
   { label: "Report Cards", href: "/student/report-cards", icon: FileText },
   { label: "Messages", href: "/student/messages", icon: MessageCircle },
@@ -39,6 +41,11 @@ type PracticeExam = {
   id: string;
   title: string;
   subjectName: string;
+  teacherName: string;
+  practiceCategory: "WAEC" | "JAMB" | "JUNIOR_WAEC" | "OTHER";
+  className: string;
+  isHistoricalClass: boolean;
+  term: { id: string; label: string; sessionLabel: string } | null;
   durationMinutes: number;
   passMark: number;
   questionCount: number;
@@ -60,6 +67,15 @@ type Subject = {
 };
 
 type Payload = {
+  currentTermId: string | null;
+  terms: Array<{
+    id: string;
+    label: string;
+    sessionLabel: string;
+    index: number;
+    isCurrent: boolean;
+  }>;
+  categories: Array<"WAEC" | "JAMB" | "JUNIOR_WAEC" | "OTHER">;
   subjects: Subject[];
   exams: PracticeExam[];
   summary: {
@@ -82,12 +98,18 @@ export default function ExamPracticePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<PracticeExam["practiceCategory"] | null>(
+    null,
+  );
+  const [selectedTermId, setSelectedTermId] = useState("");
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
     try {
-      const response = await fetch("/api/student/practice", { cache: "no-store" });
+      const params = new URLSearchParams();
+      if (selectedTermId) params.set("termId", selectedTermId);
+      const response = await fetch(`/api/student/practice?${params.toString()}`, {
+        cache: "no-store",
+      });
       const body = await response.json();
       if (!response.ok) throw new Error(body?.error || "Unable to load practice exams.");
       setData(body);
@@ -96,18 +118,28 @@ export default function ExamPracticePage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedTermId]);
 
   useEffect(() => {
+    // The async helper awaits fetch before changing React state; this is not a synchronous effect update.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load();
+  }, [load]);
+
+  const retryLoad = useCallback(() => {
+    setLoading(true);
+    setError("");
     void load();
   }, [load]);
 
   const visibleExams = useMemo(() => {
     if (!data) return [];
-    return selectedSubject
-      ? data.exams.filter((exam) => exam.subjectName === selectedSubject)
-      : data.exams;
-  }, [data, selectedSubject]);
+    return data.exams.filter((exam) => {
+      const categoryMatches = !selectedCategory || exam.practiceCategory === selectedCategory;
+      const subjectMatches = !selectedSubject || exam.subjectName === selectedSubject;
+      return categoryMatches && subjectMatches;
+    });
+  }, [data, selectedSubject, selectedCategory]);
 
   const summary = data?.summary;
   const hasAnyExam = Boolean(data?.exams.length);
@@ -137,6 +169,35 @@ export default function ExamPracticePage() {
             <PortalSidebar portalName="Student" portalType="student" items={SIDEBAR_ITEMS} />
 
             <div className="flex-1 min-w-0 space-y-6">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <StudentCbtNav active="practice" />
+                {data?.terms.length ? (
+                  <label className="min-w-[15rem] flex-1 sm:flex-none">
+                    <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                      Term / session
+                    </span>
+                    <select
+                      aria-label="Filter practice by term and session"
+                      value={selectedTermId}
+                      onChange={(event) => {
+                        setLoading(true);
+                        setError("");
+                        setSelectedTermId(event.target.value);
+                      }}
+                      className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2.5 text-sm text-[var(--input-text)] sm:min-w-[15rem]"
+                    >
+                      <option value="">All terms and sessions</option>
+                      {data.terms.map((term) => (
+                        <option key={term.id} value={term.id}>
+                          {term.sessionLabel} · {term.label}
+                          {term.isCurrent ? " (current)" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+              </div>
+
               {loading && (
                 <div className="p-12 rounded-[2rem] bg-[var(--surface-card)] border border-[var(--border-subtle)] flex flex-col items-center justify-center gap-3">
                   <Loader2 size={28} className="animate-spin text-[var(--text-accent-warm)]" />
@@ -149,7 +210,7 @@ export default function ExamPracticePage() {
                   <AlertCircle size={28} className="mx-auto mb-3 text-red-500" />
                   <p className="text-sm text-[var(--text-primary)] font-semibold mb-1">{error}</p>
                   <button
-                    onClick={() => void load()}
+                    onClick={retryLoad}
                     className="mt-3 inline-flex items-center gap-2 px-5 py-2 rounded-full bg-brand-orange text-brand-navy text-sm font-bold"
                   >
                     <RotateCcw size={14} /> Try again
@@ -181,6 +242,44 @@ export default function ExamPracticePage() {
 
               {!loading && !error && hasAnyExam && (
                 <>
+                  <div>
+                    <h3 className="mb-3 font-display text-lg text-[var(--text-primary)]">
+                      Choose practice programme
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategory(null)}
+                        aria-pressed={selectedCategory === null}
+                        className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-widest ${
+                          selectedCategory === null
+                            ? "bg-brand-orange text-brand-navy"
+                            : "border border-[var(--border-subtle)] text-[var(--text-secondary)]"
+                        }`}
+                      >
+                        All programmes
+                      </button>
+                      {data!.categories.map((category) => (
+                        <button
+                          key={category}
+                          type="button"
+                          onClick={() => {
+                            setSelectedCategory(category);
+                            setSelectedSubject(null);
+                          }}
+                          aria-pressed={selectedCategory === category}
+                          className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-widest ${
+                            selectedCategory === category
+                              ? "bg-brand-orange text-brand-navy"
+                              : "border border-[var(--border-subtle)] text-[var(--text-secondary)]"
+                          }`}
+                        >
+                          {category.replaceAll("_", " ")}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {data!.subjects.length > 1 && (
                     <div>
                       <h3 className="font-display text-xl text-[var(--text-primary)] mb-4">
@@ -245,6 +344,11 @@ export default function ExamPracticePage() {
                     <h3 className="font-display text-xl text-[var(--text-primary)] mb-4">
                       {selectedSubject ? `${selectedSubject} practice` : "Practice sets"}
                     </h3>
+                    {!visibleExams.length ? (
+                      <p className="rounded-2xl border border-dashed border-[var(--border-default)] p-8 text-center text-sm text-[var(--text-muted)]">
+                        No practice sets match this programme, subject and term filter.
+                      </p>
+                    ) : null}
                     <div className="space-y-3">
                       {visibleExams.map((exam) => (
                         <div
@@ -255,7 +359,17 @@ export default function ExamPracticePage() {
                             <Award size={20} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-[var(--text-primary)]">{exam.title}</h4>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h4 className="font-bold text-[var(--text-primary)]">{exam.title}</h4>
+                              <span className="rounded-full bg-brand-orange/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-orange">
+                                {exam.practiceCategory.replaceAll("_", " ")}
+                              </span>
+                              {exam.isHistoricalClass ? (
+                                <span className="rounded-full bg-[var(--surface-disabled)] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                                  Previous class
+                                </span>
+                              ) : null}
+                            </div>
                             <div className="flex flex-wrap gap-3 text-xs text-[var(--text-muted)] mt-1">
                               <span className="flex items-center gap-1">
                                 <BookOpen size={11} /> {exam.questionCount} Qs
@@ -263,7 +377,12 @@ export default function ExamPracticePage() {
                               <span className="flex items-center gap-1">
                                 <Clock size={11} /> {exam.durationMinutes} min
                               </span>
-                              <span>{exam.subjectName}</span>
+                              <span>
+                                {exam.subjectName} · {exam.className} · {exam.teacherName}
+                                {exam.term
+                                  ? ` · ${exam.term.sessionLabel} ${exam.term.label}`
+                                  : " · legacy term"}
+                              </span>
                               {exam.attemptCount > 0 && (
                                 <span className="flex items-center gap-1">
                                   <RotateCcw size={11} /> {exam.attemptCount}{" "}

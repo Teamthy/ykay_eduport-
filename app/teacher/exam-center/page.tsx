@@ -40,6 +40,9 @@ type Exam = {
   subjectLabel: string;
   className: string;
   examType: string;
+  practiceCategory: string | null;
+  gradebookComponent: string | null;
+  term: { id: string; label: string; sessionLabel: string } | null;
   durationMinutes: number;
   theoryMinutes: number;
   totalMarks: number;
@@ -112,12 +115,14 @@ export default function ExamCenterPage() {
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [tab, setTab] = useState<"MIDTERM" | "EXAM" | "ALL">("ALL");
+  const [tab, setTab] = useState<"ALL" | "CA" | "MIDTERM" | "EXAM">("ALL");
 
   const [form, setForm] = useState({
     assignmentId: "",
     title: "",
     examType: "MIDTERM",
+    practiceCategory: "WAEC",
+    gradebookComponent: "MIDTERM",
     durationMinutes: 45,
     theoryMinutes: 0,
     passMark: 40,
@@ -158,6 +163,8 @@ export default function ExamCenterPage() {
           assignmentId: form.assignmentId,
           title: form.title.trim(),
           examType: form.examType,
+          practiceCategory: form.examType === "PRACTICE" ? form.practiceCategory : undefined,
+          gradebookComponent: form.examType === "PRACTICE" ? null : form.gradebookComponent || null,
           durationMinutes: Number(form.durationMinutes),
           theoryMinutes: Number(form.theoryMinutes) || 0,
           passMark: Number(form.passMark),
@@ -363,7 +370,7 @@ export default function ExamCenterPage() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    {(["ALL", "MIDTERM", "EXAM"] as const).map((key) => (
+                    {(["ALL", "CA", "MIDTERM", "EXAM"] as const).map((key) => (
                       <button
                         key={key}
                         onClick={() => setTab(key)}
@@ -375,9 +382,11 @@ export default function ExamCenterPage() {
                       >
                         {key === "ALL"
                           ? "All"
-                          : key === "MIDTERM"
-                            ? "Midterm tests"
-                            : "Final exams"}
+                          : key === "CA"
+                            ? "CA tests"
+                            : key === "MIDTERM"
+                              ? "Midterm tests"
+                              : "Final exams"}
                       </button>
                     ))}
                     <button
@@ -418,7 +427,20 @@ export default function ExamCenterPage() {
                           </span>
                           <select
                             value={form.examType}
-                            onChange={(e) => setForm({ ...form, examType: e.target.value })}
+                            onChange={(e) => {
+                              const examType = e.target.value;
+                              const defaultComponent: Record<string, string> = {
+                                CA: "CA1",
+                                MIDTERM: "MIDTERM",
+                                EXAM: "EXAM",
+                                PRACTICE: "",
+                              };
+                              setForm({
+                                ...form,
+                                examType,
+                                gradebookComponent: defaultComponent[examType] ?? "",
+                              });
+                            }}
                             className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm text-[var(--input-text)]"
                           >
                             {TYPES.map((t) => (
@@ -428,6 +450,49 @@ export default function ExamCenterPage() {
                             ))}
                           </select>
                         </label>
+
+                        {form.examType === "PRACTICE" ? (
+                          <label>
+                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                              Practice programme
+                            </span>
+                            <select
+                              value={form.practiceCategory}
+                              onChange={(e) =>
+                                setForm({ ...form, practiceCategory: e.target.value })
+                              }
+                              className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm text-[var(--input-text)]"
+                            >
+                              <option value="WAEC">WAEC</option>
+                              <option value="JAMB">JAMB</option>
+                              <option value="JUNIOR_WAEC">Junior WAEC</option>
+                              <option value="OTHER">Other</option>
+                            </select>
+                          </label>
+                        ) : (
+                          <label>
+                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                              Term result component
+                            </span>
+                            <select
+                              value={form.gradebookComponent}
+                              onChange={(e) =>
+                                setForm({ ...form, gradebookComponent: e.target.value })
+                              }
+                              className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-sm text-[var(--input-text)]"
+                            >
+                              <option value="CA1">CA 1 · /10</option>
+                              <option value="CA2">CA 2 · /10</option>
+                              <option value="MIDTERM">Mid-term · /10</option>
+                              <option value="ASSIGNMENT">Assignment · /10</option>
+                              <option value="EXAM">End-of-term exam · /60</option>
+                              <option value="">Do not sync to the gradebook</option>
+                            </select>
+                            <span className="mt-1 block text-xs text-[var(--text-muted)]">
+                              Released scores are scaled into this term&apos;s cumulative component.
+                            </span>
+                          </label>
+                        )}
 
                         <label className="sm:col-span-2">
                           <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
@@ -577,6 +642,12 @@ export default function ExamCenterPage() {
                               {exam.subjectLabel} · {exam.className} · {exam.questionCount} question
                               {exam.questionCount === 1 ? "" : "s"} · {exam.totalMarks} marks ·{" "}
                               {exam.durationMinutes} min
+                              {exam.term
+                                ? ` · ${exam.term.label} · ${exam.term.sessionLabel}`
+                                : " · Legacy exam (term not assigned)"}
+                              {exam.practiceCategory
+                                ? ` · ${exam.practiceCategory.replaceAll("_", " ")}`
+                                : ""}
                               {exam.theoryMinutes > 0 ? ` + ${exam.theoryMinutes} theory` : ""}
                             </p>
                             {when(exam.scheduledFor) ? (
@@ -651,7 +722,13 @@ export default function ExamCenterPage() {
                         <CheckCircle2 className="mx-auto mb-3 text-[var(--text-muted)]" size={28} />
                         <p className="text-sm text-[var(--text-muted)]">
                           No{" "}
-                          {tab === "ALL" ? "papers" : tab === "MIDTERM" ? "midterm tests" : "exams"}{" "}
+                          {tab === "ALL"
+                            ? "papers"
+                            : tab === "CA"
+                              ? "CA tests"
+                              : tab === "MIDTERM"
+                                ? "midterm tests"
+                                : "exams"}{" "}
                           yet. Create one above.
                         </p>
                       </div>

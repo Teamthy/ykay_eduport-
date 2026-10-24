@@ -1,5 +1,5 @@
 import { ExamAttemptStatus, ExamStatus } from "@prisma/client";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getStudentExamContext } from "@/lib/exams";
 import { prisma } from "@/lib/prisma";
 
@@ -22,23 +22,51 @@ export const dynamic = "force-dynamic";
  *
  * Both rules are enforced server-side in ./[id]/attempt.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   const context = await getStudentExamContext();
   if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const requestedCategory = request.nextUrl.searchParams.get("category")?.trim() || "";
+  const allowedCategories = new Set(["WAEC", "JAMB", "JUNIOR_WAEC", "OTHER"]);
+  if (requestedCategory && !allowedCategories.has(requestedCategory)) {
+    return NextResponse.json({ error: "Unknown practice category." }, { status: 400 });
+  }
+  const requestedTermId = request.nextUrl.searchParams.get("termId")?.trim() || "";
+  const terms = await prisma.term.findMany({
+    where: { schoolId: context.user.schoolId },
+    orderBy: [{ session: { label: "desc" } }, { index: "asc" }],
+    select: {
+      id: true,
+      label: true,
+      index: true,
+      isCurrent: true,
+      session: { select: { label: true } },
+    },
+  });
 
   const exams = await prisma.exam.findMany({
     where: {
       schoolId: context.user.schoolId,
-      classId: context.studentProfile.currentClassId,
+      OR: [
+        { classId: context.studentProfile.currentClassId },
+        { attempts: { some: { studentProfileId: context.studentProfile.id } } },
+      ],
       examType: "PRACTICE",
       status: { in: [ExamStatus.PUBLISHED, ExamStatus.CLOSED] },
+      ...(requestedCategory ? { practiceCategory: requestedCategory } : {}),
+      ...(requestedTermId ? { termId: requestedTermId } : {}),
     },
     orderBy: [{ subjectName: "asc" }, { createdAt: "desc" }],
     take: 200,
     select: {
       id: true,
+      classId: true,
       title: true,
       subjectName: true,
+      practiceCategory: true,
+      classroom: { select: { displayName: true } },
+      teacherProfile: { select: { displayName: true } },
+      term: { select: { id: true, label: true, session: { select: { label: true } } } },
       durationMinutes: true,
       passMark: true,
       instructions: true,
@@ -74,17 +102,25 @@ export async function GET() {
     const bestPercent = percentages.length ? Math.max(...percentages) : null;
     const lastPercent = percentages.length ? percentages[0] : null;
 
+    const isCurrentClass = exam.classId === context.studentProfile.currentClassId;
     return {
       id: exam.id,
       title: exam.title,
       subjectName: exam.subjectName,
+      teacherName: exam.teacherProfile.displayName,
+      practiceCategory: exam.practiceCategory ?? "OTHER",
+      className: exam.classroom.displayName,
+      term: exam.term
+        ? { id: exam.term.id, label: exam.term.label, sessionLabel: exam.term.session.label }
+        : null,
+      isHistoricalClass: !isCurrentClass,
       durationMinutes: exam.durationMinutes,
       passMark: exam.passMark,
       instructions: exam.instructions,
       questionCount: exam.questions.length,
       totalMarks,
       // Practice never locks: a student may retake as often as they like.
-      canStart: exam.status === ExamStatus.PUBLISHED && exam.questions.length > 0,
+      canStart: isCurrentClass && exam.status === ExamStatus.PUBLISHED && exam.questions.length > 0,
       canResume: Boolean(inProgress),
       resumeAttemptId: inProgress?.id ?? null,
       attemptCount: finished.length,
@@ -139,6 +175,15 @@ export async function GET() {
       displayName: context.studentProfile.displayName,
       studentId: context.studentProfile.studentId,
     },
+    currentTermId: terms.find((term) => term.isCurrent)?.id ?? null,
+    terms: terms.map((term) => ({
+      id: term.id,
+      label: term.label,
+      sessionLabel: term.session.label,
+      index: term.index,
+      isCurrent: term.isCurrent,
+    })),
+    categories: ["WAEC", "JAMB", "JUNIOR_WAEC", "OTHER"],
     subjects,
     exams: cards,
     summary,

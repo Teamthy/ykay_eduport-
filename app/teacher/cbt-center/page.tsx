@@ -34,6 +34,9 @@ type ExamRow = {
   resultsReleased: boolean;
   attemptCount: number;
   submittedCount: number;
+  gradedCount: number;
+  pendingGradeCount: number;
+  inProgressCount: number;
   createdAt: string;
 };
 
@@ -445,9 +448,13 @@ export default function TeacherCbtCenterPage() {
                                 {exam.questionCount} questions · {exam.totalMarks} marks
                               </span>
                               <span className="inline-flex items-center gap-1">
-                                <Users size={11} /> {exam.submittedCount}/{exam.attemptCount}{" "}
-                                submitted
+                                <Users size={11} /> {exam.gradedCount}/{exam.attemptCount} graded
                               </span>
+                              {exam.pendingGradeCount > 0 ? (
+                                <span className="text-brand-orange">
+                                  {exam.pendingGradeCount} awaiting essay grading
+                                </span>
+                              ) : null}
                             </div>
                           </div>
                           <div className="flex flex-wrap gap-2">
@@ -476,7 +483,23 @@ export default function TeacherCbtCenterPage() {
                                   exam.resultsReleased ? "UNRELEASE_RESULTS" : "RELEASE_RESULTS",
                                 )
                               }
-                              disabled={busy}
+                              disabled={
+                                busy ||
+                                (!exam.resultsReleased &&
+                                  (exam.status !== "CLOSED" ||
+                                    exam.attemptCount === 0 ||
+                                    exam.inProgressCount > 0 ||
+                                    exam.pendingGradeCount > 0))
+                              }
+                              title={
+                                !exam.resultsReleased && exam.status !== "CLOSED"
+                                  ? "Close the assessment before releasing results."
+                                  : !exam.resultsReleased && exam.pendingGradeCount > 0
+                                    ? "Grade all submitted essays before releasing results."
+                                    : !exam.resultsReleased && exam.inProgressCount > 0
+                                      ? "Wait for in-progress attempts to finish."
+                                      : undefined
+                              }
                               className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-brand-orange hover:bg-brand-orange hover:text-brand-navy disabled:opacity-50"
                             >
                               <CheckCircle2 size={12} />{" "}

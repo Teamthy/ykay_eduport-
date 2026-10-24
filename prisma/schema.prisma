@@ -190,8 +190,9 @@ model School {
   feeInvoices             FeeInvoice[]
   feePayments             FeePayment[]
   feePaymentAttempts      FeePaymentAttempt[]
-  reportCards             ReportCard[]
-  itEnrollments           ItEnrollment[]
+  reportCards              ReportCard[]
+  examGradebookSyncs       ExamGradebookSync[]
+  itEnrollments            ItEnrollment[]
   notificationJobs        NotificationJob[]
   userNotifications       UserNotification[]
   notificationPreferences NotificationPreference[]
@@ -366,7 +367,8 @@ model StudentProfile {
   reportCards          ReportCard[]
   gradebookEntries     GradebookEntry[]
   examAttempts         ExamAttempt[]
-  examRetakes          ExamRetake[]
+  examRetakes           ExamRetake[]
+  examGradebookSyncs   ExamGradebookSync[]
   admissionApplication AdmissionApplication? @relation("AdmissionEnrollment", fields: [admissionApplicationId], references: [id], onDelete: SetNull)
   messageThreads       MessageThread[]
   behaviorRecords      BehaviorRecord[]
@@ -696,7 +698,7 @@ model ReportCard {
   updatedAt          DateTime         @updatedAt
 
   school         School              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  studentProfile StudentProfile      @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  studentProfile StudentProfile      @relation(fields: [studentProfileId], references: [id], onDelete: Restrict)
   parentProfile  ParentProfile?      @relation(fields: [parentProfileId], references: [id], onDelete: SetNull)
   subjects       ReportCardSubject[]
 
@@ -984,11 +986,39 @@ model GradebookEntry {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  gradebook      SubjectGradebook @relation(fields: [gradebookId], references: [id], onDelete: Cascade)
-  studentProfile StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  gradebook      SubjectGradebook @relation(fields: [gradebookId], references: [id], onDelete: Restrict)
+  studentProfile StudentProfile   @relation(fields: [studentProfileId], references: [id], onDelete: Restrict)
+  examSyncs      ExamGradebookSync[]
 
   @@unique([gradebookId, studentProfileId])
   @@index([studentProfileId, updatedAt])
+}
+
+/// Provenance for an exam score written into one cumulative gradebook slot.
+/// The prior value makes a result hide/release cycle safely reversible and
+/// prevents a retry from overwriting manual or newer gradebook changes.
+model ExamGradebookSync {
+  id               String   @id @default(cuid())
+  schoolId         String
+  examId           String
+  studentProfileId String
+  gradebookEntryId String
+  component        String
+  previousValue    Int
+  syncedValue      Int
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  school         School         @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  exam           Exam           @relation(fields: [examId], references: [id], onDelete: Restrict)
+  studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Restrict)
+  gradebookEntry GradebookEntry @relation(fields: [gradebookEntryId], references: [id], onDelete: Restrict)
+
+  @@unique([examId, studentProfileId])
+  @@index([schoolId, examId])
+  @@index([gradebookEntryId, isActive])
+  @@index([studentProfileId, isActive])
 }
 
 model Exam {
@@ -996,9 +1026,15 @@ model Exam {
   schoolId         String
   classId          String
   teacherProfileId String
+  /// Null only for legacy exams created before term-aware CBT was introduced.
+  termId           String?
   subjectName      String
   title            String
   examType         String     @default("CA")
+  /// Programme category for PRACTICE exams: WAEC, JAMB, JUNIOR_WAEC, OTHER.
+  practiceCategory String?
+  /// Optional destination in the cumulative term gradebook (CA1/CA2/MIDTERM/ASSIGNMENT/EXAM).
+  gradebookComponent String?
   durationMinutes  Int        @default(30)
   totalMarks       Int        @default(0)
   passMark         Int        @default(40)
@@ -1022,12 +1058,15 @@ model Exam {
   school         School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   classroom      SchoolClass    @relation(fields: [classId], references: [id], onDelete: Cascade)
   teacherProfile TeacherProfile @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  term           Term?          @relation(fields: [termId], references: [id], onDelete: Restrict)
   subject        Subject?       @relation("ExamSubject", fields: [subjectId], references: [id], onDelete: SetNull)
   questions      ExamQuestion[]
   attempts       ExamAttempt[]
-  retakes        ExamRetake[]
+  retakes          ExamRetake[]
+  gradebookSyncs   ExamGradebookSync[]
 
   @@index([schoolId, status, createdAt])
+  @@index([termId])
   /// Drives the student exam list: "what am I sitting, and when".
   @@index([classId, status, scheduledFor])
   @@index([classId, status])
@@ -1068,8 +1107,8 @@ model ExamAttempt {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
-  exam           Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
-  studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  exam           Exam           @relation(fields: [examId], references: [id], onDelete: Restrict)
+  studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Restrict)
   answers        ExamAnswer[]
 
   @@unique([examId, studentProfileId, attemptNumber])
@@ -1101,7 +1140,7 @@ model ExamRetake {
   createdAt        DateTime @default(now())
 
   exam           Exam           @relation(fields: [examId], references: [id], onDelete: Cascade)
-  studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Restrict)
 
   @@unique([examId, studentProfileId])
 }
@@ -1695,6 +1734,7 @@ model Term {
   session       AcademicSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   feeStructures FeeStructure[]
   invoices      FeeInvoice[]    @relation("InvoiceTerm")
+  exams         Exam[]
 
   @@unique([sessionId, index])
   @@index([schoolId, isCurrent])
@@ -1714,9 +1754,9 @@ model StudentEnrolment {
   updatedAt        DateTime         @updatedAt
 
   school         School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  studentProfile StudentProfile  @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  studentProfile StudentProfile  @relation(fields: [studentProfileId], references: [id], onDelete: Restrict)
   classroom      SchoolClass     @relation(fields: [classId], references: [id], onDelete: Restrict)
-  session        AcademicSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session        AcademicSession @relation(fields: [sessionId], references: [id], onDelete: Restrict)
 
   /// A student sits in exactly one class per session.
   @@unique([studentProfileId, sessionId])

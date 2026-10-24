@@ -4,7 +4,7 @@ import { z } from "zod";
 import { finalizeAttempt, getStudentExamContext } from "@/lib/exams";
 import { getStudentFeeLock } from "@/lib/fee-lock";
 import { prisma } from "@/lib/prisma";
-import { attemptDeadline, startWindowRefusal } from "@/lib/subjects";
+import { attemptDeadline, startWindowRefusal, studentSubjectIds } from "@/lib/subjects";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +30,18 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
 
   const { id } = await context.params;
   const exam = await prisma.exam.findFirst({
-    where: { id, classId: studentContext.studentProfile.currentClassId },
+    where: {
+      id,
+      schoolId: studentContext.user.schoolId,
+      OR: [
+        { classId: studentContext.studentProfile.currentClassId },
+        {
+          attempts: {
+            some: { studentProfileId: studentContext.studentProfile.id },
+          },
+        },
+      ],
+    },
     include: { questions: { orderBy: { sortOrder: "asc" } } },
   });
   if (!exam) return NextResponse.json({ error: "Exam not found for your class." }, { status: 404 });
@@ -39,6 +50,13 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
     where: { examId: exam.id, studentProfileId: studentContext.studentProfile.id },
     orderBy: { attemptNumber: "desc" },
   });
+
+  if (exam.subjectId && existing?.status !== ExamAttemptStatus.IN_PROGRESS) {
+    const enrolledSubjectIds = await studentSubjectIds(studentContext.studentProfile.id);
+    if (!enrolledSubjectIds.includes(exam.subjectId)) {
+      return NextResponse.json({ error: "Exam not found for your subjects." }, { status: 404 });
+    }
+  }
 
   let attempt = existing;
 
@@ -52,6 +70,16 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
       );
     }
   } else {
+    // A past class paper remains readable through the student's result
+    // history, but it cannot be restarted after promotion. Only an in-progress
+    // attempt (handled above) may be resumed from a prior class.
+    if (exam.classId !== studentContext.studentProfile.currentClassId) {
+      return NextResponse.json(
+        { error: "This past-class exam is available in your result history only." },
+        { status: 409 },
+      );
+    }
+
     if (exam.status !== ExamStatus.PUBLISHED) {
       return NextResponse.json(
         { error: "This exam is not open for new attempts." },

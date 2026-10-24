@@ -1,0 +1,398 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import PortalTopbar from "@/components/PortalTopbar";
+import PortalSidebar from "@/components/PortalSidebar";
+import StudentCbtNav from "@/components/student/StudentCbtNav";
+import {
+  Award,
+  BookOpen,
+  CalendarCheck,
+  CalendarClock,
+  CalendarDays,
+  CheckCircle2,
+  ClipboardCheck,
+  FileSpreadsheet,
+  GraduationCap,
+  IdCard,
+  LayoutDashboard,
+  Megaphone,
+  MessageSquare,
+  User,
+  Clock,
+  LoaderCircle,
+  PlayCircle,
+  RotateCcw,
+  Shield,
+  Lock,
+  XCircle,
+  Search,
+} from "lucide-react";
+
+/** "Mon 14 Sep, 9:00 am" — a student needs the day and the time, not an ISO string. */
+function whenLabel(iso: string | null): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+/** Colour + icon per state, so the list is scannable without reading it. */
+const AVAILABILITY_STYLE: Record<string, { chip: string; icon: typeof Clock }> = {
+  READY: { chip: "bg-brand-green/10 text-brand-green", icon: PlayCircle },
+  UPCOMING: { chip: "bg-brand-orange/10 text-brand-orange", icon: CalendarClock },
+  CLOSED: { chip: "bg-red-500/10 text-red-500", icon: XCircle },
+  COMPLETED: { chip: "bg-[var(--surface-disabled)] text-[var(--text-muted)]", icon: CheckCircle2 },
+};
+
+const STUDENT_NAV_ITEMS = [
+  { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
+  { label: "Attendance", href: "/student/attendance", icon: CalendarCheck },
+  { label: "Timetable", href: "/student/timetable", icon: CalendarDays },
+  { label: "Take Exams", href: "/student/exams", icon: ClipboardCheck },
+  { label: "CA Test", href: "/student/ca-tests", icon: CalendarCheck },
+  { label: "Personal Practice", href: "/student/waec-practice", icon: Award },
+  { label: "Report Cards", href: "/student/report-cards", icon: FileSpreadsheet },
+  { label: "Messages", href: "/student/messages", icon: MessageSquare },
+  { label: "Announcements", href: "/student/announcements", icon: Megaphone },
+  { label: "My Profile", href: "/student/profile", icon: User },
+  { label: "Teachers", href: "/student/teachers", icon: GraduationCap },
+  { label: "ID Card", href: "/student/id-card", icon: IdCard },
+];
+
+type ExamCard = {
+  id: string;
+  title: string;
+  subjectName: string;
+  teacherName: string;
+  examType: string;
+  practiceCategory: string | null;
+  className: string;
+  isHistoricalClass: boolean;
+  term: { id: string; label: string; sessionLabel: string } | null;
+  durationMinutes: number;
+  questionCount: number;
+  totalMarks: number;
+  passMark: number;
+  hasEssay: boolean;
+  status: string;
+  instructions: string | null;
+  theoryMinutes: number;
+  scheduledFor: string | null;
+  availableUntil: string | null;
+  availability: "UPCOMING" | "READY" | "CLOSED" | "COMPLETED";
+  availabilityLabel: string;
+  feeLocked: boolean;
+  canStart: boolean;
+  canResume: boolean;
+  attempt: {
+    id: string;
+    status: string;
+    totalScore: number | null;
+    submittedAt: string | null;
+    scoreVisible: boolean;
+    percent: number | null;
+  } | null;
+};
+
+type Response = {
+  student: { displayName: string; studentId: string };
+  currentTermId: string | null;
+  terms: Array<{
+    id: string;
+    label: string;
+    sessionLabel: string;
+    index: number;
+    isCurrent: boolean;
+  }>;
+  exams: ExamCard[];
+};
+
+type ExamCatalogueMode = "take" | "ca";
+
+export default function StudentExamCatalogue({ mode }: { mode: ExamCatalogueMode }) {
+  const [data, setData] = useState<Response | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [q, setQ] = useState("");
+  const [selectedTermId, setSelectedTermId] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadExams() {
+      const params = new URLSearchParams({ section: mode });
+      if (selectedTermId) params.set("termId", selectedTermId);
+      try {
+        const response = await fetch(`/api/student/exams?${params.toString()}`, {
+          cache: "no-store",
+        });
+        const body = (await response.json()) as Response & { error?: string };
+        if (!response.ok) throw new Error(body.error || "Unable to load exams.");
+        if (active) setData(body);
+      } catch (loadError) {
+        if (active) {
+          setError(loadError instanceof Error ? loadError.message : "Unable to load exams.");
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    void loadExams();
+    return () => {
+      active = false;
+    };
+  }, [mode, selectedTermId]);
+
+  return (
+    <>
+      <PortalTopbar title={mode === "ca" ? "CA tests" : "Take exams"} />
+      <main className="min-h-screen w-full bg-[var(--bg-primary)] theme-transition">
+        <section className="portal-hero px-4 py-10 sm:px-6 lg:py-12">
+          <div className="w-full">
+            <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-brand-green/40 bg-brand-green/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
+              <ClipboardCheck size={11} /> Student CBT Tests
+            </span>
+            <h1 className="font-display text-4xl tracking-widest text-white md:text-6xl">
+              {mode === "ca" ? (
+                <>
+                  CA <span className="text-brand-green">TESTS</span>
+                </>
+              ) : (
+                <>
+                  TAKE <span className="text-brand-green">EXAMS</span>
+                </>
+              )}
+            </h1>
+            <p className="mt-3 max-w-2xl font-body text-sm text-white/60">
+              {mode === "ca"
+                ? "Review class-assigned continuous and mid-term tests for the selected school term."
+                : "Sit a published end-of-term paper for your class. Your answers save automatically, and the timer submits when time runs out."}
+            </p>
+            <label className="relative mt-6 block max-w-md">
+              <Search
+                size={14}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/40"
+              />
+              <input
+                type="search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search by subject or paper title…"
+                className="w-full rounded-full border border-white/15 bg-white/10 py-3 pl-10 pr-4 text-sm text-white outline-none placeholder:text-white/40 focus:border-brand-green"
+              />
+            </label>
+          </div>
+        </section>
+
+        <section className="px-4 py-8 sm:px-6 xl:px-8">
+          <div className="portal-full-width flex flex-col gap-6 lg:flex-row xl:gap-8">
+            <PortalSidebar portalName="Student" portalType="student" items={STUDENT_NAV_ITEMS} />
+            <div className="min-w-0 flex-1 space-y-4">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <StudentCbtNav active={mode} />
+                {data?.terms.length ? (
+                  <label className="min-w-[15rem] flex-1 sm:flex-none">
+                    <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                      Term / session
+                    </span>
+                    <select
+                      aria-label="Filter exams by term and session"
+                      value={selectedTermId}
+                      onChange={(event) => {
+                        setLoading(true);
+                        setError("");
+                        setSelectedTermId(event.target.value);
+                      }}
+                      className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2.5 text-sm text-[var(--input-text)] sm:min-w-[15rem]"
+                    >
+                      <option value="">All terms and sessions</option>
+                      {data.terms.map((term) => (
+                        <option key={term.id} value={term.id}>
+                          {term.sessionLabel} · {term.label}
+                          {term.isCurrent ? " (current)" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+              </div>
+
+              {error ? (
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                  {error}
+                </div>
+              ) : null}
+
+              {loading ? (
+                <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-10 shadow-[var(--card-shadow)]">
+                  <div className="flex items-center gap-3 text-[var(--text-secondary)]">
+                    <LoaderCircle className="animate-spin text-brand-green" size={20} /> Loading
+                    your exams...
+                  </div>
+                </div>
+              ) : null}
+
+              {!loading && data
+                ? data.exams
+                    .filter((exam) => {
+                      const needle = q.trim().toLowerCase();
+                      if (!needle) return true;
+                      return (
+                        exam.title.toLowerCase().includes(needle) ||
+                        exam.subjectName.toLowerCase().includes(needle) ||
+                        exam.teacherName.toLowerCase().includes(needle)
+                      );
+                    })
+                    .map((exam) => (
+                      <div
+                        key={exam.id}
+                        className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="font-display text-xl text-[var(--text-primary)]">
+                                {exam.title}
+                              </h3>
+                              <span className="rounded-full bg-brand-green/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-green">
+                                {exam.examType}
+                              </span>
+                              {exam.term ? (
+                                <span className="rounded-full bg-[var(--surface-disabled)] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                                  {exam.term.label} · {exam.term.sessionLabel}
+                                </span>
+                              ) : (
+                                <span className="rounded-full bg-[var(--surface-disabled)] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                                  Legacy term
+                                </span>
+                              )}
+                              {exam.isHistoricalClass ? (
+                                <span className="rounded-full bg-brand-orange/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-brand-orange">
+                                  Previous class
+                                </span>
+                              ) : null}
+                              {exam.status === "CLOSED" ? (
+                                <span className="rounded-full bg-red-500/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-red-500">
+                                  Closed
+                                </span>
+                              ) : null}
+                            </div>
+                            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                              <span className="inline-flex items-center gap-1">
+                                <BookOpen size={11} /> {exam.subjectName} · {exam.className} ·{" "}
+                                {exam.teacherName}
+                              </span>
+                              <span className="inline-flex items-center gap-1">
+                                <Clock size={11} /> {exam.durationMinutes} min
+                              </span>
+                              <span>
+                                {exam.questionCount} questions · {exam.totalMarks} marks · pass{" "}
+                                {exam.passMark}%
+                              </span>
+                              <span className="inline-flex items-center gap-1">
+                                <Shield size={11} /> Auto-save · Auto-submit
+                                {exam.hasEssay ? " · Essay included" : ""}
+                              </span>
+                            </div>
+                            {/* When to sit it — the whole point of the list. */}
+                            {whenLabel(exam.scheduledFor) ? (
+                              <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)]">
+                                <CalendarClock size={12} className="text-brand-green" />
+                                {exam.availability === "UPCOMING" ? "Opens" : "Scheduled"}{" "}
+                                {whenLabel(exam.scheduledFor)}
+                                {whenLabel(exam.availableUntil)
+                                  ? ` — closes ${whenLabel(exam.availableUntil)}`
+                                  : ""}
+                              </p>
+                            ) : null}
+                            {exam.theoryMinutes > 0 ? (
+                              <p className="mt-1 text-xs text-[var(--text-muted)]">
+                                {exam.durationMinutes} min objective + {exam.theoryMinutes} min
+                                theory
+                              </p>
+                            ) : null}
+                            {exam.instructions ? (
+                              <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                                {exam.instructions}
+                              </p>
+                            ) : null}
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            {exam.attempt?.scoreVisible ? (
+                              <div className="text-right">
+                                <div
+                                  className={`font-display text-3xl ${exam.attempt.percent !== null && exam.attempt.percent >= exam.passMark ? "text-brand-green" : "text-red-500"}`}
+                                >
+                                  {exam.attempt.percent}%
+                                </div>
+                                <div className="text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+                                  {exam.attempt.totalScore}/{exam.totalMarks} marks
+                                </div>
+                              </div>
+                            ) : exam.attempt && exam.attempt.status !== "IN_PROGRESS" ? (
+                              <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-orange/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-orange">
+                                <CheckCircle2 size={12} /> Submitted — awaiting results
+                              </span>
+                            ) : null}
+                            {/* Why there is no button. Previously an exam that
+                            could not be started showed nothing at all — no
+                            button, no reason — so a student stared at a card
+                            that appeared broken. */}
+                            {!exam.canResume && !exam.canStart ? (
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest ${
+                                  AVAILABILITY_STYLE[exam.availability]?.chip ??
+                                  "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
+                                }`}
+                              >
+                                {exam.feeLocked ? <Lock size={12} /> : null}
+                                {exam.feeLocked ? "Fees outstanding" : exam.availabilityLabel}
+                              </span>
+                            ) : null}
+                            {exam.canResume ? (
+                              <Link
+                                href={`/student/exams/${exam.id}`}
+                                className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-orange-dark"
+                              >
+                                <RotateCcw size={13} /> Resume Exam
+                              </Link>
+                            ) : exam.canStart ? (
+                              <Link
+                                href={`/student/exams/${exam.id}`}
+                                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark"
+                              >
+                                <PlayCircle size={13} /> Start Exam
+                              </Link>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                : null}
+
+              {!loading && data && !data.exams.length ? (
+                <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-12 text-center shadow-[var(--card-shadow)]">
+                  <Award className="mx-auto mb-3 text-[var(--text-muted)]" size={32} />
+                  <p className="text-sm text-[var(--text-muted)]">
+                    {mode === "ca"
+                      ? "No CA or mid-term tests are published for this class and term yet."
+                      : "No end-of-term exams are published for this class and term yet."}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </section>
+      </main>
+    </>
+  );
+}

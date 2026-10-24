@@ -28,9 +28,19 @@ function shuffled<T>(items: T[], seed: string): T[] {
  * stops a student pointing the practice endpoints at a real CA or end-of-term exam to
  * get unlimited attempts with no fee lock.
  */
-async function loadPracticeExam(examId: string, schoolId: string, classId: string) {
+async function loadPracticeExam(
+  examId: string,
+  schoolId: string,
+  currentClassId: string,
+  studentProfileId: string,
+) {
   return prisma.exam.findFirst({
-    where: { id: examId, schoolId, classId, examType: "PRACTICE" },
+    where: {
+      id: examId,
+      schoolId,
+      examType: "PRACTICE",
+      OR: [{ classId: currentClassId }, { attempts: { some: { studentProfileId } } }],
+    },
     include: { questions: { orderBy: { sortOrder: "asc" } } },
   });
 }
@@ -52,6 +62,7 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
     id,
     studentContext.user.schoolId,
     studentContext.studentProfile.currentClassId,
+    studentContext.studentProfile.id,
   );
   if (!exam) {
     return NextResponse.json({ error: "Practice exam not found for your class." }, { status: 404 });
@@ -66,6 +77,19 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
   });
 
   let attempt = existing;
+
+  if (
+    exam.classId !== studentContext.studentProfile.currentClassId &&
+    (!existing || existing.status !== ExamAttemptStatus.IN_PROGRESS)
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Previous-class practice history is read-only; only an in-progress attempt can be resumed.",
+      },
+      { status: 409 },
+    );
+  }
 
   if (existing && existing.status === ExamAttemptStatus.IN_PROGRESS) {
     // Resume — unless the clock already ran out, in which case submit it.
@@ -169,6 +193,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     id,
     studentContext.user.schoolId,
     studentContext.studentProfile.currentClassId,
+    studentContext.studentProfile.id,
   );
   if (!exam) {
     return NextResponse.json({ error: "Practice exam not found for your class." }, { status: 404 });

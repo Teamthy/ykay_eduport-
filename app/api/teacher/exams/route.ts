@@ -1,24 +1,37 @@
-import { ExamAttemptStatus, ExamStatus, Prisma } from "@prisma/client";
+import { ExamAttemptStatus, ExamStatus, GradebookStatus, Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getExamTeacherContext, parseBulkQuestions, examStatusLabel } from "@/lib/exams";
+import { NoCurrentTermError, requireCurrentLabels } from "@/lib/academic-session";
 import { prisma } from "@/lib/prisma";
+import {
+  gradebookFieldForComponent,
+  isGradebookComponent,
+  mergeExamScoreIntoGradebook,
+  restoreGradebookComponent,
+  type GradebookComponent,
+} from "@/lib/exam-gradebook-sync";
 import { getClientIp } from "@/lib/requests";
 
 export const dynamic = "force-dynamic";
+
+class GradebookNotOpenError extends Error {}
+class GradebookSyncConflictError extends Error {}
+class ExamReleaseConflictError extends Error {}
 
 export async function GET() {
   const context = await getExamTeacherContext();
   if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const exams = await prisma.exam.findMany({
-    where: { teacherProfileId: context.teacherProfile.id },
+    where: { schoolId: context.user.schoolId, teacherProfileId: context.teacherProfile.id },
     orderBy: { createdAt: "desc" },
     include: {
       classroom: { select: { displayName: true, level: true } },
       questions: { select: { id: true, marks: true, type: true } },
       attempts: { select: { id: true, status: true } },
       subject: { select: { id: true, name: true } },
+      term: { select: { id: true, label: true, session: { select: { label: true } } } },
     },
   });
 
@@ -36,6 +49,11 @@ export async function GET() {
       subjectName: exam.subjectName,
       className: exam.classroom.displayName,
       examType: exam.examType,
+      practiceCategory: exam.practiceCategory,
+      gradebookComponent: exam.gradebookComponent,
+      term: exam.term
+        ? { id: exam.term.id, label: exam.term.label, sessionLabel: exam.term.session.label }
+        : null,
       durationMinutes: exam.durationMinutes,
       totalMarks: exam.questions.reduce((sum, question) => sum + question.marks, 0),
       passMark: exam.passMark,
@@ -45,7 +63,14 @@ export async function GET() {
       resultsReleased: exam.resultsReleased,
       attemptCount: exam.attempts.length,
       submittedCount: exam.attempts.filter((attempt) => attempt.status !== "IN_PROGRESS").length,
-      inProgressCount: exam.attempts.filter((attempt) => attempt.status === "IN_PROGRESS").length,
+      gradedCount: exam.attempts.filter((attempt) => attempt.status === ExamAttemptStatus.GRADED)
+        .length,
+      pendingGradeCount: exam.attempts.filter(
+        (attempt) => attempt.status === ExamAttemptStatus.SUBMITTED,
+      ).length,
+      inProgressCount: exam.attempts.filter(
+        (attempt) => attempt.status === ExamAttemptStatus.IN_PROGRESS,
+      ).length,
       createdAt: exam.createdAt.toISOString(),
       // Scheduling, so the management centre can show what is coming up.
       scheduledFor: exam.scheduledFor?.toISOString() || null,
@@ -73,6 +98,8 @@ const createSchema = z.object({
   assignmentId: z.string().trim().min(1),
   title: z.string().trim().min(3).max(160),
   examType: z.enum(["CA", "MIDTERM", "EXAM", "PRACTICE"]),
+  practiceCategory: z.enum(["WAEC", "JAMB", "JUNIOR_WAEC", "OTHER"]).nullable().optional(),
+  gradebookComponent: z.enum(["CA1", "CA2", "MIDTERM", "ASSIGNMENT", "EXAM"]).nullable().optional(),
   durationMinutes: z.number().int().min(5).max(240),
   passMark: z.number().int().min(0).max(100),
   instructions: z.string().trim().max(2000).optional(),
@@ -109,6 +136,30 @@ export async function POST(request: NextRequest) {
       { status: 403 },
     );
   }
+
+  // Assessment records must be tied to a school-configured term. Never stamp
+  // a date-based guess onto a result that will outlive the current session.
+  let currentTerm: Awaited<ReturnType<typeof requireCurrentLabels>>;
+  try {
+    currentTerm = await requireCurrentLabels(context.user.schoolId);
+  } catch (termError) {
+    if (termError instanceof NoCurrentTermError) {
+      return NextResponse.json({ error: termError.message }, { status: 409 });
+    }
+    throw termError;
+  }
+
+  const defaultComponent: Record<string, string> = {
+    CA: "CA1",
+    MIDTERM: "MIDTERM",
+    EXAM: "EXAM",
+  };
+  const gradebookComponent =
+    payload.examType === "PRACTICE"
+      ? null
+      : payload.gradebookComponent === undefined
+        ? (defaultComponent[payload.examType] ?? null)
+        : payload.gradebookComponent;
 
   // A window that closes before it opens would silently make the exam
   // unsittable — refuse rather than create it.
@@ -154,9 +205,13 @@ export async function POST(request: NextRequest) {
       schoolId: context.user.schoolId,
       classId: assignment.classroom.id,
       teacherProfileId: context.teacherProfile.id,
+      termId: currentTerm.termId,
       subjectName: assignment.subjectName,
       title: payload.title,
       examType: payload.examType,
+      practiceCategory:
+        payload.examType === "PRACTICE" ? (payload.practiceCategory ?? "OTHER") : null,
+      gradebookComponent,
       durationMinutes: payload.durationMinutes,
       passMark: payload.passMark,
       instructions: payload.instructions || null,
@@ -193,6 +248,9 @@ export async function POST(request: NextRequest) {
         title: exam.title,
         subject: exam.subjectName,
         questions: parsed.questions.length,
+        termId: exam.termId,
+        practiceCategory: exam.practiceCategory,
+        gradebookComponent: exam.gradebookComponent,
       },
       ipAddress: getClientIp(request),
     },
@@ -244,7 +302,11 @@ export async function PATCH(request: NextRequest) {
   }
 
   const exam = await prisma.exam.findFirst({
-    where: { id: payload.examId, teacherProfileId: context.teacherProfile.id },
+    where: {
+      id: payload.examId,
+      schoolId: context.user.schoolId,
+      teacherProfileId: context.teacherProfile.id,
+    },
     include: { questions: { select: { id: true, marks: true, sortOrder: true } } },
   });
   if (!exam) return NextResponse.json({ error: "Exam not found." }, { status: 404 });
@@ -295,6 +357,13 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (payload.action === "UPDATE_SETTINGS") {
+    if (exam.resultsReleased) {
+      return NextResponse.json(
+        { error: "Hide released results before changing assessment settings." },
+        { status: 409 },
+      );
+    }
+
     // Resolve the window against what is being saved, falling back to what is
     // already stored — otherwise editing only the close time could produce a
     // window that closes before an unchanged opening time.
@@ -337,7 +406,7 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    const data: Prisma.ExamUpdateInput = {};
+    const data: Prisma.ExamUpdateManyMutationInput = {};
     if (payload.durationMinutes !== undefined) data.durationMinutes = payload.durationMinutes;
     if (payload.theoryMinutes !== undefined) data.theoryMinutes = payload.theoryMinutes;
     if (payload.passMark !== undefined) data.passMark = payload.passMark;
@@ -349,7 +418,22 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
     }
 
-    await prisma.exam.update({ where: { id: exam.id }, data });
+    const settingsUpdate = await prisma.exam.updateMany({
+      where: {
+        id: exam.id,
+        schoolId: context.user.schoolId,
+        teacherProfileId: context.teacherProfile.id,
+        resultsReleased: false,
+        updatedAt: exam.updatedAt,
+      },
+      data,
+    });
+    if (settingsUpdate.count !== 1) {
+      return NextResponse.json(
+        { error: "Assessment settings changed or results were released. Reload and try again." },
+        { status: 409 },
+      );
+    }
     await prisma.auditLog.create({
       data: {
         schoolId: context.user.schoolId,
@@ -366,13 +450,35 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (payload.action === "PUBLISH") {
+    if (exam.status !== ExamStatus.DRAFT || exam.resultsReleased) {
+      return NextResponse.json(
+        { error: "Only an unreleased draft assessment can be published." },
+        { status: 409 },
+      );
+    }
     if (!exam.questions.length) {
       return NextResponse.json(
         { error: "Add at least one question before publishing." },
         { status: 409 },
       );
     }
-    await prisma.exam.update({ where: { id: exam.id }, data: { status: ExamStatus.PUBLISHED } });
+    const publish = await prisma.exam.updateMany({
+      where: {
+        id: exam.id,
+        schoolId: context.user.schoolId,
+        teacherProfileId: context.teacherProfile.id,
+        status: ExamStatus.DRAFT,
+        resultsReleased: false,
+        updatedAt: exam.updatedAt,
+      },
+      data: { status: ExamStatus.PUBLISHED },
+    });
+    if (publish.count !== 1) {
+      return NextResponse.json(
+        { error: "Assessment state changed. Reload before publishing." },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({
       ok: true,
       message: "Exam published. Students in the class can now take it.",
@@ -380,26 +486,418 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (payload.action === "CLOSE") {
-    await prisma.exam.update({ where: { id: exam.id }, data: { status: ExamStatus.CLOSED } });
+    if (exam.status === ExamStatus.CLOSED) {
+      return NextResponse.json({ ok: true, message: "Exam is already closed." });
+    }
+    if (exam.status !== ExamStatus.PUBLISHED) {
+      return NextResponse.json(
+        { error: "Only a published assessment can be closed." },
+        { status: 409 },
+      );
+    }
+    const close = await prisma.exam.updateMany({
+      where: {
+        id: exam.id,
+        schoolId: context.user.schoolId,
+        teacherProfileId: context.teacherProfile.id,
+        status: ExamStatus.PUBLISHED,
+        updatedAt: exam.updatedAt,
+      },
+      data: { status: ExamStatus.CLOSED },
+    });
+    if (close.count !== 1) {
+      const current = await prisma.exam.findFirst({
+        where: {
+          id: exam.id,
+          schoolId: context.user.schoolId,
+          teacherProfileId: context.teacherProfile.id,
+        },
+        select: { status: true },
+      });
+      if (current?.status === ExamStatus.CLOSED) {
+        return NextResponse.json({ ok: true, message: "Exam is already closed." });
+      }
+      return NextResponse.json(
+        { error: "Assessment state changed. Reload before closing." },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ ok: true, message: "Exam closed. No new attempts can start." });
   }
 
   if (payload.action === "RELEASE_RESULTS" || payload.action === "UNRELEASE_RESULTS") {
     const release = payload.action === "RELEASE_RESULTS";
-    await prisma.exam.update({ where: { id: exam.id }, data: { resultsReleased: release } });
-    await prisma.auditLog.create({
-      data: {
-        schoolId: context.user.schoolId,
-        actorUserId: context.user.id,
-        action: release ? "EXAM_RESULTS_RELEASED" : "EXAM_RESULTS_HIDDEN",
-        entityType: "Exam",
-        entityId: exam.id,
-        ipAddress: getClientIp(request),
+    if (!release) {
+      if (!exam.resultsReleased) {
+        return NextResponse.json({ ok: true, message: "Results are already hidden." });
+      }
+
+      let restoredComponents = 0;
+      try {
+        await prisma.$transaction(async (tx) => {
+          const syncs = await tx.examGradebookSync.findMany({
+            where: { examId: exam.id, isActive: true },
+            include: {
+              gradebookEntry: { include: { gradebook: { select: { status: true } } } },
+            },
+          });
+
+          for (const sync of syncs) {
+            if (!isGradebookComponent(sync.component)) throw new GradebookSyncConflictError();
+            if (sync.gradebookEntry.gradebook.status !== GradebookStatus.OPEN) {
+              throw new GradebookNotOpenError();
+            }
+
+            const componentField = gradebookFieldForComponent(sync.component);
+            const entry = sync.gradebookEntry;
+            if (entry[componentField] !== sync.syncedValue) {
+              throw new GradebookSyncConflictError();
+            }
+            const restored = restoreGradebookComponent(
+              {
+                ca1: entry.ca1,
+                ca2: entry.ca2,
+                midterm: entry.midterm,
+                assignment: entry.assignment,
+                exam: entry.exam,
+              },
+              sync.previousValue,
+              sync.component,
+            );
+            await tx.gradebookEntry.update({
+              where: { id: entry.id },
+              data: {
+                [componentField]: restored[componentField],
+                total: restored.total,
+                grade: restored.grade,
+              },
+            });
+            await tx.examGradebookSync.update({
+              where: { id: sync.id },
+              data: { isActive: false },
+            });
+          }
+
+          await tx.exam.update({ where: { id: exam.id }, data: { resultsReleased: false } });
+          await tx.auditLog.create({
+            data: {
+              schoolId: context.user.schoolId,
+              actorUserId: context.user.id,
+              action: "EXAM_RESULTS_HIDDEN",
+              entityType: "Exam",
+              entityId: exam.id,
+              metadata: { restoredGradebookComponents: syncs.length },
+              ipAddress: getClientIp(request),
+            },
+          });
+          restoredComponents = syncs.length;
+        });
+      } catch (hideError) {
+        if (hideError instanceof GradebookNotOpenError) {
+          return NextResponse.json(
+            {
+              error:
+                "Results cannot be hidden after the cumulative gradebook has been submitted or locked.",
+            },
+            { status: 409 },
+          );
+        }
+        if (hideError instanceof GradebookSyncConflictError) {
+          return NextResponse.json(
+            {
+              error:
+                "A gradebook component changed after sync. Resolve the gradebook conflict before hiding results.",
+            },
+            { status: 409 },
+          );
+        }
+        throw hideError;
+      }
+
+      return NextResponse.json({
+        ok: true,
+        message: restoredComponents
+          ? `Results hidden and ${restoredComponents} gradebook component(s) safely restored.`
+          : "Results hidden from students.",
+      });
+    }
+
+    if (exam.resultsReleased) {
+      return NextResponse.json({ ok: true, message: "Results are already released." });
+    }
+    if (exam.status !== ExamStatus.CLOSED) {
+      return NextResponse.json(
+        { error: "Close the assessment before releasing its results." },
+        { status: 409 },
+      );
+    }
+
+    const attempts = await prisma.examAttempt.findMany({
+      where: { examId: exam.id },
+      orderBy: [{ attemptNumber: "desc" }, { submittedAt: "desc" }],
+      select: {
+        id: true,
+        studentProfileId: true,
+        attemptNumber: true,
+        status: true,
+        totalScore: true,
+        studentProfile: { select: { schoolId: true } },
       },
     });
+    if (!attempts.length) {
+      return NextResponse.json(
+        { error: "There are no completed attempts to release yet." },
+        { status: 409 },
+      );
+    }
+    if (attempts.some((attempt) => attempt.status !== ExamAttemptStatus.GRADED)) {
+      return NextResponse.json(
+        {
+          error:
+            "Finish all in-progress attempts and grade pending essays before releasing results.",
+        },
+        { status: 409 },
+      );
+    }
+    if (attempts.some((attempt) => attempt.studentProfile.schoolId !== context.user.schoolId)) {
+      return NextResponse.json(
+        { error: "An attempt is linked to a different school." },
+        { status: 409 },
+      );
+    }
+
+    const totalMarks = exam.questions.reduce((sum, question) => sum + question.marks, 0);
+    if (
+      totalMarks <= 0 ||
+      attempts.some((attempt) => attempt.totalScore < 0 || attempt.totalScore > totalMarks)
+    ) {
+      return NextResponse.json(
+        { error: "Stored assessment marks are invalid. Contact an administrator." },
+        { status: 409 },
+      );
+    }
+
+    let term: { label: string; session: { label: string } } | null = null;
+    let gradebookComponent: GradebookComponent | null = null;
+    if (exam.gradebookComponent) {
+      if (!isGradebookComponent(exam.gradebookComponent) || !exam.termId) {
+        return NextResponse.json(
+          { error: "This assessment has an invalid cumulative gradebook configuration." },
+          { status: 409 },
+        );
+      }
+      term = await prisma.term.findFirst({
+        where: { id: exam.termId, schoolId: context.user.schoolId },
+        select: { label: true, session: { select: { label: true } } },
+      });
+      if (!term) {
+        return NextResponse.json(
+          { error: "The assessment's configured term/session no longer exists." },
+          { status: 409 },
+        );
+      }
+      gradebookComponent = exam.gradebookComponent;
+    }
+
+    let syncedStudents = 0;
+    try {
+      await prisma.$transaction(async (tx) => {
+        // Claim the release state before reading attempts. The conditional row
+        // update serializes this transaction with essay grading, which uses the
+        // same exam row as its release guard. Any later failure rolls the claim
+        // back together with the gradebook writes.
+        const releaseClaim = await tx.exam.updateMany({
+          where: {
+            id: exam.id,
+            schoolId: context.user.schoolId,
+            teacherProfileId: context.teacherProfile.id,
+            status: ExamStatus.CLOSED,
+            resultsReleased: false,
+            updatedAt: exam.updatedAt,
+          },
+          data: { resultsReleased: true },
+        });
+        if (releaseClaim.count !== 1) throw new ExamReleaseConflictError();
+
+        const currentAttempts = await tx.examAttempt.findMany({
+          where: { examId: exam.id },
+          orderBy: [{ attemptNumber: "desc" }, { submittedAt: "desc" }],
+          select: {
+            id: true,
+            studentProfileId: true,
+            attemptNumber: true,
+            status: true,
+            totalScore: true,
+            studentProfile: { select: { schoolId: true } },
+          },
+        });
+        if (
+          !currentAttempts.length ||
+          currentAttempts.some((attempt) => attempt.status !== ExamAttemptStatus.GRADED) ||
+          currentAttempts.some(
+            (attempt) => attempt.studentProfile.schoolId !== context.user.schoolId,
+          ) ||
+          currentAttempts.some(
+            (attempt) => attempt.totalScore < 0 || attempt.totalScore > totalMarks,
+          )
+        ) {
+          throw new ExamReleaseConflictError();
+        }
+
+        const latestAttemptByStudent = new Map<string, (typeof currentAttempts)[number]>();
+        for (const attempt of currentAttempts) {
+          if (!latestAttemptByStudent.has(attempt.studentProfileId)) {
+            latestAttemptByStudent.set(attempt.studentProfileId, attempt);
+          }
+        }
+        syncedStudents = latestAttemptByStudent.size;
+
+        if (gradebookComponent && term) {
+          const gradebook = await tx.subjectGradebook.upsert({
+            where: {
+              classId_subjectName_sessionLabel_termLabel: {
+                classId: exam.classId,
+                subjectName: exam.subjectName,
+                sessionLabel: term.session.label,
+                termLabel: term.label,
+              },
+            },
+            update: {},
+            create: {
+              schoolId: context.user.schoolId,
+              classId: exam.classId,
+              teacherProfileId: exam.teacherProfileId,
+              subjectName: exam.subjectName,
+              sessionLabel: term.session.label,
+              termLabel: term.label,
+              status: GradebookStatus.OPEN,
+            },
+          });
+          if (gradebook.status !== GradebookStatus.OPEN) throw new GradebookNotOpenError();
+
+          const componentField = gradebookFieldForComponent(gradebookComponent);
+          for (const attempt of latestAttemptByStudent.values()) {
+            const key = {
+              gradebookId_studentProfileId: {
+                gradebookId: gradebook.id,
+                studentProfileId: attempt.studentProfileId,
+              },
+            };
+            const syncKey = {
+              examId_studentProfileId: {
+                examId: exam.id,
+                studentProfileId: attempt.studentProfileId,
+              },
+            };
+            const existingSync = await tx.examGradebookSync.findUnique({ where: syncKey });
+            if (existingSync?.isActive) throw new GradebookSyncConflictError();
+
+            const existing = await tx.gradebookEntry.findUnique({ where: key });
+            const currentValue = existing?.[componentField] ?? 0;
+            if (existingSync && currentValue !== existingSync.previousValue) {
+              throw new GradebookSyncConflictError();
+            }
+            const previousValue = existingSync?.previousValue ?? currentValue;
+            const totals = mergeExamScoreIntoGradebook(
+              {
+                ca1: existing?.ca1 ?? 0,
+                ca2: existing?.ca2 ?? 0,
+                midterm: existing?.midterm ?? 0,
+                assignment: existing?.assignment ?? 0,
+                exam: existing?.exam ?? 0,
+              },
+              attempt.totalScore,
+              totalMarks,
+              gradebookComponent,
+            );
+            const entry = await tx.gradebookEntry.upsert({
+              where: key,
+              update: {
+                [componentField]: totals[componentField],
+                total: totals.total,
+                grade: totals.grade,
+              },
+              create: {
+                gradebookId: gradebook.id,
+                studentProfileId: attempt.studentProfileId,
+                ...totals,
+              },
+            });
+            await tx.examGradebookSync.upsert({
+              where: syncKey,
+              update: {
+                gradebookEntryId: entry.id,
+                component: gradebookComponent,
+                previousValue,
+                syncedValue: totals[componentField],
+                isActive: true,
+              },
+              create: {
+                schoolId: context.user.schoolId,
+                examId: exam.id,
+                studentProfileId: attempt.studentProfileId,
+                gradebookEntryId: entry.id,
+                component: gradebookComponent,
+                previousValue,
+                syncedValue: totals[componentField],
+                isActive: true,
+              },
+            });
+          }
+        }
+
+        await tx.auditLog.create({
+          data: {
+            schoolId: context.user.schoolId,
+            actorUserId: context.user.id,
+            action: "EXAM_RESULTS_RELEASED",
+            entityType: "Exam",
+            entityId: exam.id,
+            metadata: {
+              gradebookComponent,
+              syncedStudents: gradebookComponent ? syncedStudents : 0,
+              termId: exam.termId,
+            },
+            ipAddress: getClientIp(request),
+          },
+        });
+      });
+    } catch (releaseError) {
+      if (releaseError instanceof ExamReleaseConflictError) {
+        return NextResponse.json(
+          {
+            error:
+              "Assessment state changed while results were being released. Refresh the results and try again.",
+          },
+          { status: 409 },
+        );
+      }
+      if (releaseError instanceof GradebookNotOpenError) {
+        return NextResponse.json(
+          {
+            error:
+              "The cumulative gradebook is submitted or locked; results were not released or synced.",
+          },
+          { status: 409 },
+        );
+      }
+      if (releaseError instanceof GradebookSyncConflictError) {
+        return NextResponse.json(
+          {
+            error:
+              "A gradebook component changed after a prior sync. Resolve the gradebook conflict before releasing results.",
+          },
+          { status: 409 },
+        );
+      }
+      throw releaseError;
+    }
+
     return NextResponse.json({
       ok: true,
-      message: release ? "Results released to students." : "Results hidden from students.",
+      message: gradebookComponent
+        ? `Results released and synced to ${gradebookComponent} in the configured term gradebook.`
+        : "Results released to students.",
     });
   }
 

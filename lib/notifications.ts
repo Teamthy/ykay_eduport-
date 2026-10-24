@@ -228,6 +228,8 @@ export type InAppNotificationInput = {
   push?: boolean;
 };
 
+export type IdempotentInAppNotificationInput = InAppNotificationInput & { id: string };
+
 /**
  * Create an in-app notification AND deliver it to the user's mobile devices.
  *
@@ -264,6 +266,38 @@ export async function createInAppNotification(input: InAppNotificationInput) {
   }
 
   return notification;
+}
+
+/**
+ * Create a durable in-app notification once for an immutable result event.
+ * The caller supplies a stable ID, so retries cannot duplicate the row. Push
+ * is only attempted when this call actually inserted the notification.
+ */
+export async function createInAppNotificationOnce(input: IdempotentInAppNotificationInput) {
+  const inserted = await prisma.userNotification.createMany({
+    data: [
+      {
+        id: input.id,
+        schoolId: input.schoolId,
+        userId: input.userId,
+        kind: input.kind,
+        title: input.title,
+        body: input.body,
+        link: input.link || null,
+      },
+    ],
+    skipDuplicates: true,
+  });
+  const notification = await prisma.userNotification.findUnique({ where: { id: input.id } });
+
+  if (!notification) throw new Error("The in-app notification could not be persisted.");
+  if (inserted.count > 0 && input.push !== false) {
+    void deliverPush(input).catch(() => {
+      /* the persisted in-app notification remains the source of truth */
+    });
+  }
+
+  return { notification, created: inserted.count > 0 };
 }
 
 async function deliverPush(input: InAppNotificationInput) {

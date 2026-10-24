@@ -159,20 +159,13 @@ export default function ResponsiveSidebar({
         />
       )}
 
-      <div
-        aria-hidden="true"
-        data-sidebar-spacer="true"
-        className={`hidden shrink-0 transition-[width] duration-200 lg:block ${
-          desktopCollapsed ? "lg:w-[80px]" : "lg:w-[272px]"
-        }`}
-      />
-
       <aside
         ref={drawerRef}
         id={id}
         role={open ? "dialog" : undefined}
         aria-modal={open ? true : undefined}
         aria-label={`${label} navigation`}
+        data-portal-sidebar="true"
         data-sidebar-collapsed={desktopCollapsed ? "true" : "false"}
         className={`${
           open
