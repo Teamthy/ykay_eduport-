@@ -55,6 +55,36 @@ function lcpElement(data) {
   return {};
 }
 
+/**
+ * Break the LCP down into its four phases.
+ *
+ * A bare "LCP=4200ms" cannot be acted on: `loadDelay` means the browser did not
+ * discover the resource until late (a rendering/JS problem), `loadTime` means it
+ * was slow on the wire, `renderDelay` means it arrived but the main thread took
+ * its time painting it. The shape of this debug blob differs between Lighthouse
+ * majors, so search it for the phase keys rather than indexing into it.
+ */
+function lcpSubparts(data) {
+  const stack = [...(data.audits?.["largest-contentful-paint"]?.details?.items ?? [])];
+  while (stack.length) {
+    const current = stack.shift();
+    if (!current || typeof current !== "object") continue;
+    if ("loadDelay" in current || "loadTime" in current || "renderDelay" in current) {
+      const ms = (value) => (Number.isFinite(value) ? Math.round(value) : undefined);
+      return {
+        fcp: ms(current.fcp),
+        loadDelay: ms(current.loadDelay),
+        loadTime: ms(current.loadTime),
+        renderDelay: ms(current.renderDelay),
+      };
+    }
+    for (const value of Object.values(current)) {
+      if (value && typeof value === "object") stack.push(value);
+    }
+  }
+  return null;
+}
+
 const reports = [];
 for (const file of files) {
   const data = JSON.parse(readFileSync(join(DIR, file), "utf8"));
@@ -72,6 +102,10 @@ for (const file of files) {
     // webfont or a JS chunk — which is how this gate stayed red for several
     // runs without anyone being able to act on it.
     ...lcpElement(data),
+    subparts: lcpSubparts(data),
+    lcpAuditIds: Object.keys(data.audits ?? {})
+      .filter((id) => /lcp|largest|font|render-blocking|server-response/.test(id))
+      .sort(),
     slowRequests: (data.audits?.["network-requests"]?.details?.items ?? [])
       .filter((item) => typeof item.transferSize === "number")
       .sort((a, b) => (b.transferSize ?? 0) - (a.transferSize ?? 0))
@@ -79,6 +113,16 @@ for (const file of files) {
       .map(
         (item) =>
           `${item.resourceType ?? "other"} ${Math.round((item.transferSize ?? 0) / 1024)}KB ${item.url}`,
+      ),
+    // Ordered by when the resource *finished*, not by size: a small file that
+    // lands at 4.1s can still be what held the paint back.
+    lateRequests: (data.audits?.["network-requests"]?.details?.items ?? [])
+      .filter((item) => Number.isFinite(item.networkEndTime))
+      .sort((a, b) => b.networkEndTime - a.networkEndTime)
+      .slice(0, 5)
+      .map(
+        (item) =>
+          `${item.resourceType ?? "other"} ${Math.round((item.transferSize ?? 0) / 1024)}KB ${Math.round(item.networkRequestTime ?? -1)}-${Math.round(item.networkEndTime)}ms ${item.url.replace(/^https?:\/\/[^/]+/, "")}`,
       ),
   });
 }
@@ -89,7 +133,12 @@ for (const report of reports) {
   )}ms FCP=${Math.round(report.fcp ?? -1)}ms TBT=${Math.round(report.tbt ?? -1)}ms CLS=${(
     report.cls ?? -1
   ).toFixed(3)}`;
-  console.log(`::notice title=Lighthouse CI::${msg}`);
+  // Phases go on the same line as the metrics: together they say whether to
+  // chase the network, the discovery path or the main thread.
+  const phases = report.subparts
+    ? ` | lcp fcp=${report.subparts.fcp} loadDelay=${report.subparts.loadDelay} load=${report.subparts.loadTime} renderDelay=${report.subparts.renderDelay}`
+    : "";
+  console.log(`::notice title=Lighthouse CI::${msg}${phases}`);
   if (report.lcpElement) {
     // Collapse whitespace/newlines: GitHub workflow commands are line-based, so
     // a multi-line node snippet truncated the annotation to its first line.
@@ -103,11 +152,13 @@ for (const report of reports) {
     // audits that ARE present. That is enough to tell whether the paint waited
     // on a font, a render-blocking resource or the image itself, without
     // downloading the artefact.
-    const ids = Object.keys(data.audits ?? {})
-      .filter((id) => /lcp|largest|font|render-blocking|server-response|text-compression/.test(id))
-      .sort();
     console.log(
-      `::notice title=Lighthouse LCP element::${report.route} audit has no LCP element block; LCP-related audits: ${ids.join(", ") || "none"}`,
+      `::notice title=Lighthouse LCP element::${report.route} audit has no LCP element block; LCP-related audits: ${report.lcpAuditIds?.join(", ") || "none"}`,
+    );
+  }
+  if (report.lateRequests?.length) {
+    console.log(
+      `::notice title=Lighthouse last responses::${report.route} ${report.lateRequests.join(" | ")}`,
     );
   }
   if (report.slowRequests?.length) {
