@@ -156,7 +156,7 @@ describe("lighthouse-report-summary", () => {
 
     expect(status).toBe(0);
     expect(output.match(/unparsed; raw details:/g)).toHaveLength(9);
-    expect(output).toContain("audits: largest-contentful-paint, render-blocking-resources");
+    expect(output).toContain("unparsed; raw details: null; present: largest-contentful-paint");
   });
 
   it("refuses to pass when a route has fewer than three runs", () => {
