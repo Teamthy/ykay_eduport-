@@ -22,6 +22,27 @@ function trackEntries() {
   return [...source.matchAll(/thumb:\s*"([^"]+)"/g)].map((match) => match[1]);
 }
 
+describe("the logo is not the heaviest response", () => {
+  it("does not advertise the 104 KB master PNG as a site icon", () => {
+    const layout = readFileSync(join(ROOT, "app/layout.tsx"), "utf8");
+    const iconsStart = layout.indexOf("icons:");
+    expect(iconsStart, "layout no longer declares `icons`").toBeGreaterThan(-1);
+    const iconsBlock = layout.slice(iconsStart, iconsStart + 800);
+    // `sizes: "any"` on the master made every page fetch 104 KB for a favicon.
+    expect(iconsBlock).not.toMatch(/ykay-logo\.png",\s*sizes:\s*"any"/);
+    expect(iconsBlock).toContain("/icons/icon-192.png");
+  });
+
+  it("uses the small webp for small raw <img> marks", () => {
+    for (const file of ["components/PlatformLanding.tsx", "app/it-portal/dashboard/page.tsx"]) {
+      const source = readFileSync(join(ROOT, file), "utf8");
+      expect(source, `${file} still points a raw <img> at the master PNG`).not.toMatch(
+        /<img[^>]+ykay-logo\.png/,
+      );
+    }
+  });
+});
+
 describe("home page track cards", () => {
   it("renders the thumbnail, not the full-bleed hero", () => {
     const source = readFileSync(COMPONENT, "utf8");
