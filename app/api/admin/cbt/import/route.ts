@@ -1,131 +1,200 @@
 import { UserRole } from "@prisma/client";
+import Papa from "papaparse";
+import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { assertNotImpersonating, requireRoleOr503 } from "@/lib/session";
+import { cbtQuestionDraftSchema, haveDistinctOptions } from "@/lib/cbt-question-validation";
+
+export const dynamic = "force-dynamic";
+
+const MAX_IMPORT_ROWS_PER_REQUEST = 250;
+const MAX_REPORTED_ERRORS = 40;
+
+type ImportRow = Record<string, unknown>;
+
+function parseCsv(csv: string): { rows?: ImportRow[]; error?: string } {
+  const result = Papa.parse<ImportRow>(csv, {
+    header: true,
+    skipEmptyLines: "greedy",
+    transformHeader: (header) => header.trim(),
+  });
+  if (result.errors.length) {
+    return { error: `CSV parsing failed near row ${result.errors[0]?.row ?? "?"}.` };
+  }
+  if (!result.meta.fields?.length) return { error: "CSV needs a header row." };
+  return { rows: result.data };
+}
+
+function asImportRow(value: unknown, index: number) {
+  const row = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const classLevel = String(row.classLevel ?? "")
+    .trim()
+    .toLowerCase();
+  const normalized = {
+    subjectSlug: String(row.subjectSlug ?? "")
+      .trim()
+      .toLowerCase(),
+    subjectName: String(row.subjectName ?? "").trim(),
+    classLevel,
+    department: String(row.department ?? "general").trim() || "general",
+    topic: String(row.topic ?? "").trim(),
+    difficulty: row.difficulty ?? 2,
+    stem: String(row.stem ?? "").trim(),
+    options: [row.optionA, row.optionB, row.optionC, row.optionD].map((option) =>
+      String(option ?? "").trim(),
+    ),
+    correctIndex: row.correctIndex,
+    explanation: String(row.explanation ?? "").trim(),
+    source: String(row.source ?? "original-draft").trim() || "original-draft",
+  };
+  return { index, parsed: cbtQuestionDraftSchema.safeParse(normalized), normalized };
+}
 
 /**
- * Admin CSV import for the shared CBT bank. Imported rows are always draft;
- * a separate review attestation is required before any student can see them.
- *
- * CSV columns (header row required):
- *   subjectSlug,subjectName,classLevel,topic,difficulty,stem,optionA,optionB,optionC,optionD,correctIndex,explanation
- *
- * correctIndex is 0-3. Questions whose stem already exists in the subject are
- * skipped, so re-uploading a file is safe.
+ * Import candidate questions in bounded batches. Every imported item remains
+ * draft until an authorized reviewer records a source citation and approval.
+ * The `rows` form is intended for the admin console's chunked 10k CSV upload;
+ * `csv` remains supported for small/manual callers.
  */
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   const auth = await requireRoleOr503([UserRole.ADMIN, UserRole.SUPER_ADMIN]);
   if (auth instanceof NextResponse) return auth;
   const impersonationBlock = assertNotImpersonating(auth);
   if (impersonationBlock) return impersonationBlock;
 
-  const { csv } = (await req.json()) as { csv?: string };
-  if (!csv || typeof csv !== "string") {
-    return NextResponse.json({ error: "csv (string) required" }, { status: 400 });
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Provide a CSV string or a rows array." }, { status: 400 });
   }
 
-  const lines = csv.trim().split(/\r?\n/);
-  if (lines.length < 2)
-    return NextResponse.json({ error: "CSV needs a header and at least one row" }, { status: 400 });
-
-  const header = lines[0].split(",").map((h) => h.trim());
-  const required = [
-    "subjectSlug",
-    "subjectName",
-    "classLevel",
-    "topic",
-    "stem",
-    "optionA",
-    "optionB",
-    "optionC",
-    "optionD",
-    "correctIndex",
-    "explanation",
-  ];
-  const missing = required.filter((r) => !header.includes(r));
-  if (missing.length)
-    return NextResponse.json({ error: `Missing columns: ${missing.join(", ")}` }, { status: 400 });
-
-  // Minimal CSV parsing (quoted fields with commas supported via a small state machine).
-  const parseLine = (line: string): string[] => {
-    const out: string[] = [];
-    let cur = "";
-    let inQuotes = false;
-    for (const ch of line) {
-      if (ch === '"') inQuotes = !inQuotes;
-      else if (ch === "," && !inQuotes) {
-        out.push(cur.trim());
-        cur = "";
-      } else cur += ch;
+  let rows: ImportRow[];
+  if ("rows" in body && Array.isArray(body.rows)) {
+    rows = body.rows as ImportRow[];
+  } else if ("csv" in body && typeof body.csv === "string") {
+    const parsedCsv = parseCsv(body.csv);
+    if (!parsedCsv.rows) {
+      return NextResponse.json({ error: parsedCsv.error }, { status: 400 });
     }
-    out.push(cur.trim());
-    return out;
-  };
+    rows = parsedCsv.rows;
+  } else {
+    return NextResponse.json({ error: "Provide a CSV string or a rows array." }, { status: 400 });
+  }
 
-  let imported = 0;
+  if (!rows.length)
+    return NextResponse.json({ error: "There are no question rows to import." }, { status: 400 });
+  if (rows.length > MAX_IMPORT_ROWS_PER_REQUEST) {
+    return NextResponse.json(
+      {
+        error: `Import at most ${MAX_IMPORT_ROWS_PER_REQUEST} rows per request; upload in batches.`,
+      },
+      { status: 413 },
+    );
+  }
+
   let skipped = 0;
   const errors: string[] = [];
+  const validRows: Array<{ index: number; data: z.infer<typeof cbtQuestionDraftSchema> }> = [];
 
-  for (let i = 1; i < lines.length; i++) {
-    const cells = parseLine(lines[i]);
-    const row = Object.fromEntries(header.map((h, c) => [h, cells[c] ?? ""]));
-    const correctIndex = Number(row.correctIndex);
-    const options = [row.optionA, row.optionB, row.optionC, row.optionD].map((value) =>
-      value.trim(),
-    );
-    const normalizedOptions = options.map((value) => value.toLowerCase());
-    const validLevels = new Set(["jss1", "jss2", "jss3", "ss1", "ss2", "ss3"]);
-    if (
-      !row.subjectSlug ||
-      !row.stem?.trim() ||
-      !row.topic?.trim() ||
-      !row.explanation?.trim() ||
-      options.some((option) => !option) ||
-      new Set(normalizedOptions).size !== 4 ||
-      !Number.isInteger(correctIndex) ||
-      correctIndex < 0 ||
-      correctIndex > 3 ||
-      !validLevels.has((row.classLevel || "").toLowerCase())
-    ) {
-      errors.push(`Row ${i + 1}: invalid class, stem, topic, explanation, options or answer key`);
-      continue;
-    }
-    const subject = await prisma.cbtSubject.upsert({
-      where: { slug: row.subjectSlug },
-      update: {},
-      create: {
-        slug: row.subjectSlug,
-        name: row.subjectName || row.subjectSlug,
-        classLevel: (row.classLevel || "jss3").toLowerCase(),
-      },
-    });
-    const exists = await prisma.cbtQuestion.findFirst({
-      where: { subjectId: subject.id, stem: row.stem },
-      select: { id: true },
-    });
-    if (exists) {
+  rows.forEach((row, index) => {
+    const normalized = asImportRow(row, index);
+    if (!normalized.parsed.success) {
       skipped += 1;
-      continue;
+      if (errors.length < MAX_REPORTED_ERRORS) {
+        errors.push(
+          `Row ${index + 1}: invalid or missing subject, class, content, options, answer or explanation.`,
+        );
+      }
+      return;
     }
-    await prisma.cbtQuestion.create({
-      data: {
-        subjectId: subject.id,
-        topic: row.topic || "General",
-        difficulty: Math.min(3, Math.max(1, Number(row.difficulty) || 2)),
-        stem: row.stem,
-        options,
-        correctIndex,
-        explanation: row.explanation.trim(),
-        status: "draft",
-        source: "curriculum",
-        reviewedByUserId: null,
-        reviewedAt: null,
-        reviewReference: null,
-        reviewNotes: null,
-      },
-    });
-    imported += 1;
+    if (!haveDistinctOptions(normalized.parsed.data.options)) {
+      skipped += 1;
+      if (errors.length < MAX_REPORTED_ERRORS)
+        errors.push(`Row ${index + 1}: options must be distinct.`);
+      return;
+    }
+    validRows.push({ index, data: normalized.parsed.data });
+  });
+
+  let imported = 0;
+  const bySubject = new Map<string, typeof validRows>();
+  for (const row of validRows) {
+    const group = bySubject.get(row.data.subjectSlug) ?? [];
+    group.push(row);
+    bySubject.set(row.data.subjectSlug, group);
   }
 
-  return NextResponse.json({ imported, skipped, errors });
+  try {
+    for (const [slug, group] of bySubject) {
+      const first = group[0]!.data;
+      const subject = await prisma.cbtSubject.upsert({
+        where: { slug },
+        create: {
+          slug,
+          name: first.subjectName,
+          classLevel: first.classLevel,
+          department: first.department || "general",
+        },
+        update: {},
+        select: { id: true, classLevel: true },
+      });
+      if (subject.classLevel !== first.classLevel) {
+        skipped += group.length;
+        if (errors.length < MAX_REPORTED_ERRORS) {
+          errors.push(`Subject ${slug} already belongs to a different class level.`);
+        }
+        continue;
+      }
+
+      const candidateByStem = new Map<string, (typeof group)[number]>();
+      for (const row of group) {
+        if (candidateByStem.has(row.data.stem)) {
+          skipped += 1;
+          if (errors.length < MAX_REPORTED_ERRORS)
+            errors.push(`Row ${row.index + 1}: duplicate stem in upload.`);
+        } else {
+          candidateByStem.set(row.data.stem, row);
+        }
+      }
+      const candidates = [...candidateByStem.values()];
+      const existing = candidates.length
+        ? await prisma.cbtQuestion.findMany({
+            where: {
+              subjectId: subject.id,
+              stem: { in: candidates.map((row) => row.data.stem) },
+            },
+            select: { stem: true },
+          })
+        : [];
+      const existingStems = new Set(existing.map((question: { stem: string }) => question.stem));
+      const toCreate = candidates.filter((row) => !existingStems.has(row.data.stem));
+      skipped += candidates.length - toCreate.length;
+      if (toCreate.length) {
+        const created = await prisma.cbtQuestion.createMany({
+          data: toCreate.map(({ data }) => ({
+            subjectId: subject.id,
+            topic: data.topic,
+            difficulty: data.difficulty,
+            stem: data.stem,
+            options: data.options,
+            correctIndex: data.correctIndex,
+            explanation: data.explanation,
+            source: data.source,
+            status: "draft",
+            reviewedByUserId: null,
+            reviewedAt: null,
+            reviewReference: null,
+            reviewNotes: null,
+          })),
+        });
+        imported += created.count;
+      }
+    }
+    return NextResponse.json({ imported, skipped, errors });
+  } catch {
+    return NextResponse.json(
+      { error: "The question import service is temporarily unavailable. Please retry this batch." },
+      { status: 503 },
+    );
+  }
 }

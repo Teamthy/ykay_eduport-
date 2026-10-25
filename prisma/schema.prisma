@@ -1824,7 +1824,7 @@ model CbtQuestion {
   explanation  String
   /// curriculum | waec-style | neco-style | jamb-style
   source       String     @default("curriculum")
-  /// draft | reviewed (legacy published rows are returned to draft by migration)
+  /// draft | reviewed | archived (legacy published rows are returned to draft by migration)
   status            String     @default("draft")
   reviewedByUserId  String?
   reviewedAt        DateTime?
