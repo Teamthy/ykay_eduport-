@@ -21,31 +21,41 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Choose a class from JSS1 to SS3." }, { status: 400 });
   }
 
-  const questions = await prisma.cbtQuestion.findMany({
-    where: {
-      status,
-      ...(classLevel ? { subject: { classLevel } } : {}),
-    },
-    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-    take: 50,
-    select: {
-      id: true,
-      topic: true,
-      difficulty: true,
-      stem: true,
-      options: true,
-      correctIndex: true,
-      explanation: true,
-      source: true,
-      status: true,
-      reviewReference: true,
-      reviewNotes: true,
-      reviewedAt: true,
-      subject: { select: { name: true, slug: true, classLevel: true, department: true } },
-    },
-  });
-  const nextCursor = questions.length === 50 ? (questions[questions.length - 1]?.id ?? null) : null;
-
-  return NextResponse.json({ questions, nextCursor });
+  try {
+    const questions = await prisma.cbtQuestion.findMany({
+      where: {
+        status,
+        ...(classLevel ? { subject: { classLevel } } : {}),
+      },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      take: 50,
+      select: {
+        id: true,
+        topic: true,
+        difficulty: true,
+        stem: true,
+        options: true,
+        correctIndex: true,
+        explanation: true,
+        source: true,
+        status: true,
+        reviewReference: true,
+        reviewNotes: true,
+        reviewedAt: true,
+        subject: { select: { name: true, slug: true, classLevel: true, department: true } },
+      },
+    });
+    const nextCursor =
+      questions.length === 50 ? (questions[questions.length - 1]?.id ?? null) : null;
+    return NextResponse.json({ questions, nextCursor });
+  } catch {
+    return NextResponse.json(
+      {
+        error:
+          "Question review is temporarily unavailable. Check database connectivity and confirm the CBT review migration is applied.",
+      },
+      { status: 503 },
+    );
+  }
 }

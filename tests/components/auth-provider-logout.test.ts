@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { AuthProvider, useAuth } from "@/components/AuthProvider";
+import { AuthProvider, signInPathForRole, useAuth } from "@/components/AuthProvider";
 
 const fetchMock = vi.fn<typeof fetch>();
 let container: HTMLDivElement | null = null;
@@ -13,8 +13,13 @@ let root: Root | null = null;
 ).IS_REACT_ACT_ENVIRONMENT = true;
 
 function SignOutButton() {
-  const { logout } = useAuth();
-  return createElement("button", { type: "button", onClick: logout }, "Sign out");
+  const { logout, user } = useAuth();
+  return createElement(
+    "div",
+    null,
+    createElement("button", { type: "button", onClick: logout }, "Sign out"),
+    createElement("span", { "data-testid": "session-user" }, user?.name ?? "Signed out"),
+  );
 }
 
 function buttonNamed(name: string) {
@@ -81,6 +86,55 @@ describe("portal sign-out flow", () => {
       }),
     );
     expect(buttonNamed("Signing out…")?.hasAttribute("disabled")).toBe(true);
+  });
+
+  it("keeps the session active when confirmation is canceled", async () => {
+    fetchMock.mockImplementation((input) => {
+      if (input === "/api/auth/me") {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            user: {
+              id: "teacher_1",
+              name: "Teacher One",
+              email: "teacher@example.test",
+              role: "TEACHER",
+            },
+          }),
+        } as Response);
+      }
+      return Promise.reject(new Error(`Unexpected fetch: ${String(input)}`));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    container = document.createElement("div");
+    document.body.append(container);
+
+    await act(async () => {
+      root = createRoot(container!);
+      root.render(createElement(AuthProvider, null, createElement(SignOutButton)));
+    });
+    expect(container.querySelector('[data-testid="session-user"]')?.textContent).toBe(
+      "Teacher One",
+    );
+
+    await act(async () => buttonNamed("Sign out")?.click());
+    expect(container.textContent).toContain("You're signed in as Teacher One");
+    await act(async () => buttonNamed("Stay signed in")?.click());
+
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(container.querySelector('[data-testid="session-user"]')?.textContent).toBe(
+      "Teacher One",
+    );
+    expect(fetchMock).not.toHaveBeenCalledWith("/api/auth/logout", expect.anything());
+  });
+
+  it("routes signed-out users back to the appropriate portal sign-in context", () => {
+    expect(signInPathForRole("TEACHER")).toBe("/login?portal=staff");
+    expect(signInPathForRole("ADMIN")).toBe("/login?portal=staff");
+    expect(signInPathForRole("STUDENT")).toBe("/login?portal=student");
+    expect(signInPathForRole("PARENT")).toBe("/login?portal=parent");
+    expect(signInPathForRole("IT_STUDENT")).toBe("/it-portal/auth");
   });
 
   it("does not claim sign-out when the backend cannot confirm revocation", async () => {

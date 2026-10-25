@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildLeaderboard,
+  buildLeaderboardRankings,
   examTypesForLeaderboard,
   type LeaderboardExam,
 } from "@/lib/leaderboards";
@@ -61,6 +62,26 @@ describe("leaderboard aggregation", () => {
     expect(
       buildLeaderboard({ exams: [], eligibleStudentIds: ["a"], viewerStudentId: "a" }),
     ).toEqual({ cohortSize: 0, myRank: null, myStars: null, topStandings: [] });
+  });
+
+  it("returns identity-linked standings only for use by authorized admin views", () => {
+    const rankings = buildLeaderboardRankings({
+      eligibleStudentIds: ["a", "b", "c"],
+      exams: [
+        gradedExam("exam_1", [
+          { studentProfileId: "a", totalScore: 20, attemptNumber: 1, submittedAt: null },
+          { studentProfileId: "b", totalScore: 20, attemptNumber: 1, submittedAt: null },
+          { studentProfileId: "c", totalScore: 10, attemptNumber: 1, submittedAt: null },
+        ]),
+      ],
+    });
+
+    expect(rankings).toEqual([
+      { studentProfileId: "a", rank: 1, stars: 5 },
+      { studentProfileId: "b", rank: 1, stars: 5 },
+      { studentProfileId: "c", rank: 3, stars: 2 },
+    ]);
+    expect(JSON.stringify(rankings)).not.toContain("totalScore");
   });
 
   it("maps CA, exams and overall to assessed exam types only", () => {

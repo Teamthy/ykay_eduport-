@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { StaffAttendanceEventType, UserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
@@ -68,6 +68,68 @@ export function badgePayload(badgeCode: string, schoolId: string) {
     schoolId,
     code: badgeCode,
   });
+}
+
+type DailyStaffQrClaims = {
+  v: 1;
+  kind: "STAFF_DAILY_ATTENDANCE";
+  schoolId: string;
+  workDate: string;
+};
+
+function staffQrSecret(): Buffer {
+  const value = process.env.AUTH_SECRET;
+  if (!value || value.length < 32) throw new Error("AUTH_SECRET must be at least 32 characters.");
+  // Derive a purpose-specific key rather than using the session signing key directly.
+  return createHmac("sha256", Buffer.from(value, "utf8"))
+    .update("ykay:staff-attendance:daily-qr:v1")
+    .digest();
+}
+
+/** A deterministic, school-bound code that is valid only for the current school day. */
+export function createDailyStaffCheckInQr(schoolId: string, now = new Date()): string {
+  const claims: DailyStaffQrClaims = {
+    v: 1,
+    kind: "STAFF_DAILY_ATTENDANCE",
+    schoolId,
+    workDate: workDateKey(now),
+  };
+  const payloadPart = Buffer.from(JSON.stringify(claims), "utf8").toString("base64url");
+  const signature = createHmac("sha256", staffQrSecret()).update(payloadPart).digest("base64url");
+  return `${payloadPart}.${signature}`;
+}
+
+/** Verify the signature, tenant and school-local date before recording attendance. */
+export function verifyDailyStaffCheckInQr(
+  token: string | null | undefined,
+  schoolId: string,
+  now = new Date(),
+): boolean {
+  if (!token || typeof token !== "string" || token.length > 2_048) return false;
+  const parts = token.split(".");
+  if (parts.length !== 2) return false;
+  const [payloadPart, signature] = parts;
+
+  try {
+    const expected = Buffer.from(
+      createHmac("sha256", staffQrSecret()).update(payloadPart).digest("base64url"),
+      "utf8",
+    );
+    const presented = Buffer.from(signature, "utf8");
+    if (expected.length !== presented.length || !timingSafeEqual(expected, presented)) return false;
+
+    const claims = JSON.parse(
+      Buffer.from(payloadPart, "base64url").toString("utf8"),
+    ) as Partial<DailyStaffQrClaims>;
+    return (
+      claims.v === 1 &&
+      claims.kind === "STAFF_DAILY_ATTENDANCE" &&
+      claims.schoolId === schoolId &&
+      claims.workDate === workDateKey(now)
+    );
+  } catch {
+    return false;
+  }
 }
 
 export function parseBadgeInput(raw: string): string | null {

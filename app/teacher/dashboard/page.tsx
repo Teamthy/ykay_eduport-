@@ -6,6 +6,7 @@ import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import DownloadForOffline from "@/components/DownloadForOffline";
+import { readJsonResponse } from "@/lib/api-response";
 
 import {
   BookOpen,
@@ -112,7 +113,7 @@ export default function TeacherDashboard() {
       setLoading(!cached);
       try {
         const response = await fetch(url, { cache: "no-store" });
-        const body = (await response.json()) as DashboardResponse & { error?: string };
+        const body = await readJsonResponse<DashboardResponse & { error?: string }>(response);
         if (!response.ok) throw new Error(body.error || "Unable to load your dashboard.");
         setData(body);
         setIsStale(false);

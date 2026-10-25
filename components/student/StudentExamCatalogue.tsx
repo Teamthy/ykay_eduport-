@@ -6,6 +6,7 @@ import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
 import StudentCbtNav from "@/components/student/StudentCbtNav";
 import { STUDENT_SIDEBAR_ITEMS } from "@/components/student/sidebarItems";
+import { readJsonResponse } from "@/lib/api-response";
 import {
   Award,
   BookOpen,
@@ -113,7 +114,7 @@ export default function StudentExamCatalogue({ mode }: { mode: ExamCatalogueMode
         const response = await fetch(`/api/student/exams?${params.toString()}`, {
           cache: "no-store",
         });
-        const body = (await response.json()) as Response & { error?: string };
+        const body = await readJsonResponse<Response & { error?: string }>(response);
         if (!response.ok) throw new Error(body.error || "Unable to load exams.");
         if (active) setData(body);
       } catch (loadError) {
