@@ -38,6 +38,24 @@ for (const file of files) {
     fcp: data.audits?.["first-contentful-paint"]?.numericValue,
     tbt: data.audits?.["total-blocking-time"]?.numericValue,
     cls: data.audits?.["cumulative-layout-shift"]?.numericValue,
+    // Which element is the LCP, and what arrived late. Without these two the
+    // annotation says "8s" and nobody can tell whether that is an image, a
+    // webfont or a JS chunk — which is exactly how this gate stayed red for
+    // several runs without anyone being able to act on it.
+    lcpElement:
+      data.audits?.["largest-contentful-paint-element"]?.details?.items?.[0]?.items?.[0]?.node
+        ?.snippet,
+    lcpElementLabel:
+      data.audits?.["largest-contentful-paint-element"]?.details?.items?.[0]?.items?.[0]?.node
+        ?.nodeLabel,
+    slowRequests: (data.audits?.["network-requests"]?.details?.items ?? [])
+      .filter((item) => typeof item.transferSize === "number")
+      .sort((a, b) => (b.transferSize ?? 0) - (a.transferSize ?? 0))
+      .slice(0, 5)
+      .map(
+        (item) =>
+          `${item.resourceType ?? "other"} ${Math.round((item.transferSize ?? 0) / 1024)}KB ${item.url}`,
+      ),
   });
 }
 
@@ -48,6 +66,16 @@ for (const report of reports) {
     report.cls ?? -1
   ).toFixed(3)}`;
   console.log(`::notice title=Lighthouse CI::${msg}`);
+  if (report.lcpElement) {
+    console.log(
+      `::notice title=Lighthouse LCP element::${report.route} ${report.lcpElementLabel ?? ""} ${report.lcpElement}`,
+    );
+  }
+  if (report.slowRequests?.length) {
+    console.log(
+      `::notice title=Lighthouse heaviest responses::${report.route} ${report.slowRequests.join(" | ")}`,
+    );
+  }
 }
 
 const byRoute = new Map();

@@ -85,10 +85,14 @@ jobs:
         # lighthouserc.json points at the seeded standalone server via
         # e2e-server.mjs, so budgets measure the real production artefact.
 
-      - name: Upload Lighthouse reports on failure
-        if: failure()
+      - name: Upload Lighthouse reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-reports
           path: .lighthouseci/
+          # `.lighthouseci` starts with a dot, and upload-artifact v4 skips
+          # hidden files by default — so the only artefact that would explain a
+          # budget failure was silently never uploaded ("No files were found").
+          include-hidden-files: true
           retention-days: 7
