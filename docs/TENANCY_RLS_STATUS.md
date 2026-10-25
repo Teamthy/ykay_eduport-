@@ -116,6 +116,31 @@ the statement waits on a lock it already holds. Reproduced on PostgreSQL 18 —
 can hang a migration is worse than the gap it closes. Coverage is therefore
 enforced outside the database via `npm run verify:rls:coverage`.
 
+## Coverage gaps found after the backfill loop
+
+Two tenant tables were created after `20260804000000` and never received a
+policy, so `npm run verify:rls:coverage` failed (and with it the Schema Drift
+job) for every commit:
+
+| Table | Created | Consequence |
+|---|---|---|
+| `TimetableSlot` | `20260810100000_add_timetable_slots` | One school's timetable readable/writable by another |
+| `CbtAttempt` | `20260904120000_add_cbt` | Practice/exam attempts and scores readable across tenants |
+
+`20261025150000_rls_timetable_slot_and_cbt_attempt` secures both by calling the
+existing `eduos_apply_tenant_rls()` helper, then asserts `relrowsecurity` and
+`relforcerowsecurity` from `information_schema` so a partial apply fails in the
+migration rather than in CI. `CbtAttempt.schoolId` is nullable for attempts
+recorded before sessions existed; the policy compares `"schoolId"::text`, so
+those rows are visible only when no tenant context is set — which is how every
+current CBT route reads them.
+
+`tests/lib/rls-migration-coverage.test.ts` now answers the same question from
+the repository instead of a live database: a model with a `schoolId` whose
+table is created after the backfill loop must have an
+`eduos_apply_tenant_rls('<Table>')` call in that migration or a later one. That
+test fails, naming the tables, if the fix migration is removed.
+
 ## Related scripts
 
 | Script | Purpose |
