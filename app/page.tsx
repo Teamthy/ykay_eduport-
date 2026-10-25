@@ -14,20 +14,14 @@ import PlatformLanding from "@/components/PlatformLanding";
  * school's palette — but the *landing* is always Ykay here.
  */
 export default async function HomePage() {
-  // Preload the two above-the-fold hero images before their markup is parsed.
+  // Preload the above-the-fold content image, and only that one.
   //
-  // The backdrop is the wider of the two; the student photograph is the one
-  // Hero.tsx documents as the LCP element on mobile. Only the backdrop used to
-  // be preloaded, so the actual LCP image was discovered during HTML parsing
-  // and competed with a decorative `opacity-20` fill for the connection. The
-  // `images` descriptor must match the rendered <img> exactly (same srcset,
-  // same `sizes`) or the browser fetches a second, different candidate.
-  preload("/home/hero-campus-750.webp", {
-    as: "image",
-    imageSrcSet: "/home/hero-campus-750.webp 750w, /home/hero-campus-1200.webp 1200w",
-    imageSizes: "100vw",
-    fetchPriority: "high",
-  });
+  // The campus backdrop is a CSS background in Hero.tsx (a 20%-opacity layer
+  // behind a 92%-opaque gradient). Preloading it at high priority spent a
+  // connection slot of a slow mobile link on a decoration and pushed the real
+  // content — this photograph, the stylesheet and the scripts — back by an RTT
+  // each. The `images` descriptor must match the rendered <img> exactly (same
+  // srcset, same `sizes`) or the browser fetches a second, different candidate.
   preload("/home/ykay-students-750.webp", {
     as: "image",
     imageSrcSet: "/home/ykay-students-750.webp 750w, /home/ykay-students-1080.webp 1080w",

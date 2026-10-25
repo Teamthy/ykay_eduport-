@@ -87,4 +87,12 @@ describe("hero LCP candidates", () => {
     expect(hero).not.toMatch(/\bshown\b/);
     expect(hero).not.toMatch(/useState|useEffect/);
   });
+
+  it("does not preload the decorative backdrop", () => {
+    // It is a CSS background now; a high-priority preload for a decoration
+    // competes with the stylesheet and scripts on a slow link.
+    const page = readFileSync(join(process.cwd(), "app/page.tsx"), "utf8");
+    expect(page).not.toContain('preload("/home/hero-campus');
+    expect(page).toContain('preload("/home/ykay-students-750.webp"');
+  });
 });

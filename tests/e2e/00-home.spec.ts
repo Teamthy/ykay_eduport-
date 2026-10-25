@@ -25,8 +25,10 @@ test.describe("college home", () => {
     const backgroundImage = await backdrop.evaluate(
       (element) => getComputedStyle(element).backgroundImage,
     );
+    // getComputedStyle resolves the URL against the document origin, so match
+    // the path and assert the host is this app rather than a remote placeholder.
     expect(backgroundImage).toContain("/home/hero-campus-750.webp");
-    expect(backgroundImage).not.toMatch(/https?:\/\//);
+    expect(backgroundImage).not.toMatch(/url\("?https:\/\/(?!localhost)/);
 
     await expect(page.locator("section img[src*='ykay-students']").first()).toBeAttached();
   });
