@@ -215,7 +215,7 @@ export default function LiveReportCardPreview({
             <div className="mt-1 text-xs text-[var(--text-secondary)]">
               Scan the QR code or visit:
             </div>
-            <div className="text-xs font-bold text-brand-green break-all">
+            <div className="text-xs font-bold text-green-800 break-all">
               /verify/report/{reportNumber}
             </div>
           </div>

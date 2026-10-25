@@ -103,7 +103,7 @@ export default function SuperAdminPortalsPage() {
             </a>
             <a
               href="/super-admin/health"
-              className="inline-flex items-center gap-2 rounded-full bg-blue-500 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.03]"
+              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-all hover:scale-[1.03]"
             >
               System Health →
             </a>

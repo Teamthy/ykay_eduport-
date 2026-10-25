@@ -106,7 +106,7 @@ export default function ParentEventsPage() {
                             }
                             className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
                               hasRsvp
-                                ? "bg-brand-green text-white"
+                                ? "bg-brand-green text-brand-navy"
                                 : "bg-[var(--surface-disabled)] text-[var(--text-primary)] hover:bg-brand-green hover:text-white"
                             }`}
                           >

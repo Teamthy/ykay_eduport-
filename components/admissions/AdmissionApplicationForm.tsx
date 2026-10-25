@@ -495,7 +495,7 @@ export default function AdmissionApplicationForm() {
                     className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${active ? "bg-brand-green/10 text-[var(--text-primary)]" : "text-[var(--text-muted)]"}`}
                   >
                     <span
-                      className={`grid size-7 place-items-center rounded-full text-xs font-bold ${complete ? "bg-brand-green text-white" : active ? "border-2 border-brand-green text-brand-green" : "bg-[var(--surface-disabled)]"}`}
+                      className={`grid size-7 place-items-center rounded-full text-xs font-bold ${complete ? "bg-brand-green text-brand-navy" : active ? "border-2 border-brand-green text-brand-green" : "bg-[var(--surface-disabled)]"}`}
                     >
                       {complete ? <Check size={14} strokeWidth={3} /> : itemStep}
                     </span>
@@ -1053,7 +1053,7 @@ function DocumentStep({
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 gap-3">
                   <div
-                    className={`grid size-10 shrink-0 place-items-center rounded-xl ${document ? "bg-brand-green text-white" : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"}`}
+                    className={`grid size-10 shrink-0 place-items-center rounded-xl ${document ? "bg-brand-green text-brand-navy" : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"}`}
                   >
                     {document ? <Check size={20} strokeWidth={3} /> : <FileText size={20} />}
                   </div>

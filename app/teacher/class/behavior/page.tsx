@@ -280,7 +280,7 @@ export default function BehaviorRecordsPage() {
                         onClick={() => setFilter(f)}
                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
                           filter === f
-                            ? "bg-brand-orange text-white"
+                            ? "bg-brand-orange text-brand-navy"
                             : "border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                         }`}
                       >
@@ -484,7 +484,7 @@ export default function BehaviorRecordsPage() {
                       onClick={() => setForm({ ...form, category: form.category === c ? "" : c })}
                       className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors ${
                         form.category === c
-                          ? "bg-brand-orange text-white"
+                          ? "bg-brand-orange text-brand-navy"
                           : "bg-white/5 text-white/60 hover:bg-white/10"
                       }`}
                     >

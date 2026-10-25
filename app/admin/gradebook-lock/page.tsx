@@ -162,7 +162,7 @@ export default function AdminGradebookLockPage() {
                 <ShieldCheck size={11} /> Results governance
               </span>
               {generation ? (
-                <span className="text-xs text-white/45">
+                <span className="text-xs text-white/55">
                   {generation.sessionLabel} · {generation.termLabel}
                 </span>
               ) : null}

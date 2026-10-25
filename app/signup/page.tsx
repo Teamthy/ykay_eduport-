@@ -136,12 +136,12 @@ export default function SchoolSignupPage() {
             </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+          {error && <p className="text-red-600 text-sm font-medium">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-[var(--color-brand-green)] text-white font-bold uppercase tracking-widest text-sm hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl bg-[var(--color-brand-green)] text-brand-navy font-bold uppercase tracking-widest text-sm hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? "Creating your school…" : "Create School"}
             {!loading && <ArrowRight size={16} />}
@@ -154,7 +154,7 @@ export default function SchoolSignupPage() {
 
           <p className="text-center text-sm text-gray-400">
             Already have an account?{" "}
-            <Link href="/login" className="text-[var(--color-brand-green)] font-bold">
+            <Link href="/login" className="text-green-800 font-bold">
               Sign in
             </Link>
           </p>

@@ -219,7 +219,7 @@ export default function TestCoursesPage() {
                       onClick={() => setClassFilter(name)}
                       className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${
                         classFilter === name
-                          ? "bg-brand-green text-white"
+                          ? "bg-brand-green text-brand-navy"
                           : "bg-[var(--surface-card)] text-[var(--text-secondary)]"
                       }`}
                     >

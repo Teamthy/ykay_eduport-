@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { AuthProvider, signInPathForRole, useAuth } from "@/components/AuthProvider";
+import { AuthProvider, useAuth } from "@/components/AuthProvider";
 
 const fetchMock = vi.fn<typeof fetch>();
+const replaceMock = vi.fn();
 let container: HTMLDivElement | null = null;
 let root: Root | null = null;
 
@@ -28,6 +29,32 @@ function buttonNamed(name: string) {
   );
 }
 
+/**
+ * Sign-out is a navigation, not a fetch.
+ *
+ * The client used to POST /api/auth/logout, wait up to ten seconds for JSON,
+ * and only then leave — so a cold function or a slow database left the dialog
+ * stuck on "The server did not confirm that your session was revoked" even
+ * though the cookie had already been cleared. The browser now navigates to the
+ * route, which revokes, clears the cookie and answers with a redirect in a
+ * single response.
+ *
+ * jsdom implements neither assignment to location nor navigation, so location
+ * is replaced with a spy; that is also what makes "did the client navigate?"
+ * observable.
+ */
+beforeEach(() => {
+  Object.defineProperty(window, "location", {
+    configurable: true,
+    value: {
+      ...window.location,
+      replace: replaceMock,
+      assign: replaceMock,
+      href: "http://localhost/",
+    },
+  });
+});
+
 afterEach(async () => {
   if (root) {
     await act(async () => root?.unmount());
@@ -35,144 +62,84 @@ afterEach(async () => {
   }
   container?.remove();
   container = null;
-  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.clearAllMocks();
 });
 
-describe("portal sign-out flow", () => {
-  it("opens an accessible confirmation and posts the logout request after confirmation", async () => {
-    fetchMock.mockImplementation((input) => {
-      if (input === "/api/auth/me") {
-        return Promise.resolve({
-          ok: false,
-          status: 401,
-          json: async () => ({ user: null }),
-        } as Response);
-      }
-      if (input === "/api/auth/logout") {
-        // Keep the request pending so the test can assert the visible busy
-        // state without triggering a full-page navigation in jsdom.
-        return new Promise<Response>(() => {});
-      }
-      return Promise.reject(new Error(`Unexpected fetch: ${String(input)}`));
-    });
-    vi.stubGlobal("fetch", fetchMock);
-    container = document.createElement("div");
-    document.body.append(container);
+function renderProvider(userPayload: unknown) {
+  fetchMock.mockImplementation((input) => {
+    if (input === "/api/auth/me") {
+      return Promise.resolve({
+        ok: Boolean(userPayload),
+        status: userPayload ? 200 : 401,
+        json: async () => ({ user: userPayload }),
+      } as Response);
+    }
+    return Promise.reject(new Error(`Unexpected fetch: ${String(input)}`));
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  container = document.createElement("div");
+  document.body.append(container);
+  act(() => {
+    root = createRoot(container!);
+    root.render(createElement(AuthProvider, null, createElement(SignOutButton)));
+  });
+}
 
-    await act(async () => {
-      root = createRoot(container!);
-      root.render(createElement(AuthProvider, null, createElement(SignOutButton)));
+describe("portal sign-out flow", () => {
+  it("asks for confirmation and navigates to the logout route on confirm", async () => {
+    renderProvider({
+      id: "teacher_1",
+      name: "Teacher One",
+      email: "teacher@example.test",
+      role: "TEACHER",
     });
 
     await act(async () => buttonNamed("Sign out")?.click());
-    const dialog = container.querySelector<HTMLElement>('[role="dialog"]');
+    const dialog = container!.querySelector<HTMLElement>('[role="dialog"]');
     expect(dialog?.getAttribute("aria-modal")).toBe("true");
     expect(dialog?.textContent).toContain("Sign out?");
+    expect(dialog?.textContent).toContain("Teacher One");
     expect(document.activeElement).toBe(buttonNamed("Stay signed in"));
 
-    vi.useFakeTimers();
+    expect(replaceMock).not.toHaveBeenCalled();
     await act(async () => buttonNamed("Yes, sign me out")?.click());
-    await act(async () => Promise.resolve());
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/auth/logout",
-      expect.objectContaining({
-        method: "POST",
-        credentials: "include",
-        cache: "no-store",
-        keepalive: true,
-      }),
-    );
-    expect(buttonNamed("Signing out…")?.hasAttribute("disabled")).toBe(true);
-  });
-
-  it("keeps the session active when confirmation is canceled", async () => {
-    fetchMock.mockImplementation((input) => {
-      if (input === "/api/auth/me") {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          json: async () => ({
-            user: {
-              id: "teacher_1",
-              name: "Teacher One",
-              email: "teacher@example.test",
-              role: "TEACHER",
-            },
-          }),
-        } as Response);
-      }
-      return Promise.reject(new Error(`Unexpected fetch: ${String(input)}`));
-    });
-    vi.stubGlobal("fetch", fetchMock);
-    container = document.createElement("div");
-    document.body.append(container);
-
-    await act(async () => {
-      root = createRoot(container!);
-      root.render(createElement(AuthProvider, null, createElement(SignOutButton)));
-    });
-    expect(container.querySelector('[data-testid="session-user"]')?.textContent).toBe(
-      "Teacher One",
-    );
-
-    await act(async () => buttonNamed("Sign out")?.click());
-    expect(container.textContent).toContain("You're signed in as Teacher One");
-    await act(async () => buttonNamed("Stay signed in")?.click());
-
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
-    expect(container.querySelector('[data-testid="session-user"]')?.textContent).toBe(
-      "Teacher One",
-    );
+    // One navigation, carrying the role so the server can pick the right
+    // sign-in page. No fetch to /api/auth/logout from the browser.
+    expect(replaceMock).toHaveBeenCalledWith("/api/auth/logout?role=TEACHER");
     expect(fetchMock).not.toHaveBeenCalledWith("/api/auth/logout", expect.anything());
   });
 
-  it("routes signed-out users back to the appropriate portal sign-in context", () => {
-    expect(signInPathForRole("TEACHER")).toBe("/login?portal=staff");
-    expect(signInPathForRole("ADMIN")).toBe("/login?portal=staff");
-    expect(signInPathForRole("STUDENT")).toBe("/login?portal=student");
-    expect(signInPathForRole("PARENT")).toBe("/login?portal=parent");
-    expect(signInPathForRole("IT_STUDENT")).toBe("/it-portal/auth");
+  it("keeps the session active when confirmation is canceled", async () => {
+    renderProvider({
+      id: "teacher_1",
+      name: "Teacher One",
+      email: "teacher@example.test",
+      role: "TEACHER",
+    });
+    await act(async () => Promise.resolve());
+    expect(container!.querySelector('[data-testid="session-user"]')?.textContent).toBe(
+      "Teacher One",
+    );
+
+    await act(async () => buttonNamed("Sign out")?.click());
+    await act(async () => buttonNamed("Stay signed in")?.click());
+
+    expect(container!.querySelector('[role="dialog"]')).toBeNull();
+    expect(container!.querySelector('[data-testid="session-user"]')?.textContent).toBe(
+      "Teacher One",
+    );
+    expect(replaceMock).not.toHaveBeenCalled();
   });
 
-  it("does not claim sign-out when the backend cannot confirm revocation", async () => {
-    fetchMock.mockImplementation((input) => {
-      if (input === "/api/auth/me") {
-        return Promise.resolve({
-          ok: false,
-          status: 401,
-          json: async () => ({ user: null }),
-        } as Response);
-      }
-      if (input === "/api/auth/logout") {
-        return Promise.resolve({
-          ok: false,
-          status: 503,
-          json: async () => ({ ok: false }),
-        } as Response);
-      }
-      return Promise.reject(new Error(`Unexpected fetch: ${String(input)}`));
-    });
-    vi.stubGlobal("fetch", fetchMock);
-    container = document.createElement("div");
-    document.body.append(container);
-
-    await act(async () => {
-      root = createRoot(container!);
-      root.render(createElement(AuthProvider, null, createElement(SignOutButton)));
-    });
+  it("does not use fetch for sign-out at all — that was the failure mode", async () => {
+    renderProvider(null);
     await act(async () => buttonNamed("Sign out")?.click());
     await act(async () => buttonNamed("Yes, sign me out")?.click());
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/auth/logout",
-      expect.objectContaining({ method: "POST", credentials: "include" }),
-    );
-    expect(container.textContent).toContain(
-      "The server did not confirm that your session was revoked",
-    );
-    expect(buttonNamed("Yes, sign me out")?.disabled).toBe(false);
+    const logoutCalls = fetchMock.mock.calls.filter(([input]) => input === "/api/auth/logout");
+    expect(logoutCalls).toHaveLength(0);
+    expect(replaceMock).toHaveBeenCalledWith("/api/auth/logout");
   });
 });

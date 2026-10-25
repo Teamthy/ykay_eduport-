@@ -159,7 +159,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
           >
             <ArrowLeft size={16} /> Dashboard
           </Link>
-          <span className="hidden text-white/20 sm:inline">|</span>
+          <span className="hidden text-white/55 sm:inline">|</span>
           <h1 className="hidden text-sm font-bold text-white sm:block">{course.title}</h1>
         </div>
         <div className="flex items-center gap-4">
@@ -197,7 +197,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
           } flex-shrink-0 overflow-y-auto border-r border-white/10 bg-[#0d1f33] transition-all duration-300 lg:w-80`}
         >
           <div className="p-4">
-            <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-white/40">
+            <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-white/60">
               Course Content
             </div>
             <div className="mb-4 text-xs text-white/60">
@@ -216,7 +216,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
                   style={{ width: `${course.progressPercent}%` }}
                 />
               </div>
-              <div className="mt-2 text-[10px] text-white/40">
+              <div className="mt-2 text-[10px] text-white/60">
                 {modules.filter((m) => m.completed).length} of {modules.length} completed
               </div>
             </div>
@@ -239,12 +239,12 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
                     ) : activeModuleId === mod.id ? (
                       <PlayCircle size={18} className="text-brand-green" />
                     ) : (
-                      <Circle size={18} className="text-white/30" />
+                      <Circle size={18} className="text-white/60" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-white/30">
+                      <span className="text-[10px] font-bold text-white/60">
                         {String(idx + 1).padStart(2, "0")}
                       </span>
                       <span
@@ -255,7 +255,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
                         {mod.title}
                       </span>
                     </div>
-                    <div className="mt-1 flex items-center gap-2 text-[10px] text-white/30">
+                    <div className="mt-1 flex items-center gap-2 text-[10px] text-white/60">
                       <Clock size={10} /> {mod.durationMinutes} min
                       {mod.completed && <span className="text-brand-green">· Done</span>}
                     </div>
@@ -293,7 +293,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
               )}
               {/* Module header */}
               <div className="mb-8">
-                <div className="mb-2 flex items-center gap-2 text-xs text-white/40">
+                <div className="mb-2 flex items-center gap-2 text-xs text-white/60">
                   <span className="font-bold text-brand-green">
                     Module {currentIdx + 1} of {modules.length}
                   </span>
@@ -379,7 +379,7 @@ export default function ItCoursePlayer({ params }: { params: Promise<{ slug: str
               </div>
             </div>
           ) : (
-            <div className="grid h-full place-items-center text-white/40">
+            <div className="grid h-full place-items-center text-white/60">
               <div className="text-center">
                 <BookOpen size={48} className="mx-auto mb-4" />
                 <p>Select a module to begin learning</p>

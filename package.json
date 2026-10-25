@@ -47,6 +47,7 @@
     "check:dead-ui": "tsx scripts/check-dead-ui.ts",
     "check:readiness": "tsx scripts/check-term-readiness.ts",
     "check:mobile": "tsx scripts/check-mobile-parity.ts",
+    "check:contrast": "tsx scripts/check-contrast.ts",
     "audit": "tsx scripts/audit-project.ts",
     "audit:deps": "node scripts/audit-deps.mjs",
     "reconcile:labels": "tsx scripts/reconcile-labels.ts",
@@ -65,7 +66,8 @@
     "cbt:audit": "python3 scripts/audit-cbt-bank.py",
     "cbt:seed:10k": "CBT_BANK_FILE=cbt-bank-10k-draft.csv tsx prisma/cbt-seed.ts",
     "cbt:seed:staging": "CBT_SEED_TARGET=staging npm run cbt:seed",
-    "cbt:seed:10k:staging": "CBT_SEED_TARGET=staging CBT_BANK_FILE=cbt-bank-10k-draft.csv tsx prisma/cbt-seed.ts"
+    "cbt:seed:10k:staging": "CBT_SEED_TARGET=staging CBT_BANK_FILE=cbt-bank-10k-draft.csv tsx prisma/cbt-seed.ts",
+    "cbt:preflight": "tsx scripts/cbt-bank-preflight.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",

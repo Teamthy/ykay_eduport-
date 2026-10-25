@@ -201,7 +201,7 @@ export default function PerformanceRecordsPage() {
                 <BarChart3 size={11} /> Scores
               </span>
               {data ? (
-                <span className="text-xs text-white/45">
+                <span className="text-xs text-white/55">
                   {data.sessionLabel} · {data.termLabel} · {subjectCount} subject
                   {subjectCount === 1 ? "" : "s"}
                 </span>

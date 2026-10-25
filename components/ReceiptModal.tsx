@@ -70,7 +70,7 @@ export default function ReceiptModal({ open, data, onClose }: Props) {
               </button>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-brand-green flex items-center justify-center">
-                  <CheckCircle2 size={26} className="text-white" strokeWidth={2.5} />
+                  <CheckCircle2 size={26} className="text-brand-navy" strokeWidth={2.5} />
                 </div>
                 <div>
                   <div className="text-xs text-white/60 uppercase tracking-widest">
@@ -156,7 +156,7 @@ export default function ReceiptModal({ open, data, onClose }: Props) {
               {/* Primary: WhatsApp Share (biggest button) */}
               <button
                 onClick={handleWhatsApp}
-                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#25D366] text-white font-bold hover:bg-[#20BA5A] transition-all shadow-lg"
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#25D366] text-brand-navy font-bold hover:bg-[#20BA5A] transition-all shadow-lg"
               >
                 <MessageCircle size={20} />
                 Share via WhatsApp

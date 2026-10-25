@@ -90,7 +90,7 @@ export default async function VerifyReportPage({
               </div>
             ) : (
               <div className="rounded-[2rem] border border-red-500/30 bg-[var(--surface-card)] p-10 text-center shadow-[var(--card-shadow)]">
-                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-500 text-white">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-600 text-white">
                   <ShieldAlert size={40} />
                 </div>
                 <h2 className="font-display text-3xl text-red-500">NOT VERIFIED</h2>

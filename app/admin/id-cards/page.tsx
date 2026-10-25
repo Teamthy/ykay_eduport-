@@ -238,7 +238,7 @@ export default function AdminIDCardsPage() {
                     alt={`QR ${s.studentId}`}
                     className="absolute bottom-3 right-3 h-16 w-16 rounded-md bg-white p-1"
                   />
-                  <div className="mt-8 text-[9px] uppercase tracking-widest text-white/40">
+                  <div className="mt-8 text-[9px] uppercase tracking-widest text-white/60">
                     Student identity card
                   </div>
                 </div>

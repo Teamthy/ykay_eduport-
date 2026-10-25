@@ -135,7 +135,7 @@ export default function PlatformLanding() {
             {Array(10)
               .fill("YKAY PLATFORM · EDUCATION OPERATING SYSTEM ·")
               .map((t, i) => (
-                <span key={i} className="text-xs font-bold tracking-[0.3em] text-[#123499]">
+                <span key={i} className="text-xs font-bold tracking-[0.3em] text-[#7aa2ff]">
                   {t}
                 </span>
               ))}
@@ -149,7 +149,7 @@ export default function PlatformLanding() {
             <Link href="/" className="flex items-center gap-2">
               <img src="/ykay-logo.png" alt="Ykay Platform" className="w-8 h-8 rounded-lg" />
               <span className="font-bold text-lg tracking-wider">
-                EDU<span className="text-[#123499]">os</span>
+                EDU<span className="text-[#7aa2ff]">os</span>
               </span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
@@ -200,7 +200,7 @@ export default function PlatformLanding() {
         <section className="py-24 px-6">
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#123499] mb-4">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#7aa2ff] mb-4">
                 About the Ykay Platform
               </p>
               <h2 className="font-bold text-3xl md:text-4xl mb-6 leading-tight">
@@ -236,7 +236,7 @@ export default function PlatformLanding() {
         <section id="services" className="py-24 px-6 border-t border-white/5">
           <div className="max-w-7xl mx-auto">
             <div className="mb-16">
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#123499] mb-4">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#7aa2ff] mb-4">
                 What We Offer
               </p>
               <h2 className="font-bold text-3xl md:text-4xl">Our Services</h2>
@@ -247,9 +247,9 @@ export default function PlatformLanding() {
                   key={s.title}
                   className="bg-[#00072D] p-8 hover:bg-[#051650] transition-colors"
                 >
-                  <s.icon className="text-[#123499] mb-5" size={28} />
+                  <s.icon className="text-[#7aa2ff] mb-5" size={28} />
                   <h3 className="font-bold text-lg mb-2">{s.title}</h3>
-                  <p className="text-white/35 text-sm leading-relaxed">{s.desc}</p>
+                  <p className="text-white/60 text-sm leading-relaxed">{s.desc}</p>
                 </div>
               ))}
             </div>
@@ -260,11 +260,11 @@ export default function PlatformLanding() {
         <section id="schools" className="py-24 px-6 border-t border-white/5">
           <div className="max-w-7xl mx-auto">
             <div className="mb-16">
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#123499] mb-4">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#7aa2ff] mb-4">
                 Our Community
               </p>
               <h2 className="font-bold text-3xl md:text-4xl mb-4">Schools on the Ykay Platform</h2>
-              <p className="text-white/30 text-sm max-w-lg">
+              <p className="text-white/60 text-sm max-w-lg">
                 Join hundreds of schools and colleges running on the Ykay Platform. Each one
                 branded, customised, and thriving.
               </p>
@@ -279,7 +279,7 @@ export default function PlatformLanding() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#00072D] to-transparent" />
                   <div className="absolute bottom-0 p-5">
-                    <div className="text-[10px] text-[#123499] font-bold uppercase tracking-widest mb-1">
+                    <div className="text-[10px] text-[#7aa2ff] font-bold uppercase tracking-widest mb-1">
                       Ykay Platform School
                     </div>
                     <h3 className="font-bold text-lg">{sch.name}</h3>
@@ -297,7 +297,7 @@ export default function PlatformLanding() {
         <section id="pillars" className="py-24 px-6 border-t border-white/5">
           <div className="max-w-7xl mx-auto">
             <div className="mb-16">
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#123499] mb-4">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#7aa2ff] mb-4">
                 Why the Ykay Platform
               </p>
               <h2 className="font-bold text-3xl md:text-4xl">Our Foundation</h2>
@@ -313,9 +313,9 @@ export default function PlatformLanding() {
                     />
                   </div>
                   <div className={i % 2 === 1 ? "md:order-1" : ""}>
-                    <p.icon className="text-[#123499] mb-4" size={28} />
+                    <p.icon className="text-[#7aa2ff] mb-4" size={28} />
                     <h3 className="font-bold text-2xl mb-3">{p.title}</h3>
-                    <p className="text-white/35 text-base leading-relaxed">{p.desc}</p>
+                    <p className="text-white/60 text-base leading-relaxed">{p.desc}</p>
                   </div>
                 </div>
               ))}
@@ -326,27 +326,27 @@ export default function PlatformLanding() {
         {/* ── CONTACT ── */}
         <section id="contact" className="py-24 px-6 border-t border-white/5">
           <div className="max-w-3xl mx-auto text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#123499] mb-4">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#7aa2ff] mb-4">
               Get In Touch
             </p>
             <h2 className="font-bold text-3xl md:text-4xl mb-4">Ready to digitise your school?</h2>
-            <p className="text-white/30 text-base mb-10 max-w-lg mx-auto">
+            <p className="text-white/60 text-base mb-10 max-w-lg mx-auto">
               Start free — no credit card required. Set up in minutes.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
               <div className="bg-[#051650] rounded-xl p-5 text-center">
-                <Mail className="mx-auto mb-2 text-[#123499]" size={20} />
-                <div className="text-xs text-white/30 mb-0.5">Email</div>
+                <Mail className="mx-auto mb-2 text-[#7aa2ff]" size={20} />
+                <div className="text-xs text-white/60 mb-0.5">Email</div>
                 <div className="text-sm font-medium">hello@ykaycollege.com</div>
               </div>
               <div className="bg-[#051650] rounded-xl p-5 text-center">
-                <Phone className="mx-auto mb-2 text-[#123499]" size={20} />
-                <div className="text-xs text-white/30 mb-0.5">Phone</div>
+                <Phone className="mx-auto mb-2 text-[#7aa2ff]" size={20} />
+                <div className="text-xs text-white/60 mb-0.5">Phone</div>
                 <div className="text-sm font-medium">+234 800 YKAY</div>
               </div>
               <div className="bg-[#051650] rounded-xl p-5 text-center">
-                <MapPin className="mx-auto mb-2 text-[#123499]" size={20} />
-                <div className="text-xs text-white/30 mb-0.5">Location</div>
+                <MapPin className="mx-auto mb-2 text-[#7aa2ff]" size={20} />
+                <div className="text-xs text-white/60 mb-0.5">Location</div>
                 <div className="text-sm font-medium">Lagos, Nigeria</div>
               </div>
             </div>
@@ -367,10 +367,10 @@ export default function PlatformLanding() {
                 <Link href="/" className="flex items-center gap-2 mb-4">
                   <img src="/ykay-logo.png" alt="Ykay Platform" className="w-7 h-7 rounded" />
                   <span className="font-bold text-sm">
-                    EDU<span className="text-[#123499]">os</span>
+                    EDU<span className="text-[#7aa2ff]">os</span>
                   </span>
                 </Link>
-                <p className="text-white/20 text-xs leading-relaxed max-w-[200px]">
+                <p className="text-white/50 text-xs leading-relaxed max-w-[200px]">
                   The Education Operating System for African schools. Admissions, fees, exams,
                   attendance, and communications — all in one branded portal.
                 </p>
@@ -441,17 +441,17 @@ export default function PlatformLanding() {
               </div>
             </div>
             <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-3">
-              <p className="text-white/15 text-[11px]">
+              <p className="text-white/50 text-[11px]">
                 © 2026 Ykay Platform — Education Operating System. All rights reserved.
               </p>
-              <div className="flex gap-5 text-[11px] text-white/15">
-                <a href="#" className="hover:text-white/30">
+              <div className="flex gap-5 text-[11px] text-white/50">
+                <a href="#" className="hover:text-white/60">
                   Privacy
                 </a>
-                <a href="#" className="hover:text-white/30">
+                <a href="#" className="hover:text-white/60">
                   Terms
                 </a>
-                <a href="#" className="hover:text-white/30">
+                <a href="#" className="hover:text-white/60">
                   Cookies
                 </a>
               </div>

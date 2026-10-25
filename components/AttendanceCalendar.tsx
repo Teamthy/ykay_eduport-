@@ -31,7 +31,7 @@ export default function AttendanceCalendar({
       case "Present":
         return "bg-brand-green text-brand-navy-dark";
       case "Absent":
-        return "bg-red-500 text-white";
+        return "bg-red-600 text-white";
       case "Late":
         return "bg-brand-orange text-brand-navy";
       default:

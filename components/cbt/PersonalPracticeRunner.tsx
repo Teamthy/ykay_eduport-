@@ -471,7 +471,7 @@ export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
                 type="button"
                 onClick={() => void saveAnswer()}
                 disabled={selectedIndex === null || saving}
-                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-bold text-brand-navy disabled:opacity-50"
               >
                 {saving ? (
                   <LoaderCircle size={15} className="animate-spin" />
@@ -511,7 +511,7 @@ export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
                     aria-label={`Go to question ${index + 1}${answer ? (answer.check.correct ? ", correct" : ", checked") : ", unanswered"}`}
                     className={`flex aspect-square items-center justify-center rounded-lg border text-xs font-bold ${
                       index === questionIndex
-                        ? "border-brand-green bg-brand-green text-white"
+                        ? "border-brand-green bg-brand-green text-brand-navy"
                         : answer?.check.correct
                           ? "border-brand-green/40 bg-brand-green/10 text-brand-green"
                           : answer

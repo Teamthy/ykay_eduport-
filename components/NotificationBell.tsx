@@ -134,7 +134,7 @@ export default function NotificationBell() {
       >
         <Bell size={18} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-red-600 text-white text-[9px] font-bold flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -150,7 +150,7 @@ export default function NotificationBell() {
               <Bell size={16} className="text-brand-green" />
               <span className="font-display text-sm text-white tracking-widest">NOTIFICATIONS</span>
               {unreadCount > 0 && (
-                <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-500 text-white font-bold">
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-600 text-white font-bold">
                   {unreadCount} new
                 </span>
               )}
@@ -199,7 +199,7 @@ export default function NotificationBell() {
                       )}
                     </div>
                     <div className="text-xs text-white/50 mt-0.5 line-clamp-2">{item.body}</div>
-                    <div className="text-[10px] text-white/30 mt-1 flex items-center gap-1">
+                    <div className="text-[10px] text-white/60 mt-1 flex items-center gap-1">
                       <Clock size={9} /> {timeAgo(item.createdAt)}
                     </div>
                   </div>
@@ -207,7 +207,7 @@ export default function NotificationBell() {
               );
             })}
             {!loading && !items.length ? (
-              <div className="p-8 text-center text-sm text-white/40">No notifications yet.</div>
+              <div className="p-8 text-center text-sm text-white/60">No notifications yet.</div>
             ) : null}
           </div>
         </div>

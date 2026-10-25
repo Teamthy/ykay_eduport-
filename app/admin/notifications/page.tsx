@@ -236,7 +236,7 @@ export default function AdminNotificationsPage() {
                     onClick={() => setTab(item.key)}
                     className={`rounded-full px-5 py-2 text-xs font-bold uppercase tracking-widest transition-all ${
                       tab === item.key
-                        ? "bg-brand-green text-white shadow"
+                        ? "bg-brand-green text-brand-navy shadow"
                         : "bg-[var(--surface-card)] border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     }`}
                   >

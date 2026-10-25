@@ -145,7 +145,7 @@ export default function IDCardPage() {
                   </div>
 
                   <div className="bg-brand-green p-3 text-center">
-                    <div className="text-white text-[10px] font-bold">
+                    <div className="text-brand-navy text-[10px] font-bold">
                       0701 537 4411 · info@ykaycollege.com
                     </div>
                   </div>

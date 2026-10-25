@@ -69,7 +69,7 @@ export default function SuperAdminBroadcastPage() {
                 key={s}
                 type="button"
                 onClick={() => setScope(s)}
-                className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-widest ${scope === s ? "bg-brand-green text-white" : "border border-[var(--input-border)] text-[var(--text-muted)]"}`}
+                className={`rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-widest ${scope === s ? "bg-brand-green text-brand-navy" : "border border-[var(--input-border)] text-[var(--text-muted)]"}`}
               >
                 {s === "all" ? "All schools" : "Single school"}
               </button>

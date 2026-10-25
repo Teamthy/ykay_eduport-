@@ -1,6 +1,11 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import { signInPathForRole } from "@/lib/auth-redirect";
+
+// Re-exported for callers that imported it from here before the mapping moved
+// to a framework-free module shared with the logout route.
+export { signInPathForRole };
 
 type User = { id: string; name: string; email: string; role: string };
 
@@ -22,24 +27,6 @@ type Value = {
 };
 
 const Context = createContext<Value | undefined>(undefined);
-
-export function signInPathForRole(role?: string) {
-  if (role === "STUDENT") return "/login?portal=student";
-  if (role === "PARENT") return "/login?portal=parent";
-  if (role === "IT_STUDENT") return "/it-portal/auth";
-  if (
-    role === "TEACHER" ||
-    role === "HOD" ||
-    role === "ADMIN" ||
-    role === "DIRECTOR" ||
-    role === "COORDINATOR" ||
-    role === "BURSAR" ||
-    role === "SUPER_ADMIN"
-  ) {
-    return "/login?portal=staff";
-  }
-  return "/login";
-}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -63,50 +50,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logoutImmediately = useCallback(async () => {
     setLogoutError("");
-    let timeoutId: number | undefined;
+    setSigningOut(true);
 
-    try {
-      // Do not navigate away until the same-origin API has acknowledged the
-      // request. The previous fire-and-forget flow hid network/route failures,
-      // so the browser appeared signed out while its session cookie remained
-      // valid and the backend had never confirmed revocation.
-      const response = await Promise.race([
-        fetch("/api/auth/logout", {
-          method: "POST",
-          credentials: "include",
-          cache: "no-store",
-          keepalive: true,
-        }),
-        new Promise<never>((_, reject) => {
-          timeoutId = window.setTimeout(
-            () => reject(new Error("The server did not confirm sign-out in time.")),
-            10_000,
-          );
-        }),
-      ]);
-
-      if (!response.ok) {
-        throw new Error(`The server returned ${response.status} while signing out.`);
-      }
-
-      const result = (await response.json().catch(() => null)) as { ok?: boolean } | null;
-      if (result?.ok !== true) {
-        throw new Error("The server did not confirm sign-out.");
-      }
-
-      setUser(null);
-      // Replace rather than push so Back does not reopen the protected page.
-      window.location.replace(signInPathForRole(user?.role));
-    } catch {
-      // Stay on the page and keep the retry action visible. Silently navigating
-      // away here would mask a request that never reached the backend.
-      setSigningOut(false);
-      setLogoutError(
-        "The server did not confirm that your session was revoked. Please retry before leaving this page; your session may still be active.",
-      );
-    } finally {
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
-    }
+    // Leave through the server, not through fetch().
+    //
+    // /api/auth/logout does the revocation and clears the cookie in the SAME
+    // response that carries the redirect, so there is no window in which the
+    // client believes it is signed out while the cookie is still valid — and no
+    // fetch that can time out on a cold start and leave the dialog stuck
+    // reporting a failure. A full navigation also works when this bundle has
+    // thrown: the button is a plain link through the browser's navigation
+    // machinery.
+    const role = user?.role ?? "";
+    const target = `/api/auth/logout${role ? `?role=${encodeURIComponent(role)}` : ""}`;
+    // `replace`, not `assign`: the route we are leaving is a signed-in page and
+    // must not be one Back-button press away. `/api/auth/logout` is a route
+    // handler that answers with a 303, so this is a server redirect, not a
+    // client-side one.
+    window.location.replace(target);
   }, [user]);
 
   // Confirmation lives here rather than in each sidebar so a new call site

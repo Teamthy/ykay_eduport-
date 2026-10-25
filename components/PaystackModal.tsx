@@ -60,7 +60,7 @@ export default function PaystackModal({
               {!busy && !leaving && (
                 <button
                   onClick={onClose}
-                  className="absolute right-4 top-4 text-brand-navy/70 hover:text-brand-navy"
+                  className="absolute right-4 top-4 text-brand-navy/80 hover:text-brand-navy"
                   aria-label="Close"
                 >
                   <X size={20} />
@@ -72,9 +72,9 @@ export default function PaystackModal({
                 </div>
                 <span className="text-lg font-bold">Paystack Checkout</span>
               </div>
-              <div className="text-xs text-white/70">{email}</div>
+              <div className="text-xs text-brand-navy/90">{email}</div>
               <div className="mt-4">
-                <div className="text-xs text-white/70">You are paying</div>
+                <div className="text-xs text-brand-navy/90">You are paying</div>
                 <div className="font-display text-3xl">₦{amount.toLocaleString()}</div>
               </div>
             </div>

@@ -152,7 +152,7 @@ export default function ClassRosterPage() {
                       onClick={() => setFilter(f.key as any)}
                       className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                         filter === f.key
-                          ? "bg-brand-orange text-white"
+                          ? "bg-brand-orange text-brand-navy"
                           : "bg-[var(--surface-disabled)] text-[var(--text-muted)] hover:bg-brand-orange/10"
                       }`}
                     >

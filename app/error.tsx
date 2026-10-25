@@ -40,11 +40,11 @@ export default function GlobalError({
               issue.
             </p>
             {error.digest && (
-              <p className="mt-2 font-mono text-xs text-slate-500">Error ID: {error.digest}</p>
+              <p className="mt-2 font-mono text-xs text-slate-400">Error ID: {error.digest}</p>
             )}
             <button
               onClick={() => reset()}
-              className="mt-6 inline-flex items-center rounded-full bg-[#16a34a] px-6 py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:bg-[#15803d]"
+              className="mt-6 inline-flex items-center rounded-full bg-[#15803d] px-6 py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:bg-[#15803d]"
             >
               Try again
             </button>

@@ -97,7 +97,7 @@ export default function ITCourseTrackPage({ course }: { course: ITCourseContent 
                 href="/it-portal/auth"
                 className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-slate-100"
               >
-                Start free IT portal <ArrowRight size={14} className="text-brand-green" />
+                Start free IT portal <ArrowRight size={14} className="text-brand-green-dark" />
               </Link>
               <Link
                 href="/it-education"

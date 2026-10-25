@@ -727,7 +727,7 @@ export default function UploadQuestionsPage() {
                   onClick={() => setFileFormat(fmt)}
                   className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
                     fileFormat === fmt
-                      ? "bg-brand-green text-white"
+                      ? "bg-brand-green text-brand-navy"
                       : "bg-[var(--surface-disabled)] text-[var(--text-secondary)]"
                   }`}
                 >

@@ -115,7 +115,7 @@ export default function ItPortalAuthPage() {
               }}
               className={`rounded-full px-4 py-2.5 transition-all ${
                 mode === "signup"
-                  ? "bg-brand-orange text-white shadow"
+                  ? "bg-brand-orange text-brand-navy shadow"
                   : "text-[var(--text-secondary)] hover:text-brand-green"
               }`}
             >

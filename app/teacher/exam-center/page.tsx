@@ -376,7 +376,7 @@ export default function ExamCenterPage() {
                         onClick={() => setTab(key)}
                         className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${
                           tab === key
-                            ? "bg-brand-green text-white"
+                            ? "bg-brand-green text-brand-navy"
                             : "bg-[var(--surface-card)] text-[var(--text-secondary)] hover:bg-[var(--surface-card-hover)]"
                         }`}
                       >
