@@ -38,7 +38,7 @@ export default function Hero() {
 
       <div className="relative z-10 mx-auto grid w-full max-w-none items-center gap-7 px-4 pb-8 pt-8 sm:gap-8 sm:px-6 sm:pt-10 md:grid-cols-2 md:gap-10 md:px-12 md:pb-14 md:pt-24 lg:px-16">
         <div>
-          <span className="anim-rise inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 font-body text-[11px] font-semibold text-white/90 backdrop-blur-sm">
+          <span className="anim-rise inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 font-body text-[11px] font-semibold text-white/90">
             <span className="h-2 w-2 rounded-full bg-brand-orange" />
             Raising Role Models · Est. 2021
           </span>
@@ -71,7 +71,7 @@ export default function Hero() {
             </a>
             <a
               href="/portal"
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/45 bg-white/10 px-6 py-3.5 font-body text-sm font-bold uppercase tracking-[0.12em] text-white sm:px-8 backdrop-blur-sm transition hover:bg-white/15"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/45 bg-white/10 px-6 py-3.5 font-body text-sm font-bold uppercase tracking-[0.12em] text-white sm:px-8 transition hover:bg-white/15"
             >
               Student Portal
             </a>
@@ -121,9 +121,13 @@ export default function Hero() {
         </div>
       </div>
 
+      {/* No backdrop-blur on this band: it sits on an almost-opaque navy fill
+          and a 20%-opacity photo, so the blur was invisible while forcing the
+          compositor to re-read the backdrop on every marquee frame. The hero
+          is the first viewport on every visit. */}
       <Marquee
         items={["ADMISSIONS OPEN", "WAEC", "NECO", "JAMB", "IT ACADEMY"]}
-        className="relative z-10 border-t border-white/15 bg-brand-navy-dark/80 py-3 backdrop-blur-sm"
+        className="relative z-10 border-t border-white/15 bg-brand-navy-dark/80 py-3"
         itemClassName="font-body text-[10px] sm:text-xs md:text-sm font-bold tracking-[0.25em] uppercase text-brand-green"
       />
     </section>

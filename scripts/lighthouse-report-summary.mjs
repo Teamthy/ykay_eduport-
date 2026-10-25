@@ -99,8 +99,15 @@ for (const report of reports) {
       `::notice title=Lighthouse LCP element::${report.route} phase=${report.lcpPhase ?? "?"} ${label} ${snippet}`,
     );
   } else {
+    // The LCP-element audit is missing from this report, so name the LCP-related
+    // audits that ARE present. That is enough to tell whether the paint waited
+    // on a font, a render-blocking resource or the image itself, without
+    // downloading the artefact.
+    const ids = Object.keys(data.audits ?? {})
+      .filter((id) => /lcp|largest|font|render-blocking|server-response|text-compression/.test(id))
+      .sort();
     console.log(
-      `::notice title=Lighthouse LCP element::${report.route} not reported by this Lighthouse version`,
+      `::notice title=Lighthouse LCP element::${report.route} audit has no LCP element block; LCP-related audits: ${ids.join(", ") || "none"}`,
     );
   }
   if (report.slowRequests?.length) {
