@@ -27,6 +27,30 @@ async function measureOffset(page: import("@playwright/test").Page) {
   });
 }
 
+/**
+ * The rail animates its width (a 200ms transition) while `main`'s padding
+ * switches immediately. Measuring between the two makes a correct layout look
+ * like an overlap, so wait for the rail to hold one width for a beat first.
+ */
+async function waitForRailToSettle(page: import("@playwright/test").Page) {
+  await page.waitForFunction(
+    () => {
+      const rail = document.querySelector<HTMLElement>('aside[data-portal-sidebar="true"]');
+      if (!rail) return false;
+      const width = Math.round(rail.getBoundingClientRect().width);
+      const state = window as unknown as { __railWidth?: number; __railSince?: number };
+      if (state.__railWidth !== width) {
+        state.__railWidth = width;
+        state.__railSince = Date.now();
+        return false;
+      }
+      return Date.now() - (state.__railSince ?? 0) >= 250;
+    },
+    undefined,
+    { polling: 50, timeout: 5_000 },
+  );
+}
+
 test.describe("portal sidebar content offset", () => {
   test("content clears the fixed sidebar across role portals and dock states", async ({
     page,
@@ -67,18 +91,7 @@ test.describe("portal sidebar content offset", () => {
           .evaluate((element) => getComputedStyle(element).paddingLeft),
       )
       .toBe("104px");
-    // The rail animates `lg:transition-[width] lg:duration-200` while the
-    // main padding flips immediately, so waiting only on the padding measures
-    // the rail mid-transition and reports a false overlap. Wait for the
-    // collapsed width itself (80px) before comparing.
-    await expect
-      .poll(() =>
-        page
-          .locator('aside[data-portal-sidebar="true"]')
-          .first()
-          .evaluate((element) => Math.round(element.getBoundingClientRect().width)),
-      )
-      .toBe(80);
+    await waitForRailToSettle(page);
     const collapsed = await measureOffset(page);
     expect(collapsed.contentLeft).toBeGreaterThanOrEqual(collapsed.sidebarRight + 7);
 

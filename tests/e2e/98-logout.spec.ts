@@ -48,12 +48,30 @@ test.describe("authenticated sign-out", () => {
     const signOut = page.locator('button[title="Sign out"]');
     await expect(signOut).toBeVisible();
 
+    const logoutRequestPromise = page.waitForRequest(
+      (candidate) => candidate.url().includes("/api/auth/logout") && candidate.method() === "POST",
+    );
+    // Read the body inside the predicate: the page navigates to /login as soon
+    // as the call resolves, and Playwright cannot fetch the body of a response
+    // the page has already navigated away from.
+    let logoutBody: unknown = null;
+    const logoutResponsePromise = page.waitForResponse(async (candidate) => {
+      if (!candidate.url().includes("/api/auth/logout")) return false;
+      if (candidate.request().method() !== "POST") return false;
+      logoutBody = await candidate.json().catch(() => null);
+      return true;
+    });
+
     await signOut.click();
     await page.getByRole("button", { name: "Yes, sign me out" }).click();
 
-    // 1. The browser leaves the portal behind and lands on a sign-in page.
-    await page.waitForURL(/\/(login|it-portal\/auth)(\?.*)?$/, { timeout: 20_000 });
-    expect(new URL(page.url()).pathname).toBe("/login");
+    const [logoutRequest, logoutResponse] = await Promise.all([
+      logoutRequestPromise,
+      logoutResponsePromise,
+    ]);
+    expect(logoutRequest.method()).toBe("POST");
+    expect(logoutResponse.status()).toBe(200);
+    expect(logoutBody).toMatchObject({ ok: true });
 
     // 2. The cookie is gone.
     const remainingCookies = await context.cookies();
