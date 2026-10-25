@@ -40,6 +40,12 @@ const ALLOWED: Record<string, string> = {
   "app/parent/messages/page.tsx": "delegates to <MessagesInbox>",
   "app/student/messages/page.tsx": "delegates to <MessagesInbox>",
   "app/admin/messages/page.tsx": "delegates to <MessagesInbox>",
+  "app/student/leaderboards/page.tsx":
+    "delegates to <LeaderboardPanel>, which fetches /api/student/leaderboards",
+  "app/parent/leaderboards/page.tsx":
+    "delegates to <LeaderboardPanel>, which fetches /api/parent/leaderboards",
+  "app/student/personal-practice/page.tsx":
+    "delegates to <PersonalPracticeFlow>, which fetches /api/cbt/sessions, subjects and topics",
   "app/super-admin/portals/page.tsx":
     "a static launcher: links to other portals, no data of its own",
   "app/teacher/evaluations/page.tsx": "redirect shim",
