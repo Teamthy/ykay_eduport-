@@ -238,7 +238,7 @@ export default function BulkAnnouncementPage() {
                             onClick={() => toggleClass(c.id)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                               selectedClasses.includes(c.id)
-                                ? "bg-brand-green text-white"
+                                ? "bg-brand-green text-brand-navy"
                                 : "bg-[var(--surface-disabled)] text-[var(--text-muted)] hover:bg-brand-green/10"
                             }`}
                           >
@@ -307,7 +307,7 @@ export default function BulkAnnouncementPage() {
                           <button
                             key={p.key}
                             onClick={() => setPriority(p.key as any)}
-                            className={`p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${priority === p.key ? (p.key === "urgent" ? "bg-red-500 text-white" : "bg-brand-green text-white") : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"}`}
+                            className={`p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${priority === p.key ? (p.key === "urgent" ? "bg-red-600 text-white" : "bg-brand-green text-brand-navy") : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"}`}
                           >
                             <p.icon size={12} /> {p.label}
                           </button>
@@ -447,7 +447,7 @@ export default function BulkAnnouncementPage() {
                         Ykay College
                       </span>
                       {priority === "urgent" && (
-                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-500 text-white font-bold">
+                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-600 text-white font-bold">
                           URGENT
                         </span>
                       )}

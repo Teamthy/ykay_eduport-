@@ -1,0 +1,168 @@
+name: Seed the CBT question bank (Staging)
+
+# Repeatable seed for the 10,000-question bank.
+#
+# It is deliberately Staging-only and manual:
+#   * production-migrations.yml owns Production; this workflow cannot reach it
+#     because prisma/cbt-seed.ts refuses any host that is not the configured
+#     Staging host, and refuses pooled Neon URLs;
+#   * the first step is a read-only preflight, so a malformed CSV fails before
+#     a single row is written;
+#   * attestation (making the questions visible to students in practice) is a
+#     separate, explicitly confirmed input that records the reviewer account,
+#     the citation and the timestamp on every row, exactly as the admin console
+#     does — and leaves structurally invalid rows in draft.
+#
+# Required configuration
+#   secret STAGING_DIRECT_DATABASE_URL   direct (unpooled) Neon Staging URL
+#   vars   STAGING_DATABASE_HOST         hostname only, e.g. ep-xxx-123456.aws.neon.tech
+#   vars   PRODUCTION_DATABASE_STATUS    AVAILABLE | NOT_PROVISIONED
+#   vars   PRODUCTION_DATABASE_HOST      hostname only, required when AVAILABLE
+# Protect the `staging-seeds` environment with required reviewers.
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "preflight is read-only; seed writes drafts; seed-and-attest also publishes them to practice"
+        required: true
+        type: choice
+        default: preflight
+        options:
+          - preflight
+          - seed
+          - seed-and-attest
+      bank_file:
+        description: "CSV under prisma/ to seed"
+        required: true
+        type: string
+        default: cbt-bank-10k-draft.csv
+      confirmation:
+        description: "For seed / seed-and-attest, type SEED STAGING to confirm the target"
+        required: false
+        type: string
+        default: ""
+      attest_email:
+        description: "seed-and-attest only: email of the reviewer account that checked the bank"
+        required: false
+        type: string
+        default: ""
+      attest_reference:
+        description: "seed-and-attest only: the source the bank was checked against (min 10 chars)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seed-cbt-bank-staging
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    name: ${{ inputs.operation }} · ${{ inputs.bank_file }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: staging-seeds
+    env:
+      CBT_BANK_FILE: ${{ inputs.bank_file }}
+
+    steps:
+      - name: Refuse to run from a non-main branch
+        if: inputs.operation != 'preflight' && github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::Seeding writes to the Staging database, so it only runs from main. Dispatch preflight to validate another branch."
+          exit 1
+
+      - name: Require explicit confirmation before writing
+        if: inputs.operation != 'preflight'
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [[ "$CONFIRMATION" != "SEED STAGING" ]]; then
+            echo "::error::Dispatch with confirmation=\"SEED STAGING\". Nothing was written."
+            exit 1
+          fi
+
+      - name: Require attestation inputs for seed-and-attest
+        if: inputs.operation == 'seed-and-attest'
+        env:
+          ATTEST_EMAIL: ${{ inputs.attest_email }}
+          ATTEST_REFERENCE: ${{ inputs.attest_reference }}
+        run: |
+          if [[ -z "$ATTEST_EMAIL" || ${#ATTEST_REFERENCE} -lt 10 ]]; then
+            echo "::error::seed-and-attest needs attest_email and an attest_reference of at least 10 characters."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.operation == 'preflight' && github.ref || 'main' }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Preflight the bank file (read-only)
+        # Runs the seed's own parser, so the counts here are exactly what the
+        # import below will attempt.
+        run: npm run cbt:preflight
+
+      - name: Generate Prisma client
+        if: inputs.operation != 'preflight'
+        run: npx prisma generate
+
+      - name: Seed as drafts
+        if: inputs.operation != 'preflight'
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          CBT_SEED_TARGET: staging
+          STAGING_DATABASE_HOST: ${{ vars.STAGING_DATABASE_HOST }}
+          PRODUCTION_DATABASE_STATUS: ${{ vars.PRODUCTION_DATABASE_STATUS }}
+          PRODUCTION_DATABASE_HOST: ${{ vars.PRODUCTION_DATABASE_HOST }}
+        run: |
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo "::error::Set STAGING_DIRECT_DATABASE_URL in the protected staging-seeds environment."
+            exit 1
+          fi
+          printf '::add-mask::%s\n' "$DATABASE_URL"
+          npm run cbt:seed:10k:staging
+
+      - name: Attest the bank in the named reviewer's name
+        if: inputs.operation == 'seed-and-attest'
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          CBT_SEED_TARGET: staging
+          STAGING_DATABASE_HOST: ${{ vars.STAGING_DATABASE_HOST }}
+          PRODUCTION_DATABASE_STATUS: ${{ vars.PRODUCTION_DATABASE_STATUS }}
+          PRODUCTION_DATABASE_HOST: ${{ vars.PRODUCTION_DATABASE_HOST }}
+          CBT_ATTEST_EMAIL: ${{ inputs.attest_email }}
+          CBT_ATTEST_REFERENCE: ${{ inputs.attest_reference }}
+          CBT_ATTEST_CONFIRMATION: ATTEST BANK VERIFIED
+        run: |
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo "::error::Set STAGING_DIRECT_DATABASE_URL in the protected staging-seeds environment."
+            exit 1
+          fi
+          printf '::add-mask::%s\n' "$DATABASE_URL"
+          npm run cbt:seed:10k:staging
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### CBT bank · ${{ inputs.operation }}"
+            echo ""
+            echo "- file: \`${{ inputs.bank_file }}\`"
+            if [[ "${{ inputs.operation }}" != "preflight" ]]; then
+              echo "- target: Staging Neon branch (host checked by \`prisma/cbt-seed.ts\`)"
+              echo "- questions are imported as drafts; students see a question only after attestation"
+            fi
+            echo "- Production is never touched by this workflow"
+          } >> "$GITHUB_STEP_SUMMARY"

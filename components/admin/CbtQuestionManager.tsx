@@ -317,7 +317,7 @@ export default function CbtQuestionManager({ onChanged }: { onChanged: () => voi
         <button
           type="submit"
           disabled={saving}
-          className="rounded-full bg-brand-green px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
+          className="rounded-full bg-brand-green px-4 py-2 text-xs font-bold text-brand-navy disabled:opacity-50"
         >
           {saving ? "Saving draft…" : "Add to draft queue"}
         </button>

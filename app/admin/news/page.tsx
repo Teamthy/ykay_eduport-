@@ -261,7 +261,7 @@ export default function AdminNewsPage() {
                           <button
                             onClick={() => setDeleteTarget(post)}
                             disabled={busy}
-                            className="inline-flex items-center gap-1.5 rounded-full bg-red-500 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
                           >
                             <Trash2 size={12} /> Delete
                           </button>

@@ -490,7 +490,7 @@ export default function CbtBankReviewPage() {
                   batchReference.trim().length < 10 ||
                   batchNotes.trim().length < 20
                 }
-                className="rounded-full bg-brand-green px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
+                className="rounded-full bg-brand-green px-4 py-2 text-xs font-bold text-brand-navy disabled:opacity-50"
               >
                 {bulkBusy ? "Approving…" : `Approve ${selected.length || ""} selected as reviewed`}
               </button>
@@ -770,7 +770,7 @@ export default function CbtBankReviewPage() {
                               form.notes.trim().length < 20 ||
                               !canApprove(form)
                             }
-                            className="inline-flex items-center gap-2 rounded-full bg-brand-green px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50"
+                            className="inline-flex items-center gap-2 rounded-full bg-brand-green px-4 py-2.5 text-xs font-bold text-brand-navy disabled:opacity-50"
                           >
                             {savingId === question.id ? (
                               <LoaderCircle size={14} className="animate-spin" />

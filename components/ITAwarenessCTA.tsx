@@ -75,7 +75,7 @@ export default function ITAwarenessCTA() {
                 href="/it-education"
                 className="inline-flex items-center justify-center gap-2 px-10 py-5 rounded-full bg-white text-brand-navy font-bold uppercase tracking-widest hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl hover:scale-[1.05]"
               >
-                Explore IT Courses <ArrowRight size={18} className="text-brand-green" />
+                Explore IT Courses <ArrowRight size={18} className="text-brand-green-dark" />
               </Link>
               <Link
                 href="/it-education#register"

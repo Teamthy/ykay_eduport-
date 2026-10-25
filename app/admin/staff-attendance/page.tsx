@@ -417,7 +417,7 @@ export default function AdminStaffAttendancePage() {
                       onClick={() => setFilter(f)}
                       className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest ${
                         filter === f
-                          ? "bg-brand-green text-white"
+                          ? "bg-brand-green text-brand-navy"
                           : "border border-[var(--border-default)] text-[var(--text-muted)]"
                       }`}
                     >

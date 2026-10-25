@@ -499,7 +499,7 @@ export default function SuperAdminPage() {
                   onClick={() => setTab(item.key)}
                   className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-widest transition-colors ${
                     tab === item.key
-                      ? "bg-brand-green text-white shadow"
+                      ? "bg-brand-green text-brand-navy shadow"
                       : "border border-[var(--border-subtle)] bg-[var(--surface-card)] text-[var(--text-secondary)]"
                   }`}
                 >
@@ -671,7 +671,7 @@ export default function SuperAdminPage() {
                           onClick={() => setLogFilter({ ...logFilter, range: tr.value, page: 1 })}
                           className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${
                             logFilter.range === tr.value
-                              ? "bg-brand-green text-white"
+                              ? "bg-brand-green text-brand-navy"
                               : "bg-[var(--surface-disabled)] text-[var(--text-secondary)]"
                           }`}
                         >
@@ -818,7 +818,7 @@ export default function SuperAdminPage() {
                           }
                           className={`rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${
                             forensicsFilter.range === tr.value
-                              ? "bg-red-500 text-white"
+                              ? "bg-red-600 text-white"
                               : "bg-[var(--surface-disabled)] text-[var(--text-secondary)]"
                           }`}
                         >
@@ -1181,7 +1181,7 @@ export default function SuperAdminPage() {
                                   label: `Suspend ${entry.name}? They will be signed out and unable to log in.`,
                                 })
                               }
-                              className="inline-flex items-center gap-1.5 rounded-full bg-red-500 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white"
+                              className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white"
                             >
                               <Lock size={12} /> Suspend
                             </button>

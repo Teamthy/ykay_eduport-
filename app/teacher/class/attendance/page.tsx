@@ -77,9 +77,9 @@ type RegisterResponse = {
 };
 
 const STATUS_BUTTONS: Array<{ label: string; value: AttendanceStatus; accent: string }> = [
-  { label: "P", value: "PRESENT", accent: "bg-brand-green text-white" },
-  { label: "A", value: "ABSENT", accent: "bg-red-500 text-white" },
-  { label: "L", value: "LATE", accent: "bg-brand-orange text-white" },
+  { label: "P", value: "PRESENT", accent: "bg-brand-green text-brand-navy" },
+  { label: "A", value: "ABSENT", accent: "bg-red-600 text-white" },
+  { label: "L", value: "LATE", accent: "bg-brand-orange text-brand-navy" },
 ];
 
 function todayKey() {
@@ -325,7 +325,7 @@ export default function ClassAttendancePage() {
                 <Calendar size={11} /> Teacher attendance workflow
               </span>
               {register?.selectedClass ? (
-                <span className="text-xs text-white/45">{register.selectedClass.displayName}</span>
+                <span className="text-xs text-white/55">{register.selectedClass.displayName}</span>
               ) : null}
             </div>
             <h1 className="font-display text-4xl tracking-widest text-white md:text-5xl">

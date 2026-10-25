@@ -461,7 +461,7 @@ export default function PersonalPracticeFlow() {
                       className={`flex min-h-24 items-start gap-3 rounded-2xl border p-4 text-left ${selected ? "border-brand-green bg-brand-green/5" : "border-[var(--border-subtle)] hover:border-brand-green/30"}`}
                     >
                       <span
-                        className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded border ${selected ? "border-brand-green bg-brand-green text-white" : "border-[var(--border-subtle)] text-transparent"}`}
+                        className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded border ${selected ? "border-brand-green bg-brand-green text-brand-navy" : "border-[var(--border-subtle)] text-transparent"}`}
                       >
                         <Check size={13} />
                       </span>
@@ -614,7 +614,7 @@ export default function PersonalPracticeFlow() {
                       type="button"
                       aria-pressed={durationMinutes === minutes}
                       onClick={() => setDurationMinutes(minutes)}
-                      className={`rounded-full border px-3 py-2 text-xs font-bold ${durationMinutes === minutes ? "border-brand-green bg-brand-green text-white" : "border-[var(--border-subtle)] text-[var(--text-primary)]"}`}
+                      className={`rounded-full border px-3 py-2 text-xs font-bold ${durationMinutes === minutes ? "border-brand-green bg-brand-green text-brand-navy" : "border-[var(--border-subtle)] text-[var(--text-primary)]"}`}
                     >
                       {minutes === 0 ? (
                         <>
@@ -719,7 +719,7 @@ export default function PersonalPracticeFlow() {
               disabled={
                 starting || !selectedSubjects.length || (mode === "topic" && !selectedTopic)
               }
-              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-2.5 text-sm font-bold text-brand-navy disabled:opacity-50"
             >
               {starting ? (
                 <LoaderCircle size={15} className="animate-spin" />

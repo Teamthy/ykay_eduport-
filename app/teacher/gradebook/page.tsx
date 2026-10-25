@@ -200,7 +200,7 @@ export default function TeacherGradebookPage() {
                 <BookOpen size={11} /> Live gradebook
               </span>
               {data?.gradebook ? (
-                <span className="text-xs text-white/45">
+                <span className="text-xs text-white/55">
                   {data.gradebook.sessionLabel} · {data.gradebook.termLabel}
                 </span>
               ) : null}
@@ -357,7 +357,7 @@ export default function TeacherGradebookPage() {
                                 className="px-4 py-3 text-center font-display text-[10px] uppercase tracking-wider text-white/70"
                               >
                                 {field.label}{" "}
-                                <span className="text-white/40">/{limits[field.key]}</span>
+                                <span className="text-white/60">/{limits[field.key]}</span>
                               </th>
                             ))}
                             <th className="px-4 py-3 text-center font-display text-[10px] uppercase tracking-wider text-white/70">

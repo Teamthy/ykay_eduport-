@@ -222,7 +222,7 @@ function Inner() {
                                     : "border-[var(--border-strong)]"
                                 }`}
                               >
-                                {on ? <Check size={12} className="text-white" /> : null}
+                                {on ? <Check size={12} className="text-brand-navy" /> : null}
                               </span>
                               <span className="flex-1 text-sm text-[var(--text-primary)]">
                                 {subject.name}

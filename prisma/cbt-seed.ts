@@ -16,6 +16,17 @@
  *
  * The target hostname is printed before writing; credentials never are.
  * Safe to re-run: subjects are upserted by slug and existing stems are skipped.
+ *
+ * ATTESTATION (optional, explicit):
+ *   CBT_ATTEST_EMAIL=<reviewer account email>
+ *   CBT_ATTEST_REFERENCE=<citation for the source the bank was checked against>
+ *   CBT_ATTEST_CONFIRMATION="ATTEST BANK VERIFIED"
+ *
+ * With all three set, every draft question in the subjects this file touches is
+ * attested in the name of that account: reviewedByUserId, reviewedAt and
+ * reviewReference are recorded, exactly as the admin console does, and the
+ * structural gate from lib/cbt-review.ts is applied first — a malformed row is
+ * left in draft and reported. Without all three, the import stays draft-only.
  * CBT_RESET=1 deletes CBT attempts, questions and subjects — only accepted along
  * with an explicit CBT_RESET_CONFIRMATION of "DELETE CBT ATTEMPTS AND QUESTIONS".
  */
@@ -24,6 +35,7 @@ import { readFile } from "fs/promises";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { chunk, planBankCsv } from "../lib/cbt-bank-import";
+import { structuralRejectionReason } from "../lib/cbt-review";
 import { validateStagingDemoTarget } from "./staging-demo-target";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -63,6 +75,116 @@ function assertTargetIsSafe() {
     productionDatabaseHost: process.env.PRODUCTION_DATABASE_HOST,
   });
   console.log(`Target verified as the staging branch: ${host}`);
+}
+
+const ATTEST_CONFIRMATION = "ATTEST BANK VERIFIED";
+const ATTEST_ROLES = new Set(["SUPER_ADMIN", "ADMIN", "DIRECTOR", "HOD"]);
+
+/**
+ * Attest imported drafts in the name of a real reviewer account.
+ *
+ * This is the workflow equivalent of selecting rows in /admin/cbt-bank and
+ * pressing "approve": it records who checked the bank, when, and against which
+ * source. It refuses to run without all three env vars, refuses a reviewer
+ * account that is missing, inactive or not an academic reviewer, and leaves any
+ * structurally invalid row in draft.
+ */
+async function attestBank(subjectIds: string[]) {
+  const email = process.env.CBT_ATTEST_EMAIL?.trim().toLowerCase();
+  const reference = process.env.CBT_ATTEST_REFERENCE?.trim();
+  const confirmation = process.env.CBT_ATTEST_CONFIRMATION?.trim();
+
+  if (!email && !reference && !confirmation) return;
+
+  if (!email || !reference || !confirmation) {
+    throw new Error(
+      "Attestation needs CBT_ATTEST_EMAIL, CBT_ATTEST_REFERENCE and CBT_ATTEST_CONFIRMATION together. Nothing was attested.",
+    );
+  }
+  if (confirmation !== ATTEST_CONFIRMATION) {
+    throw new Error(`CBT_ATTEST_CONFIRMATION must be exactly "${ATTEST_CONFIRMATION}".`);
+  }
+  if (reference.length < 10) {
+    throw new Error("CBT_ATTEST_REFERENCE must name the source in at least 10 characters.");
+  }
+
+  const reviewer = await prisma.user.findFirst({
+    where: { email },
+    select: { id: true, email: true, role: true, isActive: true, schoolId: true },
+  });
+  if (!reviewer) throw new Error("CBT_ATTEST_EMAIL does not match any user account.");
+  if (!reviewer.isActive) throw new Error("The attestation account is deactivated.");
+  if (!ATTEST_ROLES.has(String(reviewer.role))) {
+    throw new Error(
+      `The attestation account must hold one of ${[...ATTEST_ROLES].join(", ")}; it holds ${reviewer.role}.`,
+    );
+  }
+
+  const reviewedAt = new Date();
+  let attested = 0;
+  let blocked = 0;
+  const blockedSamples: string[] = [];
+
+  for (const subjectId of subjectIds) {
+    let cursor: string | undefined;
+    for (;;) {
+      const rows = await prisma.cbtQuestion.findMany({
+        where: { subjectId, status: "draft" },
+        select: { id: true, stem: true, topic: true, explanation: true, options: true },
+        orderBy: { id: "asc" },
+        take: 500,
+        ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+      });
+      if (!rows.length) break;
+      cursor = rows[rows.length - 1].id;
+
+      const allowed: string[] = [];
+      for (const row of rows) {
+        const reason = structuralRejectionReason(row);
+        if (reason) {
+          blocked += 1;
+          if (blockedSamples.length < 10) blockedSamples.push(`${row.id}: ${reason}`);
+        } else {
+          allowed.push(row.id);
+        }
+      }
+      if (allowed.length) {
+        const result = await prisma.cbtQuestion.updateMany({
+          where: { id: { in: allowed }, status: "draft" },
+          data: {
+            status: "reviewed",
+            reviewedByUserId: reviewer.id,
+            reviewedAt,
+            reviewReference: reference,
+            reviewNotes: `Attested by staging seed workflow (${BANK_FILE}).`,
+          },
+        });
+        attested += result.count;
+      }
+    }
+  }
+
+  await prisma.auditLog.create({
+    data: {
+      schoolId: reviewer.schoolId,
+      actorUserId: reviewer.id,
+      action: "CBT_BANK_ATTESTED_BY_SEED",
+      entityType: "CbtQuestion",
+      metadata: {
+        bankFile: BANK_FILE,
+        reference,
+        attested,
+        leftInDraft: blocked,
+        sample: blockedSamples,
+      },
+    },
+  });
+
+  console.log(
+    `attested ${attested} question(s) as ${reviewer.email} against "${reference}"` +
+      (blocked ? `; ${blocked} left in draft as structurally invalid` : ""),
+  );
+  for (const sample of blockedSamples) console.warn(`  left in draft — ${sample}`);
 }
 
 async function main() {
@@ -167,6 +289,12 @@ async function main() {
       `  ${group.slug.padEnd(24)} ${String(fresh.length).padStart(4)} new · bank now ${total}`,
     );
   }
+
+  const seededSubjects: Array<{ id: string }> = await prisma.cbtSubject.findMany({
+    where: { slug: { in: plan.subjects.map((group) => group.slug) } },
+    select: { id: true },
+  });
+  await attestBank(seededSubjects.map((subject) => subject.id));
 
   const drafts = await prisma.cbtQuestion.count({ where: { status: "draft" } });
   const reviewed = await prisma.cbtQuestion.count({ where: { status: "reviewed" } });

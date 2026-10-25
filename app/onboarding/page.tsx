@@ -55,14 +55,14 @@ export default function OnboardingPage() {
           {/* Step indicator */}
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[var(--color-brand-green)] text-white flex items-center justify-center text-xs font-bold">
+              <div className="w-8 h-8 rounded-full bg-[var(--color-brand-green)] text-brand-navy flex items-center justify-center text-xs font-bold">
                 ✓
               </div>
               <span className="text-xs text-gray-400 font-medium">School Created</span>
             </div>
             <div className="w-12 h-0.5 bg-gray-200"></div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[var(--color-brand-green)] text-white flex items-center justify-center text-xs font-bold">
+              <div className="w-8 h-8 rounded-full bg-[var(--color-brand-green)] text-brand-navy flex items-center justify-center text-xs font-bold">
                 2
               </div>
               <span className="text-xs text-gray-600 font-bold">School Profile</span>
@@ -149,12 +149,12 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+          {error && <p className="text-red-600 text-sm font-medium">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-[var(--color-brand-green)] text-white font-bold uppercase tracking-widest text-sm hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl bg-[var(--color-brand-green)] text-brand-navy font-bold uppercase tracking-widest text-sm hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? "Saving..." : "Complete Setup"} {!loading && <ArrowRight size={16} />}
           </button>

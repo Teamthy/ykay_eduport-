@@ -71,6 +71,14 @@ jobs:
           npx tsx scripts/check-dead-ui.ts
           npx tsx scripts/check-orphan-pages.ts
 
+      - name: Contrast guard
+        # Static, no database. Fails when a theme token pair drops below WCAG
+        # 4.5:1 or when a component hardcodes an unreadable literal pair like
+        # `bg-brand-green text-white` (2.2:1) or `bg-white text-white`.
+        # Both themes are measured, because dark is the default and light is a
+        # supported user setting.
+        run: npm run check:contrast
+
   schema-drift:
     name: Schema Drift
     runs-on: ubuntu-latest

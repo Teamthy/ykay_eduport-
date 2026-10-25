@@ -467,7 +467,7 @@ export default function AdminClassManagerPage() {
                                           })
                                         }
                                         disabled={busy}
-                                        className="inline-flex items-center gap-1 rounded-full bg-red-500 px-3.5 py-2 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
+                                        className="inline-flex items-center gap-1 rounded-full bg-red-600 px-3.5 py-2 text-[10px] font-bold uppercase tracking-widest text-white disabled:opacity-50"
                                       >
                                         <Archive size={11} /> Archive
                                       </button>

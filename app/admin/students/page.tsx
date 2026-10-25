@@ -3,7 +3,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import AdminSidebar from "@/components/AdminSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
-import { Search, UserPlus, X } from "lucide-react";
+import { Search, Upload, UserPlus, X } from "lucide-react";
 type Class = { id: string; displayName: string; capacity: number | null };
 type Student = {
   id: string;
@@ -143,6 +143,12 @@ export default function StudentsPage() {
               {shown.length} of {students.length}
             </span>
 
+            <Link
+              href="/admin/students/import"
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--border-default)] px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-[var(--text-primary)]"
+            >
+              <Upload size={15} /> Import a class list
+            </Link>
             <button
               onClick={() => setOpen(true)}
               className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-navy"

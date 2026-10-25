@@ -99,7 +99,7 @@ export default function GenerateInvoicesPage() {
                 <Receipt size={11} /> Bursary
               </span>
               {data ? (
-                <span className="text-xs text-white/45">
+                <span className="text-xs text-white/55">
                   {data.term.sessionLabel} · {data.term.label}
                 </span>
               ) : null}

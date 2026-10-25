@@ -411,7 +411,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
             </span>
             <span
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-display text-lg ${
-                secondsLeft < 120 ? "bg-red-500 text-white" : "bg-brand-green/20 text-brand-green"
+                secondsLeft < 120 ? "bg-red-600 text-white" : "bg-brand-green/20 text-brand-green"
               }`}
             >
               <Clock size={16} /> {String(minutes).padStart(2, "0")}:
@@ -467,7 +467,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
                         <span
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                             answers[question.id] === option.key
-                              ? "bg-brand-green text-white"
+                              ? "bg-brand-green text-brand-navy"
                               : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
                           }`}
                         >

@@ -91,7 +91,7 @@ export default function LogoutPage() {
               <button
                 onClick={confirm}
                 disabled={busy}
-                className="w-full rounded-xl bg-red-500 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-red-600 disabled:opacity-60"
+                className="w-full rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-red-700 disabled:opacity-60"
               >
                 {busy ? "Signing out…" : "Yes, sign me out"}
               </button>

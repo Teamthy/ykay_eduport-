@@ -25,7 +25,7 @@ The current `npm run cbt:seed` script reads `prisma/cbt-bank.csv`, **not** the 1
 
 ## Loading Staging (chosen path: isolated branch, expert review before release)
 
-Two equivalent ways to fill the isolated Staging branch. Both write **draft only**; neither can mark a question reviewed.
+Three equivalent ways to fill the isolated Staging branch. All of them import **drafts**; publishing to student practice is a separate, explicitly confirmed attestation step (option C, or the console in option B).
 
 ### A. From the repo (recommended: auditable, repeatable)
 
@@ -48,10 +48,34 @@ npm run cbt:seed:10k:staging
 
 Deploy this branch to a preview pointed at Staging, sign in as an admin, open `/admin/cbt-bank`, and use "Bulk question bank". The browser sends 200-row batches against the deployment's own database, so confirm the preview's `DATABASE_URL` is the Staging branch first.
 
+### C. From GitHub Actions (repeatable, no local credentials)
+
+`.github/workflows/seed-cbt-bank-staging.yml` — "Seed the CBT question bank (Staging)".
+
+| Input | Meaning |
+| --- | --- |
+| `operation` | `preflight` (read-only CSV check), `seed` (import drafts), `seed-and-attest` (import drafts, then attest) |
+| `bank_file` | CSV under `prisma/`; default `cbt-bank-10k-draft.csv` |
+| `confirmation` | must read `SEED STAGING` before anything is written |
+| `attest_email` / `attest_reference` | `seed-and-attest` only: the reviewer account and the source the bank was checked against |
+
+Configuration the workflow reads:
+
+- secret `STAGING_DIRECT_DATABASE_URL` — the direct (unpooled) Neon **Staging** URL.
+- vars `STAGING_DATABASE_HOST`, `PRODUCTION_DATABASE_STATUS`, `PRODUCTION_DATABASE_HOST` — the same guard the CLI uses.
+- environment `staging-seeds` — protect it with required reviewers.
+
+Why it is safe to expose as a button:
+
+- the first step is `npm run cbt:preflight`, which parses the file with the seed's own parser and fails on any rejected row before a database is touched;
+- `npm run cbt:seed:10k:staging` refuses any host that is not `STAGING_DATABASE_HOST`, refuses a pooled Neon host, and refuses the Production host;
+- `seed` and `seed-and-attest` only run from `main`, behind `confirmation=SEED STAGING`;
+- `seed-and-attest` requires `CBT_ATTEST_EMAIL`, `CBT_ATTEST_REFERENCE` and `CBT_ATTEST_CONFIRMATION="ATTEST BANK VERIFIED"`. It applies the **same** structural gate as the console (`lib/cbt-review.ts`), stores `reviewedByUserId` / `reviewedAt` / `reviewReference` on every row, leaves any malformed row in `draft` and reports it, and writes one `CBT_BANK_ATTESTED_BY_SEED` audit entry naming the reviewer, the citation and the counts.
+
 ### After either load
 
 1. `/admin/cbt-bank` shows `Bank: 10,000 draft · 0 reviewed · 0 archived`.
-2. A subject reviewer clears items (individually or 100 at a time with one citation) → `reviewed`.
+2. A subject reviewer clears items (individually, 100 at a time from the console, or in one pass with `seed-and-attest` after the bank has been checked) → `reviewed`. Any item found wrong later is corrected from the console: archive it, or return it to draft and re-review.
 3. Only then does the student CBT catalogue list that subject for that class, because `lib/cbt-review.ts` requires `status = reviewed` plus reviewer, timestamp and citation.
 4. Repeat the import + review on Production only after the cutover target is confirmed.
 

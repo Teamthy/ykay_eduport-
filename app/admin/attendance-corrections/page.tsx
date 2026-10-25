@@ -194,7 +194,7 @@ export default function AdminAttendanceCorrectionsPage() {
           <div className="w-full max-w-2xl rounded-3xl bg-white p-7 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-bold tracking-widest text-brand-green">
+                <p className="text-xs font-bold tracking-widest text-green-800">
                   ATTENDANCE CORRECTION REVIEW
                 </p>
                 <h2 className="mt-2 font-display text-3xl text-brand-navy">

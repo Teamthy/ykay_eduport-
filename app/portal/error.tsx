@@ -30,7 +30,7 @@ export default function PortalError({
       </p>
       <button
         onClick={() => reset()}
-        className="mt-5 inline-flex items-center rounded-full bg-[#16a34a] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#15803d]"
+        className="mt-5 inline-flex items-center rounded-full bg-[#15803d] px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-[#15803d]"
       >
         Retry
       </button>
