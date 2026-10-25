@@ -33,7 +33,12 @@ test.describe("authenticated sign-out", () => {
 
     const pageResponse = await page.goto("/super-admin", { waitUntil: "domcontentloaded" });
     expect(pageResponse?.status()).toBeLessThan(400);
-    await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
+
+    // The portal legitimately offers two sign-out controls: the sidebar footer
+    // and the topbar action. Both carry the accessible name "Sign out", so an
+    // unscoped role query is ambiguous by design — target the topbar one.
+    const signOut = page.locator('button[title="Sign out"]');
+    await expect(signOut).toBeVisible();
 
     const logoutRequestPromise = page.waitForRequest(
       (candidate) => candidate.url().includes("/api/auth/logout") && candidate.method() === "POST",
@@ -43,7 +48,7 @@ test.describe("authenticated sign-out", () => {
         candidate.url().includes("/api/auth/logout") && candidate.request().method() === "POST",
     );
 
-    await page.getByRole("button", { name: "Sign out" }).click();
+    await signOut.click();
     await page.getByRole("button", { name: "Yes, sign me out" }).click();
 
     const [logoutRequest, logoutResponse] = await Promise.all([

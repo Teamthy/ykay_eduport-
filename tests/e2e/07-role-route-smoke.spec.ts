@@ -151,6 +151,27 @@ function pagePathFor(file: string, rootName: string): string {
     .join("/")}`;
 }
 
+/**
+ * Visit a route, tolerating one aborted navigation.
+ *
+ * `page.goto` throws net::ERR_ABORTED when the browser discards a navigation
+ * it had already started — in practice the previous page's client-side
+ * redirect (a router.push after a failed fetch) still landing. Retrying once
+ * tells that apart from a route that never settles: a genuinely broken page
+ * aborts again and still fails.
+ */
+async function visitRoute(page: Page, path: string) {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await page.goto(path, { waitUntil: "domcontentloaded" });
+    } catch (error) {
+      const aborted = error instanceof Error && /ERR_ABORTED/.test(error.message);
+      if (!aborted || attempt >= 2) throw error;
+      await page.waitForLoadState("domcontentloaded").catch(() => undefined);
+    }
+  }
+}
+
 const PORTAL_PAGES = collectPortalPages();
 const READ_API_ROUTES = collectReadApiRoutes();
 
@@ -176,7 +197,7 @@ test.describe("seeded role and route smoke", () => {
         .map((file) => pagePathFor(file, rootName));
 
       for (const path of rolePages) {
-        const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+        const response = await visitRoute(page, path);
         const status = response?.status() ?? 0;
         expect(status < 500 || status === 503, `${role} route ${path} returned ${status}`).toBe(
           true,
