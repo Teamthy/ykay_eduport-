@@ -39,6 +39,7 @@ function catalogueRequest(search = "") {
 function practiceExam(overrides: Record<string, unknown> = {}) {
   return {
     id: "exam_prac",
+    classId: "cls_1",
     title: "WAEC Maths Practice",
     subjectName: "Mathematics",
     durationMinutes: 30,
@@ -46,6 +47,12 @@ function practiceExam(overrides: Record<string, unknown> = {}) {
     instructions: null,
     status: "PUBLISHED",
     shuffleQuestions: false,
+    // The catalogue card shows the assigned teacher and the class name, and
+    // optionally a term. The route selects these relations, so the fixture has
+    // to carry them or the card renderer dereferences undefined.
+    classroom: { displayName: "SS 2A" },
+    teacherProfile: { displayName: "T One" },
+    term: null,
     questions: [
       {
         id: "q1",
@@ -87,7 +94,13 @@ describe("GET /api/student/practice — catalogue", () => {
     const where = mockPrisma.exam.findMany.mock.calls[0][0].where;
     expect(where.examType).toBe("PRACTICE");
     expect(where.schoolId).toBe("school_1");
-    expect(where.classId).toBe("cls_1");
+    // Class scoping is expressed as an OR: the student's current class, plus
+    // any older set they already sat (so last year's practice stays visible).
+    // A set from another class they never sat must not match either branch.
+    expect(where.OR).toEqual([
+      { classId: "cls_1" },
+      { attempts: { some: { studentProfileId: "stu_1" } } },
+    ]);
   });
 
   it("bounds the query so a big catalogue cannot blow up the request", async () => {
@@ -200,7 +213,12 @@ describe("POST /api/student/practice/[id]/attempt — starting", () => {
 
     const where = mockPrisma.exam.findFirst.mock.calls[0][0].where;
     expect(where.schoolId).toBe("school_1");
-    expect(where.classId).toBe("cls_1");
+    // Same scoping as the catalogue: current class, or a set this student has
+    // already sat (so revision of last year's papers keeps working).
+    expect(where.OR).toEqual([
+      { classId: "cls_1" },
+      { attempts: { some: { studentProfileId: "stu_1" } } },
+    ]);
   });
 
   it("rejects a practice set with no questions", async () => {
