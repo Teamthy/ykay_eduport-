@@ -103,6 +103,13 @@ for (const file of files) {
     // runs without anyone being able to act on it.
     ...lcpElement(data),
     subparts: lcpSubparts(data),
+    // Raw fallbacks. Every "which element / which phase" question here has been
+    // answered by guessing twice already; when the structured extraction finds
+    // nothing, print the blob and let the numbers speak.
+    metrics: data.audits?.metrics?.details?.items?.[0] ?? null,
+    lcpElementRaw: JSON.stringify(
+      data.audits?.["largest-contentful-paint-element"]?.details ?? null,
+    ).slice(0, 700),
     lcpAuditIds: Object.keys(data.audits ?? {})
       .filter((id) => /lcp|largest|font|render-blocking|server-response/.test(id))
       .sort(),
@@ -153,7 +160,22 @@ for (const report of reports) {
     // on a font, a render-blocking resource or the image itself, without
     // downloading the artefact.
     console.log(
-      `::notice title=Lighthouse LCP element::${report.route} audit has no LCP element block; LCP-related audits: ${report.lcpAuditIds?.join(", ") || "none"}`,
+      `::notice title=Lighthouse LCP element::${report.route} unparsed; raw details: ${report.lcpElementRaw}`,
+    );
+  }
+  if (report.metrics) {
+    const observed = report.metrics.observedLargestContentfulPaint;
+    const simulated = report.metrics.largestContentfulPaint;
+    // Lighthouse simulates throttling on the recorded trace, so `observedLCP` is
+    // what happened on the runner and `largestContentfulPaint` is the modelled
+    // number the budget uses. If observed is fast but simulated is not, the fix
+    // is fewer bytes on the critical path, not a faster server.
+    console.log(
+      `::notice title=Lighthouse observed vs simulated::${report.route} observedLCP=${Math.round(
+        observed ?? -1,
+      )}ms simulatedLCP=${Math.round(simulated ?? -1)}ms bytes=${report.metrics.totalByteWeight ?? "?"} observedFCP=${Math.round(
+        report.metrics.observedFirstContentfulPaint ?? -1,
+      )}ms`,
     );
   }
   if (report.lateRequests?.length) {
