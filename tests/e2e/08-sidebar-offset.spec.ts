@@ -67,6 +67,18 @@ test.describe("portal sidebar content offset", () => {
           .evaluate((element) => getComputedStyle(element).paddingLeft),
       )
       .toBe("104px");
+    // The rail animates `lg:transition-[width] lg:duration-200` while the
+    // main padding flips immediately, so waiting only on the padding measures
+    // the rail mid-transition and reports a false overlap. Wait for the
+    // collapsed width itself (80px) before comparing.
+    await expect
+      .poll(() =>
+        page
+          .locator('aside[data-portal-sidebar="true"]')
+          .first()
+          .evaluate((element) => Math.round(element.getBoundingClientRect().width)),
+      )
+      .toBe(80);
     const collapsed = await measureOffset(page);
     expect(collapsed.contentLeft).toBeGreaterThanOrEqual(collapsed.sidebarRight + 7);
 
