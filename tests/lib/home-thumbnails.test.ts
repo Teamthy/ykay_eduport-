@@ -61,3 +61,30 @@ describe("home page track cards", () => {
     expect(path).toMatch(/-520\.webp$/);
   });
 });
+
+describe("hero LCP candidates", () => {
+  const hero = readFileSync(join(process.cwd(), "components/Hero.tsx"), "utf8");
+
+  it("renders the decorative backdrop as a CSS background, not an <img>", () => {
+    // As an <img> the full-bleed backdrop was the largest element in the first
+    // viewport, so the LCP budget measured a 20%-opacity decoration behind a
+    // 92%-opaque gradient. CSS backgrounds are not LCP candidates.
+    expect(hero).toContain("url('/home/hero-campus-750.webp')");
+    expect(hero).not.toContain('src="/home/hero-campus-750.webp"');
+  });
+
+  it("keeps the student photograph preloaded, high-priority and sized", () => {
+    expect(hero).toContain('src="/home/ykay-students-750.webp"');
+    expect(hero).toContain('fetchPriority="high"');
+    expect(hero).toMatch(/width=\{\d+\}/);
+    expect(hero).toMatch(/height=\{\d+\}/);
+    expect(hero).not.toContain('loading="lazy"');
+  });
+
+  it("leaves no above-the-fold element gated on JavaScript", () => {
+    // A hero that only appears after hydration turns the LCP budget into a
+    // hydration benchmark: the measured paint lands seconds after the real one.
+    expect(hero).not.toMatch(/\bshown\b/);
+    expect(hero).not.toMatch(/useState|useEffect/);
+  });
+});

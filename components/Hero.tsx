@@ -9,21 +9,23 @@ export default function Hero() {
   return (
     <section className="relative w-full overflow-hidden bg-brand-navy-dark">
       <div className="absolute inset-0 z-0">
-        {/* This full-bleed backdrop is the largest in-viewport image, so it
-            is the LCP element. Served as a pre-built WebP (no on-demand
-            /_next/image conversion — a cold optimizer cache on a fresh
-            server would delay the LCP paint) with fetchpriority=high so it
-            wins the connection. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/home/hero-campus-750.webp"
-          srcSet="/home/hero-campus-750.webp 750w, /home/hero-campus-1200.webp 1200w"
-          sizes="100vw"
-          alt=""
+        {/* Decorative backdrop as a CSS background, not an <img>.
+            As an <img> it was the largest in-viewport element and therefore
+            the LCP candidate — while being a 20%-opacity texture behind a
+            92%-opaque navy gradient. That made the LCP budget measure a
+            decoration at Slow-4G speed instead of the headline. CSS
+            backgrounds are not LCP candidates, so the photograph still
+            renders identically but the paint that is measured is the copy.
+            The image is still preloaded in app/page.tsx (same srcset/sizes),
+            so the browser starts fetching it before this element is parsed. */}
+        <div
           aria-hidden="true"
-          fetchPriority="high"
-          decoding="async"
-          className="absolute inset-0 h-full w-full object-cover opacity-20"
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: "url('/home/hero-campus-750.webp')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-dark via-brand-navy-dark/92 to-brand-navy-dark/70" />
         <div
@@ -93,10 +95,10 @@ export default function Hero() {
             aria-hidden="true"
             className="absolute -inset-3 rounded-[2rem] border border-brand-green/30"
           />
-          {/* The identity photograph is the LCP element on mobile — mark it
-              priority so it is preloaded and fetched ahead of everything
-              else, and let next/image serve a right-sized WebP. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {/* The identity photograph is now the first *content* image on the
+              page (the backdrop is a CSS background), so keep it preloaded
+              with high priority and its intrinsic size declared, or it
+              becomes the paint that misses the budget. */}
           <img
             src="/home/ykay-students-750.webp"
             srcSet="/home/ykay-students-750.webp 750w, /home/ykay-students-1080.webp 1080w"
