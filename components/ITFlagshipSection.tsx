@@ -2,42 +2,53 @@ import Link from "next/link";
 import { ArrowRight, Award, Code2, Shield, Sparkles } from "lucide-react";
 
 import { AnimatedText } from "@/components/AnimatedTextStatic";
+/**
+ * `image` is the full-bleed hero used by the track page; `thumb` is the
+ * right-sized card image built by scripts/build-home-thumbnails.mjs. Never
+ * point the card at `image` again — it is 8x larger than the tile.
+ */
 const TRACKS = [
   {
     title: "Python",
     href: "/it-education/python",
     blurb: "Programming foundations to automation",
     image: "/python-hero.jpg",
+    thumb: "/python-hero-520.webp",
   },
   {
     title: "Artificial Intelligence",
     href: "/it-education/ai",
     blurb: "Practical AI literacy for students",
     image: "/ai-hero.jpg",
+    thumb: "/ai-hero-520.webp",
   },
   {
     title: "Cybersecurity",
     href: "/it-education/cybersecurity",
     blurb: "Defend systems and data",
     image: "/cybersecurity-hero.jpg",
+    thumb: "/cybersecurity-hero-520.webp",
   },
   {
     title: "Microsoft Office",
     href: "/it-education/microsoft-excel",
     blurb: "Word, Excel, PowerPoint pathways",
     image: "/microsoft-excel-hero.jpg",
+    thumb: "/microsoft-excel-hero-520.webp",
   },
   {
     title: "Digital Literacy",
     href: "/it-education/digital-literacy",
     blurb: "Essential computing for every learner",
     image: "/digital-literacy-hero.jpg",
+    thumb: "/digital-literacy-hero-520.webp",
   },
   {
     title: "Excel Expert",
     href: "/it-education/excel-expert",
     blurb: "Advanced analysis and dashboards",
     image: "/excel-expert-hero.jpg",
+    thumb: "/excel-expert-hero-520.webp",
   },
 ];
 
@@ -108,11 +119,19 @@ export default function ITFlagshipSection() {
                 href={track.href}
                 className="group relative overflow-hidden rounded-3xl border border-[var(--border-subtle)] min-h-[140px] shadow-sm transition hover:-translate-y-1 hover:border-brand-green/50 hover:shadow-xl"
               >
+                {/* `thumb`, not `image`: these tiles are ~200-260 CSS px wide
+                    and the page hero is a 2070px JPEG of up to 577 KB. Six of
+                    them made the home page pull 2.4 MB for six thumbnails, and
+                    Lighthouse caught it — they were the five heaviest
+                    responses while the 23 KB LCP image waited behind them.
+                    Regenerate with `node scripts/build-home-thumbnails.mjs`. */}
                 <img
-                  src={track.image}
+                  src={track.thumb}
                   alt=""
                   loading="lazy"
                   decoding="async"
+                  width={520}
+                  height={290}
                   className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/80 to-brand-navy/30" />
