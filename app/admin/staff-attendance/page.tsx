@@ -18,6 +18,7 @@ import PortalTopbar from "@/components/PortalTopbar";
 import StaffQrScanner from "@/components/StaffQrScanner";
 import { useToast } from "@/components/Toast";
 import QrImage from "@/components/QrImage";
+import { readJsonResponse } from "@/lib/api-response";
 
 type Row = {
   teacherProfileId: string;
@@ -40,6 +41,8 @@ type Badge = {
   badgeCode: string;
   qrPayload: string;
 };
+
+type DailyQr = { qrPayload: string; date: string; timeZone: string; validFor: string };
 
 type Overview = {
   date: string;
@@ -69,6 +72,8 @@ export default function AdminStaffAttendancePage() {
   const [lastResult, setLastResult] = useState<string>("");
   const [cameraOn, setCameraOn] = useState(false);
   const [online, setOnline] = useState(true);
+  const [dailyQr, setDailyQr] = useState<DailyQr | null>(null);
+  const [generatingQr, setGeneratingQr] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -77,17 +82,43 @@ export default function AdminStaffAttendancePage() {
         fetch("/api/admin/staff-attendance", { cache: "no-store" }),
         fetch("/api/admin/staff-attendance/badges", { cache: "no-store" }),
       ]);
-      const aj = await a.json();
-      const bj = await b.json();
+      const aj = await readJsonResponse<Overview & { error?: string }>(a);
       if (!a.ok) throw new Error(aj.error || "Unable to load attendance.");
       setData(aj);
-      if (b.ok) setBadges(bj.badges || []);
+      if (b.ok) {
+        try {
+          const bj = await readJsonResponse<{ badges?: Badge[] }>(b);
+          setBadges(bj.badges || []);
+        } catch {
+          setBadges([]);
+        }
+      } else {
+        setBadges([]);
+      }
     } catch (e) {
       toast(e instanceof Error ? e.message : "Unable to load attendance.", "error");
     } finally {
       setLoading(false);
     }
   }, [toast]);
+
+  async function generateDailyQr() {
+    setGeneratingQr(true);
+    try {
+      const response = await fetch("/api/admin/staff-attendance/check-in-qr", {
+        method: "POST",
+        cache: "no-store",
+      });
+      const payload = await readJsonResponse<DailyQr & { error?: string }>(response);
+      if (!response.ok) throw new Error(payload.error || "Unable to generate today's QR.");
+      setDailyQr(payload);
+      toast("Today's teacher attendance QR is ready.", "success");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Unable to generate today's QR.", "error");
+    } finally {
+      setGeneratingQr(false);
+    }
+  }
 
   useEffect(() => {
     void load();
@@ -172,8 +203,13 @@ export default function AdminStaffAttendancePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ badgeCode, eventType: mode }),
       });
-      const j = await r.json();
+      const j = await readJsonResponse<{
+        staff?: { displayName: string };
+        event?: { eventType: string; isLate: boolean; lateMinutes: number };
+        error?: string;
+      }>(r);
       if (!r.ok) throw new Error(j.error || "Scan failed.");
+      if (!j.staff || !j.event) throw new Error("The server returned an incomplete scan result.");
       const msg = `${j.staff.displayName} · ${j.event.eventType.replace("_", " ")}${
         j.event.isLate ? ` · LATE +${j.event.lateMinutes}m` : ""
       }`;
@@ -206,6 +242,59 @@ export default function AdminStaffAttendancePage() {
               {data?.lateCutoff || "08:00"} (Africa/Lagos) are marked late automatically.
             </p>
           </div>
+
+          <section className="grid gap-5 rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)] sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto]">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
+                Teacher self-service
+              </p>
+              <h2 className="mt-2 font-display text-2xl tracking-widest text-[var(--text-primary)]">
+                TODAY&apos;S CHECK-IN QR
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--text-secondary)]">
+                Generate the school-bound QR for teachers to scan before checking in or out. It is
+                signed by the server and expires when the school-local attendance date changes. When
+                campus GPS is enabled, the attendance API validates the reported location against
+                the configured geofence. An authorized admin can configure the campus pin and radius
+                under School Profile; GPS remains off until deliberately enabled.
+              </p>
+              <button
+                type="button"
+                onClick={() => void generateDailyQr()}
+                disabled={generatingQr}
+                className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy disabled:opacity-50"
+              >
+                {generatingQr ? (
+                  <LoaderCircle className="animate-spin" size={15} />
+                ) : (
+                  <QrCode size={15} />
+                )}
+                {generatingQr
+                  ? "Generating…"
+                  : dailyQr
+                    ? "Refresh today's QR"
+                    : "Generate today's QR"}
+              </button>
+            </div>
+            {dailyQr ? (
+              <div className="rounded-2xl border border-brand-green/20 bg-[var(--bg-secondary)] p-4 text-center">
+                <QrImage
+                  value={dailyQr.qrPayload}
+                  size={240}
+                  alt={`Daily teacher check-in QR for ${dailyQr.date}`}
+                  className="mx-auto h-48 w-48 rounded-xl border border-[var(--border-subtle)] bg-white p-2 sm:h-56 sm:w-56"
+                />
+                <p className="mt-3 text-xs font-bold text-[var(--text-primary)]">{dailyQr.date}</p>
+                <p className="mt-1 text-[10px] text-[var(--text-muted)]">
+                  Valid {dailyQr.validFor} · {dailyQr.timeZone}
+                </p>
+              </div>
+            ) : (
+              <div className="grid min-h-40 place-items-center rounded-2xl border border-dashed border-[var(--border-default)] p-6 text-center text-sm text-[var(--text-muted)]">
+                Generate today&apos;s QR to display it here.
+              </div>
+            )}
+          </section>
 
           <form
             onSubmit={submitScan}

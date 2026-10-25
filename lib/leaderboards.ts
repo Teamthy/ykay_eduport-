@@ -2,8 +2,7 @@
  * Pure aggregation for school leaderboards.
  *
  * Callers supply only released, graded exam results already scoped to one
- * tenant and one cohort. This module returns positions and star tiers only —
- * student identities and raw marks/percentages never leave the server.
+ * tenant and one cohort. Rank helpers never return marks or percentages.
  */
 export type LeaderboardCategory = "CA" | "EXAM" | "OVERALL";
 export type LeaderboardScope = "CLASS" | "SUBJECT";
@@ -22,6 +21,7 @@ export type LeaderboardExam = {
 };
 
 export type Standing = { rank: number; stars: number };
+export type RankedLearner = Standing & { studentProfileId: string };
 
 export type LeaderboardResult = {
   cohortSize: number;
@@ -55,16 +55,15 @@ function starsForRank(rank: number, cohortSize: number): number {
 }
 
 /**
- * Rank students by their weighted mean across released assessments. A student's
- * best graded attempt counts once per exam, so retakes cannot inflate the
- * number of observations. Ties receive competition ranks (1, 1, 3).
+ * Rank each learner with at least one valid released result. A learner's best
+ * attempt counts once per exam; ties receive competition ranks (1, 1, 3).
+ * This is used by the authorized admin view, which may map IDs to names after
+ * the cohort and released-result query has been scoped server-side.
  */
-export function buildLeaderboard(params: {
+export function buildLeaderboardRankings(params: {
   exams: LeaderboardExam[];
   eligibleStudentIds: string[];
-  viewerStudentId: string;
-  topLimit?: number;
-}): LeaderboardResult {
+}): RankedLearner[] {
   const eligible = new Set(params.eligibleStudentIds);
   const totals = new Map<string, { score: number; possible: number }>();
 
@@ -92,38 +91,55 @@ export function buildLeaderboard(params: {
 
   const rows = [...totals.entries()]
     .filter(([, total]) => total.possible > 0)
-    .map(([studentId, total]) => ({ studentId, ...total }))
+    .map(([studentProfileId, total]) => ({ studentProfileId, ...total }))
     .sort((left, right) => {
       const delta = left.score * right.possible - right.score * left.possible;
-      return delta === 0 ? left.studentId.localeCompare(right.studentId) : delta > 0 ? -1 : 1;
+      return delta === 0
+        ? left.studentProfileId.localeCompare(right.studentProfileId)
+        : delta > 0
+          ? -1
+          : 1;
     });
 
-  const ranks = new Map<string, Standing>();
   let previous: (typeof rows)[number] | null = null;
   let previousRank = 0;
-  rows.forEach((row, index) => {
+  return rows.map((row, index) => {
     const tied =
       previous !== null && row.score * previous.possible === previous.score * row.possible;
     const rank = tied ? previousRank : index + 1;
-    ranks.set(row.studentId, { rank, stars: starsForRank(rank, rows.length) });
     previous = row;
     previousRank = rank;
+    return {
+      studentProfileId: row.studentProfileId,
+      rank,
+      stars: starsForRank(rank, rows.length),
+    };
   });
+}
 
-  const myStanding = ranks.get(params.viewerStudentId) ?? null;
+/** Student/parent-safe aggregate: ranks and star tiers, but no learner IDs. */
+export function buildLeaderboard(params: {
+  exams: LeaderboardExam[];
+  eligibleStudentIds: string[];
+  viewerStudentId: string;
+  topLimit?: number;
+}): LeaderboardResult {
+  const rankings = buildLeaderboardRankings(params);
+  const myStanding = rankings.find(
+    (standing) => standing.studentProfileId === params.viewerStudentId,
+  );
   const topLimit = Math.max(1, Math.min(params.topLimit ?? 10, 25));
   const topStandings: Standing[] = [];
   const seenRanks = new Set<number>();
-  for (const row of rows) {
-    const standing = ranks.get(row.studentId);
-    if (!standing || seenRanks.has(standing.rank)) continue;
+  for (const standing of rankings) {
+    if (seenRanks.has(standing.rank)) continue;
     seenRanks.add(standing.rank);
-    topStandings.push(standing);
+    topStandings.push({ rank: standing.rank, stars: standing.stars });
     if (topStandings.length >= topLimit) break;
   }
 
   return {
-    cohortSize: rows.length,
+    cohortSize: rankings.length,
     myRank: myStanding?.rank ?? null,
     myStars: myStanding?.stars ?? null,
     topStandings,

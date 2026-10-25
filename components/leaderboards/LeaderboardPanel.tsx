@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { LeaderboardCategory, LeaderboardScope, Standing } from "@/lib/leaderboards";
+import { readJsonResponse } from "@/lib/api-response";
 import LeaderboardView, { type LeaderboardSubjectOption } from "./LeaderboardView";
 
 type Child = {
@@ -58,7 +59,7 @@ export default function LeaderboardPanel({ audience }: Props) {
       setError("");
       try {
         const response = await fetch(url, { cache: "no-store", signal: controller.signal });
-        const payload = (await response.json()) as ApiPayload;
+        const payload = await readJsonResponse<ApiPayload>(response);
         if (!response.ok) throw new Error(payload.error || "Unable to load standings.");
         if (audience === "parent") {
           setChildren(payload.children ?? []);

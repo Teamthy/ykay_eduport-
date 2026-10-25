@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import PortalTopbar from "@/components/PortalTopbar";
+import { readJsonResponse } from "@/lib/api-response";
 import {
   CheckCircle2,
   ChevronLeft,
@@ -90,11 +91,11 @@ export default function CbtBankReviewPage() {
     setError("");
     try {
       const response = await fetch(`/api/admin/cbt/questions?${query}`, { cache: "no-store" });
-      const payload = (await response.json()) as {
+      const payload = await readJsonResponse<{
         questions?: Question[];
         nextCursor?: string | null;
         error?: string;
-      };
+      }>(response);
       if (!response.ok) throw new Error(payload.error || "Unable to load CBT questions.");
       const rows = payload.questions ?? [];
       setQuestions(rows);
@@ -163,7 +164,7 @@ export default function CbtBankReviewPage() {
           notes: form.notes,
         }),
       });
-      const payload = (await response.json()) as { error?: string };
+      const payload = await readJsonResponse<{ error?: string }>(response);
       if (!response.ok) throw new Error(payload.error || "Unable to save the review decision.");
       setNotice(
         decision === "APPROVE"

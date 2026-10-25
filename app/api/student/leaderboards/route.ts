@@ -19,27 +19,34 @@ function parseFilters(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const context = await getStudentExamContext();
-  if (!context) return jsonNoStore({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const context = await getStudentExamContext();
+    if (!context) return jsonNoStore({ error: "Unauthorized" }, { status: 401 });
 
-  const filters = parseFilters(request);
-  if (!filters) {
+    const filters = parseFilters(request);
+    if (!filters) {
+      return jsonNoStore(
+        { error: "Choose CA, Exams or Overall and a Class or Subject cohort." },
+        { status: 400 },
+      );
+    }
+
+    const result = await loadLeaderboardView({
+      schoolId: context.user.schoolId,
+      classId: context.studentProfile.currentClassId,
+      viewerStudentId: context.studentProfile.id,
+      ...filters,
+    });
+    if (!result.ok) return jsonNoStore({ error: result.error }, { status: result.status });
+
+    return jsonNoStore({
+      student: { displayName: context.studentProfile.displayName },
+      ...result.data,
+    });
+  } catch {
     return jsonNoStore(
-      { error: "Choose CA, Exams or Overall and a Class or Subject cohort." },
-      { status: 400 },
+      { error: "The student leaderboard is temporarily unavailable. Please retry shortly." },
+      { status: 503 },
     );
   }
-
-  const result = await loadLeaderboardView({
-    schoolId: context.user.schoolId,
-    classId: context.studentProfile.currentClassId,
-    viewerStudentId: context.studentProfile.id,
-    ...filters,
-  });
-  if (!result.ok) return jsonNoStore({ error: result.error }, { status: result.status });
-
-  return jsonNoStore({
-    student: { displayName: context.studentProfile.displayName },
-    ...result.data,
-  });
 }

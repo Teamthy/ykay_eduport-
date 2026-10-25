@@ -1,6 +1,9 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockPrisma } from "../setup";
+import { createDailyStaffCheckInQr } from "@/lib/staff-attendance";
+
+process.env.AUTH_SECRET = "test-secret-that-is-at-least-32-characters-long-for-testing";
 
 vi.mock("@prisma/client", () => ({
   StaffAttendanceEventType: { CHECK_IN: "CHECK_IN", CHECK_OUT: "CHECK_OUT" },
@@ -18,13 +21,18 @@ vi.mock("@prisma/client", () => ({
 const routeMocks = vi.hoisted(() => ({
   user: { id: "staff_user_1", schoolId: "school_1", role: "TEACHER" },
   requireRole: vi.fn(),
+  requireRoleOr503: vi.fn(),
   ensureTeacherBadge: vi.fn(),
   recordStaffScan: vi.fn(),
 }));
 
 vi.mock("@/lib/session", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/session")>();
-  return { ...actual, requireRole: routeMocks.requireRole };
+  return {
+    ...actual,
+    requireRole: routeMocks.requireRole,
+    requireRoleOr503: routeMocks.requireRoleOr503,
+  };
 });
 
 vi.mock("@/lib/staff-attendance", async (importOriginal) => {
@@ -40,7 +48,10 @@ function post(body: unknown) {
   return new NextRequest("http://localhost:3000/api/staff/attendance/me", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      dailyQrToken: createDailyStaffCheckInQr("school_1"),
+      ...(body as Record<string, unknown>),
+    }),
   });
 }
 
@@ -54,6 +65,7 @@ const enabledSchool = {
 beforeEach(() => {
   vi.clearAllMocks();
   routeMocks.requireRole.mockResolvedValue(routeMocks.user);
+  routeMocks.requireRoleOr503.mockResolvedValue(routeMocks.user);
   routeMocks.ensureTeacherBadge.mockResolvedValue({ badgeCode: "YKST-TEST-01" });
   routeMocks.recordStaffScan.mockResolvedValue({ event: { id: "event_1" } });
   mockPrisma.teacherProfile.findFirst.mockResolvedValue({
@@ -64,6 +76,19 @@ beforeEach(() => {
 });
 
 describe("POST /api/staff/attendance/me — server-side geofence", () => {
+  it("rejects a missing, tampered, cross-tenant or expired daily QR", async () => {
+    const { POST } = await import("@/app/api/staff/attendance/me/route");
+    const response = await POST(
+      post({ action: "CHECK_IN", dailyQrToken: createDailyStaffCheckInQr("another_school") }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({
+      error: expect.stringContaining("invalid or expired"),
+    });
+    expect(routeMocks.recordStaffScan).not.toHaveBeenCalled();
+  });
+
   it("requires a location when the school enables the fence", async () => {
     const { POST } = await import("@/app/api/staff/attendance/me/route");
     const response = await POST(post({ action: "CHECK_IN" }));
@@ -110,7 +135,7 @@ describe("POST /api/staff/attendance/me — server-side geofence", () => {
     expect(routeMocks.recordStaffScan).toHaveBeenCalledWith(
       expect.objectContaining({
         schoolId: "school_1",
-        source: "GPS_SELF_SERVICE",
+        source: "DAILY_QR_GPS_SELF_SERVICE",
         geofence: { distanceFromCampusMeters: 0, locationAccuracyMeters: 15 },
       }),
     );
@@ -130,7 +155,7 @@ describe("POST /api/staff/attendance/me — server-side geofence", () => {
 
     expect(response.status).toBe(201);
     expect(routeMocks.recordStaffScan).toHaveBeenCalledWith(
-      expect.objectContaining({ source: "SELF_SERVICE", geofence: null }),
+      expect.objectContaining({ source: "DAILY_QR_SELF_SERVICE", geofence: null }),
     );
   });
 

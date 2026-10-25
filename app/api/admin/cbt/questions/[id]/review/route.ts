@@ -41,64 +41,71 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     );
   }
   const { id } = await context.params;
-  const question = await prisma.cbtQuestion.findUnique({
-    where: { id },
-    select: { id: true },
-  });
-  if (!question) return NextResponse.json({ error: "Question not found." }, { status: 404 });
+  try {
+    const question = await prisma.cbtQuestion.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!question) return NextResponse.json({ error: "Question not found." }, { status: 404 });
 
-  if (parsed.data.decision === "APPROVE") {
-    const content = parsed.data.question;
-    const normalizedOptions = content.options.map((option) => option.toLowerCase());
-    const genericPhrases = [
-      "this sits in the nerdc scheme",
-      "common distractor",
-      "mixes a related but different idea",
-      "not the required relationship",
-      "does not satisfy the stem",
-    ];
-    const explanation = content.explanation.toLowerCase();
-    if (
-      new Set(normalizedOptions).size !== 4 ||
-      genericPhrases.some((phrase) => explanation.includes(phrase))
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "The four options must be distinct and the explanation must be rewritten with question-specific reasoning before approval.",
+    if (parsed.data.decision === "APPROVE") {
+      const content = parsed.data.question;
+      const normalizedOptions = content.options.map((option) => option.toLowerCase());
+      const genericPhrases = [
+        "this sits in the nerdc scheme",
+        "common distractor",
+        "mixes a related but different idea",
+        "not the required relationship",
+        "does not satisfy the stem",
+      ];
+      const explanation = content.explanation.toLowerCase();
+      if (
+        new Set(normalizedOptions).size !== 4 ||
+        genericPhrases.some((phrase) => explanation.includes(phrase))
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "The four options must be distinct and the explanation must be rewritten with question-specific reasoning before approval.",
+          },
+          { status: 409 },
+        );
+      }
+      const updated = await prisma.cbtQuestion.update({
+        where: { id },
+        data: {
+          topic: content.topic,
+          stem: content.stem,
+          options: content.options,
+          correctIndex: content.correctIndex,
+          explanation: content.explanation,
+          status: "reviewed",
+          reviewedByUserId: auth.id,
+          reviewedAt: new Date(),
+          reviewReference: parsed.data.reference,
+          reviewNotes: parsed.data.notes,
         },
-        { status: 409 },
-      );
+        select: { id: true, status: true, reviewedAt: true, reviewReference: true },
+      });
+      return NextResponse.json({ question: updated });
     }
+
     const updated = await prisma.cbtQuestion.update({
       where: { id },
       data: {
-        topic: content.topic,
-        stem: content.stem,
-        options: content.options,
-        correctIndex: content.correctIndex,
-        explanation: content.explanation,
-        status: "reviewed",
-        reviewedByUserId: auth.id,
-        reviewedAt: new Date(),
-        reviewReference: parsed.data.reference,
+        status: "draft",
+        reviewedByUserId: null,
+        reviewedAt: null,
+        reviewReference: null,
         reviewNotes: parsed.data.notes,
       },
-      select: { id: true, status: true, reviewedAt: true, reviewReference: true },
+      select: { id: true, status: true, reviewNotes: true },
     });
     return NextResponse.json({ question: updated });
+  } catch {
+    return NextResponse.json(
+      { error: "The CBT review service is temporarily unavailable. Please retry shortly." },
+      { status: 503 },
+    );
   }
-
-  const updated = await prisma.cbtQuestion.update({
-    where: { id },
-    data: {
-      status: "draft",
-      reviewedByUserId: null,
-      reviewedAt: null,
-      reviewReference: null,
-      reviewNotes: parsed.data.notes,
-    },
-    select: { id: true, status: true, reviewNotes: true },
-  });
-  return NextResponse.json({ question: updated });
 }

@@ -128,6 +128,7 @@ const ADMIN_NAV = [
     roles: ACADEMIC_ADMIN,
   },
   { label: "Broadsheet", href: "/admin/broadsheet", icon: Grid3X3, roles: ACADEMIC_ADMIN },
+  { label: "Leaderboards", href: "/admin/leaderboards", icon: TrendingUp, roles: ACADEMIC_ADMIN },
   { label: "ID Cards", href: "/admin/id-cards", icon: IdCard, roles: PEOPLE_ADMIN },
   { label: "Post & News", href: "/admin/news", icon: Newspaper, roles: PEOPLE_ADMIN },
   { label: "Notifications", href: "/admin/notifications", icon: Bell, roles: PEOPLE_ADMIN },

@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import ResponsiveSidebar, { useResponsiveSidebar } from "@/components/ResponsiveSidebar";
+import { readJsonResponse } from "@/lib/api-response";
 
 type Me = {
   displayName: string;
@@ -99,8 +100,8 @@ export default function TeacherSidebar() {
     (async () => {
       try {
         const r = await fetch("/api/teacher/dashboard", { cache: "no-store" });
-        const j = await r.json();
-        if (!cancelled && r.ok) setMe(j.teacher);
+        const j = await readJsonResponse<{ teacher?: Me } & { error?: string }>(r);
+        if (!cancelled && r.ok && j.teacher) setMe(j.teacher);
       } catch {
         /* sidebar still usable */
       } finally {

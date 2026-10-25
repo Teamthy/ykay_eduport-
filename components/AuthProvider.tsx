@@ -23,6 +23,24 @@ type Value = {
 
 const Context = createContext<Value | undefined>(undefined);
 
+export function signInPathForRole(role?: string) {
+  if (role === "STUDENT") return "/login?portal=student";
+  if (role === "PARENT") return "/login?portal=parent";
+  if (role === "IT_STUDENT") return "/it-portal/auth";
+  if (
+    role === "TEACHER" ||
+    role === "HOD" ||
+    role === "ADMIN" ||
+    role === "DIRECTOR" ||
+    role === "COORDINATOR" ||
+    role === "BURSAR" ||
+    role === "SUPER_ADMIN"
+  ) {
+    return "/login?portal=staff";
+  }
+  return "/login";
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(null);
       // Replace rather than push so Back does not reopen the protected page.
-      window.location.replace("/login");
+      window.location.replace(signInPathForRole(user?.role));
     } catch {
       // Stay on the page and keep the retry action visible. Silently navigating
       // away here would mask a request that never reached the backend.
@@ -89,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     }
-  }, []);
+  }, [user]);
 
   // Confirmation lives here rather than in each sidebar so a new call site
   // cannot accidentally ship an unguarded sign-out. Previously four separate
