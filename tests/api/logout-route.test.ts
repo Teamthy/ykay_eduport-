@@ -97,10 +97,10 @@ describe("logout route", () => {
   });
 
   describe("GET — browser navigation", () => {
-    async function callGet(query: string) {
+    async function callGet(query: string, headers: Record<string, string> = {}) {
       const { NextRequest } = await import("next/server");
       const { GET } = await import("@/app/api/auth/logout/route");
-      return GET(new NextRequest(`http://localhost:3000/api/auth/logout${query}`));
+      return GET(new NextRequest(`http://localhost:3000/api/auth/logout${query}`, { headers }));
     }
 
     it("answers with a redirect the browser can follow without JavaScript", async () => {
@@ -132,6 +132,30 @@ describe("logout route", () => {
           "http://localhost:3000/login?signedout=1",
         );
       }
+    });
+
+    it("answers a top-level navigation from this site", async () => {
+      const response = await callGet("?role=ADMIN", {
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "navigate",
+      });
+      expect(response.status).toBe(303);
+    });
+
+    it("refuses cross-site and non-navigation GETs without clearing the cookie", async () => {
+      // <img src="/api/auth/logout"> sends dest=image, mode=no-cors, and a
+      // cross-site link sends site=cross-site. Neither may sign anyone out:
+      // sign-out revokes every session for the account.
+      for (const headers of [
+        { "sec-fetch-site": "cross-site", "sec-fetch-mode": "navigate" },
+        { "sec-fetch-site": "same-origin", "sec-fetch-mode": "no-cors" },
+        { "sec-fetch-site": "same-site", "sec-fetch-mode": "navigate" },
+      ]) {
+        const response = await callGet("?role=ADMIN", headers);
+        expect(response.status, JSON.stringify(headers)).toBe(403);
+        expect(response.cookies.get("ykay_session"), JSON.stringify(headers)).toBeUndefined();
+      }
+      expect(mocks.revokeAllSessions).not.toHaveBeenCalled();
     });
 
     it("allows a same-site destination", async () => {

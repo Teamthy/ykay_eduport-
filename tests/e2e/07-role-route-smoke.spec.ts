@@ -54,9 +54,16 @@ const API_ROLE_BY_PREFIX: Record<string, Role> = {
   teacher: "teacher",
 };
 
-// GET normally means read-only, but this legacy cron endpoint deliberately
-// aliases GET to a notification dispatcher. Never execute it in a route smoke.
-const SIDE_EFFECTFUL_GET_ENDPOINTS = new Set(["/api/jobs/dispatch-notifications"]);
+// GET normally means read-only. Two exceptions:
+//   * the legacy cron endpoint aliases GET to a notification dispatcher;
+//   * sign-out is a browser navigation answered in one response, so a GET there
+//     revokes the account's sessions. Hammering it here signed the shared admin
+//     cookie out from under every later test.
+// Never execute either in a route smoke.
+const SIDE_EFFECTFUL_GET_ENDPOINTS = new Set([
+  "/api/jobs/dispatch-notifications",
+  "/api/auth/logout",
+]);
 
 type RouteFile = { path: string; role: Role; dynamic: boolean };
 
