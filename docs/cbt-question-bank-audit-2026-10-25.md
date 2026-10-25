@@ -23,6 +23,38 @@ Passing these checks does not prove that an answer key, distractor, explanation,
 
 The current `npm run cbt:seed` script reads `prisma/cbt-bank.csv`, **not** the 10,000-row candidate file. Its audit reported 5,483 total rows, 4,228 with a currently supported JSS1–SS3/SS1–SS3 class level, and 1,255 rows labelled with exam-level values such as `bece`, `jamb`, `waec` or `neco` rather than supported class levels. Among the 4,228 supported rows, it found 28 duplicate-option rows, boilerplate NERDC wording on all rows, and generic distractor rationales on 2,061. It is also not factually certified.
 
+## Loading Staging (chosen path: isolated branch, expert review before release)
+
+Two equivalent ways to fill the isolated Staging branch. Both write **draft only**; neither can mark a question reviewed.
+
+### A. From the repo (recommended: auditable, repeatable)
+
+```bash
+# Staging branch, direct (unpooled) Neon URL. Never the Production host.
+export DATABASE_URL='postgresql://…@<staging-host>.neon.tech/neondb?sslmode=require'
+export STAGING_DATABASE_HOST='<staging-host>.neon.tech'
+export PRODUCTION_DATABASE_STATUS='AVAILABLE'      # or NOT_PROVISIONED
+export PRODUCTION_DATABASE_HOST='<production-host>.neon.tech'
+
+npm run cbt:seed:10k:staging
+```
+
+- `CBT_SEED_TARGET=staging` runs the existing `validateStagingDemoTarget` guard: Neon host required, `-pooler` rejected, `DATABASE_URL` host must equal `STAGING_DATABASE_HOST`, and it must differ from `PRODUCTION_DATABASE_HOST`.
+- The script prints row counts, per-subject inserts and the final draft/reviewed totals. Credentials are never printed.
+- Re-running is safe (existing stems are skipped). Subjects already bound to a different class level are skipped with a warning instead of being silently reassigned.
+- `CBT_RESET=1` additionally requires `CBT_RESET_CONFIRMATION="DELETE CBT ATTEMPTS AND QUESTIONS"` because it deletes attempts, questions and subjects.
+
+### B. From the admin console
+
+Deploy this branch to a preview pointed at Staging, sign in as an admin, open `/admin/cbt-bank`, and use "Bulk question bank". The browser sends 200-row batches against the deployment's own database, so confirm the preview's `DATABASE_URL` is the Staging branch first.
+
+### After either load
+
+1. `/admin/cbt-bank` shows `Bank: 10,000 draft · 0 reviewed · 0 archived`.
+2. A subject reviewer clears items (individually or 100 at a time with one citation) → `reviewed`.
+3. Only then does the student CBT catalogue list that subject for that class, because `lib/cbt-review.ts` requires `status = reviewed` plus reviewer, timestamp and citation.
+4. Repeat the import + review on Production only after the cutover target is confirmed.
+
 ## Operator runbook (admin console → `/admin/cbt-bank`)
 
 1. **Confirm the target before importing.** The console writes to whatever database the running deployment is connected to. Never upload the candidate CSV into an unconfirmed or public Production target.
