@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isResponse, requireCbtUser } from "@/lib/cbt-auth";
+import { REVIEWED_QUESTION_FILTER } from "@/lib/cbt-review";
 
-/** Signed-in: distinct published topics for a subject slug (SEC-02). */
+/** Signed-in: distinct reviewed topics for a subject slug. */
 export async function GET(req: NextRequest) {
   const user = await requireCbtUser();
   if (isResponse(user)) return user;
@@ -12,7 +13,7 @@ export async function GET(req: NextRequest) {
   if (!subject) return NextResponse.json({ error: "Subject not found" }, { status: 404 });
 
   const rows = await prisma.cbtQuestion.findMany({
-    where: { subjectId: subject.id, status: "published" },
+    where: { subjectId: subject.id, ...REVIEWED_QUESTION_FILTER },
     distinct: ["topic"],
     select: { topic: true },
     orderBy: { topic: "asc" },

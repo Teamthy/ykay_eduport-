@@ -45,7 +45,7 @@ export async function getParentReportCardContext() {
       id: true,
       displayName: true,
       studentLinks: {
-        where: { studentProfile: { is: { schoolId: user.schoolId } } },
+        where: { studentProfile: { is: { schoolId: user.schoolId, isActive: true } } },
         orderBy: [{ isPrimary: "desc" }, { studentProfile: { displayName: "asc" } }],
         select: {
           isPrimary: true,

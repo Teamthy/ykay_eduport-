@@ -3,30 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
+import { STUDENT_SIDEBAR_ITEMS } from "@/components/student/sidebarItems";
 import { useToast } from "@/components/Toast";
 import QrImage from "@/components/QrImage";
 import { useSchoolProfile } from "@/components/SchoolProfileContext";
 import Image from "next/image";
-import {
-  MessageCircle,
-  LayoutDashboard,
-  User,
-  FileText,
-  Bell,
-  IdCard,
-  Download,
-  Printer,
-  QrCode,
-} from "lucide-react";
+import { Download, Printer, QrCode } from "lucide-react";
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
-  { label: "My Profile", href: "/student/profile", icon: User },
-  { label: "ID Card", href: "/student/id-card", icon: IdCard },
-  { label: "Report Cards", href: "/student/report-cards", icon: FileText },
-  { label: "Messages", href: "/student/messages", icon: MessageCircle },
-  { label: "Announcements", href: "/student/announcements", icon: Bell },
-];
+const SIDEBAR_ITEMS = STUDENT_SIDEBAR_ITEMS;
 
 type Profile = {
   displayName: string;

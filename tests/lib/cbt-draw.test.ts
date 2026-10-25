@@ -21,6 +21,19 @@ describe("CBT draw tokens", () => {
     expect(draw!.questionIds).toEqual(["q1", "q2"]);
   });
 
+  it("supports a signed mixed-subject paper and enforces the 60-question cap", async () => {
+    const { signCbtDraw, verifyCbtDraw, CBT_DRAW_MAX_QUESTIONS } = await import("@/lib/cbt-draw");
+    const token = signCbtDraw({
+      userId: "user_1",
+      subjectIds: ["math", "science", "math"],
+      questionIds: Array.from({ length: CBT_DRAW_MAX_QUESTIONS + 10 }, (_, index) => `q${index}`),
+      nowSeconds: 1_000,
+    });
+    const draw = verifyCbtDraw(token, "user_1", 1_500);
+    expect(draw?.subjectIds).toEqual(["math", "science"]);
+    expect(draw?.questionIds).toHaveLength(CBT_DRAW_MAX_QUESTIONS);
+  });
+
   it("rejects a draw presented by a different user", async () => {
     const { signCbtDraw, verifyCbtDraw } = await import("@/lib/cbt-draw");
     const token = signCbtDraw({

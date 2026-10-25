@@ -7,5 +7,5 @@ export const metadata = {
 
 /** Public /cbt used to crash on Vercel (Prisma). Send visitors to login. */
 export default function CbtPage() {
-  redirect("/login?next=/student/exams");
+  redirect("/login?next=/student/personal-practice");
 }

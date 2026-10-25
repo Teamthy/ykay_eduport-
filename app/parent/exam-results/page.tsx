@@ -3,17 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
-import {
-  Award,
-  CalendarDays,
-  CreditCard,
-  FileText,
-  LayoutDashboard,
-  LoaderCircle,
-  MessageCircle,
-  Calendar,
-  History,
-} from "lucide-react";
+import { PARENT_SIDEBAR_ITEMS } from "@/components/parent/sidebarItems";
+import { Award, FileText, LoaderCircle, History } from "lucide-react";
 
 type ExamResult = {
   id: string;
@@ -54,15 +45,7 @@ type ResultsResponse = {
   results: ExamResult[];
 };
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
-  { label: "Attendance", href: "/parent/attendance", icon: CalendarDays },
-  { label: "Fees", href: "/parent/fees", icon: CreditCard },
-  { label: "Report Cards", href: "/parent/report-cards", icon: FileText },
-  { label: "Exam Results", href: "/parent/exam-results", icon: Award },
-  { label: "Messages", href: "/parent/messages", icon: MessageCircle },
-  { label: "Events", href: "/parent/events", icon: Calendar },
-];
+const SIDEBAR_ITEMS = PARENT_SIDEBAR_ITEMS;
 
 export default function ParentExamResultsPage() {
   const [data, setData] = useState<ResultsResponse | null>(null);

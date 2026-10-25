@@ -37,6 +37,7 @@ import {
 import { useAuth } from "./AuthProvider";
 import Image from "next/image";
 import ResponsiveSidebar, { useResponsiveSidebar } from "@/components/ResponsiveSidebar";
+import { activeNavigationHref } from "@/lib/route-matching";
 
 /**
  * Role-gated admin navigation (audit H9).
@@ -50,6 +51,7 @@ const PEOPLE_ADMIN = ["ADMIN", "DIRECTOR", "COORDINATOR", "SUPER_ADMIN"] as cons
 const ACADEMIC_ADMIN = ["ADMIN", "DIRECTOR", "COORDINATOR", "SUPER_ADMIN"] as const;
 const FINANCE_ADMIN = ["ADMIN", "DIRECTOR", "BURSAR", "COORDINATOR"] as const;
 const ALL_ADMIN_AREA = ["ADMIN", "DIRECTOR", "BURSAR", "COORDINATOR", "SUPER_ADMIN"] as const;
+const CBT_CONTENT_ADMIN = ["ADMIN", "SUPER_ADMIN"] as const;
 
 const ADMIN_NAV = [
   { label: "Admin Dashboard", href: "/admin", icon: LayoutDashboard, roles: ALL_ADMIN_AREA },
@@ -131,12 +133,25 @@ const ADMIN_NAV = [
   { label: "Notifications", href: "/admin/notifications", icon: Bell, roles: PEOPLE_ADMIN },
   { label: "School Profile", href: "/admin/school-profile", icon: Building2, roles: CORE_ADMIN },
   { label: "View Questions", href: "/admin/questions", icon: HelpCircle, roles: PEOPLE_ADMIN },
+  {
+    label: "CBT Question Review",
+    href: "/admin/cbt-bank",
+    icon: HelpCircle,
+    roles: CBT_CONTENT_ADMIN,
+  },
 ];
 
 function AdminSidebarContent() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { collapsed } = useResponsiveSidebar();
+  const visibleNavigation = ADMIN_NAV.filter(
+    (item) => user?.role && (item.roles as readonly string[]).includes(user.role),
+  );
+  const activeHref = activeNavigationHref(
+    pathname,
+    visibleNavigation.map((item) => item.href),
+  );
   const initials =
     user?.name
       ?.trim()
@@ -194,11 +209,8 @@ function AdminSidebarContent() {
       ) : null}
 
       <nav aria-label="Admin pages" className="space-y-1">
-        {ADMIN_NAV.filter(
-          (item) => user?.role && (item.roles as readonly string[]).includes(user.role),
-        ).map((item) => {
-          const isActive =
-            pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+        {visibleNavigation.map((item) => {
+          const isActive = activeHref === item.href;
           return (
             <Link
               key={item.href}

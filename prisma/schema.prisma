@@ -216,7 +216,8 @@ model School {
   terms                   Term[]
   studentEnrolments       StudentEnrolment[]
   timetableSlots          TimetableSlot[]
-  contactEnquiries        ContactEnquiry[]
+  contactEnquiries      ContactEnquiry[]
+  cbtAttempts           CbtAttempt[]
 }
 
 model User {
@@ -249,6 +250,8 @@ model User {
   messageParticipants         MessageParticipant[]
   sentMessages                Message[]
   notificationPreference      NotificationPreference?
+  cbtAttempts                 CbtAttempt[]
+  reviewedCbtQuestions        CbtQuestion[]                  @relation("CbtQuestionReviewer")
 
   @@unique([schoolId, email])
   @@index([schoolId, role])
@@ -374,6 +377,7 @@ model StudentProfile {
   behaviorRecords      BehaviorRecord[]
   enrolments           StudentEnrolment[]
   studentSubjects      StudentSubject[]
+  cbtAttempts          CbtAttempt[]
 
   @@unique([schoolId, studentId])
   @@index([currentClassId, isActive])
@@ -1820,32 +1824,84 @@ model CbtQuestion {
   explanation  String
   /// curriculum | waec-style | neco-style | jamb-style
   source       String     @default("curriculum")
-  /// draft | reviewed | published
-  status       String     @default("published")
-  createdAt    DateTime   @default(now())
-  subject      CbtSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  /// draft | reviewed (legacy published rows are returned to draft by migration)
+  status            String     @default("draft")
+  reviewedByUserId  String?
+  reviewedAt        DateTime?
+  /// Citation to the exact approved curriculum or examination-board source.
+  reviewReference   String?
+  reviewNotes       String?
+  createdAt         DateTime   @default(now())
+
+  subject         CbtSubject            @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  reviewer        User?                 @relation("CbtQuestionReviewer", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+  practiceAnswers CbtPracticeAnswer[]
 
   @@index([subjectId, status])
+  @@index([status, reviewedAt])
 }
 
 model CbtAttempt {
-  id              String     @id @default(cuid())
-  subjectId       String
+  id                String     @id @default(cuid())
+  subjectId         String
   /// practice | exam
-  mode            String
-  total           Int
-  correct         Int
-  skipped         Int
-  scorePct        Int
-  durationSeconds Int
-  studentName     String?
-  studentEmail    String?
-  /// JSON array of { questionId, selectedIndex|null }
-  answers         Json
-  createdAt       DateTime   @default(now())
-  subject         CbtSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  mode              String
+  total             Int
+  correct           Int
+  skipped           Int
+  scorePct          Int
+  durationSeconds   Int
+  studentName       String?
+  studentEmail      String?
+  /// JSON array of { questionId, selectedIndex|null } for legacy attempts.
+  answers           Json
+  /// Optional owner/tenant links are null only for attempts created before sessions were added.
+  userId            String?
+  schoolId          String?
+  studentProfileId  String?
+  classLevel        String?
+  /// topic | subject | mixed
+  practiceMode      String?
+  topic             String?
+  subjectIds        Json?
+  questionIds       Json?
+  drawToken         String?
+  status            String     @default("COMPLETED")
+  isTimed           Boolean    @default(false)
+  deadlineAt        DateTime?
+  expiresAt         DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @default(now()) @updatedAt
+
+  subject         CbtSubject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  user            User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  school          School?            @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  studentProfile  StudentProfile?    @relation(fields: [studentProfileId], references: [id], onDelete: SetNull)
+  practiceAnswers CbtPracticeAnswer[]
 
   @@index([subjectId, createdAt])
+  @@index([userId, status, createdAt])
+  @@index([schoolId, createdAt])
+  @@index([studentProfileId, createdAt])
+}
+
+model CbtPracticeAnswer {
+  id            String      @id @default(cuid())
+  attemptId     String
+  questionId    String
+  selectedIndex Int
+  isCorrect     Boolean
+  correctIndex  Int
+  explanation   String
+  createdAt     DateTime    @default(now())
+
+  attempt  CbtAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question CbtQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  /// One checked answer per question per paper prevents answer-key guessing by repeated checks.
+  @@unique([attemptId, questionId])
+  @@index([questionId])
 }
 
 /// An enquiry sent through the public contact form. It is stored so the school office

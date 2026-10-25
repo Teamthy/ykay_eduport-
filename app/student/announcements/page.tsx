@@ -2,29 +2,12 @@
 
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
-import {
-  MessageCircle,
-  LayoutDashboard,
-  CalendarDays,
-  FileText,
-  User,
-  Bell,
-  Info,
-  AlertCircle,
-  CheckCircle2,
-} from "lucide-react";
+import { STUDENT_SIDEBAR_ITEMS } from "@/components/student/sidebarItems";
+import { Bell, Info, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useApi } from "@/lib/useApi";
 import { EmptyState, LoadingState } from "@/components/DataStates";
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
-  { label: "Attendance", href: "/student/attendance", icon: CalendarDays },
-  { label: "Timetable", href: "/student/timetable", icon: CalendarDays },
-  { label: "Report Cards", href: "/student/report-cards", icon: FileText },
-  { label: "Messages", href: "/student/messages", icon: MessageCircle },
-  { label: "Announcements", href: "/student/announcements", icon: Bell },
-  { label: "My Profile", href: "/student/dashboard", icon: User },
-];
+const SIDEBAR_ITEMS = STUDENT_SIDEBAR_ITEMS;
 
 const typeConfig = {
   success: { icon: CheckCircle2, color: "text-brand-green", bg: "bg-brand-green/10" },

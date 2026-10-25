@@ -6,17 +6,10 @@ import { useSearchParams } from "next/navigation";
 import { CreditCard, LoaderCircle, Receipt as ReceiptIcon, Building2 } from "lucide-react";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
+import { PARENT_SIDEBAR_ITEMS } from "@/components/parent/sidebarItems";
 import PaystackModal from "@/components/PaystackModal";
 import ReceiptModal from "@/components/ReceiptModal";
 import { useToast } from "@/components/Toast";
-import {
-  LayoutDashboard,
-  CreditCard as FeeIcon,
-  ClipboardCheck,
-  FileText,
-  CalendarDays,
-  MessageSquare,
-} from "lucide-react";
 import type { ReceiptData } from "@/lib/receipt";
 
 type FeesResponse = {
@@ -70,14 +63,7 @@ type FeesResponse = {
   summary: { totalBilled: number; totalPaid: number; totalOutstanding: number };
 };
 
-const NAV = [
-  { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
-  { label: "Fees", href: "/parent/fees", icon: FeeIcon },
-  { label: "Attendance", href: "/parent/attendance", icon: ClipboardCheck },
-  { label: "Report Cards", href: "/parent/report-cards", icon: FileText },
-  { label: "Events", href: "/parent/events", icon: CalendarDays },
-  { label: "Messages", href: "/parent/messages", icon: MessageSquare },
-];
+const NAV = PARENT_SIDEBAR_ITEMS;
 
 function formatMethod(method: string) {
   return method.replaceAll("_", " ");

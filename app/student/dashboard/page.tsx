@@ -5,16 +5,13 @@ import { cacheGet, cacheSet } from "@/lib/offline/db";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
+import { STUDENT_SIDEBAR_ITEMS } from "@/components/student/sidebarItems";
 import {
   MessageCircle,
-  LayoutDashboard,
   CalendarDays,
   FileText,
-  User,
-  Bell,
   ClipboardCheck,
   TrendingUp,
-  GraduationCap,
   LoaderCircle,
   ChevronRight,
   Activity,
@@ -26,17 +23,7 @@ import {
   CircleHelp,
 } from "lucide-react";
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
-  { label: "Attendance", href: "/student/attendance", icon: CalendarDays },
-  { label: "Timetable", href: "/student/timetable", icon: CalendarDays },
-  { label: "CBT Tests", href: "/student/exams", icon: ClipboardCheck },
-  { label: "Report Cards", href: "/student/report-cards", icon: FileText },
-  { label: "Messages", href: "/student/messages", icon: MessageCircle },
-  { label: "Announcements", href: "/student/announcements", icon: Bell },
-  { label: "My Profile", href: "/student/profile", icon: User },
-  { label: "Teachers", href: "/student/teachers", icon: GraduationCap },
-];
+const SIDEBAR_ITEMS = STUDENT_SIDEBAR_ITEMS;
 
 type DashboardResponse = {
   student: { displayName: string; studentId: string; className: string };

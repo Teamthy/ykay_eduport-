@@ -3,27 +3,11 @@
 import { useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
-import {
-  LayoutDashboard,
-  CalendarDays,
-  CreditCard,
-  FileText,
-  MessageCircle,
-  Calendar,
-  MapPin,
-  Clock,
-  CheckCircle2,
-} from "lucide-react";
+import { PARENT_SIDEBAR_ITEMS } from "@/components/parent/sidebarItems";
+import { MapPin, Clock, CheckCircle2 } from "lucide-react";
 import { useApi } from "@/lib/useApi";
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
-  { label: "Attendance", href: "/parent/attendance", icon: CalendarDays },
-  { label: "Fees", href: "/parent/fees", icon: CreditCard },
-  { label: "Report Cards", href: "/parent/report-cards", icon: FileText },
-  { label: "Messages", href: "/parent/messages", icon: MessageCircle },
-  { label: "Events", href: "/parent/events", icon: Calendar },
-];
+const SIDEBAR_ITEMS = PARENT_SIDEBAR_ITEMS;
 
 const typeConfig = {
   meeting: { color: "text-brand-green", bg: "bg-brand-green/10" },

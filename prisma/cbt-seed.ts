@@ -1,13 +1,12 @@
 /**
  * CBT seed — the shared question bank (cbt-bank.csv).
  *
- * 5,000+ NERDC-aligned questions (JSS1–SS3 + BECE/WAEC/NECO/JAMB),
- * single source of truth for BOTH sites: this file and the Go seed in the
- * YK-Virtual repo read the same CSV layout, so both banks stay in sync.
+ * Imports question candidates from cbt-bank.csv. Imported content is always
+ * draft: the CSV has not been factually verified, so it must not be served as
+ * student practice until an authorized reviewer changes its status to reviewed.
  *
  * Run: npm run cbt:seed
- * Safe to re-run: upserts subjects by slug, skips questions whose stem
- * already exists in the subject.
+ * Safe to re-run: upserts subjects by slug and synchronizes candidate content.
  */
 import { PrismaClient } from "@prisma/client";
 import { readFile } from "fs/promises";
@@ -119,6 +118,13 @@ async function main() {
             correctIndex: Number(r.correctIndex),
             explanation: r.explanation,
             source: r.source || "curriculum",
+            // Imports are never marked reviewed by a seed job. A human editor must
+            // check the key, options and explanation against a source first.
+            status: "draft",
+            reviewedByUserId: null,
+            reviewedAt: null,
+            reviewReference: null,
+            reviewNotes: null,
           },
         });
         updated++;
@@ -134,7 +140,8 @@ async function main() {
           correctIndex: Number(r.correctIndex),
           explanation: r.explanation,
           source: r.source || "curriculum",
-          status: "published",
+          // Imported material remains hidden until an authorized subject expert reviews it.
+          status: "draft",
         },
       });
       created++;
