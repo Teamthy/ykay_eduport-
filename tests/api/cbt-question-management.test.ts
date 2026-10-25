@@ -54,10 +54,10 @@ describe("admin CBT question management", () => {
     } as never);
     mockPrisma.cbtQuestion.update.mockResolvedValue({ id: "question_a", status: "draft" } as never);
     mockPrisma.cbtQuestion.updateMany.mockResolvedValue({ count: 1 } as never);
-    mockPrisma.cbtQuestion.groupBy.mockResolvedValue([
-      { status: "draft", _count: { _all: 10000 } },
-      { status: "reviewed", _count: { _all: 12 } },
-    ] as never);
+    mockPrisma.cbtQuestion.count
+      .mockResolvedValueOnce(10000)
+      .mockResolvedValueOnce(12)
+      .mockResolvedValueOnce(0);
   });
 
   it("creates a question as draft, never as reviewed", async () => {

@@ -271,7 +271,7 @@ const mockPrisma = {
     createMany: vi.fn(),
     update: vi.fn(),
     updateMany: vi.fn(),
-    groupBy: vi.fn(),
+    count: vi.fn(),
   },
   cbtAttempt: {
     findFirst: vi.fn(),

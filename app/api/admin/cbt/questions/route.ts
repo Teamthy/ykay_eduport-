@@ -72,15 +72,16 @@ export async function GET(request: NextRequest) {
     const nextCursor =
       questions.length === 50 ? (questions[questions.length - 1]?.id ?? null) : null;
     // Totals make an empty queue diagnosable in the UI instead of looking like a broken page.
-    const grouped = (await prisma.cbtQuestion.groupBy({
-      by: ["status"],
-      _count: { _all: true },
-    })) as Array<{ status: string; _count: { _all: number } }>;
-    const totals = { draft: 0, reviewed: 0, archived: 0 };
-    for (const row of grouped) {
-      if (row.status in totals) totals[row.status as keyof typeof totals] = row._count._all;
-    }
-    return NextResponse.json({ questions, nextCursor, totals });
+    const [draft, reviewed, archived] = await Promise.all([
+      prisma.cbtQuestion.count({ where: { status: "draft" } }),
+      prisma.cbtQuestion.count({ where: { status: "reviewed" } }),
+      prisma.cbtQuestion.count({ where: { status: "archived" } }),
+    ]);
+    return NextResponse.json({
+      questions,
+      nextCursor,
+      totals: { draft, reviewed, archived },
+    });
   } catch {
     return NextResponse.json(
       { error: "Question review is temporarily unavailable. Please retry shortly." },
