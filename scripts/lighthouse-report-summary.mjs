@@ -160,7 +160,7 @@ for (const report of reports) {
     // on a font, a render-blocking resource or the image itself, without
     // downloading the artefact.
     console.log(
-      `::notice title=Lighthouse LCP element::${report.route} unparsed; raw details: ${report.lcpElementRaw}`,
+      `::notice title=Lighthouse LCP element::${report.route} unparsed; raw details: ${report.lcpElementRaw}; present: ${report.lcpAuditIds?.join(", ") || "none"}`,
     );
   }
   if (report.metrics) {
