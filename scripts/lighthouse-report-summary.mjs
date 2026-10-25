@@ -26,6 +26,35 @@ if (files.length === 0) {
   process.exit(1);
 }
 
+/**
+ * Find the LCP element inside `largest-contentful-paint-element`.
+ *
+ * The audit's `details` nesting has changed across Lighthouse majors (a table
+ * straight inside `items`, or a table of tables), so walk the structure for the
+ * first object carrying a `node` instead of hard-coding a depth. `phase` is the
+ * other half of the answer: "LOADING" means a network resource held the paint
+ * back, "RENDERING" means it was waiting on the main thread.
+ */
+function lcpElement(data) {
+  const items = data.audits?.["largest-contentful-paint-element"]?.details?.items ?? [];
+  const stack = [...items];
+  while (stack.length) {
+    const current = stack.shift();
+    if (!current || typeof current !== "object") continue;
+    if (current.node && typeof current.node === "object") {
+      return {
+        lcpElement: current.node.snippet,
+        lcpElementLabel: current.node.nodeLabel,
+        lcpPhase: current.phase,
+      };
+    }
+    for (const value of Object.values(current)) {
+      if (value && typeof value === "object") stack.push(value);
+    }
+  }
+  return {};
+}
+
 const reports = [];
 for (const file of files) {
   const data = JSON.parse(readFileSync(join(DIR, file), "utf8"));
@@ -40,14 +69,9 @@ for (const file of files) {
     cls: data.audits?.["cumulative-layout-shift"]?.numericValue,
     // Which element is the LCP, and what arrived late. Without these two the
     // annotation says "8s" and nobody can tell whether that is an image, a
-    // webfont or a JS chunk — which is exactly how this gate stayed red for
-    // several runs without anyone being able to act on it.
-    lcpElement:
-      data.audits?.["largest-contentful-paint-element"]?.details?.items?.[0]?.items?.[0]?.node
-        ?.snippet,
-    lcpElementLabel:
-      data.audits?.["largest-contentful-paint-element"]?.details?.items?.[0]?.items?.[0]?.node
-        ?.nodeLabel,
+    // webfont or a JS chunk — which is how this gate stayed red for several
+    // runs without anyone being able to act on it.
+    ...lcpElement(data),
     slowRequests: (data.audits?.["network-requests"]?.details?.items ?? [])
       .filter((item) => typeof item.transferSize === "number")
       .sort((a, b) => (b.transferSize ?? 0) - (a.transferSize ?? 0))
@@ -67,8 +91,16 @@ for (const report of reports) {
   ).toFixed(3)}`;
   console.log(`::notice title=Lighthouse CI::${msg}`);
   if (report.lcpElement) {
+    // Collapse whitespace/newlines: GitHub workflow commands are line-based, so
+    // a multi-line node snippet truncated the annotation to its first line.
+    const snippet = String(report.lcpElement).replace(/\s+/g, " ").slice(0, 300);
+    const label = String(report.lcpElementLabel ?? "").replace(/\s+/g, " ");
     console.log(
-      `::notice title=Lighthouse LCP element::${report.route} ${report.lcpElementLabel ?? ""} ${report.lcpElement}`,
+      `::notice title=Lighthouse LCP element::${report.route} phase=${report.lcpPhase ?? "?"} ${label} ${snippet}`,
+    );
+  } else {
+    console.log(
+      `::notice title=Lighthouse LCP element::${report.route} not reported by this Lighthouse version`,
     );
   }
   if (report.slowRequests?.length) {
