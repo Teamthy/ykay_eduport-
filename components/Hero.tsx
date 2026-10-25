@@ -14,10 +14,15 @@ export default function Hero() {
             the LCP candidate — while being a 20%-opacity texture behind a
             92%-opaque navy gradient. That made the LCP budget measure a
             decoration at Slow-4G speed instead of the headline. CSS
-            backgrounds are not LCP candidates, so the photograph still
-            renders identically but the paint that is measured is the copy.
-            The image is still preloaded in app/page.tsx (same srcset/sizes),
-            so the browser starts fetching it before this element is parsed. */}
+            backgrounds are not LCP candidates, so the paint that is measured
+            is the headline instead of the texture.
+
+            A background cannot carry a srcset, so this always uses the 750w
+            variant even on wide screens. It is a 20%-opacity layer under a
+            92%-opaque gradient, where the extra pixels are invisible; the
+            content photograph below keeps its srcset. app/page.tsx still
+            preloads this image (same srcset/sizes) so the fetch starts before
+            this element is parsed. */}
         <div
           aria-hidden="true"
           className="absolute inset-0 opacity-20"
