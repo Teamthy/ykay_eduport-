@@ -4,32 +4,13 @@ import { useEffect, useState } from "react";
 import { cacheGet, cacheSet } from "@/lib/offline/db";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
+import { PARENT_SIDEBAR_ITEMS } from "@/components/parent/sidebarItems";
 import LiveReportCardPreview from "@/components/LiveReportCardPreview";
-import {
-  Calendar,
-  CalendarDays,
-  CreditCard,
-  Download,
-  Eye,
-  FileText,
-  LayoutDashboard,
-  LoaderCircle,
-  MessageCircle,
-  Award,
-  Printer,
-} from "lucide-react";
+import { Download, Eye, LoaderCircle, Award, Printer } from "lucide-react";
 import { generateReportCardPDF } from "@/lib/branded-pdf";
 import { useSchoolProfile } from "@/components/SchoolProfileContext";
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
-  { label: "Attendance", href: "/parent/attendance", icon: CalendarDays },
-  { label: "Fees", href: "/parent/fees", icon: CreditCard },
-  { label: "Report Cards", href: "/parent/report-cards", icon: FileText },
-  { label: "Exam Results", href: "/parent/exam-results", icon: Award },
-  { label: "Messages", href: "/parent/messages", icon: MessageCircle },
-  { label: "Events", href: "/parent/events", icon: Calendar },
-];
+const SIDEBAR_ITEMS = PARENT_SIDEBAR_ITEMS;
 
 type Report = {
   id: string;

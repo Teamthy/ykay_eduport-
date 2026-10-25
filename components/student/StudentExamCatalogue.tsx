@@ -5,21 +5,13 @@ import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
 import StudentCbtNav from "@/components/student/StudentCbtNav";
+import { STUDENT_SIDEBAR_ITEMS } from "@/components/student/sidebarItems";
 import {
   Award,
   BookOpen,
-  CalendarCheck,
   CalendarClock,
-  CalendarDays,
   CheckCircle2,
   ClipboardCheck,
-  FileSpreadsheet,
-  GraduationCap,
-  IdCard,
-  LayoutDashboard,
-  Megaphone,
-  MessageSquare,
-  User,
   Clock,
   LoaderCircle,
   PlayCircle,
@@ -52,20 +44,7 @@ const AVAILABILITY_STYLE: Record<string, { chip: string; icon: typeof Clock }> =
   COMPLETED: { chip: "bg-[var(--surface-disabled)] text-[var(--text-muted)]", icon: CheckCircle2 },
 };
 
-const STUDENT_NAV_ITEMS = [
-  { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
-  { label: "Attendance", href: "/student/attendance", icon: CalendarCheck },
-  { label: "Timetable", href: "/student/timetable", icon: CalendarDays },
-  { label: "Take Exams", href: "/student/exams", icon: ClipboardCheck },
-  { label: "CA Test", href: "/student/ca-tests", icon: CalendarCheck },
-  { label: "Personal Practice", href: "/student/waec-practice", icon: Award },
-  { label: "Report Cards", href: "/student/report-cards", icon: FileSpreadsheet },
-  { label: "Messages", href: "/student/messages", icon: MessageSquare },
-  { label: "Announcements", href: "/student/announcements", icon: Megaphone },
-  { label: "My Profile", href: "/student/profile", icon: User },
-  { label: "Teachers", href: "/student/teachers", icon: GraduationCap },
-  { label: "ID Card", href: "/student/id-card", icon: IdCard },
-];
+const STUDENT_NAV_ITEMS = STUDENT_SIDEBAR_ITEMS;
 
 type ExamCard = {
   id: string;

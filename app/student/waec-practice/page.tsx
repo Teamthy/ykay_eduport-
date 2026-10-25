@@ -5,15 +5,9 @@ import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
 import StudentCbtNav from "@/components/student/StudentCbtNav";
+import { STUDENT_SIDEBAR_ITEMS } from "@/components/student/sidebarItems";
 import {
-  MessageCircle,
-  LayoutDashboard,
-  CalendarDays,
-  FileText,
-  User,
-  Bell,
   ClipboardCheck,
-  GraduationCap,
   BookOpen,
   Award,
   Clock,
@@ -24,18 +18,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
-  { label: "Take Exams", href: "/student/exams", icon: ClipboardCheck },
-  { label: "CA Test", href: "/student/ca-tests", icon: ClipboardCheck },
-  { label: "Personal Practice", href: "/student/waec-practice", icon: Award },
-  { label: "Attendance", href: "/student/attendance", icon: CalendarDays },
-  { label: "Report Cards", href: "/student/report-cards", icon: FileText },
-  { label: "Messages", href: "/student/messages", icon: MessageCircle },
-  { label: "Announcements", href: "/student/announcements", icon: Bell },
-  { label: "My Profile", href: "/student/profile", icon: User },
-  { label: "Teachers", href: "/student/teachers", icon: GraduationCap },
-];
+const SIDEBAR_ITEMS = STUDENT_SIDEBAR_ITEMS;
 
 type PracticeExam = {
   id: string;
@@ -170,7 +153,7 @@ export default function ExamPracticePage() {
 
             <div className="flex-1 min-w-0 space-y-6">
               <div className="flex flex-wrap items-end justify-between gap-3">
-                <StudentCbtNav active="practice" />
+                <StudentCbtNav active="teacher-practice" />
                 {data?.terms.length ? (
                   <label className="min-w-[15rem] flex-1 sm:flex-none">
                     <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">

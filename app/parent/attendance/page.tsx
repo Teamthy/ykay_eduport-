@@ -3,27 +3,11 @@
 import { useEffect, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
+import { PARENT_SIDEBAR_ITEMS } from "@/components/parent/sidebarItems";
 import AttendanceCalendar, { type AttendanceDay } from "@/components/AttendanceCalendar";
-import {
-  Calendar,
-  CalendarDays,
-  CreditCard,
-  FileText,
-  LayoutDashboard,
-  LoaderCircle,
-  MessageCircle,
-  BellRing,
-  FileWarning,
-} from "lucide-react";
+import { LoaderCircle, BellRing, FileWarning } from "lucide-react";
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
-  { label: "Attendance", href: "/parent/attendance", icon: CalendarDays },
-  { label: "Fees", href: "/parent/fees", icon: CreditCard },
-  { label: "Report Cards", href: "/parent/report-cards", icon: FileText },
-  { label: "Messages", href: "/parent/messages", icon: MessageCircle },
-  { label: "Events", href: "/parent/events", icon: Calendar },
-];
+const SIDEBAR_ITEMS = PARENT_SIDEBAR_ITEMS;
 
 type ParentAttendanceResponse = {
   parent: { displayName: string };

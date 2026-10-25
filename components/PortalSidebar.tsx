@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
+  Award,
   BookOpen,
   BrainCircuit,
   CalendarCheck,
@@ -21,9 +22,11 @@ import {
   School,
   User,
   Users,
+  Trophy,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import ResponsiveSidebar, { useResponsiveSidebar } from "@/components/ResponsiveSidebar";
+import { activeNavigationHref } from "@/lib/route-matching";
 
 interface SidebarItem {
   label: string;
@@ -44,6 +47,8 @@ const STUDENT_ICON_BY_ROUTE: Record<string, LucideIcon> = {
   "/student/timetable": CalendarClock,
   "/student/exams": ClipboardCheck,
   "/student/waec-practice": BrainCircuit,
+  "/student/personal-practice": BrainCircuit,
+  "/student/leaderboards": Trophy,
   "/student/report-cards": FileSpreadsheet,
   "/student/messages": MessageSquare,
   "/student/announcements": Megaphone,
@@ -57,6 +62,8 @@ const PARENT_ICON_BY_ROUTE: Record<string, LucideIcon> = {
   "/parent/attendance": CalendarCheck,
   "/parent/fees": CreditCard,
   "/parent/report-cards": FileSpreadsheet,
+  "/parent/exam-results": Award,
+  "/parent/leaderboards": Trophy,
   "/parent/messages": MessageSquare,
   "/parent/events": CalendarDays,
 };
@@ -83,6 +90,10 @@ function PortalSidebarContent({ portalName, portalType, items }: PortalSidebarPr
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { collapsed } = useResponsiveSidebar();
+  const activeHref = activeNavigationHref(
+    pathname,
+    items.map((item) => item.href),
+  );
   const PortalIcon = PORTAL_MARK[portalType];
   const iconByRoute = portalType === "student" ? STUDENT_ICON_BY_ROUTE : PARENT_ICON_BY_ROUTE;
 
@@ -134,7 +145,7 @@ function PortalSidebarContent({ portalName, portalType, items }: PortalSidebarPr
 
       <nav aria-label={`${portalName} pages`} className="space-y-1">
         {items.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const isActive = activeHref === item.href;
           const Icon = iconByRoute[item.href] ?? item.icon;
           return (
             <Link

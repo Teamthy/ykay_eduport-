@@ -2,24 +2,11 @@
 
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
+import { PARENT_SIDEBAR_ITEMS } from "@/components/parent/sidebarItems";
 import MessagesInbox from "@/components/MessagesInbox";
-import {
-  LayoutDashboard,
-  CalendarDays,
-  CreditCard,
-  FileText,
-  MessageCircle,
-  Calendar,
-} from "lucide-react";
+import { MessageCircle } from "lucide-react";
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
-  { label: "Attendance", href: "/parent/attendance", icon: CalendarDays },
-  { label: "Fees", href: "/parent/fees", icon: CreditCard },
-  { label: "Report Cards", href: "/parent/report-cards", icon: FileText },
-  { label: "Messages", href: "/parent/messages", icon: MessageCircle },
-  { label: "Events", href: "/parent/events", icon: Calendar },
-];
+const SIDEBAR_ITEMS = PARENT_SIDEBAR_ITEMS;
 
 /**
  * Parent messages.

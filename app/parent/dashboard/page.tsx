@@ -5,26 +5,18 @@ import { cacheGet, cacheSet } from "@/lib/offline/db";
 import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
+import { PARENT_SIDEBAR_ITEMS } from "@/components/parent/sidebarItems";
 import {
   Award,
-  Calendar,
   CalendarDays,
   CreditCard,
   FileText,
-  LayoutDashboard,
   LoaderCircle,
   MessageCircle,
   BellRing,
 } from "lucide-react";
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/parent/dashboard", icon: LayoutDashboard },
-  { label: "Attendance", href: "/parent/attendance", icon: CalendarDays },
-  { label: "Fees", href: "/parent/fees", icon: CreditCard },
-  { label: "Report Cards", href: "/parent/report-cards", icon: FileText },
-  { label: "Messages", href: "/parent/messages", icon: MessageCircle },
-  { label: "Events", href: "/parent/events", icon: Calendar },
-];
+const SIDEBAR_ITEMS = PARENT_SIDEBAR_ITEMS;
 
 type ParentDashboardResponse = {
   parent: { displayName: string };

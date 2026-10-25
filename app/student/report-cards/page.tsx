@@ -4,37 +4,13 @@ import { useEffect, useState } from "react";
 import { cacheGet, cacheSet } from "@/lib/offline/db";
 import PortalTopbar from "@/components/PortalTopbar";
 import PortalSidebar from "@/components/PortalSidebar";
+import { STUDENT_SIDEBAR_ITEMS } from "@/components/student/sidebarItems";
 import LiveReportCardPreview from "@/components/LiveReportCardPreview";
 import { generateReportCardPDF } from "@/lib/branded-pdf";
 import { useSchoolProfile } from "@/components/SchoolProfileContext";
-import {
-  MessageCircle,
-  CalendarDays,
-  Eye,
-  FileText,
-  GraduationCap,
-  LayoutDashboard,
-  Bell,
-  ClipboardCheck,
-  Calendar,
-  User,
-  LoaderCircle,
-  Award,
-  Download,
-  Printer,
-} from "lucide-react";
+import { Eye, LoaderCircle, Award, Download, Printer } from "lucide-react";
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
-  { label: "Attendance", href: "/student/attendance", icon: CalendarDays },
-  { label: "Timetable", href: "/student/timetable", icon: Calendar },
-  { label: "CBT Tests", href: "/student/exams", icon: ClipboardCheck },
-  { label: "Report Cards", href: "/student/report-cards", icon: FileText },
-  { label: "Messages", href: "/student/messages", icon: MessageCircle },
-  { label: "Announcements", href: "/student/announcements", icon: Bell },
-  { label: "My Profile", href: "/student/profile", icon: User },
-  { label: "Teachers", href: "/student/teachers", icon: GraduationCap },
-];
+const SIDEBAR_ITEMS = STUDENT_SIDEBAR_ITEMS;
 
 type Report = {
   id: string;

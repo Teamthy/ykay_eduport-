@@ -1,12 +1,19 @@
 import Link from "next/link";
-import { Award, CalendarCheck, ClipboardCheck } from "lucide-react";
+import { Award, CalendarCheck, ClipboardCheck, Trophy } from "lucide-react";
 
-type Flow = "take" | "ca" | "practice";
+type Flow = "take" | "ca" | "practice" | "teacher-practice" | "leaderboards";
 
 const FLOWS: Array<{ id: Flow; label: string; href: string; icon: typeof ClipboardCheck }> = [
   { id: "take", label: "Take Exams", href: "/student/exams", icon: ClipboardCheck },
   { id: "ca", label: "CA Test", href: "/student/ca-tests", icon: CalendarCheck },
-  { id: "practice", label: "Personal Practice", href: "/student/waec-practice", icon: Award },
+  { id: "practice", label: "Personal Practice", href: "/student/personal-practice", icon: Award },
+  {
+    id: "teacher-practice",
+    label: "Teacher Practice Sets",
+    href: "/student/waec-practice",
+    icon: ClipboardCheck,
+  },
+  { id: "leaderboards", label: "Leaderboards", href: "/student/leaderboards", icon: Trophy },
 ];
 
 export default function StudentCbtNav({ active }: { active: Flow }) {
