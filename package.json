@@ -62,7 +62,10 @@
     "audit:routes": "tsx scripts/e2e-smoke.ts --list-only",
     "check:tenant-coverage": "tsx scripts/check-tenant-route-coverage.ts",
     "cbt:seed": "tsx prisma/cbt-seed.ts",
-    "cbt:audit": "python3 scripts/audit-cbt-bank.py"
+    "cbt:audit": "python3 scripts/audit-cbt-bank.py",
+    "cbt:seed:10k": "CBT_BANK_FILE=cbt-bank-10k-draft.csv tsx prisma/cbt-seed.ts",
+    "cbt:seed:staging": "CBT_SEED_TARGET=staging npm run cbt:seed",
+    "cbt:seed:10k:staging": "CBT_SEED_TARGET=staging CBT_BANK_FILE=cbt-bank-10k-draft.csv tsx prisma/cbt-seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",

@@ -81,9 +81,37 @@ function inMemoryCheck(
 // keeping the per-email failure cap unchanged. Preview uses separate Redis
 // prefixes so test traffic cannot consume a Production login bucket even if
 // both environments point at the same Redis database.
+/**
+ * Isolated localhost E2E runtime.
+ *
+ * The same marker chain that permits the in-memory limiter below: a temporary
+ * readiness mode, the E2E marker, a 127.0.0.1/localhost origin and not Vercel.
+ * `lib/env.ts` refuses `E2E_TEST_MODE` on Vercel or on any non-localhost
+ * origin, so this cannot be true for public traffic.
+ */
+const isLocalE2ETestOrigin = /^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(
+  process.env.NEXT_PUBLIC_SITE_URL ?? "",
+);
+const IS_E2E_TEST_RUNTIME =
+  process.env.E2E_TEST_MODE === "true" &&
+  process.env.APP_READINESS_MODE === "temporary" &&
+  isLocalE2ETestOrigin &&
+  process.env.VERCEL !== "1";
+
 const isVercelPreview = process.env.VERCEL_ENV === "preview";
 const isVercelProduction = process.env.VERCEL_ENV === "production";
-const loginIpMaxRequests = isVercelPreview ? 30 : isVercelProduction ? 20 : 10;
+const loginIpMaxRequests = IS_E2E_TEST_RUNTIME
+  ? // The browser suite signs in as every seeded role, from one address, plus
+    // deliberate bad-password attempts — 10 per IP fails the run rather than
+    // proving anything about login. Only the per-IP bucket is widened; the
+    // per-email failure cap (loginStrict, 3) is untouched, so lockout
+    // behaviour and the negative tests that exercise it are unchanged.
+    200
+  : isVercelPreview
+    ? 30
+    : isVercelProduction
+      ? 20
+      : 10;
 const loginIpPrefix = isVercelPreview ? "ykay:auth:login:preview" : "ykay:auth:login";
 const loginStrictPrefix = isVercelPreview
   ? "ykay:auth:login-strict:preview"
@@ -263,15 +291,8 @@ const DISTRIBUTED_REQUIRED: ReadonlySet<RateLimitKind> = new Set<RateLimitKind>(
   "cbt",
 ]);
 
-const isLocalE2ETestOrigin = /^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(
-  process.env.NEXT_PUBLIC_SITE_URL ?? "",
-);
 const ALLOW_MEMORY_RATE_LIMITS =
-  process.env.ALLOW_MEMORY_RATE_LIMITS === "true" &&
-  process.env.APP_READINESS_MODE === "temporary" &&
-  process.env.E2E_TEST_MODE === "true" &&
-  isLocalE2ETestOrigin &&
-  process.env.VERCEL !== "1";
+  process.env.ALLOW_MEMORY_RATE_LIMITS === "true" && IS_E2E_TEST_RUNTIME;
 
 const failClosedWarned = new Set<string>();
 

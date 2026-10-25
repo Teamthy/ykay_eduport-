@@ -57,6 +57,8 @@ function exam(overrides: Record<string, unknown> = {}) {
     passMark: 40,
     scheduledFor: null,
     availableUntil: null,
+    resultsReleased: false,
+    updatedAt: new Date("2026-01-01T00:00:00Z"),
     questions: [{ id: "q1", marks: 1, sortOrder: 1 }],
     ...overrides,
   };
@@ -66,7 +68,7 @@ describe("PATCH /api/teacher/exams — UPDATE_SETTINGS", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.exam.findFirst.mockResolvedValue(exam());
-    mockPrisma.exam.update.mockResolvedValue({ id: "exam_1" });
+    mockPrisma.exam.updateMany.mockResolvedValue({ count: 1 });
     mockPrisma.auditLog.create.mockResolvedValue({ id: "al" });
   });
 
@@ -85,7 +87,7 @@ describe("PATCH /api/teacher/exams — UPDATE_SETTINGS", () => {
     );
 
     expect(response.status).toBe(200);
-    const data = mockPrisma.exam.update.mock.calls[0][0].data;
+    const data = mockPrisma.exam.updateMany.mock.calls[0][0].data;
     expect(data.durationMinutes).toBe(60);
     expect(data.theoryMinutes).toBe(30);
     expect(data.passMark).toBe(50);
@@ -109,14 +111,14 @@ describe("PATCH /api/teacher/exams — UPDATE_SETTINGS", () => {
     );
 
     expect(response.status).toBe(400);
-    expect(mockPrisma.exam.update).not.toHaveBeenCalled();
+    expect(mockPrisma.exam.updateMany).not.toHaveBeenCalled();
   });
 
   it("only changes the fields that were sent", async () => {
     const { PATCH } = await import("@/app/api/teacher/exams/route");
     await PATCH(request({ examId: "exam_1", action: "UPDATE_SETTINGS", passMark: 55 }));
 
-    const data = mockPrisma.exam.update.mock.calls[0][0].data;
+    const data = mockPrisma.exam.updateMany.mock.calls[0][0].data;
     expect(data.passMark).toBe(55);
     // Omitting a field must not blank it — a partial save that wipes the
     // exam date is worse than refusing the edit.
@@ -134,7 +136,7 @@ describe("PATCH /api/teacher/exams — UPDATE_SETTINGS", () => {
     const { PATCH } = await import("@/app/api/teacher/exams/route");
     await PATCH(request({ examId: "exam_1", action: "UPDATE_SETTINGS", durationMinutes: 50 }));
 
-    const data = mockPrisma.exam.update.mock.calls[0][0].data;
+    const data = mockPrisma.exam.updateMany.mock.calls[0][0].data;
     expect(data.durationMinutes).toBe(50);
     for (const omitted of [
       "passMark",
@@ -158,7 +160,7 @@ describe("PATCH /api/teacher/exams — UPDATE_SETTINGS", () => {
       }),
     );
 
-    const data = mockPrisma.exam.update.mock.calls[0][0].data;
+    const data = mockPrisma.exam.updateMany.mock.calls[0][0].data;
     expect(data.scheduledFor).toBeNull();
     expect(data.availableUntil).toBeNull();
   });
@@ -178,7 +180,7 @@ describe("PATCH /api/teacher/exams — UPDATE_SETTINGS", () => {
     );
 
     expect(response.status).toBe(409);
-    expect(mockPrisma.exam.update).not.toHaveBeenCalled();
+    expect(mockPrisma.exam.updateMany).not.toHaveBeenCalled();
   });
 
   it("still allows a pass-mark change while attempts are running", async () => {
@@ -194,6 +196,28 @@ describe("PATCH /api/teacher/exams — UPDATE_SETTINGS", () => {
     expect(response.status).toBe(200);
   });
 
+  /**
+   * Two staff members can have the same settings screen open. The update is
+   * conditional on `updatedAt`, so the second save is refused rather than
+   * silently overwriting the first — and a refusal must not leave an audit
+   * record claiming the change happened.
+   */
+  it("refuses the save when the exam changed since it was loaded", async () => {
+    mockPrisma.exam.updateMany.mockResolvedValue({ count: 0 });
+
+    const { PATCH } = await import("@/app/api/teacher/exams/route");
+    const response = await PATCH(
+      request({ examId: "exam_1", action: "UPDATE_SETTINGS", passMark: 46 }),
+    );
+
+    expect(response.status).toBe(409);
+    expect(mockPrisma.auditLog.create).not.toHaveBeenCalled();
+    // The conditional write must actually be conditional.
+    const where = mockPrisma.exam.updateMany.mock.calls[0][0].where;
+    expect(where.updatedAt).toEqual(new Date("2026-01-01T00:00:00Z"));
+    expect(where.resultsReleased).toBe(false);
+  });
+
   it("cannot touch an exam belonging to another teacher", async () => {
     mockPrisma.exam.findFirst.mockResolvedValue(null);
 
@@ -203,7 +227,7 @@ describe("PATCH /api/teacher/exams — UPDATE_SETTINGS", () => {
     );
 
     expect(response.status).toBe(404);
-    expect(mockPrisma.exam.update).not.toHaveBeenCalled();
+    expect(mockPrisma.exam.updateMany).not.toHaveBeenCalled();
   });
 
   it("scopes the lookup to the calling teacher", async () => {

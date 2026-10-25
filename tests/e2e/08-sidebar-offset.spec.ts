@@ -38,7 +38,11 @@ test.describe("portal sidebar content offset", () => {
     for (const portal of PORTAL_PAGES) {
       await useSession(context, page, portal.role);
       await page.goto(portal.path, { waitUntil: "domcontentloaded" });
-      const sidebar = page.locator('aside[data-portal-sidebar="true"]');
+      // measureOffset() deliberately measures the first aside in the DOM; some
+      // portals keep the server-rendered shell in the document alongside the
+      // hydrated tree, and asserting on the whole set trips strict mode for a
+      // reason that says nothing about the layout under test.
+      const sidebar = page.locator('aside[data-portal-sidebar="true"]').first();
       await expect(sidebar, `${portal.role} sidebar on ${portal.path}`).toBeVisible();
       await expect(page.locator("main").first().locator(":scope > section").first()).toBeVisible();
 
