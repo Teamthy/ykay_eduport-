@@ -487,8 +487,15 @@ export default function PersonalPracticeFlow() {
               </div>
             ) : (
               <div className="mt-5 rounded-2xl bg-[var(--bg-secondary)] p-5 text-sm text-[var(--text-muted)]">
-                No reviewed question subjects are currently available for {classLevel.toUpperCase()}
-                .
+                <p className="font-semibold text-[var(--text-primary)]">
+                  No reviewed questions for {classLevel.toUpperCase()} yet
+                </p>
+                <p className="mt-2 leading-relaxed">
+                  Practice sets are built only from questions a subject teacher has reviewed and
+                  approved, so a subject appears here once it has been signed off. If your class has
+                  an imported question bank waiting, your subject teacher can release it from the
+                  Admin CBT question bank.
+                </p>
               </div>
             )}
             {selectedSubjects.length ? (
