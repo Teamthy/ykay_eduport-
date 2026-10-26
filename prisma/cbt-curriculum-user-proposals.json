@@ -1,0 +1,413 @@
+{
+  "schemaVersion": 1,
+  "status": "proposed_not_verified_pending_human_review",
+  "source": {
+    "type": "user-provided topic list",
+    "receivedDate": "2026-10-26",
+    "claimedBasis": "NERDC 9-Year Basic Education and Senior Secondary Education curricula, as stated by the submitter",
+    "officialCitation": null,
+    "pdfPageReferences": [],
+    "verificationStatus": "NOT VERIFIED; no official document title, edition, URL, or page citations were supplied"
+  },
+  "processingNotes": [
+    "Week numbers and week-based organization are omitted, consistent with the project requirement.",
+    "Revision prefixes and examination/past-question-only activities are omitted; named subject-matter areas inside revision lists are retained as candidate topics.",
+    "These candidates do not change the source-extracted curriculum manifest, do not count as verified source coverage, and are not added to the CBT bank until reviewed.",
+    "The submitted subject label Catering Craft Practice differs from the expected manifest subject Catering Craft; identity requires human confirmation before mapping."
+  ],
+  "entries": [
+    {
+      "level": "jss3",
+      "subject": "Christian Religious Studies",
+      "term": "third",
+      "topics": [
+        "The Early Church: Fellowship, Sharing and Persecution",
+        "The Conversion and Missionary Journeys of Paul",
+        "The Council of Jerusalem (Acts 15)",
+        "The Fruit of the Holy Spirit (Galatians 5:22–23)",
+        "Christian Stewardship and Responsibility",
+        "Christian Family Life and Moral Values"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "jss3",
+      "subject": "French",
+      "term": "third",
+      "topics": [
+        "Les professions et les métiers (Professions)",
+        "La santé et le corps humain (Health and the Human Body)",
+        "Les moyens de transport (Means of Transport)",
+        "Les loisirs, les sports et les vacances (Leisure, Sports and Holidays)",
+        "La correspondance : lettre amicale et officielle (Friendly and Formal Letter Writing)",
+        "Les fêtes et les célébrations (Festivals and Celebrations)"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "English Language",
+      "term": "third",
+      "topics": [
+        "Comprehension: Inference, Tone and Mood",
+        "Summary Writing: Précis Techniques",
+        "Essay Writing: Argumentative, Descriptive, Narrative and Expository",
+        "Lexis and Structure: Concord, Idioms, Phrasal Verbs and Register",
+        "Oral English: Vowel and Consonant Contrasts, Stress, Intonation and Rhyme"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "General Mathematics",
+      "term": "third",
+      "topics": [
+        "Statistics: Measures of Central Tendency and Dispersion",
+        "Probability: Mutually Exclusive and Independent Events",
+        "Trigonometry: Sine Rule, Cosine Rule, Bearings, and Angles of Elevation and Depression",
+        "Mensuration: Surface Areas and Volumes of Composite Solids",
+        "Coordinate Geometry: Gradient, Midpoint, Distance, and Equation of a Line",
+        "Sequences and Series: Arithmetic and Geometric Progressions",
+        "Matrices and Determinants (2×2): Operations, Inverse, and Applications",
+        "Introductory Calculus: Differentiation and Integration of Simple Polynomials"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Biology",
+      "term": "second",
+      "topics": [
+        "Ecology: Ecosystem, Habitat, Niche, Biotic and Abiotic Factors",
+        "Food Chains, Food Webs and Trophic Levels",
+        "Nutrient Cycles: Carbon, Nitrogen and Water Cycles",
+        "Population Ecology: Population Size, Density and Growth Curves",
+        "Conservation of Natural Resources",
+        "Pollution: Types, Causes, Effects and Control",
+        "Evolution: Lamarck's and Darwin's Theories and Evidence of Evolution",
+        "Adaptation of Organisms to their Environment"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Biology",
+      "term": "third",
+      "topics": [
+        "Cell Biology",
+        "Nutrition",
+        "Transport",
+        "Respiration",
+        "Reproduction",
+        "Growth",
+        "Excretion",
+        "Homeostasis",
+        "Genetics",
+        "Heredity and Variation",
+        "Ecology",
+        "Evolution"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Physics",
+      "term": "second",
+      "topics": [
+        "Light Waves: Refraction at Plane and Curved Surfaces and Total Internal Reflection",
+        "Lenses: Types, Ray Diagrams, Lens Formula and Magnification",
+        "Optical Instruments: Camera, Eye, Microscope and Telescope",
+        "Sound Waves: Production, Transmission, Characteristics and Echo",
+        "Models of the Atom: Thomson, Rutherford and Bohr",
+        "Radioactivity: Types of Radiation, Half-Life and Decay Law",
+        "Nuclear Energy: Fission, Fusion and Binding Energy",
+        "Energy Quantization and Wave-Particle Duality",
+        "Introductory Electronics: Semiconductors, Diodes and Transistors"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Physics",
+      "term": "third",
+      "topics": [
+        "Mechanics: Motion, Forces, Energy and Momentum",
+        "Waves, Light and Sound",
+        "Electricity and Magnetism",
+        "Modern Physics: Atomic Physics, Nuclear Physics and Electronics"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Agriculture",
+      "term": "second",
+      "topics": [
+        "Agricultural Ecology: Agro-Ecological Zones of Nigeria",
+        "Soil Science: Soil Formation, Types, Profile, Properties and Fertility",
+        "Crop Production: Cereals, Legumes, Tubers and Vegetables",
+        "Animal Production: Poultry, Cattle, Sheep, Goats and Fish Farming",
+        "Agricultural Economics: Factors of Production and Farm Planning",
+        "Farm Management and Accounting: Farm Records, Profit and Loss",
+        "Agricultural Marketing and Extension Services"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Agriculture",
+      "term": "third",
+      "topics": [
+        "Basic Agricultural Concepts and Tools",
+        "Crop and Animal Production",
+        "Soil Science and Agricultural Ecology",
+        "Agricultural Economics, Marketing and Extension"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Further Mathematics",
+      "term": "third",
+      "topics": [
+        "Complex Numbers: Argand Diagram, Modulus, Argument and De Moivre's Theorem",
+        "Matrices and Determinants (3×3): Inverse and Cramer's Rule",
+        "Vectors in 3D: Scalar and Vector Products",
+        "Dynamics: Velocity, Acceleration and Projectile Motion",
+        "Statics: Equilibrium of Forces, Moments and Friction",
+        "Differential Equations: First-Order Separable Equations",
+        "Advanced Integration: Integration by Parts, Substitution and Definite Integrals",
+        "Probability Distributions: Binomial and Normal Distributions"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Foods & Nutrition",
+      "term": "third",
+      "topics": [
+        "Meal Planning for Special Groups: Infants, Adolescents, Pregnant Women, Older Adults and Sick People",
+        "Food Preservation: Drying, Canning, Freezing, Smoking and Fermentation",
+        "Food Hygiene, Safety and Sanitation",
+        "Consumer Education: Wise Buying, Food Labelling and Adulteration",
+        "Kitchen Management and Equipment",
+        "Entrepreneurship in Foods and Nutrition"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Geography",
+      "term": "second",
+      "topics": [
+        "Economic Geography: Subsistence and Commercial Agriculture",
+        "Mining and Manufacturing Industries",
+        "Transport and Communication Systems",
+        "Population Geography: Distribution, Density, Migration and Growth",
+        "Urbanization: Causes, Problems and Solutions",
+        "Environmental Issues: Desertification, Deforestation, Flooding and Erosion",
+        "Regional Geography of Nigeria: Physical, Economic and Social Geography",
+        "Regional Geography of Africa"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Geography",
+      "term": "third",
+      "topics": [
+        "Map Reading: Scale, Contours, Cross-Profiles and Gradient",
+        "Physical Geography: Landforms, Climate and Vegetation",
+        "Human and Economic Geography",
+        "Regional Geography: Nigeria and Africa"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Technical Drawing",
+      "term": "third",
+      "topics": [
+        "Building Drawing: Floor Plans, Elevations and Sections",
+        "Building Drawing: Roof Plans and Foundation Details",
+        "Mechanical Drawing: Assembly and Detail Drawings",
+        "Isometric and Oblique Projections",
+        "Perspective Drawing: One-Point and Two-Point Perspective",
+        "Auxiliary Views and Intersection of Solids"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Government",
+      "term": "third",
+      "topics": [
+        "International Organizations: United Nations Organs and Functions",
+        "African Union: Origin, Structure and Achievements",
+        "ECOWAS: Aims, Structure, Achievements and Challenges",
+        "OPEC and the Commonwealth",
+        "Nigeria's Foreign Policy: Principles and Implementation",
+        "Nigeria's Role in International Organizations",
+        "Pre-Colonial, Colonial and Post-Colonial Political Systems"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Christian Religious Studies",
+      "term": "second",
+      "topics": [
+        "The Early Church: Unity, Fellowship and Communal Living (Acts 2–4)",
+        "Persecution of the Early Church: Stephen and Saul",
+        "Paul's Conversion and Missionary Journeys",
+        "The Council of Jerusalem (Acts 15)",
+        "Christianity in Nigeria: Arrival, Spread and Impact",
+        "Christian Ethics: Honesty, Integrity and Contentment",
+        "Social Issues: Drug Abuse, Cultism and Immorality (Christian Response)"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Christian Religious Studies",
+      "term": "third",
+      "topics": [
+        "Themes from the Synoptic Gospels: Life and Teachings of Jesus",
+        "Themes from the Acts of the Apostles",
+        "Themes from the Epistles: Romans, Corinthians, Galatians and James",
+        "Christian Living: Stewardship, Leadership and Service"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Visual Arts",
+      "term": "third",
+      "topics": [
+        "Art Appreciation and Criticism: Analysis of Artworks",
+        "African Art: Nok, Ife, Benin and Igbo-Ukwu",
+        "Western Art: Renaissance to Modern",
+        "Contemporary Nigerian Artists and their Works",
+        "Portfolio Preparation and Practical Project",
+        "Exhibition"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Literature in English",
+      "term": "third",
+      "topics": [
+        "African Prose Text: Themes, Characters and Style",
+        "Non-African Prose Text",
+        "African Drama Text",
+        "Non-African Drama Text",
+        "African and Non-African Poetry: Literary Devices and Themes",
+        "General Literary Appreciation: Figures of Speech, Genre and Tone"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Catering Craft",
+      "submittedSubjectLabel": "Catering Craft Practice",
+      "term": "third",
+      "subjectIdentityReviewRequired": true,
+      "topics": [
+        "Advanced Cookery Methods: Braising, Stewing, Roasting and Grilling",
+        "Menu Planning and Compilation: Table d'hôte and À la carte",
+        "Table Setting, Laying and Service Styles: Silver, French and Buffet",
+        "Food and Beverage Service: Bar Operations, Cocktails and Mocktails",
+        "Pastry and Confectionery: Cakes, Breads and Pastries",
+        "Entrepreneurship in Catering: Business Plan, Costing and Pricing"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Accounting",
+      "term": "second",
+      "topics": [
+        "Partnership Accounts: Formation and Profit/Loss Appropriation",
+        "Partnership: Admission, Retirement and Dissolution",
+        "Company Accounts: Ordinary and Preference Shares and Debentures",
+        "Company Accounts: Final Accounts of Limited Liability Companies",
+        "Manufacturing Accounts: Cost of Production and Prime Cost",
+        "Incomplete Records: Single Entry and Statement of Affairs",
+        "Public Sector Accounting: Government Budgets and Consolidated Revenue Fund",
+        "Introduction to Cost Accounting"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Accounting",
+      "term": "third",
+      "topics": [
+        "Interpretation of Financial Statements: Liquidity, Profitability and Efficiency Ratios",
+        "Management Accounting: Budgeting and Budgetary Control",
+        "Introduction to Computerised Accounting",
+        "Sole Trader and Partnership Accounts",
+        "Company Accounts, Manufacturing Accounts and Incomplete Records"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Commerce",
+      "term": "second",
+      "topics": [
+        "International Trade: Imports, Exports and Terms of Trade",
+        "Balance of Trade and Balance of Payments",
+        "Economic Groupings: ECOWAS, AU, EU and ASEAN",
+        "Communication in Business: Types and Modern Trends, including E-Commerce and ICT",
+        "Insurance: Principles, Types and Documents",
+        "Banking: Central Bank, Commercial Banks, Functions and Instruments",
+        "The Nigerian Stock Exchange and Securities",
+        "Business Finance: Sources of Short-Term and Long-Term Capital"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Commerce",
+      "term": "third",
+      "topics": [
+        "Business Management: Planning, Organising, Staffing, Directing and Controlling",
+        "Entrepreneurship: Qualities, Role and Small and Medium Enterprises",
+        "Consumer Protection: Rights, Responsibilities and Agencies",
+        "Trade, Aids to Trade, Home Trade and Foreign Trade",
+        "Banking, Insurance, Communication and Economic Groupings"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Marketing",
+      "term": "third",
+      "topics": [
+        "Marketing Research: Process, Methods and Data Collection",
+        "Consumer Behaviour: Factors Influencing Buying Decisions",
+        "Marketing Planning and Strategy: Segmentation, Targeting and Positioning",
+        "International Marketing: Opportunities, Challenges and Export Procedures",
+        "Sales Promotion and Advertising: Media and Ethics",
+        "E-Marketing and Digital Marketing"
+      ],
+      "reviewStatus": "pending"
+    },
+    {
+      "level": "ss3",
+      "subject": "Economics",
+      "term": "third",
+      "topics": [
+        "International Trade: Comparative Advantage, Terms of Trade and Tariffs",
+        "Economic Integration: ECOWAS, AU and EU—Aims, Benefits and Problems",
+        "Economic Development and Planning: Indicators, Strategies and Challenges in Nigeria",
+        "The Nigerian Economy: Oil and Gas, Agriculture, Industry and Services",
+        "Public Finance: Revenue, Expenditure, National Debt and Fiscal Policy",
+        "Money and Inflation: Monetary Policy, Causes and Effects of Inflation"
+      ],
+      "reviewStatus": "pending"
+    }
+  ]
+}

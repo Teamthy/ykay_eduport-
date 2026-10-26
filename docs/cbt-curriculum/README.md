@@ -30,6 +30,10 @@ python3 scripts/audit-cbt-draft-answer-keys.py
 
 The original 10,000-row CSV is left untouched. In the merged CSV, a legacy row receives a term only when its class, subject, and exact topic label match one unique source term; all other legacy terms stay blank. New questions use explicit source-derived terms/topics and the `curriculum-map-draft` source label. They test alignment to scheme labels/content, not independent subject-matter truth; all generated rows require human review and remain drafts on import.
 
+## User-proposed topics for missing slots
+
+User-provided candidate topics for the missing 27 slots are kept separately in `prisma/cbt-curriculum-user-proposals.json`, with a human-review worksheet at `prisma/cbt-curriculum-user-proposals-review.csv`. They are not independently verified, do not change source coverage counts, and are excluded from the generated bank until reviewed against authoritative citations. See `user-proposed-gap-topics-review.md`.
+
 ## Coverage limitations
 
 The source manifest includes 414 expected class/subject/term combinations. The supplied PDF currently has no extracted topic section for 27 combinations; those are listed in `missingSourceEntries` and are not inferred. The existing 10,000-row bank has exact class/subject identity in 24/138 required pairs. No legacy subject aliases are inferred. In the merged CSV, 172 legacy rows receive a term only where exact class/subject/topic identity has one unique source term; the other 9,828 legacy rows remain unassigned. The merged draft bank has source-mapped rows in all 138 exact pairs. Administrative schedule rows and placeholder-only topic cells remain in the manifest but are not converted into questions. Meaningful topic rows without descriptive content receive lower-confidence source-navigation drafts; the CBT topic field accepts up to 240 characters so long source labels remain intact. The audit reports these separately and must not be read as full textbook-content verification, database import, staging validation, or production evidence.
