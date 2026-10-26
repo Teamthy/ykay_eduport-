@@ -1,6 +1,7 @@
 import { GradebookStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { resolveCurrentLabels } from "@/lib/academic-session";
 import { GRADEBOOK_ADMIN_ROLES, gradebookStatusLabel } from "@/lib/gradebook";
 import { prisma } from "@/lib/prisma";
 import { getClientIp } from "@/lib/requests";
@@ -13,13 +14,40 @@ const updateSchema = z.object({
   action: z.enum(["LOCK", "REOPEN"]),
 });
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const user = await requireRole(GRADEBOOK_ADMIN_ROLES);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // One term at a time.
+  //
+  // This listed every gradebook the school had ever had, while the readiness
+  // panel next to it counted only the current term — so the lock table showed
+  // last term's OPEN books as work still to do, and the two halves of the same
+  // page disagreed about the same classes. The default is the term the report
+  // cards are generated for; a term can still be named explicitly to review it.
+  const requestedSession = request.nextUrl.searchParams.get("session");
+  const requestedTerm = request.nextUrl.searchParams.get("term");
+  const current = await resolveCurrentLabels(user.schoolId);
+
+  let sessionLabel = requestedSession || (current.source === "TERM" ? current.sessionLabel : null);
+  let termLabel = requestedTerm || (current.source === "TERM" ? current.termLabel : null);
+
+  if (!sessionLabel || !termLabel) {
+    // No configured term (the calendar fallback is a guess) and nothing was
+    // asked for: show the most recently touched period that actually exists,
+    // rather than an empty table labelled with a guessed term.
+    const latest = await prisma.subjectGradebook.findFirst({
+      where: { schoolId: user.schoolId },
+      orderBy: { updatedAt: "desc" },
+      select: { sessionLabel: true, termLabel: true },
+    });
+    sessionLabel = latest?.sessionLabel ?? current.sessionLabel;
+    termLabel = latest?.termLabel ?? current.termLabel;
+  }
+
   const gradebooks = await prisma.subjectGradebook.findMany({
     take: 500,
-    where: { schoolId: user.schoolId },
+    where: { schoolId: user.schoolId, sessionLabel, termLabel },
     orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
     include: {
       classroom: { select: { displayName: true } },
@@ -29,6 +57,11 @@ export async function GET() {
   });
 
   return NextResponse.json({
+    sessionLabel,
+    termLabel,
+    // "CALENDAR" means no term is configured and the labels are a date guess;
+    // the page already surfaces that for the generation panel.
+    labelSource: current.source,
     summary: {
       total: gradebooks.length,
       open: gradebooks.filter((g) => g.status === GradebookStatus.OPEN).length,

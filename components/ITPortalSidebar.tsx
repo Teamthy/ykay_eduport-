@@ -16,7 +16,7 @@ const NAV_ITEMS = [
 
 function SidebarContent() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, logoutHref } = useAuth();
   const { collapsed } = useResponsiveSidebar();
   const initials =
     user?.name
@@ -93,9 +93,16 @@ function SidebarContent() {
       </nav>
 
       <div className="border-t border-[var(--border-subtle)] pt-3">
-        <button
-          type="button"
-          onClick={logout}
+        <a
+          href={logoutHref}
+          onClick={(event) => {
+            // Progressive enhancement: with JavaScript this opens the confirmation
+            // dialog; without it (a bundle that never hydrated, or has thrown) the
+            // href still signs out, because /api/auth/logout answers a plain
+            // navigation with a 303 to the sign-in page.
+            event.preventDefault();
+            logout();
+          }}
           aria-label="Sign out"
           title={collapsed ? "Sign out" : undefined}
           className="portal-nav-link text-left hover:!border-red-500/15 hover:!bg-red-500/10 hover:!text-red-400"
@@ -104,7 +111,7 @@ function SidebarContent() {
             <LogOut size={16} strokeWidth={1.85} />
           </span>
           <span className="portal-nav-label">Sign out</span>
-        </button>
+        </a>
       </div>
     </div>
   );

@@ -16,8 +16,19 @@ type BroadsheetStudent = {
   subjects: Record<string, number>;
 };
 
+type Period = {
+  sessionLabel: string;
+  termLabel: string;
+  studentCount: number;
+  generatedAt: string;
+};
+
 type Response = {
   classes: Array<{ id: string; displayName: string }>;
+  /** Every session/term the class has cards for, newest first. */
+  periods: Period[];
+  /** The period actually rendered (the request may have named an older one). */
+  selected: Period | null;
   broadsheet: {
     className: string;
     termLabel: string;
@@ -32,32 +43,53 @@ type Response = {
 export default function AdminBroadsheetPage() {
   const [data, setData] = useState<Response | null>(null);
   const [classId, setClassId] = useState("");
+  const [period, setPeriod] = useState<Period | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const load = useCallback(async (selected: string) => {
-    setLoading(true);
-    setError("");
-    try {
-      const query = selected ? `?classId=${encodeURIComponent(selected)}` : "";
-      const response = await fetch(`/api/admin/broadsheet${query}`, { cache: "no-store" });
-      const body = (await response.json()) as Response & { error?: string };
-      if (!response.ok) throw new Error(body.error || "Unable to load broadsheet.");
-      setData(body);
-      if (!selected && body.classes[0]) {
-        setClassId(body.classes[0].id);
-        return load(body.classes[0].id);
+  const load = useCallback(
+    async (selected: string, target?: { session: string; term: string } | null) => {
+      setLoading(true);
+      setError("");
+      try {
+        const params = new URLSearchParams();
+        if (selected) params.set("classId", selected);
+        // Naming the period keeps the page on the term the admin picked; without
+        // it every reload snapped back to the newest one.
+        if (target?.session) params.set("session", target.session);
+        if (target?.term) params.set("term", target.term);
+        const query = params.toString();
+        const response = await fetch(`/api/admin/broadsheet${query ? `?${query}` : ""}`, {
+          cache: "no-store",
+        });
+        const body = (await response.json()) as Response & { error?: string };
+        if (!response.ok) throw new Error(body.error || "Unable to load broadsheet.");
+        setData(body);
+        setPeriod(body.selected ?? null);
+      } catch (loadError) {
+        setError(loadError instanceof Error ? loadError.message : "Unable to load broadsheet.");
+      } finally {
+        setLoading(false);
       }
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Unable to load broadsheet.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     void load("");
   }, [load]);
+
+  // Open on the first class once the list arrives. This used to be a recursive
+  // `load()` call from inside the callback itself, which no longer compiles
+  // under the React compiler rules (the callback accessed itself before it was
+  // declared).
+  useEffect(() => {
+    const first = data?.classes[0];
+    if (!classId && first) {
+      setClassId(first.id);
+      void load(first.id, null);
+    }
+  }, [classId, data, load]);
 
   const sheet = data?.broadsheet || null;
 
@@ -102,13 +134,48 @@ export default function AdminBroadsheetPage() {
                     value={classId}
                     onChange={(event) => {
                       setClassId(event.target.value);
-                      void load(event.target.value);
+                      // A term from the previous class usually does not exist
+                      // for the new one, so start from its newest.
+                      setPeriod(null);
+                      void load(event.target.value, null);
                     }}
                     className="mt-2 block w-64 rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)]"
                   >
                     {data?.classes.map((entry) => (
                       <option key={entry.id} value={entry.id}>
                         {entry.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                  Session · Term
+                  <select
+                    value={period ? `${period.sessionLabel}|${period.termLabel}` : ""}
+                    disabled={!data?.periods.length}
+                    onChange={(event) => {
+                      const [session, term] = event.target.value.split("|");
+                      if (!session || !term) return;
+                      const next = { session, term };
+                      // Keep the select responsive while the sheet reloads;
+                      // the response replaces this placeholder with the real row.
+                      setPeriod({
+                        sessionLabel: session,
+                        termLabel: term,
+                        studentCount: 0,
+                        generatedAt: "",
+                      });
+                      void load(classId, next);
+                    }}
+                    className="mt-2 block w-64 rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm text-[var(--input-text)] disabled:opacity-50"
+                  >
+                    {data?.periods.length ? null : <option value="">No terms yet</option>}
+                    {data?.periods.map((entry) => (
+                      <option
+                        key={`${entry.sessionLabel}|${entry.termLabel}`}
+                        value={`${entry.sessionLabel}|${entry.termLabel}`}
+                      >
+                        {entry.sessionLabel} · {entry.termLabel} ({entry.studentCount})
                       </option>
                     ))}
                   </select>
