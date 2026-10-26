@@ -22,7 +22,7 @@ export default function StudentCbtNav({ active }: { active: Flow }) {
       aria-label="Student CBT tests"
       className="flex flex-wrap gap-2 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-2"
     >
-      {FLOWS.map((flow) => {
+      {FLOWS.filter((flow) => flow.id !== active).map((flow) => {
         const Icon = flow.icon;
         const selected = flow.id === active;
         return (

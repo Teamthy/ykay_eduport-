@@ -639,36 +639,57 @@ export default function PersonalPracticeFlow() {
                 </p>
               </div>
 
-              <fieldset className="rounded-2xl border border-[var(--border-subtle)] p-5">
-                <legend className="px-1 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                  Timer
+              <fieldset className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)] sm:p-5">
+                <legend className="px-2 text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-secondary)]">
+                  Set your timer
                 </legend>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {[0, 10, 15, 20, 30, 45].map((minutes) => (
-                    <button
-                      key={minutes}
-                      type="button"
-                      aria-pressed={durationMinutes === minutes}
-                      onClick={() => setDurationMinutes(minutes)}
-                      className={`rounded-full border px-3 py-2 text-xs font-bold ${durationMinutes === minutes ? "border-brand-green bg-brand-green text-brand-navy" : "border-[var(--border-subtle)] text-[var(--text-primary)]"}`}
-                    >
-                      {minutes === 0 ? (
-                        <>
-                          <TimerOff size={13} className="mr-1 inline" />
-                          Untimed
-                        </>
-                      ) : (
-                        <>
-                          <Clock3 size={13} className="mr-1 inline" />
-                          {minutes} min
-                        </>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-3 text-xs text-[var(--text-muted)]">
-                  Timed sets submit automatically when time runs out.
+                <p className="-mt-1 mb-4 px-2 text-xs text-[var(--text-muted)]">
+                  Choose a pace for this practice session.
                 </p>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {[0, 10, 15, 20, 30, 45].map((minutes) => {
+                    const selected = durationMinutes === minutes;
+                    const Icon = minutes === 0 ? TimerOff : Clock3;
+                    return (
+                      <button
+                        key={minutes}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => setDurationMinutes(minutes)}
+                        className={`group relative flex min-h-[78px] items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-card)] sm:px-4 ${selected ? "border-brand-green bg-brand-green/10 ring-1 ring-brand-green" : "border-[var(--border-subtle)] bg-[var(--bg-secondary)] hover:border-brand-green/50 hover:bg-brand-green/5"}`}
+                      >
+                        <span
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${selected ? "bg-brand-green text-brand-navy" : "bg-[var(--surface-card)] text-[var(--text-secondary)] group-hover:text-brand-green"}`}
+                        >
+                          <Icon size={19} aria-hidden="true" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-bold text-[var(--text-primary)]">
+                            {minutes === 0 ? "Untimed" : `${minutes} min`}
+                          </span>
+                          <span className="mt-0.5 block text-[10px] leading-4 text-[var(--text-muted)]">
+                            {minutes === 0 ? "At your own pace" : "Timed session"}
+                          </span>
+                        </span>
+                        {selected ? (
+                          <Check
+                            size={15}
+                            className="absolute right-2 top-2 text-brand-green"
+                            aria-label="Selected"
+                          />
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 flex items-start gap-2 rounded-xl bg-[var(--bg-secondary)] px-3 py-2.5">
+                  <Clock3 size={14} className="mt-0.5 shrink-0 text-brand-green" />
+                  <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
+                    {durationMinutes === 0
+                      ? "No countdown. Take the time you need; finish when you are ready."
+                      : `You will have ${durationMinutes} minutes. The set submits automatically when the timer runs out.`}
+                  </p>
+                </div>
               </fieldset>
             </div>
 
