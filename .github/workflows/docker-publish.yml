@@ -69,10 +69,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute lowercase GHCR image name
-        id: image
-        run: printf 'name=%s\n' "${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
-
       - name: Extract image tag
         id: meta
         run: |
@@ -82,10 +78,22 @@ jobs:
           elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
             TAG="main"
           else
-            TAG="${GITHUB_REF_NAME//[^a-zA-Z0-9._-]/-}"
+            TAG="${GITHUB_REF_NAME}"
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "IMAGE=${{ steps.image.outputs.name }}:$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Compute image reference
+        id: image
+        run: |
+          # The repository slug is not a valid image path: this one is
+          # "ykay_eduport-", and that trailing hyphen made every reference
+          # invalid ("ghcr.io/teamthy/ykay_eduport-:main"), so every publish
+          # from main failed with "invalid reference format" and the image was
+          # never pushed. The helper normalises and validates both parts.
+          REF="$(node scripts/docker-image-ref.mjs "$REGISTRY" "$GITHUB_REPOSITORY" "${{ steps.meta.outputs.tag }}")"
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "name=${REF%:*}" >> "$GITHUB_OUTPUT"
+          echo "Publishing $REF"
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -93,12 +101,12 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:${{ steps.meta.outputs.tag }}
-            ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:latest
+            ${{ steps.image.outputs.ref }}
+            ${{ steps.image.outputs.name }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Image summary
         run: |
-          echo "Published ${{ env.REGISTRY }}/${{ steps.meta.outputs.IMAGE }}"
-          echo "Pull: docker pull ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}:${{ steps.meta.outputs.tag }}"
+          echo "Published ${{ steps.image.outputs.ref }}"
+          echo "Pull: docker pull ${{ steps.image.outputs.ref }}"
