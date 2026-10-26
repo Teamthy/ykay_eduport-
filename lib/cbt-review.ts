@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 /**
  * Question-bank review rules.
  *
@@ -13,7 +15,7 @@ export const REVIEWED_QUESTION_FILTER = {
   OR: [{ reviewedByUserId: { not: null } }, { reviewedByExternalActor: { not: null } }],
   reviewedAt: { not: null },
   reviewReference: { not: null },
-} as const;
+} satisfies Prisma.CbtQuestionWhereInput;
 
 /** Explanations that say nothing about why the answer is right. */
 export const GENERIC_PHRASES = [
