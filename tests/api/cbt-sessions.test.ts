@@ -58,7 +58,6 @@ describe("personal CBT session creation", () => {
         classLevel: "ss2",
         practiceMode: "subject",
         term: "second",
-        week: 5,
         subjectSlugs: ["mathematics-ss2"],
         questionCount: 60,
         durationMinutes: 0,
@@ -75,14 +74,12 @@ describe("personal CBT session creation", () => {
     expect(JSON.stringify(payload.questions)).not.toContain("explanation");
     expect(mockPrisma.cbtQuestion.findMany.mock.calls[0]?.[0].where).toMatchObject({
       term: "second",
-      week: 5,
     });
     expect(mockPrisma.cbtAttempt.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           status: "IN_PROGRESS",
           term: "second",
-          week: 5,
           isTimed: false,
           total: 60,
           userId: "user_1",
@@ -116,26 +113,6 @@ describe("personal CBT session creation", () => {
     expect(payload.sessions).toHaveLength(1);
     expect(payload.sessions[0].id).toBe("attempt_timed");
     expect(payload.sessions[0].secondsLeft).toBe(0);
-  });
-
-  it("rejects a week filter without a specific term", async () => {
-    const request = new NextRequest("http://localhost/api/cbt/sessions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        classLevel: "ss2",
-        practiceMode: "subject",
-        term: "all",
-        week: 5,
-        subjectSlugs: ["mathematics-ss2"],
-        questionCount: 10,
-        durationMinutes: 0,
-      }),
-    });
-
-    const response = await POST(request);
-    expect(response.status).toBe(400);
-    expect(mockPrisma.cbtAttempt.create).not.toHaveBeenCalled();
   });
 
   it("rejects a client request above the server-enforced maximum", async () => {

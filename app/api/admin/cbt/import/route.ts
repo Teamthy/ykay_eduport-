@@ -41,7 +41,6 @@ function asImportRow(value: unknown, index: number) {
     department: String(row.department ?? "general").trim() || "general",
     topic: String(row.topic ?? "").trim(),
     term: normalizeCbtTerm(row.term),
-    week: row.week == null || String(row.week).trim() === "" ? null : row.week,
     difficulty: row.difficulty ?? 2,
     stem: String(row.stem ?? "").trim(),
     options: [row.optionA, row.optionB, row.optionC, row.optionD].map((option) =>
@@ -178,7 +177,6 @@ export async function POST(request: NextRequest) {
             subjectId: subject.id,
             topic: data.topic,
             term: data.term ?? null,
-            week: data.week ?? null,
             difficulty: data.difficulty,
             stem: data.stem,
             options: data.options,

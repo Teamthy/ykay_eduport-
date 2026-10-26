@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { chunk, planBankCsv } from "@/lib/cbt-bank-import";
 
 const HEADER =
-  "subjectSlug,subjectName,classLevel,department,topic,term,week,difficulty,stem,optionA,optionB,optionC,optionD,correctIndex,explanation,source";
+  "subjectSlug,subjectName,classLevel,department,topic,term,difficulty,stem,optionA,optionB,optionC,optionD,correctIndex,explanation,source";
 
 function row(overrides: Record<string, string> = {}) {
   const base: Record<string, string> = {
@@ -14,7 +14,6 @@ function row(overrides: Record<string, string> = {}) {
     department: "general",
     topic: "Whole-number operations",
     term: "",
-    week: "",
     difficulty: "2",
     stem: "Calculate 101 + 699.",
     optionA: "70599",
@@ -46,25 +45,12 @@ describe("planBankCsv", () => {
     });
     expect(plan.subjects[0]?.rows[0]?.data.source).toBe("original-draft");
     expect(plan.subjects[0]?.rows[0]?.data.term).toBeNull();
-    expect(plan.subjects[0]?.rows[0]?.data.week).toBeNull();
   });
 
   it("normalises common term labels for curriculum CSVs", () => {
     const plan = planBankCsv([HEADER, row({ term: "Second Term" })].join("\n"));
     expect(plan.rejected).toEqual([]);
     expect(plan.subjects[0]?.rows[0]?.data.term).toBe("second");
-  });
-
-  it("accepts only valid week numbers attached to a verified term", () => {
-    const valid = planBankCsv([HEADER, row({ term: "first", week: "4" })].join("\n"));
-    expect(valid.rejected).toEqual([]);
-    expect(valid.subjects[0]?.rows[0]?.data.week).toBe(4);
-
-    const withoutTerm = planBankCsv([HEADER, row({ week: "4" })].join("\n"));
-    expect(withoutTerm.rejected[0]?.reason).toContain("week");
-
-    const invalid = planBankCsv([HEADER, row({ term: "first", week: "1.5" })].join("\n"));
-    expect(invalid.rejected[0]?.reason).toContain("week");
   });
 
   it("rejects an unrecognised term label rather than guessing", () => {

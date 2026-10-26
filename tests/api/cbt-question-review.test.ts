@@ -21,7 +21,6 @@ const approval = {
   question: {
     topic: "Addition",
     term: "second",
-    week: 6,
     difficulty: 2,
     stem: "What is 2 + 2?",
     options: ["3", "4", "5", "6"],
@@ -62,7 +61,6 @@ describe("CBT question review state transitions", () => {
           status: "reviewed",
           difficulty: 2,
           term: "second",
-          week: 6,
           source: "original-draft",
           reviewReference: approval.reference,
           reviewedByUserId: "admin_a",

@@ -89,18 +89,6 @@ describe("admin CBT question management", () => {
     expect(mockPrisma.cbtQuestion.create).not.toHaveBeenCalled();
   });
 
-  it("requires a verified term when a manual week is supplied", async () => {
-    const response = await POST(
-      request("http://localhost/api/admin/cbt/questions", "POST", {
-        ...validDraft,
-        week: 2,
-      }),
-    );
-
-    expect(response.status).toBe(400);
-    expect(mockPrisma.cbtQuestion.create).not.toHaveBeenCalled();
-  });
-
   it("rejects duplicate answer options on manual creation", async () => {
     const response = await POST(
       request("http://localhost/api/admin/cbt/questions", "POST", {

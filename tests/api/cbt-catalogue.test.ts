@@ -13,7 +13,6 @@ vi.mock("@/lib/cbt-auth", () => ({
 
 import { GET as getSubjects } from "@/app/api/cbt/subjects/route";
 import { GET as getTopics } from "@/app/api/cbt/topics/route";
-import { GET as getWeeks } from "@/app/api/cbt/weeks/route";
 
 describe("student personal-practice catalogue endpoints", () => {
   beforeEach(() => {
@@ -74,39 +73,9 @@ describe("student personal-practice catalogue endpoints", () => {
     );
   });
 
-  it("returns only reviewed week assignments for the selected class and term", async () => {
-    mockPrisma.cbtQuestion.findMany.mockResolvedValue([{ week: 2 }, { week: 5 }] as never);
-    const response = await getWeeks(
-      new NextRequest("http://localhost/api/cbt/weeks?classLevel=ss2&term=second"),
-    );
-    const body = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(body.weeks).toEqual([2, 5]);
-    expect(mockPrisma.cbtQuestion.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          term: "second",
-          week: { not: null },
-          subject: { is: { classLevel: "ss2" } },
-        }),
-        distinct: ["week"],
-        orderBy: { week: "asc" },
-      }),
-    );
-  });
-
-  it("rejects week discovery across all terms", async () => {
-    const response = await getWeeks(
-      new NextRequest("http://localhost/api/cbt/weeks?classLevel=ss2&term=all"),
-    );
-    expect(response.status).toBe(400);
-    expect(mockPrisma.cbtQuestion.findMany).not.toHaveBeenCalled();
-  });
-
   it("loads distinct reviewed topics from the selected subject slug", async () => {
     const response = await getTopics(
-      new NextRequest("http://localhost/api/cbt/topics?subject=mathematics-ss2&term=second&week=5"),
+      new NextRequest("http://localhost/api/cbt/topics?subject=mathematics-ss2&term=second"),
     );
     const body = await response.json();
 
@@ -124,7 +93,6 @@ describe("student personal-practice catalogue endpoints", () => {
           OR: [{ reviewedByUserId: { not: null } }, { reviewedByExternalActor: { not: null } }],
           reviewedAt: { not: null },
           term: "second",
-          week: 5,
           reviewReference: { not: null },
         },
       }),

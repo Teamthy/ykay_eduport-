@@ -1816,8 +1816,6 @@ model CbtQuestion {
   topic        String
   /// first | second | third; null for legacy questions without a verified term assignment.
   term         String?
-  /// Week number within the assigned term; null until supported by a source mapping.
-  week         Int?
   /// 1 easy · 2 medium · 3 hard
   difficulty   Int        @default(2)
   stem         String
@@ -1845,7 +1843,6 @@ model CbtQuestion {
 
   @@index([subjectId, status])
   @@index([subjectId, term, status])
-  @@index([subjectId, term, week, status])
   @@index([status, reviewedAt])
 }
 
@@ -1873,8 +1870,6 @@ model CbtAttempt {
   topic             String?
   /// first | second | third; null for legacy attempts not filtered by term.
   term              String?
-  /// Week number within the selected term; null when the session spans weeks.
-  week              Int?
   subjectIds        Json?
   questionIds       Json?
   drawToken         String?

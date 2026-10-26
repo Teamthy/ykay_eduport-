@@ -20,7 +20,6 @@ type QuestionDraft = {
   department: string;
   topic: string;
   term: "" | "first" | "second" | "third";
-  week: number | "";
   difficulty: number;
   stem: string;
   options: string[];
@@ -36,7 +35,6 @@ const blankDraft = (): QuestionDraft => ({
   department: "general",
   topic: "",
   term: "",
-  week: "",
   difficulty: 2,
   stem: "",
   options: ["", "", "", ""],
@@ -51,7 +49,6 @@ const CSV_COLUMNS = [
   "classLevel",
   "topic",
   "term",
-  "week",
   "difficulty",
   "stem",
   "optionA",
@@ -83,11 +80,7 @@ export default function CbtQuestionManager({ onChanged }: { onChanged: () => voi
       const response = await fetch("/api/admin/cbt/questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...draft,
-          term: draft.term || null,
-          week: draft.term && draft.week !== "" ? Number(draft.week) : null,
-        }),
+        body: JSON.stringify({ ...draft, term: draft.term || null }),
       });
       const payload = await readJsonResponse<{ error?: string }>(response);
       if (!response.ok) throw new Error(payload.error || "Unable to add the question.");
@@ -122,9 +115,7 @@ export default function CbtQuestionManager({ onChanged }: { onChanged: () => voi
         throw new Error(`CSV parsing failed near row ${parsed.errors[0]?.row ?? "?"}.`);
       }
       const fields = parsed.meta.fields ?? [];
-      const missing = CSV_COLUMNS.filter(
-        (column) => !["term", "week"].includes(column) && !fields.includes(column),
-      );
+      const missing = CSV_COLUMNS.filter((column) => column !== "term" && !fields.includes(column));
       if (missing.length) throw new Error(`CSV is missing columns: ${missing.join(", ")}.`);
       const rows = parsed.data.filter((row) => Object.values(row).some((value) => value?.trim()));
       if (!rows.length) throw new Error("The CSV has no question rows.");
@@ -256,11 +247,7 @@ export default function CbtQuestionManager({ onChanged }: { onChanged: () => voi
             <select
               value={draft.term}
               onChange={(event) =>
-                setDraft({
-                  ...draft,
-                  term: event.target.value as QuestionDraft["term"],
-                  week: event.target.value ? draft.week : "",
-                })
+                setDraft({ ...draft, term: event.target.value as QuestionDraft["term"] })
               }
               className="mt-1 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--input-text)]"
             >
@@ -269,25 +256,6 @@ export default function CbtQuestionManager({ onChanged }: { onChanged: () => voi
               <option value="second">Second term</option>
               <option value="third">Third term</option>
             </select>
-          </label>
-          <label className="text-xs font-semibold text-[var(--text-muted)]">
-            Week within term
-            <input
-              type="number"
-              min={1}
-              max={52}
-              step={1}
-              value={draft.week}
-              disabled={!draft.term}
-              onChange={(event) =>
-                setDraft({
-                  ...draft,
-                  week: event.target.value ? Number(event.target.value) : "",
-                })
-              }
-              placeholder={draft.term ? "e.g. 1" : "Choose a term first"}
-              className="mt-1 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--input-text)] disabled:opacity-50"
-            />
           </label>
           <label className="text-xs font-semibold text-[var(--text-muted)]">
             Topic
@@ -423,9 +391,8 @@ export default function CbtQuestionManager({ onChanged }: { onChanged: () => voi
         </button>
         <p className="text-[11px] leading-relaxed text-[var(--text-muted)]">
           Required headers: subjectSlug, subjectName, classLevel, topic, difficulty, stem, optionA,
-          optionB, optionC, optionD, correctIndex, explanation. Optional: term (first/second/third),
-          week (1–52; requires term). Each batch is capped at 200 rows; imports support up to 25,000
-          rows.
+          optionB, optionC, optionD, correctIndex, explanation. Optional: term (first/second/third).
+          Each batch is capped at 200 rows; imports support up to 25,000 rows.
         </p>
       </div>
     </section>

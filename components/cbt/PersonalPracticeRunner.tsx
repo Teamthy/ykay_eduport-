@@ -55,8 +55,6 @@ type SessionPayload = {
     classLevel: string | null;
     practiceMode: string | null;
     topic: string | null;
-    term: string | null;
-    week: number | null;
     isTimed: boolean;
     deadlineAt: string | null;
     secondsLeft: number | null;
@@ -353,8 +351,6 @@ export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
             {formatLabel(session.classLevel)} · {formatLabel(session.practiceMode)} practice
           </p>
           <p className="mt-1 truncate text-xs text-[var(--text-muted)]">
-            {session.term ? `${formatLabel(session.term)} term` : "All terms"} ·{" "}
-            {session.week ? `Week ${session.week}` : "All weeks"} ·{" "}
             {session.topic || questions[0]?.subjectName} · {answeredCount} of {questions.length}{" "}
             checked
           </p>

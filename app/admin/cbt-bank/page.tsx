@@ -22,7 +22,6 @@ type Question = {
   id: string;
   topic: string;
   term: "first" | "second" | "third" | null;
-  week: number | null;
   difficulty: number;
   stem: string;
   options: unknown;
@@ -42,7 +41,6 @@ type ReviewForm = {
   notes: string;
   topic: string;
   term: "first" | "second" | "third" | null;
-  week: number | null;
   difficulty: number;
   stem: string;
   options: string[];
@@ -130,7 +128,6 @@ export default function CbtBankReviewPage() {
               notes: question.reviewNotes ?? "",
               topic: question.topic,
               term: question.term,
-              week: question.week,
               difficulty: question.difficulty,
               stem: question.stem,
               options: optionList(question.options),
@@ -161,7 +158,6 @@ export default function CbtBankReviewPage() {
       notes: "",
       topic: question.topic,
       term: question.term,
-      week: question.week,
       difficulty: question.difficulty,
       stem: question.stem,
       options: optionList(question.options),
@@ -184,7 +180,6 @@ export default function CbtBankReviewPage() {
                 question: {
                   topic: form.topic,
                   term: form.term,
-                  week: form.week,
                   difficulty: form.difficulty,
                   stem: form.stem,
                   options: form.options,
@@ -273,7 +268,6 @@ export default function CbtBankReviewPage() {
         body: JSON.stringify({
           topic: form.topic,
           term: form.term,
-          week: form.week,
           difficulty: form.difficulty,
           stem: form.stem,
           options: form.options,
@@ -609,7 +603,6 @@ export default function CbtBankReviewPage() {
                             {question.subject.name} · {question.subject.classLevel.toUpperCase()} ·{" "}
                             {question.topic} ·{" "}
                             {question.term ? `${question.term} term` : "term unassigned"}
-                            {question.week ? ` · week ${question.week}` : ""}
                           </p>
                           <p className="mt-1 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                             Difficulty {question.difficulty}/3 · {question.source} ·{" "}
@@ -656,7 +649,6 @@ export default function CbtBankReviewPage() {
                               [question.id]: {
                                 ...form,
                                 term: (event.target.value || null) as ReviewForm["term"],
-                                week: event.target.value ? form.week : null,
                               },
                             }))
                           }
@@ -667,29 +659,6 @@ export default function CbtBankReviewPage() {
                           <option value="second">Second term</option>
                           <option value="third">Third term</option>
                         </select>
-                      </label>
-                      <label>
-                        <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                          Week within term
-                        </span>
-                        <input
-                          type="number"
-                          min={1}
-                          max={52}
-                          step={1}
-                          value={form.week ?? ""}
-                          disabled={status !== "draft" || !form.term}
-                          onChange={(event) =>
-                            setForms((current) => ({
-                              ...current,
-                              [question.id]: {
-                                ...form,
-                                week: event.target.value ? Number(event.target.value) : null,
-                              },
-                            }))
-                          }
-                          className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2.5 text-sm text-[var(--input-text)] disabled:opacity-60"
-                        />
                       </label>
                       <label>
                         <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">

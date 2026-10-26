@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Create a non-generative work queue for term/topic extraction.
+"""Create a term/topic work queue from the verified class/subject checklist.
 
-This only expands the verified class/subject checklist into term slots. It does
-not add topics, infer terms for legacy questions, or create question content.
+This intentionally contains no week field. It does not invent topics, infer
+term assignments for legacy questions, or generate question content.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ def main() -> int:
             "level": level,
             "subject": subject,
             "term": term,
-            "weeks": [],
+            "topics": [],
             "status": "pending_source_mapping",
             "sourceReference": None,
         }
@@ -39,8 +39,8 @@ def main() -> int:
     document = {
         "schemaVersion": 1,
         "source": source["source"],
-        "status": "scaffold_only_not_ready_for_question_generation",
-        "topicRequirements": "For each term, copy the scheme's week numbers and topic labels with source references; do not infer weeks or topics.",
+        "status": "term_topic_scaffold_only_not_ready_for_question_generation",
+        "topicRequirements": "Copy exact topic labels into each class/subject/term entry from the supplied scheme and retain a citation; do not infer missing topics.",
         "entries": entries,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -49,7 +49,7 @@ def main() -> int:
         encoding="utf-8",
     )
     pending = sum(entry["status"] == "pending_source_mapping" for entry in entries)
-    print(f"Wrote {args.output}: {len(entries)} term slots; {pending} pending; 0 weeks or topics invented.")
+    print(f"Wrote {args.output}: {len(entries)} term slots; {pending} pending; no weeks or topics invented.")
     return 0
 
 
