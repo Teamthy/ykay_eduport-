@@ -7,7 +7,7 @@ import { assertNotImpersonating, requireRoleOr503 } from "@/lib/session";
 export const dynamic = "force-dynamic";
 
 const reviewContentSchema = z.object({
-  topic: z.string().trim().min(2).max(120),
+  topic: z.string().trim().min(2).max(240),
   term: z.enum(["first", "second", "third"]).nullable().optional(),
   difficulty: z.number().int().min(1).max(3),
   stem: z.string().trim().min(5).max(4000),

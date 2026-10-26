@@ -53,6 +53,15 @@ describe("planBankCsv", () => {
     expect(plan.subjects[0]?.rows[0]?.data.term).toBe("second");
   });
 
+  it("accepts exact long curriculum topic labels up to 240 characters", () => {
+    const topic = `${"Source-backed topic segment ".repeat(8)}source label`.slice(0, 200);
+    const plan = planBankCsv([HEADER, row({ topic, term: "first" })].join("\n"));
+
+    expect(plan.rejected).toEqual([]);
+    expect(plan.subjects[0]?.rows[0]?.data.topic).toBe(topic);
+    expect(plan.subjects[0]?.rows[0]?.data.term).toBe("first");
+  });
+
   it("rejects an unrecognised term label rather than guessing", () => {
     const plan = planBankCsv([HEADER, row({ term: "midyear" })].join("\n"));
     expect(plan.rejected[0]?.reason).toContain("term");

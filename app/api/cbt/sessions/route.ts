@@ -13,7 +13,7 @@ const startSchema = z.object({
   practiceMode: z.enum(["topic", "subject", "mixed"]),
   term: z.enum(["all", "first", "second", "third"]).default("all"),
   subjectSlugs: z.array(z.string().trim().min(1).max(100)).min(1).max(20),
-  topic: z.string().trim().max(120).nullable().optional(),
+  topic: z.string().trim().max(240).nullable().optional(),
   questionCount: z.number().int().min(1).max(60),
   durationMinutes: z.number().int().min(0).max(120).default(0),
 });

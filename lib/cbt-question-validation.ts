@@ -14,7 +14,7 @@ export const cbtQuestionDraftSchema = z.object({
   subjectName: z.string().trim().min(2).max(120),
   classLevel: z.enum(CBT_CLASS_LEVELS),
   department: z.string().trim().min(1).max(60).optional(),
-  topic: z.string().trim().min(2).max(120),
+  topic: z.string().trim().min(2).max(240),
   term: termSchema,
   difficulty: z.coerce.number().int().min(1).max(3).default(2),
   stem: z.string().trim().min(5).max(4000),
@@ -25,7 +25,7 @@ export const cbtQuestionDraftSchema = z.object({
 });
 
 export const cbtQuestionEditableSchema = z.object({
-  topic: z.string().trim().min(2).max(120),
+  topic: z.string().trim().min(2).max(240),
   term: termSchema,
   difficulty: z.coerce.number().int().min(1).max(3),
   stem: z.string().trim().min(5).max(4000),

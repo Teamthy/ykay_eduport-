@@ -262,6 +262,7 @@ export default function CbtQuestionManager({ onChanged }: { onChanged: () => voi
             <input
               required
               minLength={2}
+              maxLength={240}
               value={draft.topic}
               onChange={(event) => setDraft({ ...draft, topic: event.target.value })}
               className="mt-1 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--input-text)]"

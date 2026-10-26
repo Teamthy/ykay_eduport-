@@ -1,0 +1,3335 @@
+{
+  "status": "drafts_generated_not_reviewed",
+  "baseBank": "prisma/cbt-bank-10k-draft.csv",
+  "baseRows": 10000,
+  "baseBankExactSubjectPairsPresent": 24,
+  "baseBankExactSubjectPairsMissing": [
+    {
+      "level": "jss1",
+      "subject": "Beauty and Cosmetology"
+    },
+    {
+      "level": "jss1",
+      "subject": "Business Studies"
+    },
+    {
+      "level": "jss1",
+      "subject": "Christian Religious Studies"
+    },
+    {
+      "level": "jss1",
+      "subject": "Computer Hardware and GSM Repairs"
+    },
+    {
+      "level": "jss1",
+      "subject": "Cultural and Creative Arts"
+    },
+    {
+      "level": "jss1",
+      "subject": "Digital Technologies"
+    },
+    {
+      "level": "jss1",
+      "subject": "English Studies"
+    },
+    {
+      "level": "jss1",
+      "subject": "Fashion Design and Garment Making"
+    },
+    {
+      "level": "jss1",
+      "subject": "French"
+    },
+    {
+      "level": "jss1",
+      "subject": "Horticulture and Crop Production"
+    },
+    {
+      "level": "jss1",
+      "subject": "Intermediate Science"
+    },
+    {
+      "level": "jss1",
+      "subject": "Islamic Studies"
+    },
+    {
+      "level": "jss1",
+      "subject": "Livestock Farming"
+    },
+    {
+      "level": "jss1",
+      "subject": "Nigerian History"
+    },
+    {
+      "level": "jss1",
+      "subject": "Physical and Health Education"
+    },
+    {
+      "level": "jss1",
+      "subject": "Social and Citizenship Studies"
+    },
+    {
+      "level": "jss1",
+      "subject": "Solar Photovoltaic Installation and Maintenance"
+    },
+    {
+      "level": "jss2",
+      "subject": "Beauty and Cosmetology"
+    },
+    {
+      "level": "jss2",
+      "subject": "Business Studies"
+    },
+    {
+      "level": "jss2",
+      "subject": "Christian Religious Studies"
+    },
+    {
+      "level": "jss2",
+      "subject": "Computer Hardware and GSM Repairs"
+    },
+    {
+      "level": "jss2",
+      "subject": "Cultural and Creative Arts"
+    },
+    {
+      "level": "jss2",
+      "subject": "Digital Technologies"
+    },
+    {
+      "level": "jss2",
+      "subject": "English Studies"
+    },
+    {
+      "level": "jss2",
+      "subject": "Fashion Design and Garment Making"
+    },
+    {
+      "level": "jss2",
+      "subject": "French"
+    },
+    {
+      "level": "jss2",
+      "subject": "Horticulture and Crop Production"
+    },
+    {
+      "level": "jss2",
+      "subject": "Intermediate Science"
+    },
+    {
+      "level": "jss2",
+      "subject": "Islamic Studies"
+    },
+    {
+      "level": "jss2",
+      "subject": "Livestock Farming"
+    },
+    {
+      "level": "jss2",
+      "subject": "Nigerian History"
+    },
+    {
+      "level": "jss2",
+      "subject": "Physical and Health Education"
+    },
+    {
+      "level": "jss2",
+      "subject": "Social and Citizenship Studies"
+    },
+    {
+      "level": "jss2",
+      "subject": "Solar Photovoltaic Installation and Maintenance"
+    },
+    {
+      "level": "jss3",
+      "subject": "Beauty and Cosmetology"
+    },
+    {
+      "level": "jss3",
+      "subject": "Business Studies"
+    },
+    {
+      "level": "jss3",
+      "subject": "Christian Religious Studies"
+    },
+    {
+      "level": "jss3",
+      "subject": "Computer Hardware and GSM Repairs"
+    },
+    {
+      "level": "jss3",
+      "subject": "Cultural and Creative Arts"
+    },
+    {
+      "level": "jss3",
+      "subject": "Digital Technologies"
+    },
+    {
+      "level": "jss3",
+      "subject": "English Studies"
+    },
+    {
+      "level": "jss3",
+      "subject": "Fashion Design and Garment Making"
+    },
+    {
+      "level": "jss3",
+      "subject": "French"
+    },
+    {
+      "level": "jss3",
+      "subject": "Horticulture and Crop Production"
+    },
+    {
+      "level": "jss3",
+      "subject": "Intermediate Science"
+    },
+    {
+      "level": "jss3",
+      "subject": "Islamic Studies"
+    },
+    {
+      "level": "jss3",
+      "subject": "Livestock Farming"
+    },
+    {
+      "level": "jss3",
+      "subject": "Nigerian History"
+    },
+    {
+      "level": "jss3",
+      "subject": "Physical and Health Education"
+    },
+    {
+      "level": "jss3",
+      "subject": "Social and Citizenship Studies"
+    },
+    {
+      "level": "jss3",
+      "subject": "Solar Photovoltaic Installation and Maintenance"
+    },
+    {
+      "level": "ss1",
+      "subject": "Accounting"
+    },
+    {
+      "level": "ss1",
+      "subject": "Agriculture"
+    },
+    {
+      "level": "ss1",
+      "subject": "Beauty and Cosmetology"
+    },
+    {
+      "level": "ss1",
+      "subject": "Catering Craft"
+    },
+    {
+      "level": "ss1",
+      "subject": "Christian Religious Studies"
+    },
+    {
+      "level": "ss1",
+      "subject": "Citizenship and Heritage Studies"
+    },
+    {
+      "level": "ss1",
+      "subject": "Commerce"
+    },
+    {
+      "level": "ss1",
+      "subject": "Computer Hardware and GSM Repairs"
+    },
+    {
+      "level": "ss1",
+      "subject": "Digital Technologies"
+    },
+    {
+      "level": "ss1",
+      "subject": "Fashion Design and Garment Making"
+    },
+    {
+      "level": "ss1",
+      "subject": "Foods & Nutrition"
+    },
+    {
+      "level": "ss1",
+      "subject": "Further Mathematics"
+    },
+    {
+      "level": "ss1",
+      "subject": "General Mathematics"
+    },
+    {
+      "level": "ss1",
+      "subject": "Geography"
+    },
+    {
+      "level": "ss1",
+      "subject": "Horticulture and Crop Production"
+    },
+    {
+      "level": "ss1",
+      "subject": "Livestock Farming"
+    },
+    {
+      "level": "ss1",
+      "subject": "Marketing"
+    },
+    {
+      "level": "ss1",
+      "subject": "Nigerian History"
+    },
+    {
+      "level": "ss1",
+      "subject": "Solar Photovoltaic Installation and Maintenance"
+    },
+    {
+      "level": "ss1",
+      "subject": "Technical Drawing"
+    },
+    {
+      "level": "ss1",
+      "subject": "Visual Arts"
+    },
+    {
+      "level": "ss2",
+      "subject": "Accounting"
+    },
+    {
+      "level": "ss2",
+      "subject": "Agriculture"
+    },
+    {
+      "level": "ss2",
+      "subject": "Beauty and Cosmetology"
+    },
+    {
+      "level": "ss2",
+      "subject": "Catering Craft"
+    },
+    {
+      "level": "ss2",
+      "subject": "Christian Religious Studies"
+    },
+    {
+      "level": "ss2",
+      "subject": "Citizenship and Heritage Studies"
+    },
+    {
+      "level": "ss2",
+      "subject": "Commerce"
+    },
+    {
+      "level": "ss2",
+      "subject": "Computer Hardware and GSM Repairs"
+    },
+    {
+      "level": "ss2",
+      "subject": "Digital Technologies"
+    },
+    {
+      "level": "ss2",
+      "subject": "Fashion Design and Garment Making"
+    },
+    {
+      "level": "ss2",
+      "subject": "Foods & Nutrition"
+    },
+    {
+      "level": "ss2",
+      "subject": "Further Mathematics"
+    },
+    {
+      "level": "ss2",
+      "subject": "General Mathematics"
+    },
+    {
+      "level": "ss2",
+      "subject": "Geography"
+    },
+    {
+      "level": "ss2",
+      "subject": "Horticulture and Crop Production"
+    },
+    {
+      "level": "ss2",
+      "subject": "Livestock Farming"
+    },
+    {
+      "level": "ss2",
+      "subject": "Marketing"
+    },
+    {
+      "level": "ss2",
+      "subject": "Nigerian History"
+    },
+    {
+      "level": "ss2",
+      "subject": "Solar Photovoltaic Installation and Maintenance"
+    },
+    {
+      "level": "ss2",
+      "subject": "Technical Drawing"
+    },
+    {
+      "level": "ss2",
+      "subject": "Visual Arts"
+    },
+    {
+      "level": "ss3",
+      "subject": "Accounting"
+    },
+    {
+      "level": "ss3",
+      "subject": "Agriculture"
+    },
+    {
+      "level": "ss3",
+      "subject": "Beauty and Cosmetology"
+    },
+    {
+      "level": "ss3",
+      "subject": "Catering Craft"
+    },
+    {
+      "level": "ss3",
+      "subject": "Christian Religious Studies"
+    },
+    {
+      "level": "ss3",
+      "subject": "Citizenship and Heritage Studies"
+    },
+    {
+      "level": "ss3",
+      "subject": "Commerce"
+    },
+    {
+      "level": "ss3",
+      "subject": "Computer Hardware and GSM Repairs"
+    },
+    {
+      "level": "ss3",
+      "subject": "Digital Technologies"
+    },
+    {
+      "level": "ss3",
+      "subject": "Fashion Design and Garment Making"
+    },
+    {
+      "level": "ss3",
+      "subject": "Foods & Nutrition"
+    },
+    {
+      "level": "ss3",
+      "subject": "Further Mathematics"
+    },
+    {
+      "level": "ss3",
+      "subject": "General Mathematics"
+    },
+    {
+      "level": "ss3",
+      "subject": "Geography"
+    },
+    {
+      "level": "ss3",
+      "subject": "Horticulture and Crop Production"
+    },
+    {
+      "level": "ss3",
+      "subject": "Livestock Farming"
+    },
+    {
+      "level": "ss3",
+      "subject": "Marketing"
+    },
+    {
+      "level": "ss3",
+      "subject": "Nigerian History"
+    },
+    {
+      "level": "ss3",
+      "subject": "Solar Photovoltaic Installation and Maintenance"
+    },
+    {
+      "level": "ss3",
+      "subject": "Technical Drawing"
+    },
+    {
+      "level": "ss3",
+      "subject": "Visual Arts"
+    }
+  ],
+  "baseBankAliasHandling": "exact class/subject identity only; no legacy subject aliases inferred",
+  "generatedRows": 9796,
+  "mergedRows": 19796,
+  "eligibleSourceTopics": 3281,
+  "eligibleTopicModes": {
+    "source_detail": 3268,
+    "topic_reference_only": 13
+  },
+  "questionsPerEligibleTopic": "2 or 3; ambiguous source-detail mappings omit the topic-identification item",
+  "ambiguousTopicDetailMappings": 34,
+  "generatedQuestionCountDistribution": {
+    "2": 47,
+    "3": 3234
+  },
+  "newQuestionSource": "curriculum-map-draft",
+  "baseQuestionTermsAssigned": 0,
+  "baseQuestionTermHandling": "blank/unassigned terms are preserved; no existing term is inferred",
+  "excludedTopicRows": 1897,
+  "exclusionReasons": {
+    "source row contains only a placeholder dash, not a topic detail": 34,
+    "administrative assessment, revision, break, or closing row": 1863
+  },
+  "sourceEntriesWithoutTopics": [
+    {
+      "level": "jss3",
+      "subject": "Christian Religious Studies",
+      "term": "third"
+    },
+    {
+      "level": "jss3",
+      "subject": "French",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "English Language",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "General Mathematics",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Biology",
+      "term": "second"
+    },
+    {
+      "level": "ss3",
+      "subject": "Biology",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Physics",
+      "term": "second"
+    },
+    {
+      "level": "ss3",
+      "subject": "Physics",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Agriculture",
+      "term": "second"
+    },
+    {
+      "level": "ss3",
+      "subject": "Agriculture",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Further Mathematics",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Foods & Nutrition",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Geography",
+      "term": "second"
+    },
+    {
+      "level": "ss3",
+      "subject": "Geography",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Technical Drawing",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Government",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Christian Religious Studies",
+      "term": "second"
+    },
+    {
+      "level": "ss3",
+      "subject": "Christian Religious Studies",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Visual Arts",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Literature in English",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Catering Craft",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Accounting",
+      "term": "second"
+    },
+    {
+      "level": "ss3",
+      "subject": "Accounting",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Commerce",
+      "term": "second"
+    },
+    {
+      "level": "ss3",
+      "subject": "Commerce",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Marketing",
+      "term": "third"
+    },
+    {
+      "level": "ss3",
+      "subject": "Economics",
+      "term": "third"
+    }
+  ],
+  "coverageByClassSubjectTerm": [
+    {
+      "level": "jss1",
+      "subject": "beauty and cosmetology",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss1",
+      "subject": "beauty and cosmetology",
+      "term": "second",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss1",
+      "subject": "beauty and cosmetology",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "business studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "business studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "business studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "christian religious studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "christian religious studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "christian religious studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "computer hardware and gsm repairs",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "computer hardware and gsm repairs",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "computer hardware and gsm repairs",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "cultural and creative arts",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "jss1",
+      "subject": "cultural and creative arts",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "jss1",
+      "subject": "cultural and creative arts",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "digital technologies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "digital technologies",
+      "term": "second",
+      "generatedQuestionCount": 23,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "digital technologies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "english studies",
+      "term": "first",
+      "generatedQuestionCount": 183,
+      "eligibleTopicCount": 61
+    },
+    {
+      "level": "jss1",
+      "subject": "english studies",
+      "term": "second",
+      "generatedQuestionCount": 144,
+      "eligibleTopicCount": 48
+    },
+    {
+      "level": "jss1",
+      "subject": "english studies",
+      "term": "third",
+      "generatedQuestionCount": 156,
+      "eligibleTopicCount": 52
+    },
+    {
+      "level": "jss1",
+      "subject": "fashion design and garment making",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss1",
+      "subject": "fashion design and garment making",
+      "term": "second",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss1",
+      "subject": "fashion design and garment making",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "french",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "french",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "french",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "jss1",
+      "subject": "horticulture and crop production",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "horticulture and crop production",
+      "term": "second",
+      "generatedQuestionCount": 23,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "horticulture and crop production",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "intermediate science",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "intermediate science",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "intermediate science",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "islamic studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "islamic studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "islamic studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "livestock farming",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "livestock farming",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "livestock farming",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "mathematics",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "mathematics",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "mathematics",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "nigerian history",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "nigerian history",
+      "term": "second",
+      "generatedQuestionCount": 22,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "nigerian history",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "physical and health education",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "physical and health education",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "physical and health education",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "social and citizenship studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "social and citizenship studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "social and citizenship studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss1",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "beauty and cosmetology",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss2",
+      "subject": "beauty and cosmetology",
+      "term": "second",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss2",
+      "subject": "beauty and cosmetology",
+      "term": "third",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss2",
+      "subject": "business studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "business studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "business studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "christian religious studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "christian religious studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "christian religious studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "computer hardware and gsm repairs",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "computer hardware and gsm repairs",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "computer hardware and gsm repairs",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "jss2",
+      "subject": "cultural and creative arts",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "cultural and creative arts",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "cultural and creative arts",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "digital technologies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "digital technologies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "digital technologies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "english studies",
+      "term": "first",
+      "generatedQuestionCount": 120,
+      "eligibleTopicCount": 40
+    },
+    {
+      "level": "jss2",
+      "subject": "english studies",
+      "term": "second",
+      "generatedQuestionCount": 135,
+      "eligibleTopicCount": 45
+    },
+    {
+      "level": "jss2",
+      "subject": "english studies",
+      "term": "third",
+      "generatedQuestionCount": 93,
+      "eligibleTopicCount": 31
+    },
+    {
+      "level": "jss2",
+      "subject": "fashion design and garment making",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss2",
+      "subject": "fashion design and garment making",
+      "term": "second",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss2",
+      "subject": "fashion design and garment making",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "french",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "french",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "french",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "horticulture and crop production",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "horticulture and crop production",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "horticulture and crop production",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "intermediate science",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "intermediate science",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "intermediate science",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "islamic studies",
+      "term": "first",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "jss2",
+      "subject": "islamic studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "islamic studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "livestock farming",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "livestock farming",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "livestock farming",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "mathematics",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss2",
+      "subject": "mathematics",
+      "term": "second",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss2",
+      "subject": "mathematics",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "jss2",
+      "subject": "nigerian history",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "nigerian history",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "nigerian history",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "physical and health education",
+      "term": "first",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "jss2",
+      "subject": "physical and health education",
+      "term": "second",
+      "generatedQuestionCount": 15,
+      "eligibleTopicCount": 5
+    },
+    {
+      "level": "jss2",
+      "subject": "physical and health education",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "social and citizenship studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "social and citizenship studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "social and citizenship studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss2",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "beauty and cosmetology",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "beauty and cosmetology",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "beauty and cosmetology",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "business studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "business studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "business studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "christian religious studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "christian religious studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "computer hardware and gsm repairs",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "jss3",
+      "subject": "computer hardware and gsm repairs",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "jss3",
+      "subject": "computer hardware and gsm repairs",
+      "term": "third",
+      "generatedQuestionCount": 9,
+      "eligibleTopicCount": 3
+    },
+    {
+      "level": "jss3",
+      "subject": "cultural and creative arts",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "cultural and creative arts",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "cultural and creative arts",
+      "term": "third",
+      "generatedQuestionCount": 12,
+      "eligibleTopicCount": 4
+    },
+    {
+      "level": "jss3",
+      "subject": "digital technologies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "digital technologies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "digital technologies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "english studies",
+      "term": "first",
+      "generatedQuestionCount": 81,
+      "eligibleTopicCount": 27
+    },
+    {
+      "level": "jss3",
+      "subject": "english studies",
+      "term": "second",
+      "generatedQuestionCount": 69,
+      "eligibleTopicCount": 23
+    },
+    {
+      "level": "jss3",
+      "subject": "english studies",
+      "term": "third",
+      "generatedQuestionCount": 40,
+      "eligibleTopicCount": 14
+    },
+    {
+      "level": "jss3",
+      "subject": "fashion design and garment making",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "fashion design and garment making",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "fashion design and garment making",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "jss3",
+      "subject": "french",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "french",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "horticulture and crop production",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "horticulture and crop production",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "horticulture and crop production",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "intermediate science",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "intermediate science",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "intermediate science",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "islamic studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "islamic studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "islamic studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "livestock farming",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "livestock farming",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "livestock farming",
+      "term": "third",
+      "generatedQuestionCount": 12,
+      "eligibleTopicCount": 4
+    },
+    {
+      "level": "jss3",
+      "subject": "mathematics",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "jss3",
+      "subject": "mathematics",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "mathematics",
+      "term": "third",
+      "generatedQuestionCount": 10,
+      "eligibleTopicCount": 4
+    },
+    {
+      "level": "jss3",
+      "subject": "nigerian history",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "nigerian history",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "nigerian history",
+      "term": "third",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "jss3",
+      "subject": "physical and health education",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "physical and health education",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "physical and health education",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "social and citizenship studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "social and citizenship studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "jss3",
+      "subject": "social and citizenship studies",
+      "term": "third",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "jss3",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "jss3",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "jss3",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "accounting",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "accounting",
+      "term": "second",
+      "generatedQuestionCount": 22,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "accounting",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "agriculture",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss1",
+      "subject": "agriculture",
+      "term": "second",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss1",
+      "subject": "agriculture",
+      "term": "third",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss1",
+      "subject": "beauty and cosmetology",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "beauty and cosmetology",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "beauty and cosmetology",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "biology",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "biology",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "biology",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "catering craft",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss1",
+      "subject": "catering craft",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "catering craft",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "chemistry",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss1",
+      "subject": "chemistry",
+      "term": "second",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss1",
+      "subject": "chemistry",
+      "term": "third",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss1",
+      "subject": "christian religious studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "christian religious studies",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "christian religious studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "citizenship and heritage studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "citizenship and heritage studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "citizenship and heritage studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "commerce",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "commerce",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "commerce",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "computer hardware and gsm repairs",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "computer hardware and gsm repairs",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "computer hardware and gsm repairs",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "digital technologies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "digital technologies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "digital technologies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "economics",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "economics",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "economics",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "english language",
+      "term": "first",
+      "generatedQuestionCount": 30,
+      "eligibleTopicCount": 10
+    },
+    {
+      "level": "ss1",
+      "subject": "english language",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "english language",
+      "term": "third",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "ss1",
+      "subject": "fashion design and garment making",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "fashion design and garment making",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "fashion design and garment making",
+      "term": "third",
+      "generatedQuestionCount": 23,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "foods nutrition",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss1",
+      "subject": "foods nutrition",
+      "term": "second",
+      "generatedQuestionCount": 30,
+      "eligibleTopicCount": 10
+    },
+    {
+      "level": "ss1",
+      "subject": "foods nutrition",
+      "term": "third",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss1",
+      "subject": "further mathematics",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "further mathematics",
+      "term": "second",
+      "generatedQuestionCount": 15,
+      "eligibleTopicCount": 5
+    },
+    {
+      "level": "ss1",
+      "subject": "further mathematics",
+      "term": "third",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "ss1",
+      "subject": "general mathematics",
+      "term": "first",
+      "generatedQuestionCount": 30,
+      "eligibleTopicCount": 10
+    },
+    {
+      "level": "ss1",
+      "subject": "general mathematics",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "general mathematics",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "geography",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "geography",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "geography",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "government",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "government",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "government",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "horticulture and crop production",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "horticulture and crop production",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "horticulture and crop production",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "literature in english",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "literature in english",
+      "term": "second",
+      "generatedQuestionCount": 25,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss1",
+      "subject": "literature in english",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "livestock farming",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "livestock farming",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "livestock farming",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "marketing",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "marketing",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "marketing",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "nigerian history",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "nigerian history",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "nigerian history",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "physics",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "physics",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "physics",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "technical drawing",
+      "term": "first",
+      "generatedQuestionCount": 30,
+      "eligibleTopicCount": 10
+    },
+    {
+      "level": "ss1",
+      "subject": "technical drawing",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss1",
+      "subject": "technical drawing",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss1",
+      "subject": "visual arts",
+      "term": "first",
+      "generatedQuestionCount": 30,
+      "eligibleTopicCount": 10
+    },
+    {
+      "level": "ss1",
+      "subject": "visual arts",
+      "term": "second",
+      "generatedQuestionCount": 30,
+      "eligibleTopicCount": 10
+    },
+    {
+      "level": "ss1",
+      "subject": "visual arts",
+      "term": "third",
+      "generatedQuestionCount": 30,
+      "eligibleTopicCount": 10
+    },
+    {
+      "level": "ss2",
+      "subject": "accounting",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "accounting",
+      "term": "second",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "ss2",
+      "subject": "accounting",
+      "term": "third",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "ss2",
+      "subject": "agriculture",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss2",
+      "subject": "agriculture",
+      "term": "second",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss2",
+      "subject": "agriculture",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "beauty and cosmetology",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "beauty and cosmetology",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "beauty and cosmetology",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "biology",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "biology",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "biology",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "catering craft",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "catering craft",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "catering craft",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "chemistry",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss2",
+      "subject": "chemistry",
+      "term": "second",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss2",
+      "subject": "chemistry",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "christian religious studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "christian religious studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "christian religious studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "citizenship and heritage studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "citizenship and heritage studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "citizenship and heritage studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "commerce",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "commerce",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "commerce",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "computer hardware and gsm repairs",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "computer hardware and gsm repairs",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "computer hardware and gsm repairs",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "digital technologies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "digital technologies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "digital technologies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "economics",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "economics",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "economics",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "english language",
+      "term": "first",
+      "generatedQuestionCount": 15,
+      "eligibleTopicCount": 5
+    },
+    {
+      "level": "ss2",
+      "subject": "english language",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "english language",
+      "term": "third",
+      "generatedQuestionCount": 36,
+      "eligibleTopicCount": 18
+    },
+    {
+      "level": "ss2",
+      "subject": "fashion design and garment making",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "fashion design and garment making",
+      "term": "second",
+      "generatedQuestionCount": 23,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "fashion design and garment making",
+      "term": "third",
+      "generatedQuestionCount": 23,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "foods nutrition",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "foods nutrition",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "foods nutrition",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "further mathematics",
+      "term": "first",
+      "generatedQuestionCount": 33,
+      "eligibleTopicCount": 11
+    },
+    {
+      "level": "ss2",
+      "subject": "further mathematics",
+      "term": "second",
+      "generatedQuestionCount": 33,
+      "eligibleTopicCount": 11
+    },
+    {
+      "level": "ss2",
+      "subject": "further mathematics",
+      "term": "third",
+      "generatedQuestionCount": 33,
+      "eligibleTopicCount": 11
+    },
+    {
+      "level": "ss2",
+      "subject": "general mathematics",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "general mathematics",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "general mathematics",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "geography",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "geography",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "geography",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "government",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "government",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "government",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "horticulture and crop production",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "horticulture and crop production",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "horticulture and crop production",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "literature in english",
+      "term": "first",
+      "generatedQuestionCount": 9,
+      "eligibleTopicCount": 3
+    },
+    {
+      "level": "ss2",
+      "subject": "literature in english",
+      "term": "second",
+      "generatedQuestionCount": 9,
+      "eligibleTopicCount": 3
+    },
+    {
+      "level": "ss2",
+      "subject": "literature in english",
+      "term": "third",
+      "generatedQuestionCount": 9,
+      "eligibleTopicCount": 3
+    },
+    {
+      "level": "ss2",
+      "subject": "livestock farming",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "livestock farming",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "livestock farming",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "marketing",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "marketing",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "marketing",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "nigerian history",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "nigerian history",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "nigerian history",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "physics",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "physics",
+      "term": "second",
+      "generatedQuestionCount": 19,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "physics",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "technical drawing",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss2",
+      "subject": "technical drawing",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "technical drawing",
+      "term": "third",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss2",
+      "subject": "visual arts",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss2",
+      "subject": "visual arts",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss2",
+      "subject": "visual arts",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "accounting",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss3",
+      "subject": "agriculture",
+      "term": "first",
+      "generatedQuestionCount": 30,
+      "eligibleTopicCount": 10
+    },
+    {
+      "level": "ss3",
+      "subject": "beauty and cosmetology",
+      "term": "first",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss3",
+      "subject": "beauty and cosmetology",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss3",
+      "subject": "beauty and cosmetology",
+      "term": "third",
+      "generatedQuestionCount": 14,
+      "eligibleTopicCount": 5
+    },
+    {
+      "level": "ss3",
+      "subject": "biology",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "catering craft",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss3",
+      "subject": "catering craft",
+      "term": "second",
+      "generatedQuestionCount": 15,
+      "eligibleTopicCount": 5
+    },
+    {
+      "level": "ss3",
+      "subject": "chemistry",
+      "term": "first",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "ss3",
+      "subject": "chemistry",
+      "term": "second",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "ss3",
+      "subject": "chemistry",
+      "term": "third",
+      "generatedQuestionCount": 12,
+      "eligibleTopicCount": 4
+    },
+    {
+      "level": "ss3",
+      "subject": "christian religious studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "citizenship and heritage studies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "citizenship and heritage studies",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "citizenship and heritage studies",
+      "term": "third",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "commerce",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "computer hardware and gsm repairs",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "computer hardware and gsm repairs",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "computer hardware and gsm repairs",
+      "term": "third",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "ss3",
+      "subject": "digital technologies",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "digital technologies",
+      "term": "second",
+      "generatedQuestionCount": 15,
+      "eligibleTopicCount": 5
+    },
+    {
+      "level": "ss3",
+      "subject": "digital technologies",
+      "term": "third",
+      "generatedQuestionCount": 14,
+      "eligibleTopicCount": 5
+    },
+    {
+      "level": "ss3",
+      "subject": "economics",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss3",
+      "subject": "economics",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "english language",
+      "term": "first",
+      "generatedQuestionCount": 30,
+      "eligibleTopicCount": 10
+    },
+    {
+      "level": "ss3",
+      "subject": "english language",
+      "term": "second",
+      "generatedQuestionCount": 15,
+      "eligibleTopicCount": 5
+    },
+    {
+      "level": "ss3",
+      "subject": "fashion design and garment making",
+      "term": "first",
+      "generatedQuestionCount": 23,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "fashion design and garment making",
+      "term": "second",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "ss3",
+      "subject": "fashion design and garment making",
+      "term": "third",
+      "generatedQuestionCount": 5,
+      "eligibleTopicCount": 2
+    },
+    {
+      "level": "ss3",
+      "subject": "foods nutrition",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss3",
+      "subject": "foods nutrition",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss3",
+      "subject": "further mathematics",
+      "term": "first",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "ss3",
+      "subject": "further mathematics",
+      "term": "second",
+      "generatedQuestionCount": 15,
+      "eligibleTopicCount": 5
+    },
+    {
+      "level": "ss3",
+      "subject": "general mathematics",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss3",
+      "subject": "general mathematics",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "geography",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss3",
+      "subject": "government",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "government",
+      "term": "second",
+      "generatedQuestionCount": 12,
+      "eligibleTopicCount": 4
+    },
+    {
+      "level": "ss3",
+      "subject": "horticulture and crop production",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "horticulture and crop production",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "horticulture and crop production",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss3",
+      "subject": "literature in english",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "literature in english",
+      "term": "second",
+      "generatedQuestionCount": 3,
+      "eligibleTopicCount": 1
+    },
+    {
+      "level": "ss3",
+      "subject": "livestock farming",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "livestock farming",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "livestock farming",
+      "term": "third",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss3",
+      "subject": "marketing",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss3",
+      "subject": "marketing",
+      "term": "second",
+      "generatedQuestionCount": 18,
+      "eligibleTopicCount": 6
+    },
+    {
+      "level": "ss3",
+      "subject": "nigerian history",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "nigerian history",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "nigerian history",
+      "term": "third",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss3",
+      "subject": "physics",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "first",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "second",
+      "generatedQuestionCount": 21,
+      "eligibleTopicCount": 7
+    },
+    {
+      "level": "ss3",
+      "subject": "solar photovoltaic installation and maintenance",
+      "term": "third",
+      "generatedQuestionCount": 5,
+      "eligibleTopicCount": 2
+    },
+    {
+      "level": "ss3",
+      "subject": "technical drawing",
+      "term": "first",
+      "generatedQuestionCount": 20,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "technical drawing",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    },
+    {
+      "level": "ss3",
+      "subject": "visual arts",
+      "term": "first",
+      "generatedQuestionCount": 27,
+      "eligibleTopicCount": 9
+    },
+    {
+      "level": "ss3",
+      "subject": "visual arts",
+      "term": "second",
+      "generatedQuestionCount": 24,
+      "eligibleTopicCount": 8
+    }
+  ],
+  "reviewWarning": "Generated items test source-scheme mapping and are drafts, not reviewed subject-matter questions."
+}
