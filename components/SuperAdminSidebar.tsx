@@ -5,9 +5,11 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   BellRing,
+  BookOpenCheck,
   LayoutDashboard,
   LogOut,
   School,
+  Settings2,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -18,7 +20,9 @@ const NAV_ITEMS = [
   { label: "Platform overview", href: "/super-admin", icon: LayoutDashboard },
   { label: "Portal hub", href: "/super-admin/portals", icon: Users },
   { label: "Schools overview", href: "/super-admin/schools", icon: School },
+  { label: "Question bank ops", href: "/super-admin/question-bank", icon: BookOpenCheck },
   { label: "System health", href: "/super-admin/health", icon: Activity },
+  { label: "System operations", href: "/super-admin/operations", icon: Settings2 },
   { label: "Broadcast", href: "/super-admin/broadcast", icon: BellRing },
 ];
 
