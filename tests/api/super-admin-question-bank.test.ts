@@ -69,7 +69,7 @@ describe("GET /api/super-admin/question-bank", () => {
     expect(mockPrisma.cbtQuestion.count).toHaveBeenCalledWith({
       where: {
         status: "reviewed",
-        reviewedByUserId: { not: null },
+        OR: [{ reviewedByUserId: { not: null } }, { reviewedByExternalActor: { not: null } }],
         reviewedAt: { not: null },
         reviewReference: { not: null },
       },

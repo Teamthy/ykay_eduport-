@@ -23,6 +23,7 @@ if (!parsed.success) throw new Error("Test bank row must be valid.");
 const expected = parsed.data;
 const persisted = {
   topic: expected.topic,
+  term: expected.term ?? null,
   difficulty: expected.difficulty,
   stem: expected.stem,
   options: [...expected.options],
@@ -38,6 +39,7 @@ describe("seed attestation source matching", () => {
 
   it.each([
     ["topic", { topic: "Different topic" }],
+    ["term", { term: "first" }],
     ["difficulty", { difficulty: 3 }],
     ["stem", { stem: "A different question stem." }],
     ["options", { options: ["70599", "800", "598", "811"] }],

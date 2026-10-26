@@ -1,10 +1,10 @@
 /**
  * CBT seed — the shared question bank.
  *
- * Imports questions as DRAFT content. The bank may be factually reviewed, but
- * student visibility still requires an explicit, attributable attestation by an
- * authorized reviewer (see /admin/cbt-bank). This workflow only attests exact
- * question records represented in the input file.
+ * Imports questions as DRAFT content. Student visibility still requires an
+ * explicit review attestation. Workflow attestations identify the external
+ * GitHub actor and never map them to an in-app account; only exact matching,
+ * structurally valid source rows are made visible.
  *
  * Usage:
  *   npm run cbt:seed                    # prisma/cbt-bank.csv, non-staging target
@@ -19,15 +19,13 @@
  * Safe to re-run: subjects are upserted by slug and existing stems are skipped.
  *
  * ATTESTATION (optional, explicit):
- *   CBT_ATTEST_EMAIL=<reviewer account email>
+ *   CBT_ATTEST_ACTOR=<GitHub workflow actor>
  *   CBT_ATTEST_REFERENCE=<citation for the source the bank was checked against>
- *   CBT_ATTEST_CONFIRMATION="ATTEST BANK VERIFIED"
+ *   CBT_ATTEST_CONFIRMATION="I REVIEWED THE CBT BANK"
  *
- * With all three set, every draft question in the subjects this file touches is
- * attested in the name of that account: reviewedByUserId, reviewedAt and
- * reviewReference are recorded, exactly as the admin console does, and the
- * structural gate from lib/cbt-review.ts is applied first — a malformed row is
- * left in draft and reported. Without all three, the import stays draft-only.
+ * The external workflow actor is recorded in reviewNotes and the audit log,
+ * never misattributed to an in-app user. reviewedAt and reviewReference are
+ * recorded; malformed or non-matching persisted rows remain drafts.
  * CBT_RESET=1 deletes CBT attempts, questions and subjects — only accepted along
  * with an explicit CBT_RESET_CONFIRMATION of "DELETE CBT ATTEMPTS AND QUESTIONS".
  */
@@ -79,31 +77,24 @@ function assertTargetIsSafe() {
   console.log(`Target verified as the staging branch: ${host}`);
 }
 
-const ATTEST_CONFIRMATION = "ATTEST BANK VERIFIED";
-const ATTEST_ROLES = new Set(["SUPER_ADMIN", "ADMIN", "DIRECTOR", "HOD"]);
+const ATTEST_CONFIRMATION = "I REVIEWED THE CBT BANK";
 
-/**
- * Attest imported drafts in the name of a real reviewer account.
- *
- * This is the workflow equivalent of selecting rows in /admin/cbt-bank and
- * pressing "approve": it records who checked the bank, when, and against which
- * source. It refuses to run without all three env vars, refuses a reviewer
- * account that is missing, inactive or not an academic reviewer. Only rows
- * whose persisted content exactly matches the source file can be attested;
- * mismatched, missing or structurally invalid rows are left out.
- */
+/** Attest only exact, structurally valid source rows; record the external actor verbatim. */
 type AttestationTarget = { subjectId: string; rows: BankRow[] };
 
 async function attestBank(targets: AttestationTarget[]) {
-  const email = process.env.CBT_ATTEST_EMAIL?.trim().toLowerCase();
+  const actor = process.env.CBT_ATTEST_ACTOR?.trim();
   const reference = process.env.CBT_ATTEST_REFERENCE?.trim();
   const confirmation = process.env.CBT_ATTEST_CONFIRMATION?.trim();
+  const runId = process.env.GITHUB_RUN_ID?.trim() || null;
+  const repository = process.env.GITHUB_REPOSITORY?.trim() || null;
+  const serverUrl = process.env.GITHUB_SERVER_URL?.trim() || "https://github.com";
+  const runUrl = runId && repository ? `${serverUrl}/${repository}/actions/runs/${runId}` : null;
 
-  if (!email && !reference && !confirmation) return;
-
-  if (!email || !reference || !confirmation) {
+  if (!actor && !reference && !confirmation) return;
+  if (!actor || !reference || !confirmation) {
     throw new Error(
-      "Attestation needs CBT_ATTEST_EMAIL, CBT_ATTEST_REFERENCE and CBT_ATTEST_CONFIRMATION together. Nothing was attested.",
+      "Attestation needs CBT_ATTEST_ACTOR, CBT_ATTEST_REFERENCE and CBT_ATTEST_CONFIRMATION together. Nothing was attested.",
     );
   }
   if (confirmation !== ATTEST_CONFIRMATION) {
@@ -111,22 +102,6 @@ async function attestBank(targets: AttestationTarget[]) {
   }
   if (reference.length < 10) {
     throw new Error("CBT_ATTEST_REFERENCE must name the source in at least 10 characters.");
-  }
-
-  const reviewer = await prisma.user.findFirst({
-    where: { email },
-    select: { id: true, email: true, role: true, isActive: true, schoolId: true },
-  });
-  if (!reviewer) {
-    throw new Error(
-      "CBT_ATTEST_EMAIL must match a reviewer account in the selected Staging database. No questions were attested.",
-    );
-  }
-  if (!reviewer.isActive) throw new Error("The attestation account is deactivated.");
-  if (!ATTEST_ROLES.has(String(reviewer.role))) {
-    throw new Error(
-      `The attestation account must hold one of ${[...ATTEST_ROLES].join(", ")}; it holds ${reviewer.role}.`,
-    );
   }
 
   const reviewedAt = new Date();
@@ -143,6 +118,7 @@ async function attestBank(targets: AttestationTarget[]) {
           id: true,
           stem: true,
           topic: true,
+          term: true,
           difficulty: true,
           options: true,
           correctIndex: true,
@@ -159,44 +135,37 @@ async function attestBank(targets: AttestationTarget[]) {
         if (!expected) continue;
         foundStems.add(row.stem);
         if (row.status !== "draft") continue;
-
         if (!matchesBankQuestion(row, expected)) {
           blocked += 1;
-          if (blockedSamples.length < 10) {
-            blockedSamples.push(`${row.id}: stored question differs from the reviewed bank file`);
-          }
+          if (blockedSamples.length < 10)
+            blockedSamples.push(`${row.id}: stored content differs from source row`);
           continue;
         }
-
         const reason = structuralRejectionReason(row);
         if (reason) {
           blocked += 1;
           if (blockedSamples.length < 10) blockedSamples.push(`${row.id}: ${reason}`);
-        } else {
-          allowed.push(row.id);
-        }
+        } else allowed.push(row.id);
       }
-
       for (const expected of expectedRows) {
         if (!foundStems.has(expected.stem)) {
           blocked += 1;
-          if (blockedSamples.length < 10) {
+          if (blockedSamples.length < 10)
             blockedSamples.push(
               `${expected.stem.slice(0, 80)}: matching stored question not found`,
             );
-          }
         }
       }
-
       if (allowed.length) {
         const result = await prisma.cbtQuestion.updateMany({
           where: { id: { in: allowed }, status: "draft" },
           data: {
             status: "reviewed",
-            reviewedByUserId: reviewer.id,
+            reviewedByUserId: null,
+            reviewedByExternalActor: actor,
             reviewedAt,
             reviewReference: reference,
-            reviewNotes: `Attested against ${BANK_FILE}.`,
+            reviewNotes: `Externally attested by GitHub actor @${actor}; bank ${BANK_FILE}${runUrl ? `; workflow ${runUrl}` : ""}.`,
           },
         });
         attested += result.count;
@@ -204,24 +173,23 @@ async function attestBank(targets: AttestationTarget[]) {
     }
   }
 
-  await prisma.auditLog.create({
+  await prisma.cbtBankAttestation.create({
     data: {
-      schoolId: reviewer.schoolId,
-      actorUserId: reviewer.id,
-      action: "CBT_BANK_ATTESTED_BY_SEED",
-      entityType: "CbtQuestion",
-      metadata: {
-        bankFile: BANK_FILE,
-        reference,
-        attested,
-        notAttested: blocked,
-        sample: blockedSamples,
-      },
+      bankFile: BANK_FILE,
+      reference,
+      externalActor: actor,
+      reviewedAt,
+      repository,
+      runId,
+      runUrl,
+      attestedCount: attested,
+      notAttestedCount: blocked,
+      metadata: { sample: blockedSamples },
     },
   });
 
   console.log(
-    `attested ${attested} question(s) as ${reviewer.email} against "${reference}"` +
+    `attested ${attested} question(s) by GitHub actor @${actor} at ${reviewedAt.toISOString()} against "${reference}"` +
       (blocked ? `; ${blocked} source row(s) not attested (see warnings)` : ""),
   );
   for (const sample of blockedSamples) console.warn(`  not attested — ${sample}`);
@@ -307,6 +275,7 @@ async function main() {
         data: batch.map(({ data }) => ({
           subjectId: subject.id,
           topic: data.topic,
+          term: data.term ?? null,
           difficulty: data.difficulty,
           stem: data.stem,
           options: data.options,
@@ -316,6 +285,7 @@ async function main() {
           // Imports are never reviewed by a seed job.
           status: "draft",
           reviewedByUserId: null,
+          reviewedByExternalActor: null,
           reviewedAt: null,
           reviewReference: null,
           reviewNotes: null,

@@ -9,11 +9,22 @@ export async function GET(req: NextRequest) {
   if (isResponse(user)) return user;
 
   const slug = req.nextUrl.searchParams.get("subject") ?? "";
+  const term = (req.nextUrl.searchParams.get("term") ?? "all").trim().toLowerCase();
+  if (!["all", "first", "second", "third"].includes(term)) {
+    return NextResponse.json(
+      { error: "Choose first, second, third or all terms." },
+      { status: 400 },
+    );
+  }
   const subject = await prisma.cbtSubject.findUnique({ where: { slug }, select: { id: true } });
   if (!subject) return NextResponse.json({ error: "Subject not found" }, { status: 404 });
 
   const rows = await prisma.cbtQuestion.findMany({
-    where: { subjectId: subject.id, ...REVIEWED_QUESTION_FILTER },
+    where: {
+      subjectId: subject.id,
+      ...REVIEWED_QUESTION_FILTER,
+      ...(term !== "all" ? { term } : {}),
+    },
     distinct: ["topic"],
     select: { topic: true },
     orderBy: { topic: "asc" },

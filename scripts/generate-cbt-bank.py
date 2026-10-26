@@ -1056,7 +1056,7 @@ def main() -> None:
         raise ValueError(f"Expected 10,000 rows, generated {len(rows)}")
 
     fieldnames = [
-        "subjectSlug", "subjectName", "classLevel", "department", "topic", "difficulty",
+        "subjectSlug", "subjectName", "classLevel", "department", "topic", "term", "difficulty",
         "stem", "optionA", "optionB", "optionC", "optionD", "correctIndex", "explanation", "source",
     ]
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)

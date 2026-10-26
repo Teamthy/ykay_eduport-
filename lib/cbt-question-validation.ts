@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CBT_CLASS_LEVELS } from "@/lib/cbt-question-levels";
 
 const optionSchema = z.string().trim().min(1).max(1000);
+const termSchema = z.enum(["first", "second", "third"]).nullable().optional();
 
 export const cbtQuestionDraftSchema = z.object({
   subjectSlug: z
@@ -14,6 +15,7 @@ export const cbtQuestionDraftSchema = z.object({
   classLevel: z.enum(CBT_CLASS_LEVELS),
   department: z.string().trim().min(1).max(60).optional(),
   topic: z.string().trim().min(2).max(120),
+  term: termSchema,
   difficulty: z.coerce.number().int().min(1).max(3).default(2),
   stem: z.string().trim().min(5).max(4000),
   options: z.array(optionSchema).length(4),
@@ -24,6 +26,7 @@ export const cbtQuestionDraftSchema = z.object({
 
 export const cbtQuestionEditableSchema = z.object({
   topic: z.string().trim().min(2).max(120),
+  term: termSchema,
   difficulty: z.coerce.number().int().min(1).max(3),
   stem: z.string().trim().min(5).max(4000),
   options: z.array(optionSchema).length(4),

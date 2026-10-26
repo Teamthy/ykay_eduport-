@@ -57,6 +57,7 @@ describe("personal CBT session creation", () => {
       body: JSON.stringify({
         classLevel: "ss2",
         practiceMode: "subject",
+        term: "second",
         subjectSlugs: ["mathematics-ss2"],
         questionCount: 60,
         durationMinutes: 0,
@@ -71,10 +72,14 @@ describe("personal CBT session creation", () => {
     expect(payload.questions).toHaveLength(60);
     expect(JSON.stringify(payload.questions)).not.toContain("correctIndex");
     expect(JSON.stringify(payload.questions)).not.toContain("explanation");
+    expect(mockPrisma.cbtQuestion.findMany.mock.calls[0]?.[0].where).toMatchObject({
+      term: "second",
+    });
     expect(mockPrisma.cbtAttempt.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           status: "IN_PROGRESS",
+          term: "second",
           isTimed: false,
           total: 60,
           userId: "user_1",

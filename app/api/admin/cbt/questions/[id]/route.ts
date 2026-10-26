@@ -31,6 +31,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
         data: {
           status: "draft",
           reviewedByUserId: null,
+          reviewedByExternalActor: null,
           reviewedAt: null,
           reviewReference: null,
           reviewNotes: null,

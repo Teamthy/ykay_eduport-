@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 const reviewContentSchema = z.object({
   topic: z.string().trim().min(2).max(120),
+  term: z.enum(["first", "second", "third"]).nullable().optional(),
   difficulty: z.number().int().min(1).max(3),
   stem: z.string().trim().min(5).max(4000),
   options: z.array(z.string().trim().min(1).max(1000)).length(4),
@@ -89,6 +90,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
         where: { id, status: "draft" },
         data: {
           topic: content.topic,
+          term: content.term ?? null,
           difficulty: content.difficulty,
           stem: content.stem,
           options: content.options,
@@ -97,6 +99,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
           source: content.source,
           status: "reviewed",
           reviewedByUserId: auth.id,
+          reviewedByExternalActor: null,
           reviewedAt: new Date(),
           reviewReference: parsed.data.reference,
           reviewNotes: parsed.data.notes,
@@ -116,6 +119,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       data: {
         status: "draft",
         reviewedByUserId: null,
+        reviewedByExternalActor: null,
         reviewedAt: null,
         reviewReference: null,
         reviewNotes: parsed.data.notes,

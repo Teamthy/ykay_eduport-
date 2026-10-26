@@ -2,6 +2,7 @@ import type { BankRow } from "@/lib/cbt-bank-import";
 
 export type PersistedBankQuestion = {
   topic: string;
+  term: string | null;
   difficulty: number;
   stem: string;
   options: unknown;
@@ -17,6 +18,7 @@ export type PersistedBankQuestion = {
 export function matchesBankQuestion(persisted: PersistedBankQuestion, expected: BankRow): boolean {
   if (
     persisted.topic !== expected.topic ||
+    persisted.term !== (expected.term ?? null) ||
     persisted.difficulty !== expected.difficulty ||
     persisted.stem !== expected.stem ||
     persisted.correctIndex !== expected.correctIndex ||

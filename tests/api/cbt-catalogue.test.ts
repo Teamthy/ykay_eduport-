@@ -63,7 +63,7 @@ describe("student personal-practice catalogue endpoints", () => {
           questions: {
             some: {
               status: "reviewed",
-              reviewedByUserId: { not: null },
+              OR: [{ reviewedByUserId: { not: null } }, { reviewedByExternalActor: { not: null } }],
               reviewedAt: { not: null },
               reviewReference: { not: null },
             },
@@ -75,7 +75,7 @@ describe("student personal-practice catalogue endpoints", () => {
 
   it("loads distinct reviewed topics from the selected subject slug", async () => {
     const response = await getTopics(
-      new NextRequest("http://localhost/api/cbt/topics?subject=mathematics-ss2"),
+      new NextRequest("http://localhost/api/cbt/topics?subject=mathematics-ss2&term=second"),
     );
     const body = await response.json();
 
@@ -90,8 +90,9 @@ describe("student personal-practice catalogue endpoints", () => {
         where: {
           subjectId: "subject_1",
           status: "reviewed",
-          reviewedByUserId: { not: null },
+          OR: [{ reviewedByUserId: { not: null } }, { reviewedByExternalActor: { not: null } }],
           reviewedAt: { not: null },
+          term: "second",
           reviewReference: { not: null },
         },
       }),
