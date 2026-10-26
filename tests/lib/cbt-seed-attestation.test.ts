@@ -24,6 +24,7 @@ const expected = parsed.data;
 const persisted = {
   topic: expected.topic,
   term: expected.term ?? null,
+  week: expected.week ?? null,
   difficulty: expected.difficulty,
   stem: expected.stem,
   options: [...expected.options],
@@ -40,6 +41,7 @@ describe("seed attestation source matching", () => {
   it.each([
     ["topic", { topic: "Different topic" }],
     ["term", { term: "first" }],
+    ["week", { week: 3 }],
     ["difficulty", { difficulty: 3 }],
     ["stem", { stem: "A different question stem." }],
     ["options", { options: ["70599", "800", "598", "811"] }],

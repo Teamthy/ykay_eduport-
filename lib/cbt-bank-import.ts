@@ -48,6 +48,7 @@ export function normaliseBankRow(record: Record<string, unknown>) {
     department: text(record.department) || "general",
     topic: text(record.topic),
     term: normalizeCbtTerm(record.term),
+    week: record.week == null || text(record.week) === "" ? null : record.week,
     difficulty: record.difficulty ?? 2,
     stem: text(record.stem),
     options: [record.optionA, record.optionB, record.optionC, record.optionD].map(text),

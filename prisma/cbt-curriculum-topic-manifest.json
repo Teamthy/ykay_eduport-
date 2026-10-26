@@ -1,0 +1,3320 @@
+{
+  "schemaVersion": 1,
+  "source": "User-provided New NERDC scheme pasted in the conversation on 2026-10-26; subject names follow the scheme's class-level lists.",
+  "status": "scaffold_only_not_ready_for_question_generation",
+  "topicRequirements": "For each term, copy the scheme's week numbers and topic labels with source references; do not infer weeks or topics.",
+  "entries": [
+    {
+      "level": "jss1",
+      "subject": "English Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "English Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "English Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Mathematics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Mathematics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Mathematics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Physical and Health Education",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Physical and Health Education",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Physical and Health Education",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Christian Religious Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Christian Religious Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Christian Religious Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Islamic Religious Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Islamic Religious Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Islamic Religious Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Nigerian History",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Nigerian History",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Nigerian History",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Social and Citizenship Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Social and Citizenship Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Social and Citizenship Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Cultural and Creative Arts",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Cultural and Creative Arts",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Cultural and Creative Arts",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "French",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "French",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "French",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Intermediate Science",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Intermediate Science",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Intermediate Science",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Digital Technologies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Digital Technologies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Digital Technologies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Business Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Business Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Business Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Fashion Design and Garment Making",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Fashion Design and Garment Making",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Fashion Design and Garment Making",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Livestock Farming",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Livestock Farming",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Livestock Farming",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Beauty and Cosmetology",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Beauty and Cosmetology",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Beauty and Cosmetology",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Horticulture and Crop Production",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Horticulture and Crop Production",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss1",
+      "subject": "Horticulture and Crop Production",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "English Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "English Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "English Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Mathematics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Mathematics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Mathematics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Physical and Health Education",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Physical and Health Education",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Physical and Health Education",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Christian Religious Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Christian Religious Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Christian Religious Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Islamic Religious Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Islamic Religious Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Islamic Religious Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Nigerian History",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Nigerian History",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Nigerian History",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Social and Citizenship Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Social and Citizenship Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Social and Citizenship Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Cultural and Creative Arts",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Cultural and Creative Arts",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Cultural and Creative Arts",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "French",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "French",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "French",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Intermediate Science",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Intermediate Science",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Intermediate Science",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Digital Technologies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Digital Technologies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Digital Technologies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Business Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Business Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Business Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Fashion Design and Garment Making",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Fashion Design and Garment Making",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Fashion Design and Garment Making",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Livestock Farming",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Livestock Farming",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Livestock Farming",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Beauty and Cosmetology",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Beauty and Cosmetology",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Beauty and Cosmetology",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Horticulture and Crop Production",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Horticulture and Crop Production",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss2",
+      "subject": "Horticulture and Crop Production",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "English Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "English Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "English Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Mathematics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Mathematics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Mathematics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Physical and Health Education",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Physical and Health Education",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Physical and Health Education",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Christian Religious Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Christian Religious Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Christian Religious Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Islamic Religious Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Islamic Religious Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Islamic Religious Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Nigerian History",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Nigerian History",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Nigerian History",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Social and Citizenship Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Social and Citizenship Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Social and Citizenship Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Cultural and Creative Arts",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Cultural and Creative Arts",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Cultural and Creative Arts",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "French",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "French",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "French",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Intermediate Science",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Intermediate Science",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Intermediate Science",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Digital Technologies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Digital Technologies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Digital Technologies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Business Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Business Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Business Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Fashion Design and Garment Making",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Fashion Design and Garment Making",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Fashion Design and Garment Making",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Livestock Farming",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Livestock Farming",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Livestock Farming",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Beauty and Cosmetology",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Beauty and Cosmetology",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Beauty and Cosmetology",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Horticulture and Crop Production",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Horticulture and Crop Production",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "jss3",
+      "subject": "Horticulture and Crop Production",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "English Language",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "English Language",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "English Language",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "General Mathematics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "General Mathematics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "General Mathematics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Citizenship and Heritage Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Citizenship and Heritage Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Citizenship and Heritage Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Digital Technologies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Digital Technologies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Digital Technologies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Biology",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Biology",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Biology",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Chemistry",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Chemistry",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Chemistry",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Physics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Physics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Physics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Agriculture",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Agriculture",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Agriculture",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Further Mathematics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Further Mathematics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Further Mathematics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Foods and Nutrition",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Foods and Nutrition",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Foods and Nutrition",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Geography",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Geography",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Geography",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Technical Drawing",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Technical Drawing",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Technical Drawing",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Nigerian History",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Nigerian History",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Nigerian History",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Government",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Government",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Government",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Christian Religious Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Christian Religious Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Christian Religious Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Visual Arts",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Visual Arts",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Visual Arts",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Literature in English",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Literature in English",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Literature in English",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Catering and Craft Practice",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Catering and Craft Practice",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Catering and Craft Practice",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Financial Accounting",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Financial Accounting",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Financial Accounting",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Commerce",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Commerce",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Commerce",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Marketing",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Marketing",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Marketing",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Economics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Economics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Economics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Fashion Design and Garment Making",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Fashion Design and Garment Making",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Fashion Design and Garment Making",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Livestock Farming",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Livestock Farming",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Livestock Farming",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Beauty and Cosmetology",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Beauty and Cosmetology",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Beauty and Cosmetology",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Horticulture and Crop Production",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Horticulture and Crop Production",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss1",
+      "subject": "Horticulture and Crop Production",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "English Language",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "English Language",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "English Language",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "General Mathematics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "General Mathematics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "General Mathematics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Citizenship and Heritage Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Citizenship and Heritage Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Citizenship and Heritage Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Digital Technologies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Digital Technologies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Digital Technologies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Biology",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Biology",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Biology",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Chemistry",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Chemistry",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Chemistry",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Physics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Physics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Physics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Agriculture",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Agriculture",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Agriculture",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Further Mathematics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Further Mathematics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Further Mathematics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Foods and Nutrition",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Foods and Nutrition",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Foods and Nutrition",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Geography",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Geography",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Geography",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Technical Drawing",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Technical Drawing",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Technical Drawing",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Nigerian History",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Nigerian History",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Nigerian History",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Government",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Government",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Government",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Christian Religious Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Christian Religious Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Christian Religious Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Visual Arts",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Visual Arts",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Visual Arts",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Literature in English",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Literature in English",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Literature in English",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Catering and Craft Practice",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Catering and Craft Practice",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Catering and Craft Practice",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Financial Accounting",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Financial Accounting",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Financial Accounting",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Commerce",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Commerce",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Commerce",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Marketing",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Marketing",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Marketing",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Economics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Economics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Economics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Fashion Design and Garment Making",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Fashion Design and Garment Making",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Fashion Design and Garment Making",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Livestock Farming",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Livestock Farming",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Livestock Farming",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Beauty and Cosmetology",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Beauty and Cosmetology",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Beauty and Cosmetology",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Horticulture and Crop Production",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Horticulture and Crop Production",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss2",
+      "subject": "Horticulture and Crop Production",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "English Language",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "English Language",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "English Language",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "General Mathematics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "General Mathematics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "General Mathematics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Citizenship and Heritage Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Citizenship and Heritage Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Citizenship and Heritage Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Digital Technologies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Digital Technologies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Digital Technologies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Biology",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Biology",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Biology",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Chemistry",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Chemistry",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Chemistry",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Physics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Physics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Physics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Agriculture",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Agriculture",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Agriculture",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Further Mathematics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Further Mathematics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Further Mathematics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Foods and Nutrition",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Foods and Nutrition",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Foods and Nutrition",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Geography",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Geography",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Geography",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Technical Drawing",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Technical Drawing",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Technical Drawing",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Nigerian History",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Nigerian History",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Nigerian History",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Government",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Government",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Government",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Christian Religious Studies",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Christian Religious Studies",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Christian Religious Studies",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Visual Arts",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Visual Arts",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Visual Arts",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Literature in English",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Literature in English",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Literature in English",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Catering and Craft Practice",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Catering and Craft Practice",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Catering and Craft Practice",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Financial Accounting",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Financial Accounting",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Financial Accounting",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Commerce",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Commerce",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Commerce",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Marketing",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Marketing",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Marketing",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Economics",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Economics",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Economics",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Solar Photovoltaic Installation and Maintenance",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Fashion Design and Garment Making",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Fashion Design and Garment Making",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Fashion Design and Garment Making",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Livestock Farming",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Livestock Farming",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Livestock Farming",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Beauty and Cosmetology",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Beauty and Cosmetology",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Beauty and Cosmetology",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Computer Hardware and GSM Repairs",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Horticulture and Crop Production",
+      "term": "first",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Horticulture and Crop Production",
+      "term": "second",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    },
+    {
+      "level": "ss3",
+      "subject": "Horticulture and Crop Production",
+      "term": "third",
+      "weeks": [],
+      "status": "pending_source_mapping",
+      "sourceReference": null
+    }
+  ]
+}

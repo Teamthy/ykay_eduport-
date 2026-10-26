@@ -6,16 +6,22 @@ import { assertNotImpersonating, requireRoleOr503 } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-const reviewContentSchema = z.object({
-  topic: z.string().trim().min(2).max(120),
-  term: z.enum(["first", "second", "third"]).nullable().optional(),
-  difficulty: z.number().int().min(1).max(3),
-  stem: z.string().trim().min(5).max(4000),
-  options: z.array(z.string().trim().min(1).max(1000)).length(4),
-  correctIndex: z.number().int().min(0).max(3),
-  explanation: z.string().trim().min(40).max(4000),
-  source: z.string().trim().min(1).max(120),
-});
+const reviewContentSchema = z
+  .object({
+    topic: z.string().trim().min(2).max(120),
+    term: z.enum(["first", "second", "third"]).nullable().optional(),
+    week: z.number().int().min(1).max(52).nullable().optional(),
+    difficulty: z.number().int().min(1).max(3),
+    stem: z.string().trim().min(5).max(4000),
+    options: z.array(z.string().trim().min(1).max(1000)).length(4),
+    correctIndex: z.number().int().min(0).max(3),
+    explanation: z.string().trim().min(40).max(4000),
+    source: z.string().trim().min(1).max(120),
+  })
+  .refine((question) => question.week == null || question.term != null, {
+    path: ["week"],
+    message: "A week assignment requires a verified term assignment.",
+  });
 
 const reviewSchema = z.discriminatedUnion("decision", [
   z.object({
@@ -91,6 +97,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
         data: {
           topic: content.topic,
           term: content.term ?? null,
+          week: content.week ?? null,
           difficulty: content.difficulty,
           stem: content.stem,
           options: content.options,

@@ -16,7 +16,22 @@ export async function GET(request: NextRequest) {
       { status: 400 },
     );
   }
-  const questionFilter = { ...REVIEWED_QUESTION_FILTER, ...(term !== "all" ? { term } : {}) };
+  const weekParam = (request.nextUrl.searchParams.get("week") ?? "all").trim().toLowerCase();
+  const week = weekParam === "all" ? null : Number(weekParam);
+  if (
+    weekParam !== "all" &&
+    (!Number.isInteger(week) || week! < 1 || week! > 52 || term === "all")
+  ) {
+    return NextResponse.json(
+      { error: "Choose a valid week within a specific term." },
+      { status: 400 },
+    );
+  }
+  const questionFilter = {
+    ...REVIEWED_QUESTION_FILTER,
+    ...(term !== "all" ? { term } : {}),
+    ...(week !== null ? { week } : {}),
+  };
   const supportedLevels = new Set(["jss1", "jss2", "jss3", "ss1", "ss2", "ss3"]);
   if (classLevel && !supportedLevels.has(classLevel)) {
     return NextResponse.json({ error: "Choose a class from JSS1 to SS3." }, { status: 400 });

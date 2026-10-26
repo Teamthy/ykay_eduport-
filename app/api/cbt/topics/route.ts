@@ -16,6 +16,17 @@ export async function GET(req: NextRequest) {
       { status: 400 },
     );
   }
+  const weekParam = (req.nextUrl.searchParams.get("week") ?? "all").trim().toLowerCase();
+  const week = weekParam === "all" ? null : Number(weekParam);
+  if (
+    weekParam !== "all" &&
+    (!Number.isInteger(week) || week! < 1 || week! > 52 || term === "all")
+  ) {
+    return NextResponse.json(
+      { error: "Choose a valid week within a specific term." },
+      { status: 400 },
+    );
+  }
   const subject = await prisma.cbtSubject.findUnique({ where: { slug }, select: { id: true } });
   if (!subject) return NextResponse.json({ error: "Subject not found" }, { status: 404 });
 
@@ -24,6 +35,7 @@ export async function GET(req: NextRequest) {
       subjectId: subject.id,
       ...REVIEWED_QUESTION_FILTER,
       ...(term !== "all" ? { term } : {}),
+      ...(week !== null ? { week } : {}),
     },
     distinct: ["topic"],
     select: { topic: true },

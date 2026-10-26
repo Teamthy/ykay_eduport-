@@ -19,6 +19,7 @@ import PersonalPracticeRunner from "@/components/cbt/PersonalPracticeRunner";
 type PracticeMode = "topic" | "subject" | "mixed";
 type ClassLevel = "jss1" | "jss2" | "jss3" | "ss1" | "ss2" | "ss3";
 type PracticeTerm = "all" | "first" | "second" | "third";
+type PracticeWeek = "all" | number;
 
 type Subject = {
   id: string;
@@ -35,6 +36,7 @@ type ResumableSession = {
   practiceMode: PracticeMode;
   topic: string | null;
   term: Exclude<PracticeTerm, "all"> | null;
+  week: number | null;
   subjectNames: string[];
   questionCount: number;
   isTimed: boolean;
@@ -88,6 +90,8 @@ export default function PersonalPracticeFlow() {
   const [mode, setMode] = useState<PracticeMode>("topic");
   const [classLevel, setClassLevel] = useState<ClassLevel>("jss1");
   const [term, setTerm] = useState<PracticeTerm>("all");
+  const [week, setWeek] = useState<PracticeWeek>("all");
+  const [availableWeeks, setAvailableWeeks] = useState<number[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
   const [topics, setTopics] = useState<string[]>([]);
@@ -99,6 +103,7 @@ export default function PersonalPracticeFlow() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [resumableSessions, setResumableSessions] = useState<ResumableSession[]>([]);
   const [loadingSubjects, setLoadingSubjects] = useState(false);
+  const [loadingWeeks, setLoadingWeeks] = useState(false);
   const [loadingTopics, setLoadingTopics] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [starting, setStarting] = useState(false);
@@ -143,6 +148,34 @@ export default function PersonalPracticeFlow() {
   }, [loadResumableSessions]);
 
   useEffect(() => {
+    if (term === "all") return;
+    const controller = new AbortController();
+    async function loadWeeks() {
+      setLoadingWeeks(true);
+      setAvailableWeeks([]);
+      try {
+        const response = await fetch(`/api/cbt/weeks?classLevel=${classLevel}&term=${term}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const payload = (await response.json()) as { weeks?: number[]; error?: string };
+        if (!response.ok) throw new Error(payload.error || "Unable to load available weeks.");
+        setAvailableWeeks(payload.weeks ?? []);
+      } catch (loadError) {
+        if (loadError instanceof Error && loadError.name === "AbortError") return;
+        setAvailableWeeks([]);
+        setError(
+          loadError instanceof Error ? loadError.message : "Unable to load available weeks.",
+        );
+      } finally {
+        if (!controller.signal.aborted) setLoadingWeeks(false);
+      }
+    }
+    void loadWeeks();
+    return () => controller.abort();
+  }, [classLevel, term]);
+
+  useEffect(() => {
     const controller = new AbortController();
     async function loadSubjects() {
       setLoadingSubjects(true);
@@ -152,10 +185,13 @@ export default function PersonalPracticeFlow() {
       setTopics([]);
       setError("");
       try {
-        const response = await fetch(`/api/cbt/subjects?classLevel=${classLevel}&term=${term}`, {
-          cache: "no-store",
-          signal: controller.signal,
-        });
+        const response = await fetch(
+          `/api/cbt/subjects?classLevel=${classLevel}&term=${term}&week=${week}`,
+          {
+            cache: "no-store",
+            signal: controller.signal,
+          },
+        );
         const payload = (await response.json()) as { subjects?: Subject[]; error?: string };
         if (!response.ok)
           throw new Error(payload.error || "Unable to load subjects for this class.");
@@ -169,7 +205,7 @@ export default function PersonalPracticeFlow() {
     }
     void loadSubjects();
     return () => controller.abort();
-  }, [classLevel, term]);
+  }, [classLevel, term, week]);
 
   const selectedTopicSubject = mode === "topic" ? selectedSubjects[0] : null;
   useEffect(() => {
@@ -182,7 +218,7 @@ export default function PersonalPracticeFlow() {
       setError("");
       try {
         const response = await fetch(
-          `/api/cbt/topics?subject=${encodeURIComponent(selectedTopicSubject!.slug)}&term=${term}`,
+          `/api/cbt/topics?subject=${encodeURIComponent(selectedTopicSubject!.slug)}&term=${term}&week=${week}`,
           { cache: "no-store", signal: controller.signal },
         );
         const payload = (await response.json()) as { topics?: string[]; error?: string };
@@ -197,7 +233,7 @@ export default function PersonalPracticeFlow() {
     }
     void loadTopics();
     return () => controller.abort();
-  }, [mode, selectedTopicSubject, step, term]);
+  }, [mode, selectedTopicSubject, step, term, week]);
 
   const chooseSubject = (subject: Subject) => {
     setSelectedSlugs((current) => {
@@ -235,6 +271,7 @@ export default function PersonalPracticeFlow() {
           classLevel,
           practiceMode: mode,
           term,
+          week: week === "all" ? null : week,
           subjectSlugs: selectedSubjects.map((subject) => subject.slug),
           topic: mode === "topic" ? selectedTopic : null,
           questionCount,
@@ -304,6 +341,7 @@ export default function PersonalPracticeFlow() {
                   </p>
                   <p className="mt-1 text-xs text-[var(--text-muted)]">
                     {saved.term ? `${saved.term} term · ` : "All terms · "}
+                    {saved.week ? `Week ${saved.week} · ` : "All weeks · "}
                     {saved.practiceMode === "topic"
                       ? saved.topic
                       : saved.practiceMode === "mixed"
@@ -410,7 +448,11 @@ export default function PersonalPracticeFlow() {
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => setClassLevel(option.value)}
+                  onClick={() => {
+                    setClassLevel(option.value);
+                    setWeek("all");
+                    setAvailableWeeks([]);
+                  }}
                   className={`rounded-2xl border px-4 py-5 text-center font-display text-xl ${classLevel === option.value ? "border-brand-green bg-brand-green/5 text-brand-green" : "border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-brand-green/30"}`}
                 >
                   {option.label}
@@ -440,13 +482,49 @@ export default function PersonalPracticeFlow() {
                   key={value}
                   type="button"
                   aria-pressed={term === value}
-                  onClick={() => setTerm(value)}
+                  onClick={() => {
+                    setTerm(value);
+                    setWeek("all");
+                    setAvailableWeeks([]);
+                  }}
                   className={`rounded-2xl border px-4 py-5 text-left font-bold ${term === value ? "border-brand-green bg-brand-green/5 text-brand-green" : "border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-brand-green/30"}`}
                 >
                   {label}
                 </button>
               ))}
             </div>
+            {term !== "all" ? (
+              <div className="mt-6">
+                <h4 className="text-sm font-bold text-[var(--text-primary)]">Choose a week</h4>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">
+                  Week choices appear only when reviewed questions have a verified week assignment.
+                  Unassigned legacy questions are never given a guessed week.
+                </p>
+                {loadingWeeks ? (
+                  <p className="mt-3 text-sm text-[var(--text-muted)]">Loading available weeks…</p>
+                ) : (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {["all" as const, ...availableWeeks].map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        aria-pressed={week === value}
+                        onClick={() => setWeek(value)}
+                        className={`rounded-full border px-4 py-2 text-sm font-bold ${week === value ? "border-brand-green bg-brand-green/5 text-brand-green" : "border-[var(--border-subtle)] text-[var(--text-primary)]"}`}
+                      >
+                        {value === "all" ? "All weeks" : `Week ${value}`}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {!loadingWeeks && availableWeeks.length === 0 ? (
+                  <p className="mt-3 text-xs text-[var(--text-muted)]">
+                    No reviewed questions have verified week assignments for this class and term
+                    yet.
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         ) : null}
 
@@ -676,6 +754,7 @@ export default function PersonalPracticeFlow() {
               <p className="font-bold text-[var(--text-primary)]">Set summary</p>
               <p className="mt-1">
                 {classLevel.toUpperCase()} · {term === "all" ? "All terms" : `${term} term`} ·{" "}
+                {week === "all" ? "All weeks" : `Week ${week}`} ·{" "}
                 {selectedSubjects.map((subject) => subject.name).join(", ")}
                 {mode === "topic" ? ` · ${selectedTopic}` : ""}
               </p>
