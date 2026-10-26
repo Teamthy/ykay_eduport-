@@ -11,6 +11,7 @@ const VALID_STATUSES = new Set(["draft", "reviewed", "archived"]);
 const QUESTION_SELECT = {
   id: true,
   topic: true,
+  term: true,
   difficulty: true,
   stem: true,
   options: true,
@@ -143,6 +144,7 @@ export async function POST(request: NextRequest) {
       data: {
         subjectId: subject.id,
         topic: parsed.data.topic,
+        term: parsed.data.term ?? null,
         difficulty: parsed.data.difficulty,
         stem: parsed.data.stem,
         options: parsed.data.options,
@@ -151,6 +153,7 @@ export async function POST(request: NextRequest) {
         source: parsed.data.source,
         status: "draft",
         reviewedByUserId: null,
+        reviewedByExternalActor: null,
         reviewedAt: null,
         reviewReference: null,
         reviewNotes: null,

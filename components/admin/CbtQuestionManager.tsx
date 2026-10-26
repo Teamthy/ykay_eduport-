@@ -19,6 +19,7 @@ type QuestionDraft = {
   classLevel: (typeof CBT_CLASS_LEVELS)[number];
   department: string;
   topic: string;
+  term: "" | "first" | "second" | "third";
   difficulty: number;
   stem: string;
   options: string[];
@@ -33,6 +34,7 @@ const blankDraft = (): QuestionDraft => ({
   classLevel: "jss1",
   department: "general",
   topic: "",
+  term: "",
   difficulty: 2,
   stem: "",
   options: ["", "", "", ""],
@@ -46,6 +48,7 @@ const CSV_COLUMNS = [
   "subjectName",
   "classLevel",
   "topic",
+  "term",
   "difficulty",
   "stem",
   "optionA",
@@ -56,7 +59,7 @@ const CSV_COLUMNS = [
   "explanation",
 ];
 const IMPORT_BATCH_SIZE = 200;
-const MAX_FILE_ROWS = 10_000;
+const MAX_FILE_ROWS = 25_000;
 
 export default function CbtQuestionManager({ onChanged }: { onChanged: () => void }) {
   const [draft, setDraft] = useState<QuestionDraft>(blankDraft);
@@ -77,7 +80,7 @@ export default function CbtQuestionManager({ onChanged }: { onChanged: () => voi
       const response = await fetch("/api/admin/cbt/questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(draft),
+        body: JSON.stringify({ ...draft, term: draft.term || null }),
       });
       const payload = await readJsonResponse<{ error?: string }>(response);
       if (!response.ok) throw new Error(payload.error || "Unable to add the question.");
@@ -112,7 +115,7 @@ export default function CbtQuestionManager({ onChanged }: { onChanged: () => voi
         throw new Error(`CSV parsing failed near row ${parsed.errors[0]?.row ?? "?"}.`);
       }
       const fields = parsed.meta.fields ?? [];
-      const missing = CSV_COLUMNS.filter((column) => !fields.includes(column));
+      const missing = CSV_COLUMNS.filter((column) => column !== "term" && !fields.includes(column));
       if (missing.length) throw new Error(`CSV is missing columns: ${missing.join(", ")}.`);
       const rows = parsed.data.filter((row) => Object.values(row).some((value) => value?.trim()));
       if (!rows.length) throw new Error("The CSV has no question rows.");
@@ -240,10 +243,26 @@ export default function CbtQuestionManager({ onChanged }: { onChanged: () => voi
             </select>
           </label>
           <label className="text-xs font-semibold text-[var(--text-muted)]">
+            Term
+            <select
+              value={draft.term}
+              onChange={(event) =>
+                setDraft({ ...draft, term: event.target.value as QuestionDraft["term"] })
+              }
+              className="mt-1 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--input-text)]"
+            >
+              <option value="">Unassigned</option>
+              <option value="first">First term</option>
+              <option value="second">Second term</option>
+              <option value="third">Third term</option>
+            </select>
+          </label>
+          <label className="text-xs font-semibold text-[var(--text-muted)]">
             Topic
             <input
               required
               minLength={2}
+              maxLength={240}
               value={draft.topic}
               onChange={(event) => setDraft({ ...draft, topic: event.target.value })}
               className="mt-1 w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--input-text)]"
@@ -373,7 +392,8 @@ export default function CbtQuestionManager({ onChanged }: { onChanged: () => voi
         </button>
         <p className="text-[11px] leading-relaxed text-[var(--text-muted)]">
           Required headers: subjectSlug, subjectName, classLevel, topic, difficulty, stem, optionA,
-          optionB, optionC, optionD, correctIndex, explanation. Each batch is capped at 200 rows.
+          optionB, optionC, optionD, correctIndex, explanation. Optional: term (first/second/third).
+          Each batch is capped at 200 rows; imports support up to 25,000 rows.
         </p>
       </div>
     </section>

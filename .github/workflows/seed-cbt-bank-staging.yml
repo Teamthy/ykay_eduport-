@@ -8,10 +8,9 @@ name: Seed the CBT question bank (Staging)
 #     Staging host, and refuses pooled Neon URLs;
 #   * the first step is a read-only preflight, so a malformed CSV fails before
 #     a single row is written;
-#   * attestation (making the questions visible to students in practice) is a
-#     separate, explicitly confirmed input that records the reviewer account,
-#     the citation and the timestamp on every row, exactly as the admin console
-#     does — and leaves structurally invalid rows in draft.
+#   * attestation (making exact source rows visible to students in practice) is
+#     separately confirmed and records the GitHub dispatch actor, citation,
+#     timestamp and workflow run without mapping that actor to an app user.
 #
 # Required configuration
 #   secret STAGING_DIRECT_DATABASE_URL   direct (unpooled) Neon Staging URL
@@ -24,7 +23,7 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: "preflight is read-only; seed writes drafts; seed-and-attest also publishes them to practice"
+        description: "preflight is read-only; seed writes drafts; seed-and-attest records explicit review and publishes exact matches"
         required: true
         type: choice
         default: preflight
@@ -42,8 +41,8 @@ on:
         required: false
         type: string
         default: ""
-      attest_email:
-        description: "seed-and-attest only: email of the reviewer account that checked the bank"
+      attestation_confirmation:
+        description: "seed-and-attest only: type I REVIEWED THE CBT BANK after checking the source bank"
         required: false
         type: string
         default: ""
@@ -86,14 +85,14 @@ jobs:
             exit 1
           fi
 
-      - name: Require attestation inputs for seed-and-attest
+      - name: Require explicit review attestation inputs
         if: inputs.operation == 'seed-and-attest'
         env:
-          ATTEST_EMAIL: ${{ inputs.attest_email }}
+          ATTEST_CONFIRMATION: ${{ inputs.attestation_confirmation }}
           ATTEST_REFERENCE: ${{ inputs.attest_reference }}
         run: |
-          if [[ -z "$ATTEST_EMAIL" || ${#ATTEST_REFERENCE} -lt 10 ]]; then
-            echo "::error::seed-and-attest needs attest_email and an attest_reference of at least 10 characters."
+          if [[ "$ATTEST_CONFIRMATION" != "I REVIEWED THE CBT BANK" || ${#ATTEST_REFERENCE} -lt 10 ]]; then
+            echo "::error::seed-and-attest needs confirmation=\"I REVIEWED THE CBT BANK\" and an attest_reference of at least 10 characters."
             exit 1
           fi
 
@@ -132,9 +131,9 @@ jobs:
             exit 1
           fi
           printf '::add-mask::%s\n' "$DATABASE_URL"
-          npm run cbt:seed:10k:staging
+          CBT_SEED_TARGET=staging npm run cbt:seed
 
-      - name: Attest the bank in the named reviewer's name
+      - name: Record GitHub actor attestation for exact bank matches
         if: inputs.operation == 'seed-and-attest'
         env:
           DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
@@ -142,16 +141,16 @@ jobs:
           STAGING_DATABASE_HOST: ${{ vars.STAGING_DATABASE_HOST }}
           PRODUCTION_DATABASE_STATUS: ${{ vars.PRODUCTION_DATABASE_STATUS }}
           PRODUCTION_DATABASE_HOST: ${{ vars.PRODUCTION_DATABASE_HOST }}
-          CBT_ATTEST_EMAIL: ${{ inputs.attest_email }}
+          CBT_ATTEST_ACTOR: ${{ github.actor }}
           CBT_ATTEST_REFERENCE: ${{ inputs.attest_reference }}
-          CBT_ATTEST_CONFIRMATION: ATTEST BANK VERIFIED
+          CBT_ATTEST_CONFIRMATION: ${{ inputs.attestation_confirmation }}
         run: |
           if [[ -z "$DATABASE_URL" ]]; then
             echo "::error::Set STAGING_DIRECT_DATABASE_URL in the protected staging-seeds environment."
             exit 1
           fi
           printf '::add-mask::%s\n' "$DATABASE_URL"
-          npm run cbt:seed:10k:staging
+          CBT_SEED_TARGET=staging npm run cbt:seed
 
       - name: Summary
         if: always()
@@ -162,7 +161,10 @@ jobs:
             echo "- file: \`${{ inputs.bank_file }}\`"
             if [[ "${{ inputs.operation }}" != "preflight" ]]; then
               echo "- target: Staging Neon branch (host checked by \`prisma/cbt-seed.ts\`)"
-              echo "- questions are imported as drafts; students see a question only after attestation"
+              echo "- imports are drafts; only exact matching source rows with structurally valid content can be attested"
+              if [[ "${{ inputs.operation }}" == "seed-and-attest" ]]; then
+                echo "- external reviewer: GitHub actor \`${{ github.actor }}\` (recorded with workflow run and date; not mapped to an app user)"
+              fi
             fi
             echo "- Production is never touched by this workflow"
           } >> "$GITHUB_STEP_SUMMARY"

@@ -57,6 +57,7 @@ describe("personal CBT session creation", () => {
       body: JSON.stringify({
         classLevel: "ss2",
         practiceMode: "subject",
+        term: "second",
         subjectSlugs: ["mathematics-ss2"],
         questionCount: 60,
         durationMinutes: 0,
@@ -71,10 +72,14 @@ describe("personal CBT session creation", () => {
     expect(payload.questions).toHaveLength(60);
     expect(JSON.stringify(payload.questions)).not.toContain("correctIndex");
     expect(JSON.stringify(payload.questions)).not.toContain("explanation");
+    expect(mockPrisma.cbtQuestion.findMany.mock.calls[0]?.[0].where).toMatchObject({
+      term: "second",
+    });
     expect(mockPrisma.cbtAttempt.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           status: "IN_PROGRESS",
+          term: "second",
           isTimed: false,
           total: 60,
           userId: "user_1",
@@ -82,6 +87,30 @@ describe("personal CBT session creation", () => {
         }),
       }),
     );
+  });
+
+  it("accepts an exact long source topic label in topic-focused practice", async () => {
+    const topic = `${"Source-backed curriculum detail ".repeat(7)}final topic`;
+    const request = new NextRequest("http://localhost/api/cbt/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        classLevel: "ss2",
+        practiceMode: "topic",
+        term: "first",
+        subjectSlugs: ["mathematics-ss2"],
+        topic,
+        questionCount: 5,
+        durationMinutes: 0,
+      }),
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(201);
+    expect(mockPrisma.cbtQuestion.findMany.mock.calls[0]?.[0].where).toMatchObject({
+      topic,
+      term: "first",
+    });
   });
 
   it("keeps an expired timer resumable so the session can auto-submit on resume", async () => {

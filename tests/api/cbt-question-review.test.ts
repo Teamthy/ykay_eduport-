@@ -20,6 +20,7 @@ const approval = {
   notes: "Checked the key, all distractors, the explanation and the class-level alignment.",
   question: {
     topic: "Addition",
+    term: "second",
     difficulty: 2,
     stem: "What is 2 + 2?",
     options: ["3", "4", "5", "6"],
@@ -59,6 +60,7 @@ describe("CBT question review state transitions", () => {
         data: expect.objectContaining({
           status: "reviewed",
           difficulty: 2,
+          term: "second",
           source: "original-draft",
           reviewReference: approval.reference,
           reviewedByUserId: "admin_a",

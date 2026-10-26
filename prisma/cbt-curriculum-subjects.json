@@ -1,0 +1,239 @@
+{
+  "source": {
+    "title": "Complete Scheme of Work JSS and SSS (New NERDC Scheme)",
+    "file": "docs/cbt-curriculum/source-scheme.pdf",
+    "sha256": "fb406e3537f0618319c0ff15c065aa36a9dda891f4a8346320aa1c6d3fd4ca24",
+    "pages": 476,
+    "subjectListPages": {
+      "jss1": 3,
+      "jss2": 73,
+      "jss3": 138,
+      "ss1": 198,
+      "ss2": 290,
+      "ss3": 380
+    }
+  },
+  "levels": {
+    "jss1": {
+      "subjects": [
+        "English Studies",
+        "Mathematics",
+        "Physical and Health Education",
+        "Christian Religious Studies",
+        "Islamic Studies",
+        "Nigerian History",
+        "Social and Citizenship Studies",
+        "Cultural and Creative Arts",
+        "French",
+        "Intermediate Science",
+        "Digital Technologies",
+        "Business Studies",
+        "Solar Photovoltaic Installation and Maintenance",
+        "Fashion Design and Garment Making",
+        "Livestock Farming",
+        "Beauty and Cosmetology",
+        "Computer Hardware and GSM Repairs",
+        "Horticulture and Crop Production"
+      ]
+    },
+    "jss2": {
+      "subjects": [
+        "English Studies",
+        "Mathematics",
+        "Physical and Health Education",
+        "Christian Religious Studies",
+        "Islamic Studies",
+        "Nigerian History",
+        "Social and Citizenship Studies",
+        "Cultural and Creative Arts",
+        "French",
+        "Intermediate Science",
+        "Digital Technologies",
+        "Business Studies",
+        "Solar Photovoltaic Installation and Maintenance",
+        "Fashion Design and Garment Making",
+        "Livestock Farming",
+        "Beauty and Cosmetology",
+        "Computer Hardware and GSM Repairs",
+        "Horticulture and Crop Production"
+      ]
+    },
+    "jss3": {
+      "subjects": [
+        "English Studies",
+        "Mathematics",
+        "Physical and Health Education",
+        "Christian Religious Studies",
+        "Islamic Studies",
+        "Nigerian History",
+        "Social and Citizenship Studies",
+        "Cultural and Creative Arts",
+        "French",
+        "Intermediate Science",
+        "Digital Technologies",
+        "Business Studies",
+        "Solar Photovoltaic Installation and Maintenance",
+        "Fashion Design and Garment Making",
+        "Livestock Farming",
+        "Beauty and Cosmetology",
+        "Computer Hardware and GSM Repairs",
+        "Horticulture and Crop Production"
+      ]
+    },
+    "ss1": {
+      "subjects": [
+        "English Language",
+        "General Mathematics",
+        "Citizenship and Heritage Studies",
+        "Digital Technologies",
+        "Biology",
+        "Chemistry",
+        "Physics",
+        "Agriculture",
+        "Further Mathematics",
+        "Foods & Nutrition",
+        "Geography",
+        "Technical Drawing",
+        "Nigerian History",
+        "Government",
+        "Christian Religious Studies",
+        "Visual Arts",
+        "Literature in English",
+        "Catering Craft",
+        "Accounting",
+        "Commerce",
+        "Marketing",
+        "Economics",
+        "Solar Photovoltaic Installation and Maintenance",
+        "Fashion Design and Garment Making",
+        "Livestock Farming",
+        "Beauty and Cosmetology",
+        "Computer Hardware and GSM Repairs",
+        "Horticulture and Crop Production"
+      ]
+    },
+    "ss2": {
+      "subjects": [
+        "English Language",
+        "General Mathematics",
+        "Citizenship and Heritage Studies",
+        "Digital Technologies",
+        "Biology",
+        "Chemistry",
+        "Physics",
+        "Agriculture",
+        "Further Mathematics",
+        "Foods & Nutrition",
+        "Geography",
+        "Technical Drawing",
+        "Nigerian History",
+        "Government",
+        "Christian Religious Studies",
+        "Visual Arts",
+        "Literature in English",
+        "Catering Craft",
+        "Accounting",
+        "Commerce",
+        "Marketing",
+        "Economics",
+        "Solar Photovoltaic Installation and Maintenance",
+        "Fashion Design and Garment Making",
+        "Livestock Farming",
+        "Beauty and Cosmetology",
+        "Computer Hardware and GSM Repairs",
+        "Horticulture and Crop Production"
+      ]
+    },
+    "ss3": {
+      "subjects": [
+        "English Language",
+        "General Mathematics",
+        "Citizenship and Heritage Studies",
+        "Digital Technologies",
+        "Biology",
+        "Chemistry",
+        "Physics",
+        "Agriculture",
+        "Further Mathematics",
+        "Foods & Nutrition",
+        "Geography",
+        "Technical Drawing",
+        "Nigerian History",
+        "Government",
+        "Christian Religious Studies",
+        "Visual Arts",
+        "Literature in English",
+        "Catering Craft",
+        "Accounting",
+        "Commerce",
+        "Marketing",
+        "Economics",
+        "Solar Photovoltaic Installation and Maintenance",
+        "Fashion Design and Garment Making",
+        "Livestock Farming",
+        "Beauty and Cosmetology",
+        "Computer Hardware and GSM Repairs",
+        "Horticulture and Crop Production"
+      ]
+    }
+  },
+  "sourceHeadingAliases": [
+    {
+      "levels": ["jss1", "jss2", "jss3"],
+      "sourceHeading": "Islamic Religious Studies (IRS)",
+      "canonicalSubject": "Islamic Studies",
+      "subjectListPages": [3, 73, 138],
+      "sampleSectionPages": [19, 89, 153]
+    },
+    {
+      "levels": ["ss1", "ss2", "ss3"],
+      "sourceHeading": "Mathematics",
+      "canonicalSubject": "General Mathematics",
+      "subjectListPages": [198, 290, 380],
+      "sampleSectionPages": [205, 297, 383]
+    },
+    {
+      "levels": ["ss1", "ss2", "ss3"],
+      "sourceHeading": "Agricultural Science",
+      "canonicalSubject": "Agriculture",
+      "subjectListPages": [198, 290, 380],
+      "sampleSectionPages": [223, 315, 396]
+    },
+    {
+      "levels": ["ss1", "ss2", "ss3"],
+      "sourceHeading": "Food and Nutrition",
+      "canonicalSubject": "Foods & Nutrition",
+      "subjectListPages": [198, 290, 380],
+      "sampleSectionPages": [229, 321, 399]
+    },
+    {
+      "levels": ["ss1", "ss2", "ss3"],
+      "sourceHeading": "Financial Accounting",
+      "canonicalSubject": "Accounting",
+      "subjectListPages": [198, 290, 380],
+      "sampleSectionPages": [259, 349, 424]
+    },
+    {
+      "levels": ["ss1", "ss3"],
+      "sourceHeading": "Catering and Craft Practice",
+      "canonicalSubject": "Catering Craft",
+      "subjectListPages": [198, 380],
+      "sampleSectionPages": [256, 422]
+    },
+    {
+      "levels": ["ss2"],
+      "sourceHeading": "Catering and Craft",
+      "canonicalSubject": "Catering Craft",
+      "subjectListPages": [290],
+      "sampleSectionPages": [346]
+    },
+    {
+      "levels": ["ss1", "ss3"],
+      "sourceHeading": "English Studies",
+      "canonicalSubject": "English Language",
+      "subjectListPages": [198, 380],
+      "sampleSectionPages": [199, 382]
+    }
+  ],
+  "terms": ["first", "second", "third"]
+}

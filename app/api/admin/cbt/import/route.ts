@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { assertNotImpersonating, requireRoleOr503 } from "@/lib/session";
 import { cbtQuestionDraftSchema, haveDistinctOptions } from "@/lib/cbt-question-validation";
+import { normalizeCbtTerm } from "@/lib/cbt-terms";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,7 @@ function asImportRow(value: unknown, index: number) {
     classLevel,
     department: String(row.department ?? "general").trim() || "general",
     topic: String(row.topic ?? "").trim(),
+    term: normalizeCbtTerm(row.term),
     difficulty: row.difficulty ?? 2,
     stem: String(row.stem ?? "").trim(),
     options: [row.optionA, row.optionB, row.optionC, row.optionD].map((option) =>
@@ -54,7 +56,7 @@ function asImportRow(value: unknown, index: number) {
 /**
  * Import candidate questions in bounded batches. Every imported item remains
  * draft until an authorized reviewer records a source citation and approval.
- * The `rows` form is intended for the admin console's chunked 10k CSV upload;
+ * The `rows` form is intended for the admin console's chunked large CSV upload;
  * `csv` remains supported for small/manual callers.
  */
 export async function POST(request: NextRequest) {
@@ -174,6 +176,7 @@ export async function POST(request: NextRequest) {
           data: toCreate.map(({ data }) => ({
             subjectId: subject.id,
             topic: data.topic,
+            term: data.term ?? null,
             difficulty: data.difficulty,
             stem: data.stem,
             options: data.options,
@@ -182,6 +185,7 @@ export async function POST(request: NextRequest) {
             source: data.source,
             status: "draft",
             reviewedByUserId: null,
+            reviewedByExternalActor: null,
             reviewedAt: null,
             reviewReference: null,
             reviewNotes: null,

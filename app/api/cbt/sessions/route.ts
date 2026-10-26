@@ -11,8 +11,9 @@ export const dynamic = "force-dynamic";
 const startSchema = z.object({
   classLevel: z.enum(["jss1", "jss2", "jss3", "ss1", "ss2", "ss3"]),
   practiceMode: z.enum(["topic", "subject", "mixed"]),
+  term: z.enum(["all", "first", "second", "third"]).default("all"),
   subjectSlugs: z.array(z.string().trim().min(1).max(100)).min(1).max(20),
-  topic: z.string().trim().max(120).nullable().optional(),
+  topic: z.string().trim().max(240).nullable().optional(),
   questionCount: z.number().int().min(1).max(60),
   durationMinutes: z.number().int().min(0).max(120).default(0),
 });
@@ -85,7 +86,12 @@ export async function POST(request: NextRequest) {
       where: {
         slug: { in: subjectSlugs },
         classLevel: input.classLevel,
-        questions: { some: REVIEWED_QUESTION_FILTER },
+        questions: {
+          some: {
+            ...REVIEWED_QUESTION_FILTER,
+            ...(input.term !== "all" ? { term: input.term } : {}),
+          },
+        },
       },
       select: { id: true, slug: true, name: true },
     }),
@@ -109,6 +115,7 @@ export async function POST(request: NextRequest) {
       subjectId: { in: subjectIds },
       ...REVIEWED_QUESTION_FILTER,
       ...(topic ? { topic } : {}),
+      ...(input.term !== "all" ? { term: input.term } : {}),
     },
     select: { id: true, subjectId: true },
   });
@@ -127,6 +134,7 @@ export async function POST(request: NextRequest) {
       id: { in: drawnIds },
       subjectId: { in: subjectIds },
       ...REVIEWED_QUESTION_FILTER,
+      ...(input.term !== "all" ? { term: input.term } : {}),
     },
     select: {
       id: true,
@@ -175,6 +183,7 @@ export async function POST(request: NextRequest) {
       classLevel: input.classLevel,
       practiceMode: input.practiceMode,
       topic,
+      term: input.term === "all" ? null : input.term,
       subjectIds,
       questionIds,
       drawToken,
@@ -193,6 +202,7 @@ export async function POST(request: NextRequest) {
       practiceMode: input.practiceMode,
       subjects: subjects.map(({ id, slug, name }) => ({ id, slug, name })),
       topic,
+      term: input.term,
       questionCount: orderedQuestions.length,
       requestedQuestionCount: input.questionCount,
       isTimed,
@@ -226,6 +236,7 @@ export async function GET() {
       classLevel: true,
       practiceMode: true,
       topic: true,
+      term: true,
       subjectIds: true,
       subjectId: true,
       total: true,
@@ -262,6 +273,7 @@ export async function GET() {
         classLevel: attempt.classLevel,
         practiceMode: attempt.practiceMode,
         topic: attempt.topic,
+        term: attempt.term,
         subjectNames: ids.flatMap((id) => {
           const name = subjectNames.get(id);
           return name ? [name] : [];

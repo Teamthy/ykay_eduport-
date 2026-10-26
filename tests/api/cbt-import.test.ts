@@ -14,8 +14,8 @@ vi.mock("@/lib/session", () => ({
 }));
 
 const validCsv = [
-  "subjectSlug,subjectName,classLevel,topic,stem,optionA,optionB,optionC,optionD,correctIndex,explanation",
-  "jss1-mathematics,Mathematics,jss1,Algebra,What is 2 + 2?,3,4,5,6,1,Adding two and two gives four; option B is the correct answer.",
+  "subjectSlug,subjectName,classLevel,topic,term,stem,optionA,optionB,optionC,optionD,correctIndex,explanation",
+  "jss1-mathematics,Mathematics,jss1,Algebra,Second Term,What is 2 + 2?,3,4,5,6,1,Adding two and two gives four; option B is the correct answer.",
 ].join("\n");
 
 function request(csv: string) {
@@ -51,6 +51,8 @@ describe("CBT import authorization and draft-only behavior", () => {
           expect.objectContaining({
             status: "draft",
             reviewedByUserId: null,
+            reviewedByExternalActor: null,
+            term: "second",
             reviewedAt: null,
             reviewReference: null,
             reviewNotes: null,
@@ -66,6 +68,7 @@ describe("CBT import authorization and draft-only behavior", () => {
       subjectName: "Mathematics",
       classLevel: "jss1",
       topic: "Algebra",
+      term: "Second Term",
       stem: "What is 2 + 2?",
       optionA: "3",
       optionB: "4",

@@ -1814,6 +1814,8 @@ model CbtQuestion {
   id           String     @id @default(cuid())
   subjectId    String
   topic        String
+  /// first | second | third; null for legacy questions without a verified term assignment.
+  term         String?
   /// 1 easy · 2 medium · 3 hard
   difficulty   Int        @default(2)
   stem         String
@@ -1825,12 +1827,14 @@ model CbtQuestion {
   /// curriculum | waec-style | neco-style | jamb-style
   source       String     @default("curriculum")
   /// draft | reviewed | archived (legacy published rows are returned to draft by migration)
-  status            String     @default("draft")
-  reviewedByUserId  String?
-  reviewedAt        DateTime?
+  status                  String     @default("draft")
+  reviewedByUserId        String?
+  /// GitHub Actions dispatch actor; mutually exclusive with in-app reviewer.
+  reviewedByExternalActor String?
+  reviewedAt              DateTime?
   /// Citation to the exact approved curriculum or examination-board source.
-  reviewReference   String?
-  reviewNotes       String?
+  reviewReference         String?
+  reviewNotes             String?
   createdAt         DateTime   @default(now())
 
   subject         CbtSubject            @relation(fields: [subjectId], references: [id], onDelete: Cascade)
@@ -1838,6 +1842,7 @@ model CbtQuestion {
   practiceAnswers CbtPracticeAnswer[]
 
   @@index([subjectId, status])
+  @@index([subjectId, term, status])
   @@index([status, reviewedAt])
 }
 
@@ -1863,6 +1868,8 @@ model CbtAttempt {
   /// topic | subject | mixed
   practiceMode      String?
   topic             String?
+  /// first | second | third; null for legacy attempts not filtered by term.
+  term              String?
   subjectIds        Json?
   questionIds       Json?
   drawToken         String?
@@ -1884,6 +1891,26 @@ model CbtAttempt {
   @@index([userId, status, createdAt])
   @@index([schoolId, createdAt])
   @@index([studentProfileId, createdAt])
+}
+
+/// External workflow attestation for the shared CBT bank. GitHub actors are not
+/// represented as application users and must never be attributed to one.
+model CbtBankAttestation {
+  id               String   @id @default(cuid())
+  externalActor    String
+  reference        String
+  bankFile         String
+  repository       String?
+  runId            String?
+  runUrl           String?
+  attestedCount    Int
+  notAttestedCount Int
+  reviewedAt       DateTime
+  createdAt        DateTime @default(now())
+  metadata         Json?
+
+  @@index([reviewedAt])
+  @@index([externalActor, reviewedAt])
 }
 
 model CbtPracticeAnswer {

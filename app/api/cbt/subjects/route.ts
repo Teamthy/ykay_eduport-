@@ -9,6 +9,14 @@ export async function GET(request: NextRequest) {
   if (isResponse(user)) return user;
 
   const classLevel = (request.nextUrl.searchParams.get("classLevel") ?? "").trim().toLowerCase();
+  const term = (request.nextUrl.searchParams.get("term") ?? "all").trim().toLowerCase();
+  if (!["all", "first", "second", "third"].includes(term)) {
+    return NextResponse.json(
+      { error: "Choose first, second, third or all terms." },
+      { status: 400 },
+    );
+  }
+  const questionFilter = { ...REVIEWED_QUESTION_FILTER, ...(term !== "all" ? { term } : {}) };
   const supportedLevels = new Set(["jss1", "jss2", "jss3", "ss1", "ss2", "ss3"]);
   if (classLevel && !supportedLevels.has(classLevel)) {
     return NextResponse.json({ error: "Choose a class from JSS1 to SS3." }, { status: 400 });
@@ -17,7 +25,7 @@ export async function GET(request: NextRequest) {
   const subjects = await prisma.cbtSubject.findMany({
     where: {
       ...(classLevel ? { classLevel } : {}),
-      questions: { some: REVIEWED_QUESTION_FILTER },
+      questions: { some: questionFilter },
     },
     orderBy: [{ classLevel: "asc" }, { name: "asc" }],
     select: {
@@ -26,7 +34,7 @@ export async function GET(request: NextRequest) {
       name: true,
       classLevel: true,
       department: true,
-      _count: { select: { questions: { where: REVIEWED_QUESTION_FILTER } } },
+      _count: { select: { questions: { where: questionFilter } } },
     },
   });
   return NextResponse.json({

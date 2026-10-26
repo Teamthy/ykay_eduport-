@@ -15,7 +15,7 @@ SHA-256: `88d4467fc45610b921aeabdbb6db0c7cb951d3f59702fe5312b12fb494a0fb97`
 - 0 duplicate-option rows, invalid answer indices, repeated subject/stem pairs, answer/explanation lead mismatches, empty options, missing topics, or missing labeled rationales under the script's structural checks.
 - All 10,000 rows are tagged `original-draft`.
 - Importability preflight: Papa Parse read all 10,000 rows with 0 CSV parse errors; normalizing the rows as the importer does and validating them with the shared Zod schema found 0 schema errors and 0 duplicate-option rows. This was not a database import.
-- Factual accuracy: **NOT VERIFIED**. The generator itself says every item needs subject-expert review and a source citation before approval.
+- The user attests that the existing 10,000-question bank was factually checked. This static audit did not independently repeat that factual review; it checked CSV structure and importability only.
 
 Passing these checks does not prove that an answer key, distractor, explanation, subject mapping, or curriculum level is factually correct.
 
@@ -57,7 +57,7 @@ Deploy this branch to a preview pointed at Staging, sign in as an admin, open `/
 | `operation` | `preflight` (read-only CSV check), `seed` (import drafts), `seed-and-attest` (import drafts, then attest) |
 | `bank_file` | CSV under `prisma/`; default `cbt-bank-10k-draft.csv` |
 | `confirmation` | must read `SEED STAGING` before anything is written |
-| `attest_email` / `attest_reference` | `seed-and-attest` only: the reviewer account and the source the bank was checked against |
+| `attestation_confirmation` / `attest_reference` | `seed-and-attest` only: explicit review confirmation and the source the bank was checked against |
 
 Configuration the workflow reads:
 
@@ -68,9 +68,9 @@ Configuration the workflow reads:
 Why it is safe to expose as a button:
 
 - the first step is `npm run cbt:preflight`, which parses the file with the seed's own parser and fails on any rejected row before a database is touched;
-- `npm run cbt:seed:10k:staging` refuses any host that is not `STAGING_DATABASE_HOST`, refuses a pooled Neon host, and refuses the Production host;
+- `CBT_SEED_TARGET=staging npm run cbt:seed` refuses any host that is not `STAGING_DATABASE_HOST`, refuses a pooled Neon host, and refuses the Production host;
 - `seed` and `seed-and-attest` only run from `main`, behind `confirmation=SEED STAGING`;
-- `seed-and-attest` requires `CBT_ATTEST_EMAIL`, `CBT_ATTEST_REFERENCE` and `CBT_ATTEST_CONFIRMATION="ATTEST BANK VERIFIED"`. It applies the **same** structural gate as the console (`lib/cbt-review.ts`), stores `reviewedByUserId` / `reviewedAt` / `reviewReference` on every row, leaves any malformed row in `draft` and reports it, and writes one `CBT_BANK_ATTESTED_BY_SEED` audit entry naming the reviewer, the citation and the counts.
+- The workflow uses the GitHub dispatch actor, explicit `I REVIEWED THE CBT BANK` confirmation, and a source reference; it does not request a reviewer email or misattribute the external attestation to an in-app user. It records a dated `CbtBankAttestation` audit row and attaches the reference/date to exact matching structurally valid questions. Malformed or mismatching rows remain drafts.
 
 ### After either load
 
@@ -91,3 +91,14 @@ Why it is safe to expose as a button:
 ## Safe publication rule
 
 Candidates must remain drafts until an authorized reviewer checks the key, options, explanation and curriculum fit, then records a specific source reference and review notes. The student-practice APIs intentionally select only attested `reviewed` questions. The import/admin console must not bypass this gate.
+
+
+## Curriculum term support
+
+CBT questions and practice attempts now carry an optional `first`, `second`, or `third` term. Existing questions remain unassigned rather than receiving inferred term labels. Personal practice can filter by term, subject, and (in topic mode) topic; choosing all terms includes legacy unassigned questions.
+
+## 2026-10-26 follow-up status
+
+- Term metadata is now supported by the question model, CSV/admin imports, draft editing, review attestations, and personal-practice filters. Legacy rows remain `term = NULL`; no term was inferred for them.
+- Workflow attestation now records the GitHub dispatch actor, reference, review timestamp, and run URL in `CbtBankAttestation`, with the actor stored separately from in-app reviewers. `CBT_ATTEST_EMAIL` is no longer used.
+- The bank content itself has **not** been expanded in this change: `cbt-bank-10k-draft.csv` remains 10,000 rows. No new question rows or curriculum topic assignments were fabricated. The requested 19,000+ full-scheme bank remains BLOCKED until the supplied scheme is available as a durable source file/manifest in the repository workspace for topic-by-topic mapping and generation.

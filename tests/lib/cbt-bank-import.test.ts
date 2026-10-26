@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { chunk, planBankCsv } from "@/lib/cbt-bank-import";
 
 const HEADER =
-  "subjectSlug,subjectName,classLevel,department,topic,difficulty,stem,optionA,optionB,optionC,optionD,correctIndex,explanation,source";
+  "subjectSlug,subjectName,classLevel,department,topic,term,difficulty,stem,optionA,optionB,optionC,optionD,correctIndex,explanation,source";
 
 function row(overrides: Record<string, string> = {}) {
   const base: Record<string, string> = {
@@ -13,6 +13,7 @@ function row(overrides: Record<string, string> = {}) {
     classLevel: "jss1",
     department: "general",
     topic: "Whole-number operations",
+    term: "",
     difficulty: "2",
     stem: "Calculate 101 + 699.",
     optionA: "70599",
@@ -43,6 +44,27 @@ describe("planBankCsv", () => {
       classLevel: "jss1",
     });
     expect(plan.subjects[0]?.rows[0]?.data.source).toBe("original-draft");
+    expect(plan.subjects[0]?.rows[0]?.data.term).toBeNull();
+  });
+
+  it("normalises common term labels for curriculum CSVs", () => {
+    const plan = planBankCsv([HEADER, row({ term: "Second Term" })].join("\n"));
+    expect(plan.rejected).toEqual([]);
+    expect(plan.subjects[0]?.rows[0]?.data.term).toBe("second");
+  });
+
+  it("accepts exact long curriculum topic labels up to 240 characters", () => {
+    const topic = `${"Source-backed topic segment ".repeat(8)}source label`.slice(0, 200);
+    const plan = planBankCsv([HEADER, row({ topic, term: "first" })].join("\n"));
+
+    expect(plan.rejected).toEqual([]);
+    expect(plan.subjects[0]?.rows[0]?.data.topic).toBe(topic);
+    expect(plan.subjects[0]?.rows[0]?.data.term).toBe("first");
+  });
+
+  it("rejects an unrecognised term label rather than guessing", () => {
+    const plan = planBankCsv([HEADER, row({ term: "midyear" })].join("\n"));
+    expect(plan.rejected[0]?.reason).toContain("term");
   });
 
   it("rejects unsupported class levels and duplicate options with a line number", () => {

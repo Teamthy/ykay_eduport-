@@ -21,6 +21,7 @@ import {
 type Question = {
   id: string;
   topic: string;
+  term: "first" | "second" | "third" | null;
   difficulty: number;
   stem: string;
   options: unknown;
@@ -31,6 +32,7 @@ type Question = {
   reviewReference: string | null;
   reviewNotes: string | null;
   reviewedAt: string | null;
+  reviewedByExternalActor: string | null;
   subject: { name: string; slug: string; classLevel: string; department: string };
 };
 
@@ -38,6 +40,7 @@ type ReviewForm = {
   reference: string;
   notes: string;
   topic: string;
+  term: "first" | "second" | "third" | null;
   difficulty: number;
   stem: string;
   options: string[];
@@ -124,6 +127,7 @@ export default function CbtBankReviewPage() {
               reference: question.reviewReference ?? "",
               notes: question.reviewNotes ?? "",
               topic: question.topic,
+              term: question.term,
               difficulty: question.difficulty,
               stem: question.stem,
               options: optionList(question.options),
@@ -153,6 +157,7 @@ export default function CbtBankReviewPage() {
       reference: "",
       notes: "",
       topic: question.topic,
+      term: question.term,
       difficulty: question.difficulty,
       stem: question.stem,
       options: optionList(question.options),
@@ -174,6 +179,7 @@ export default function CbtBankReviewPage() {
                 reference: form.reference,
                 question: {
                   topic: form.topic,
+                  term: form.term,
                   difficulty: form.difficulty,
                   stem: form.stem,
                   options: form.options,
@@ -261,6 +267,7 @@ export default function CbtBankReviewPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           topic: form.topic,
+          term: form.term,
           difficulty: form.difficulty,
           stem: form.stem,
           options: form.options,
@@ -594,7 +601,8 @@ export default function CbtBankReviewPage() {
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-widest text-brand-green">
                             {question.subject.name} · {question.subject.classLevel.toUpperCase()} ·{" "}
-                            {question.topic}
+                            {question.topic} ·{" "}
+                            {question.term ? `${question.term} term` : "term unassigned"}
                           </p>
                           <p className="mt-1 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
                             Difficulty {question.difficulty}/3 · {question.source} ·{" "}
@@ -605,6 +613,9 @@ export default function CbtBankReviewPage() {
                       {question.reviewedAt ? (
                         <span className="text-[10px] text-[var(--text-muted)]">
                           Reviewed {new Date(question.reviewedAt).toLocaleDateString()}
+                          {question.reviewedByExternalActor
+                            ? ` · GitHub @${question.reviewedByExternalActor}`
+                            : ""}
                         </span>
                       ) : null}
                     </div>
@@ -624,6 +635,30 @@ export default function CbtBankReviewPage() {
                           }
                           className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2.5 text-sm text-[var(--input-text)] disabled:opacity-60"
                         />
+                      </label>
+                      <label>
+                        <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                          Curriculum term
+                        </span>
+                        <select
+                          value={form.term ?? ""}
+                          disabled={status !== "draft"}
+                          onChange={(event) =>
+                            setForms((current) => ({
+                              ...current,
+                              [question.id]: {
+                                ...form,
+                                term: (event.target.value || null) as ReviewForm["term"],
+                              },
+                            }))
+                          }
+                          className="w-full rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2.5 text-sm text-[var(--input-text)] disabled:opacity-60"
+                        >
+                          <option value="">Unassigned</option>
+                          <option value="first">First term</option>
+                          <option value="second">Second term</option>
+                          <option value="third">Third term</option>
+                        </select>
                       </label>
                       <label>
                         <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">

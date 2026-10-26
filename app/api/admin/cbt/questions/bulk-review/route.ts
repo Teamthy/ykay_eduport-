@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
         data: {
           status: "reviewed",
           reviewedByUserId: auth.id,
+          reviewedByExternalActor: null,
           reviewedAt,
           reviewReference: parsed.data.reference,
           reviewNotes: parsed.data.notes,

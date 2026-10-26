@@ -18,6 +18,7 @@ import PersonalPracticeRunner from "@/components/cbt/PersonalPracticeRunner";
 
 type PracticeMode = "topic" | "subject" | "mixed";
 type ClassLevel = "jss1" | "jss2" | "jss3" | "ss1" | "ss2" | "ss3";
+type PracticeTerm = "all" | "first" | "second" | "third";
 
 type Subject = {
   id: string;
@@ -33,6 +34,7 @@ type ResumableSession = {
   classLevel: ClassLevel;
   practiceMode: PracticeMode;
   topic: string | null;
+  term: Exclude<PracticeTerm, "all"> | null;
   subjectNames: string[];
   questionCount: number;
   isTimed: boolean;
@@ -85,6 +87,7 @@ export default function PersonalPracticeFlow() {
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState<PracticeMode>("topic");
   const [classLevel, setClassLevel] = useState<ClassLevel>("jss1");
+  const [term, setTerm] = useState<PracticeTerm>("all");
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
   const [topics, setTopics] = useState<string[]>([]);
@@ -149,7 +152,7 @@ export default function PersonalPracticeFlow() {
       setTopics([]);
       setError("");
       try {
-        const response = await fetch(`/api/cbt/subjects?classLevel=${classLevel}`, {
+        const response = await fetch(`/api/cbt/subjects?classLevel=${classLevel}&term=${term}`, {
           cache: "no-store",
           signal: controller.signal,
         });
@@ -166,11 +169,11 @@ export default function PersonalPracticeFlow() {
     }
     void loadSubjects();
     return () => controller.abort();
-  }, [classLevel]);
+  }, [classLevel, term]);
 
   const selectedTopicSubject = mode === "topic" ? selectedSubjects[0] : null;
   useEffect(() => {
-    if (step !== 3 || mode !== "topic" || !selectedTopicSubject) return;
+    if (step !== 4 || mode !== "topic" || !selectedTopicSubject) return;
     const controller = new AbortController();
     async function loadTopics() {
       setLoadingTopics(true);
@@ -179,7 +182,7 @@ export default function PersonalPracticeFlow() {
       setError("");
       try {
         const response = await fetch(
-          `/api/cbt/topics?subject=${encodeURIComponent(selectedTopicSubject!.slug)}`,
+          `/api/cbt/topics?subject=${encodeURIComponent(selectedTopicSubject!.slug)}&term=${term}`,
           { cache: "no-store", signal: controller.signal },
         );
         const payload = (await response.json()) as { topics?: string[]; error?: string };
@@ -194,7 +197,7 @@ export default function PersonalPracticeFlow() {
     }
     void loadTopics();
     return () => controller.abort();
-  }, [mode, selectedTopicSubject, step]);
+  }, [mode, selectedTopicSubject, step, term]);
 
   const chooseSubject = (subject: Subject) => {
     setSelectedSlugs((current) => {
@@ -213,7 +216,7 @@ export default function PersonalPracticeFlow() {
       return;
     }
     setError("");
-    setStep(mode === "topic" ? 3 : 4);
+    setStep(mode === "topic" ? 4 : 5);
   }
 
   async function startPractice() {
@@ -231,6 +234,7 @@ export default function PersonalPracticeFlow() {
         body: JSON.stringify({
           classLevel,
           practiceMode: mode,
+          term,
           subjectSlugs: selectedSubjects.map((subject) => subject.slug),
           topic: mode === "topic" ? selectedTopic : null,
           questionCount,
@@ -268,8 +272,8 @@ export default function PersonalPracticeFlow() {
     return <PersonalPracticeRunner key={sessionId} sessionId={sessionId} onExit={exitSession} />;
   }
 
-  const totalSteps = mode === "topic" ? 5 : 4;
-  const currentStep = step === 4 ? (mode === "topic" ? 5 : 4) : step + 1;
+  const totalSteps = mode === "topic" ? 6 : 5;
+  const currentStep = step + 1;
 
   return (
     <div className="space-y-6">
@@ -299,6 +303,7 @@ export default function PersonalPracticeFlow() {
                     {saved.classLevel.toUpperCase()} · {saved.subjectNames.join(", ") || "Practice"}
                   </p>
                   <p className="mt-1 text-xs text-[var(--text-muted)]">
+                    {saved.term ? `${saved.term} term · ` : "All terms · "}
                     {saved.practiceMode === "topic"
                       ? saved.topic
                       : saved.practiceMode === "mixed"
@@ -417,6 +422,36 @@ export default function PersonalPracticeFlow() {
 
         {step === 2 ? (
           <div className="mt-7">
+            <h3 className="font-display text-2xl text-[var(--text-primary)]">Choose a term</h3>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">
+              Filter the reviewed question bank by the term in the supplied scheme. Unassigned
+              legacy questions appear under all terms only.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {(
+                [
+                  ["all", "All terms"],
+                  ["first", "First term"],
+                  ["second", "Second term"],
+                  ["third", "Third term"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={term === value}
+                  onClick={() => setTerm(value)}
+                  className={`rounded-2xl border px-4 py-5 text-left font-bold ${term === value ? "border-brand-green bg-brand-green/5 text-brand-green" : "border-[var(--border-subtle)] text-[var(--text-primary)] hover:border-brand-green/30"}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {step === 3 ? (
+          <div className="mt-7">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h3 className="font-display text-2xl text-[var(--text-primary)]">
@@ -488,13 +523,14 @@ export default function PersonalPracticeFlow() {
             ) : (
               <div className="mt-5 rounded-2xl bg-[var(--bg-secondary)] p-5 text-sm text-[var(--text-muted)]">
                 <p className="font-semibold text-[var(--text-primary)]">
-                  No reviewed questions for {classLevel.toUpperCase()} yet
+                  No reviewed questions for {classLevel.toUpperCase()} in{" "}
+                  {term === "all" ? "all terms" : `${term} term`} yet
                 </p>
                 <p className="mt-2 leading-relaxed">
-                  Practice sets are built only from questions a subject teacher has reviewed and
-                  approved, so a subject appears here once it has been signed off. If your class has
-                  an imported question bank waiting, your subject teacher can release it from the
-                  Admin CBT question bank.
+                  Practice sets use reviewed questions assigned to the selected term. Legacy
+                  questions without a verified term assignment appear only when All terms is
+                  selected. If this class and term have an imported bank waiting, an administrator
+                  can release it from the CBT question bank after review.
                 </p>
               </div>
             )}
@@ -506,7 +542,7 @@ export default function PersonalPracticeFlow() {
           </div>
         ) : null}
 
-        {step === 3 && mode === "topic" ? (
+        {step === 4 && mode === "topic" ? (
           <div className="mt-7">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
@@ -558,7 +594,7 @@ export default function PersonalPracticeFlow() {
           </div>
         ) : null}
 
-        {step === 4 ? (
+        {step === 5 ? (
           <div className="mt-7">
             <h3 className="font-display text-2xl text-[var(--text-primary)]">
               Set practice length
@@ -639,7 +675,7 @@ export default function PersonalPracticeFlow() {
             <div className="mt-5 rounded-2xl bg-[var(--bg-secondary)] p-4 text-sm text-[var(--text-muted)]">
               <p className="font-bold text-[var(--text-primary)]">Set summary</p>
               <p className="mt-1">
-                {classLevel.toUpperCase()} ·{" "}
+                {classLevel.toUpperCase()} · {term === "all" ? "All terms" : `${term} term`} ·{" "}
                 {selectedSubjects.map((subject) => subject.name).join(", ")}
                 {mode === "topic" ? ` · ${selectedTopic}` : ""}
               </p>
@@ -666,7 +702,7 @@ export default function PersonalPracticeFlow() {
               type="button"
               onClick={() => {
                 setError("");
-                if (step === 4) setStep(mode === "topic" ? 3 : 2);
+                if (step === 5 && mode !== "topic") setStep(3);
                 else setStep((current) => Math.max(0, current - 1));
               }}
               className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] px-5 py-2.5 text-sm font-bold text-[var(--text-primary)]"
@@ -692,6 +728,18 @@ export default function PersonalPracticeFlow() {
           {step === 2 ? (
             <button
               type="button"
+              onClick={() => {
+                setError("");
+                setStep(3);
+              }}
+              className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 text-sm font-bold text-white"
+            >
+              Continue <ArrowRight size={15} />
+            </button>
+          ) : null}
+          {step === 3 ? (
+            <button
+              type="button"
               onClick={goToSettings}
               disabled={loadingSubjects || !selectedSubjects.length}
               className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50"
@@ -699,12 +747,12 @@ export default function PersonalPracticeFlow() {
               Continue <ArrowRight size={15} />
             </button>
           ) : null}
-          {step === 3 && mode === "topic" ? (
+          {step === 4 && mode === "topic" ? (
             <button
               type="button"
               onClick={() => {
                 setError("");
-                setStep(4);
+                setStep(5);
               }}
               disabled={!selectedTopic || loadingTopics}
               className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50"
@@ -712,7 +760,7 @@ export default function PersonalPracticeFlow() {
               Continue <ArrowRight size={15} />
             </button>
           ) : null}
-          {step === 4 ? (
+          {step === 5 ? (
             <button
               type="button"
               onClick={() => void startPractice()}

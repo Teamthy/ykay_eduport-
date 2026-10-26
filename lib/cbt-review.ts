@@ -7,10 +7,10 @@
  * the same structural gate, so the rules live here rather than in the route.
  */
 
-/** Only questions with a named reviewer, date and citation may be served. */
+/** Only questions with a recorded in-app or external reviewer, date and citation may be served. */
 export const REVIEWED_QUESTION_FILTER = {
   status: "reviewed",
-  reviewedByUserId: { not: null },
+  OR: [{ reviewedByUserId: { not: null } }, { reviewedByExternalActor: { not: null } }],
   reviewedAt: { not: null },
   reviewReference: { not: null },
 } as const;
