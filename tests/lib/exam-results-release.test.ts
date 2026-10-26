@@ -40,6 +40,7 @@ function baseExam(overrides: Record<string, unknown> = {}) {
     status: "CLOSED",
     resultsReleased: false,
     updatedAt: new Date("2026-10-24T00:00:00.000Z"),
+    snapshots: [{ totalMarks: 50 }],
     questions: [{ id: "q1", marks: 50, sortOrder: 1 }],
     ...overrides,
   };
@@ -51,6 +52,17 @@ describe("PATCH /api/teacher/exams — result release and gradebook sync", () =>
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.exam.findFirst.mockResolvedValue(baseExam() as never);
+    mockPrisma.exam.findUnique.mockResolvedValue({
+      ...baseExam(),
+      theoryMinutes: 0,
+      passMark: 40,
+      shuffleQuestions: false,
+      scheduledFor: null,
+      availableUntil: null,
+      snapshots: [],
+      questions: [{ id: "q1", marks: 50, sortOrder: 1, versions: [{ id: "qv1" }] }],
+    } as never);
+    mockPrisma.examSnapshot.create.mockResolvedValue({ id: "snapshot_1" } as never);
     mockPrisma.examAttempt.findMany.mockResolvedValue([
       {
         id: "attempt_1",
@@ -58,6 +70,7 @@ describe("PATCH /api/teacher/exams — result release and gradebook sync", () =>
         attemptNumber: 1,
         status: "GRADED",
         totalScore: 38,
+        snapshot: { totalMarks: 50 },
         studentProfile: { schoolId: "school_1" },
       },
     ] as never);
@@ -217,6 +230,7 @@ describe("PATCH /api/teacher/exams — result release and gradebook sync", () =>
         attemptNumber: 1,
         status: "SUBMITTED",
         totalScore: 38,
+        snapshot: { totalMarks: 50 },
         studentProfile: { schoolId: "school_1" },
       },
     ] as never);
@@ -308,6 +322,7 @@ describe("PATCH /api/teacher/exams — result release and gradebook sync", () =>
           attemptNumber: 1,
           status: "GRADED",
           totalScore: 38,
+          snapshot: { totalMarks: 50 },
           studentProfile: { schoolId: "school_1" },
         },
       ] as never)
@@ -318,6 +333,7 @@ describe("PATCH /api/teacher/exams — result release and gradebook sync", () =>
           attemptNumber: 1,
           status: "SUBMITTED",
           totalScore: 38,
+          snapshot: { totalMarks: 50 },
           studentProfile: { schoolId: "school_1" },
         },
       ] as never);

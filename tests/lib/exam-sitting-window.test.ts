@@ -71,10 +71,43 @@ function scheduledExam(overrides: Record<string, unknown> = {}) {
 
 const params = { params: Promise.resolve({ id: "exam_1" }) };
 
+function snapshot() {
+  return {
+    id: "snap_1",
+    examId: "exam_1",
+    title: "Midterm Test",
+    subjectName: "Biology",
+    instructions: null,
+    durationMinutes: 40,
+    totalMarks: 1,
+    passMark: 40,
+    shuffleQuestions: false,
+    scheduledFor: null,
+    availableUntil: null,
+    questions: [
+      {
+        id: "sq1",
+        questionId: "q1",
+        sortOrder: 1,
+        questionVersion: {
+          id: "qv1",
+          type: "MCQ",
+          questionText: "2+2?",
+          marks: 1,
+          options: null,
+          correctKey: "B",
+          correctText: null,
+        },
+      },
+    ],
+  };
+}
+
 describe("POST /api/student/exams/[id]/attempt — sitting window", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.examAttempt.findFirst.mockResolvedValue(null);
+    mockPrisma.examSnapshot.findFirst.mockResolvedValue(snapshot() as never);
     mockPrisma.examAnswer.findMany.mockResolvedValue([]);
     mockPrisma.examAttempt.create.mockImplementation(async ({ data }: never) => ({
       id: "att_new",
@@ -162,6 +195,8 @@ describe("POST /api/student/exams/[id]/attempt — sitting window", () => {
     );
     mockPrisma.examAttempt.findFirst.mockResolvedValue({
       id: "att_live",
+      snapshotId: "snap_1",
+      snapshot: snapshot(),
       status: "IN_PROGRESS",
       attemptNumber: 1,
       // Deadline still in the future: their own clock is still running.
@@ -217,6 +252,7 @@ describe("POST /api/student/exams/[id]/attempt — start race (C-004)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.examAttempt.findFirst.mockResolvedValue(null);
+    mockPrisma.examSnapshot.findFirst.mockResolvedValue(snapshot() as never);
     mockPrisma.examAnswer.findMany.mockResolvedValue([]);
     mockPrisma.examAttempt.create.mockImplementation(async ({ data }: never) => ({
       id: "att_new",
@@ -230,6 +266,7 @@ describe("POST /api/student/exams/[id]/attempt — start race (C-004)", () => {
     // insert race, the re-read finds the winner's IN_PROGRESS attempt.
     mockPrisma.examAttempt.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({
       id: "att_live",
+      snapshotId: "snap_1",
       status: "IN_PROGRESS",
       attemptNumber: 1,
       deadlineAt: new Date(Date.now() + 10 * 60_000),

@@ -22,14 +22,19 @@ describe("PATCH /api/teacher/exams/[id]/results release race", () => {
     mockPrisma.examAnswer.findFirst.mockResolvedValue({
       id: "answer_1",
       response: "written answer",
-      question: { type: "ESSAY", marks: 10 },
+      snapshotQuestion: { questionVersion: { type: "ESSAY", marks: 10 } },
       attempt: { id: "attempt_1", exam: { resultsReleased: false } },
     } as never);
     mockPrisma.examAnswer.update.mockResolvedValue({ id: "answer_1" } as never);
     mockPrisma.examAttempt.findUnique.mockResolvedValue({
       id: "attempt_1",
       autoScore: 10,
-      answers: [{ question: { type: "ESSAY" }, awardedMarks: 4 }],
+      answers: [
+        {
+          snapshotQuestion: { questionVersion: { type: "ESSAY" } },
+          awardedMarks: 4,
+        },
+      ],
     } as never);
     mockPrisma.examAttempt.update.mockResolvedValue({ id: "attempt_1" } as never);
   });
