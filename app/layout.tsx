@@ -88,10 +88,11 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   icons: {
-    icon: [
-      { url: "/ykay-logo.png", sizes: "any", type: "image/png" },
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-    ],
+    // The 104 KB master PNG was listed as `sizes: "any"`, so every page
+    // fetched it as the favicon — it was the single heaviest response on
+    // every route Lighthouse measured. The 192px icon is 15 KB and is what
+    // the browser actually needs; the master stays for og:image.
+    icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
     shortcut: "/icons/icon-192.png",
   },
@@ -207,7 +208,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const primary = safeColor(branding?.primaryColor, DEFAULT_BRANDING.primaryColor);
   const secondary = safeColor(branding?.secondaryColor, DEFAULT_BRANDING.secondaryColor);
   const accent = safeColor(branding?.accentColor, DEFAULT_BRANDING.accentColor);
-  const faviconUrl = branding?.faviconUrl ?? "/ykay-logo.png";
+  const faviconUrl = branding?.faviconUrl ?? "/icons/icon-192.png";
 
   return (
     <html

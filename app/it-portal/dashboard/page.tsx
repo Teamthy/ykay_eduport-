@@ -176,7 +176,7 @@ export default function ItPortalDashboard() {
         <section className="bg-brand-navy px-6 pt-28 pb-14">
           <div className="w-full">
             <div className="flex items-center gap-3 mb-3">
-              <img src="/ykay-logo.png" alt="Ykay" className="h-10 w-10 rounded-lg" />
+              <img src="/ykay-logo-280.webp" alt="Ykay" className="h-10 w-10 rounded-lg" />
               <span className="rounded-full bg-brand-green/20 border border-brand-green/40 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
                 IT Learning Hub
               </span>

@@ -147,7 +147,7 @@ export default function PlatformLanding() {
         <nav className="sticky top-0 z-50 bg-[#00072D]/95 border-b border-white/5">
           <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
             <Link href="/" className="flex items-center gap-2">
-              <img src="/ykay-logo.png" alt="Ykay Platform" className="w-8 h-8 rounded-lg" />
+              <img src="/ykay-logo-280.webp" alt="Ykay Platform" className="w-8 h-8 rounded-lg" />
               <span className="font-bold text-lg tracking-wider">
                 EDU<span className="text-[#7aa2ff]">os</span>
               </span>
@@ -365,7 +365,7 @@ export default function PlatformLanding() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
               <div className="col-span-2 md:col-span-1">
                 <Link href="/" className="flex items-center gap-2 mb-4">
-                  <img src="/ykay-logo.png" alt="Ykay Platform" className="w-7 h-7 rounded" />
+                  <img src="/ykay-logo-280.webp" alt="Ykay Platform" className="w-7 h-7 rounded" />
                   <span className="font-bold text-sm">
                     EDU<span className="text-[#7aa2ff]">os</span>
                   </span>

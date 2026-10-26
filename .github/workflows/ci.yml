@@ -226,12 +226,17 @@ jobs:
         env:
           CI: "true"
 
-      - name: Upload report on failure
+      # CI uses the github+list reporters, so no HTML report is generated —
+      # the step used to upload `playwright-report/`, which never exists, and
+      # the only forensic artefact (traces, screenshot, video for the retries
+      # that `retain-on-failure` keeps) was never uploaded.
+      - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: playwright-test-results
+          path: test-results/
+          if-no-files-found: ignore
           retention-days: 7
 
   load:

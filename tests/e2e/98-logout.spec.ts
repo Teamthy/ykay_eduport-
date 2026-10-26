@@ -48,30 +48,25 @@ test.describe("authenticated sign-out", () => {
     const signOut = page.locator('button[title="Sign out"]');
     await expect(signOut).toBeVisible();
 
+    // Sign-out is a full-page navigation to /api/auth/logout, so the request
+    // is a document GET that the server answers with a 303 to the sign-in
+    // page. Both hops are observable: the request URL, then the final URL.
     const logoutRequestPromise = page.waitForRequest(
-      (candidate) => candidate.url().includes("/api/auth/logout") && candidate.method() === "POST",
+      (candidate) => candidate.url().includes("/api/auth/logout") && candidate.method() === "GET",
     );
-    // Read the body inside the predicate: the page navigates to /login as soon
-    // as the call resolves, and Playwright cannot fetch the body of a response
-    // the page has already navigated away from.
-    let logoutBody: unknown = null;
-    const logoutResponsePromise = page.waitForResponse(async (candidate) => {
-      if (!candidate.url().includes("/api/auth/logout")) return false;
-      if (candidate.request().method() !== "POST") return false;
-      logoutBody = await candidate.json().catch(() => null);
-      return true;
-    });
 
     await signOut.click();
     await page.getByRole("button", { name: "Yes, sign me out" }).click();
 
-    const [logoutRequest, logoutResponse] = await Promise.all([
-      logoutRequestPromise,
-      logoutResponsePromise,
-    ]);
-    expect(logoutRequest.method()).toBe("POST");
-    expect(logoutResponse.status()).toBe(200);
-    expect(logoutBody).toMatchObject({ ok: true });
+    const logoutRequest = await logoutRequestPromise;
+    expect(logoutRequest.method()).toBe("GET");
+    // The role hint keeps the user on the right sign-in form after the 303.
+    expect(new URL(logoutRequest.url()).searchParams.get("role")).toBe("SUPER_ADMIN");
+
+    await page.waitForURL((url) => url.pathname === "/login", { timeout: 15_000 });
+    const landed = new URL(page.url());
+    expect(landed.pathname).toBe("/login");
+    expect(landed.searchParams.get("signedout")).toBe("1");
 
     // 2. The cookie is gone.
     const remainingCookies = await context.cookies();

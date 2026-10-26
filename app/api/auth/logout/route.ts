@@ -117,8 +117,36 @@ async function revoke() {
   }
 }
 
+/**
+ * A GET signs the account out, so it must only answer a top-level navigation
+ * that started on this site.
+ *
+ * Sign-out revokes every session for the account, which means a cross-site
+ * request would sign the user out on their phone as well as in this browser:
+ * `<img src="https://portal/api/auth/logout">` on any page would be enough.
+ * Browsers label navigations with Sec-Fetch-*; a picture, a stylesheet or a
+ * cross-site link does not look like one. Clients that send neither header
+ * (older browsers) are allowed through, because the alternative is stranding
+ * them on a page they cannot leave.
+ */
+function isSameOriginNavigation(request: NextRequest): boolean {
+  const site = request.headers.get("sec-fetch-site");
+  if (site && site !== "same-origin" && site !== "none") return false;
+  const mode = request.headers.get("sec-fetch-mode");
+  if (mode && mode !== "navigate") return false;
+  return true;
+}
+
 /** Browser navigation: clear, then leave for the login page. */
 export async function GET(request: NextRequest) {
+  if (!isSameOriginNavigation(request)) {
+    // No Set-Cookie: a refused request must not be able to sign anyone out.
+    return NextResponse.json(
+      { error: "Sign out from the portal." },
+      { status: 403, headers: { "cache-control": "no-store" } },
+    );
+  }
+
   const outcome = await revoke();
   const requested = request.nextUrl.searchParams.get("next");
   const role = request.nextUrl.searchParams.get("role") ?? undefined;
