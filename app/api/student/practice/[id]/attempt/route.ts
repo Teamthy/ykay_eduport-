@@ -41,7 +41,6 @@ async function loadPracticeExam(
       examType: "PRACTICE",
       OR: [{ classId: currentClassId }, { attempts: { some: { studentProfileId } } }],
     },
-    include: { questions: { orderBy: { sortOrder: "asc" } } },
   });
 }
 
@@ -67,15 +66,25 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
   if (!exam) {
     return NextResponse.json({ error: "Practice exam not found for your class." }, { status: 404 });
   }
-  if (!exam.questions.length) {
-    return NextResponse.json({ error: "This practice set has no questions yet." }, { status: 409 });
-  }
-
   const existing = await prisma.examAttempt.findFirst({
     where: { examId: exam.id, studentProfileId: studentContext.studentProfile.id },
     orderBy: { attemptNumber: "desc" },
+    include: { snapshot: { include: { questions: { include: { questionVersion: true } } } } },
   });
 
+  const activeSnapshot =
+    (existing?.status === ExamAttemptStatus.IN_PROGRESS ? existing.snapshot : null) ??
+    (await prisma.examSnapshot.findFirst({
+      where: { examId: exam.id },
+      orderBy: { revision: "desc" },
+      include: { questions: { orderBy: { sortOrder: "asc" }, include: { questionVersion: true } } },
+    }));
+  if (!activeSnapshot || !activeSnapshot.questions.length) {
+    return NextResponse.json(
+      { error: "This practice set has no published snapshot." },
+      { status: 503 },
+    );
+  }
   let attempt = existing;
 
   if (
@@ -109,9 +118,10 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
     attempt = await prisma.examAttempt.create({
       data: {
         examId: exam.id,
+        snapshotId: activeSnapshot.id,
         studentProfileId: studentContext.studentProfile.id,
         attemptNumber: (existing?.attemptNumber || 0) + 1,
-        deadlineAt: new Date(Date.now() + exam.durationMinutes * 60_000),
+        deadlineAt: new Date(Date.now() + activeSnapshot.durationMinutes * 60_000),
       },
     });
   }
@@ -128,7 +138,20 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
     savedAnswers.map((answer) => [answer.questionId, answer.response]),
   );
 
-  const ordered = exam.shuffleQuestions ? shuffled(exam.questions, attempt.id) : exam.questions;
+  const attemptSnapshot =
+    attempt.snapshotId === activeSnapshot.id
+      ? activeSnapshot
+      : await prisma.examSnapshot.findUnique({
+          where: { id: attempt.snapshotId },
+          include: {
+            questions: { orderBy: { sortOrder: "asc" }, include: { questionVersion: true } },
+          },
+        });
+  if (!attemptSnapshot)
+    return NextResponse.json({ error: "Attempt snapshot unavailable." }, { status: 503 });
+  const ordered = attemptSnapshot.shuffleQuestions
+    ? shuffled(attemptSnapshot.questions, attempt.id)
+    : attemptSnapshot.questions;
 
   return NextResponse.json({
     attempt: {
@@ -136,22 +159,23 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
       attemptNumber: attempt.attemptNumber,
       deadlineAt: attempt.deadlineAt.toISOString(),
       secondsLeft: Math.max(0, Math.floor((attempt.deadlineAt.getTime() - Date.now()) / 1000)),
+      lastClientSequence: attempt.lastClientSequence,
     },
     exam: {
       id: exam.id,
-      title: exam.title,
-      subjectName: exam.subjectName,
-      instructions: exam.instructions,
-      durationMinutes: exam.durationMinutes,
-      totalMarks: exam.questions.reduce((sum, question) => sum + question.marks, 0),
+      title: attemptSnapshot.title,
+      subjectName: attemptSnapshot.subjectName,
+      instructions: attemptSnapshot.instructions,
+      durationMinutes: attemptSnapshot.durationMinutes,
+      totalMarks: attemptSnapshot.totalMarks,
     },
     questions: ordered.map((question) => ({
-      id: question.id,
-      type: question.type,
-      questionText: question.questionText,
-      marks: question.marks,
-      options: (question.options as OptionShape[] | null) || null,
-      savedResponse: responses[question.id] ?? null,
+      id: question.questionId,
+      type: question.questionVersion.type,
+      questionText: question.questionVersion.questionText,
+      marks: question.questionVersion.marks,
+      options: (question.questionVersion.options as OptionShape[] | null) || null,
+      savedResponse: responses[question.questionId] ?? null,
     })),
   });
 }
@@ -159,6 +183,7 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
 const saveSchema = z.object({
   attemptId: z.string().trim().min(1),
   action: z.enum(["SAVE", "SUBMIT"]),
+  clientSequence: z.number().int().min(1).max(2_147_483_647).optional(),
   answers: z
     .array(
       z.object({
@@ -206,32 +231,62 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       examId: exam.id,
       studentProfileId: studentContext.studentProfile.id,
     },
+    include: { snapshot: { include: { questions: { include: { questionVersion: true } } } } },
   });
   if (!attempt) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
   if (attempt.status !== ExamAttemptStatus.IN_PROGRESS) {
     return NextResponse.json({ error: "This attempt is already submitted." }, { status: 409 });
   }
 
-  const validQuestionIds = new Set(exam.questions.map((question) => question.id));
+  const snapshotQuestionById = new Map(
+    attempt.snapshot.questions.map((question) => [question.questionId, question]),
+  );
+  const validQuestionIds = new Set(snapshotQuestionById.keys());
   const answers = payload.answers.filter((answer) => validQuestionIds.has(answer.questionId));
 
-  if (answers.length) {
-    await prisma.$transaction(
+  const clientSequence = payload.clientSequence ?? attempt.lastClientSequence + 1;
+  const saveApplied = await prisma.$transaction(async (tx) => {
+    const claim = await tx.examAttempt.updateMany({
+      where: {
+        id: attempt.id,
+        status: ExamAttemptStatus.IN_PROGRESS,
+        lastClientSequence: { lt: clientSequence },
+      },
+      data: { lastClientSequence: clientSequence },
+    });
+    if (claim.count !== 1) return false;
+    await Promise.all(
       answers.map((answer) =>
-        prisma.examAnswer.upsert({
-          where: {
-            attemptId_questionId: { attemptId: attempt.id, questionId: answer.questionId },
-          },
+        tx.examAnswer.upsert({
+          where: { attemptId_questionId: { attemptId: attempt.id, questionId: answer.questionId } },
           create: {
             attemptId: attempt.id,
             questionId: answer.questionId,
+            snapshotQuestionId: snapshotQuestionById.get(answer.questionId)!.id,
             response: answer.response,
           },
           update: { response: answer.response },
         }),
       ),
     );
+    return true;
+  });
+  if (!saveApplied && payload.action === "SAVE") {
+    const latest = await prisma.examAttempt.findUnique({
+      where: { id: attempt.id },
+      select: { lastClientSequence: true },
+    });
+    return NextResponse.json({
+      ok: true,
+      staleSaveIgnored: true,
+      lastClientSequence: latest?.lastClientSequence ?? attempt.lastClientSequence,
+    });
   }
+  if (!saveApplied)
+    return NextResponse.json(
+      { error: "A newer response was saved. Retry submission." },
+      { status: 409 },
+    );
 
   if (payload.action === "SAVE") {
     const expired = attempt.deadlineAt.getTime() < Date.now();
@@ -241,16 +296,18 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
         ok: true,
         autoSubmitted: true,
         totalScore: finalized?.totalScore ?? 0,
+        lastClientSequence: clientSequence,
       });
     }
     return NextResponse.json({
       ok: true,
       secondsLeft: Math.max(0, Math.floor((attempt.deadlineAt.getTime() - Date.now()) / 1000)),
+      lastClientSequence: clientSequence,
     });
   }
 
   const finalized = await finalizeAttempt(attempt.id);
-  const totalMarks = exam.questions.reduce((sum, question) => sum + question.marks, 0);
+  const totalMarks = attempt.snapshot.totalMarks;
 
   // Instant review — correct answers and per-question marks. Safe here because
   // practice sets are revision material, not assessed work.
@@ -266,13 +323,14 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       totalScore: finalized?.totalScore ?? 0,
       totalMarks,
       percent: totalMarks ? Math.round(((finalized?.totalScore ?? 0) / totalMarks) * 100) : 0,
-      passMark: exam.passMark,
+      passMark: attempt.snapshot.passMark,
       attemptNumber: attempt.attemptNumber,
     },
-    review: exam.questions.map((question) => {
-      const answer = gradedByQuestion.get(question.id);
+    review: attempt.snapshot.questions.map((item) => {
+      const question = item.questionVersion;
+      const answer = gradedByQuestion.get(item.questionId);
       return {
-        id: question.id,
+        id: item.questionId,
         questionText: question.questionText,
         type: question.type,
         marks: question.marks,

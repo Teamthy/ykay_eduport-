@@ -189,6 +189,10 @@ model School {
   correctionRequests      AttendanceCorrectionRequest[]
   feeInvoices             FeeInvoice[]
   feePayments             FeePayment[]
+  feePaymentCorrections   FeePaymentCorrection[]
+  examQuestionVersions    ExamQuestionVersion[]
+  examSnapshots           ExamSnapshot[]
+  examSnapshotQuestions   ExamSnapshotQuestion[]
   feePaymentAttempts      FeePaymentAttempt[]
   reportCards              ReportCard[]
   examGradebookSyncs       ExamGradebookSync[]
@@ -596,6 +600,7 @@ model FeeInvoice {
   items           FeeInvoiceItem[]
   payments        FeePayment[]
   paymentAttempts FeePaymentAttempt[]
+  corrections     FeePaymentCorrection[]
 
   /// One invoice per student per term when raised from a structure. This is
   /// what makes generation safely re-runnable.
@@ -637,15 +642,38 @@ model FeePayment {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
-  school         School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  invoice        FeeInvoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
-  parentProfile  ParentProfile? @relation(fields: [parentProfileId], references: [id], onDelete: SetNull)
+  school         School         @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  invoice        FeeInvoice     @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Restrict)
+  parentProfile  ParentProfile? @relation(fields: [parentProfileId], references: [id], onDelete: Restrict)
+  corrections    FeePaymentCorrection[]
 
   @@index([schoolId, paidAt])
   @@index([invoiceId, paidAt])
   @@index([parentProfileId, paidAt])
   @@index([status])
+}
+
+/// Append-only compensating entry. Negative amountDelta reverses a posted receipt.
+model FeePaymentCorrection {
+  id           String   @id @default(cuid())
+  paymentId    String
+  invoiceId    String
+  schoolId     String
+  amountDelta  Int
+  action       String
+  reason       String
+  reference    String   @unique
+  actorUserId  String
+  createdAt    DateTime @default(now())
+
+  payment FeePayment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  invoice FeeInvoice @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+  school  School     @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+
+  @@index([schoolId])
+  @@index([paymentId, createdAt])
+  @@index([invoiceId, createdAt])
 }
 
 model FeePaymentAttempt {
@@ -1064,8 +1092,9 @@ model Exam {
   teacherProfile TeacherProfile @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
   term           Term?          @relation(fields: [termId], references: [id], onDelete: Restrict)
   subject        Subject?       @relation("ExamSubject", fields: [subjectId], references: [id], onDelete: SetNull)
-  questions      ExamQuestion[]
-  attempts       ExamAttempt[]
+  questions        ExamQuestion[]
+  snapshots        ExamSnapshot[]
+  attempts         ExamAttempt[]
   retakes          ExamRetake[]
   gradebookSyncs   ExamGradebookSync[]
 
@@ -1087,12 +1116,88 @@ model ExamQuestion {
   correctText  String?
   marks        Int              @default(1)
   sortOrder    Int              @default(0)
+  version      Int              @default(1)
+  archivedAt   DateTime?
   createdAt    DateTime         @default(now())
 
-  exam    Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
-  answers ExamAnswer[]
+  exam     Exam                   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  answers       ExamAnswer[]
+  versions      ExamQuestionVersion[]
+  snapshotItems ExamSnapshotQuestion[]
 
   @@index([examId, sortOrder])
+}
+
+/// Append-only record of the exact content/answer key for each question revision.
+model ExamQuestionVersion {
+  id           String           @id @default(cuid())
+  schoolId     String
+  questionId   String
+  version      Int
+  type         ExamQuestionType
+  questionText String
+  options      Json?
+  correctKey   String?
+  correctText  String?
+  marks        Int
+  createdAt    DateTime         @default(now())
+
+  school         School               @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  question       ExamQuestion         @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  snapshotItems  ExamSnapshotQuestion[]
+
+  @@unique([questionId, version])
+  @@index([schoolId])
+  @@index([questionId, createdAt])
+}
+
+/// Frozen exam configuration at publication. A new published revision gets a new snapshot.
+model ExamSnapshot {
+  id               String   @id @default(cuid())
+  schoolId         String
+  examId           String
+  revision         Int
+  title            String
+  subjectName      String
+  instructions     String?
+  durationMinutes  Int
+  theoryMinutes    Int
+  passMark         Int
+  totalMarks       Int
+  shuffleQuestions Boolean
+  scheduledFor     DateTime?
+  availableUntil   DateTime?
+  createdAt        DateTime @default(now())
+
+  school    School                 @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  exam      Exam                   @relation(fields: [examId], references: [id], onDelete: Restrict)
+  questions ExamSnapshotQuestion[]
+  attempts  ExamAttempt[]
+
+  @@unique([examId, revision])
+  @@index([schoolId])
+  @@index([examId, createdAt])
+}
+
+/// Question order and question-version membership frozen for one exam revision.
+model ExamSnapshotQuestion {
+  id                String @id @default(cuid())
+  schoolId          String
+  snapshotId        String
+  questionId        String
+  questionVersionId String
+  sortOrder         Int
+
+  school         School              @relation(fields: [schoolId], references: [id], onDelete: Restrict)
+  snapshot       ExamSnapshot        @relation(fields: [snapshotId], references: [id], onDelete: Restrict)
+  question       ExamQuestion        @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  questionVersion ExamQuestionVersion @relation(fields: [questionVersionId], references: [id], onDelete: Restrict)
+  answers        ExamAnswer[]
+
+  @@unique([snapshotId, questionId])
+  @@unique([snapshotId, sortOrder])
+  @@index([schoolId])
+  @@index([questionVersionId])
 }
 
 model ExamAttempt {
@@ -1108,10 +1213,13 @@ model ExamAttempt {
   essayScore       Int               @default(0)
   totalScore       Int               @default(0)
   tabSwitches      Int               @default(0)
+  lastClientSequence Int             @default(0)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
   exam           Exam           @relation(fields: [examId], references: [id], onDelete: Restrict)
+  snapshotId     String
+  snapshot       ExamSnapshot   @relation(fields: [snapshotId], references: [id], onDelete: Restrict)
   studentProfile StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Restrict)
   answers        ExamAnswer[]
 
@@ -1123,14 +1231,16 @@ model ExamAttempt {
 model ExamAnswer {
   id           String   @id @default(cuid())
   attemptId    String
-  questionId   String
-  response     String?
+  questionId         String
+  snapshotQuestionId String
+  response           String?
   isCorrect    Boolean?
   awardedMarks Int?
   updatedAt    DateTime @updatedAt
 
-  attempt  ExamAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  question ExamQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  attempt          ExamAttempt          @relation(fields: [attemptId], references: [id], onDelete: Restrict)
+  question         ExamQuestion         @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  snapshotQuestion ExamSnapshotQuestion @relation(fields: [snapshotQuestionId], references: [id], onDelete: Restrict)
 
   @@unique([attemptId, questionId])
 }
@@ -1247,6 +1357,27 @@ model AdmissionDocument {
 
   @@unique([applicationId, type])
   @@index([applicationId])
+}
+
+/// Authenticated provider events that could not be matched/posted are retained for finance reconciliation.
+model PaymentReconciliationIssue {
+  id                  String   @id @default(cuid())
+  provider            String
+  reference           String
+  reason              String
+  expectedAmount      Int?
+  receivedAmount      Int?
+  receivedCurrency    String?
+  payload             Json?
+  status              String   @default("OPEN")
+  resolutionNote      String?
+  resolvedByUserId    String?
+  resolvedAt          DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([provider, reference])
+  @@index([status, createdAt])
 }
 
 model PaymentTransaction {

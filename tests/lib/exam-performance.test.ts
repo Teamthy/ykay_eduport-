@@ -48,20 +48,33 @@ describe("finalizeAttempt — batched grading", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.examAnswer.updateMany.mockResolvedValue({ count: 0 });
+    mockPrisma.examAttempt.updateMany.mockResolvedValue({ count: 1 });
     mockPrisma.examAttempt.update.mockResolvedValue({ id: "att_1", status: "GRADED" });
   });
 
   /** 60 MCQs, all 1 mark, alternating right and wrong. */
   function bigAttempt(count = 60) {
+    const answers = Array.from({ length: count }, (_, index) => ({
+      id: `a${index}`,
+      snapshotQuestionId: `sq${index}`,
+      response: index % 2 === 0 ? "A" : "D",
+      snapshotQuestion: {
+        id: `sq${index}`,
+        questionVersion: { type: "MCQ", correctKey: "A", correctText: null, marks: 1 },
+      },
+    }));
     return {
       id: "att_1",
       essayScore: 0,
       exam: { id: "exam_1" },
-      answers: Array.from({ length: count }, (_, index) => ({
-        id: `a${index}`,
-        response: index % 2 === 0 ? "A" : "D",
-        question: { type: "MCQ", correctKey: "A", correctText: null, marks: 1 },
-      })),
+      snapshot: {
+        questions: answers.map((answer, index) => ({
+          id: answer.snapshotQuestionId,
+          questionId: `q${index}`,
+          questionVersion: { type: "MCQ" },
+        })),
+      },
+      answers,
     };
   }
 
@@ -113,16 +126,30 @@ describe("finalizeAttempt — batched grading", () => {
       id: "att_1",
       essayScore: 0,
       exam: { id: "exam_1" },
+      snapshot: {
+        questions: [
+          { id: "sq1", questionId: "q1", questionVersion: { type: "MCQ" } },
+          { id: "sq2", questionId: "q2", questionVersion: { type: "MCQ" } },
+        ],
+      },
       answers: [
         {
           id: "a1",
+          snapshotQuestionId: "sq1",
           response: "A",
-          question: { type: "MCQ", correctKey: "A", correctText: null, marks: 1 },
+          snapshotQuestion: {
+            id: "sq1",
+            questionVersion: { type: "MCQ", correctKey: "A", correctText: null, marks: 1 },
+          },
         },
         {
           id: "a2",
+          snapshotQuestionId: "sq2",
           response: "A",
-          question: { type: "MCQ", correctKey: "A", correctText: null, marks: 5 },
+          snapshotQuestion: {
+            id: "sq2",
+            questionVersion: { type: "MCQ", correctKey: "A", correctText: null, marks: 5 },
+          },
         },
       ],
     });
@@ -193,6 +220,7 @@ describe("finalizeAttempt — batched grading", () => {
       id: "att_1",
       essayScore: 0,
       exam: { id: "exam_1" },
+      snapshot: { questions: [] },
       answers: [],
     });
 
@@ -220,13 +248,15 @@ describe("PATCH .../attempt — autosave writes only what changed", () => {
       id: "att_1",
       status: "IN_PROGRESS",
       deadlineAt: new Date(Date.now() + 30 * 60_000),
-      exam: { questions: questionIds.map((id) => ({ id })) },
+      lastClientSequence: 0,
+      snapshot: { questions: questionIds.map((id) => ({ id: `snapshot_${id}`, questionId: id })) },
     };
   }
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.examAttempt.findFirst.mockResolvedValue(liveAttempt(["q1", "q2", "q3"]));
+    mockPrisma.examAttempt.updateMany.mockResolvedValue({ count: 1 } as never);
   });
 
   it("writes nothing when the client re-sends identical answers", async () => {
@@ -251,7 +281,25 @@ describe("PATCH .../attempt — autosave writes only what changed", () => {
     expect(response.status).toBe(200);
     // The steady state of a 15-second autosave loop: nothing has changed.
     expect(mockPrisma.examAnswer.upsert).not.toHaveBeenCalled();
-    expect(mockPrisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("ignores a delayed autosave when a newer sequence already won", async () => {
+    mockPrisma.examAttempt.updateMany.mockResolvedValue({ count: 0 } as never);
+    const { PATCH } = await import("@/app/api/student/exams/[id]/attempt/route");
+
+    const response = await PATCH(
+      request({
+        attemptId: "att_1",
+        action: "SAVE",
+        clientSequence: 4,
+        answers: [{ questionId: "q1", response: "old answer" }],
+      }),
+      params,
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ staleSaveIgnored: true });
+    expect(mockPrisma.examAnswer.upsert).not.toHaveBeenCalled();
   });
 
   it("writes only the answer the student actually changed", async () => {
@@ -293,6 +341,9 @@ describe("PATCH .../attempt — autosave writes only what changed", () => {
     );
 
     expect(mockPrisma.examAnswer.upsert).toHaveBeenCalledTimes(1);
+    expect(mockPrisma.examAnswer.upsert.mock.calls[0][0].create.snapshotQuestionId).toBe(
+      "snapshot_q3",
+    );
   });
 
   /**

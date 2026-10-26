@@ -27,7 +27,7 @@ type Question = {
 };
 
 type StartResponse = {
-  attempt: { id: string; deadlineAt: string; secondsLeft: number };
+  attempt: { id: string; deadlineAt: string; secondsLeft: number; lastClientSequence: number };
   exam: {
     id: string;
     title: string;
@@ -56,6 +56,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
   const [saveState, setSaveState] = useState<"IDLE" | "SAVING" | "SAVED" | "FAILED">("IDLE");
   const dirtyRef = useRef(false);
   const answersRef = useRef<Record<string, string>>({});
+  const clientSequenceRef = useRef(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Start / resume attempt (caches for offline use)
@@ -66,6 +67,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
       const cached = await cacheGet<StartResponse>(cacheKey);
       if (cached) {
         setData(cached.data);
+        clientSequenceRef.current = cached.data.attempt.lastClientSequence ?? 0;
         setSecondsLeft(cached.data.attempt.secondsLeft);
         const restored: Record<string, string> = {};
         for (const q of cached.data.questions) {
@@ -92,6 +94,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
         const body = (await response.json()) as StartResponse & { error?: string };
         if (!response.ok) throw new Error(body.error || "Unable to start the exam.");
         setData(body);
+        clientSequenceRef.current = body.attempt.lastClientSequence ?? 0;
         setSecondsLeft(body.attempt.secondsLeft);
         const restored: Record<string, string> = {};
         for (const question of body.questions) {
@@ -117,6 +120,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
       const payload = {
         attemptId: data.attempt.id,
         action,
+        clientSequence: ++clientSequenceRef.current,
         answers: Object.entries(answersRef.current).map(([questionId, response]) => ({
           questionId,
           response: response || null,
@@ -142,12 +146,20 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        return (await response.json()) as {
+        const result = (await response.json()) as {
           ok?: boolean;
           submitted?: boolean;
           message?: string;
           error?: string;
+          lastClientSequence?: number;
         };
+        if (result.lastClientSequence !== undefined) {
+          clientSequenceRef.current = Math.max(
+            clientSequenceRef.current,
+            result.lastClientSequence,
+          );
+        }
+        return result;
       } catch {
         // Network dropped mid-request — queue it
         await queueWrite({ url, method: "PATCH", body: payload });
@@ -196,6 +208,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
       const payload = JSON.stringify({
         attemptId: data.attempt.id,
         action: "SAVE",
+        clientSequence: ++clientSequenceRef.current,
         answers: Object.entries(answersRef.current).map(([questionId, response]) => ({
           questionId,
           response: response || null,

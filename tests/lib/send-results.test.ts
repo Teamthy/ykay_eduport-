@@ -51,6 +51,7 @@ function gradedAttempt(overrides: Record<string, unknown> = {}) {
   return {
     id: "att_1",
     attemptNumber: 1,
+    snapshot: { totalMarks: 50 },
     totalScore: 38,
     submittedAt: new Date("2026-05-12T10:00:00Z"),
     studentProfile: {
@@ -82,7 +83,7 @@ function releasedExam(overrides: Record<string, unknown> = {}) {
     examType: "CA",
     classroom: { displayName: "SS 2" },
     term: { label: "Second Term", session: { label: "2025/2026" } },
-    questions: [{ marks: 50 }],
+    snapshots: [{ totalMarks: 50 }],
     attempts: [gradedAttempt()],
     ...overrides,
   };

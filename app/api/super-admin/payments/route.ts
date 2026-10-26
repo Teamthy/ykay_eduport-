@@ -47,12 +47,12 @@ export async function POST(request: NextRequest) {
 
   if (!payment) return NextResponse.json({ error: "Payment not found." }, { status: 404 });
 
-  if (payment.status === "REFUNDED") {
-    return NextResponse.json({ error: "This payment has already been refunded." }, { status: 409 });
-  }
-  if (payment.status === "FAILED") {
+  const priorCorrection = await prisma.feePaymentCorrection.findUnique({
+    where: { paymentId: payment.id },
+  });
+  if (priorCorrection) {
     return NextResponse.json(
-      { error: "This payment has already been voided or failed." },
+      { error: `This payment already has a ${priorCorrection.action.toLowerCase()} correction.` },
       { status: 409 },
     );
   }
@@ -65,44 +65,46 @@ export async function POST(request: NextRequest) {
 
   const ip = getClientIp(request);
   const ua = getUserAgent(request);
-  const newStatus = input.action === "VOID" ? "FAILED" : "REFUNDED";
-
   try {
     await prisma.$transaction(async (tx) => {
-      // Update the payment record
-      await tx.feePayment.update({
-        where: { id: input.paymentId },
+      // Keep the receipt as-posted. Reversal/correction is a new immutable ledger row.
+      await tx.feePaymentCorrection.create({
         data: {
-          status: newStatus,
-          providerData: {
-            ...(typeof payment.providerData === "object" && payment.providerData
-              ? payment.providerData
-              : {}),
-            voidedBy: user.id,
-            voidedAt: new Date().toISOString(),
-            voidReason: input.reason,
-            voidAction: input.action,
-          },
+          paymentId: payment.id,
+          invoiceId: payment.invoiceId,
+          schoolId: payment.schoolId,
+          amountDelta: -payment.amount,
+          action: input.action,
+          reason: input.reason,
+          reference: `correction:${payment.reference}`,
+          actorUserId: user.id,
         },
       });
 
-      // Recalculate the invoice balance
+      // Recalculate the invoice balance from posted payments and compensating entries.
       const invoice = await tx.feeInvoice.findUnique({
         where: { id: payment.invoiceId },
         include: {
           items: true,
           payments: { where: { status: "COMPLETED" } },
+          corrections: true,
         },
       });
 
       if (invoice) {
-        const totalBilled = invoice.items.reduce((sum, item) => sum + item.amount, 0);
-        const totalPaid = invoice.payments.reduce((sum, p) => sum + p.amount, 0);
-        const balance = totalBilled - totalPaid;
+        const totalBilled = invoice.totalAmount;
+        const grossPaid = invoice.payments.reduce((sum, p) => sum + p.amount, 0);
+        const netPaid = Math.max(
+          0,
+          grossPaid + invoice.corrections.reduce((sum, entry) => sum + entry.amountDelta, 0),
+        );
+        const balance = totalBilled - netPaid;
 
         await tx.feeInvoice.update({
           where: { id: invoice.id },
           data: {
+            amountPaid: netPaid,
+            balanceDue: Math.max(0, balance),
             status: balance <= 0 ? "PAID" : balance < totalBilled ? "PARTIAL" : "UNPAID",
           },
         });
@@ -154,7 +156,12 @@ export async function POST(request: NextRequest) {
         id: payment.id,
         receiptNumber: payment.receiptNumber,
         amount: payment.amount,
-        newStatus,
+        status: payment.status,
+        correction: {
+          action: input.action,
+          amountDelta: -payment.amount,
+          reference: `correction:${payment.reference}`,
+        },
       },
     });
   } catch (_error) {
@@ -202,6 +209,7 @@ export async function GET(request: NextRequest) {
           },
         },
         parentProfile: { select: { displayName: true } },
+        corrections: { orderBy: { createdAt: "desc" }, take: 1 },
       },
     }),
   ]);
@@ -215,7 +223,13 @@ export async function GET(request: NextRequest) {
       id: p.id,
       amount: p.amount,
       method: p.method,
-      status: p.status,
+      status:
+        p.corrections[0]?.action === "VOID"
+          ? "FAILED"
+          : p.corrections[0]?.action === "REFUND"
+            ? "REFUNDED"
+            : p.status,
+      correction: p.corrections[0] ?? null,
       reference: p.reference,
       receiptNumber: p.receiptNumber,
       paidAt: p.paidAt.toISOString(),

@@ -49,6 +49,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (
+      application.paymentStatus === PaymentStatus.PAID ||
+      application.payment?.status === PaymentStatus.PAID
+    ) {
+      return jsonNoStore(
+        { error: "This application fee is already recorded as paid." },
+        { status: 409 },
+      );
+    }
+
     const uploaded = new Set<AdmissionDocumentType>(
       application.documents.map((document) => document.type),
     );

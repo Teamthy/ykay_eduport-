@@ -43,8 +43,8 @@ function releasedExamWhere(
   };
 }
 
-function totalMarksFor(exam: { questions: Array<{ marks: number }> }) {
-  return exam.questions.reduce((sum, question) => sum + question.marks, 0);
+function totalMarksFor(exam: { snapshots: Array<{ totalMarks: number }> }) {
+  return exam.snapshots[0]?.totalMarks ?? 0;
 }
 
 /**
@@ -66,12 +66,13 @@ export async function GET() {
     include: {
       classroom: { select: { displayName: true } },
       term: { select: { label: true, session: { select: { label: true } } } },
-      questions: { select: { marks: true } },
+      snapshots: { orderBy: { revision: "desc" }, take: 1, select: { totalMarks: true } },
       attempts: {
         where: { status: ExamAttemptStatus.GRADED },
         orderBy: [{ submittedAt: "desc" }, { attemptNumber: "desc" }],
         take: 1000,
         include: {
+          snapshot: { select: { totalMarks: true } },
           studentProfile: { select: { id: true, studentId: true, displayName: true } },
         },
       },
@@ -87,16 +88,18 @@ export async function GET() {
       const studentId = attempt.studentProfile.id;
       if (seenStudents.has(studentId)) return [];
       seenStudents.add(studentId);
-      if (attempt.totalScore < 0 || attempt.totalScore > totalMarks) return [];
+      const attemptTotal = attempt.snapshot.totalMarks;
+      if (attemptTotal <= 0 || attempt.totalScore < 0 || attempt.totalScore > attemptTotal)
+        return [];
 
-      const percent = Math.round((attempt.totalScore / totalMarks) * 100);
+      const percent = Math.round((attempt.totalScore / attemptTotal) * 100);
       return [
         {
           profileId: studentId,
           studentId: attempt.studentProfile.studentId,
           studentName: attempt.studentProfile.displayName,
           score: attempt.totalScore,
-          total: totalMarks,
+          total: attemptTotal,
           percent,
           grade: waecGrade(percent),
           attemptNumber: attempt.attemptNumber,
@@ -159,7 +162,7 @@ export async function POST(request: NextRequest) {
     include: {
       classroom: { select: { displayName: true } },
       term: { select: { label: true, session: { select: { label: true } } } },
-      questions: { select: { marks: true } },
+      snapshots: { orderBy: { revision: "desc" }, take: 1, select: { totalMarks: true } },
       attempts: {
         where: {
           status: ExamAttemptStatus.GRADED,
@@ -167,6 +170,7 @@ export async function POST(request: NextRequest) {
         },
         orderBy: [{ submittedAt: "desc" }, { attemptNumber: "desc" }],
         include: {
+          snapshot: { select: { totalMarks: true } },
           studentProfile: {
             select: {
               id: true,
@@ -218,7 +222,9 @@ export async function POST(request: NextRequest) {
 
   const selectedAttempts = input.studentProfileIds.map((id) => latestAttemptByStudent.get(id)!);
   if (
-    selectedAttempts.some((attempt) => attempt.totalScore < 0 || attempt.totalScore > totalMarks)
+    selectedAttempts.some(
+      (attempt) => attempt.totalScore < 0 || attempt.totalScore > attempt.snapshot.totalMarks,
+    )
   ) {
     return NextResponse.json(
       { error: "A stored result is outside this assessment's marks. Contact an administrator." },
@@ -283,8 +289,8 @@ export async function POST(request: NextRequest) {
     }
     if (!recipients.size) withoutPortalAccount += 1;
 
-    const percent = Math.round((attempt.totalScore / totalMarks) * 100);
-    const body = `${student.displayName} scored ${attempt.totalScore}/${totalMarks} (${percent}%) in ${resultLabel}${exam.term ? `, ${exam.term.session.label} ${exam.term.label}` : ""}.`;
+    const percent = Math.round((attempt.totalScore / attempt.snapshot.totalMarks) * 100);
+    const body = `${student.displayName} scored ${attempt.totalScore}/${attempt.snapshot.totalMarks} (${percent}%) in ${resultLabel}${exam.term ? `, ${exam.term.session.label} ${exam.term.label}` : ""}.`;
     for (const userId of recipients) {
       const isParent = usersById.get(userId)?.role === UserRole.PARENT;
       const link = isParent

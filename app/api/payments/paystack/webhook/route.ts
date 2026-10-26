@@ -1,4 +1,4 @@
-import { FeePaymentMethod, PaymentStatus } from "@prisma/client";
+import { FeePaymentMethod } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { isPaystackReady } from "@/lib/env";
 import { APPLICATION_FEE_KOBO } from "@/lib/admissions";
@@ -26,6 +26,39 @@ interface PaystackWebhookPayload {
     paid_at?: string | null;
     metadata?: { kind?: string; paymentAttemptId?: string; invoiceId?: string };
   };
+}
+
+async function recordReconciliationIssue(input: {
+  reference: string;
+  reason: string;
+  expectedAmount?: number;
+  receivedAmount?: number;
+  currency?: string;
+  payload: PaystackWebhookPayload;
+}) {
+  await prisma.paymentReconciliationIssue.upsert({
+    where: { provider_reference: { provider: "PAYSTACK", reference: input.reference } },
+    create: {
+      provider: "PAYSTACK",
+      reference: input.reference,
+      reason: input.reason,
+      expectedAmount: input.expectedAmount,
+      receivedAmount: input.receivedAmount,
+      receivedCurrency: input.currency,
+      payload: toPrismaJson(input.payload),
+    },
+    update: {
+      reason: input.reason,
+      expectedAmount: input.expectedAmount,
+      receivedAmount: input.receivedAmount,
+      receivedCurrency: input.currency,
+      payload: toPrismaJson(input.payload),
+      status: "OPEN",
+      resolutionNote: null,
+      resolvedByUserId: null,
+      resolvedAt: null,
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -57,9 +90,18 @@ export async function POST(request: NextRequest) {
         payload.data.currency !== "NGN" ||
         payload.data.status !== "success"
       ) {
-        await prisma.feePaymentAttempt.update({
-          where: { id: feeAttempt.id },
-          data: { status: PaymentStatus.FAILED, providerData: toPrismaJson(payload) },
+        await recordReconciliationIssue({
+          reference,
+          reason:
+            "Fee payment webhook amount, currency, or provider status does not match the pending attempt.",
+          expectedAmount: feeAttempt.amount * 100,
+          receivedAmount: payload.data.amount,
+          currency: payload.data.currency,
+          payload,
+        });
+        logger.error("Paystack fee payment requires reconciliation", {
+          reference,
+          attemptId: feeAttempt.id,
         });
         return jsonNoStore({ ok: true });
       }
@@ -84,17 +126,34 @@ export async function POST(request: NextRequest) {
       select: { applicationId: true, parentEmail: true },
     });
 
-    if (!application) return jsonNoStore({ ok: true });
+    if (!application) {
+      await recordReconciliationIssue({
+        reference,
+        reason:
+          "Authenticated successful provider event has no matching fee attempt or admission application.",
+        receivedAmount: payload.data.amount,
+        currency: payload.data.currency,
+        payload,
+      });
+      logger.error("Unmatched Paystack success event requires reconciliation", { reference });
+      return jsonNoStore({ ok: true });
+    }
 
     if (
       payload.data.amount !== APPLICATION_FEE_KOBO ||
       payload.data.currency !== "NGN" ||
       payload.data.status !== "success"
     ) {
-      await prisma.paymentTransaction.updateMany({
-        where: { reference },
-        data: { status: PaymentStatus.FAILED, providerData: toPrismaJson(payload) },
+      await recordReconciliationIssue({
+        reference,
+        reason:
+          "Admission fee webhook amount, currency, or provider status does not match the expected fee.",
+        expectedAmount: APPLICATION_FEE_KOBO,
+        receivedAmount: payload.data.amount,
+        currency: payload.data.currency,
+        payload,
       });
+      logger.error("Paystack admission payment requires reconciliation", { reference });
       return jsonNoStore({ ok: true });
     }
 

@@ -64,19 +64,19 @@ export async function GET(request: NextRequest) {
     },
     orderBy: [{ submittedAt: "desc" }, { createdAt: "desc" }],
     include: {
+      snapshot: { select: { totalMarks: true, passMark: true } },
       exam: {
         include: {
           classroom: { select: { id: true, displayName: true } },
           teacherProfile: { select: { displayName: true } },
           term: { select: { label: true, session: { select: { label: true } } } },
-          questions: { select: { marks: true } },
         },
       },
     },
   });
 
   const results = attempts.flatMap((attempt) => {
-    const total = attempt.exam.questions.reduce((sum, question) => sum + question.marks, 0);
+    const total = attempt.snapshot.totalMarks;
     if (total <= 0 || attempt.totalScore < 0 || attempt.totalScore > total) return [];
     return [
       {

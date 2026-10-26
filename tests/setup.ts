@@ -172,10 +172,12 @@ const mockPrisma = {
     count: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+    updateMany: vi.fn(),
   },
   examAnswer: {
     findFirst: vi.fn(),
     findMany: vi.fn(),
+    create: vi.fn(),
     update: vi.fn(),
     updateMany: vi.fn(),
     upsert: vi.fn(),
@@ -230,6 +232,7 @@ const mockPrisma = {
     update: vi.fn(),
   },
   paymentTransaction: {
+    findUnique: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     updateMany: vi.fn(),
@@ -299,6 +302,14 @@ const mockPrisma = {
     findUnique: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+    updateMany: vi.fn(),
+  },
+  examSnapshot: { findFirst: vi.fn(), findUnique: vi.fn(), create: vi.fn() },
+  feePaymentCorrection: { findUnique: vi.fn(), create: vi.fn() },
+  paymentReconciliationIssue: {
+    findMany: vi.fn(),
+    findUnique: vi.fn(),
+    upsert: vi.fn(),
     updateMany: vi.fn(),
   },
   examGradebookSync: {
