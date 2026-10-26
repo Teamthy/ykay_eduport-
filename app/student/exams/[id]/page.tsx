@@ -13,6 +13,7 @@ import {
   Clock,
   Flag,
   LoaderCircle,
+  LogOut,
   Send,
   Shield,
 } from "lucide-react";
@@ -51,6 +52,7 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
+  const [confirmExit, setConfirmExit] = useState(false);
   const [error, setError] = useState("");
   const [, setIsOffline] = useState(false);
   const [saveState, setSaveState] = useState<"IDLE" | "SAVING" | "SAVED" | "FAILED">("IDLE");
@@ -354,6 +356,21 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
     }
   }
 
+  async function exitExam() {
+    try {
+      const result = await persist("SAVE");
+      if (result?.error) throw new Error(result.error);
+      router.replace("/student/exams");
+    } catch (exitError) {
+      toast(
+        exitError instanceof Error ? exitError.message : "Could not save before exiting.",
+        "error",
+      );
+    } finally {
+      setConfirmExit(false);
+    }
+  }
+
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
   const question = data?.questions[index] || null;
@@ -391,19 +408,19 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
   }
 
   return (
-    <main className="min-h-screen bg-[var(--bg-primary)] theme-transition">
-      {/* Exam header — no site nav to reduce distraction */}
-      <header className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-brand-navy px-6 py-4">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
+    <main className="flex h-[100dvh] flex-col overflow-hidden bg-[var(--bg-primary)] theme-transition">
+      {/* Dedicated exam shell: no site navigation while the student is sitting. */}
+      <header className="z-50 shrink-0 border-b border-white/10 bg-brand-navy px-3 py-3 sm:px-6 sm:py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-4">
           <div className="min-w-0">
-            <div className="truncate font-display text-lg tracking-widest text-white">
+            <div className="truncate font-display text-sm tracking-wider text-white sm:text-lg">
               {data.exam.title}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-white/50">
+            <div className="truncate text-[9px] uppercase tracking-wider text-white/50 sm:text-[10px] sm:tracking-widest">
               {data.exam.subjectName} · {answeredCount}/{data.questions.length} answered
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-3">
             {/* A failed save must be visible while the student still has time
                 to do something about it — not discovered at submission. */}
             {saveState === "FAILED" ? (
@@ -419,188 +436,230 @@ export default function StudentExamRunnerPage({ params }: { params: Promise<{ id
                 <CheckCircle2 size={11} /> Saved
               </span>
             ) : null}
-            <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white/70">
+            <span className="hidden items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white/70 sm:inline-flex">
               <Shield size={11} /> Monitored
             </span>
             <span
-              className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-display text-lg ${
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-1.5 font-mono text-sm font-bold sm:gap-2 sm:px-4 sm:py-2 sm:text-lg ${
                 secondsLeft < 120 ? "bg-red-600 text-white" : "bg-brand-green/20 text-brand-green"
               }`}
             >
               <Clock size={16} /> {String(minutes).padStart(2, "0")}:
               {String(seconds).padStart(2, "0")}
             </span>
+            <button
+              type="button"
+              onClick={() => setConfirmExit(true)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/15 px-2.5 py-2 text-[10px] font-bold uppercase tracking-wide text-white/75 hover:border-brand-green hover:text-brand-green sm:px-3"
+              aria-label="Exit exam"
+            >
+              <LogOut size={14} />
+              <span className="hidden sm:inline">Exit</span>
+            </button>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-5xl gap-6 px-6 py-8 lg:grid-cols-[1fr_240px]">
-        {/* Question panel */}
-        <div className="space-y-6">
-          {question ? (
-            <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-8 shadow-[var(--card-shadow)]">
-              <div className="mb-4 flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                  Question {index + 1} of {data.questions.length} · {question.marks} mark(s)
-                </span>
-                <button
-                  onClick={() =>
-                    setFlagged((previous) => {
-                      const next = new Set(previous);
-                      if (next.has(question.id)) next.delete(question.id);
-                      else next.add(question.id);
-                      return next;
-                    })
-                  }
-                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all ${
-                    flagged.has(question.id)
-                      ? "bg-brand-orange text-brand-navy"
-                      : "bg-[var(--surface-disabled)] text-[var(--text-muted)] hover:text-brand-orange"
-                  }`}
-                >
-                  <Flag size={11} /> {flagged.has(question.id) ? "Flagged" : "Flag"}
-                </button>
-              </div>
-              <p className="text-lg leading-relaxed text-[var(--text-primary)]">
-                {question.questionText}
-              </p>
-
-              <div className="mt-6 space-y-3">
-                {question.options
-                  ? question.options.map((option) => (
-                      <button
-                        key={option.key}
-                        onClick={() => setAnswer(question.id, option.key)}
-                        className={`flex w-full items-center gap-3 rounded-2xl border px-5 py-4 text-left text-sm transition-all ${
-                          answers[question.id] === option.key
-                            ? "border-brand-green bg-brand-green/10 font-bold text-[var(--text-primary)]"
-                            : "border-[var(--border-subtle)] bg-[var(--card-bg-subtle)] text-[var(--text-secondary)] hover:border-brand-green/40"
-                        }`}
-                      >
-                        <span
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                            answers[question.id] === option.key
-                              ? "bg-brand-green text-brand-navy"
-                              : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
-                          }`}
-                        >
-                          {option.key}
-                        </span>
-                        {option.text}
-                      </button>
-                    ))
-                  : null}
-
-                {question.type === "FILL_BLANK" ? (
-                  <input
-                    value={answers[question.id] || ""}
-                    onChange={(event) => setAnswer(question.id, event.target.value)}
-                    placeholder="Type your answer"
-                    className="w-full rounded-2xl border border-[var(--input-border)] bg-[var(--input-bg)] px-5 py-4 text-sm text-[var(--input-text)] outline-none focus:border-[var(--input-border-focus)]"
-                  />
-                ) : null}
-
-                {question.type === "ESSAY" ? (
-                  <textarea
-                    value={answers[question.id] || ""}
-                    onChange={(event) => setAnswer(question.id, event.target.value)}
-                    rows={8}
-                    placeholder="Write your answer here. It is saved automatically."
-                    className="w-full rounded-2xl border border-[var(--input-border)] bg-[var(--input-bg)] px-5 py-4 text-sm leading-7 text-[var(--input-text)] outline-none focus:border-[var(--input-border-focus)]"
-                  />
-                ) : null}
-              </div>
-            </div>
-          ) : null}
-
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setIndex(Math.max(0, index - 1))}
-              disabled={index === 0}
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--surface-card)] border border-[var(--border-subtle)] px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--text-primary)] disabled:opacity-40"
-            >
-              <ChevronLeft size={14} /> Previous
-            </button>
-            {index === data.questions.length - 1 ? (
-              <button
-                onClick={() => setConfirmSubmit(true)}
-                disabled={submitting}
-                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
-              >
-                {submitting ? (
-                  <LoaderCircle size={14} className="animate-spin" />
-                ) : (
-                  <Send size={14} />
-                )}{" "}
-                Submit Exam
-              </button>
-            ) : (
-              <button
-                onClick={() => setIndex(Math.min(data.questions.length - 1, index + 1))}
-                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark"
-              >
-                Next <ChevronRight size={14} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Navigator */}
-        <aside className="lg:sticky lg:top-24 h-fit rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
-          <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-            Question Navigator
-          </div>
-          <div className="grid grid-cols-5 gap-2">
+      <section className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-8">
+        <div className="mx-auto grid max-w-7xl gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
+          <div
+            className="flex gap-2 overflow-x-auto pb-1 lg:hidden"
+            aria-label="Question navigation"
+          >
             {data.questions.map((entry, entryIndex) => {
-              const isAnswered = (answers[entry.id] || "").length > 0;
-              const isFlagged = flagged.has(entry.id);
+              const answered = (answers[entry.id] || "").length > 0;
               return (
                 <button
                   key={entry.id}
+                  type="button"
                   onClick={() => setIndex(entryIndex)}
-                  className={`relative flex h-10 w-10 items-center justify-center rounded-xl text-xs font-bold transition-all ${
-                    entryIndex === index
-                      ? "bg-brand-navy text-white ring-2 ring-brand-green"
-                      : isAnswered
-                        ? "bg-brand-green/15 text-brand-green"
-                        : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
-                  }`}
+                  className={`h-9 min-w-9 shrink-0 rounded-xl px-2 text-xs font-bold ${entryIndex === index ? "bg-brand-green text-brand-navy" : answered ? "bg-brand-green/15 text-brand-green" : "bg-[var(--surface-card)] text-[var(--text-muted)] border border-[var(--border-subtle)]"}`}
+                  aria-label={`Go to question ${entryIndex + 1}`}
                 >
                   {entryIndex + 1}
-                  {isFlagged ? (
-                    <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-brand-orange" />
-                  ) : null}
                 </button>
               );
             })}
           </div>
-          <div className="mt-5 space-y-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded bg-brand-green/40" /> Answered ({answeredCount})
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded bg-brand-orange" /> Flagged ({flagged.size})
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded bg-[var(--surface-disabled)]" /> Unanswered (
-              {data.questions.length - answeredCount})
+
+          {/* Question panel */}
+          <div className="min-w-0 space-y-4 sm:space-y-6">
+            {question ? (
+              <div className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)] sm:p-8">
+                <div className="mb-4 flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                    Question {index + 1} of {data.questions.length} · {question.marks} mark(s)
+                  </span>
+                  <button
+                    onClick={() =>
+                      setFlagged((previous) => {
+                        const next = new Set(previous);
+                        if (next.has(question.id)) next.delete(question.id);
+                        else next.add(question.id);
+                        return next;
+                      })
+                    }
+                    className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                      flagged.has(question.id)
+                        ? "bg-brand-orange text-brand-navy"
+                        : "bg-[var(--surface-disabled)] text-[var(--text-muted)] hover:text-brand-orange"
+                    }`}
+                  >
+                    <Flag size={11} /> {flagged.has(question.id) ? "Flagged" : "Flag"}
+                  </button>
+                </div>
+                <p className="text-lg leading-relaxed text-[var(--text-primary)]">
+                  {question.questionText}
+                </p>
+
+                <div className="mt-6 space-y-3">
+                  {question.options
+                    ? question.options.map((option) => (
+                        <button
+                          key={option.key}
+                          onClick={() => setAnswer(question.id, option.key)}
+                          className={`flex w-full items-center gap-3 rounded-2xl border px-5 py-4 text-left text-sm transition-all ${
+                            answers[question.id] === option.key
+                              ? "border-brand-green bg-brand-green/10 font-bold text-[var(--text-primary)]"
+                              : "border-[var(--border-subtle)] bg-[var(--card-bg-subtle)] text-[var(--text-secondary)] hover:border-brand-green/40"
+                          }`}
+                        >
+                          <span
+                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                              answers[question.id] === option.key
+                                ? "bg-brand-green text-brand-navy"
+                                : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
+                            }`}
+                          >
+                            {option.key}
+                          </span>
+                          {option.text}
+                        </button>
+                      ))
+                    : null}
+
+                  {question.type === "FILL_BLANK" ? (
+                    <input
+                      value={answers[question.id] || ""}
+                      onChange={(event) => setAnswer(question.id, event.target.value)}
+                      placeholder="Type your answer"
+                      className="w-full rounded-2xl border border-[var(--input-border)] bg-[var(--input-bg)] px-5 py-4 text-sm text-[var(--input-text)] outline-none focus:border-[var(--input-border-focus)]"
+                    />
+                  ) : null}
+
+                  {question.type === "ESSAY" ? (
+                    <textarea
+                      value={answers[question.id] || ""}
+                      onChange={(event) => setAnswer(question.id, event.target.value)}
+                      rows={8}
+                      placeholder="Write your answer here. It is saved automatically."
+                      className="w-full rounded-2xl border border-[var(--input-border)] bg-[var(--input-bg)] px-5 py-4 text-sm leading-7 text-[var(--input-text)] outline-none focus:border-[var(--input-border-focus)]"
+                    />
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setIndex(Math.max(0, index - 1))}
+                disabled={index === 0}
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--surface-card)] border border-[var(--border-subtle)] px-6 py-3 text-xs font-bold uppercase tracking-widest text-[var(--text-primary)] disabled:opacity-40"
+              >
+                <ChevronLeft size={14} /> Previous
+              </button>
+              {index === data.questions.length - 1 ? (
+                <button
+                  onClick={() => setConfirmSubmit(true)}
+                  disabled={submitting}
+                  className="inline-flex items-center gap-2 rounded-full bg-brand-green px-8 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
+                >
+                  {submitting ? (
+                    <LoaderCircle size={14} className="animate-spin" />
+                  ) : (
+                    <Send size={14} />
+                  )}{" "}
+                  Submit Exam
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIndex(Math.min(data.questions.length - 1, index + 1))}
+                  className="inline-flex items-center gap-2 rounded-full bg-brand-green px-6 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark"
+                >
+                  Next <ChevronRight size={14} />
+                </button>
+              )}
             </div>
           </div>
-          {/* Shortcuts are worthless if nobody knows they exist. */}
-          <p className="mt-4 border-t border-[var(--border-subtle)] pt-4 text-[10px] leading-relaxed text-[var(--text-muted)]">
-            Press <strong className="text-[var(--text-secondary)]">A–D</strong> to answer,{" "}
-            <strong className="text-[var(--text-secondary)]">← →</strong> to move between questions.
-          </p>
-          <button
-            onClick={() => setConfirmSubmit(true)}
-            disabled={submitting}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
-          >
-            <CheckCircle2 size={13} /> Finish & Submit
-          </button>
-        </aside>
-      </div>
 
+          {/* Navigator */}
+          <aside className="hidden h-fit rounded-[2rem] lg:sticky lg:top-4 lg:block border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)]">
+            <div className="mb-4 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+              Question Navigator
+            </div>
+            <div className="grid grid-cols-5 gap-2">
+              {data.questions.map((entry, entryIndex) => {
+                const isAnswered = (answers[entry.id] || "").length > 0;
+                const isFlagged = flagged.has(entry.id);
+                return (
+                  <button
+                    key={entry.id}
+                    onClick={() => setIndex(entryIndex)}
+                    className={`relative flex h-10 w-10 items-center justify-center rounded-xl text-xs font-bold transition-all ${
+                      entryIndex === index
+                        ? "bg-brand-navy text-white ring-2 ring-brand-green"
+                        : isAnswered
+                          ? "bg-brand-green/15 text-brand-green"
+                          : "bg-[var(--surface-disabled)] text-[var(--text-muted)]"
+                    }`}
+                  >
+                    {entryIndex + 1}
+                    {isFlagged ? (
+                      <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-brand-orange" />
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-5 space-y-2 text-[10px] uppercase tracking-widest text-[var(--text-muted)]">
+              <div className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded bg-brand-green/40" /> Answered ({answeredCount})
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded bg-brand-orange" /> Flagged ({flagged.size})
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded bg-[var(--surface-disabled)]" /> Unanswered (
+                {data.questions.length - answeredCount})
+              </div>
+            </div>
+            {/* Shortcuts are worthless if nobody knows they exist. */}
+            <p className="mt-4 border-t border-[var(--border-subtle)] pt-4 text-[10px] leading-relaxed text-[var(--text-muted)]">
+              Press <strong className="text-[var(--text-secondary)]">A–D</strong> to answer,{" "}
+              <strong className="text-[var(--text-secondary)]">← →</strong> to move between
+              questions.
+            </p>
+            <button
+              onClick={() => setConfirmSubmit(true)}
+              disabled={submitting}
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-green px-5 py-3 text-xs font-bold uppercase tracking-widest text-brand-navy shadow-lg hover:bg-brand-green-dark disabled:opacity-50"
+            >
+              <CheckCircle2 size={13} /> Finish & Submit
+            </button>
+          </aside>
+        </div>
+      </section>
+
+      <ConfirmDialog
+        open={confirmExit}
+        title="Exit this exam?"
+        message="Your current answers will be saved before you leave. You can resume if the exam is still open."
+        confirmText="Save & exit"
+        cancelText="Keep working"
+        variant="warning"
+        onConfirm={() => void exitExam()}
+        onCancel={() => setConfirmExit(false)}
+      />
       <ConfirmDialog
         open={confirmSubmit}
         title="Submit your exam?"

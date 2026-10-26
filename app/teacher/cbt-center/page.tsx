@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useToast } from "@/components/Toast";
+import { clearIdempotencyKey, getIdempotencyKey } from "@/lib/client-idempotency";
 import {
   BookOpen,
   CheckCircle2,
@@ -145,21 +146,24 @@ export default function TeacherCbtCenterPage() {
     }
     setBusy(true);
     try {
+      const requestBody = {
+        assignmentId: form.assignmentId,
+        title: form.title.trim(),
+        examType: form.examType,
+        durationMinutes: Number(form.durationMinutes) || 30,
+        passMark: Number(form.passMark) || 40,
+        instructions: form.instructions.trim() || undefined,
+        bulkQuestions: form.bulkQuestions.trim() || undefined,
+      };
+      const idempotencyKey = await getIdempotencyKey("exam-create", requestBody);
       const response = await fetch("/api/teacher/exams", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          assignmentId: form.assignmentId,
-          title: form.title.trim(),
-          examType: form.examType,
-          durationMinutes: Number(form.durationMinutes) || 30,
-          passMark: Number(form.passMark) || 40,
-          instructions: form.instructions.trim() || undefined,
-          bulkQuestions: form.bulkQuestions.trim() || undefined,
-        }),
+        headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
+        body: JSON.stringify(requestBody),
       });
       const body = (await response.json()) as { message?: string; error?: string };
       if (!response.ok) throw new Error(body.error || "Unable to create exam.");
+      await clearIdempotencyKey("exam-create", requestBody);
       toast(body.message || "Exam created.", "success");
       setShowCreate(false);
       setForm((previous) => ({ ...previous, title: "", instructions: "", bulkQuestions: "" }));

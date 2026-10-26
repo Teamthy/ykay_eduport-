@@ -5,6 +5,7 @@ import Link from "next/link";
 import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useToast } from "@/components/Toast";
+import { clearIdempotencyKey, getIdempotencyKey } from "@/lib/client-idempotency";
 import {
   AlertCircle,
   CalendarClock,
@@ -156,26 +157,29 @@ export default function ExamCenterPage() {
     if (!form.assignmentId || !form.title.trim()) return;
     setCreating(true);
     try {
+      const requestBody = {
+        assignmentId: form.assignmentId,
+        title: form.title.trim(),
+        examType: form.examType,
+        practiceCategory: form.examType === "PRACTICE" ? form.practiceCategory : undefined,
+        gradebookComponent: form.examType === "PRACTICE" ? null : form.gradebookComponent || null,
+        durationMinutes: Number(form.durationMinutes),
+        theoryMinutes: Number(form.theoryMinutes) || 0,
+        passMark: Number(form.passMark),
+        scheduledFor: toIsoOrNull(form.scheduledFor),
+        availableUntil: toIsoOrNull(form.availableUntil),
+        instructions: form.instructions.trim() || undefined,
+        bulkQuestions: form.bulkQuestions.trim() || undefined,
+      };
+      const idempotencyKey = await getIdempotencyKey("exam-create", requestBody);
       const response = await fetch("/api/teacher/exams", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          assignmentId: form.assignmentId,
-          title: form.title.trim(),
-          examType: form.examType,
-          practiceCategory: form.examType === "PRACTICE" ? form.practiceCategory : undefined,
-          gradebookComponent: form.examType === "PRACTICE" ? null : form.gradebookComponent || null,
-          durationMinutes: Number(form.durationMinutes),
-          theoryMinutes: Number(form.theoryMinutes) || 0,
-          passMark: Number(form.passMark),
-          scheduledFor: toIsoOrNull(form.scheduledFor),
-          availableUntil: toIsoOrNull(form.availableUntil),
-          instructions: form.instructions.trim() || undefined,
-          bulkQuestions: form.bulkQuestions.trim() || undefined,
-        }),
+        headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
+        body: JSON.stringify(requestBody),
       });
       const body = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(body.error || "Unable to create the exam.");
+      await clearIdempotencyKey("exam-create", requestBody);
       toast(`${form.title.trim()} created.`, "success");
       setShowForm(false);
       setForm((f) => ({
