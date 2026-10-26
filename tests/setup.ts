@@ -287,6 +287,7 @@ const mockPrisma = {
     findUnique: vi.fn(),
     findMany: vi.fn(),
     count: vi.fn(),
+    aggregate: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     updateMany: vi.fn(),
@@ -295,6 +296,7 @@ const mockPrisma = {
     findUnique: vi.fn(),
     findMany: vi.fn(),
     create: vi.fn(),
+    upsert: vi.fn(),
   },
   exam: {
     findMany: vi.fn(),

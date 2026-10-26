@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 const patchSchema = z.discriminatedUnion("action", [
   z.object({
-    action: z.literal("CHECK"),
+    action: z.literal("SAVE"),
     questionId: z.string().trim().min(1).max(120),
     selectedIndex: z.number().int().min(0).max(3),
   }),
@@ -363,7 +363,10 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       secondsLeft,
     },
     questions: questions.map(publicQuestion),
-    answers: answers.map(sessionAnswer),
+    answers: answers.map((answer) => ({
+      questionId: answer.questionId,
+      selectedIndex: answer.selectedIndex,
+    })),
   });
 }
 
@@ -433,9 +436,9 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     });
   }
 
-  if (parsed.data.action === "CHECK") {
-    const checkData = parsed.data;
-    const question = questions.find((row) => row.id === checkData.questionId);
+  if (parsed.data.action === "SAVE") {
+    const saveData = parsed.data;
+    const question = questions.find((row) => row.id === saveData.questionId);
     if (!question) {
       return NextResponse.json(
         { error: "That question is not in this practice paper." },
@@ -443,47 +446,36 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       );
     }
 
-    const existing = answers.find((answer) => answer.questionId === question.id);
-    if (existing) return NextResponse.json(sessionAnswer(existing));
     const optionCount = Array.isArray(question.options) ? question.options.length : 0;
-    if (checkData.selectedIndex >= optionCount) {
+    if (saveData.selectedIndex >= optionCount) {
       return NextResponse.json({ error: "Choose one of the available options." }, { status: 400 });
     }
 
-    const answer: StoredAnswer = {
+    // Persist the student's current choice without returning correctness,
+    // answer keys, or explanations. Review is released only after SUBMIT.
+    await prisma.cbtPracticeAnswer.upsert({
+      where: { attemptId_questionId: { attemptId: attempt.id, questionId: question.id } },
+      update: {
+        selectedIndex: saveData.selectedIndex,
+        isCorrect: saveData.selectedIndex === question.correctIndex,
+        correctIndex: question.correctIndex,
+        explanation: question.explanation,
+      },
+      create: {
+        attemptId: attempt.id,
+        questionId: question.id,
+        selectedIndex: saveData.selectedIndex,
+        isCorrect: saveData.selectedIndex === question.correctIndex,
+        correctIndex: question.correctIndex,
+        explanation: question.explanation,
+      },
+    });
+    return NextResponse.json({
+      ok: true,
+      saved: true,
       questionId: question.id,
-      selectedIndex: checkData.selectedIndex,
-      isCorrect: checkData.selectedIndex === question.correctIndex,
-      correctIndex: question.correctIndex,
-      explanation: question.explanation,
-    };
-    try {
-      await prisma.cbtPracticeAnswer.create({
-        data: {
-          attemptId: attempt.id,
-          questionId: question.id,
-          selectedIndex: answer.selectedIndex,
-          isCorrect: answer.isCorrect,
-          correctIndex: answer.correctIndex,
-          explanation: answer.explanation,
-        },
-      });
-    } catch (error) {
-      // A concurrent retry may have won the unique (attempt, question) insert.
-      const saved = await prisma.cbtPracticeAnswer.findUnique({
-        where: { attemptId_questionId: { attemptId: attempt.id, questionId: question.id } },
-        select: {
-          questionId: true,
-          selectedIndex: true,
-          isCorrect: true,
-          correctIndex: true,
-          explanation: true,
-        },
-      });
-      if (!saved) throw error;
-      return NextResponse.json(sessionAnswer(saved));
-    }
-    return NextResponse.json(sessionAnswer(answer));
+      selectedIndex: saveData.selectedIndex,
+    });
   }
 
   const completion = await completeAttempt({ attempt, questions, answers });
