@@ -4,9 +4,10 @@
 
 ## Evidence and status
 
-- These are **user-provided proposals**, not independently verified NERDC topics. The submitter described them as based on NERDC curricula, but did not provide an official document edition, page citation, or other verifiable reference.
-- `officialCitation` and `pdfPageReferences` are intentionally blank in the review worksheet. Fill these from an authoritative source during review.
-- All proposals remain `pending`; they are not added to the source-extracted manifest, source-coverage counts, generated CBT bank, or published content.
+- The user has stated that these topics have already been factually reviewed. The register records that attestation; it does not independently repeat or validate the review.
+- The submitter described the topics as based on NERDC curricula but did not provide an official document edition or page citations. NERDC provenance is therefore not independently verified.
+- `officialCitation` and `pdfPageReferences` remain blank. Add them if source traceability is required.
+- The proposals remain separate from the source-extracted manifest and generated CBT bank; they do not change the supplied PDF's 27 documented gaps. Generated questions still require their own review before publication.
 - `Catering Craft Practice` was submitted for a missing `Catering Craft` slot. The proposed register preserves that submitted label and flags the subject identity for confirmation.
 - Week numbers and week-based organization are omitted. Revision-only and exam/past-question-only activities are omitted; specific content areas named inside revision lists are retained as candidate topics.
 

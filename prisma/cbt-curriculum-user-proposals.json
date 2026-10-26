@@ -1,19 +1,19 @@
 {
   "schemaVersion": 1,
-  "status": "proposed_not_verified_pending_human_review",
+  "status": "user_attested_factually_reviewed_supplement",
   "source": {
     "type": "user-provided topic list",
     "receivedDate": "2026-10-26",
     "claimedBasis": "NERDC 9-Year Basic Education and Senior Secondary Education curricula, as stated by the submitter",
     "officialCitation": null,
     "pdfPageReferences": [],
-    "verificationStatus": "NOT VERIFIED; no official document title, edition, URL, or page citations were supplied"
+    "verificationStatus": "The user states these topics have already been factually reviewed. Official source/page citations were not supplied and NERDC provenance is not independently verified."
   },
   "processingNotes": [
     "Week numbers and week-based organization are omitted, consistent with the project requirement.",
     "Revision prefixes and examination/past-question-only activities are omitted; named subject-matter areas inside revision lists are retained as candidate topics.",
-    "These candidates do not change the source-extracted curriculum manifest, do not count as verified source coverage, and are not added to the CBT bank until reviewed.",
-    "The submitted subject label Catering Craft Practice differs from the expected manifest subject Catering Craft; identity requires human confirmation before mapping."
+    "The user attests that the candidate topics have been factually reviewed. They do not change the source-extracted curriculum manifest or verified source-coverage counts; they remain outside the generated CBT bank pending provenance/citation handling.",
+    "Catering Craft Practice was submitted for an expected manifest subject of Catering Craft; the subject identity still needs confirmation before mapping."
   ],
   "entries": [
     {
@@ -28,7 +28,7 @@
         "Christian Stewardship and Responsibility",
         "Christian Family Life and Moral Values"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "jss3",
@@ -42,7 +42,7 @@
         "La correspondance : lettre amicale et officielle (Friendly and Formal Letter Writing)",
         "Les fêtes et les célébrations (Festivals and Celebrations)"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -55,7 +55,7 @@
         "Lexis and Structure: Concord, Idioms, Phrasal Verbs and Register",
         "Oral English: Vowel and Consonant Contrasts, Stress, Intonation and Rhyme"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -71,7 +71,7 @@
         "Matrices and Determinants (2×2): Operations, Inverse, and Applications",
         "Introductory Calculus: Differentiation and Integration of Simple Polynomials"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -87,7 +87,7 @@
         "Evolution: Lamarck's and Darwin's Theories and Evidence of Evolution",
         "Adaptation of Organisms to their Environment"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -107,7 +107,7 @@
         "Ecology",
         "Evolution"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -124,7 +124,7 @@
         "Energy Quantization and Wave-Particle Duality",
         "Introductory Electronics: Semiconductors, Diodes and Transistors"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -136,7 +136,7 @@
         "Electricity and Magnetism",
         "Modern Physics: Atomic Physics, Nuclear Physics and Electronics"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -151,7 +151,7 @@
         "Farm Management and Accounting: Farm Records, Profit and Loss",
         "Agricultural Marketing and Extension Services"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -163,7 +163,7 @@
         "Soil Science and Agricultural Ecology",
         "Agricultural Economics, Marketing and Extension"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -179,7 +179,7 @@
         "Advanced Integration: Integration by Parts, Substitution and Definite Integrals",
         "Probability Distributions: Binomial and Normal Distributions"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -193,7 +193,7 @@
         "Kitchen Management and Equipment",
         "Entrepreneurship in Foods and Nutrition"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -209,7 +209,7 @@
         "Regional Geography of Nigeria: Physical, Economic and Social Geography",
         "Regional Geography of Africa"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -221,7 +221,7 @@
         "Human and Economic Geography",
         "Regional Geography: Nigeria and Africa"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -235,7 +235,7 @@
         "Perspective Drawing: One-Point and Two-Point Perspective",
         "Auxiliary Views and Intersection of Solids"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -250,7 +250,7 @@
         "Nigeria's Role in International Organizations",
         "Pre-Colonial, Colonial and Post-Colonial Political Systems"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -265,7 +265,7 @@
         "Christian Ethics: Honesty, Integrity and Contentment",
         "Social Issues: Drug Abuse, Cultism and Immorality (Christian Response)"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -277,7 +277,7 @@
         "Themes from the Epistles: Romans, Corinthians, Galatians and James",
         "Christian Living: Stewardship, Leadership and Service"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -291,7 +291,7 @@
         "Portfolio Preparation and Practical Project",
         "Exhibition"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -305,7 +305,7 @@
         "African and Non-African Poetry: Literary Devices and Themes",
         "General Literary Appreciation: Figures of Speech, Genre and Tone"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -321,7 +321,7 @@
         "Pastry and Confectionery: Cakes, Breads and Pastries",
         "Entrepreneurship in Catering: Business Plan, Costing and Pricing"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -337,7 +337,7 @@
         "Public Sector Accounting: Government Budgets and Consolidated Revenue Fund",
         "Introduction to Cost Accounting"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -350,7 +350,7 @@
         "Sole Trader and Partnership Accounts",
         "Company Accounts, Manufacturing Accounts and Incomplete Records"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -366,7 +366,7 @@
         "The Nigerian Stock Exchange and Securities",
         "Business Finance: Sources of Short-Term and Long-Term Capital"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -379,7 +379,7 @@
         "Trade, Aids to Trade, Home Trade and Foreign Trade",
         "Banking, Insurance, Communication and Economic Groupings"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -393,7 +393,7 @@
         "Sales Promotion and Advertising: Media and Ethics",
         "E-Marketing and Digital Marketing"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     },
     {
       "level": "ss3",
@@ -407,7 +407,13 @@
         "Public Finance: Revenue, Expenditure, National Debt and Fiscal Policy",
         "Money and Inflation: Monetary Policy, Causes and Effects of Inflation"
       ],
-      "reviewStatus": "pending"
+      "reviewStatus": "factually_reviewed_by_user_attestation"
     }
-  ]
+  ],
+  "reviewAttestation": {
+    "date": "2026-10-26",
+    "reviewer": "user attestation in conversation",
+    "statement": "User states that the proposed topics have already been factually reviewed.",
+    "scope": "Topic factuality only; does not verify NERDC source provenance or review generated questions."
+  }
 }

@@ -32,7 +32,7 @@ The original 10,000-row CSV is left untouched. In the merged CSV, a legacy row r
 
 ## User-proposed topics for missing slots
 
-User-provided candidate topics for the missing 27 slots are kept separately in `prisma/cbt-curriculum-user-proposals.json`, with a human-review worksheet at `prisma/cbt-curriculum-user-proposals-review.csv`. They are not independently verified, do not change source coverage counts, and are excluded from the generated bank until reviewed against authoritative citations. See `user-proposed-gap-topics-review.md`.
+User-provided topics for the missing 27 slots are kept separately in `prisma/cbt-curriculum-user-proposals.json`, with a worksheet at `prisma/cbt-curriculum-user-proposals-review.csv`. The user attests that the topics are factually reviewed; this is recorded as an attestation, not independent verification. Official NERDC provenance/page citations remain unverified. The proposals do not change source-PDF coverage counts and are excluded from the generated bank. See `user-proposed-gap-topics-review.md`.
 
 ## Coverage limitations
 

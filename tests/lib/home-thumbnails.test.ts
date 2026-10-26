@@ -65,20 +65,24 @@ describe("home page track cards", () => {
 describe("hero LCP candidates", () => {
   const hero = readFileSync(join(process.cwd(), "components/Hero.tsx"), "utf8");
 
-  it("renders the decorative backdrop as a CSS background, not an <img>", () => {
-    // As an <img> the full-bleed backdrop was the largest element in the first
-    // viewport, so the LCP budget measured a 20%-opacity decoration behind a
-    // 92%-opaque gradient. CSS backgrounds are not LCP candidates.
-    expect(hero).toContain("url('/home/hero-campus-750.webp')");
-    expect(hero).not.toContain('src="/home/hero-campus-750.webp"');
+  it("keeps the decorative backdrop image-free so it cannot compete for LCP", () => {
+    expect(hero).toContain("bg-gradient-to-r");
+    expect(hero).not.toContain("url('/home/");
+    expect(hero).not.toContain("hero-campus-750.webp");
   });
 
-  it("keeps the student photograph preloaded, high-priority and sized", () => {
+  it("keeps the student photograph high-priority and sized", () => {
     expect(hero).toContain('src="/home/ykay-students-750.webp"');
     expect(hero).toContain('fetchPriority="high"');
     expect(hero).toMatch(/width=\{\d+\}/);
     expect(hero).toMatch(/height=\{\d+\}/);
     expect(hero).not.toContain('loading="lazy"');
+    const page = readFileSync(join(process.cwd(), "app/page.tsx"), "utf8");
+    expect(page).toContain('preload("/home/ykay-students-750.webp"');
+  });
+
+  it("does not hide critical hero text behind an entrance animation", () => {
+    expect(hero).not.toContain("anim-rise");
   });
 
   it("leaves no above-the-fold element gated on JavaScript", () => {
@@ -88,9 +92,7 @@ describe("hero LCP candidates", () => {
     expect(hero).not.toMatch(/useState|useEffect/);
   });
 
-  it("does not preload the decorative backdrop", () => {
-    // It is a CSS background now; a high-priority preload for a decoration
-    // competes with the stylesheet and scripts on a slow link.
+  it("does not preload a decorative backdrop", () => {
     const page = readFileSync(join(process.cwd(), "app/page.tsx"), "utf8");
     expect(page).not.toContain('preload("/home/hero-campus');
     expect(page).toContain('preload("/home/ykay-students-750.webp"');
