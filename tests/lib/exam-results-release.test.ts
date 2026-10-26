@@ -193,6 +193,7 @@ describe("PATCH /api/teacher/exams — result release and gradebook sync", () =>
   });
 
   it("rejects settings writes if release wins the row-version race", async () => {
+    mockPrisma.exam.findFirst.mockResolvedValue(baseExam({ status: "DRAFT" }) as never);
     mockPrisma.exam.updateMany.mockResolvedValue({ count: 0 } as never);
     const { PATCH } = await import("@/app/api/teacher/exams/route");
     const response = await PATCH(

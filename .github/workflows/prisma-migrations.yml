@@ -81,14 +81,16 @@ jobs:
               while IFS= read -r file; do
                 echo "-- $file"
                 cat "$file"
-                sql_message=$(tr '\n' ' ' < "$file")
-                sql_message=${sql_message//'%'/'%25'}
-                sql_message=${sql_message//$'\r'/'%0D'}
-                if [[ ${#sql_message} -gt 60000 ]]; then sql_message=${sql_message:0:60000}; fi
-                echo "::error title=Generated Prisma migration::$sql_message"
               done <<< "$generated_files"
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
+            while IFS= read -r file; do
+              sql_message=$(tr '\n' ' ' < "$file")
+              sql_message=${sql_message//'%'/'%25'}
+              sql_message=${sql_message//$'\r'/'%0D'}
+              if [[ ${#sql_message} -gt 60000 ]]; then sql_message=${sql_message:0:60000}; fi
+              echo "::error title=Generated Prisma migration::$sql_message"
+            done <<< "$generated_files"
             exit 1
           fi
 

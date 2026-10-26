@@ -47,6 +47,7 @@ function practiceExam(overrides: Record<string, unknown> = {}) {
     instructions: null,
     status: "PUBLISHED",
     shuffleQuestions: false,
+    snapshots: [{ totalMarks: 2 }],
     // The catalogue card shows the assigned teacher and the class name, and
     // optionally a term. The route selects these relations, so the fixture has
     // to carry them or the card renderer dereferences undefined.
@@ -137,8 +138,22 @@ describe("GET /api/student/practice — catalogue", () => {
     mockPrisma.exam.findMany.mockResolvedValue([
       practiceExam({
         attempts: [
-          { id: "a2", status: "GRADED", totalScore: 1, attemptNumber: 2, submittedAt: new Date() },
-          { id: "a1", status: "GRADED", totalScore: 2, attemptNumber: 1, submittedAt: new Date() },
+          {
+            id: "a2",
+            status: "GRADED",
+            totalScore: 1,
+            attemptNumber: 2,
+            submittedAt: new Date(),
+            snapshot: { totalMarks: 2 },
+          },
+          {
+            id: "a1",
+            status: "GRADED",
+            totalScore: 2,
+            attemptNumber: 1,
+            submittedAt: new Date(),
+            snapshot: { totalMarks: 2 },
+          },
         ],
       }),
     ]);
@@ -156,7 +171,14 @@ describe("GET /api/student/practice — catalogue", () => {
       practiceExam({
         attempts: [
           { id: "a2", status: "IN_PROGRESS", totalScore: 0, attemptNumber: 2, submittedAt: null },
-          { id: "a1", status: "GRADED", totalScore: 2, attemptNumber: 1, submittedAt: new Date() },
+          {
+            id: "a1",
+            status: "GRADED",
+            totalScore: 2,
+            attemptNumber: 1,
+            submittedAt: new Date(),
+            snapshot: { totalMarks: 2 },
+          },
         ],
       }),
     ]);
@@ -192,9 +214,43 @@ describe("GET /api/student/practice — catalogue", () => {
 describe("POST /api/student/practice/[id]/attempt — starting", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPrisma.examSnapshot.findFirst.mockResolvedValue(snapshot() as never);
   });
 
   const params = { params: Promise.resolve({ id: "exam_prac" }) };
+
+  function snapshot(overrides: Record<string, unknown> = {}) {
+    return {
+      id: "snap_1",
+      examId: "exam_prac",
+      title: "WAEC Maths Practice",
+      subjectName: "Mathematics",
+      instructions: null,
+      durationMinutes: 30,
+      totalMarks: 2,
+      passMark: 50,
+      shuffleQuestions: false,
+      scheduledFor: null,
+      availableUntil: null,
+      questions: [
+        {
+          id: "sq1",
+          questionId: "q1",
+          sortOrder: 1,
+          questionVersion: {
+            id: "qv1",
+            type: "MCQ",
+            questionText: "2+2?",
+            marks: 1,
+            options: null,
+            correctKey: "B",
+            correctText: null,
+          },
+        },
+      ],
+      ...overrides,
+    };
+  }
 
   it("refuses an exam that is not examType PRACTICE", async () => {
     // findFirst carries the examType filter — a graded exam simply won't match.
@@ -223,10 +279,11 @@ describe("POST /api/student/practice/[id]/attempt — starting", () => {
 
   it("rejects a practice set with no questions", async () => {
     mockPrisma.exam.findFirst.mockResolvedValue(practiceExam({ questions: [] }));
+    mockPrisma.examSnapshot.findFirst.mockResolvedValue(snapshot({ questions: [] }) as never);
     const { POST } = await import("@/app/api/student/practice/[id]/attempt/route");
     const response = await POST({} as never, params);
 
-    expect(response.status).toBe(409);
+    expect(response.status).toBe(503);
   });
 
   it("allows an immediate retake — no ExamRetake grant required", async () => {
@@ -234,12 +291,15 @@ describe("POST /api/student/practice/[id]/attempt — starting", () => {
     // A previous, completed attempt exists.
     mockPrisma.examAttempt.findFirst.mockResolvedValue({
       id: "att_old",
+      snapshotId: "snap_1",
       status: "GRADED",
       attemptNumber: 1,
       deadlineAt: new Date(Date.now() - 1000),
     });
     mockPrisma.examAttempt.create.mockResolvedValue({
       id: "att_new",
+      snapshotId: "snap_1",
+      lastClientSequence: 0,
       attemptNumber: 2,
       deadlineAt: new Date(Date.now() + 60_000),
     });
@@ -260,6 +320,8 @@ describe("POST /api/student/practice/[id]/attempt — starting", () => {
     mockPrisma.examAttempt.findFirst.mockResolvedValue(null);
     mockPrisma.examAttempt.create.mockResolvedValue({
       id: "att_1",
+      snapshotId: "snap_1",
+      lastClientSequence: 0,
       attemptNumber: 1,
       deadlineAt: new Date(Date.now() + 60_000),
     });
@@ -288,6 +350,8 @@ describe("POST /api/student/practice/[id]/attempt — starting", () => {
     mockPrisma.examAttempt.findFirst.mockResolvedValue(null);
     mockPrisma.examAttempt.create.mockResolvedValue({
       id: "att_1",
+      snapshotId: "snap_1",
+      lastClientSequence: 0,
       attemptNumber: 1,
       deadlineAt: new Date(Date.now() + 60_000),
     });
