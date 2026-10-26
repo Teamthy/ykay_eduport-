@@ -380,12 +380,6 @@ export async function PATCH(request: NextRequest) {
   if (!exam) return NextResponse.json({ error: "Exam not found." }, { status: 404 });
 
   if (payload.action === "ADD_QUESTIONS") {
-    if (exam.status !== ExamStatus.DRAFT) {
-      return NextResponse.json(
-        { error: "Questions can only be added while the exam is a draft." },
-        { status: 409 },
-      );
-    }
     const parsed = parseBulkQuestions(payload.bulkQuestions || "");
     if (!parsed.questions.length) {
       return NextResponse.json(
@@ -393,7 +387,50 @@ export async function PATCH(request: NextRequest) {
         { status: 400 },
       );
     }
+    const idempotencyKey = request.headers.get("Idempotency-Key")?.trim();
+    if (!idempotencyKey || idempotencyKey.length > 200) {
+      return NextResponse.json(
+        { error: "A valid Idempotency-Key header is required." },
+        { status: 400 },
+      );
+    }
+    const scope = `TEACHER_EXAM_ADD_QUESTIONS:${exam.id}`;
+    const reservation = await reserveIdempotency({
+      schoolId: context.user.schoolId,
+      scope,
+      key: idempotencyKey,
+      requestHash: idempotencyRequestHash({
+        method: requestMethodForIdempotency(request),
+        path: requestPathForIdempotency(request, "/api/teacher/exams"),
+        actorId: context.user.id,
+        scope,
+        body: payload,
+      }),
+    });
+    if (reservation.outcome === "replay")
+      return NextResponse.json(reservation.body, { status: reservation.status });
+    if (reservation.outcome === "conflict")
+      return NextResponse.json(reservation.body, { status: reservation.status });
+    if (reservation.outcome === "in-progress") {
+      return NextResponse.json(reservation.body, {
+        status: reservation.status,
+        headers: { "Retry-After": String(reservation.retryAfterSeconds) },
+      });
+    }
+    if (exam.status !== ExamStatus.DRAFT) {
+      await releaseReservedIdempotency({
+        schoolId: context.user.schoolId,
+        scope,
+        key: idempotencyKey,
+        lockedUntil: reservation.lockedUntil,
+      });
+      return NextResponse.json(
+        { error: "Questions can only be added while the exam is a draft." },
+        { status: 409 },
+      );
+    }
     const startOrder = exam.questions.length;
+    const response = { ok: true, message: `${parsed.questions.length} question(s) added.` };
     try {
       await prisma.$transaction(async (tx) => {
         const draftClaim = await tx.exam.updateMany({
@@ -429,8 +466,22 @@ export async function PATCH(request: NextRequest) {
               parsed.questions.reduce((sum, question) => sum + question.marks, 0),
           },
         });
+        await completeReservedIdempotency(tx, {
+          schoolId: context.user.schoolId,
+          scope,
+          key: idempotencyKey,
+          lockedUntil: reservation.lockedUntil,
+          response,
+          statusCode: 200,
+        });
       });
     } catch (error) {
+      await releaseReservedIdempotency({
+        schoolId: context.user.schoolId,
+        scope,
+        key: idempotencyKey,
+        lockedUntil: reservation.lockedUntil,
+      });
       if (error instanceof Error && error.message === "EXAM_NO_LONGER_DRAFT") {
         return NextResponse.json(
           { error: "Assessment state changed. Reload before adding questions." },
@@ -439,10 +490,7 @@ export async function PATCH(request: NextRequest) {
       }
       throw error;
     }
-    return NextResponse.json({
-      ok: true,
-      message: `${parsed.questions.length} question(s) added.`,
-    });
+    return NextResponse.json(response);
   }
 
   if (payload.action === "UPDATE_SETTINGS") {
