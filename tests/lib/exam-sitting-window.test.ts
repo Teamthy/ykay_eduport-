@@ -100,6 +100,7 @@ function snapshot(overrides: Record<string, unknown> = {}) {
         },
       },
     ],
+    ...overrides,
   };
 }
 

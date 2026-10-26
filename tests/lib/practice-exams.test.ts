@@ -47,7 +47,7 @@ function practiceExam(overrides: Record<string, unknown> = {}) {
     instructions: null,
     status: "PUBLISHED",
     shuffleQuestions: false,
-    snapshots: [{ totalMarks: 2 }],
+    snapshots: [{ totalMarks: 2, questions: [{}, {}] }],
     // The catalogue card shows the assigned teacher and the class name, and
     // optionally a term. The route selects these relations, so the fixture has
     // to carry them or the card renderer dereferences undefined.
