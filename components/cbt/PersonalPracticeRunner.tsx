@@ -71,6 +71,7 @@ type SessionPayload = {
 type Props = {
   sessionId: string;
   onExit: () => void;
+  onExitLabel?: string;
 };
 
 function formatTime(seconds: number | null) {
@@ -184,7 +185,11 @@ function FinishPanel({
   );
 }
 
-export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
+export default function PersonalPracticeRunner({
+  sessionId,
+  onExit,
+  onExitLabel = "Start another set",
+}: Props) {
   const [session, setSession] = useState<SessionPayload["session"] | null>(null);
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, PracticeAnswer>>({});
@@ -376,13 +381,23 @@ export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
         <p role="alert" className="text-sm text-red-600">
           {error}
         </p>
-        <button
-          type="button"
-          onClick={() => void loadSession()}
-          className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-navy px-4 py-2 text-sm font-bold text-white"
-        >
-          <RotateCcw size={14} /> Try again
-        </button>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => void loadSession()}
+            className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-4 py-2 text-sm font-bold text-white"
+          >
+            <RotateCcw size={14} /> Try again
+          </button>
+          <button
+            type="button"
+            onClick={onExit}
+            className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] px-4 py-2 text-sm font-bold text-[var(--text-primary)]"
+          >
+            <ArrowLeft size={14} />{" "}
+            {onExitLabel === "Back to history" ? onExitLabel : "Back to setup"}
+          </button>
+        </div>
       </div>
     );
   }
@@ -409,7 +424,7 @@ export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
               onClick={onExit}
               className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-5 py-3 text-sm font-bold text-white"
             >
-              <RotateCcw size={15} /> Start another set
+              <RotateCcw size={15} /> {onExitLabel}
             </button>
           </div>
         </div>

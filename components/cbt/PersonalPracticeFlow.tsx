@@ -6,6 +6,7 @@ import {
   ArrowRight,
   BookOpen,
   Check,
+  History,
   Clock3,
   Layers3,
   LoaderCircle,
@@ -14,6 +15,7 @@ import {
   Search,
   TimerOff,
 } from "lucide-react";
+import PersonalPracticeHistory from "@/components/cbt/PersonalPracticeHistory";
 import PersonalPracticeRunner from "@/components/cbt/PersonalPracticeRunner";
 
 type PracticeMode = "topic" | "subject" | "mixed";
@@ -85,6 +87,8 @@ function minutesAndSeconds(seconds: number) {
 
 export default function PersonalPracticeFlow() {
   const [step, setStep] = useState(0);
+  const [view, setView] = useState<"setup" | "history">("setup");
+  const [sessionReturnView, setSessionReturnView] = useState<"setup" | "history">("setup");
   const [mode, setMode] = useState<PracticeMode>("topic");
   const [classLevel, setClassLevel] = useState<ClassLevel>("jss1");
   const [term, setTerm] = useState<PracticeTerm>("all");
@@ -245,6 +249,7 @@ export default function PersonalPracticeFlow() {
       if (!response.ok || !payload.sessionId) {
         throw new Error(payload.error || "Unable to start this practice set.");
       }
+      setSessionReturnView("setup");
       setSessionId(payload.sessionId);
       window.history.replaceState(
         null,
@@ -264,6 +269,13 @@ export default function PersonalPracticeFlow() {
   function exitSession() {
     setSessionId(null);
     window.history.replaceState(null, "", window.location.pathname);
+    if (sessionReturnView === "history") {
+      setSessionReturnView("setup");
+      setView("history");
+      void loadResumableSessions();
+      return;
+    }
+    setView("setup");
     setMode("topic");
     setClassLevel("jss1");
     setTerm("all");
@@ -278,6 +290,16 @@ export default function PersonalPracticeFlow() {
     void loadResumableSessions();
   }
 
+  function openHistoryReview(attemptId: string) {
+    setSessionReturnView("history");
+    setSessionId(attemptId);
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}?session=${encodeURIComponent(attemptId)}`,
+    );
+  }
+
   function resetSetup() {
     setMode("topic");
     setClassLevel("jss1");
@@ -290,14 +312,6 @@ export default function PersonalPracticeFlow() {
     setTopicSearch("");
     setError("");
     setStep(0);
-  }
-
-  if (sessionId) {
-    return (
-      <div className="mx-auto w-full max-w-7xl">
-        <PersonalPracticeRunner key={sessionId} sessionId={sessionId} onExit={exitSession} />
-      </div>
-    );
   }
 
   const flowSteps =
@@ -321,9 +335,47 @@ export default function PersonalPracticeFlow() {
   const currentStep = flowSteps.findIndex((flowStep) => flowStep.step === step) + 1;
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="mx-auto w-full max-w-7xl space-y-6">
+      {sessionId ? (
+        <PersonalPracticeRunner
+          key={sessionId}
+          sessionId={sessionId}
+          onExit={exitSession}
+          onExitLabel={sessionReturnView === "history" ? "Back to history" : undefined}
+        />
+      ) : null}
+      <nav
+        hidden={Boolean(sessionId)}
+        aria-label="Personal practice pages"
+        className="inline-flex rounded-full border border-[var(--border-subtle)] bg-[var(--surface-card)] p-1.5 shadow-[var(--card-shadow)]"
+      >
+        <button
+          type="button"
+          aria-current={view === "setup" ? "page" : undefined}
+          onClick={() => setView("setup")}
+          className={`rounded-full px-4 py-2.5 text-xs font-bold transition sm:px-5 ${view === "setup" ? "bg-brand-navy text-white" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+        >
+          Set up practice
+        </button>
+        <button
+          type="button"
+          aria-current={view === "history" ? "page" : undefined}
+          onClick={() => setView("history")}
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-bold transition sm:px-5 ${view === "history" ? "bg-brand-navy text-white" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"}`}
+        >
+          <History size={14} /> History
+        </button>
+      </nav>
+
+      <div hidden={Boolean(sessionId)}>
+        {view === "history" ? <PersonalPracticeHistory onReview={openHistoryReview} /> : null}
+      </div>
+
       {resumableSessions.length ? (
-        <section className="rounded-[1.7rem] border border-brand-orange/30 bg-brand-orange/5 p-5 md:p-6">
+        <section
+          hidden={Boolean(sessionId) || view !== "setup"}
+          className="rounded-[1.7rem] border border-brand-orange/30 bg-brand-orange/5 p-5 md:p-6"
+        >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-brand-orange">
@@ -364,6 +416,7 @@ export default function PersonalPracticeFlow() {
                 <button
                   type="button"
                   onClick={() => {
+                    setSessionReturnView("setup");
                     setSessionId(saved.id);
                     window.history.replaceState(
                       null,
@@ -381,7 +434,10 @@ export default function PersonalPracticeFlow() {
         </section>
       ) : null}
 
-      <section className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)] md:p-7">
+      <section
+        hidden={Boolean(sessionId) || view !== "setup"}
+        className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5 shadow-[var(--card-shadow)] md:p-7"
+      >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-green">
