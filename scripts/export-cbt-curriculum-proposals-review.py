@@ -21,6 +21,7 @@ FIELDS = [
     "officialCitation",
     "pdfPageReferences",
     "reviewStatus",
+    "reviewAttestation",
     "subjectIdentityReviewRequired",
     "reviewerNotes",
 ]
@@ -33,8 +34,8 @@ def main() -> int:
     args = parser.parse_args()
 
     proposal = json.loads(args.input.read_text(encoding="utf-8"))
-    if proposal.get("status") != "proposed_not_verified_pending_human_review":
-        raise ValueError("Proposal data must remain explicitly unverified and pending human review")
+    if proposal.get("status") != "user_attested_factually_reviewed_supplement":
+        raise ValueError("Proposal data must record the user's factual-review attestation")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     row_count = 0
@@ -54,6 +55,7 @@ def main() -> int:
                         "officialCitation": "",
                         "pdfPageReferences": "",
                         "reviewStatus": entry.get("reviewStatus", "pending"),
+                        "reviewAttestation": proposal["reviewAttestation"]["statement"],
                         "subjectIdentityReviewRequired": str(entry.get("subjectIdentityReviewRequired", False)).lower(),
                         "reviewerNotes": "",
                     }
@@ -62,7 +64,8 @@ def main() -> int:
 
     print(f"Proposed topic slots: {len(proposal['entries'])}")
     print(f"Proposed topic rows exported: {row_count}")
-    print("Verification status: NOT VERIFIED; awaiting human review and authoritative citations")
+    print("Topic factuality: user-attested as reviewed")
+    print("NERDC provenance/page citations: NOT VERIFIED; citations were not supplied")
     print(f"Wrote {args.output}")
     return 0
 
