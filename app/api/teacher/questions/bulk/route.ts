@@ -5,6 +5,14 @@ import { requireRole, type SessionUser } from "@/lib/session";
 import { UserRole, ExamQuestionType, ExamStatus, Prisma } from "@prisma/client";
 
 import { logger } from "@/lib/logger";
+import {
+  completeReservedIdempotency,
+  idempotencyRequestHash,
+  releaseReservedIdempotency,
+  reserveIdempotency,
+  requestMethodForIdempotency,
+  requestPathForIdempotency,
+} from "@/lib/idempotency";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +78,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Validation failed.", details: issues }, { status: 400 });
   }
 
+  const idempotencyKey = request.headers.get("Idempotency-Key")?.trim();
+  if (!idempotencyKey || idempotencyKey.length > 200) {
+    return NextResponse.json(
+      { error: "A valid Idempotency-Key header is required." },
+      { status: 400 },
+    );
+  }
+
   const exam = await prisma.exam.findFirst({
     where: examAccessWhere(user, input.examId),
     include: {
@@ -83,19 +99,51 @@ export async function POST(request: NextRequest) {
       { status: 404 },
     );
   }
+  const scope = `TEACHER_QUESTION_BULK:${input.examId}`;
+  const reservation = await reserveIdempotency({
+    schoolId: user.schoolId,
+    scope,
+    key: idempotencyKey,
+    requestHash: idempotencyRequestHash({
+      method: requestMethodForIdempotency(request),
+      path: requestPathForIdempotency(request, "/api/teacher/questions/bulk"),
+      actorId: user.id,
+      scope,
+      body: input,
+    }),
+  });
+  if (reservation.outcome === "replay")
+    return NextResponse.json(reservation.body, { status: reservation.status });
+  if (reservation.outcome === "conflict")
+    return NextResponse.json(reservation.body, { status: reservation.status });
+  if (reservation.outcome === "in-progress") {
+    return NextResponse.json(reservation.body, {
+      status: reservation.status,
+      headers: { "Retry-After": String(reservation.retryAfterSeconds) },
+    });
+  }
+
   if (exam.status !== ExamStatus.DRAFT) {
+    await releaseReservedIdempotency({
+      schoolId: user.schoolId,
+      scope,
+      key: idempotencyKey,
+      lockedUntil: reservation.lockedUntil,
+    });
     return NextResponse.json(
       { error: "Questions can only be changed while the exam is still in DRAFT." },
       { status: 409 },
     );
   }
-
-  // Check total question limit (max 500 per exam)
   if (exam.questions.length + input.questions.length > 500) {
+    await releaseReservedIdempotency({
+      schoolId: user.schoolId,
+      scope,
+      key: idempotencyKey,
+      lockedUntil: reservation.lockedUntil,
+    });
     return NextResponse.json(
-      {
-        error: `Exam already has ${exam.questions.length} questions. Maximum is 500.`,
-      },
+      { error: `Exam already has ${exam.questions.length} questions. Maximum is 500.` },
       { status: 400 },
     );
   }
@@ -144,17 +192,32 @@ export async function POST(request: NextRequest) {
         where: { id: input.examId },
         data: { totalMarks },
       });
-      return { created, totalQuestions: aggregate._count._all, totalMarks };
+      const response = {
+        ok: true,
+        message: `${created.length} questions synced successfully.`,
+        created: created.length,
+        totalQuestions: aggregate._count._all,
+        totalMarks,
+      };
+      await completeReservedIdempotency(tx, {
+        schoolId: user.schoolId,
+        scope,
+        key: idempotencyKey,
+        lockedUntil: reservation.lockedUntil,
+        response,
+        statusCode: 200,
+      });
+      return response;
     });
 
-    return NextResponse.json({
-      ok: true,
-      message: `${result.created.length} questions synced successfully.`,
-      created: result.created.length,
-      totalQuestions: result.totalQuestions,
-      totalMarks: result.totalMarks,
-    });
+    return NextResponse.json(result);
   } catch (error) {
+    await releaseReservedIdempotency({
+      schoolId: user.schoolId,
+      scope,
+      key: idempotencyKey,
+      lockedUntil: reservation.lockedUntil,
+    });
     if (error instanceof Error && error.message === "EXAM_NO_LONGER_DRAFT") {
       return NextResponse.json(
         { error: "Assessment state changed. Reload before adding questions." },

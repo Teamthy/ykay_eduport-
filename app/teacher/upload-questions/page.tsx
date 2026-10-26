@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import PortalTopbar from "@/components/PortalTopbar";
 import TeacherSidebar from "@/components/TeacherSidebar";
 import { useApi } from "@/lib/useApi";
+import { clearIdempotencyKey, getIdempotencyKey } from "@/lib/client-idempotency";
 import { useToast } from "@/components/Toast";
 import {
   Upload,
@@ -406,16 +407,16 @@ export default function UploadQuestionsPage() {
     setSyncResult(null);
 
     try {
+      const requestBody = { examId: selectedExamId, questions: parseResult.questions };
+      const idempotencyKey = await getIdempotencyKey("question-bulk", requestBody);
       const r = await fetch("/api/teacher/questions/bulk", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          examId: selectedExamId,
-          questions: parseResult.questions,
-        }),
+        headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
+        body: JSON.stringify(requestBody),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || "Sync failed.");
+      await clearIdempotencyKey("question-bulk", requestBody);
       setSyncResult({
         ok: true,
         message: j.message,
