@@ -166,6 +166,11 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
                 availableUntil: activeSnapshot.availableUntil,
               }),
             },
+            include: {
+              snapshot: {
+                include: { questions: { include: { questionVersion: true } } },
+              },
+            },
           });
         })
         .catch(async (error: unknown) => {
@@ -180,6 +185,9 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
             const raced = await prisma.examAttempt.findFirst({
               where: { examId: exam.id, studentProfileId: studentContext.studentProfile.id },
               orderBy: { attemptNumber: "desc" },
+              include: {
+                snapshot: { include: { questions: { include: { questionVersion: true } } } },
+              },
             });
             if (raced && raced.status === ExamAttemptStatus.IN_PROGRESS) return raced;
           }

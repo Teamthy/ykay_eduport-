@@ -657,7 +657,7 @@ model FeePayment {
 /// Append-only compensating entry. Negative amountDelta reverses a posted receipt.
 model FeePaymentCorrection {
   id           String   @id @default(cuid())
-  paymentId    String
+  paymentId    String   @unique
   invoiceId    String
   schoolId     String
   amountDelta  Int
