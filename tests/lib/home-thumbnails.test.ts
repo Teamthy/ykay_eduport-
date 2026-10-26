@@ -65,12 +65,10 @@ describe("home page track cards", () => {
 describe("hero LCP candidates", () => {
   const hero = readFileSync(join(process.cwd(), "components/Hero.tsx"), "utf8");
 
-  it("renders the decorative backdrop as a CSS background, not an <img>", () => {
-    // As an <img> the full-bleed backdrop was the largest element in the first
-    // viewport, so the LCP budget measured a 20%-opacity decoration behind a
-    // 92%-opaque gradient. CSS backgrounds are not LCP candidates.
-    expect(hero).toContain("url('/home/hero-campus-750.webp')");
-    expect(hero).not.toContain('src="/home/hero-campus-750.webp"');
+  it("keeps the decorative backdrop image-free so it cannot compete for LCP", () => {
+    expect(hero).toContain("bg-gradient-to-r");
+    expect(hero).not.toContain("url('/home/");
+    expect(hero).not.toContain("hero-campus-750.webp");
   });
 
   it("keeps the student photograph preloaded, high-priority and sized", () => {
