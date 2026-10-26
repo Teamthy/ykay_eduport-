@@ -1,0 +1,148 @@
+name: Prisma migrations
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "prisma/schema.prisma"
+      - "prisma/migrations/**"
+      - ".github/workflows/prisma-migrations.yml"
+  push:
+    branches: [main, develop]
+    paths:
+      - "prisma/schema.prisma"
+      - "prisma/migrations/**"
+      - ".github/workflows/prisma-migrations.yml"
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "status is read-only; deploy applies pending migrations to Staging"
+        required: true
+        type: choice
+        default: status
+        options:
+          - status
+          - deploy
+      confirmation:
+        description: "For deploy only, enter APPLY STAGING MIGRATIONS"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prisma-migrations-${{ github.event_name == 'workflow_dispatch' && 'staging' || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ci-migrations:
+    name: Validate migrate dev and deploy on disposable PostgreSQL
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate committed migrations with migrate dev
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+        run: |
+          npx prisma migrate dev --schema prisma/schema.prisma --name ci_schema_drift_check --create-only
+          if [[ -n "$(git status --porcelain --untracked-files=all -- prisma/migrations)" ]]; then
+            echo "::error::prisma migrate dev generated a migration. Add the schema change as a reviewed migration and rerun CI."
+            git status --short -- prisma/migrations
+            exit 1
+          fi
+
+      - name: Create a fresh database for deploy validation
+        run: PGPASSWORD=ci psql -h localhost -U ci -d ci -v ON_ERROR_STOP=1 -c 'CREATE DATABASE ci_deploy;'
+
+      - name: Validate migrate deploy from a clean database
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_deploy
+        run: |
+          npx prisma migrate deploy --schema prisma/schema.prisma
+          npx prisma migrate status --schema prisma/schema.prisma
+
+  staging-migrations:
+    name: ${{ inputs.operation == 'deploy' && 'Apply Staging migrations' || 'Check Staging migration status' }}
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging-demo
+    steps:
+      - name: Require explicit confirmation for migration deploy
+        if: inputs.operation == 'deploy'
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [[ "$CONFIRMATION" != "APPLY STAGING MIGRATIONS" ]]; then
+            echo "::error::For a Staging migration deploy, enter confirmation=APPLY STAGING MIGRATIONS. No database changes were made."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate the exact direct Staging target
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          STAGING_DATABASE_HOST: ${{ vars.STAGING_DATABASE_HOST }}
+          PRODUCTION_DATABASE_STATUS: ${{ vars.PRODUCTION_DATABASE_STATUS }}
+          PRODUCTION_DATABASE_HOST: ${{ vars.PRODUCTION_DATABASE_HOST }}
+        run: |
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo "::error::Set STAGING_DIRECT_DATABASE_URL in the protected staging-demo GitHub environment."
+            exit 1
+          fi
+          printf '::add-mask::%s\n' "$DATABASE_URL"
+          npm run db:seed-staging-demo -- --check-target
+
+      - name: Check Staging migration status (read-only)
+        if: inputs.operation == 'status'
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+        run: |
+          printf '::add-mask::%s\n' "$DATABASE_URL"
+          npx prisma migrate status --schema prisma/schema.prisma
+
+      - name: Apply pending Staging migrations
+        if: inputs.operation == 'deploy' && inputs.confirmation == 'APPLY STAGING MIGRATIONS'
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+        run: |
+          printf '::add-mask::%s\n' "$DATABASE_URL"
+          npx prisma migrate deploy --schema prisma/schema.prisma
+          npx prisma migrate status --schema prisma/schema.prisma
