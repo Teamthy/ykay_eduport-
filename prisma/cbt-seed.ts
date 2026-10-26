@@ -1,9 +1,10 @@
 /**
  * CBT seed — the shared question bank.
  *
- * Imports question candidates as DRAFT content. The CSV is not factually
- * verified, so nothing here may mark a question reviewed: an authorized
- * reviewer must attest each item (see /admin/cbt-bank) before students see it.
+ * Imports questions as DRAFT content. The bank may be factually reviewed, but
+ * student visibility still requires an explicit, attributable attestation by an
+ * authorized reviewer (see /admin/cbt-bank). This workflow only attests exact
+ * question records represented in the input file.
  *
  * Usage:
  *   npm run cbt:seed                    # prisma/cbt-bank.csv, non-staging target
@@ -34,8 +35,9 @@ import { PrismaClient } from "@prisma/client";
 import { readFile } from "fs/promises";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { chunk, planBankCsv } from "../lib/cbt-bank-import";
+import { chunk, planBankCsv, type BankRow } from "../lib/cbt-bank-import";
 import { structuralRejectionReason } from "../lib/cbt-review";
+import { matchesBankQuestion } from "../lib/cbt-seed-attestation";
 import { validateStagingDemoTarget } from "./staging-demo-target";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -86,10 +88,13 @@ const ATTEST_ROLES = new Set(["SUPER_ADMIN", "ADMIN", "DIRECTOR", "HOD"]);
  * This is the workflow equivalent of selecting rows in /admin/cbt-bank and
  * pressing "approve": it records who checked the bank, when, and against which
  * source. It refuses to run without all three env vars, refuses a reviewer
- * account that is missing, inactive or not an academic reviewer, and leaves any
- * structurally invalid row in draft.
+ * account that is missing, inactive or not an academic reviewer. Only rows
+ * whose persisted content exactly matches the source file can be attested;
+ * mismatched, missing or structurally invalid rows are left out.
  */
-async function attestBank(subjectIds: string[]) {
+type AttestationTarget = { subjectId: string; rows: BankRow[] };
+
+async function attestBank(targets: AttestationTarget[]) {
   const email = process.env.CBT_ATTEST_EMAIL?.trim().toLowerCase();
   const reference = process.env.CBT_ATTEST_REFERENCE?.trim();
   const confirmation = process.env.CBT_ATTEST_CONFIRMATION?.trim();
@@ -112,7 +117,11 @@ async function attestBank(subjectIds: string[]) {
     where: { email },
     select: { id: true, email: true, role: true, isActive: true, schoolId: true },
   });
-  if (!reviewer) throw new Error("CBT_ATTEST_EMAIL does not match any user account.");
+  if (!reviewer) {
+    throw new Error(
+      "CBT_ATTEST_EMAIL must match a reviewer account in the selected Staging database. No questions were attested.",
+    );
+  }
   if (!reviewer.isActive) throw new Error("The attestation account is deactivated.");
   if (!ATTEST_ROLES.has(String(reviewer.role))) {
     throw new Error(
@@ -125,21 +134,40 @@ async function attestBank(subjectIds: string[]) {
   let blocked = 0;
   const blockedSamples: string[] = [];
 
-  for (const subjectId of subjectIds) {
-    let cursor: string | undefined;
-    for (;;) {
-      const rows = await prisma.cbtQuestion.findMany({
-        where: { subjectId, status: "draft" },
-        select: { id: true, stem: true, topic: true, explanation: true, options: true },
-        orderBy: { id: "asc" },
-        take: 500,
-        ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+  for (const target of targets) {
+    for (const expectedRows of chunk(target.rows, 500)) {
+      const expectedByStem = new Map(expectedRows.map((row) => [row.stem, row]));
+      const persistedRows = await prisma.cbtQuestion.findMany({
+        where: { subjectId: target.subjectId, stem: { in: [...expectedByStem.keys()] } },
+        select: {
+          id: true,
+          stem: true,
+          topic: true,
+          difficulty: true,
+          options: true,
+          correctIndex: true,
+          explanation: true,
+          source: true,
+          status: true,
+        },
       });
-      if (!rows.length) break;
-      cursor = rows[rows.length - 1].id;
-
+      const foundStems = new Set<string>();
       const allowed: string[] = [];
-      for (const row of rows) {
+
+      for (const row of persistedRows) {
+        const expected = expectedByStem.get(row.stem);
+        if (!expected) continue;
+        foundStems.add(row.stem);
+        if (row.status !== "draft") continue;
+
+        if (!matchesBankQuestion(row, expected)) {
+          blocked += 1;
+          if (blockedSamples.length < 10) {
+            blockedSamples.push(`${row.id}: stored question differs from the reviewed bank file`);
+          }
+          continue;
+        }
+
         const reason = structuralRejectionReason(row);
         if (reason) {
           blocked += 1;
@@ -148,6 +176,18 @@ async function attestBank(subjectIds: string[]) {
           allowed.push(row.id);
         }
       }
+
+      for (const expected of expectedRows) {
+        if (!foundStems.has(expected.stem)) {
+          blocked += 1;
+          if (blockedSamples.length < 10) {
+            blockedSamples.push(
+              `${expected.stem.slice(0, 80)}: matching stored question not found`,
+            );
+          }
+        }
+      }
+
       if (allowed.length) {
         const result = await prisma.cbtQuestion.updateMany({
           where: { id: { in: allowed }, status: "draft" },
@@ -156,7 +196,7 @@ async function attestBank(subjectIds: string[]) {
             reviewedByUserId: reviewer.id,
             reviewedAt,
             reviewReference: reference,
-            reviewNotes: `Attested by staging seed workflow (${BANK_FILE}).`,
+            reviewNotes: `Attested against ${BANK_FILE}.`,
           },
         });
         attested += result.count;
@@ -174,7 +214,7 @@ async function attestBank(subjectIds: string[]) {
         bankFile: BANK_FILE,
         reference,
         attested,
-        leftInDraft: blocked,
+        notAttested: blocked,
         sample: blockedSamples,
       },
     },
@@ -182,9 +222,9 @@ async function attestBank(subjectIds: string[]) {
 
   console.log(
     `attested ${attested} question(s) as ${reviewer.email} against "${reference}"` +
-      (blocked ? `; ${blocked} left in draft as structurally invalid` : ""),
+      (blocked ? `; ${blocked} source row(s) not attested (see warnings)` : ""),
   );
-  for (const sample of blockedSamples) console.warn(`  left in draft — ${sample}`);
+  for (const sample of blockedSamples) console.warn(`  not attested — ${sample}`);
 }
 
 async function main() {
@@ -290,11 +330,24 @@ async function main() {
     );
   }
 
-  const seededSubjects: Array<{ id: string }> = await prisma.cbtSubject.findMany({
-    where: { slug: { in: plan.subjects.map((group) => group.slug) } },
-    select: { id: true },
+  const seededSubjects: Array<{ id: string; slug: string; classLevel: string }> =
+    await prisma.cbtSubject.findMany({
+      where: { slug: { in: plan.subjects.map((group) => group.slug) } },
+      select: { id: true, slug: true, classLevel: true },
+    });
+  const subjectsBySlug = new Map(seededSubjects.map((subject) => [subject.slug, subject]));
+  const attestationTargets = plan.subjects.map((group) => {
+    const subject = subjectsBySlug.get(group.slug);
+    if (!subject)
+      throw new Error(`Could not resolve imported subject ${group.slug} for attestation.`);
+    if (subject.classLevel !== group.classLevel) {
+      throw new Error(
+        `Cannot attest ${group.slug}: the stored subject is ${subject.classLevel}, but the bank file says ${group.classLevel}.`,
+      );
+    }
+    return { subjectId: subject.id, rows: group.rows.map(({ data }) => data) };
   });
-  await attestBank(seededSubjects.map((subject) => subject.id));
+  await attestBank(attestationTargets);
 
   const drafts = await prisma.cbtQuestion.count({ where: { status: "draft" } });
   const reviewed = await prisma.cbtQuestion.count({ where: { status: "reviewed" } });
