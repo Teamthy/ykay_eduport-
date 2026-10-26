@@ -12,16 +12,19 @@
  * commits, that the unique constraints hold, or that the enrolment gate really
  * blocks an unpaid applicant. This does.
  *
- * Uses a throwaway school and cleans up after itself. Exits non-zero on
- * failure so it can gate a deploy.
+ * Runs only against the disposable localhost database named `ci`; all fixtures
+ * disappear with that PostgreSQL service. Paid transaction rows are never
+ * deleted because financial ledger facts are immutable.
  */
 import { PrismaClient, ApplicationStatus, PaymentStatus, PaymentProvider } from "@prisma/client";
 import { logger } from "@/lib/logger";
 
 const prisma = new PrismaClient({ log: [] });
 
-const SCHOOL = "opsverify_school";
-const APP_ID = "YKCAPP2026OPS001";
+const RUN_ID = `${Date.now()}_${process.pid}`;
+const SCHOOL = `opsverify_${RUN_ID}`;
+const CLASS_ID = `${SCHOOL}_jss1`;
+const APP_ID = `YKCAPP${RUN_ID}`;
 let failures = 0;
 
 function check(name: string, actual: unknown, expected: unknown) {
@@ -32,31 +35,24 @@ function check(name: string, actual: unknown, expected: unknown) {
   );
 }
 
-async function cleanup() {
-  await prisma.parentStudentLink.deleteMany({
-    where: { studentProfile: { schoolId: SCHOOL } },
-  });
-  await prisma.studentProfile.deleteMany({ where: { schoolId: SCHOOL } });
-  await prisma.paymentTransaction.deleteMany({
-    where: { application: { schoolId: SCHOOL } },
-  });
-  await prisma.admissionApplication.deleteMany({ where: { schoolId: SCHOOL } });
-  await prisma.parentProfile.deleteMany({ where: { schoolId: SCHOOL } });
-  await prisma.auditLog.deleteMany({ where: { schoolId: SCHOOL } });
-  await prisma.idempotencyRecord.deleteMany({ where: { schoolId: SCHOOL } });
-  await prisma.user.deleteMany({ where: { schoolId: SCHOOL } });
-  await prisma.schoolClass.deleteMany({ where: { schoolId: SCHOOL } });
-  await prisma.school.deleteMany({ where: { id: SCHOOL } });
-}
-
 async function main() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) throw new Error("DATABASE_URL is required.");
+  const target = new URL(databaseUrl);
+  if (
+    !["postgres:", "postgresql:"].includes(target.protocol) ||
+    target.hostname !== "localhost" ||
+    target.pathname !== "/ci"
+  ) {
+    throw new Error("This write test is restricted to the disposable localhost database named ci.");
+  }
+
   console.log("Admissions operations loop — paper intake to enrolled student\n");
-  await cleanup();
 
   await prisma.school.create({
     data: {
       id: SCHOOL,
-      slug: "opsverify",
+      slug: `opsverify-${RUN_ID}`,
       name: "Ops Verify College",
       address: "test",
       phone: "+2348000000000",
@@ -65,7 +61,7 @@ async function main() {
   });
   await prisma.schoolClass.create({
     data: {
-      id: "opsverify_jss1",
+      id: CLASS_ID,
       schoolId: SCHOOL,
       level: "JSS1",
       arm: "A",
@@ -164,9 +160,9 @@ async function main() {
     const student = await tx.studentProfile.create({
       data: {
         schoolId: SCHOOL,
-        currentClassId: "opsverify_jss1",
+        currentClassId: CLASS_ID,
         admissionApplicationId: paid.id,
-        studentId: "YKC/2026/OPS001",
+        studentId: `YKC/2026/${RUN_ID}/OPS001`,
         firstName: paid.firstName,
         lastName: paid.lastName,
         displayName: `${paid.firstName} ${paid.lastName}`,
@@ -217,9 +213,9 @@ async function main() {
     await prisma.studentProfile.create({
       data: {
         schoolId: SCHOOL,
-        currentClassId: "opsverify_jss1",
+        currentClassId: CLASS_ID,
         admissionApplicationId: paid.id, // unique — one student per application
-        studentId: "YKC/2026/OPS002",
+        studentId: `YKC/2026/${RUN_ID}/OPS002`,
         firstName: "Duplicate",
         lastName: "Okafor",
         displayName: "Duplicate Okafor",
@@ -230,7 +226,8 @@ async function main() {
   }
   check("a second student cannot reuse the same application", duplicateBlocked, true);
 
-  await cleanup();
+  // The CI PostgreSQL service is discarded when the job ends. Do not delete
+  // paid PaymentTransaction facts: posted financial records are immutable.
   await prisma.$disconnect();
 
   console.log(
@@ -245,7 +242,6 @@ main().catch(async (error) => {
   logger.error("\nVerification crashed:", {
     error: error instanceof Error ? error.message : String(error),
   });
-  await cleanup().catch(() => {});
   await prisma.$disconnect();
   process.exit(1);
 });

@@ -42,12 +42,23 @@ function exam(overrides: Record<string, unknown> = {}) {
     availableUntil: null,
     subjectId: null,
     questions: [{ id: "question_1", marks: 50, type: "MCQ" }],
+    snapshots: [
+      {
+        totalMarks: 50,
+        scheduledFor: null,
+        availableUntil: null,
+        durationMinutes: 30,
+        theoryMinutes: 0,
+        questions: [{ questionVersion: { type: "MCQ" } }],
+      },
+    ],
     attempts: [
       {
         id: "attempt_1",
         status: "GRADED",
         totalScore: 45,
         submittedAt: new Date("2026-05-12T10:00:00Z"),
+        snapshot: { totalMarks: 50 },
       },
     ],
     retakes: [],

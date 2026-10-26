@@ -183,7 +183,7 @@ describe("PATCH /api/teacher/exams — UPDATE_SETTINGS", () => {
     expect(mockPrisma.exam.updateMany).not.toHaveBeenCalled();
   });
 
-  it("still allows a pass-mark change while attempts are running", async () => {
+  it("refuses a pass-mark change after publication, even while attempts are running", async () => {
     mockPrisma.exam.findFirst.mockResolvedValue(exam({ status: "PUBLISHED" }));
     mockPrisma.examAttempt.count.mockResolvedValue(2);
 
@@ -192,8 +192,9 @@ describe("PATCH /api/teacher/exams — UPDATE_SETTINGS", () => {
       request({ examId: "exam_1", action: "UPDATE_SETTINGS", passMark: 45 }),
     );
 
-    // Pass mark is applied at grading, not during the sitting.
-    expect(response.status).toBe(200);
+    // Published attempts use the frozen snapshot's pass mark.
+    expect(response.status).toBe(409);
+    expect(mockPrisma.exam.updateMany).not.toHaveBeenCalled();
   });
 
   /**

@@ -123,6 +123,7 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
         attemptNumber: (existing?.attemptNumber || 0) + 1,
         deadlineAt: new Date(Date.now() + activeSnapshot.durationMinutes * 60_000),
       },
+      include: { snapshot: { include: { questions: { include: { questionVersion: true } } } } },
     });
   }
 

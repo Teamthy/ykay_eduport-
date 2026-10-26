@@ -71,10 +71,44 @@ function scheduledExam(overrides: Record<string, unknown> = {}) {
 
 const params = { params: Promise.resolve({ id: "exam_1" }) };
 
+function snapshot(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "snap_1",
+    examId: "exam_1",
+    title: "Midterm Test",
+    subjectName: "Biology",
+    instructions: null,
+    durationMinutes: 40,
+    totalMarks: 1,
+    passMark: 40,
+    shuffleQuestions: false,
+    scheduledFor: null,
+    availableUntil: null,
+    questions: [
+      {
+        id: "sq1",
+        questionId: "q1",
+        sortOrder: 1,
+        questionVersion: {
+          id: "qv1",
+          type: "MCQ",
+          questionText: "2+2?",
+          marks: 1,
+          options: null,
+          correctKey: "B",
+          correctText: null,
+        },
+      },
+    ],
+    ...overrides,
+  };
+}
+
 describe("POST /api/student/exams/[id]/attempt — sitting window", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.examAttempt.findFirst.mockResolvedValue(null);
+    mockPrisma.examSnapshot.findFirst.mockResolvedValue(snapshot() as never);
     mockPrisma.examAnswer.findMany.mockResolvedValue([]);
     mockPrisma.examAttempt.create.mockImplementation(async ({ data }: never) => ({
       id: "att_new",
@@ -83,8 +117,10 @@ describe("POST /api/student/exams/[id]/attempt — sitting window", () => {
   });
 
   it("refuses to start an exam before it opens", async () => {
-    mockPrisma.exam.findFirst.mockResolvedValue(
-      scheduledExam({ scheduledFor: new Date(Date.now() + 2 * HOUR) }),
+    const opensAt = new Date(Date.now() + 2 * HOUR);
+    mockPrisma.exam.findFirst.mockResolvedValue(scheduledExam({ scheduledFor: opensAt }));
+    mockPrisma.examSnapshot.findFirst.mockResolvedValue(
+      snapshot({ scheduledFor: opensAt }) as never,
     );
 
     const { POST } = await import("@/app/api/student/exams/[id]/attempt/route");
@@ -98,11 +134,13 @@ describe("POST /api/student/exams/[id]/attempt — sitting window", () => {
   });
 
   it("refuses to start an exam after the window closes", async () => {
+    const opensAt = new Date(Date.now() - 4 * HOUR);
+    const closesAt = new Date(Date.now() - HOUR);
     mockPrisma.exam.findFirst.mockResolvedValue(
-      scheduledExam({
-        scheduledFor: new Date(Date.now() - 4 * HOUR),
-        availableUntil: new Date(Date.now() - HOUR),
-      }),
+      scheduledExam({ scheduledFor: opensAt, availableUntil: closesAt }),
+    );
+    mockPrisma.examSnapshot.findFirst.mockResolvedValue(
+      snapshot({ scheduledFor: opensAt, availableUntil: closesAt }) as never,
     );
 
     const { POST } = await import("@/app/api/student/exams/[id]/attempt/route");
@@ -126,11 +164,13 @@ describe("POST /api/student/exams/[id]/attempt — sitting window", () => {
   });
 
   it("allows a start inside the window", async () => {
+    const opensAt = new Date(Date.now() - HOUR);
+    const closesAt = new Date(Date.now() + HOUR);
     mockPrisma.exam.findFirst.mockResolvedValue(
-      scheduledExam({
-        scheduledFor: new Date(Date.now() - HOUR),
-        availableUntil: new Date(Date.now() + HOUR),
-      }),
+      scheduledExam({ scheduledFor: opensAt, availableUntil: closesAt }),
+    );
+    mockPrisma.examSnapshot.findFirst.mockResolvedValue(
+      snapshot({ scheduledFor: opensAt, availableUntil: closesAt }) as never,
     );
 
     const { POST } = await import("@/app/api/student/exams/[id]/attempt/route");
@@ -162,6 +202,8 @@ describe("POST /api/student/exams/[id]/attempt — sitting window", () => {
     );
     mockPrisma.examAttempt.findFirst.mockResolvedValue({
       id: "att_live",
+      snapshotId: "snap_1",
+      snapshot: snapshot(),
       status: "IN_PROGRESS",
       attemptNumber: 1,
       // Deadline still in the future: their own clock is still running.
@@ -182,6 +224,9 @@ describe("POST /api/student/exams/[id]/attempt — sitting window", () => {
   it("clamps the attempt deadline to the close of the window", async () => {
     const closesAt = new Date(Date.now() + 5 * 60_000); // 5 min left, 40 min exam
     mockPrisma.exam.findFirst.mockResolvedValue(scheduledExam({ availableUntil: closesAt }));
+    mockPrisma.examSnapshot.findFirst.mockResolvedValue(
+      snapshot({ availableUntil: closesAt }) as never,
+    );
 
     const { POST } = await import("@/app/api/student/exams/[id]/attempt/route");
     await POST({} as never, params);
@@ -193,6 +238,9 @@ describe("POST /api/student/exams/[id]/attempt — sitting window", () => {
   it("does not clamp when the window closes after the full duration would end", async () => {
     const closesAt = new Date(Date.now() + 5 * HOUR);
     mockPrisma.exam.findFirst.mockResolvedValue(scheduledExam({ availableUntil: closesAt }));
+    mockPrisma.examSnapshot.findFirst.mockResolvedValue(
+      snapshot({ availableUntil: closesAt }) as never,
+    );
 
     const { POST } = await import("@/app/api/student/exams/[id]/attempt/route");
     await POST({} as never, params);
@@ -217,6 +265,7 @@ describe("POST /api/student/exams/[id]/attempt — start race (C-004)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.examAttempt.findFirst.mockResolvedValue(null);
+    mockPrisma.examSnapshot.findFirst.mockResolvedValue(snapshot() as never);
     mockPrisma.examAnswer.findMany.mockResolvedValue([]);
     mockPrisma.examAttempt.create.mockImplementation(async ({ data }: never) => ({
       id: "att_new",
@@ -230,6 +279,7 @@ describe("POST /api/student/exams/[id]/attempt — start race (C-004)", () => {
     // insert race, the re-read finds the winner's IN_PROGRESS attempt.
     mockPrisma.examAttempt.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({
       id: "att_live",
+      snapshotId: "snap_1",
       status: "IN_PROGRESS",
       attemptNumber: 1,
       deadlineAt: new Date(Date.now() + 10 * 60_000),
