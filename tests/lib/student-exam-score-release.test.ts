@@ -49,6 +49,7 @@ function exam(overrides: Record<string, unknown> = {}) {
         availableUntil: null,
         durationMinutes: 30,
         theoryMinutes: 0,
+        questions: [{ questionVersion: { type: "MCQ" } }],
       },
     ],
     attempts: [

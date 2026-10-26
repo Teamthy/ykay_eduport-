@@ -192,7 +192,9 @@ describe("GET /api/student/practice — catalogue", () => {
   });
 
   it("cannot be started when the set has no questions", async () => {
-    mockPrisma.exam.findMany.mockResolvedValue([practiceExam({ questions: [] })]);
+    mockPrisma.exam.findMany.mockResolvedValue([
+      practiceExam({ questions: [], snapshots: [{ totalMarks: 2, questions: [] }] }),
+    ]);
     const { GET } = await import("@/app/api/student/practice/route");
     const body = await (await GET(catalogueRequest())).json();
 
