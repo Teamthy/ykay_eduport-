@@ -8,6 +8,8 @@ name: Seed the CBT question bank (Staging)
 #     Staging host, and refuses pooled Neon URLs;
 #   * the first step is a read-only preflight, so a malformed CSV fails before
 #     a single row is written;
+#   * before a staging write, the exact protected host is checked and pending
+#     Prisma migrations are applied to that Staging database;
 #   * attestation (making exact source rows visible to students in practice) is
 #     separately confirmed and records the GitHub dispatch actor, citation,
 #     timestamp and workflow run without mapping that actor to an app user.
@@ -116,6 +118,24 @@ jobs:
       - name: Generate Prisma client
         if: inputs.operation != 'preflight'
         run: npx prisma generate
+
+      - name: Verify staging target and apply pending migrations
+        if: inputs.operation != 'preflight'
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DIRECT_DATABASE_URL }}
+          STAGING_DATABASE_HOST: ${{ vars.STAGING_DATABASE_HOST }}
+          PRODUCTION_DATABASE_STATUS: ${{ vars.PRODUCTION_DATABASE_STATUS }}
+          PRODUCTION_DATABASE_HOST: ${{ vars.PRODUCTION_DATABASE_HOST }}
+        run: |
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo "::error::Set STAGING_DIRECT_DATABASE_URL in the protected staging-seeds environment."
+            exit 1
+          fi
+          printf '::add-mask::%s\n' "$DATABASE_URL"
+          npm run db:seed-staging-demo -- --check-target
+          npx prisma migrate status --schema prisma/schema.prisma
+          npx prisma migrate deploy --schema prisma/schema.prisma
+          npx prisma migrate status --schema prisma/schema.prisma
 
       - name: Seed as drafts
         if: inputs.operation != 'preflight'

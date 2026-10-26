@@ -55,7 +55,7 @@ Deploy this branch to a preview pointed at Staging, sign in as an admin, open `/
 | Input | Meaning |
 | --- | --- |
 | `operation` | `preflight` (read-only CSV check), `seed` (import drafts), `seed-and-attest` (import drafts, then attest) |
-| `bank_file` | CSV under `prisma/`; default `cbt-bank-10k-draft.csv` |
+| `bank_file` | CSV under `prisma/`; default `cbt-bank-19k-draft.csv` |
 | `confirmation` | must read `SEED STAGING` before anything is written |
 | `attestation_confirmation` / `attest_reference` | `seed-and-attest` only: explicit review confirmation and the source the bank was checked against |
 
@@ -68,7 +68,7 @@ Configuration the workflow reads:
 Why it is safe to expose as a button:
 
 - the first step is `npm run cbt:preflight`, which parses the file with the seed's own parser and fails on any rejected row before a database is touched;
-- `CBT_SEED_TARGET=staging npm run cbt:seed` refuses any host that is not `STAGING_DATABASE_HOST`, refuses a pooled Neon host, and refuses the Production host;
+- before writing, the workflow validates the staging hostname and applies pending Prisma migrations to the protected direct Neon target; `CBT_SEED_TARGET=staging npm run cbt:seed` re-checks that host and rejects pooled or Production hosts;
 - `seed` and `seed-and-attest` only run from `main`, behind `confirmation=SEED STAGING`;
 - The workflow uses the GitHub dispatch actor, explicit `I REVIEWED THE CBT BANK` confirmation, and a source reference; it does not request a reviewer email or misattribute the external attestation to an in-app user. It records a dated `CbtBankAttestation` audit row and attaches the reference/date to exact matching structurally valid questions. Malformed or mismatching rows remain drafts.
 
