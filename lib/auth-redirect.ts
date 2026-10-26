@@ -32,3 +32,16 @@ export function signedOutPathForRole(role?: string): string {
   const path = signInPathForRole(role);
   return `${path}${path.includes("?") ? "&" : "?"}signedout=1`;
 }
+
+/**
+ * Where a browser signs out: the route handler that revokes the session, clears
+ * the cookie and answers with a 303 to the sign-in page.
+ *
+ * This is deliberately a path, not a fetch target. Sign-out controls render it
+ * as an anchor href, so signing out survives a bundle that never hydrated or
+ * has thrown; the confirmation dialog is an enhancement on top, not the
+ * transport.
+ */
+export function logoutPathForRole(role?: string): string {
+  return role ? `/api/auth/logout?role=${encodeURIComponent(role)}` : "/api/auth/logout";
+}

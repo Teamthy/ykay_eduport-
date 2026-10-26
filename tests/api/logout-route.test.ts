@@ -107,30 +107,28 @@ describe("logout route", () => {
       const response = await callGet("?role=STUDENT");
 
       expect(response.status).toBe(303);
-      expect(response.headers.get("location")).toBe(
-        "http://localhost:3000/login?portal=student&signedout=1",
-      );
+      // Relative on purpose: the handler only knows the host it was invoked
+      // with, which behind a proxy or preview hostname can be an address the
+      // browser cannot resolve. The browser resolves this against the URL it
+      // just requested, so sign-out lands on the right origin everywhere.
+      expect(response.headers.get("location")).toBe("/login?portal=student&signedout=1");
       expect(response.cookies.get("ykay_session")?.maxAge).toBe(0);
     });
 
     it("routes staff and IT students to their own sign-in pages", async () => {
       expect((await callGet("?role=TEACHER")).headers.get("location")).toBe(
-        "http://localhost:3000/login?portal=staff&signedout=1",
+        "/login?portal=staff&signedout=1",
       );
       expect((await callGet("?role=IT_STUDENT")).headers.get("location")).toBe(
-        "http://localhost:3000/it-portal/auth?signedout=1",
+        "/it-portal/auth?signedout=1",
       );
-      expect((await callGet("")).headers.get("location")).toBe(
-        "http://localhost:3000/login?signedout=1",
-      );
+      expect((await callGet("")).headers.get("location")).toBe("/login?signedout=1");
     });
 
     it("refuses to be used as an open redirect", async () => {
       for (const target of ["//evil.example", "https://evil.example", "evil.example"]) {
         const response = await callGet(`?next=${encodeURIComponent(target)}`);
-        expect(response.headers.get("location"), target).toBe(
-          "http://localhost:3000/login?signedout=1",
-        );
+        expect(response.headers.get("location"), target).toBe("/login?signedout=1");
       }
     });
 
@@ -158,9 +156,21 @@ describe("logout route", () => {
       expect(mocks.revokeAllSessions).not.toHaveBeenCalled();
     });
 
+    it("never puts a host in the destination, whatever host invoked it", async () => {
+      // The 303 must be origin-agnostic: a proxy hostname, a preview URL or an
+      // internal address must not end up in Location.
+      const { NextRequest } = await import("next/server");
+      const { GET } = await import("@/app/api/auth/logout/route");
+      const response = await GET(
+        new NextRequest("http://internal-abc123:3000/api/auth/logout?role=ADMIN"),
+      );
+      expect(response.headers.get("location")).toBe("/login?portal=staff&signedout=1");
+      expect(response.headers.get("location")).not.toContain("internal-abc123");
+    });
+
     it("allows a same-site destination", async () => {
       const response = await callGet("?next=%2Flogin%3Fportal%3Dparent");
-      expect(response.headers.get("location")).toBe("http://localhost:3000/login?portal=parent");
+      expect(response.headers.get("location")).toBe("/login?portal=parent");
     });
   });
 });

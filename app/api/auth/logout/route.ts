@@ -154,8 +154,17 @@ export async function GET(request: NextRequest) {
   // phishing link start on the real sign-out page and end somewhere else.
   const safeNext = requested && requested.startsWith("/") && !requested.startsWith("//");
   const destination = safeNext ? requested : signedOutPathForRole(role);
+  // A RELATIVE Location, deliberately.
+  //
+  // NextResponse.redirect() needs an absolute URL, and the only host this
+  // handler can see is the one it was invoked with — behind a proxy or a
+  // preview hostname that is frequently the internal address, which would send
+  // the browser to a host that does not resolve for it (the page simply never
+  // arrives). A relative reference is resolved by the browser against the URL
+  // it just requested, so the sign-out lands on the right origin wherever the
+  // app is hosted. RFC 7231 allows it and every browser follows it.
   const response = clearSessionCookie(
-    NextResponse.redirect(new URL(destination, request.url), 303),
+    new NextResponse(null, { status: 303, headers: { location: destination } }),
   );
   logger.info("logout: browser sign-out completed", {
     revoked: outcome.revoked,

@@ -30,7 +30,8 @@ const PORTALS = [
       { href: "/admin/staff-assignments", label: "Staff assignments", icon: BookOpen },
       { href: "/admin/class-manager", label: "Class manager", icon: School },
       { href: "/admin/news", label: "Post & news", icon: Bell },
-      { href: "/admin/questions", label: "Question bank", icon: ClipboardCheck },
+      { href: "/admin/questions", label: "Exam question records", icon: ClipboardCheck },
+      { href: "/admin/cbt-bank", label: "CBT question bank review", icon: ClipboardCheck },
     ],
   },
   {
@@ -55,7 +56,8 @@ const PORTALS = [
     icon: GraduationCap,
     routes: [
       { href: "/student/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/student/exams", label: "CBT / Exams", icon: ClipboardCheck },
+      { href: "/student/exams", label: "School exams", icon: ClipboardCheck },
+      { href: "/student/personal-practice", label: "Personal question practice", icon: BookOpen },
       { href: "/student/report-cards", label: "Report cards", icon: FileText },
       { href: "/student/profile", label: "My profile", icon: Users },
       { href: "/student/id-card", label: "ID card", icon: IdCard },

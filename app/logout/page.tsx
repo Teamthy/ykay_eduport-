@@ -17,7 +17,7 @@ import { LogOut, ShieldCheck, ArrowLeft, AlertTriangle } from "lucide-react";
  */
 export default function LogoutPage() {
   const router = useRouter();
-  const { user, loading, logoutImmediately } = useAuth();
+  const { user, loading, logoutImmediately, logoutHref } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -88,13 +88,21 @@ export default function LogoutPage() {
 
           {user ? (
             <div className="mt-7 flex flex-col gap-3">
-              <button
-                onClick={confirm}
-                disabled={busy}
-                className="w-full rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-red-700 disabled:opacity-60"
+              {/* An anchor, not a button: with JavaScript this confirms first,
+                  and without it the browser still navigates to the route that
+                  revokes the session and redirects. */}
+              <a
+                href={logoutHref}
+                onClick={(event) => {
+                  event.preventDefault();
+                  void confirm();
+                }}
+                aria-busy={busy}
+                aria-disabled={busy}
+                className="w-full rounded-xl bg-red-600 px-5 py-3 text-center text-sm font-bold text-white transition-colors hover:bg-red-700 aria-disabled:opacity-60"
               >
                 {busy ? "Signing out…" : "Yes, sign me out"}
-              </button>
+              </a>
               <button
                 onClick={() => router.back()}
                 disabled={busy}

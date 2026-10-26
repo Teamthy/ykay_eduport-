@@ -438,6 +438,39 @@ export default function CbtBankReviewPage() {
             </div>
           </div>
 
+          {/* Why the bank can be empty, in the place the question is asked.
+              "Not showing" has two different causes and they need different
+              actions: nothing seeded at all, versus rows waiting for review
+              (only reviewed questions reach student practice). */}
+          {totals.draft === 0 && totals.reviewed === 0 && totals.archived === 0 ? (
+            <div className="rounded-2xl border border-brand-orange/40 bg-brand-orange/10 p-4 text-sm text-[var(--text-primary)]">
+              <p className="font-bold">No questions are loaded in this database yet.</p>
+              <p className="mt-1 text-[var(--text-secondary)]">
+                The bank is empty, so there is nothing to review and students have nothing to
+                practise. Load it on Staging with{" "}
+                <code className="rounded bg-[var(--surface-disabled)] px-1.5 py-0.5 font-mono text-xs">
+                  npm run cbt:seed:10k:staging
+                </code>{" "}
+                (or run the “Seed the CBT question bank (Staging)” workflow), then reload this page.{" "}
+                <code className="font-mono text-xs">npm run cbt:bank:status</code> reports what any
+                configured database actually contains.
+              </p>
+            </div>
+          ) : null}
+
+          {totals.reviewed === 0 && totals.draft > 0 ? (
+            <div className="rounded-2xl border border-brand-orange/40 bg-brand-orange/10 p-4 text-sm text-[var(--text-primary)]">
+              <p className="font-bold">
+                {totals.draft.toLocaleString()} questions are waiting for review.
+              </p>
+              <p className="mt-1 text-[var(--text-secondary)]">
+                Only reviewed questions reach student practice, so the bank is invisible to students
+                until it is approved. Select the rows below — or approve them in the seed-and-attest
+                workflow, which records who checked them.
+              </p>
+            </div>
+          ) : null}
+
           {status === "draft" && questions.length ? (
             <div className="space-y-3 rounded-2xl border border-brand-green/30 bg-brand-green/5 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">

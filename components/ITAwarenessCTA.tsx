@@ -78,10 +78,10 @@ export default function ITAwarenessCTA() {
                 Explore IT Courses <ArrowRight size={18} className="text-brand-green-dark" />
               </Link>
               <Link
-                href="/it-education#register"
+                href="/it-portal/auth"
                 className="inline-flex items-center justify-center gap-2 px-8 py-5 rounded-full bg-brand-green text-brand-navy font-bold uppercase tracking-widest hover:bg-brand-green-dark transition-all"
               >
-                Register Now <GraduationCap size={18} />
+                Create account or sign in <GraduationCap size={18} />
               </Link>
             </div>
           </div>

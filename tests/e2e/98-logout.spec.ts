@@ -45,8 +45,13 @@ test.describe("authenticated sign-out", () => {
     // The portal legitimately offers two sign-out controls: the sidebar footer
     // and the topbar action. Both carry the accessible name "Sign out", so an
     // unscoped role query is ambiguous by design — target the topbar one.
-    const signOut = page.locator('button[title="Sign out"]');
+    //
+    // They are anchors, not buttons: the href is the whole fallback. If the
+    // bundle never hydrates (the state where the old button did nothing at
+    // all), the browser still follows it to the route that redirects.
+    const signOut = page.locator('a[title="Sign out"]');
     await expect(signOut).toBeVisible();
+    await expect(signOut).toHaveAttribute("href", "/api/auth/logout?role=SUPER_ADMIN");
 
     // Sign-out is a full-page navigation to /api/auth/logout, so the request
     // is a document GET that the server answers with a 303 to the sign-in

@@ -1,17 +1,28 @@
-import { UserRole } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+import {
+  buildBroadsheet,
+  listPeriods,
+  pickPeriod,
+  reportsForPeriod,
+  type BroadsheetReport,
+} from "@/lib/broadsheet";
+import { GRADEBOOK_ADMIN_ROLES } from "@/lib/gradebook";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-const ADMIN_ROLES = [UserRole.ADMIN, UserRole.DIRECTOR, UserRole.COORDINATOR];
-
 export async function GET(request: NextRequest) {
-  const user = await requireRole(ADMIN_ROLES);
+  // One role list for the whole results surface. This route used to declare its
+  // own trio without SUPER_ADMIN while the sidebar offered the page to super
+  // admins (and the middleware let them onto /admin), so the page loaded and
+  // then failed with "Unauthorized".
+  const user = await requireRole(GRADEBOOK_ADMIN_ROLES);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const classId = request.nextUrl.searchParams.get("classId");
+  const session = request.nextUrl.searchParams.get("session");
+  const term = request.nextUrl.searchParams.get("term");
 
   const classes = await prisma.schoolClass.findMany({
     where: { schoolId: user.schoolId, isActive: true },
@@ -20,7 +31,7 @@ export async function GET(request: NextRequest) {
   });
 
   if (!classId) {
-    return NextResponse.json({ classes, broadsheet: null });
+    return NextResponse.json({ classes, periods: [], selected: null, broadsheet: null });
   }
 
   const schoolClass = classes.find((entry) => entry.id === classId);
@@ -37,70 +48,50 @@ export async function GET(request: NextRequest) {
       schoolId: user.schoolId,
       classNameSnapshot: schoolClass.displayName,
     },
-    take: 500,
+    // Every term the class has been graded in, so the picker can offer them:
+    // 30 students × 6 terms is 180 cards for a single class.
+    take: 2000,
     orderBy: [{ generatedAt: "desc" }],
-    include: {
+    select: {
+      reportNumber: true,
+      sessionLabel: true,
+      termLabel: true,
+      status: true,
+      overallAverage: true,
+      overallGrade: true,
+      classPosition: true,
+      generatedAt: true,
       studentProfile: { select: { id: true, studentId: true, displayName: true } },
-      subjects: { orderBy: { sortOrder: "asc" } },
+      subjects: {
+        orderBy: { sortOrder: "asc" },
+        select: { subject: true, total: true },
+      },
     },
   });
 
-  // Latest report per student
-  const latestByStudent = new Map<string, (typeof reports)[number]>();
-  for (const report of reports) {
-    if (!latestByStudent.has(report.studentProfile.id)) {
-      latestByStudent.set(report.studentProfile.id, report);
-    }
-  }
-  const rows = [...latestByStudent.values()];
-
-  const subjectNames = [
-    ...new Set(rows.flatMap((report) => report.subjects.map((subject) => subject.subject))),
-  ];
-
-  const students = rows
-    .map((report) => ({
+  const cards: BroadsheetReport[] = reports.map((report) => ({
+    reportNumber: report.reportNumber,
+    sessionLabel: report.sessionLabel,
+    termLabel: report.termLabel,
+    status: report.status,
+    overallAverage: report.overallAverage,
+    overallGrade: report.overallGrade,
+    classPosition: report.classPosition,
+    generatedAt: report.generatedAt,
+    student: {
+      id: report.studentProfile.id,
       studentId: report.studentProfile.studentId,
       displayName: report.studentProfile.displayName,
-      reportNumber: report.reportNumber,
-      status: report.status,
-      termLabel: report.termLabel,
-      sessionLabel: report.sessionLabel,
-      overallAverage: report.overallAverage,
-      overallGrade: report.overallGrade,
-      classPosition: report.classPosition,
-      subjects: Object.fromEntries(
-        report.subjects.map((subject) => [subject.subject, subject.total]),
-      ),
-    }))
-    .sort((a, b) => b.overallAverage - a.overallAverage);
-
-  const subjectAverages = subjectNames.map((subject) => {
-    const scores = students
-      .map((student) => student.subjects[subject])
-      .filter((score): score is number => typeof score === "number");
-    return {
-      subject,
-      average: scores.length
-        ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length)
-        : 0,
-    };
-  });
-
-  return NextResponse.json({
-    classes,
-    broadsheet: {
-      className: schoolClass.displayName,
-      termLabel: students[0]?.termLabel || "",
-      sessionLabel: students[0]?.sessionLabel || "",
-      subjectNames,
-      students,
-      subjectAverages,
-      classAverage: students.length
-        ? Math.round(
-            students.reduce((sum, student) => sum + student.overallAverage, 0) / students.length,
-          )
-        : 0,
     },
-  });
+    subjects: report.subjects.map((subject) => ({
+      subject: subject.subject,
+      total: subject.total,
+    })),
+  }));
+
+  const periods = listPeriods(cards);
+  const selected = pickPeriod(periods, { session, term });
+  const broadsheet = buildBroadsheet(schoolClass.displayName, reportsForPeriod(cards, selected));
+
+  return NextResponse.json({ classes, periods, selected, broadsheet });
 }

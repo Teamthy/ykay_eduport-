@@ -14,12 +14,30 @@ let root: Root | null = null;
 ).IS_REACT_ACT_ENVIRONMENT = true;
 
 function SignOutButton() {
-  const { logout, user } = useAuth();
+  const { logout, logoutHref, user } = useAuth();
   return createElement(
     "div",
     null,
-    createElement("button", { type: "button", onClick: logout }, "Sign out"),
+    // Mirrors the real controls: an anchor that signs out by navigation when
+    // JavaScript is unavailable, and opens the dialog when it is.
+    createElement(
+      "a",
+      {
+        href: logoutHref,
+        onClick: (event: React.MouseEvent<HTMLAnchorElement>) => {
+          event.preventDefault();
+          logout();
+        },
+      },
+      "Sign out",
+    ),
     createElement("span", { "data-testid": "session-user" }, user?.name ?? "Signed out"),
+  );
+}
+
+function linkNamed(name: string) {
+  return Array.from(container?.querySelectorAll<HTMLAnchorElement>("a") ?? []).find(
+    (link) => link.textContent?.trim() === name,
   );
 }
 
@@ -87,6 +105,40 @@ function renderProvider(userPayload: unknown) {
 }
 
 describe("portal sign-out flow", () => {
+  it("renders a real href, so sign-out survives a bundle that never hydrated", async () => {
+    renderProvider({
+      id: "teacher_1",
+      name: "Teacher One",
+      email: "teacher@example.test",
+      role: "TEACHER",
+    });
+    await act(async () => Promise.resolve());
+
+    // This attribute is the whole fallback: no handler has to run for the
+    // browser to reach /api/auth/logout, which answers with the redirect.
+    expect(linkNamed("Sign out")?.getAttribute("href")).toBe("/api/auth/logout?role=TEACHER");
+  });
+
+  it("omits the role hint for a signed-out visitor instead of sending an empty one", async () => {
+    renderProvider(null);
+    await act(async () => Promise.resolve());
+    expect(linkNamed("Sign out")?.getAttribute("href")).toBe("/api/auth/logout");
+  });
+
+  it("does not navigate on click when the dialog can still ask", async () => {
+    renderProvider({
+      id: "teacher_1",
+      name: "Teacher One",
+      email: "teacher@example.test",
+      role: "TEACHER",
+    });
+    await act(async () => Promise.resolve());
+    await act(async () => linkNamed("Sign out")?.click());
+
+    expect(container!.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(replaceMock).not.toHaveBeenCalled();
+  });
+
   it("asks for confirmation and navigates to the logout route on confirm", async () => {
     renderProvider({
       id: "teacher_1",
@@ -95,7 +147,7 @@ describe("portal sign-out flow", () => {
       role: "TEACHER",
     });
 
-    await act(async () => buttonNamed("Sign out")?.click());
+    await act(async () => linkNamed("Sign out")?.click());
     const dialog = container!.querySelector<HTMLElement>('[role="dialog"]');
     expect(dialog?.getAttribute("aria-modal")).toBe("true");
     expect(dialog?.textContent).toContain("Sign out?");
@@ -123,7 +175,7 @@ describe("portal sign-out flow", () => {
       "Teacher One",
     );
 
-    await act(async () => buttonNamed("Sign out")?.click());
+    await act(async () => linkNamed("Sign out")?.click());
     await act(async () => buttonNamed("Stay signed in")?.click());
 
     expect(container!.querySelector('[role="dialog"]')).toBeNull();
@@ -135,7 +187,7 @@ describe("portal sign-out flow", () => {
 
   it("does not use fetch for sign-out at all — that was the failure mode", async () => {
     renderProvider(null);
-    await act(async () => buttonNamed("Sign out")?.click());
+    await act(async () => linkNamed("Sign out")?.click());
     await act(async () => buttonNamed("Yes, sign me out")?.click());
 
     const logoutCalls = fetchMock.mock.calls.filter(([input]) => input === "/api/auth/logout");

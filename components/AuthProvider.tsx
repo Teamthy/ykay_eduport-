@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { signInPathForRole } from "@/lib/auth-redirect";
+import { logoutPathForRole, signInPathForRole } from "@/lib/auth-redirect";
 
 // Re-exported for callers that imported it from here before the mapping moved
 // to a framework-free module shared with the logout route.
@@ -15,9 +15,18 @@ type Value = {
   refresh: () => Promise<void>;
   /**
    * Opens a confirmation dialog and only signs out if the user agrees.
-   * Every sidebar/topbar sign-out button routes through this.
+   * Every sidebar/topbar sign-out control routes through this.
    */
   logout: () => void;
+  /**
+   * The sign-out route for the current role, for use as an anchor `href`.
+   *
+   * Sign-out controls render this so the click still works as a plain
+   * navigation when JavaScript never ran — a hydration failure used to leave
+   * the button doing nothing at all, which is indistinguishable from "sign out
+   * is broken".
+   */
+  logoutHref: string;
   /**
    * Signs out immediately, no prompt. Reserved for cases where the session is
    * already invalid and there is nothing to confirm — e.g. a wrong-role login
@@ -61,13 +70,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // reporting a failure. A full navigation also works when this bundle has
     // thrown: the button is a plain link through the browser's navigation
     // machinery.
-    const role = user?.role ?? "";
-    const target = `/api/auth/logout${role ? `?role=${encodeURIComponent(role)}` : ""}`;
+    const target = logoutPathForRole(user?.role);
     // `replace`, not `assign`: the route we are leaving is a signed-in page and
     // must not be one Back-button press away. `/api/auth/logout` is a route
     // handler that answers with a 303, so this is a server redirect, not a
     // client-side one.
-    window.location.replace(target);
+    try {
+      window.location.replace(target);
+    } catch {
+      // A webview or an embedder can refuse the replace form. The assignment
+      // form is the same navigation by a different path; better to try it than
+      // to leave the dialog saying "Signing out…" with the page still there.
+      window.location.href = target;
+    }
   }, [user]);
 
   // Confirmation lives here rather than in each sidebar so a new call site
@@ -80,7 +95,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <Context.Provider value={{ user, loading, refresh, logout, logoutImmediately }}>
+    <Context.Provider
+      value={{
+        user,
+        loading,
+        refresh,
+        logout,
+        logoutHref: logoutPathForRole(user?.role),
+        logoutImmediately,
+      }}
+    >
       {children}
       <ConfirmDialog
         open={confirming}

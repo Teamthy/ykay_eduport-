@@ -9,10 +9,25 @@ export const GRADEBOOK_TEACHER_ROLES: UserRole[] = [
   UserRole.DIRECTOR,
 ];
 
+/**
+ * Who may see and act on results across the school.
+ *
+ * This list is the single source of truth for the results surface — gradebook
+ * locks, report-card generation, the broadsheet and the admin leaderboard. It
+ * previously omitted SUPER_ADMIN while `ACADEMIC_ADMIN` in AdminSidebar.tsx
+ * (and the /admin guard in middleware.ts) included them, so a super admin was
+ * offered "Gradebook Lock", "Report Cards" and "Broadsheet", could open the
+ * page, and was then answered 401 by every API behind it.
+ *
+ * SUPER_ADMIN is tenant-scoped (seed-super-admin.ts creates it under the
+ * school), so including it does not widen the data: every query still filters
+ * on `schoolId: user.schoolId`.
+ */
 export const GRADEBOOK_ADMIN_ROLES: UserRole[] = [
   UserRole.ADMIN,
   UserRole.DIRECTOR,
   UserRole.COORDINATOR,
+  UserRole.SUPER_ADMIN,
 ];
 
 export const SCORE_LIMITS = {

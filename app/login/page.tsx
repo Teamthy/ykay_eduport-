@@ -4,7 +4,15 @@ import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { safeNextPath } from "@/lib/safe-redirect";
-import { LockKeyhole, ShieldCheck, AlertCircle, GraduationCap, User, Users } from "lucide-react";
+import {
+  LockKeyhole,
+  ShieldCheck,
+  AlertCircle,
+  CheckCircle2,
+  GraduationCap,
+  User,
+  Users,
+} from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 
 const destinations: Record<string, string> = {
@@ -146,6 +154,18 @@ function LoginForm() {
             {context.heading}
           </h2>
           <p className="mt-2 text-sm leading-6 text-ink-600">{context.sub}</p>
+          {/* Sign-out ends here, so say so. Without this the redirect looked
+              like nothing had happened: the user landed on a sign-in form that
+              is visually identical to the one they left. */}
+          {searchParams.get("signedout") === "1" && !error && (
+            <p
+              role="status"
+              className="mt-5 flex items-start gap-2 rounded-xl bg-green-50 p-3 text-sm text-green-900"
+            >
+              <CheckCircle2 size={17} className="mt-0.5 shrink-0" />
+              <span>You&apos;ve been signed out. Sign in again to open your portal.</span>
+            </p>
+          )}
           {error && (
             <p
               role="alert"

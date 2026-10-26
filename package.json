@@ -67,7 +67,8 @@
     "cbt:seed:10k": "CBT_BANK_FILE=cbt-bank-10k-draft.csv tsx prisma/cbt-seed.ts",
     "cbt:seed:staging": "CBT_SEED_TARGET=staging npm run cbt:seed",
     "cbt:seed:10k:staging": "CBT_SEED_TARGET=staging CBT_BANK_FILE=cbt-bank-10k-draft.csv tsx prisma/cbt-seed.ts",
-    "cbt:preflight": "tsx scripts/cbt-bank-preflight.ts"
+    "cbt:preflight": "tsx scripts/cbt-bank-preflight.ts",
+    "cbt:bank:status": "tsx scripts/cbt-bank-status.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1092.0",

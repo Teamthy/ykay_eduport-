@@ -5,9 +5,11 @@ import { usePathname } from "next/navigation";
 import {
   Activity,
   BellRing,
+  BookOpenCheck,
   LayoutDashboard,
   LogOut,
   School,
+  Settings2,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -18,13 +20,15 @@ const NAV_ITEMS = [
   { label: "Platform overview", href: "/super-admin", icon: LayoutDashboard },
   { label: "Portal hub", href: "/super-admin/portals", icon: Users },
   { label: "Schools overview", href: "/super-admin/schools", icon: School },
+  { label: "Question bank ops", href: "/super-admin/question-bank", icon: BookOpenCheck },
   { label: "System health", href: "/super-admin/health", icon: Activity },
+  { label: "System operations", href: "/super-admin/operations", icon: Settings2 },
   { label: "Broadcast", href: "/super-admin/broadcast", icon: BellRing },
 ];
 
 function SidebarContent() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, logoutHref } = useAuth();
   const { collapsed } = useResponsiveSidebar();
   const isSuperAdmin = user?.role === "SUPER_ADMIN";
   const initials =
@@ -104,9 +108,16 @@ function SidebarContent() {
         </nav>
       ) : null}
 
-      <button
-        type="button"
-        onClick={logout}
+      <a
+        href={logoutHref}
+        onClick={(event) => {
+          // Progressive enhancement: with JavaScript this opens the confirmation
+          // dialog; without it (a bundle that never hydrated, or has thrown) the
+          // href still signs out, because /api/auth/logout answers a plain
+          // navigation with a 303 to the sign-in page.
+          event.preventDefault();
+          logout();
+        }}
         aria-label="Sign out"
         title={collapsed ? "Sign out" : undefined}
         className="portal-nav-link text-left hover:!border-red-500/15 hover:!bg-red-500/10 hover:!text-red-400"
@@ -115,7 +126,7 @@ function SidebarContent() {
           <LogOut size={16} strokeWidth={1.85} />
         </span>
         <span className="portal-nav-label">Sign out</span>
-      </button>
+      </a>
     </div>
   );
 }
