@@ -14,22 +14,18 @@ test.describe("college home", () => {
     await expect(page.getByRole("link", { name: /Student Portal/i }).first()).toBeVisible();
   });
 
-  test("hero uses a real campus photograph, not a remote placeholder", async ({ page }) => {
+  test("keeps the hero photo local and its backdrop free of competing imagery", async ({
+    page,
+  }) => {
     await page.goto("/");
-    // The backdrop is a CSS background rather than an <img> so that a
-    // 20%-opacity decoration cannot be the LCP element. What this test cares
-    // about is unchanged: the photograph is the local asset, not a remote
-    // placeholder, and the content image is still a real <img>.
-    const backdrop = page.locator("section div[style*='hero-campus']");
-    await expect(backdrop).toHaveCount(1);
-    const backgroundImage = await backdrop.evaluate(
-      (element) => getComputedStyle(element).backgroundImage,
-    );
-    // getComputedStyle resolves the URL against the document origin, so match
-    // the path and assert the host is this app rather than a remote placeholder.
-    expect(backgroundImage).toContain("/home/hero-campus-750.webp");
-    expect(backgroundImage).not.toMatch(/url\("?https:\/\/(?!localhost)/);
+    const hero = page.locator("section").first();
+    const contentImage = hero.locator("img[src*='ykay-students']").first();
+    await expect(contentImage).toBeAttached();
+    const imageUrl = await contentImage.getAttribute("src");
+    expect(imageUrl).toBe("/home/ykay-students-750.webp");
 
-    await expect(page.locator("section img[src*='ykay-students']").first()).toBeAttached();
+    // The low-contrast decorative backdrop was removed from the critical path;
+    // only the student portrait remains as an above-the-fold image.
+    await expect(hero.locator("[style*='hero-campus']")).toHaveCount(0);
   });
 });
