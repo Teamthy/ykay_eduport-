@@ -1,16 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import {
   ArrowLeft,
   ArrowRight,
-  CheckCircle2,
+  Calculator,
   Clock3,
   LoaderCircle,
-  LogOut,
+  Map,
   RotateCcw,
   Send,
-  XCircle,
+  X,
 } from "lucide-react";
 
 type PracticeQuestion = {
@@ -25,7 +26,7 @@ type PracticeQuestion = {
 type PracticeAnswer = {
   questionId: string;
   selectedIndex: number;
-  check: { correct: boolean; correctIndex: number; explanation: string };
+  check?: { correct: boolean; correctIndex: number; explanation: string };
 };
 
 type ReviewQuestion = {
@@ -83,6 +84,106 @@ function formatLabel(value: string | null | undefined) {
   return value ? value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase()) : "";
 }
 
+function calculatePracticeValue(left: number, right: number, operation: "+" | "−" | "×" | "÷") {
+  if (operation === "+") return left + right;
+  if (operation === "−") return left - right;
+  if (operation === "×") return left * right;
+  return right === 0 ? Number.NaN : left / right;
+}
+
+function formatCalculatorValue(value: number) {
+  return String(Number(value.toPrecision(10)));
+}
+
+function QuestionMapPanel({
+  questions,
+  answers,
+  draftSelections,
+  questionIndex,
+  onSelect,
+  answeredCount,
+}: {
+  questions: PracticeQuestion[];
+  answers: Record<string, PracticeAnswer>;
+  draftSelections: Record<string, number>;
+  questionIndex: number;
+  onSelect: (_index: number) => void;
+  answeredCount: number;
+}) {
+  return (
+    <div className="rounded-[1.5rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+          Question map
+        </p>
+        <span className="text-[10px] font-semibold text-[var(--text-muted)]">
+          {answeredCount}/{questions.length}
+        </span>
+      </div>
+      <div className="mt-4 grid grid-cols-5 gap-2">
+        {questions.map((question, index) => {
+          const answered =
+            draftSelections[question.id] !== undefined || Boolean(answers[question.id]);
+          return (
+            <button
+              key={question.id}
+              type="button"
+              onClick={() => onSelect(index)}
+              aria-label={`Go to question ${index + 1}, ${answered ? "answered" : "unanswered"}`}
+              aria-current={index === questionIndex ? "step" : undefined}
+              className={`flex aspect-square items-center justify-center rounded-lg border text-xs font-bold transition-colors ${
+                index === questionIndex
+                  ? "border-brand-green bg-brand-green text-brand-navy"
+                  : answered
+                    ? "border-brand-green/35 bg-brand-green/10 text-brand-green"
+                    : "border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:border-brand-green/40"
+              }`}
+            >
+              {index + 1}
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-3 text-[11px] text-[var(--text-muted)]">
+        {questions.length - answeredCount} unanswered
+      </p>
+    </div>
+  );
+}
+
+function FinishPanel({
+  answeredCount,
+  questionCount,
+  saving,
+  onSubmit,
+}: {
+  answeredCount: number;
+  questionCount: number;
+  saving: boolean;
+  onSubmit: () => void;
+}) {
+  return (
+    <div className="rounded-[1.5rem] border border-brand-orange/30 bg-brand-orange/5 p-5">
+      <p className="text-sm font-bold text-[var(--text-primary)]">Ready to finish?</p>
+      <p className="mt-2 text-xs leading-relaxed text-[var(--text-muted)]">
+        Answers and explanations stay hidden until you submit. You may finish with unanswered
+        questions.
+      </p>
+      <p className="mt-3 text-xs font-semibold text-[var(--text-secondary)]">
+        {answeredCount} of {questionCount} answered
+      </p>
+      <button
+        type="button"
+        onClick={onSubmit}
+        disabled={saving}
+        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange px-4 py-2.5 text-sm font-bold text-brand-navy disabled:opacity-50"
+      >
+        <Send size={15} /> Submit set
+      </button>
+    </div>
+  );
+}
+
 export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
   const [session, setSession] = useState<SessionPayload["session"] | null>(null);
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
@@ -96,21 +197,41 @@ export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const [savingAnswers, setSavingAnswers] = useState(false);
+  const [showQuestionMap, setShowQuestionMap] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
+  const [calculatorDisplay, setCalculatorDisplay] = useState("0");
+  const [calculatorStoredValue, setCalculatorStoredValue] = useState<number | null>(null);
+  const [calculatorOperation, setCalculatorOperation] = useState<"+" | "−" | "×" | "÷" | null>(
+    null,
+  );
+  const [calculatorReplaceDisplay, setCalculatorReplaceDisplay] = useState(false);
+  const draftSelectionsRef = useRef<Record<string, number>>({});
+  const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const submitRef = useRef<(_automatic?: boolean) => Promise<void>>(async () => {});
   const attemptedAutoSubmit = useRef(false);
   const timerSecondsRef = useRef<number | null>(null);
 
   const currentQuestion = questions[questionIndex] ?? null;
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] : undefined;
-  const selectedIndex =
-    currentAnswer?.selectedIndex ??
-    (currentQuestion ? (draftSelections[currentQuestion.id] ?? null) : null);
-  const answeredCount = Object.keys(answers).length;
+  const selectedIndex = currentQuestion
+    ? (draftSelections[currentQuestion.id] ?? currentAnswer?.selectedIndex ?? null)
+    : null;
+  const answeredCount = Object.keys(draftSelections).length;
 
   const applyPayload = useCallback((payload: SessionPayload) => {
     setSession(payload.session);
     setQuestions(payload.questions);
-    setAnswers(Object.fromEntries(payload.answers.map((answer) => [answer.questionId, answer])));
+    const answerMap = Object.fromEntries(
+      payload.answers.map((answer) => [answer.questionId, answer]),
+    );
+    const selectionMap = Object.fromEntries(
+      payload.answers.map((answer) => [answer.questionId, answer.selectedIndex]),
+    );
+    setAnswers(answerMap);
+    setDraftSelections(selectionMap);
+    draftSelectionsRef.current = selectionMap;
     setSecondsLeft(payload.session.secondsLeft);
     timerSecondsRef.current = payload.session.secondsLeft;
     if (payload.session.status === "IN_PROGRESS") attemptedAutoSubmit.current = false;
@@ -148,6 +269,7 @@ export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
       setSaving(true);
       setError("");
       try {
+        await saveQueueRef.current.catch(() => undefined);
         const response = await fetch(`/api/cbt/sessions/${sessionId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -187,38 +309,57 @@ export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
     return () => window.clearInterval(timer);
   }, [session?.id, session?.isTimed, session?.status]);
 
-  const saveAnswer = useCallback(async () => {
-    if (!currentQuestion || selectedIndex === null || currentAnswer || saving) return;
-    setSaving(true);
-    setError("");
-    try {
-      const response = await fetch(`/api/cbt/sessions/${sessionId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "CHECK",
-          questionId: currentQuestion.id,
-          selectedIndex,
-        }),
-      });
-      const payload = (await response.json()) as PracticeAnswer & SessionPayload;
-      if (payload.session?.status === "COMPLETED") {
-        applyPayload(payload);
-        return;
-      }
-      if (!response.ok) throw new Error(payload.error || "Unable to check this answer.");
-      const answer: PracticeAnswer = {
-        questionId: payload.questionId,
-        selectedIndex: payload.selectedIndex,
-        check: payload.check,
-      };
-      setAnswers((previous) => ({ ...previous, [answer.questionId]: answer }));
-    } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : "Unable to check this answer.");
-    } finally {
-      setSaving(false);
-    }
-  }, [applyPayload, currentAnswer, currentQuestion, saving, selectedIndex, sessionId]);
+  const saveSelection = useCallback(
+    (questionId: string, selectedIndex: number) => {
+      const nextDraft = { ...draftSelectionsRef.current, [questionId]: selectedIndex };
+      draftSelectionsRef.current = nextDraft;
+      setDraftSelections(nextDraft);
+      setSavingAnswers(true);
+      setError("");
+
+      const queued = saveQueueRef.current
+        .catch(() => undefined)
+        .then(async () => {
+          const latestSelection = draftSelectionsRef.current[questionId];
+          if (latestSelection === undefined) return;
+          const response = await fetch(`/api/cbt/sessions/${sessionId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "SAVE",
+              questionId,
+              selectedIndex: latestSelection,
+            }),
+          });
+          const payload = (await response.json()) as SessionPayload & {
+            ok?: boolean;
+            saved?: boolean;
+            questionId?: string;
+            selectedIndex?: number;
+          };
+          if (!response.ok) throw new Error(payload.error || "Unable to save this response.");
+          if ("session" in payload && payload.session?.status === "COMPLETED") {
+            applyPayload(payload);
+            return;
+          }
+          if (payload.saved && typeof payload.selectedIndex === "number") {
+            setAnswers((previous) => ({
+              ...previous,
+              [questionId]: { questionId, selectedIndex: payload.selectedIndex! },
+            }));
+          }
+        })
+        .catch((saveError: unknown) => {
+          setError(
+            saveError instanceof Error ? saveError.message : "Unable to save this response.",
+          );
+        })
+        .finally(() => setSavingAnswers(false));
+      saveQueueRef.current = queued;
+      return queued;
+    },
+    [applyPayload, sessionId],
+  );
 
   if (loading || !loaded) {
     return (
@@ -343,113 +484,186 @@ export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
   }
 
   const timerIsLow = secondsLeft !== null && secondsLeft <= 60;
-  return (
-    <section className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4">
-        <div className="min-w-0">
-          <p className="truncate text-xs font-bold uppercase tracking-widest text-[var(--text-primary)]">
-            {formatLabel(session.classLevel)} · {formatLabel(session.practiceMode)} practice
-          </p>
-          <p className="mt-1 truncate text-xs text-[var(--text-muted)]">
-            {session.topic || questions[0]?.subjectName} · {answeredCount} of {questions.length}{" "}
-            checked
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div
-            className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold ${timerIsLow ? "bg-red-500/10 text-red-500" : "bg-[var(--bg-secondary)] text-[var(--text-primary)]"}`}
-          >
-            <Clock3 size={15} /> {formatTime(secondsLeft)}
-          </div>
-          <button
-            type="button"
-            onClick={onExit}
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] px-3 py-2 text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-            title="Answers save as you go"
-          >
-            <LogOut size={14} /> Save & exit
-          </button>
-        </div>
-      </div>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_16rem]">
-        <article className="rounded-[2rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-6 shadow-[var(--card-shadow)] md:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+  function calculatorDigit(digit: string) {
+    if (calculatorReplaceDisplay || calculatorDisplay === "0" || calculatorDisplay === "Error") {
+      setCalculatorDisplay(digit);
+      setCalculatorReplaceDisplay(false);
+      return;
+    }
+    if (calculatorDisplay.length < 14) setCalculatorDisplay((value) => value + digit);
+  }
+
+  function calculatorDecimal() {
+    if (calculatorReplaceDisplay || calculatorDisplay === "Error") {
+      setCalculatorDisplay("0.");
+      setCalculatorReplaceDisplay(false);
+    } else if (!calculatorDisplay.includes(".")) {
+      setCalculatorDisplay((value) => `${value}.`);
+    }
+  }
+
+  function calculatorOperator(operation: "+" | "−" | "×" | "÷") {
+    const current = Number(calculatorDisplay);
+    if (!Number.isFinite(current)) return;
+    if (calculatorStoredValue !== null && calculatorOperation && !calculatorReplaceDisplay) {
+      const next = calculatePracticeValue(calculatorStoredValue, current, calculatorOperation);
+      setCalculatorDisplay(formatCalculatorValue(next));
+      setCalculatorStoredValue(next);
+    } else {
+      setCalculatorStoredValue(current);
+    }
+    setCalculatorOperation(operation);
+    setCalculatorReplaceDisplay(true);
+  }
+
+  function calculatorEquals() {
+    if (calculatorStoredValue === null || !calculatorOperation) return;
+    const next = calculatePracticeValue(
+      calculatorStoredValue,
+      Number(calculatorDisplay),
+      calculatorOperation,
+    );
+    setCalculatorDisplay(Number.isFinite(next) ? formatCalculatorValue(next) : "Error");
+    setCalculatorStoredValue(null);
+    setCalculatorOperation(null);
+    setCalculatorReplaceDisplay(true);
+  }
+
+  function resetCalculator() {
+    setCalculatorDisplay("0");
+    setCalculatorStoredValue(null);
+    setCalculatorOperation(null);
+    setCalculatorReplaceDisplay(false);
+  }
+
+  async function returnToSetup() {
+    await saveQueueRef.current.catch(() => undefined);
+    onExit();
+  }
+
+  return (
+    <section className="mx-auto w-full max-w-7xl space-y-4">
+      <header className="sticky top-0 z-30 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-primary)]/95 p-3 shadow-[var(--card-shadow)] backdrop-blur-xl sm:p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              onClick={() => void returnToSetup()}
+              disabled={saving}
+              className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[var(--border-subtle)] px-3 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green/50 hover:text-brand-green disabled:opacity-50"
+              title="Return to setup and choose a different set"
+            >
+              <ArrowLeft size={14} />
+              <span className="hidden sm:inline">Change set</span>
+            </button>
+            <div className="min-w-0">
+              <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--text-secondary)] sm:text-xs">
+                {formatLabel(session.classLevel)} · {formatLabel(session.practiceMode)} practice
+              </p>
+              <p className="truncate text-[11px] text-[var(--text-muted)] sm:text-xs">
+                {session.topic || questions[0]?.subjectName} · {answeredCount} of {questions.length}{" "}
+                answered
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold tabular-nums ${timerIsLow ? "bg-red-500/10 text-red-500" : "bg-[var(--bg-secondary)] text-[var(--text-primary)]"}`}
+            >
+              <Clock3 size={14} /> {formatTime(secondsLeft)}
+            </span>
+            <span
+              aria-live="polite"
+              className={`hidden min-w-16 text-[10px] font-semibold sm:inline ${error ? "text-red-500" : "text-[var(--text-muted)]"}`}
+            >
+              {savingAnswers ? "Saving…" : error ? "Needs attention" : "Saved"}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowQuestionMap(true)}
+              aria-expanded={showQuestionMap}
+              aria-label="Open question map"
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] px-3 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green/50 hover:text-brand-green"
+            >
+              <Map size={15} />
+              <span className="hidden sm:inline">Questions</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowCalculator(true)}
+              aria-label="Open calculator"
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] px-3 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green/50 hover:text-brand-green"
+            >
+              <Calculator size={15} />
+              <span className="hidden sm:inline">Calculator</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmSubmit(true)}
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-full bg-brand-orange px-3 py-2 text-xs font-bold text-brand-navy hover:bg-brand-orange-dark disabled:opacity-50 sm:px-4"
+            >
+              <Send size={14} />
+              <span className="hidden sm:inline">Finish set</span>
+            </button>
+          </div>
+        </div>
+        <div className="mt-3 h-1 overflow-hidden rounded-full bg-[var(--surface-disabled)]">
+          <div
+            className="h-full rounded-full bg-brand-green transition-all"
+            style={{
+              width: `${questions.length ? ((questionIndex + 1) / questions.length) * 100 : 0}%`,
+            }}
+          />
+        </div>
+      </header>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_17rem]">
+        <article className="min-w-0 rounded-[1.75rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)] sm:p-6 md:p-8">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-brand-green/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand-green">
+              <span className="rounded-full bg-brand-green/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-green">
                 Question {questionIndex + 1} of {questions.length}
               </span>
-              <span className="rounded-full bg-[var(--bg-secondary)] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+              <span className="max-w-full rounded-full bg-[var(--bg-secondary)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
                 {currentQuestion.subjectName} · {currentQuestion.topic}
               </span>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+            <span className="rounded-full bg-[var(--bg-secondary)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
               Difficulty {currentQuestion.difficulty}/3
             </span>
           </div>
-          <h2 className="mt-6 whitespace-pre-line text-base font-semibold leading-relaxed text-[var(--text-primary)] md:text-lg">
+          <h2 className="mt-5 whitespace-pre-line text-base font-semibold leading-relaxed text-[var(--text-primary)] sm:mt-7 sm:text-lg">
             {currentQuestion.stem}
           </h2>
 
-          <fieldset className="mt-6 grid gap-3">
+          <fieldset className="mt-5 grid gap-2.5 sm:mt-7 sm:gap-3">
             <legend className="sr-only">Choose an answer</legend>
             {currentQuestion.options.map((option, optionIndex) => {
-              const isSelected = (currentAnswer?.selectedIndex ?? selectedIndex) === optionIndex;
-              const wasChecked = Boolean(currentAnswer);
-              const isCorrect = currentAnswer?.check.correctIndex === optionIndex;
-              const isWrongSelection = wasChecked && isSelected && !currentAnswer?.check.correct;
+              const isSelected = selectedIndex === optionIndex;
               return (
                 <label
                   key={`${currentQuestion.id}-${optionIndex}`}
-                  className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3 text-sm transition ${
-                    isCorrect
-                      ? "border-brand-green/40 bg-brand-green/10"
-                      : isWrongSelection
-                        ? "border-red-500/40 bg-red-500/5"
-                        : isSelected
-                          ? "border-brand-green/50 bg-brand-green/5"
-                          : "border-[var(--border-subtle)] bg-[var(--bg-secondary)] hover:border-brand-green/30"
-                  } ${wasChecked ? "cursor-default" : ""}`}
+                  className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-4 py-3.5 text-sm transition-colors sm:px-5 sm:py-4 ${isSelected ? "border-brand-green/60 bg-brand-green/10" : "border-[var(--border-subtle)] bg-[var(--bg-secondary)] hover:border-brand-green/40"} ${saving ? "cursor-wait opacity-70" : ""}`}
                 >
                   <input
                     type="radio"
                     name={`answer-${currentQuestion.id}`}
                     value={optionIndex}
                     checked={isSelected}
-                    disabled={wasChecked || saving}
-                    onChange={() =>
-                      setDraftSelections((previous) => ({
-                        ...previous,
-                        [currentQuestion.id]: optionIndex,
-                      }))
-                    }
+                    disabled={saving || session.status !== "IN_PROGRESS"}
+                    onChange={() => saveSelection(currentQuestion.id, optionIndex)}
                     className="mt-0.5 accent-emerald-600"
                   />
                   <span className="font-bold text-brand-green">
                     {String.fromCharCode(65 + optionIndex)}.
                   </span>
                   <span className="flex-1 text-[var(--text-primary)]">{option}</span>
-                  {isCorrect ? <CheckCircle2 size={17} className="text-brand-green" /> : null}
-                  {isWrongSelection ? <XCircle size={17} className="text-red-500" /> : null}
                 </label>
               );
             })}
           </fieldset>
-
-          {currentAnswer ? (
-            <div
-              className={`mt-5 rounded-2xl border p-4 ${currentAnswer.check.correct ? "border-brand-green/30 bg-brand-green/5" : "border-brand-orange/30 bg-brand-orange/5"}`}
-            >
-              <p className="text-sm font-bold text-[var(--text-primary)]">
-                {currentAnswer.check.correct
-                  ? "Correct — well done!"
-                  : "Not quite. Review the explanation."}
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)]">
-                {currentAnswer.check.explanation}
-              </p>
-            </div>
-          ) : null}
 
           {error ? (
             <p role="alert" className="mt-4 text-sm text-red-500">
@@ -457,7 +671,10 @@ export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
             </p>
           ) : null}
 
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <nav
+            aria-label="Practice question navigation"
+            className="mt-6 flex items-center justify-between gap-3 border-t border-[var(--border-subtle)] pt-4"
+          >
             <button
               type="button"
               onClick={() => setQuestionIndex((index) => Math.max(0, index - 1))}
@@ -466,86 +683,197 @@ export default function PersonalPracticeRunner({ sessionId, onExit }: Props) {
             >
               <ArrowLeft size={15} /> Previous
             </button>
-            {!currentAnswer ? (
-              <button
-                type="button"
-                onClick={() => void saveAnswer()}
-                disabled={selectedIndex === null || saving}
-                className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-bold text-brand-navy disabled:opacity-50"
-              >
-                {saving ? (
-                  <LoaderCircle size={15} className="animate-spin" />
-                ) : (
-                  <CheckCircle2 size={15} />
-                )}
-                Check answer
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() =>
-                  setQuestionIndex((index) => Math.min(questions.length - 1, index + 1))
-                }
-                disabled={questionIndex >= questions.length - 1 || saving}
-                className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-4 py-2.5 text-sm font-bold text-white disabled:opacity-40"
-              >
-                Next <ArrowRight size={15} />
-              </button>
-            )}
-          </div>
-        </article>
-
-        <aside className="space-y-4">
-          <div className="rounded-[1.5rem] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-5">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-              Question map
-            </p>
-            <div className="mt-4 grid grid-cols-5 gap-2">
-              {questions.map((question, index) => {
-                const answer = answers[question.id];
-                return (
-                  <button
-                    key={question.id}
-                    type="button"
-                    onClick={() => setQuestionIndex(index)}
-                    aria-label={`Go to question ${index + 1}${answer ? (answer.check.correct ? ", correct" : ", checked") : ", unanswered"}`}
-                    className={`flex aspect-square items-center justify-center rounded-lg border text-xs font-bold ${
-                      index === questionIndex
-                        ? "border-brand-green bg-brand-green text-brand-navy"
-                        : answer?.check.correct
-                          ? "border-brand-green/40 bg-brand-green/10 text-brand-green"
-                          : answer
-                            ? "border-brand-orange/40 bg-brand-orange/10 text-brand-orange"
-                            : "border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-muted)]"
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="mt-3 text-[11px] text-[var(--text-muted)]">
-              {questions.length - answeredCount} still to check
-            </p>
-          </div>
-          <div className="rounded-[1.5rem] border border-brand-orange/30 bg-brand-orange/5 p-5">
-            <p className="text-sm font-bold text-[var(--text-primary)]">Ready to finish?</p>
-            <p className="mt-2 text-xs leading-relaxed text-[var(--text-muted)]">
-              You can submit with unanswered questions. Your saved answers and explanations stay
-              with this session.
-            </p>
+            <span className="text-xs font-semibold tabular-nums text-[var(--text-muted)]">
+              {questionIndex + 1} / {questions.length}
+            </span>
             <button
               type="button"
-              onClick={() => void submit(false)}
-              disabled={saving}
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-orange px-4 py-2.5 text-sm font-bold text-brand-navy disabled:opacity-50"
+              onClick={() => setQuestionIndex((index) => Math.min(questions.length - 1, index + 1))}
+              disabled={questionIndex >= questions.length - 1 || saving}
+              className="inline-flex items-center gap-2 rounded-full bg-brand-navy px-4 py-2.5 text-sm font-bold text-white disabled:opacity-40"
             >
-              {saving ? <LoaderCircle size={15} className="animate-spin" /> : <Send size={15} />}
-              Submit set
+              Next <ArrowRight size={15} />
             </button>
-          </div>
+          </nav>
+        </article>
+
+        <aside className="hidden h-fit space-y-4 xl:block">
+          <QuestionMapPanel
+            questions={questions}
+            answers={answers}
+            draftSelections={draftSelections}
+            questionIndex={questionIndex}
+            onSelect={setQuestionIndex}
+            answeredCount={answeredCount}
+          />
+          <FinishPanel
+            answeredCount={answeredCount}
+            questionCount={questions.length}
+            saving={saving}
+            onSubmit={() => setConfirmSubmit(true)}
+          />
         </aside>
       </div>
+
+      {showQuestionMap ? (
+        <div
+          className="fixed inset-0 z-[140] flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm"
+          role="presentation"
+          onClick={() => setShowQuestionMap(false)}
+        >
+          <div
+            className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-5 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="practice-question-map-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2
+                  id="practice-question-map-title"
+                  className="font-display text-xl text-[var(--text-primary)]"
+                >
+                  Question map
+                </h2>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">
+                  Jump to a question. Answers stay hidden until you finish.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQuestionMap(false)}
+                aria-label="Close question map"
+                className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--surface-card-hover)]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <QuestionMapPanel
+              questions={questions}
+              answers={answers}
+              draftSelections={draftSelections}
+              questionIndex={questionIndex}
+              onSelect={(index) => {
+                setQuestionIndex(index);
+                setShowQuestionMap(false);
+              }}
+              answeredCount={answeredCount}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {showCalculator ? (
+        <div
+          className="fixed inset-0 z-[145] flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm"
+          role="presentation"
+          onClick={() => setShowCalculator(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-5 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="practice-calculator-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Calculator size={18} className="text-brand-green" />
+                <h2
+                  id="practice-calculator-title"
+                  className="font-display text-xl text-[var(--text-primary)]"
+                >
+                  Calculator
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCalculator(false)}
+                aria-label="Close calculator"
+                className="rounded-full p-2 text-[var(--text-muted)] hover:bg-[var(--surface-card-hover)]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <output
+              aria-live="polite"
+              className="mb-3 flex h-16 items-center justify-end overflow-hidden rounded-2xl bg-[var(--bg-secondary)] px-4 font-mono text-2xl font-bold text-[var(--text-primary)]"
+            >
+              {calculatorDisplay}
+            </output>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: "AC", action: resetCalculator, style: "text-brand-orange" },
+                {
+                  label: "±",
+                  action: () =>
+                    setCalculatorDisplay((value) =>
+                      value === "0" || value === "Error" ? value : String(-Number(value)),
+                    ),
+                  style: "",
+                },
+                {
+                  label: "%",
+                  action: () =>
+                    setCalculatorDisplay((value) =>
+                      Number.isFinite(Number(value))
+                        ? formatCalculatorValue(Number(value) / 100)
+                        : "Error",
+                    ),
+                  style: "",
+                },
+                { label: "÷", action: () => calculatorOperator("÷"), style: "text-brand-green" },
+                ...["7", "8", "9"].map((label) => ({
+                  label,
+                  action: () => calculatorDigit(label),
+                  style: "",
+                })),
+                { label: "×", action: () => calculatorOperator("×"), style: "text-brand-green" },
+                ...["4", "5", "6"].map((label) => ({
+                  label,
+                  action: () => calculatorDigit(label),
+                  style: "",
+                })),
+                { label: "−", action: () => calculatorOperator("−"), style: "text-brand-green" },
+                ...["1", "2", "3"].map((label) => ({
+                  label,
+                  action: () => calculatorDigit(label),
+                  style: "",
+                })),
+                { label: "+", action: () => calculatorOperator("+"), style: "text-brand-green" },
+                { label: "0", action: () => calculatorDigit("0"), style: "col-span-2" },
+                { label: ".", action: calculatorDecimal, style: "" },
+                { label: "=", action: calculatorEquals, style: "bg-brand-green text-brand-navy" },
+              ].map((key) => (
+                <button
+                  key={key.label}
+                  type="button"
+                  onClick={key.action}
+                  className={`min-h-12 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface-card)] text-sm font-bold text-[var(--text-primary)] hover:border-brand-green/40 ${key.style}`}
+                >
+                  {key.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <ConfirmDialog
+        open={confirmSubmit}
+        title="Finish this practice set?"
+        message={`You have answered ${answeredCount} of ${questions.length} questions. Your answers and explanations will be revealed after you submit.`}
+        confirmText="Submit and review"
+        cancelText="Keep practising"
+        variant="warning"
+        busy={saving}
+        onConfirm={() => {
+          setConfirmSubmit(false);
+          void submit(false);
+        }}
+        onCancel={() => setConfirmSubmit(false)}
+      />
     </section>
   );
 }

@@ -264,19 +264,64 @@ export default function PersonalPracticeFlow() {
   function exitSession() {
     setSessionId(null);
     window.history.replaceState(null, "", window.location.pathname);
+    setMode("topic");
+    setClassLevel("jss1");
+    setTerm("all");
+    setSelectedSlugs([]);
+    setSelectedTopic("");
+    setQuestionCount(30);
+    setDurationMinutes(0);
+    setSubjectSearch("");
+    setTopicSearch("");
+    setError("");
     setStep(0);
     void loadResumableSessions();
   }
 
-  if (sessionId) {
-    return <PersonalPracticeRunner key={sessionId} sessionId={sessionId} onExit={exitSession} />;
+  function resetSetup() {
+    setMode("topic");
+    setClassLevel("jss1");
+    setTerm("all");
+    setSelectedSlugs([]);
+    setSelectedTopic("");
+    setQuestionCount(30);
+    setDurationMinutes(0);
+    setSubjectSearch("");
+    setTopicSearch("");
+    setError("");
+    setStep(0);
   }
 
-  const totalSteps = mode === "topic" ? 6 : 5;
-  const currentStep = step + 1;
+  if (sessionId) {
+    return (
+      <div className="mx-auto w-full max-w-7xl">
+        <PersonalPracticeRunner key={sessionId} sessionId={sessionId} onExit={exitSession} />
+      </div>
+    );
+  }
+
+  const flowSteps =
+    mode === "topic"
+      ? [
+          { label: "Mode", step: 0 },
+          { label: "Class", step: 1 },
+          { label: "Term", step: 2 },
+          { label: "Subjects", step: 3 },
+          { label: "Topic", step: 4 },
+          { label: "Length", step: 5 },
+        ]
+      : [
+          { label: "Mode", step: 0 },
+          { label: "Class", step: 1 },
+          { label: "Term", step: 2 },
+          { label: "Subjects", step: 3 },
+          { label: "Length", step: 5 },
+        ];
+  const totalSteps = flowSteps.length;
+  const currentStep = flowSteps.findIndex((flowStep) => flowStep.step === step) + 1;
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       {resumableSessions.length ? (
         <section className="rounded-[1.7rem] border border-brand-orange/30 bg-brand-orange/5 p-5 md:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -345,17 +390,61 @@ export default function PersonalPracticeFlow() {
             <h2 className="mt-1 font-display text-3xl text-[var(--text-primary)]">
               Build your own practice set
             </h2>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">
+              Choose what to revise, then set your session length.
+            </p>
           </div>
-          <p className="rounded-full bg-[var(--bg-secondary)] px-3 py-2 text-xs font-bold text-[var(--text-muted)]">
-            Step {currentStep} of {totalSteps}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="rounded-full bg-[var(--bg-secondary)] px-3 py-2 text-xs font-bold text-[var(--text-muted)]">
+              Step {currentStep} of {totalSteps}
+            </p>
+            {step > 0 ? (
+              <button
+                type="button"
+                onClick={resetSetup}
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] px-3 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-brand-green/40 hover:text-brand-green"
+              >
+                <RotateCcw size={13} /> Reset setup
+              </button>
+            ) : null}
+          </div>
         </div>
 
-        <div className="mt-5 flex gap-1" aria-label="Practice setup progress">
-          {Array.from({ length: totalSteps }, (_, index) => (
+        <nav
+          aria-label="Practice setup steps"
+          className="mt-5 grid grid-cols-5 gap-1.5 sm:grid-cols-6"
+        >
+          {flowSteps.map((flowStep, index) => {
+            const canReturn = flowStep.step <= step;
+            return (
+              <button
+                key={flowStep.label}
+                type="button"
+                disabled={!canReturn}
+                onClick={() => {
+                  setError("");
+                  setStep(flowStep.step);
+                }}
+                aria-current={flowStep.step === step ? "step" : undefined}
+                className={`relative rounded-xl px-2 py-2.5 text-[10px] font-bold transition-colors sm:text-xs ${
+                  flowStep.step === step
+                    ? "bg-brand-green text-brand-navy"
+                    : canReturn
+                      ? "bg-brand-green/10 text-brand-green hover:bg-brand-green/15"
+                      : "bg-[var(--bg-secondary)] text-[var(--text-muted)] opacity-70"
+                }`}
+              >
+                <span className="mr-1 hidden sm:inline">{index + 1}.</span>
+                {flowStep.label}
+              </button>
+            );
+          })}
+        </nav>
+        <div className="mt-2 flex gap-1" aria-hidden="true">
+          {flowSteps.map((flowStep) => (
             <span
-              key={index}
-              className={`h-1.5 flex-1 rounded-full ${index < currentStep ? "bg-brand-green" : "bg-[var(--bg-secondary)]"}`}
+              key={flowStep.label}
+              className={`h-1 flex-1 rounded-full ${flowStep.step <= step ? "bg-brand-green" : "bg-[var(--bg-secondary)]"}`}
             />
           ))}
         </div>
@@ -602,50 +691,72 @@ export default function PersonalPracticeFlow() {
             <p className="mt-1 text-sm text-[var(--text-muted)]">
               Each practice set is limited to 60 questions. Your answers save as you go.
             </p>
-            <div className="mt-5 grid gap-6 md:grid-cols-2">
-              <div className="rounded-2xl border border-[var(--border-subtle)] p-5">
-                <label
-                  htmlFor="practice-question-count"
-                  className="block text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]"
-                >
-                  Question count
-                </label>
-                <div className="mt-3 flex items-center gap-3">
-                  <input
-                    id="practice-question-count"
-                    type="range"
-                    min={1}
-                    max={60}
-                    value={questionCount}
-                    onChange={(event) =>
-                      setQuestionCount(Math.min(60, Math.max(1, Number(event.target.value))))
-                    }
-                    className="w-full accent-emerald-600"
-                  />
-                  <input
-                    aria-label="Number of practice questions"
-                    type="number"
-                    min={1}
-                    max={60}
-                    value={questionCount}
-                    onChange={(event) =>
-                      setQuestionCount(Math.min(60, Math.max(1, Number(event.target.value) || 1)))
-                    }
-                    className="w-20 rounded-xl border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-center font-bold text-[var(--input-text)]"
-                  />
+            <div className="mt-5 grid items-stretch gap-4 lg:grid-cols-[minmax(15rem,0.82fr)_minmax(0,1.18fr)]">
+              <div className="flex flex-col rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 sm:p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <label
+                      htmlFor="practice-question-count"
+                      className="block text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]"
+                    >
+                      Question count
+                    </label>
+                    <p className="mt-1 text-xs text-[var(--text-muted)]">Choose 1–60 questions.</p>
+                  </div>
+                  <div className="rounded-2xl border border-brand-green/30 bg-brand-green/10 px-4 py-2 text-center">
+                    <output
+                      htmlFor="practice-question-count"
+                      className="block font-display text-3xl leading-none text-brand-green"
+                    >
+                      {questionCount}
+                    </output>
+                    <span className="mt-1 block text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                      questions
+                    </span>
+                  </div>
                 </div>
-                <p className="mt-2 text-xs text-[var(--text-muted)]">
-                  The server enforces the 60-question maximum.
-                </p>
+                <input
+                  id="practice-question-count"
+                  type="range"
+                  min={1}
+                  max={60}
+                  value={questionCount}
+                  onChange={(event) =>
+                    setQuestionCount(Math.min(60, Math.max(1, Number(event.target.value))))
+                  }
+                  className="mt-6 w-full accent-emerald-600"
+                />
+                <div className="mt-4 grid grid-cols-5 gap-1.5">
+                  {[10, 20, 30, 45, 60].map((count) => (
+                    <button
+                      key={count}
+                      type="button"
+                      aria-pressed={questionCount === count}
+                      onClick={() => setQuestionCount(count)}
+                      className={`rounded-xl border px-1 py-2 text-xs font-bold transition-colors ${questionCount === count ? "border-brand-green bg-brand-green text-brand-navy" : "border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-brand-green/40"}`}
+                    >
+                      {count}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-auto pt-5 text-xs leading-relaxed text-[var(--text-muted)]">
+                  The server enforces the 60-question maximum. If fewer reviewed questions are
+                  available, the set uses what is available.
+                </div>
               </div>
 
               <fieldset className="rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)] p-4 shadow-[var(--card-shadow)] sm:p-5">
                 <legend className="px-2 text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-secondary)]">
                   Set your timer
                 </legend>
-                <p className="-mt-1 mb-4 px-2 text-xs text-[var(--text-muted)]">
-                  Choose a pace for this practice session.
-                </p>
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2 px-2">
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Choose a pace for this practice session.
+                  </p>
+                  <span className="rounded-full bg-[var(--bg-secondary)] px-2.5 py-1 text-[10px] font-bold text-[var(--text-secondary)]">
+                    {durationMinutes === 0 ? "No time limit" : `${durationMinutes} minutes`}
+                  </span>
+                </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {[0, 10, 15, 20, 30, 45].map((minutes) => {
                     const selected = durationMinutes === minutes;
@@ -656,24 +767,24 @@ export default function PersonalPracticeFlow() {
                         type="button"
                         aria-pressed={selected}
                         onClick={() => setDurationMinutes(minutes)}
-                        className={`group relative flex min-h-[78px] items-center gap-3 rounded-2xl border px-3 py-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-card)] sm:px-4 ${selected ? "border-brand-green bg-brand-green/10 ring-1 ring-brand-green" : "border-[var(--border-subtle)] bg-[var(--bg-secondary)] hover:border-brand-green/50 hover:bg-brand-green/5"}`}
+                        className={`group relative flex min-h-[76px] items-center gap-2 rounded-2xl border px-2.5 py-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-green sm:gap-3 sm:px-3 ${selected ? "border-brand-green bg-brand-green/10 ring-1 ring-brand-green" : "border-[var(--border-subtle)] bg-[var(--bg-secondary)] hover:border-brand-green/50 hover:bg-brand-green/5"}`}
                       >
                         <span
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${selected ? "bg-brand-green text-brand-navy" : "bg-[var(--surface-card)] text-[var(--text-secondary)] group-hover:text-brand-green"}`}
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${selected ? "bg-brand-green text-brand-navy" : "bg-[var(--surface-card)] text-[var(--text-secondary)] group-hover:text-brand-green"}`}
                         >
-                          <Icon size={19} aria-hidden="true" />
+                          <Icon size={18} aria-hidden="true" />
                         </span>
                         <span className="min-w-0">
-                          <span className="block text-sm font-bold text-[var(--text-primary)]">
+                          <span className="block whitespace-nowrap text-xs font-bold text-[var(--text-primary)] sm:text-sm">
                             {minutes === 0 ? "Untimed" : `${minutes} min`}
                           </span>
-                          <span className="mt-0.5 block text-[10px] leading-4 text-[var(--text-muted)]">
-                            {minutes === 0 ? "At your own pace" : "Timed session"}
+                          <span className="mt-0.5 block text-[9px] leading-3 text-[var(--text-muted)]">
+                            {minutes === 0 ? "At your pace" : "Timed session"}
                           </span>
                         </span>
                         {selected ? (
                           <Check
-                            size={15}
+                            size={14}
                             className="absolute right-2 top-2 text-brand-green"
                             aria-label="Selected"
                           />
@@ -686,8 +797,8 @@ export default function PersonalPracticeFlow() {
                   <Clock3 size={14} className="mt-0.5 shrink-0 text-brand-green" />
                   <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
                     {durationMinutes === 0
-                      ? "No countdown. Take the time you need; finish when you are ready."
-                      : `You will have ${durationMinutes} minutes. The set submits automatically when the timer runs out.`}
+                      ? "No countdown. Take the time you need and finish when ready."
+                      : `You will have ${durationMinutes} minutes. The set submits automatically when time runs out.`}
                   </p>
                 </div>
               </fieldset>
