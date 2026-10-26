@@ -13,144 +13,60 @@
   },
   "sourceHeadingAliases": [
     {
-      "levels": [
-        "jss1",
-        "jss2",
-        "jss3"
-      ],
+      "levels": ["jss1", "jss2", "jss3"],
       "sourceHeading": "Islamic Religious Studies (IRS)",
       "canonicalSubject": "Islamic Studies",
-      "subjectListPages": [
-        3,
-        73,
-        138
-      ],
-      "sampleSectionPages": [
-        19,
-        89,
-        153
-      ]
+      "subjectListPages": [3, 73, 138],
+      "sampleSectionPages": [19, 89, 153]
     },
     {
-      "levels": [
-        "ss1",
-        "ss2",
-        "ss3"
-      ],
+      "levels": ["ss1", "ss2", "ss3"],
       "sourceHeading": "Mathematics",
       "canonicalSubject": "General Mathematics",
-      "subjectListPages": [
-        198,
-        290,
-        380
-      ],
-      "sampleSectionPages": [
-        205,
-        297,
-        383
-      ]
+      "subjectListPages": [198, 290, 380],
+      "sampleSectionPages": [205, 297, 383]
     },
     {
-      "levels": [
-        "ss1",
-        "ss2",
-        "ss3"
-      ],
+      "levels": ["ss1", "ss2", "ss3"],
       "sourceHeading": "Agricultural Science",
       "canonicalSubject": "Agriculture",
-      "subjectListPages": [
-        198,
-        290,
-        380
-      ],
-      "sampleSectionPages": [
-        223,
-        315,
-        396
-      ]
+      "subjectListPages": [198, 290, 380],
+      "sampleSectionPages": [223, 315, 396]
     },
     {
-      "levels": [
-        "ss1",
-        "ss2",
-        "ss3"
-      ],
+      "levels": ["ss1", "ss2", "ss3"],
       "sourceHeading": "Food and Nutrition",
       "canonicalSubject": "Foods & Nutrition",
-      "subjectListPages": [
-        198,
-        290,
-        380
-      ],
-      "sampleSectionPages": [
-        229,
-        321,
-        399
-      ]
+      "subjectListPages": [198, 290, 380],
+      "sampleSectionPages": [229, 321, 399]
     },
     {
-      "levels": [
-        "ss1",
-        "ss2",
-        "ss3"
-      ],
+      "levels": ["ss1", "ss2", "ss3"],
       "sourceHeading": "Financial Accounting",
       "canonicalSubject": "Accounting",
-      "subjectListPages": [
-        198,
-        290,
-        380
-      ],
-      "sampleSectionPages": [
-        259,
-        349,
-        424
-      ]
+      "subjectListPages": [198, 290, 380],
+      "sampleSectionPages": [259, 349, 424]
     },
     {
-      "levels": [
-        "ss1",
-        "ss3"
-      ],
+      "levels": ["ss1", "ss3"],
       "sourceHeading": "Catering and Craft Practice",
       "canonicalSubject": "Catering Craft",
-      "subjectListPages": [
-        198,
-        380
-      ],
-      "sampleSectionPages": [
-        256,
-        422
-      ]
+      "subjectListPages": [198, 380],
+      "sampleSectionPages": [256, 422]
     },
     {
-      "levels": [
-        "ss2"
-      ],
+      "levels": ["ss2"],
       "sourceHeading": "Catering and Craft",
       "canonicalSubject": "Catering Craft",
-      "subjectListPages": [
-        290
-      ],
-      "sampleSectionPages": [
-        346
-      ]
+      "subjectListPages": [290],
+      "sampleSectionPages": [346]
     },
     {
-      "levels": [
-        "ss1",
-        "ss3"
-      ],
+      "levels": ["ss1", "ss3"],
       "sourceHeading": "English Studies",
       "canonicalSubject": "English Language",
-      "subjectListPages": [
-        198,
-        380
-      ],
-      "sampleSectionPages": [
-        199,
-        382
-      ]
+      "subjectListPages": [198, 380],
+      "sampleSectionPages": [199, 382]
     }
   ],
   "sourcePageDisposition": [
@@ -160,10 +76,7 @@
       "includedAsTopic": false
     },
     {
-      "pdfPages": [
-        433,
-        450
-      ],
+      "pdfPages": [433, 450],
       "classification": "SS3 trade-subject scheme tables",
       "includedAsTopic": true
     },
@@ -326,10 +239,7 @@
       "subject": "English Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 4",
-        "PDF p. 5"
-      ],
+      "sourceReferences": ["PDF p. 4", "PDF p. 5"],
       "topics": [
         {
           "label": "Composition: –",
@@ -1287,10 +1197,7 @@
       "subject": "English Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 6",
-        "PDF p. 7"
-      ],
+      "sourceReferences": ["PDF p. 6", "PDF p. 7"],
       "topics": [
         {
           "label": "Composition: Argumentative Essay – Arranging ideas in logical sequence",
@@ -2128,10 +2035,7 @@
       "subject": "English Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 8",
-        "PDF p. 9"
-      ],
+      "sourceReferences": ["PDF p. 8", "PDF p. 9"],
       "topics": [
         {
           "label": "Composition: Argumentative Essay – Cultism erodes traditional values",
@@ -3002,9 +2906,7 @@
       "subject": "Mathematics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 10"
-      ],
+      "sourceReferences": ["PDF p. 10"],
       "topics": [
         {
           "label": "Basic Operations on Whole Numbers",
@@ -3145,9 +3047,7 @@
       "subject": "Mathematics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 11"
-      ],
+      "sourceReferences": ["PDF p. 11"],
       "topics": [
         {
           "label": "Addition & Subtraction of Fractions",
@@ -3288,9 +3188,7 @@
       "subject": "Mathematics",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 12"
-      ],
+      "sourceReferences": ["PDF p. 12"],
       "topics": [
         {
           "label": "Angles",
@@ -3431,9 +3329,7 @@
       "subject": "Physical and Health Education",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 13"
-      ],
+      "sourceReferences": ["PDF p. 13"],
       "topics": [
         {
           "label": "Characteristics of a Physically Fit Person",
@@ -3598,9 +3494,7 @@
       "subject": "Physical and Health Education",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 14"
-      ],
+      "sourceReferences": ["PDF p. 14"],
       "topics": [
         {
           "label": "Athletics – Discus Throw (Basic Skills and Techniques)",
@@ -3765,9 +3659,7 @@
       "subject": "Physical and Health Education",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 15"
-      ],
+      "sourceReferences": ["PDF p. 15"],
       "topics": [
         {
           "label": "Basic Skills and Techniques in Contact and Non-Contact Sports",
@@ -3932,9 +3824,7 @@
       "subject": "Christian Religious Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 16"
-      ],
+      "sourceReferences": ["PDF p. 16"],
       "topics": [
         {
           "label": "Disobedience I",
@@ -4075,9 +3965,7 @@
       "subject": "Christian Religious Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 17"
-      ],
+      "sourceReferences": ["PDF p. 17"],
       "topics": [
         {
           "label": "Call to Obedience I",
@@ -4218,9 +4106,7 @@
       "subject": "Christian Religious Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 18"
-      ],
+      "sourceReferences": ["PDF p. 18"],
       "topics": [
         {
           "label": "Midterm Break",
@@ -4361,9 +4247,7 @@
       "subject": "Islamic Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 19"
-      ],
+      "sourceReferences": ["PDF p. 19"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -4528,9 +4412,7 @@
       "subject": "Islamic Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 20"
-      ],
+      "sourceReferences": ["PDF p. 20"],
       "topics": [
         {
           "label": "Application of Islamic Ethics",
@@ -4695,9 +4577,7 @@
       "subject": "Islamic Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 21"
-      ],
+      "sourceReferences": ["PDF p. 21"],
       "topics": [
         {
           "label": "Application of Faith",
@@ -4862,9 +4742,7 @@
       "subject": "Nigerian History",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 22"
-      ],
+      "sourceReferences": ["PDF p. 22"],
       "topics": [
         {
           "label": "Closing",
@@ -5029,9 +4907,7 @@
       "subject": "Nigerian History",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 23"
-      ],
+      "sourceReferences": ["PDF p. 23"],
       "topics": [
         {
           "label": "Abolition of Slave Trade",
@@ -5196,9 +5072,7 @@
       "subject": "Nigerian History",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 24"
-      ],
+      "sourceReferences": ["PDF p. 24"],
       "topics": [
         {
           "label": "Closing",
@@ -5363,9 +5237,7 @@
       "subject": "Social and Citizenship Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 25"
-      ],
+      "sourceReferences": ["PDF p. 25"],
       "topics": [
         {
           "label": "Citizenship",
@@ -5530,9 +5402,7 @@
       "subject": "Social and Citizenship Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 26"
-      ],
+      "sourceReferences": ["PDF p. 26"],
       "topics": [
         {
           "label": "Climate Change",
@@ -5697,10 +5567,7 @@
       "subject": "Social and Citizenship Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 27",
-        "PDF p. 28"
-      ],
+      "sourceReferences": ["PDF p. 27", "PDF p. 28"],
       "topics": [
         {
           "label": "Benefits and Ideals of Money",
@@ -5865,9 +5732,7 @@
       "subject": "Cultural and Creative Arts",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 29"
-      ],
+      "sourceReferences": ["PDF p. 29"],
       "topics": [
         {
           "label": "Crafts",
@@ -6008,9 +5873,7 @@
       "subject": "Cultural and Creative Arts",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 30"
-      ],
+      "sourceReferences": ["PDF p. 30"],
       "topics": [
         {
           "label": "Bead Work",
@@ -6151,9 +6014,7 @@
       "subject": "Cultural and Creative Arts",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 31"
-      ],
+      "sourceReferences": ["PDF p. 31"],
       "topics": [
         {
           "label": "Drama & Theatre",
@@ -6294,9 +6155,7 @@
       "subject": "French",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 32"
-      ],
+      "sourceReferences": ["PDF p. 32"],
       "topics": [
         {
           "label": "Closing",
@@ -6461,9 +6320,7 @@
       "subject": "French",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 33"
-      ],
+      "sourceReferences": ["PDF p. 33"],
       "topics": [
         {
           "label": "Closing",
@@ -6628,9 +6485,7 @@
       "subject": "French",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 34"
-      ],
+      "sourceReferences": ["PDF p. 34"],
       "topics": [
         {
           "label": "Closing",
@@ -6795,9 +6650,7 @@
       "subject": "Intermediate Science",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 35"
-      ],
+      "sourceReferences": ["PDF p. 35"],
       "topics": [
         {
           "label": "Climate and Weather",
@@ -6962,9 +6815,7 @@
       "subject": "Intermediate Science",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 36"
-      ],
+      "sourceReferences": ["PDF p. 36"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -7129,10 +6980,7 @@
       "subject": "Intermediate Science",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 37",
-        "PDF p. 38"
-      ],
+      "sourceReferences": ["PDF p. 37", "PDF p. 38"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -7297,10 +7145,7 @@
       "subject": "Digital Technologies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 39",
-        "PDF p. 40"
-      ],
+      "sourceReferences": ["PDF p. 39", "PDF p. 40"],
       "topics": [
         {
           "label": "Basic Computer Hardware Components I",
@@ -7465,10 +7310,7 @@
       "subject": "Digital Technologies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 41",
-        "PDF p. 42"
-      ],
+      "sourceReferences": ["PDF p. 41", "PDF p. 42"],
       "topics": [
         {
           "label": "3D Modelling with Paint 3D",
@@ -7633,10 +7475,7 @@
       "subject": "Digital Technologies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 43",
-        "PDF p. 44"
-      ],
+      "sourceReferences": ["PDF p. 43", "PDF p. 44"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -7801,9 +7640,7 @@
       "subject": "Business Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 45"
-      ],
+      "sourceReferences": ["PDF p. 45"],
       "topics": [
         {
           "label": "Commerce – The Heart of Business I",
@@ -7944,9 +7781,7 @@
       "subject": "Business Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 46"
-      ],
+      "sourceReferences": ["PDF p. 46"],
       "topics": [
         {
           "label": "Consumer, Market and Society",
@@ -8087,9 +7922,7 @@
       "subject": "Business Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 47"
-      ],
+      "sourceReferences": ["PDF p. 47"],
       "topics": [
         {
           "label": "Book-keeping as a Tool in Business I",
@@ -8230,10 +8063,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 49",
-        "PDF p. 50"
-      ],
+      "sourceReferences": ["PDF p. 49", "PDF p. 50"],
       "topics": [
         {
           "label": "CLOSING",
@@ -8398,10 +8228,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 51",
-        "PDF p. 52"
-      ],
+      "sourceReferences": ["PDF p. 51", "PDF p. 52"],
       "topics": [
         {
           "label": "Bookkeeping in Solar PV Installation and Maintenance",
@@ -8566,10 +8393,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 53",
-        "PDF p. 54"
-      ],
+      "sourceReferences": ["PDF p. 53", "PDF p. 54"],
       "topics": [
         {
           "label": "CLOSING",
@@ -8734,9 +8558,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 55"
-      ],
+      "sourceReferences": ["PDF p. 55"],
       "topics": [
         {
           "label": "Basic Sewing Techniques",
@@ -8901,9 +8723,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 56"
-      ],
+      "sourceReferences": ["PDF p. 56"],
       "topics": [
         {
           "label": "Closing",
@@ -9068,9 +8888,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 57"
-      ],
+      "sourceReferences": ["PDF p. 57"],
       "topics": [
         {
           "label": "Career Opportunities in Fashion",
@@ -9235,9 +9053,7 @@
       "subject": "Livestock Farming",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 58"
-      ],
+      "sourceReferences": ["PDF p. 58"],
       "topics": [
         {
           "label": "Breeds of Poultry Birds",
@@ -9402,9 +9218,7 @@
       "subject": "Livestock Farming",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 59"
-      ],
+      "sourceReferences": ["PDF p. 59"],
       "topics": [
         {
           "label": "Breeds of Rabbit",
@@ -9569,9 +9383,7 @@
       "subject": "Livestock Farming",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 60"
-      ],
+      "sourceReferences": ["PDF p. 60"],
       "topics": [
         {
           "label": "Breeding in Sheep and Goats",
@@ -9736,9 +9548,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 61"
-      ],
+      "sourceReferences": ["PDF p. 61"],
       "topics": [
         {
           "label": "Basic Hair Care Practices",
@@ -9903,9 +9713,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 62"
-      ],
+      "sourceReferences": ["PDF p. 62"],
       "topics": [
         {
           "label": "Customer Care in Beauty Services",
@@ -10070,9 +9878,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 63"
-      ],
+      "sourceReferences": ["PDF p. 63"],
       "topics": [
         {
           "label": "Advanced Hair Styling",
@@ -10237,9 +10043,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 64"
-      ],
+      "sourceReferences": ["PDF p. 64"],
       "topics": [
         {
           "label": "Basic Care & Maintenance of Computer/GSM",
@@ -10404,9 +10208,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 65"
-      ],
+      "sourceReferences": ["PDF p. 65"],
       "topics": [
         {
           "label": "Basic Troubleshooting",
@@ -10571,9 +10373,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 66"
-      ],
+      "sourceReferences": ["PDF p. 66"],
       "topics": [
         {
           "label": "Assembling a Simple Computer",
@@ -10738,10 +10538,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 67",
-        "PDF p. 68"
-      ],
+      "sourceReferences": ["PDF p. 67", "PDF p. 68"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -10906,10 +10703,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 69",
-        "PDF p. 70"
-      ],
+      "sourceReferences": ["PDF p. 69", "PDF p. 70"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -11074,10 +10868,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 71",
-        "PDF p. 72"
-      ],
+      "sourceReferences": ["PDF p. 71", "PDF p. 72"],
       "topics": [
         {
           "label": "Book Keeping in Horticulture and Crop Production",
@@ -11242,10 +11033,7 @@
       "subject": "English Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 74",
-        "PDF p. 75"
-      ],
+      "sourceReferences": ["PDF p. 74", "PDF p. 75"],
       "topics": [
         {
           "label": "Composition: –",
@@ -11991,10 +11779,7 @@
       "subject": "English Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 76",
-        "PDF p. 77"
-      ],
+      "sourceReferences": ["PDF p. 76", "PDF p. 77"],
       "topics": [
         {
           "label": "Composition: –",
@@ -12747,10 +12532,7 @@
       "subject": "English Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 78",
-        "PDF p. 79"
-      ],
+      "sourceReferences": ["PDF p. 78", "PDF p. 79"],
       "topics": [
         {
           "label": "8: 12",
@@ -13323,9 +13105,7 @@
       "subject": "Mathematics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 80"
-      ],
+      "sourceReferences": ["PDF p. 80"],
       "topics": [
         {
           "label": "Algebraic Expressions I",
@@ -13490,9 +13270,7 @@
       "subject": "Mathematics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 81"
-      ],
+      "sourceReferences": ["PDF p. 81"],
       "topics": [
         {
           "label": "Closing",
@@ -13657,9 +13435,7 @@
       "subject": "Mathematics",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 82"
-      ],
+      "sourceReferences": ["PDF p. 82"],
       "topics": [
         {
           "label": "Angles and Polygons",
@@ -13824,9 +13600,7 @@
       "subject": "Physical and Health Education",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 83"
-      ],
+      "sourceReferences": ["PDF p. 83"],
       "topics": [
         {
           "label": "Human Trafficking",
@@ -13953,9 +13727,7 @@
       "subject": "Physical and Health Education",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 84"
-      ],
+      "sourceReferences": ["PDF p. 84"],
       "topics": [
         {
           "label": "Computer Games",
@@ -14075,9 +13847,7 @@
       "subject": "Physical and Health Education",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 85"
-      ],
+      "sourceReferences": ["PDF p. 85"],
       "topics": [
         {
           "label": "Accidents & Safety",
@@ -14218,9 +13988,7 @@
       "subject": "Christian Religious Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 86"
-      ],
+      "sourceReferences": ["PDF p. 86"],
       "topics": [
         {
           "label": "Closing",
@@ -14385,9 +14153,7 @@
       "subject": "Christian Religious Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 87"
-      ],
+      "sourceReferences": ["PDF p. 87"],
       "topics": [
         {
           "label": "Call of the First Disciples",
@@ -14552,9 +14318,7 @@
       "subject": "Christian Religious Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 88"
-      ],
+      "sourceReferences": ["PDF p. 88"],
       "topics": [
         {
           "label": "Appearances, Significance & Role of Women",
@@ -14719,9 +14483,7 @@
       "subject": "Islamic Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 89"
-      ],
+      "sourceReferences": ["PDF p. 89"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -14886,10 +14648,7 @@
       "subject": "Islamic Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 89",
-        "PDF p. 90"
-      ],
+      "sourceReferences": ["PDF p. 89", "PDF p. 90"],
       "topics": [
         {
           "label": "Avoidance of Corruption and Dishonesty",
@@ -15054,9 +14813,7 @@
       "subject": "Islamic Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 91"
-      ],
+      "sourceReferences": ["PDF p. 91"],
       "topics": [
         {
           "label": "Applying Iman in Daily Life",
@@ -15221,9 +14978,7 @@
       "subject": "Nigerian History",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 92"
-      ],
+      "sourceReferences": ["PDF p. 92"],
       "topics": [
         {
           "label": "Closing",
@@ -15388,9 +15143,7 @@
       "subject": "Nigerian History",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 93"
-      ],
+      "sourceReferences": ["PDF p. 93"],
       "topics": [
         {
           "label": "Challenges of Democracy",
@@ -15555,9 +15308,7 @@
       "subject": "Nigerian History",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 94"
-      ],
+      "sourceReferences": ["PDF p. 94"],
       "topics": [
         {
           "label": "Closing",
@@ -15722,9 +15473,7 @@
       "subject": "Social and Citizenship Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 95"
-      ],
+      "sourceReferences": ["PDF p. 95"],
       "topics": [
         {
           "label": "Citizenship",
@@ -15889,9 +15638,7 @@
       "subject": "Social and Citizenship Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 96"
-      ],
+      "sourceReferences": ["PDF p. 96"],
       "topics": [
         {
           "label": "Closing",
@@ -16056,9 +15803,7 @@
       "subject": "Social and Citizenship Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 97"
-      ],
+      "sourceReferences": ["PDF p. 97"],
       "topics": [
         {
           "label": "Civic Challenges in Nigeria",
@@ -16223,9 +15968,7 @@
       "subject": "Cultural and Creative Arts",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 98"
-      ],
+      "sourceReferences": ["PDF p. 98"],
       "topics": [
         {
           "label": "Closing",
@@ -16390,9 +16133,7 @@
       "subject": "Cultural and Creative Arts",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 99"
-      ],
+      "sourceReferences": ["PDF p. 99"],
       "topics": [
         {
           "label": "Bead Work",
@@ -16557,9 +16298,7 @@
       "subject": "Cultural and Creative Arts",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 100"
-      ],
+      "sourceReferences": ["PDF p. 100"],
       "topics": [
         {
           "label": "Closing",
@@ -16724,9 +16463,7 @@
       "subject": "French",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 101"
-      ],
+      "sourceReferences": ["PDF p. 101"],
       "topics": [
         {
           "label": "Closing",
@@ -16891,9 +16628,7 @@
       "subject": "French",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 102"
-      ],
+      "sourceReferences": ["PDF p. 102"],
       "topics": [
         {
           "label": "Closing",
@@ -17058,9 +16793,7 @@
       "subject": "French",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 103"
-      ],
+      "sourceReferences": ["PDF p. 103"],
       "topics": [
         {
           "label": "Closing",
@@ -17225,9 +16958,7 @@
       "subject": "Intermediate Science",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 104"
-      ],
+      "sourceReferences": ["PDF p. 104"],
       "topics": [
         {
           "label": "Air and Water Pollution",
@@ -17392,9 +17123,7 @@
       "subject": "Intermediate Science",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 105"
-      ],
+      "sourceReferences": ["PDF p. 105"],
       "topics": [
         {
           "label": "Acids, Bases and Salts",
@@ -17559,9 +17288,7 @@
       "subject": "Intermediate Science",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 106"
-      ],
+      "sourceReferences": ["PDF p. 106"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -17726,10 +17453,7 @@
       "subject": "Digital Technologies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 107",
-        "PDF p. 108"
-      ],
+      "sourceReferences": ["PDF p. 107", "PDF p. 108"],
       "topics": [
         {
           "label": "Basic Computer Communication Networks",
@@ -17894,10 +17618,7 @@
       "subject": "Digital Technologies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 109",
-        "PDF p. 110"
-      ],
+      "sourceReferences": ["PDF p. 109", "PDF p. 110"],
       "topics": [
         {
           "label": "Basic Algorithms",
@@ -18062,9 +17783,7 @@
       "subject": "Digital Technologies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 111"
-      ],
+      "sourceReferences": ["PDF p. 111"],
       "topics": [
         {
           "label": "Artificial Intelligence (AI)",
@@ -18229,9 +17948,7 @@
       "subject": "Business Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 112"
-      ],
+      "sourceReferences": ["PDF p. 112"],
       "topics": [
         {
           "label": "Closing",
@@ -18396,9 +18113,7 @@
       "subject": "Business Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 113"
-      ],
+      "sourceReferences": ["PDF p. 113"],
       "topics": [
         {
           "label": "Aids to Trade",
@@ -18563,9 +18278,7 @@
       "subject": "Business Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 114"
-      ],
+      "sourceReferences": ["PDF p. 114"],
       "topics": [
         {
           "label": "Business Opportunities",
@@ -18730,10 +18443,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 116",
-        "PDF p. 117"
-      ],
+      "sourceReferences": ["PDF p. 116", "PDF p. 117"],
       "topics": [
         {
           "label": "CLOSING",
@@ -18898,10 +18608,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 118",
-        "PDF p. 119"
-      ],
+      "sourceReferences": ["PDF p. 118", "PDF p. 119"],
       "topics": [
         {
           "label": "CLOSING",
@@ -19066,10 +18773,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 120",
-        "PDF p. 121"
-      ],
+      "sourceReferences": ["PDF p. 120", "PDF p. 121"],
       "topics": [
         {
           "label": "Career Opportunities in Renewable Energy",
@@ -19234,9 +18938,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 122"
-      ],
+      "sourceReferences": ["PDF p. 122"],
       "topics": [
         {
           "label": "Advanced Sewing Techniques",
@@ -19401,9 +19103,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 123"
-      ],
+      "sourceReferences": ["PDF p. 123"],
       "topics": [
         {
           "label": "Closing",
@@ -19568,9 +19268,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 124"
-      ],
+      "sourceReferences": ["PDF p. 124"],
       "topics": [
         {
           "label": "Branding in Fashion",
@@ -19735,9 +19433,7 @@
       "subject": "Livestock Farming",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 125"
-      ],
+      "sourceReferences": ["PDF p. 125"],
       "topics": [
         {
           "label": "Closing / Vacation",
@@ -19902,9 +19598,7 @@
       "subject": "Livestock Farming",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 126"
-      ],
+      "sourceReferences": ["PDF p. 126"],
       "topics": [
         {
           "label": "Closing / Vacation",
@@ -20069,9 +19763,7 @@
       "subject": "Livestock Farming",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 127"
-      ],
+      "sourceReferences": ["PDF p. 127"],
       "topics": [
         {
           "label": "Business Records",
@@ -20236,9 +19928,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 128"
-      ],
+      "sourceReferences": ["PDF p. 128"],
       "topics": [
         {
           "label": "Examination / Closing",
@@ -20403,9 +20093,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 129"
-      ],
+      "sourceReferences": ["PDF p. 129"],
       "topics": [
         {
           "label": "Examination / Closing",
@@ -20570,9 +20258,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 130"
-      ],
+      "sourceReferences": ["PDF p. 130"],
       "topics": [
         {
           "label": "Beauty Product Packaging",
@@ -20737,9 +20423,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 131"
-      ],
+      "sourceReferences": ["PDF p. 131"],
       "topics": [
         {
           "label": "Closing / Vacation",
@@ -20904,9 +20588,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 132"
-      ],
+      "sourceReferences": ["PDF p. 132"],
       "topics": [
         {
           "label": "Bookkeeping in GSM Repairs",
@@ -21071,9 +20753,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 133"
-      ],
+      "sourceReferences": ["PDF p. 133"],
       "topics": [
         {
           "label": "Closing / Vacation",
@@ -21226,10 +20906,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 134",
-        "PDF p. 135"
-      ],
+      "sourceReferences": ["PDF p. 134", "PDF p. 135"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -21394,10 +21071,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 136",
-        "PDF p. 137"
-      ],
+      "sourceReferences": ["PDF p. 136", "PDF p. 137"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -21562,9 +21236,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 138"
-      ],
+      "sourceReferences": ["PDF p. 138"],
       "topics": [
         {
           "label": "Business Simulation",
@@ -21729,10 +21401,7 @@
       "subject": "English Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 140",
-        "PDF p. 141"
-      ],
+      "sourceReferences": ["PDF p. 140", "PDF p. 141"],
       "topics": [
         {
           "label": "8: 13",
@@ -22257,10 +21926,7 @@
       "subject": "English Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 142",
-        "PDF p. 143"
-      ],
+      "sourceReferences": ["PDF p. 142", "PDF p. 143"],
       "topics": [
         {
           "label": "9: 13",
@@ -22785,9 +22451,7 @@
       "subject": "English Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 144"
-      ],
+      "sourceReferences": ["PDF p. 144"],
       "topics": [
         {
           "label": "Composition: –",
@@ -23144,9 +22808,7 @@
       "subject": "Mathematics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 145"
-      ],
+      "sourceReferences": ["PDF p. 145"],
       "topics": [
         {
           "label": "Addition and Subtraction of Numbers in Base 2",
@@ -23311,9 +22973,7 @@
       "subject": "Mathematics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 146"
-      ],
+      "sourceReferences": ["PDF p. 146"],
       "topics": [
         {
           "label": "Angles of Elevation and Depression / Study of Measurement Using Clinometers",
@@ -23478,9 +23138,7 @@
       "subject": "Mathematics",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 147"
-      ],
+      "sourceReferences": ["PDF p. 147"],
       "topics": [
         {
           "label": "Application of Measures of Central Tendency To Analyze any Given Information",
@@ -23573,9 +23231,7 @@
       "subject": "Physical and Health Education",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 148"
-      ],
+      "sourceReferences": ["PDF p. 148"],
       "topics": [
         {
           "label": "Ball Games (Hockey) – Part 1",
@@ -23740,9 +23396,7 @@
       "subject": "Physical and Health Education",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 149"
-      ],
+      "sourceReferences": ["PDF p. 149"],
       "topics": [
         {
           "label": "Closing",
@@ -23907,9 +23561,7 @@
       "subject": "Physical and Health Education",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 150"
-      ],
+      "sourceReferences": ["PDF p. 150"],
       "topics": [
         {
           "label": "Closing",
@@ -24074,9 +23726,7 @@
       "subject": "Christian Religious Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 151"
-      ],
+      "sourceReferences": ["PDF p. 151"],
       "topics": [
         {
           "label": "Closing",
@@ -24241,9 +23891,7 @@
       "subject": "Christian Religious Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 152"
-      ],
+      "sourceReferences": ["PDF p. 152"],
       "topics": [
         {
           "label": "Christian Unity and Living Among Non- Christians",
@@ -24416,9 +24064,7 @@
       "subject": "Islamic Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 153"
-      ],
+      "sourceReferences": ["PDF p. 153"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -24583,9 +24229,7 @@
       "subject": "Islamic Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 154"
-      ],
+      "sourceReferences": ["PDF p. 154"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -24750,9 +24394,7 @@
       "subject": "Islamic Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 155"
-      ],
+      "sourceReferences": ["PDF p. 155"],
       "topics": [
         {
           "label": "Belief in the Hereafter",
@@ -24917,9 +24559,7 @@
       "subject": "Nigerian History",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 156"
-      ],
+      "sourceReferences": ["PDF p. 156"],
       "topics": [
         {
           "label": "Anti-Corruption Struggles",
@@ -25084,9 +24724,7 @@
       "subject": "Nigerian History",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 157"
-      ],
+      "sourceReferences": ["PDF p. 157"],
       "topics": [
         {
           "label": "Challenges Facing Nigeria",
@@ -25251,9 +24889,7 @@
       "subject": "Nigerian History",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 158"
-      ],
+      "sourceReferences": ["PDF p. 158"],
       "topics": [
         {
           "label": "BECE Examination",
@@ -25394,9 +25030,7 @@
       "subject": "Social and Citizenship Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 159"
-      ],
+      "sourceReferences": ["PDF p. 159"],
       "topics": [
         {
           "label": "Citizenship Education Recap",
@@ -25561,9 +25195,7 @@
       "subject": "Social and Citizenship Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 160"
-      ],
+      "sourceReferences": ["PDF p. 160"],
       "topics": [
         {
           "label": "Citizenship in a Digital Age",
@@ -25728,9 +25360,7 @@
       "subject": "Social and Citizenship Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 161"
-      ],
+      "sourceReferences": ["PDF p. 161"],
       "topics": [
         {
           "label": "Civic Challenges in Africa",
@@ -25883,9 +25513,7 @@
       "subject": "Cultural and Creative Arts",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 162"
-      ],
+      "sourceReferences": ["PDF p. 162"],
       "topics": [
         {
           "label": "Closing",
@@ -26050,9 +25678,7 @@
       "subject": "Cultural and Creative Arts",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 163"
-      ],
+      "sourceReferences": ["PDF p. 163"],
       "topics": [
         {
           "label": "Batik Work",
@@ -26217,9 +25843,7 @@
       "subject": "Cultural and Creative Arts",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 164"
-      ],
+      "sourceReferences": ["PDF p. 164"],
       "topics": [
         {
           "label": "Midterm Examination",
@@ -26300,9 +25924,7 @@
       "subject": "French",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 165"
-      ],
+      "sourceReferences": ["PDF p. 165"],
       "topics": [
         {
           "label": "Closing",
@@ -26467,9 +26089,7 @@
       "subject": "French",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 166"
-      ],
+      "sourceReferences": ["PDF p. 166"],
       "topics": [
         {
           "label": "Closing",
@@ -26642,9 +26262,7 @@
       "subject": "Intermediate Science",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 167"
-      ],
+      "sourceReferences": ["PDF p. 167"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -26809,9 +26427,7 @@
       "subject": "Intermediate Science",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 168"
-      ],
+      "sourceReferences": ["PDF p. 168"],
       "topics": [
         {
           "label": "Adaptation of Organisms",
@@ -26976,9 +26592,7 @@
       "subject": "Intermediate Science",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 169"
-      ],
+      "sourceReferences": ["PDF p. 169"],
       "topics": [
         {
           "label": "Career Opportunities in Science and Technology",
@@ -27143,9 +26757,7 @@
       "subject": "Digital Technologies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 170"
-      ],
+      "sourceReferences": ["PDF p. 170"],
       "topics": [
         {
           "label": "Advanced MS PowerPoint",
@@ -27310,9 +26922,7 @@
       "subject": "Digital Technologies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 171"
-      ],
+      "sourceReferences": ["PDF p. 171"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -27477,9 +27087,7 @@
       "subject": "Digital Technologies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 172"
-      ],
+      "sourceReferences": ["PDF p. 172"],
       "topics": [
         {
           "label": "Artificial Intelligence in Everyday Life",
@@ -27644,9 +27252,7 @@
       "subject": "Business Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 173"
-      ],
+      "sourceReferences": ["PDF p. 173"],
       "topics": [
         {
           "label": "Closing",
@@ -27811,9 +27417,7 @@
       "subject": "Business Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 174"
-      ],
+      "sourceReferences": ["PDF p. 174"],
       "topics": [
         {
           "label": "Advertising (Part 1)",
@@ -27978,9 +27582,7 @@
       "subject": "Business Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 175"
-      ],
+      "sourceReferences": ["PDF p. 175"],
       "topics": [
         {
           "label": "Bookkeeping and Business Success",
@@ -28145,10 +27747,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 177",
-        "PDF p. 178"
-      ],
+      "sourceReferences": ["PDF p. 177", "PDF p. 178"],
       "topics": [
         {
           "label": "Advanced Solar System Components",
@@ -28313,10 +27912,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 179",
-        "PDF p. 180"
-      ],
+      "sourceReferences": ["PDF p. 179", "PDF p. 180"],
       "topics": [
         {
           "label": "Battery Bank Configuration",
@@ -28481,11 +28077,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 181",
-        "PDF p. 182",
-        "PDF p. 183"
-      ],
+      "sourceReferences": ["PDF p. 181", "PDF p. 182", "PDF p. 183"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -28650,9 +28242,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 183"
-      ],
+      "sourceReferences": ["PDF p. 183"],
       "topics": [
         {
           "label": "Advanced Pattern Drafting",
@@ -28817,9 +28407,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 184"
-      ],
+      "sourceReferences": ["PDF p. 184"],
       "topics": [
         {
           "label": "Branding and Marketing",
@@ -28984,9 +28572,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 185"
-      ],
+      "sourceReferences": ["PDF p. 185"],
       "topics": [
         {
           "label": "BECE Examination",
@@ -29151,9 +28737,7 @@
       "subject": "Livestock Farming",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 186"
-      ],
+      "sourceReferences": ["PDF p. 186"],
       "topics": [
         {
           "label": "Advanced Poultry Management",
@@ -29318,9 +28902,7 @@
       "subject": "Livestock Farming",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 187"
-      ],
+      "sourceReferences": ["PDF p. 187"],
       "topics": [
         {
           "label": "Advanced Entrepreneurship in Livestock",
@@ -29485,9 +29067,7 @@
       "subject": "Livestock Farming",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 188"
-      ],
+      "sourceReferences": ["PDF p. 188"],
       "topics": [
         {
           "label": "Agribusiness Project Development",
@@ -29580,9 +29160,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 189"
-      ],
+      "sourceReferences": ["PDF p. 189"],
       "topics": [
         {
           "label": "Advanced Hair Styling",
@@ -29735,9 +29313,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 190"
-      ],
+      "sourceReferences": ["PDF p. 190"],
       "topics": [
         {
           "label": "Advanced Skin Treatment",
@@ -29890,9 +29466,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 191"
-      ],
+      "sourceReferences": ["PDF p. 191"],
       "topics": [
         {
           "label": "Beauty Career Opportunities",
@@ -30045,9 +29619,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 192"
-      ],
+      "sourceReferences": ["PDF p. 192"],
       "topics": [
         {
           "label": "Closing / Vacation",
@@ -30200,9 +29772,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 193"
-      ],
+      "sourceReferences": ["PDF p. 193"],
       "topics": [
         {
           "label": "Bookkeeping and Financial Records",
@@ -30355,9 +29925,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 194"
-      ],
+      "sourceReferences": ["PDF p. 194"],
       "topics": [
         {
           "label": "BECE Examination and Closing",
@@ -30438,9 +30006,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 195"
-      ],
+      "sourceReferences": ["PDF p. 195"],
       "topics": [
         {
           "label": "CLOSING/VACATION",
@@ -30605,9 +30171,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 196"
-      ],
+      "sourceReferences": ["PDF p. 196"],
       "topics": [
         {
           "label": "Agribusiness Project",
@@ -30772,9 +30336,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 197"
-      ],
+      "sourceReferences": ["PDF p. 197"],
       "topics": [
         {
           "label": "Business Management",
@@ -30939,10 +30501,7 @@
       "subject": "English Language",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 199",
-        "PDF p. 200"
-      ],
+      "sourceReferences": ["PDF p. 199", "PDF p. 200"],
       "topics": [
         {
           "label": "Grammar: Countable and Uncountable Nouns Listening Comprehension Reading Comprehension Continuous Writing: Narrative Grammar: Types of Nouns",
@@ -31107,9 +30666,7 @@
       "subject": "English Language",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 201"
-      ],
+      "sourceReferences": ["PDF p. 201"],
       "topics": [
         {
           "label": "Listening Comprehension: Mood, Tone, and Purpose",
@@ -31226,10 +30783,7 @@
       "subject": "English Language",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 203",
-        "PDF p. 204"
-      ],
+      "sourceReferences": ["PDF p. 203", "PDF p. 204"],
       "topics": [
         {
           "label": "9: 13",
@@ -31358,9 +30912,7 @@
       "subject": "General Mathematics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 205"
-      ],
+      "sourceReferences": ["PDF p. 205"],
       "topics": [
         {
           "label": "Effective Use of Logarithm Tables",
@@ -31525,9 +31077,7 @@
       "subject": "General Mathematics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 206"
-      ],
+      "sourceReferences": ["PDF p. 206"],
       "topics": [
         {
           "label": "Application of Trigonometric Ratios",
@@ -31680,9 +31230,7 @@
       "subject": "General Mathematics",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 207"
-      ],
+      "sourceReferences": ["PDF p. 207"],
       "topics": [
         {
           "label": "Area and Volume of Frustum",
@@ -31847,9 +31395,7 @@
       "subject": "Citizenship and Heritage Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 208"
-      ],
+      "sourceReferences": ["PDF p. 208"],
       "topics": [
         {
           "label": "Duties and Obligations of Citizens",
@@ -31990,9 +31536,7 @@
       "subject": "Citizenship and Heritage Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 209"
-      ],
+      "sourceReferences": ["PDF p. 209"],
       "topics": [
         {
           "label": "Citizenship by Law",
@@ -32133,9 +31677,7 @@
       "subject": "Citizenship and Heritage Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 210"
-      ],
+      "sourceReferences": ["PDF p. 210"],
       "topics": [
         {
           "label": "Citizenship Education in Other Countries",
@@ -32276,9 +31818,7 @@
       "subject": "Digital Technologies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 211"
-      ],
+      "sourceReferences": ["PDF p. 211"],
       "topics": [
         {
           "label": "Computer Hardware",
@@ -32419,9 +31959,7 @@
       "subject": "Digital Technologies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 212"
-      ],
+      "sourceReferences": ["PDF p. 212"],
       "topics": [
         {
           "label": "Computer Networks",
@@ -32562,9 +32100,7 @@
       "subject": "Digital Technologies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 213"
-      ],
+      "sourceReferences": ["PDF p. 213"],
       "topics": [
         {
           "label": "Database Introduction",
@@ -32705,9 +32241,7 @@
       "subject": "Biology",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 214"
-      ],
+      "sourceReferences": ["PDF p. 214"],
       "topics": [
         {
           "label": "Cell and Its Environment",
@@ -32872,9 +32406,7 @@
       "subject": "Biology",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 215"
-      ],
+      "sourceReferences": ["PDF p. 215"],
       "topics": [
         {
           "label": "Basic Ecological Concepts",
@@ -33039,9 +32571,7 @@
       "subject": "Biology",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 216"
-      ],
+      "sourceReferences": ["PDF p. 216"],
       "topics": [
         {
           "label": "Aquatic Habitat",
@@ -33206,10 +32736,7 @@
       "subject": "Chemistry",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 217",
-        "PDF p. 452"
-      ],
+      "sourceReferences": ["PDF p. 217", "PDF p. 452"],
       "topics": [
         {
           "label": "Acids, Bases, and Salts",
@@ -33439,9 +32966,7 @@
       "subject": "Chemistry",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 218"
-      ],
+      "sourceReferences": ["PDF p. 218"],
       "topics": [
         {
           "label": "Closing",
@@ -33606,9 +33131,7 @@
       "subject": "Chemistry",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 219"
-      ],
+      "sourceReferences": ["PDF p. 219"],
       "topics": [
         {
           "label": "Alkanes, Alkenes, and Alkynes",
@@ -33773,9 +33296,7 @@
       "subject": "Physics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 220"
-      ],
+      "sourceReferences": ["PDF p. 220"],
       "topics": [
         {
           "label": "Closing",
@@ -33933,9 +33454,7 @@
       "subject": "Physics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 221"
-      ],
+      "sourceReferences": ["PDF p. 221"],
       "topics": [
         {
           "label": "Closing",
@@ -34093,9 +33612,7 @@
       "subject": "Physics",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 222"
-      ],
+      "sourceReferences": ["PDF p. 222"],
       "topics": [
         {
           "label": "Closing",
@@ -34253,9 +33770,7 @@
       "subject": "Agriculture",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 223"
-      ],
+      "sourceReferences": ["PDF p. 223"],
       "topics": [
         {
           "label": "Agricultural Ecology",
@@ -34420,9 +33935,7 @@
       "subject": "Agriculture",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 224"
-      ],
+      "sourceReferences": ["PDF p. 224"],
       "topics": [
         {
           "label": "Agro-Allied Industries",
@@ -34587,9 +34100,7 @@
       "subject": "Agriculture",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 225"
-      ],
+      "sourceReferences": ["PDF p. 225"],
       "topics": [
         {
           "label": "Agricultural Pollution",
@@ -34754,9 +34265,7 @@
       "subject": "Further Mathematics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 226"
-      ],
+      "sourceReferences": ["PDF p. 226"],
       "topics": [
         {
           "label": "Binary Operations",
@@ -34897,9 +34406,7 @@
       "subject": "Further Mathematics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 227"
-      ],
+      "sourceReferences": ["PDF p. 227"],
       "topics": [
         {
           "label": "Calculating and Processing Devices",
@@ -35016,9 +34523,7 @@
       "subject": "Further Mathematics",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 228"
-      ],
+      "sourceReferences": ["PDF p. 228"],
       "topics": [
         {
           "label": "Application of Models",
@@ -35147,9 +34652,7 @@
       "subject": "Foods & Nutrition",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 229"
-      ],
+      "sourceReferences": ["PDF p. 229"],
       "topics": [
         {
           "label": "Basic Food Nutrients (Carbohydrates)",
@@ -35314,9 +34817,7 @@
       "subject": "Foods & Nutrition",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 230"
-      ],
+      "sourceReferences": ["PDF p. 230"],
       "topics": [
         {
           "label": "Digestion and Absorption",
@@ -35481,9 +34982,7 @@
       "subject": "Foods & Nutrition",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 231"
-      ],
+      "sourceReferences": ["PDF p. 231"],
       "topics": [
         {
           "label": "Cleaning Agents and Abrasives",
@@ -35648,9 +35147,7 @@
       "subject": "Geography",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 232"
-      ],
+      "sourceReferences": ["PDF p. 232"],
       "topics": [
         {
           "label": "Closing",
@@ -35815,9 +35312,7 @@
       "subject": "Geography",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 233"
-      ],
+      "sourceReferences": ["PDF p. 233"],
       "topics": [
         {
           "label": "Climate I",
@@ -35970,9 +35465,7 @@
       "subject": "Geography",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 234"
-      ],
+      "sourceReferences": ["PDF p. 234"],
       "topics": [
         {
           "label": "Basic Concepts in Map Reading",
@@ -36125,9 +35618,7 @@
       "subject": "Technical Drawing",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 235"
-      ],
+      "sourceReferences": ["PDF p. 235"],
       "topics": [
         {
           "label": "Angles – Construction and Measurement",
@@ -36292,9 +35783,7 @@
       "subject": "Technical Drawing",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 236"
-      ],
+      "sourceReferences": ["PDF p. 236"],
       "topics": [
         {
           "label": "Enlargement and Reduction of Plane Figures",
@@ -36440,9 +35929,7 @@
       "subject": "Technical Drawing",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 237"
-      ],
+      "sourceReferences": ["PDF p. 237"],
       "topics": [
         {
           "label": "Closing",
@@ -36600,9 +36087,7 @@
       "subject": "Nigerian History",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 238"
-      ],
+      "sourceReferences": ["PDF p. 238"],
       "topics": [
         {
           "label": "Closing",
@@ -36767,9 +36252,7 @@
       "subject": "Nigerian History",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 239"
-      ],
+      "sourceReferences": ["PDF p. 239"],
       "topics": [
         {
           "label": "Centralized States I",
@@ -36934,9 +36417,7 @@
       "subject": "Nigerian History",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 240"
-      ],
+      "sourceReferences": ["PDF p. 240"],
       "topics": [
         {
           "label": "Closing",
@@ -37101,9 +36582,7 @@
       "subject": "Government",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 241"
-      ],
+      "sourceReferences": ["PDF p. 241"],
       "topics": [
         {
           "label": "Basic Concepts of Government",
@@ -37268,9 +36747,7 @@
       "subject": "Government",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 242"
-      ],
+      "sourceReferences": ["PDF p. 242"],
       "topics": [
         {
           "label": "Citizenship",
@@ -37435,9 +36912,7 @@
       "subject": "Government",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 243"
-      ],
+      "sourceReferences": ["PDF p. 243"],
       "topics": [
         {
           "label": "Civil Service",
@@ -37590,9 +37065,7 @@
       "subject": "Christian Religious Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 244"
-      ],
+      "sourceReferences": ["PDF p. 244"],
       "topics": [
         {
           "label": "Closing",
@@ -37757,9 +37230,7 @@
       "subject": "Christian Religious Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 245"
-      ],
+      "sourceReferences": ["PDF p. 245"],
       "topics": [
         {
           "label": "Closing",
@@ -37912,9 +37383,7 @@
       "subject": "Christian Religious Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 246"
-      ],
+      "sourceReferences": ["PDF p. 246"],
       "topics": [
         {
           "label": "Christians’ Attitudes Towards Persecution",
@@ -38079,10 +37548,7 @@
       "subject": "Visual Arts",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 247",
-        "PDF p. 248"
-      ],
+      "sourceReferences": ["PDF p. 247", "PDF p. 248"],
       "topics": [
         {
           "label": "Drawing and Shading",
@@ -38247,9 +37713,7 @@
       "subject": "Visual Arts",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 249"
-      ],
+      "sourceReferences": ["PDF p. 249"],
       "topics": [
         {
           "label": "Computer Graphics II",
@@ -38414,9 +37878,7 @@
       "subject": "Visual Arts",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 250"
-      ],
+      "sourceReferences": ["PDF p. 250"],
       "topics": [
         {
           "label": "Historical Foundation of Nigerian Arts I",
@@ -38581,9 +38043,7 @@
       "subject": "Literature in English",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 252"
-      ],
+      "sourceReferences": ["PDF p. 252"],
       "topics": [
         {
           "label": "Closing",
@@ -38748,9 +38208,7 @@
       "subject": "Literature in English",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 253"
-      ],
+      "sourceReferences": ["PDF p. 253"],
       "topics": [
         {
           "label": "African Drama: Bosede Ademilua- Afolayan’s Once Upon an Elephant I",
@@ -38927,9 +38385,7 @@
       "subject": "Literature in English",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 254"
-      ],
+      "sourceReferences": ["PDF p. 254"],
       "topics": [
         {
           "label": "African Poetry I",
@@ -39094,9 +38550,7 @@
       "subject": "Catering Craft",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 256"
-      ],
+      "sourceReferences": ["PDF p. 256"],
       "topics": [
         {
           "label": "Catering Establishments I",
@@ -39261,9 +38715,7 @@
       "subject": "Catering Craft",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 257"
-      ],
+      "sourceReferences": ["PDF p. 257"],
       "topics": [
         {
           "label": "Examination",
@@ -39428,9 +38880,7 @@
       "subject": "Catering Craft",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 258"
-      ],
+      "sourceReferences": ["PDF p. 258"],
       "topics": [
         {
           "label": "Demonstration of Napkin Folds and Placement of Table Wares",
@@ -39595,9 +39045,7 @@
       "subject": "Accounting",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 259"
-      ],
+      "sourceReferences": ["PDF p. 259"],
       "topics": [
         {
           "label": "Accounting Concepts (Part 1)",
@@ -39762,9 +39210,7 @@
       "subject": "Accounting",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 260"
-      ],
+      "sourceReferences": ["PDF p. 260"],
       "topics": [
         {
           "label": "Adjustments in Profit and Loss Account",
@@ -39929,9 +39375,7 @@
       "subject": "Accounting",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 261"
-      ],
+      "sourceReferences": ["PDF p. 261"],
       "topics": [
         {
           "label": "Balance Sheet (Part 1)",
@@ -40084,9 +39528,7 @@
       "subject": "Commerce",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 262"
-      ],
+      "sourceReferences": ["PDF p. 262"],
       "topics": [
         {
           "label": "Closing",
@@ -40251,9 +39693,7 @@
       "subject": "Commerce",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 263"
-      ],
+      "sourceReferences": ["PDF p. 263"],
       "topics": [
         {
           "label": "Career Opportunities",
@@ -40418,9 +39858,7 @@
       "subject": "Commerce",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 264"
-      ],
+      "sourceReferences": ["PDF p. 264"],
       "topics": [
         {
           "label": "Closing",
@@ -40585,9 +40023,7 @@
       "subject": "Marketing",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 265"
-      ],
+      "sourceReferences": ["PDF p. 265"],
       "topics": [
         {
           "label": "Classification of Products I",
@@ -40752,9 +40188,7 @@
       "subject": "Marketing",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 266"
-      ],
+      "sourceReferences": ["PDF p. 266"],
       "topics": [
         {
           "label": "Advertising I",
@@ -40919,9 +40353,7 @@
       "subject": "Marketing",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 267"
-      ],
+      "sourceReferences": ["PDF p. 267"],
       "topics": [
         {
           "label": "Advertising II",
@@ -41086,9 +40518,7 @@
       "subject": "Economics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 268"
-      ],
+      "sourceReferences": ["PDF p. 268"],
       "topics": [
         {
           "label": "Basic Economic Problems of Society",
@@ -41253,9 +40683,7 @@
       "subject": "Economics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 269"
-      ],
+      "sourceReferences": ["PDF p. 269"],
       "topics": [
         {
           "label": "Agriculture",
@@ -41420,9 +40848,7 @@
       "subject": "Economics",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 270"
-      ],
+      "sourceReferences": ["PDF p. 270"],
       "topics": [
         {
           "label": "Closing",
@@ -41587,9 +41013,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 272"
-      ],
+      "sourceReferences": ["PDF p. 272"],
       "topics": [
         {
           "label": "Basics of Solar Energy",
@@ -41730,9 +41154,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 273"
-      ],
+      "sourceReferences": ["PDF p. 273"],
       "topics": [
         {
           "label": "Basic Electrical Concepts",
@@ -41873,9 +41295,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 274"
-      ],
+      "sourceReferences": ["PDF p. 274"],
       "topics": [
         {
           "label": "Midterm Break",
@@ -42016,9 +41436,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 275"
-      ],
+      "sourceReferences": ["PDF p. 275"],
       "topics": [
         {
           "label": "Basic Sewing Tools & Equipment I",
@@ -42159,9 +41577,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 276"
-      ],
+      "sourceReferences": ["PDF p. 276"],
       "topics": [
         {
           "label": "Basic Sewing Stitches I",
@@ -42302,9 +41718,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 277"
-      ],
+      "sourceReferences": ["PDF p. 277"],
       "topics": [
         {
           "label": "Body Measurements",
@@ -42445,9 +41859,7 @@
       "subject": "Livestock Farming",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 278"
-      ],
+      "sourceReferences": ["PDF p. 278"],
       "topics": [
         {
           "label": "Animal Breeding I",
@@ -42612,9 +42024,7 @@
       "subject": "Livestock Farming",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 279"
-      ],
+      "sourceReferences": ["PDF p. 279"],
       "topics": [
         {
           "label": "Closing",
@@ -42779,9 +42189,7 @@
       "subject": "Livestock Farming",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 280"
-      ],
+      "sourceReferences": ["PDF p. 280"],
       "topics": [
         {
           "label": "Business Opportunities in Livestock",
@@ -42946,9 +42354,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 281"
-      ],
+      "sourceReferences": ["PDF p. 281"],
       "topics": [
         {
           "label": "Closing",
@@ -43113,9 +42519,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 282"
-      ],
+      "sourceReferences": ["PDF p. 282"],
       "topics": [
         {
           "label": "Closing",
@@ -43280,9 +42684,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 283"
-      ],
+      "sourceReferences": ["PDF p. 283"],
       "topics": [
         {
           "label": "Closing",
@@ -43447,9 +42849,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 284"
-      ],
+      "sourceReferences": ["PDF p. 284"],
       "topics": [
         {
           "label": "Classification of Computer Hardware",
@@ -43614,9 +43014,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 285"
-      ],
+      "sourceReferences": ["PDF p. 285"],
       "topics": [
         {
           "label": "Closing 285",
@@ -43781,9 +43179,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 286"
-      ],
+      "sourceReferences": ["PDF p. 286"],
       "topics": [
         {
           "label": "Closing",
@@ -43948,9 +43344,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 287"
-      ],
+      "sourceReferences": ["PDF p. 287"],
       "topics": [
         {
           "label": "Branches of Horticulture",
@@ -44115,9 +43509,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 288"
-      ],
+      "sourceReferences": ["PDF p. 288"],
       "topics": [
         {
           "label": "Closing",
@@ -44282,9 +43674,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 289"
-      ],
+      "sourceReferences": ["PDF p. 289"],
       "topics": [
         {
           "label": "Classification of Crops by Life Cycle",
@@ -44449,9 +43839,7 @@
       "subject": "English Language",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 291"
-      ],
+      "sourceReferences": ["PDF p. 291"],
       "topics": [
         {
           "label": "Grammar, Oral, Summary, Vocabulary",
@@ -44532,10 +43920,7 @@
       "subject": "English Language",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 293",
-        "PDF p. 294"
-      ],
+      "sourceReferences": ["PDF p. 293", "PDF p. 294"],
       "topics": [
         {
           "label": "Closing",
@@ -44705,9 +44090,7 @@
       "subject": "English Language",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 295"
-      ],
+      "sourceReferences": ["PDF p. 295"],
       "topics": [
         {
           "label": "A. Grammar: Affixation (Prefixes as word extensions)",
@@ -44983,9 +44366,7 @@
       "subject": "General Mathematics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 297"
-      ],
+      "sourceReferences": ["PDF p. 297"],
       "topics": [
         {
           "label": "Examination",
@@ -45138,9 +44519,7 @@
       "subject": "General Mathematics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 298"
-      ],
+      "sourceReferences": ["PDF p. 298"],
       "topics": [
         {
           "label": "Circle Geometry I",
@@ -45293,9 +44672,7 @@
       "subject": "General Mathematics",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 299"
-      ],
+      "sourceReferences": ["PDF p. 299"],
       "topics": [
         {
           "label": "Angles of Elevation and Depression",
@@ -45448,9 +44825,7 @@
       "subject": "Citizenship and Heritage Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 300"
-      ],
+      "sourceReferences": ["PDF p. 300"],
       "topics": [
         {
           "label": "Colonial Heritage",
@@ -45591,9 +44966,7 @@
       "subject": "Citizenship and Heritage Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 301"
-      ],
+      "sourceReferences": ["PDF p. 301"],
       "topics": [
         {
           "label": "Case Studies",
@@ -45734,9 +45107,7 @@
       "subject": "Citizenship and Heritage Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 302"
-      ],
+      "sourceReferences": ["PDF p. 302"],
       "topics": [
         {
           "label": "Civic Challenges",
@@ -45877,9 +45248,7 @@
       "subject": "Digital Technologies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 303"
-      ],
+      "sourceReferences": ["PDF p. 303"],
       "topics": [
         {
           "label": "Advanced Presentation Tools",
@@ -46020,9 +45389,7 @@
       "subject": "Digital Technologies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 304"
-      ],
+      "sourceReferences": ["PDF p. 304"],
       "topics": [
         {
           "label": "Artificial Intelligence",
@@ -46163,9 +45530,7 @@
       "subject": "Digital Technologies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 305"
-      ],
+      "sourceReferences": ["PDF p. 305"],
       "topics": [
         {
           "label": "Blockchain Technology",
@@ -46306,9 +45671,7 @@
       "subject": "Biology",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 306"
-      ],
+      "sourceReferences": ["PDF p. 306"],
       "topics": [
         {
           "label": "Closing",
@@ -46473,9 +45836,7 @@
       "subject": "Biology",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 307"
-      ],
+      "sourceReferences": ["PDF p. 307"],
       "topics": [
         {
           "label": "Closing",
@@ -46640,9 +46001,7 @@
       "subject": "Biology",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 308"
-      ],
+      "sourceReferences": ["PDF p. 308"],
       "topics": [
         {
           "label": "Balance in Nature",
@@ -46807,9 +46166,7 @@
       "subject": "Chemistry",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 309"
-      ],
+      "sourceReferences": ["PDF p. 309"],
       "topics": [
         {
           "label": "Acid-Base Titration",
@@ -46974,9 +46331,7 @@
       "subject": "Chemistry",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 310"
-      ],
+      "sourceReferences": ["PDF p. 310"],
       "topics": [
         {
           "label": "Alkali and Alkaline Earth Metals",
@@ -47141,9 +46496,7 @@
       "subject": "Chemistry",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 311"
-      ],
+      "sourceReferences": ["PDF p. 311"],
       "topics": [
         {
           "label": "Alcohols, Ethers, and Phenols",
@@ -47308,9 +46661,7 @@
       "subject": "Physics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 312"
-      ],
+      "sourceReferences": ["PDF p. 312"],
       "topics": [
         {
           "label": "Application of Sound Waves",
@@ -47475,9 +46826,7 @@
       "subject": "Physics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 313"
-      ],
+      "sourceReferences": ["PDF p. 313"],
       "topics": [
         {
           "label": "Battery",
@@ -47630,9 +46979,7 @@
       "subject": "Physics",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 314"
-      ],
+      "sourceReferences": ["PDF p. 314"],
       "topics": [
         {
           "label": "Application of Electromagnetic Field",
@@ -47797,9 +47144,7 @@
       "subject": "Agriculture",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 315"
-      ],
+      "sourceReferences": ["PDF p. 315"],
       "topics": [
         {
           "label": "Agro-Forestry Practices in Nigeria",
@@ -47952,9 +47297,7 @@
       "subject": "Agriculture",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 316"
-      ],
+      "sourceReferences": ["PDF p. 316"],
       "topics": [
         {
           "label": "Anatomy and Physiology of Farm Animals",
@@ -48107,9 +47450,7 @@
       "subject": "Agriculture",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 317"
-      ],
+      "sourceReferences": ["PDF p. 317"],
       "topics": [
         {
           "label": "Animal Nutrition",
@@ -48274,9 +47615,7 @@
       "subject": "Further Mathematics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 318"
-      ],
+      "sourceReferences": ["PDF p. 318"],
       "topics": [
         {
           "label": "Cubic Equations and their Factorization",
@@ -48441,9 +47780,7 @@
       "subject": "Further Mathematics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 319"
-      ],
+      "sourceReferences": ["PDF p. 319"],
       "topics": [
         {
           "label": "Application of Differentiation",
@@ -48608,9 +47945,7 @@
       "subject": "Further Mathematics",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 320"
-      ],
+      "sourceReferences": ["PDF p. 320"],
       "topics": [
         {
           "label": "Binomial Expansion",
@@ -48775,9 +48110,7 @@
       "subject": "Foods & Nutrition",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 321"
-      ],
+      "sourceReferences": ["PDF p. 321"],
       "topics": [
         {
           "label": "Closing",
@@ -48942,9 +48275,7 @@
       "subject": "Foods & Nutrition",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 322"
-      ],
+      "sourceReferences": ["PDF p. 322"],
       "topics": [
         {
           "label": "Closing",
@@ -49109,9 +48440,7 @@
       "subject": "Foods & Nutrition",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 323"
-      ],
+      "sourceReferences": ["PDF p. 323"],
       "topics": [
         {
           "label": "Budgeting",
@@ -49276,9 +48605,7 @@
       "subject": "Geography",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 324"
-      ],
+      "sourceReferences": ["PDF p. 324"],
       "topics": [
         {
           "label": "Basic Concepts of GIS",
@@ -49431,9 +48758,7 @@
       "subject": "Geography",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 325"
-      ],
+      "sourceReferences": ["PDF p. 325"],
       "topics": [
         {
           "label": "Agriculture",
@@ -49586,9 +48911,7 @@
       "subject": "Geography",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 326"
-      ],
+      "sourceReferences": ["PDF p. 326"],
       "topics": [
         {
           "label": "Closing",
@@ -49753,9 +49076,7 @@
       "subject": "Technical Drawing",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 327"
-      ],
+      "sourceReferences": ["PDF p. 327"],
       "topics": [
         {
           "label": "Closing",
@@ -49913,9 +49234,7 @@
       "subject": "Technical Drawing",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 328"
-      ],
+      "sourceReferences": ["PDF p. 328"],
       "topics": [
         {
           "label": "Assembly Drawing",
@@ -50080,9 +49399,7 @@
       "subject": "Technical Drawing",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 329"
-      ],
+      "sourceReferences": ["PDF p. 329"],
       "topics": [
         {
           "label": "Building Drawings",
@@ -50247,9 +49564,7 @@
       "subject": "Nigerian History",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 330"
-      ],
+      "sourceReferences": ["PDF p. 330"],
       "topics": [
         {
           "label": "Bornu under the Shehus: The Emergence of El-Kanemi",
@@ -50414,9 +49729,7 @@
       "subject": "Nigerian History",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 331"
-      ],
+      "sourceReferences": ["PDF p. 331"],
       "topics": [
         {
           "label": "Benin in the 19th Century",
@@ -50581,9 +49894,7 @@
       "subject": "Nigerian History",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 332"
-      ],
+      "sourceReferences": ["PDF p. 332"],
       "topics": [
         {
           "label": "Closing",
@@ -50748,9 +50059,7 @@
       "subject": "Government",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 333"
-      ],
+      "sourceReferences": ["PDF p. 333"],
       "topics": [
         {
           "label": "Civil Rule in Nigeria: Features, Merits, Challenges",
@@ -50915,9 +50224,7 @@
       "subject": "Government",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 334"
-      ],
+      "sourceReferences": ["PDF p. 334"],
       "topics": [
         {
           "label": "Citizenship Education and National Integration",
@@ -51082,9 +50389,7 @@
       "subject": "Government",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 335"
-      ],
+      "sourceReferences": ["PDF p. 335"],
       "topics": [
         {
           "label": "Closing",
@@ -51237,9 +50542,7 @@
       "subject": "Christian Religious Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 336"
-      ],
+      "sourceReferences": ["PDF p. 336"],
       "topics": [
         {
           "label": "Closing",
@@ -51404,9 +50707,7 @@
       "subject": "Christian Religious Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 337"
-      ],
+      "sourceReferences": ["PDF p. 337"],
       "topics": [
         {
           "label": "Closing",
@@ -51571,9 +50872,7 @@
       "subject": "Christian Religious Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 338"
-      ],
+      "sourceReferences": ["PDF p. 338"],
       "topics": [
         {
           "label": "Call of the Disciples",
@@ -51738,9 +51037,7 @@
       "subject": "Visual Arts",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 339"
-      ],
+      "sourceReferences": ["PDF p. 339"],
       "topics": [
         {
           "label": "Drawing",
@@ -51905,9 +51202,7 @@
       "subject": "Visual Arts",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 340"
-      ],
+      "sourceReferences": ["PDF p. 340"],
       "topics": [
         {
           "label": "Book Cover and Jacket Design",
@@ -52072,9 +51367,7 @@
       "subject": "Visual Arts",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 341"
-      ],
+      "sourceReferences": ["PDF p. 341"],
       "topics": [
         {
           "label": "Basic Shapes and Designs",
@@ -52239,9 +51532,7 @@
       "subject": "Literature in English",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 343"
-      ],
+      "sourceReferences": ["PDF p. 343"],
       "topics": [
         {
           "label": "African Poetry",
@@ -52371,9 +51662,7 @@
       "subject": "Literature in English",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 344"
-      ],
+      "sourceReferences": ["PDF p. 344"],
       "topics": [
         {
           "label": "African Prose",
@@ -52510,9 +51799,7 @@
       "subject": "Literature in English",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 345"
-      ],
+      "sourceReferences": ["PDF p. 345"],
       "topics": [
         {
           "label": "African Drama",
@@ -52642,9 +51929,7 @@
       "subject": "Catering Craft",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 346"
-      ],
+      "sourceReferences": ["PDF p. 346"],
       "topics": [
         {
           "label": "Bar Equipment and Functions",
@@ -52809,9 +52094,7 @@
       "subject": "Catering Craft",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 347"
-      ],
+      "sourceReferences": ["PDF p. 347"],
       "topics": [
         {
           "label": "Cake Decoration",
@@ -52976,9 +52259,7 @@
       "subject": "Catering Craft",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 348"
-      ],
+      "sourceReferences": ["PDF p. 348"],
       "topics": [
         {
           "label": "Adaptation of Basic Block for Costume Design",
@@ -53143,9 +52424,7 @@
       "subject": "Accounting",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 349"
-      ],
+      "sourceReferences": ["PDF p. 349"],
       "topics": [
         {
           "label": "Admission of a New Partner and Goodwill Account",
@@ -53298,9 +52577,7 @@
       "subject": "Accounting",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 350"
-      ],
+      "sourceReferences": ["PDF p. 350"],
       "topics": [
         {
           "label": "Closing",
@@ -53441,9 +52718,7 @@
       "subject": "Accounting",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 351"
-      ],
+      "sourceReferences": ["PDF p. 351"],
       "topics": [
         {
           "label": "Benefits of Capital Market",
@@ -53584,9 +52859,7 @@
       "subject": "Commerce",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 352"
-      ],
+      "sourceReferences": ["PDF p. 352"],
       "topics": [
         {
           "label": "Advertising I",
@@ -53751,9 +53024,7 @@
       "subject": "Commerce",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 353"
-      ],
+      "sourceReferences": ["PDF p. 353"],
       "topics": [
         {
           "label": "Business Law",
@@ -53918,9 +53189,7 @@
       "subject": "Commerce",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 354"
-      ],
+      "sourceReferences": ["PDF p. 354"],
       "topics": [
         {
           "label": "Closing",
@@ -54073,9 +53342,7 @@
       "subject": "Marketing",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 355"
-      ],
+      "sourceReferences": ["PDF p. 355"],
       "topics": [
         {
           "label": "Application of ICT in International Marketing",
@@ -54240,9 +53507,7 @@
       "subject": "Marketing",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 356"
-      ],
+      "sourceReferences": ["PDF p. 356"],
       "topics": [
         {
           "label": "Branding and Packaging",
@@ -54407,9 +53672,7 @@
       "subject": "Marketing",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 357"
-      ],
+      "sourceReferences": ["PDF p. 357"],
       "topics": [
         {
           "label": "Advertising",
@@ -54562,9 +53825,7 @@
       "subject": "Economics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 358"
-      ],
+      "sourceReferences": ["PDF p. 358"],
       "topics": [
         {
           "label": "Balanced and Unbalanced Budget",
@@ -54729,9 +53990,7 @@
       "subject": "Economics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 359"
-      ],
+      "sourceReferences": ["PDF p. 359"],
       "topics": [
         {
           "label": "Agencies that Regulate the Financial Markets",
@@ -54884,9 +54143,7 @@
       "subject": "Economics",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 360"
-      ],
+      "sourceReferences": ["PDF p. 360"],
       "topics": [
         {
           "label": "Closing",
@@ -55051,9 +54308,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 362"
-      ],
+      "sourceReferences": ["PDF p. 362"],
       "topics": [
         {
           "label": "Advanced PV System Design",
@@ -55194,9 +54449,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 363"
-      ],
+      "sourceReferences": ["PDF p. 363"],
       "topics": [
         {
           "label": "Advanced Wiring Techniques",
@@ -55337,9 +54590,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 364"
-      ],
+      "sourceReferences": ["PDF p. 364"],
       "topics": [
         {
           "label": "Business Skills in Solar Sector",
@@ -55480,9 +54731,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 365"
-      ],
+      "sourceReferences": ["PDF p. 365"],
       "topics": [
         {
           "label": "Advanced Garment Construction I",
@@ -55623,9 +54872,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 366"
-      ],
+      "sourceReferences": ["PDF p. 366"],
       "topics": [
         {
           "label": "Fashion Accessories",
@@ -55766,9 +55013,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 367"
-      ],
+      "sourceReferences": ["PDF p. 367"],
       "topics": [
         {
           "label": "Colour & Design Principles",
@@ -55909,9 +55154,7 @@
       "subject": "Livestock Farming",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 368"
-      ],
+      "sourceReferences": ["PDF p. 368"],
       "topics": [
         {
           "label": "Closing",
@@ -56076,9 +55319,7 @@
       "subject": "Livestock Farming",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 369"
-      ],
+      "sourceReferences": ["PDF p. 369"],
       "topics": [
         {
           "label": "Animal Health I",
@@ -56243,9 +55484,7 @@
       "subject": "Livestock Farming",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 370"
-      ],
+      "sourceReferences": ["PDF p. 370"],
       "topics": [
         {
           "label": "Closing",
@@ -56410,9 +55649,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 371"
-      ],
+      "sourceReferences": ["PDF p. 371"],
       "topics": [
         {
           "label": "Advanced Hair Styling I",
@@ -56577,9 +55814,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 372"
-      ],
+      "sourceReferences": ["PDF p. 372"],
       "topics": [
         {
           "label": "Business Skills I",
@@ -56744,9 +55979,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 373"
-      ],
+      "sourceReferences": ["PDF p. 373"],
       "topics": [
         {
           "label": "Closing",
@@ -56911,9 +56144,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 374"
-      ],
+      "sourceReferences": ["PDF p. 374"],
       "topics": [
         {
           "label": "Advanced Computer Components",
@@ -57078,9 +56309,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 375"
-      ],
+      "sourceReferences": ["PDF p. 375"],
       "topics": [
         {
           "label": "Closing",
@@ -57245,9 +56474,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 376"
-      ],
+      "sourceReferences": ["PDF p. 376"],
       "topics": [
         {
           "label": "Advanced Computer Repairs I",
@@ -57412,9 +56639,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 377"
-      ],
+      "sourceReferences": ["PDF p. 377"],
       "topics": [
         {
           "label": "Agroforestry",
@@ -57579,9 +56804,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 378"
-      ],
+      "sourceReferences": ["PDF p. 378"],
       "topics": [
         {
           "label": "Agricultural Cooperatives",
@@ -57746,9 +56969,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 379"
-      ],
+      "sourceReferences": ["PDF p. 379"],
       "topics": [
         {
           "label": "Cereal Crops",
@@ -57913,9 +57134,7 @@
       "subject": "English Language",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 381"
-      ],
+      "sourceReferences": ["PDF p. 381"],
       "topics": [
         {
           "label": "Comprehension – Silent Reading",
@@ -58080,9 +57299,7 @@
       "subject": "English Language",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 382"
-      ],
+      "sourceReferences": ["PDF p. 382"],
       "topics": [
         {
           "label": "Closing",
@@ -58231,9 +57448,7 @@
       "subject": "General Mathematics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 383"
-      ],
+      "sourceReferences": ["PDF p. 383"],
       "topics": [
         {
           "label": "Application of Surds to Trigonometry",
@@ -58398,9 +57613,7 @@
       "subject": "General Mathematics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 384"
-      ],
+      "sourceReferences": ["PDF p. 384"],
       "topics": [
         {
           "label": "Closing",
@@ -58573,9 +57786,7 @@
       "subject": "Citizenship and Heritage Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 385"
-      ],
+      "sourceReferences": ["PDF p. 385"],
       "topics": [
         {
           "label": "Civic Entrepreneurship",
@@ -58716,9 +57927,7 @@
       "subject": "Citizenship and Heritage Studies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 386"
-      ],
+      "sourceReferences": ["PDF p. 386"],
       "topics": [
         {
           "label": "Challenges of Nigerian Citizenship",
@@ -58859,9 +58068,7 @@
       "subject": "Citizenship and Heritage Studies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 387"
-      ],
+      "sourceReferences": ["PDF p. 387"],
       "topics": [
         {
           "label": "Consolidation of Citizenship Education",
@@ -59002,9 +58209,7 @@
       "subject": "Digital Technologies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 388"
-      ],
+      "sourceReferences": ["PDF p. 388"],
       "topics": [
         {
           "label": "Advanced Programming I",
@@ -59145,9 +58350,7 @@
       "subject": "Digital Technologies",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 389"
-      ],
+      "sourceReferences": ["PDF p. 389"],
       "topics": [
         {
           "label": "Advanced Database Management",
@@ -59288,9 +58491,7 @@
       "subject": "Digital Technologies",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 390"
-      ],
+      "sourceReferences": ["PDF p. 390"],
       "topics": [
         {
           "label": "Closing & Graduation",
@@ -59419,9 +58620,7 @@
       "subject": "Biology",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 391"
-      ],
+      "sourceReferences": ["PDF p. 391"],
       "topics": [
         {
           "label": "Application of Genetics and Evolution",
@@ -59602,9 +58801,7 @@
       "subject": "Chemistry",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 392"
-      ],
+      "sourceReferences": ["PDF p. 392"],
       "topics": [
         {
           "label": "Chemical Calculations Practice",
@@ -59769,9 +58966,7 @@
       "subject": "Chemistry",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 393"
-      ],
+      "sourceReferences": ["PDF p. 393"],
       "topics": [
         {
           "label": "Chemistry in Everyday Life",
@@ -59936,9 +59131,7 @@
       "subject": "Chemistry",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 394"
-      ],
+      "sourceReferences": ["PDF p. 394"],
       "topics": [
         {
           "label": "Closing",
@@ -60103,9 +59296,7 @@
       "subject": "Physics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 395"
-      ],
+      "sourceReferences": ["PDF p. 395"],
       "topics": [
         {
           "label": "Closing",
@@ -60286,9 +59477,7 @@
       "subject": "Agriculture",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 396"
-      ],
+      "sourceReferences": ["PDF p. 396"],
       "topics": [
         {
           "label": "Agricultural Extension",
@@ -60481,9 +59670,7 @@
       "subject": "Further Mathematics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 397"
-      ],
+      "sourceReferences": ["PDF p. 397"],
       "topics": [
         {
           "label": "Correlation",
@@ -60588,9 +59775,7 @@
       "subject": "Further Mathematics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 398"
-      ],
+      "sourceReferences": ["PDF p. 398"],
       "topics": [
         {
           "label": "Conic Sections",
@@ -60691,10 +59876,7 @@
       "subject": "Foods & Nutrition",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 399",
-        "PDF p. 400"
-      ],
+      "sourceReferences": ["PDF p. 399", "PDF p. 400"],
       "topics": [
         {
           "label": "Art of Entertainment",
@@ -60859,10 +60041,7 @@
       "subject": "Foods & Nutrition",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 401",
-        "PDF p. 402"
-      ],
+      "sourceReferences": ["PDF p. 401", "PDF p. 402"],
       "topics": [
         {
           "label": "Closing",
@@ -61035,9 +60214,7 @@
       "subject": "Geography",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 403"
-      ],
+      "sourceReferences": ["PDF p. 403"],
       "topics": [
         {
           "label": "Climatic Change",
@@ -61230,9 +60407,7 @@
       "subject": "Technical Drawing",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 404"
-      ],
+      "sourceReferences": ["PDF p. 404"],
       "topics": [
         {
           "label": "Block Sectioning",
@@ -61397,9 +60572,7 @@
       "subject": "Technical Drawing",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 405"
-      ],
+      "sourceReferences": ["PDF p. 405"],
       "topics": [
         {
           "label": "Arches",
@@ -61572,9 +60745,7 @@
       "subject": "Nigerian History",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 406"
-      ],
+      "sourceReferences": ["PDF p. 406"],
       "topics": [
         {
           "label": "Christian Missionary Activities in West Africa",
@@ -61739,9 +60910,7 @@
       "subject": "Nigerian History",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 407"
-      ],
+      "sourceReferences": ["PDF p. 407"],
       "topics": [
         {
           "label": "Closing",
@@ -61906,9 +61075,7 @@
       "subject": "Nigerian History",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 408"
-      ],
+      "sourceReferences": ["PDF p. 408"],
       "topics": [
         {
           "label": "Africans in the Diaspora and Global Contributions",
@@ -62073,10 +61240,7 @@
       "subject": "Government",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 409",
-        "PDF p. 410"
-      ],
+      "sourceReferences": ["PDF p. 409", "PDF p. 410"],
       "topics": [
         {
           "label": "Conflict Resolution and Management",
@@ -62229,9 +61393,7 @@
       "subject": "Government",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 411"
-      ],
+      "sourceReferences": ["PDF p. 411"],
       "topics": [
         {
           "label": "Continuation / Practical Applications",
@@ -62344,9 +61506,7 @@
       "subject": "Christian Religious Studies",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 412"
-      ],
+      "sourceReferences": ["PDF p. 412"],
       "topics": [
         {
           "label": "Christian Attitude to Corruption",
@@ -62527,11 +61687,7 @@
       "subject": "Visual Arts",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 413",
-        "PDF p. 414",
-        "PDF p. 415"
-      ],
+      "sourceReferences": ["PDF p. 413", "PDF p. 414", "PDF p. 415"],
       "topics": [
         {
           "label": "Closing",
@@ -62696,10 +61852,7 @@
       "subject": "Visual Arts",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 416",
-        "PDF p. 417"
-      ],
+      "sourceReferences": ["PDF p. 416", "PDF p. 417"],
       "topics": [
         {
           "label": "Appreciation of Nigerian Crafts and Arts",
@@ -62872,10 +62025,7 @@
       "subject": "Literature in English",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 419",
-        "PDF p. 420"
-      ],
+      "sourceReferences": ["PDF p. 419", "PDF p. 420"],
       "topics": [
         {
           "label": "Antony and Cleopatra – Act I",
@@ -63028,9 +62178,7 @@
       "subject": "Literature in English",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 421"
-      ],
+      "sourceReferences": ["PDF p. 421"],
       "topics": [
         {
           "label": "General Revision",
@@ -63155,9 +62303,7 @@
       "subject": "Catering Craft",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 422"
-      ],
+      "sourceReferences": ["PDF p. 422"],
       "topics": [
         {
           "label": "Examination / Closing",
@@ -63322,9 +62468,7 @@
       "subject": "Catering Craft",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 423"
-      ],
+      "sourceReferences": ["PDF p. 423"],
       "topics": [
         {
           "label": "Bed Making",
@@ -63461,9 +62605,7 @@
       "subject": "Accounting",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 424"
-      ],
+      "sourceReferences": ["PDF p. 424"],
       "topics": [
         {
           "label": "Branch Account",
@@ -63608,9 +62750,7 @@
       "subject": "Commerce",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 425"
-      ],
+      "sourceReferences": ["PDF p. 425"],
       "topics": [
         {
           "label": "Business Law",
@@ -63791,9 +62931,7 @@
       "subject": "Marketing",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 426"
-      ],
+      "sourceReferences": ["PDF p. 426"],
       "topics": [
         {
           "label": "Approaches to International Market",
@@ -63970,9 +63108,7 @@
       "subject": "Marketing",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 427"
-      ],
+      "sourceReferences": ["PDF p. 427"],
       "topics": [
         {
           "label": "Closing",
@@ -64109,10 +63245,7 @@
       "subject": "Economics",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 428",
-        "PDF p. 429"
-      ],
+      "sourceReferences": ["PDF p. 428", "PDF p. 429"],
       "topics": [
         {
           "label": "Agencies that Regulate Financial Markets",
@@ -64289,10 +63422,7 @@
       "subject": "Economics",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 430",
-        "PDF p. 431"
-      ],
+      "sourceReferences": ["PDF p. 430", "PDF p. 431"],
       "topics": [
         {
           "label": "Balance of Payments (B.O.P) I",
@@ -64465,9 +63595,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 433"
-      ],
+      "sourceReferences": ["PDF p. 433"],
       "topics": [
         {
           "label": "Advanced PV Technologies",
@@ -64608,9 +63736,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 434"
-      ],
+      "sourceReferences": ["PDF p. 434"],
       "topics": [
         {
           "label": "Exam Prep & Coaching",
@@ -64751,9 +63877,7 @@
       "subject": "Solar Photovoltaic Installation and Maintenance",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 435"
-      ],
+      "sourceReferences": ["PDF p. 435"],
       "topics": [
         {
           "label": "Closing & Graduation",
@@ -64870,9 +63994,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 436"
-      ],
+      "sourceReferences": ["PDF p. 436"],
       "topics": [
         {
           "label": "Customer Relations",
@@ -65013,9 +64135,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 437"
-      ],
+      "sourceReferences": ["PDF p. 437"],
       "topics": [
         {
           "label": "Exam Prep & Coaching",
@@ -65156,9 +64276,7 @@
       "subject": "Fashion Design and Garment Making",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 438"
-      ],
+      "sourceReferences": ["PDF p. 438"],
       "topics": [
         {
           "label": "Closing & Graduation",
@@ -65275,9 +64393,7 @@
       "subject": "Livestock Farming",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 439"
-      ],
+      "sourceReferences": ["PDF p. 439"],
       "topics": [
         {
           "label": "Animal Welfare and Ethics",
@@ -65442,9 +64558,7 @@
       "subject": "Livestock Farming",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 440"
-      ],
+      "sourceReferences": ["PDF p. 440"],
       "topics": [
         {
           "label": "Closing",
@@ -65609,9 +64723,7 @@
       "subject": "Livestock Farming",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 441"
-      ],
+      "sourceReferences": ["PDF p. 441"],
       "topics": [
         {
           "label": "Career Opportunities in Livestock",
@@ -65776,9 +64888,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 442"
-      ],
+      "sourceReferences": ["PDF p. 442"],
       "topics": [
         {
           "label": "Bridal and Event Management in Beauty",
@@ -65943,9 +65053,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 443"
-      ],
+      "sourceReferences": ["PDF p. 443"],
       "topics": [
         {
           "label": "Advanced Spa Services",
@@ -66110,9 +65218,7 @@
       "subject": "Beauty and Cosmetology",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 444"
-      ],
+      "sourceReferences": ["PDF p. 444"],
       "topics": [
         {
           "label": "Exams/Closing",
@@ -66253,9 +65359,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 445"
-      ],
+      "sourceReferences": ["PDF p. 445"],
       "topics": [
         {
           "label": "Advanced Computer Networking",
@@ -66420,9 +65524,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 446"
-      ],
+      "sourceReferences": ["PDF p. 446"],
       "topics": [
         {
           "label": "Advanced Computer Maintenance",
@@ -66587,9 +65689,7 @@
       "subject": "Computer Hardware and GSM Repairs",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 447"
-      ],
+      "sourceReferences": ["PDF p. 447"],
       "topics": [
         {
           "label": "Closing/Graduation",
@@ -66754,9 +65854,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "first",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 448"
-      ],
+      "sourceReferences": ["PDF p. 448"],
       "topics": [
         {
           "label": "Advanced Greenhouse Technology",
@@ -66921,9 +66019,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "second",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 449"
-      ],
+      "sourceReferences": ["PDF p. 449"],
       "topics": [
         {
           "label": "Agribusiness Opportunities",
@@ -67088,9 +66184,7 @@
       "subject": "Horticulture and Crop Production",
       "term": "third",
       "status": "mapped",
-      "sourceReferences": [
-        "PDF p. 450"
-      ],
+      "sourceReferences": ["PDF p. 450"],
       "topics": [
         {
           "label": "Closing/Graduation",

@@ -9,29 +9,8 @@ export default function Hero() {
   return (
     <section className="relative w-full overflow-hidden bg-brand-navy-dark">
       <div className="absolute inset-0 z-0">
-        {/* Decorative backdrop as a CSS background, not an <img>.
-            As an <img> it was the largest in-viewport element and therefore
-            the LCP candidate — while being a 20%-opacity texture behind a
-            92%-opaque navy gradient. That made the LCP budget measure a
-            decoration at Slow-4G speed instead of the headline. CSS
-            backgrounds are not LCP candidates, so the paint that is measured
-            is the headline instead of the texture.
-
-            A background cannot carry a srcset, so this always uses the 750w
-            variant even on wide screens. It is a 20%-opacity layer under a
-            92%-opaque gradient, where the extra pixels are invisible; the
-            content photograph below keeps its srcset. app/page.tsx still
-            preloads this image (same srcset/sizes) so the fetch starts before
-            this element is parsed. */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: "url('/home/hero-campus-750.webp')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
+        {/* Keep this decorative layer image-free so it cannot compete with
+            the student portrait for bandwidth or become the LCP candidate. */}
         <div className="absolute inset-0 bg-gradient-to-r from-brand-navy-dark via-brand-navy-dark/92 to-brand-navy-dark/70" />
         <div
           aria-hidden="true"

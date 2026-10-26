@@ -5,7 +5,11 @@ export type CbtTerm = (typeof CBT_TERMS)[number];
 export function normalizeCbtTerm(value: unknown): string | null {
   const raw =
     typeof value === "string"
-      ? value.trim().toLowerCase().replace(/[._-]+/g, " ").replace(/\s+/g, " ")
+      ? value
+          .trim()
+          .toLowerCase()
+          .replace(/[._-]+/g, " ")
+          .replace(/\s+/g, " ")
       : value == null
         ? ""
         : String(value).trim().toLowerCase();
