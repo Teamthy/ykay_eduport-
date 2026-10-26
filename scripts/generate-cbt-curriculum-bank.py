@@ -196,11 +196,46 @@ def main() -> int:
     if any(field not in base_rows[0] for field in FIELDS if field != "term"):
         raise ValueError("Base bank is missing required question columns.")
 
+    exact_source_terms: dict[tuple[str, str, str], set[str]] = defaultdict(set)
+    exact_source_pages: dict[tuple[str, str, str, str], set[int]] = defaultdict(set)
+    for entry in manifest["entries"]:
+        for topic in entry["topics"]:
+            if not topic.get("eligibleForQuestionGeneration"):
+                continue
+            key = (entry["level"], norm(entry["subject"]), norm(topic["label"]))
+            exact_source_terms[key].add(entry["term"])
+            full_key = (*key, entry["term"])
+            for evidence in topic.get("evidence", []):
+                if evidence.get("pdfPage"):
+                    exact_source_pages[full_key].add(int(evidence["pdfPage"]))
+
     existing_slugs: dict[tuple[str, str], str] = {}
     existing_stems: dict[str, set[str]] = defaultdict(set)
+    base_assignment_groups: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+    base_rows_for_output: list[dict[str, Any]] = []
     for row in base_rows:
         level = clean(row.get("classLevel")).lower()
         subject = clean(row.get("subjectName"))
+        topic_label = clean(row.get("topic"))
+        verified_term = clean(row.get("term"))
+        source_key = (level, norm(subject), norm(topic_label))
+        matching_terms = exact_source_terms.get(source_key, set())
+        if not verified_term and len(matching_terms) == 1:
+            verified_term = next(iter(matching_terms))
+            assignment_key = (level, subject, verified_term, topic_label)
+            assignment = base_assignment_groups.setdefault(
+                assignment_key,
+                {
+                    "level": level,
+                    "subject": subject,
+                    "term": verified_term,
+                    "topic": topic_label,
+                    "questionCount": 0,
+                    "sourcePdfPages": sorted(exact_source_pages.get((*source_key, verified_term), set())),
+                },
+            )
+            assignment["questionCount"] += 1
+        base_rows_for_output.append({**row, "term": verified_term})
         existing_slugs.setdefault((level, norm(subject)), clean(row.get("subjectSlug")))
         existing_stems[clean(row.get("subjectSlug"))].add(norm(clean(row.get("stem"))))
 
@@ -340,8 +375,8 @@ def main() -> int:
     with args.output.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=output_fields, extrasaction="ignore")
         writer.writeheader()
-        for row in base_rows:
-            writer.writerow({**{field: row.get(field, "") for field in output_fields}, "term": row.get("term", "")})
+        for row in base_rows_for_output:
+            writer.writerow({field: row.get(field, "") for field in output_fields})
         writer.writerows(generated_records)
 
     rows_by_entry = [
@@ -381,8 +416,12 @@ def main() -> int:
         "ambiguousTopicDetailMappings": ambiguous_topic_details,
         "generatedQuestionCountDistribution": {str(key): value for key, value in sorted(per_topic_counts.items())},
         "newQuestionSource": SOURCE,
-        "baseQuestionTermsAssigned": 0,
-        "baseQuestionTermHandling": "blank/unassigned terms are preserved; no existing term is inferred",
+        "baseQuestionTermsAssigned": sum(item["questionCount"] for item in base_assignment_groups.values()),
+        "baseQuestionTermAssignmentGroups": sorted(
+            base_assignment_groups.values(),
+            key=lambda item: (item["level"], item["subject"], item["term"], item["topic"]),
+        ),
+        "baseQuestionTermHandling": "only exact class/subject/topic matches with one unique source term are assigned; all other legacy terms remain blank; no subject aliases are inferred",
         "excludedTopicRows": sum(excluded.values()),
         "exclusionReasons": dict(excluded),
         "sourceEntriesWithoutTopics": manifest["missingSourceEntries"],

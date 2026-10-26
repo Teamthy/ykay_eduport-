@@ -1,0 +1,18 @@
+{
+  "status": "automated_source_mapping_passed_human_review_pending",
+  "bank": "prisma/cbt-bank-19k-draft.csv",
+  "bankSha256": "c794600e85397b376ba610812efc3e8c4c2150301eba40f887a7868adf4f01c6",
+  "sourcePdfSha256": "fb406e3537f0618319c0ff15c065aa36a9dda891f4a8346320aa1c6d3fd4ca24",
+  "generatedDraftsChecked": 9796,
+  "exactMatchLegacyTermAssignmentsChecked": 172,
+  "questionTemplates": {
+    "topic-from-source-detail": 3234,
+    "source-detail-from-topic": 3268,
+    "term-from-topic": 3281,
+    "page-from-topic-reference": 13
+  },
+  "issueCount": 0,
+  "issueSamples": [],
+  "humanReview": "NOT VERIFIED; this audit only compares generated answer keys and citations to the source manifest",
+  "sourceGapsRemain": 27
+}

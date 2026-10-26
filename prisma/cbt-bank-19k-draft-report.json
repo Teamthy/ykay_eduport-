@@ -476,8 +476,122 @@
     "3": 3234
   },
   "newQuestionSource": "curriculum-map-draft",
-  "baseQuestionTermsAssigned": 0,
-  "baseQuestionTermHandling": "blank/unassigned terms are preserved; no existing term is inferred",
+  "baseQuestionTermsAssigned": 172,
+  "baseQuestionTermAssignmentGroups": [
+    {
+      "level": "ss1",
+      "subject": "Chemistry",
+      "term": "first",
+      "topic": "Atomic structure",
+      "questionCount": 75,
+      "sourcePdfPages": [
+        217,
+        452
+      ]
+    },
+    {
+      "level": "ss1",
+      "subject": "Chemistry",
+      "term": "first",
+      "topic": "Periodic table",
+      "questionCount": 8,
+      "sourcePdfPages": [
+        217,
+        452
+      ]
+    },
+    {
+      "level": "ss1",
+      "subject": "Economics",
+      "term": "third",
+      "topic": "Market structures",
+      "questionCount": 6,
+      "sourcePdfPages": [
+        270
+      ]
+    },
+    {
+      "level": "ss1",
+      "subject": "Government",
+      "term": "first",
+      "topic": "Constitution",
+      "questionCount": 7,
+      "sourcePdfPages": [
+        241
+      ]
+    },
+    {
+      "level": "ss1",
+      "subject": "Government",
+      "term": "second",
+      "topic": "Citizenship",
+      "questionCount": 7,
+      "sourcePdfPages": [
+        242
+      ]
+    },
+    {
+      "level": "ss1",
+      "subject": "Government",
+      "term": "second",
+      "topic": "Political participation",
+      "questionCount": 6,
+      "sourcePdfPages": [
+        242
+      ]
+    },
+    {
+      "level": "ss1",
+      "subject": "Government",
+      "term": "second",
+      "topic": "Political parties",
+      "questionCount": 7,
+      "sourcePdfPages": [
+        242
+      ]
+    },
+    {
+      "level": "ss1",
+      "subject": "Government",
+      "term": "second",
+      "topic": "Public opinion",
+      "questionCount": 6,
+      "sourcePdfPages": [
+        242
+      ]
+    },
+    {
+      "level": "ss1",
+      "subject": "Government",
+      "term": "third",
+      "topic": "Local government",
+      "questionCount": 14,
+      "sourcePdfPages": [
+        243
+      ]
+    },
+    {
+      "level": "ss1",
+      "subject": "Government",
+      "term": "third",
+      "topic": "Public administration",
+      "questionCount": 7,
+      "sourcePdfPages": [
+        243
+      ]
+    },
+    {
+      "level": "ss1",
+      "subject": "Physics",
+      "term": "first",
+      "topic": "Motion",
+      "questionCount": 29,
+      "sourcePdfPages": [
+        220
+      ]
+    }
+  ],
+  "baseQuestionTermHandling": "only exact class/subject/topic matches with one unique source term are assigned; all other legacy terms remain blank; no subject aliases are inferred",
   "excludedTopicRows": 1897,
   "exclusionReasons": {
     "source row contains only a placeholder dash, not a topic detail": 34,

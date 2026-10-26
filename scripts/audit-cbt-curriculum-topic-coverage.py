@@ -60,6 +60,7 @@ def main() -> int:
     bank_rows = 0
     term_tagged = 0
     tagged_generated = 0
+    verified_legacy_term_tagged = 0
     has_week_column = False
     covered: set[tuple[str, str, str, str]] = set()
     exact_pairs: set[tuple[str, str]] = set()
@@ -90,6 +91,8 @@ def main() -> int:
                 source_count_by_level[level] += 1
                 if "curriculum-map-draft" in source:
                     tagged_generated += 1
+                else:
+                    verified_legacy_term_tagged += 1
             else:
                 unassigned_by_level[level] += 1
             if term and topic:
@@ -117,6 +120,7 @@ def main() -> int:
     print(f"Bank rows: {bank_rows}")
     print(f"Question term-tagged rows: {term_tagged}; blank/unassigned: {bank_rows - term_tagged}")
     print(f"Tagged generated curriculum drafts: {tagged_generated}")
+    print(f"Exact-match legacy rows assigned a unique source term: {verified_legacy_term_tagged}")
     print(f"Question term/topic field contains week column: {'YES' if has_week_column else 'NO'}")
     print(f"Source class/subject pairs present exactly: {len(source_pairs_present)}/{len(unique_subject_pairs)}")
     print(f"Source class/subject/term entries with extracted topics: {represented_source_entries}/{len(source_entries)}")
