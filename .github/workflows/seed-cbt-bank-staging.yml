@@ -1,6 +1,6 @@
 name: Seed the CBT question bank (Staging)
 
-# Repeatable seed for the 10,000-question bank.
+# Repeatable seed for the reviewed 19,796-row curriculum-aligned bank.
 #
 # It is deliberately Staging-only and manual:
 #   * production-migrations.yml owns Production; this workflow cannot reach it
@@ -35,7 +35,7 @@ on:
         description: "CSV under prisma/ to seed"
         required: true
         type: string
-        default: cbt-bank-10k-draft.csv
+        default: cbt-bank-19k-draft.csv
       confirmation:
         description: "For seed / seed-and-attest, type SEED STAGING to confirm the target"
         required: false

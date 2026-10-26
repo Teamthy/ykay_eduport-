@@ -24,31 +24,22 @@ export default function Hero() {
 
       <div className="relative z-10 mx-auto grid w-full max-w-none items-center gap-7 px-4 pb-8 pt-8 sm:gap-8 sm:px-6 sm:pt-10 md:grid-cols-2 md:gap-10 md:px-12 md:pb-14 md:pt-24 lg:px-16">
         <div>
-          <span className="anim-rise inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 font-body text-[11px] font-semibold text-white/90">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 font-body text-[11px] font-semibold text-white/90">
             <span className="h-2 w-2 rounded-full bg-brand-orange" />
             Raising Role Models · Est. 2021
           </span>
 
-          <h1
-            className="anim-rise mt-5 font-display text-[clamp(2.15rem,8.5vw,5.2rem)] leading-[0.94] tracking-[-0.02em] text-white sm:mt-7 sm:text-[clamp(2.4rem,6.5vw,5.2rem)]"
-            style={{ animationDelay: "0.08s" }}
-          >
+          <h1 className="mt-5 font-display text-[clamp(2.15rem,8.5vw,5.2rem)] leading-[0.94] tracking-[-0.02em] text-white sm:mt-7 sm:text-[clamp(2.4rem,6.5vw,5.2rem)]">
             Excellence in Education.
             <span className="mt-1 block text-brand-green">Leadership. Character.</span>
           </h1>
 
-          <p
-            className="anim-rise mt-4 max-w-xl font-body text-base leading-relaxed text-white/90 sm:mt-5 md:text-lg"
-            style={{ animationDelay: "0.18s" }}
-          >
+          <p className="mt-4 max-w-xl font-body text-base leading-relaxed text-white/90 sm:mt-5 md:text-lg">
             A premium day secondary school — JSS1 to SS3 with science laboratories, sports, clubs
             and a full IT academy built into the timetable.
           </p>
 
-          <div
-            className="anim-rise mt-6 flex flex-col items-stretch gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center"
-            style={{ animationDelay: "0.28s" }}
-          >
+          <div className="mt-6 flex flex-col items-stretch gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center">
             <a
               href="/admissions"
               className="inline-flex min-h-12 items-center justify-center rounded-full bg-white px-6 py-3.5 font-body text-sm font-bold uppercase tracking-[0.12em] text-brand-navy sm:px-8 shadow-lg shadow-black/30 transition hover:scale-[1.03] hover:bg-white/90"
@@ -74,15 +65,13 @@ export default function Hero() {
           </p>
         </div>
 
-        <div className="anim-rise relative" style={{ animationDelay: "0.2s" }}>
+        <div className="relative">
           <div
             aria-hidden="true"
             className="absolute -inset-3 rounded-[2rem] border border-brand-green/30"
           />
-          {/* The identity photograph is now the first *content* image on the
-              page (the backdrop is a CSS background), so keep it preloaded
-              with high priority and its intrinsic size declared, or it
-              becomes the paint that misses the budget. */}
+          {/* Keep the above-the-fold student portrait sized and high-priority;
+              app/page.tsx preloads the matching responsive image candidate. */}
           <img
             src="/home/ykay-students-750.webp"
             srcSet="/home/ykay-students-750.webp 750w, /home/ykay-students-1080.webp 1080w"
