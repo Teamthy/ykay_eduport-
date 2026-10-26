@@ -71,6 +71,14 @@ export async function markApplicationPaid(
   providerData: Prisma.InputJsonValue,
 ) {
   return prisma.$transaction(async (tx) => {
+    const existing = await tx.paymentTransaction.findUnique({ where: { applicationId } });
+    if (existing?.status === PaymentStatus.PAID) {
+      if (existing.reference !== reference) {
+        throw new Error("A different admission payment is already posted for this application.");
+      }
+      return tx.admissionApplication.findUniqueOrThrow({ where: { applicationId } });
+    }
+
     const application = await tx.admissionApplication.update({
       where: { applicationId },
       data: {
@@ -79,23 +87,21 @@ export async function markApplicationPaid(
       },
     });
 
-    await tx.paymentTransaction.upsert({
-      where: { applicationId },
-      create: {
-        applicationId: application.id,
-        reference,
-        amountKobo: APPLICATION_FEE_KOBO,
-        status: PaymentStatus.PAID,
-        paidAt: new Date(),
-        providerData,
-      },
-      update: {
-        reference,
-        status: PaymentStatus.PAID,
-        paidAt: new Date(),
-        providerData,
-      },
-    });
+    const paymentData = {
+      reference,
+      provider: "PAYSTACK" as const,
+      amountKobo: APPLICATION_FEE_KOBO,
+      status: PaymentStatus.PAID,
+      paidAt: new Date(),
+      providerData,
+    };
+    if (existing) {
+      await tx.paymentTransaction.update({ where: { id: existing.id }, data: paymentData });
+    } else {
+      await tx.paymentTransaction.create({
+        data: { applicationId: application.id, ...paymentData },
+      });
+    }
 
     return application;
   });

@@ -66,10 +66,17 @@ export async function GET(request: NextRequest) {
         teacherProfile: { select: { displayName: true } },
         classroom: { select: { displayName: true } },
         term: { select: { id: true, label: true, session: { select: { label: true } } } },
-        questions: { select: { id: true, marks: true, type: true } },
+        snapshots: {
+          orderBy: { revision: "desc" },
+          take: 1,
+          include: {
+            questions: { select: { questionVersion: { select: { type: true } } } },
+          },
+        },
         attempts: {
           where: { studentProfileId: context.studentProfile.id },
           orderBy: { attemptNumber: "desc" },
+          include: { snapshot: { select: { totalMarks: true, passMark: true } } },
         },
         retakes: { where: { studentProfileId: context.studentProfile.id } },
       },
@@ -92,7 +99,9 @@ export async function GET(request: NextRequest) {
       exams: exams.map((exam) => {
         const latestAttempt = exam.attempts[0] || null;
         const retake = exam.retakes[0] || null;
-        const totalMarks = exam.questions.reduce((sum, question) => sum + question.marks, 0);
+        const snapshot = exam.snapshots[0];
+        const totalMarks = snapshot?.totalMarks ?? 0;
+        const attemptTotal = latestAttempt?.snapshot.totalMarks ?? totalMarks;
         const hasUnusedRetake = Boolean(retake && !retake.used);
         const hasSubmitted = Boolean(
           latestAttempt && latestAttempt.status !== ExamAttemptStatus.IN_PROGRESS,
@@ -100,8 +109,8 @@ export async function GET(request: NextRequest) {
 
         // One definition of "can this be sat right now", shared with the runner.
         const availability = examAvailability({
-          scheduledFor: exam.scheduledFor,
-          availableUntil: exam.availableUntil,
+          scheduledFor: snapshot?.scheduledFor ?? exam.scheduledFor,
+          availableUntil: snapshot?.availableUntil ?? exam.availableUntil,
           hasSubmitted: hasSubmitted && !hasUnusedRetake,
         });
 
@@ -132,21 +141,23 @@ export async function GET(request: NextRequest) {
             ? { id: exam.term.id, label: exam.term.label, sessionLabel: exam.term.session.label }
             : null,
           isHistoricalClass: !isCurrentClass,
-          durationMinutes: exam.durationMinutes,
-          theoryMinutes: exam.theoryMinutes ?? 0,
+          durationMinutes: snapshot?.durationMinutes ?? exam.durationMinutes,
+          theoryMinutes: snapshot?.theoryMinutes ?? exam.theoryMinutes ?? 0,
           subjectId: exam.subjectId,
           // When to sit it — the whole point of the student exam list.
-          scheduledFor: exam.scheduledFor?.toISOString() || null,
-          availableUntil: exam.availableUntil?.toISOString() || null,
+          scheduledFor: (snapshot?.scheduledFor ?? exam.scheduledFor)?.toISOString() || null,
+          availableUntil: (snapshot?.availableUntil ?? exam.availableUntil)?.toISOString() || null,
           availability,
           availabilityLabel: availabilityLabel(availability),
           isElective: exam.subjectId ? takenSubjects.has(exam.subjectId) : false,
-          questionCount: exam.questions.length,
+          questionCount: snapshot?.questions.length ?? 0,
           totalMarks,
-          passMark: exam.passMark,
-          hasEssay: exam.questions.some((question) => question.type === "ESSAY"),
+          passMark: snapshot?.passMark ?? exam.passMark,
+          hasEssay:
+            snapshot?.questions.some((question) => question.questionVersion.type === "ESSAY") ??
+            false,
           status: exam.status,
-          instructions: exam.instructions,
+          instructions: snapshot?.instructions ?? exam.instructions,
           canStart: feeLock ? false : canStart,
           canResume: feeLock ? false : canResume,
           feeLocked: Boolean(feeLock),
@@ -158,8 +169,8 @@ export async function GET(request: NextRequest) {
                 submittedAt: latestAttempt.submittedAt?.toISOString() || null,
                 scoreVisible,
                 percent:
-                  scoreVisible && totalMarks
-                    ? Math.round((latestAttempt.totalScore / totalMarks) * 100)
+                  scoreVisible && attemptTotal
+                    ? Math.round((latestAttempt.totalScore / attemptTotal) * 100)
                     : null,
               }
             : null,

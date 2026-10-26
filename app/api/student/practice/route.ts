@@ -71,7 +71,11 @@ export async function GET(request: NextRequest) {
       passMark: true,
       instructions: true,
       status: true,
-      questions: { select: { marks: true } },
+      snapshots: {
+        orderBy: { revision: "desc" },
+        take: 1,
+        include: { questions: { select: { id: true } } },
+      },
       attempts: {
         where: { studentProfileId: context.studentProfile.id },
         orderBy: { attemptNumber: "desc" },
@@ -82,13 +86,15 @@ export async function GET(request: NextRequest) {
           totalScore: true,
           attemptNumber: true,
           submittedAt: true,
+          snapshot: { select: { totalMarks: true } },
         },
       },
     },
   });
 
   const cards = exams.map((exam) => {
-    const totalMarks = exam.questions.reduce((sum, question) => sum + question.marks, 0);
+    const snapshot = exam.snapshots[0];
+    const totalMarks = snapshot?.totalMarks ?? 0;
     const finished = exam.attempts.filter(
       (attempt) => attempt.status !== ExamAttemptStatus.IN_PROGRESS,
     );
@@ -96,9 +102,9 @@ export async function GET(request: NextRequest) {
       (attempt) => attempt.status === ExamAttemptStatus.IN_PROGRESS,
     );
 
-    const percentages = totalMarks
-      ? finished.map((attempt) => Math.round((attempt.totalScore / totalMarks) * 100))
-      : [];
+    const percentages = finished
+      .filter((attempt) => attempt.snapshot.totalMarks > 0)
+      .map((attempt) => Math.round((attempt.totalScore / attempt.snapshot.totalMarks) * 100));
     const bestPercent = percentages.length ? Math.max(...percentages) : null;
     const lastPercent = percentages.length ? percentages[0] : null;
 
@@ -114,13 +120,16 @@ export async function GET(request: NextRequest) {
         ? { id: exam.term.id, label: exam.term.label, sessionLabel: exam.term.session.label }
         : null,
       isHistoricalClass: !isCurrentClass,
-      durationMinutes: exam.durationMinutes,
-      passMark: exam.passMark,
-      instructions: exam.instructions,
-      questionCount: exam.questions.length,
+      durationMinutes: snapshot?.durationMinutes ?? exam.durationMinutes,
+      passMark: snapshot?.passMark ?? exam.passMark,
+      instructions: snapshot?.instructions ?? exam.instructions,
+      questionCount: snapshot?.questions.length ?? 0,
       totalMarks,
       // Practice never locks: a student may retake as often as they like.
-      canStart: isCurrentClass && exam.status === ExamStatus.PUBLISHED && exam.questions.length > 0,
+      canStart:
+        isCurrentClass &&
+        exam.status === ExamStatus.PUBLISHED &&
+        (snapshot?.questions.length ?? 0) > 0,
       canResume: Boolean(inProgress),
       resumeAttemptId: inProgress?.id ?? null,
       attemptCount: finished.length,

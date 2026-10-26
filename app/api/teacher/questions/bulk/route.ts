@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
   const exam = await prisma.exam.findFirst({
     where: examAccessWhere(user, input.examId),
     include: {
-      questions: { select: { id: true } },
+      questions: { where: { archivedAt: null }, select: { id: true } },
     },
   });
 
@@ -120,12 +120,22 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await prisma.$transaction(async (tx) => {
+      const draftClaim = await tx.exam.updateMany({
+        where: {
+          id: exam.id,
+          schoolId: user.schoolId,
+          status: ExamStatus.DRAFT,
+          updatedAt: exam.updatedAt,
+        },
+        data: { updatedAt: new Date() },
+      });
+      if (draftClaim.count !== 1) throw new Error("EXAM_NO_LONGER_DRAFT");
       const created = [];
       for (const data of questionData) {
         created.push(await tx.examQuestion.create({ data }));
       }
       const aggregate = await tx.examQuestion.aggregate({
-        where: { examId: input.examId },
+        where: { examId: input.examId, archivedAt: null },
         _sum: { marks: true },
         _count: { _all: true },
       });
@@ -145,6 +155,12 @@ export async function POST(request: NextRequest) {
       totalMarks: result.totalMarks,
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "EXAM_NO_LONGER_DRAFT") {
+      return NextResponse.json(
+        { error: "Assessment state changed. Reload before adding questions." },
+        { status: 409 },
+      );
+    }
     logger.error("[bulk-questions] Transaction failed:", {
       error: error instanceof Error ? error.message : String(error),
     });
@@ -175,7 +191,7 @@ export async function GET(request: NextRequest) {
   const exam = await prisma.exam.findFirst({
     where: examAccessWhere(user, examId),
     include: {
-      questions: { orderBy: { sortOrder: "asc" } },
+      questions: { where: { archivedAt: null }, orderBy: { sortOrder: "asc" } },
       classroom: { select: { displayName: true } },
     },
   });
@@ -221,12 +237,13 @@ export async function DELETE(request: NextRequest) {
   const question = await prisma.examQuestion.findFirst({
     where: {
       id: questionId,
+      archivedAt: null,
       exam: {
         schoolId: user.schoolId,
         ...(TEACHING_ROLES.has(user.role) ? { teacherProfile: { userId: user.id } } : {}),
       },
     },
-    include: { exam: { select: { id: true, status: true } } },
+    include: { exam: { select: { id: true, status: true, updatedAt: true } } },
   });
 
   if (!question) return NextResponse.json({ error: "Question not found." }, { status: 404 });
@@ -237,17 +254,38 @@ export async function DELETE(request: NextRequest) {
     );
   }
 
-  const result = await prisma.$transaction(async (tx) => {
-    await tx.examQuestion.delete({ where: { id: questionId } });
-    const aggregate = await tx.examQuestion.aggregate({
-      where: { examId: question.exam.id },
-      _sum: { marks: true },
-      _count: { _all: true },
+  let result: { totalMarks: number; totalQuestions: number };
+  try {
+    result = await prisma.$transaction(async (tx) => {
+      const draftClaim = await tx.exam.updateMany({
+        where: {
+          id: question.exam.id,
+          schoolId: user.schoolId,
+          status: ExamStatus.DRAFT,
+          updatedAt: question.exam.updatedAt,
+        },
+        data: { updatedAt: new Date() },
+      });
+      if (draftClaim.count !== 1) throw new Error("EXAM_NO_LONGER_DRAFT");
+      await tx.examQuestion.update({ where: { id: questionId }, data: { archivedAt: new Date() } });
+      const aggregate = await tx.examQuestion.aggregate({
+        where: { examId: question.exam.id, archivedAt: null },
+        _sum: { marks: true },
+        _count: { _all: true },
+      });
+      const totalMarks = aggregate._sum.marks ?? 0;
+      await tx.exam.update({ where: { id: question.exam.id }, data: { totalMarks } });
+      return { totalMarks, totalQuestions: aggregate._count._all };
     });
-    const totalMarks = aggregate._sum.marks ?? 0;
-    await tx.exam.update({ where: { id: question.exam.id }, data: { totalMarks } });
-    return { totalMarks, totalQuestions: aggregate._count._all };
-  });
+  } catch (error) {
+    if (error instanceof Error && error.message === "EXAM_NO_LONGER_DRAFT") {
+      return NextResponse.json(
+        { error: "Assessment state changed. Reload before deleting questions." },
+        { status: 409 },
+      );
+    }
+    throw error;
+  }
 
   return NextResponse.json({
     ok: true,

@@ -42,13 +42,13 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
         },
       ],
     },
-    include: { questions: { orderBy: { sortOrder: "asc" } } },
   });
   if (!exam) return NextResponse.json({ error: "Exam not found for your class." }, { status: 404 });
 
   const existing = await prisma.examAttempt.findFirst({
     where: { examId: exam.id, studentProfileId: studentContext.studentProfile.id },
     orderBy: { attemptNumber: "desc" },
+    include: { snapshot: { include: { questions: { include: { questionVersion: true } } } } },
   });
 
   if (exam.subjectId && existing?.status !== ExamAttemptStatus.IN_PROGRESS) {
@@ -56,6 +56,20 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
     if (!enrolledSubjectIds.includes(exam.subjectId)) {
       return NextResponse.json({ error: "Exam not found for your subjects." }, { status: 404 });
     }
+  }
+
+  const activeSnapshot =
+    (existing?.status === ExamAttemptStatus.IN_PROGRESS ? existing.snapshot : null) ??
+    (await prisma.examSnapshot.findFirst({
+      where: { examId: exam.id },
+      orderBy: { revision: "desc" },
+      include: { questions: { orderBy: { sortOrder: "asc" }, include: { questionVersion: true } } },
+    }));
+  if (!activeSnapshot) {
+    return NextResponse.json(
+      { error: "This exam has no published snapshot. Contact your school." },
+      { status: 503 },
+    );
   }
 
   let attempt = existing;
@@ -93,8 +107,8 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
     // Note this guards NEW attempts only: an attempt already in progress falls
     // into the resume branch above and keeps its own clock.
     const refusal = startWindowRefusal({
-      scheduledFor: exam.scheduledFor,
-      availableUntil: exam.availableUntil,
+      scheduledFor: activeSnapshot.scheduledFor,
+      availableUntil: activeSnapshot.availableUntil,
     });
     if (refusal) {
       return NextResponse.json({ error: refusal.message, code: refusal.code }, { status: 409 });
@@ -142,13 +156,14 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
           return tx.examAttempt.create({
             data: {
               examId: exam.id,
+              snapshotId: activeSnapshot.id,
               studentProfileId: studentContext.studentProfile.id,
               attemptNumber: (existing?.attemptNumber || 0) + 1,
               // Bounded by the window as well as the duration: starting a minute
               // before close must not buy a full extra sitting.
               deadlineAt: attemptDeadline({
-                durationMinutes: exam.durationMinutes,
-                availableUntil: exam.availableUntil,
+                durationMinutes: activeSnapshot.durationMinutes,
+                availableUntil: activeSnapshot.availableUntil,
               }),
             },
           });
@@ -192,28 +207,42 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
     savedAnswers.map((answer) => [answer.questionId, answer.response]),
   );
 
-  const ordered = exam.shuffleQuestions ? shuffled(exam.questions, attempt.id) : exam.questions;
+  const attemptSnapshot =
+    attempt.snapshotId === activeSnapshot.id
+      ? activeSnapshot
+      : await prisma.examSnapshot.findUnique({
+          where: { id: attempt.snapshotId },
+          include: {
+            questions: { orderBy: { sortOrder: "asc" }, include: { questionVersion: true } },
+          },
+        });
+  if (!attemptSnapshot)
+    return NextResponse.json({ error: "Attempt snapshot unavailable." }, { status: 503 });
+  const ordered = attemptSnapshot.shuffleQuestions
+    ? shuffled(attemptSnapshot.questions, attempt.id)
+    : attemptSnapshot.questions;
 
   return NextResponse.json({
     attempt: {
       id: attempt.id,
       deadlineAt: attempt.deadlineAt.toISOString(),
       secondsLeft: Math.max(0, Math.floor((attempt.deadlineAt.getTime() - Date.now()) / 1000)),
+      lastClientSequence: attempt.lastClientSequence,
     },
     exam: {
       id: exam.id,
-      title: exam.title,
-      subjectName: exam.subjectName,
-      instructions: exam.instructions,
-      durationMinutes: exam.durationMinutes,
+      title: attemptSnapshot.title,
+      subjectName: attemptSnapshot.subjectName,
+      instructions: attemptSnapshot.instructions,
+      durationMinutes: attemptSnapshot.durationMinutes,
     },
     questions: ordered.map((question) => ({
-      id: question.id,
-      type: question.type,
-      questionText: question.questionText,
-      marks: question.marks,
-      options: (question.options as OptionShape[] | null) || null,
-      savedResponse: responses[question.id] ?? null,
+      id: question.questionId,
+      type: question.questionVersion.type,
+      questionText: question.questionVersion.questionText,
+      marks: question.questionVersion.marks,
+      options: (question.questionVersion.options as OptionShape[] | null) || null,
+      savedResponse: responses[question.questionId] ?? null,
     })),
   });
 }
@@ -221,6 +250,7 @@ export async function POST(_request: NextRequest, context: { params: Promise<{ i
 const saveSchema = z.object({
   attemptId: z.string().trim().min(1),
   action: z.enum(["SAVE", "SUBMIT", "TAB_SWITCH"]),
+  clientSequence: z.number().int().min(1).max(2_147_483_647).optional(),
   answers: z
     .array(
       z.object({
@@ -251,7 +281,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       examId: id,
       studentProfileId: studentContext.studentProfile.id,
     },
-    include: { exam: { select: { questions: { select: { id: true } } } } },
+    include: { snapshot: { include: { questions: { select: { id: true, questionId: true } } } } },
   });
   if (!attempt) return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
   if (attempt.status !== ExamAttemptStatus.IN_PROGRESS) {
@@ -277,7 +307,10 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     return NextResponse.json({ ok: true });
   }
 
-  const validQuestionIds = new Set(attempt.exam.questions.map((question) => question.id));
+  const snapshotQuestionById = new Map(
+    attempt.snapshot.questions.map((question) => [question.questionId, question.id]),
+  );
+  const validQuestionIds = new Set(snapshotQuestionById.keys());
   const answers = (payload.answers || []).filter((answer) =>
     validQuestionIds.has(answer.questionId),
   );
@@ -297,33 +330,67 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
    * touches one or two answers, so the steady state is now a single read plus
    * a tiny write batch.
    */
-  const existingAnswers = await prisma.examAnswer.findMany({
-    where: { attemptId: attempt.id },
-    select: { questionId: true, response: true },
-  });
-  const storedByQuestion = new Map(
-    existingAnswers.map((entry) => [entry.questionId, entry.response]),
-  );
+  const clientSequence = payload.clientSequence ?? attempt.lastClientSequence + 1;
+  const saveApplied = await prisma.$transaction(async (tx) => {
+    const claim = await tx.examAttempt.updateMany({
+      where: {
+        id: attempt.id,
+        status: ExamAttemptStatus.IN_PROGRESS,
+        lastClientSequence: { lt: clientSequence },
+      },
+      data: { lastClientSequence: clientSequence },
+    });
+    if (claim.count !== 1) return false; // a delayed or replayed autosave lost to a newer save
 
-  const changed = answers.filter(
-    (answer) =>
-      !storedByQuestion.has(answer.questionId) ||
-      storedByQuestion.get(answer.questionId) !== answer.response,
-  );
-
-  if (changed.length) {
-    await prisma.$transaction(
+    const existingAnswers = await tx.examAnswer.findMany({
+      where: { attemptId: attempt.id },
+      select: { questionId: true, response: true },
+    });
+    const storedByQuestion = new Map(
+      existingAnswers.map((entry) => [entry.questionId, entry.response]),
+    );
+    const changed = answers.filter(
+      (answer) =>
+        !storedByQuestion.has(answer.questionId) ||
+        storedByQuestion.get(answer.questionId) !== answer.response,
+    );
+    await Promise.all(
       changed.map((answer) =>
-        prisma.examAnswer.upsert({
+        tx.examAnswer.upsert({
           where: { attemptId_questionId: { attemptId: attempt.id, questionId: answer.questionId } },
           update: { response: answer.response },
           create: {
             attemptId: attempt.id,
             questionId: answer.questionId,
+            snapshotQuestionId: snapshotQuestionById.get(answer.questionId)!,
             response: answer.response,
           },
         }),
       ),
+    );
+    return true;
+  });
+
+  if (!saveApplied && payload.action !== "SUBMIT") {
+    const latest = await prisma.examAttempt.findUnique({
+      where: { id: attempt.id },
+      select: { lastClientSequence: true },
+    });
+    return NextResponse.json({
+      ok: true,
+      submitted: false,
+      staleSaveIgnored: true,
+      lastClientSequence: latest?.lastClientSequence ?? attempt.lastClientSequence,
+    });
+  }
+  if (!saveApplied && payload.action === "SUBMIT") {
+    const refreshed = await prisma.examAttempt.findUnique({ where: { id: attempt.id } });
+    if (refreshed && refreshed.status !== ExamAttemptStatus.IN_PROGRESS) {
+      return NextResponse.json({ ok: true, submitted: true, status: refreshed.status });
+    }
+    return NextResponse.json(
+      { error: "A newer save is being applied. Retry submission." },
+      { status: 409 },
     );
   }
 

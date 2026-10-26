@@ -73,6 +73,19 @@ describe("teacher exam state transitions at the API boundary", () => {
     vi.mocked(getExamTeacherContext).mockResolvedValue(context as never);
     mockPrisma.exam.findFirst.mockResolvedValue(exam("DRAFT") as never);
     mockPrisma.exam.updateMany.mockResolvedValue({ count: 1 } as never);
+    mockPrisma.exam.findUnique.mockResolvedValue({
+      id: "exam_a",
+      title: "Paper",
+      subjectName: "Mathematics",
+      instructions: null,
+      durationMinutes: 30,
+      theoryMinutes: 0,
+      passMark: 40,
+      shuffleQuestions: true,
+      snapshots: [],
+      questions: [{ id: "question_1", marks: 1, sortOrder: 1, versions: [{ id: "version_1" }] }],
+    } as never);
+    mockPrisma.examSnapshot.create.mockResolvedValue({ id: "snapshot_1" } as never);
   });
 
   it.each(["PUBLISHED", "CLOSED"] as const)("refuses PUBLISH directly from %s", async (status) => {

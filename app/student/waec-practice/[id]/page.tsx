@@ -78,6 +78,7 @@ export default function PracticeRunnerPage() {
   const [review, setReview] = useState<ReviewRow[]>([]);
 
   const submittedRef = useRef(false);
+  const clientSequenceRef = useRef(0);
 
   const start = useCallback(async () => {
     if (!examId) return;
@@ -92,6 +93,7 @@ export default function PracticeRunnerPage() {
       if (!response.ok) throw new Error(body?.error || "Unable to start this practice set.");
       setExam(body.exam);
       setAttemptId(body.attempt.id);
+      clientSequenceRef.current = body.attempt.lastClientSequence ?? 0;
       setQuestions(body.questions);
       setResponses(
         Object.fromEntries(body.questions.map((q: Question) => [q.id, q.savedResponse])),
@@ -120,6 +122,7 @@ export default function PracticeRunnerPage() {
         body: JSON.stringify({
           attemptId,
           action: "SUBMIT",
+          clientSequence: ++clientSequenceRef.current,
           answers: Object.entries(responses).map(([questionId, value]) => ({
             questionId,
             response: value,
@@ -159,12 +162,23 @@ export default function PracticeRunnerPage() {
         body: JSON.stringify({
           attemptId,
           action: "SAVE",
+          clientSequence: ++clientSequenceRef.current,
           answers: Object.entries(responses).map(([questionId, value]) => ({
             questionId,
             response: value,
           })),
         }),
-      }).catch(() => {});
+      })
+        .then(async (response) => {
+          const body = await response.json();
+          if (typeof body.lastClientSequence === "number") {
+            clientSequenceRef.current = Math.max(
+              clientSequenceRef.current,
+              body.lastClientSequence,
+            );
+          }
+        })
+        .catch(() => {});
     }, 20_000);
     return () => clearInterval(timer);
   }, [attemptId, examId, responses, result]);

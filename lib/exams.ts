@@ -90,80 +90,118 @@ export {
 } from "@/lib/exam-questions";
 
 export async function finalizeAttempt(attemptId: string) {
-  const attempt = await prisma.examAttempt.findUnique({
-    where: { id: attemptId },
-    include: {
-      answers: {
-        include: {
-          question: {
-            select: { type: true, correctKey: true, correctText: true, marks: true },
+  return prisma.$transaction(async (tx) => {
+    // Claim the attempt before reading answers. This serializes finalization with
+    // autosaves on the same attempt row, so a response cannot land after grading
+    // has read its answer set. Any later grading failure rolls this claim back.
+    const claim = await tx.examAttempt.updateMany({
+      where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
+      data: { status: ExamAttemptStatus.SUBMITTED, submittedAt: new Date() },
+    });
+    if (claim.count !== 1) {
+      return tx.examAttempt.findUnique({ where: { id: attemptId } });
+    }
+
+    const attempt = await tx.examAttempt.findUnique({
+      where: { id: attemptId },
+      include: {
+        answers: {
+          include: {
+            snapshotQuestion: {
+              include: {
+                questionVersion: {
+                  select: { type: true, correctKey: true, correctText: true, marks: true },
+                },
+              },
+            },
+          },
+        },
+        snapshot: {
+          include: {
+            questions: {
+              select: { id: true, questionId: true, questionVersion: { select: { type: true } } },
+            },
           },
         },
       },
-      exam: { select: { id: true } },
-    },
-  });
-  if (!attempt) return null;
-
-  let autoScore = 0;
-  let hasEssay = false;
-
-  /**
-   * Grading used to issue one UPDATE per answer, awaited in sequence. A
-   * 60-question paper meant 60 sequential round trips at submit time — the
-   * single moment a student is least willing to wait, and the moment a whole
-   * class hits the server at once because the timer expires for everyone
-   * together.
-   *
-   * The marks awarded only ever take a handful of distinct values (0, or the
-   * question's mark value), so answers are bucketed by the (isCorrect,
-   * awardedMarks) pair they resolve to and written with one `updateMany` per
-   * bucket. 60 round trips becomes 2–3, and the whole thing is one
-   * transaction so a mid-grade failure cannot leave an attempt half-scored.
-   */
-  const buckets = new Map<string, { isCorrect: boolean; awardedMarks: number; ids: string[] }>();
-
-  for (const answer of attempt.answers) {
-    if (answer.question.type === ExamQuestionType.ESSAY) {
-      hasEssay = true;
-      continue;
-    }
-    const graded = gradeObjectiveAnswer({
-      type: answer.question.type,
-      correctKey: answer.question.correctKey,
-      correctText: answer.question.correctText,
-      marks: answer.question.marks,
-      response: answer.response,
     });
-    const awardedMarks = graded.awardedMarks || 0;
-    const isCorrect = graded.isCorrect === true;
-    autoScore += awardedMarks;
+    if (!attempt) return null;
 
-    const key = `${isCorrect}:${awardedMarks}`;
-    const bucket = buckets.get(key);
-    if (bucket) bucket.ids.push(answer.id);
-    else buckets.set(key, { isCorrect, awardedMarks, ids: [answer.id] });
-  }
+    // Materialize unanswered items at submit time so zero-response essays remain
+    // pending for a teacher and unanswered objective items are explicitly zero.
+    const answeredSnapshotQuestionIds = new Set(
+      attempt.answers.map((answer) => answer.snapshotQuestionId),
+    );
+    const unansweredQuestions = attempt.snapshot.questions.filter(
+      (question) => !answeredSnapshotQuestionIds.has(question.id),
+    );
+    const emptyAnswers = await Promise.all(
+      unansweredQuestions.map((question) =>
+        tx.examAnswer.create({
+          data: {
+            attemptId: attempt.id,
+            questionId: question.questionId,
+            snapshotQuestionId: question.id,
+            response: null,
+          },
+          include: {
+            snapshotQuestion: {
+              include: {
+                questionVersion: {
+                  select: { type: true, correctKey: true, correctText: true, marks: true },
+                },
+              },
+            },
+          },
+        }),
+      ),
+    );
+    const answers = [...attempt.answers, ...emptyAnswers];
 
-  // Unanswered objective questions count as zero — ensured by autoScore accumulation.
-  const results = await prisma.$transaction([
-    ...[...buckets.values()].map((bucket) =>
-      prisma.examAnswer.updateMany({
-        where: { id: { in: bucket.ids } },
-        data: { isCorrect: bucket.isCorrect, awardedMarks: bucket.awardedMarks },
-      }),
-    ),
-    prisma.examAttempt.update({
+    let autoScore = 0;
+    let hasEssay = false;
+    const buckets = new Map<string, { isCorrect: boolean; awardedMarks: number; ids: string[] }>();
+
+    for (const answer of answers) {
+      const version = answer.snapshotQuestion.questionVersion;
+      if (version.type === ExamQuestionType.ESSAY) {
+        hasEssay = true;
+        continue;
+      }
+      const graded = gradeObjectiveAnswer({
+        type: version.type,
+        correctKey: version.correctKey,
+        correctText: version.correctText,
+        marks: version.marks,
+        response: answer.response,
+      });
+      const awardedMarks = graded.awardedMarks || 0;
+      const isCorrect = graded.isCorrect === true;
+      autoScore += awardedMarks;
+
+      const key = `${isCorrect}:${awardedMarks}`;
+      const bucket = buckets.get(key);
+      if (bucket) bucket.ids.push(answer.id);
+      else buckets.set(key, { isCorrect, awardedMarks, ids: [answer.id] });
+    }
+
+    // One update per distinct score outcome; all work, including the claim,
+    // answer marks, and final score, commits or rolls back together.
+    await Promise.all(
+      [...buckets.values()].map((bucket) =>
+        tx.examAnswer.updateMany({
+          where: { id: { in: bucket.ids } },
+          data: { isCorrect: bucket.isCorrect, awardedMarks: bucket.awardedMarks },
+        }),
+      ),
+    );
+    return tx.examAttempt.update({
       where: { id: attempt.id },
       data: {
         status: hasEssay ? ExamAttemptStatus.SUBMITTED : ExamAttemptStatus.GRADED,
-        submittedAt: new Date(),
         autoScore,
         totalScore: autoScore + attempt.essayScore,
       },
-    }),
-  ]);
-
-  // The attempt update is always the last entry in the batch.
-  return results[results.length - 1] as Awaited<ReturnType<typeof prisma.examAttempt.update>>;
+    });
+  });
 }

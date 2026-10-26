@@ -78,21 +78,10 @@ async function upsertPayment(input: {
   paidAt: Date;
   providerData?: Prisma.InputJsonValue;
 }) {
-  return prisma.feePayment.upsert({
-    where: { reference: input.reference },
-    update: {
-      schoolId: input.schoolId,
-      invoiceId: input.invoiceId,
-      studentProfileId: input.studentProfileId,
-      parentProfileId: input.parentProfileId || null,
-      amount: input.amount,
-      method: input.method,
-      status: FeePaymentStatus.COMPLETED,
-      receiptNumber: input.receiptNumber,
-      paidAt: input.paidAt,
-      providerData: input.providerData,
-    },
-    create: {
+  const existing = await prisma.feePayment.findUnique({ where: { reference: input.reference } });
+  if (existing) return existing; // Existing receipts are immutable ledger facts.
+  return prisma.feePayment.create({
+    data: {
       schoolId: input.schoolId,
       invoiceId: input.invoiceId,
       studentProfileId: input.studentProfileId,
@@ -111,11 +100,15 @@ async function upsertPayment(input: {
 async function refreshInvoiceTotals(invoiceId: string) {
   const invoice = await prisma.feeInvoice.findUnique({
     where: { id: invoiceId },
-    include: { payments: { where: { status: FeePaymentStatus.COMPLETED } } },
+    include: { payments: { where: { status: FeePaymentStatus.COMPLETED } }, corrections: true },
   });
   if (!invoice) return null;
 
-  const amountPaid = invoice.payments.reduce((sum, payment) => sum + payment.amount, 0);
+  const amountPaid = Math.max(
+    0,
+    invoice.payments.reduce((sum, payment) => sum + payment.amount, 0) +
+      invoice.corrections.reduce((sum, entry) => sum + entry.amountDelta, 0),
+  );
   const balanceDue = Math.max(invoice.totalAmount - amountPaid, 0);
   const status = invoiceStatus(invoice.totalAmount, amountPaid, invoice.dueDate);
 

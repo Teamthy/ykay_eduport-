@@ -2,6 +2,7 @@ import { ExamAttemptStatus, ExamStatus, GradebookStatus, Prisma } from "@prisma/
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getExamTeacherContext, parseBulkQuestions, examStatusLabel } from "@/lib/exams";
+import { createExamSnapshot } from "@/lib/exam-snapshots";
 import { NoCurrentTermError, requireCurrentLabels } from "@/lib/academic-session";
 import { prisma } from "@/lib/prisma";
 import {
@@ -28,7 +29,7 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
     include: {
       classroom: { select: { displayName: true, level: true } },
-      questions: { select: { id: true, marks: true, type: true } },
+      questions: { where: { archivedAt: null }, select: { id: true, marks: true, type: true } },
       attempts: { select: { id: true, status: true } },
       subject: { select: { id: true, name: true } },
       term: { select: { id: true, label: true, session: { select: { label: true } } } },
@@ -307,7 +308,13 @@ export async function PATCH(request: NextRequest) {
       schoolId: context.user.schoolId,
       teacherProfileId: context.teacherProfile.id,
     },
-    include: { questions: { select: { id: true, marks: true, sortOrder: true } } },
+    include: {
+      snapshots: { orderBy: { revision: "desc" }, take: 1 },
+      questions: {
+        where: { archivedAt: null },
+        select: { id: true, marks: true, sortOrder: true },
+      },
+    },
   });
   if (!exam) return NextResponse.json({ error: "Exam not found." }, { status: 404 });
 
@@ -326,30 +333,51 @@ export async function PATCH(request: NextRequest) {
       );
     }
     const startOrder = exam.questions.length;
-    await prisma.$transaction([
-      prisma.examQuestion.createMany({
-        data: parsed.questions.map((question, index) => ({
-          examId: exam.id,
-          type: question.type,
-          questionText: question.questionText,
-          options: question.options
-            ? (question.options as unknown as Prisma.InputJsonValue)
-            : Prisma.JsonNull,
-          correctKey: question.correctKey,
-          correctText: question.correctText,
-          marks: question.marks,
-          sortOrder: startOrder + index + 1,
-        })),
-      }),
-      prisma.exam.update({
-        where: { id: exam.id },
-        data: {
-          totalMarks:
-            exam.questions.reduce((sum, question) => sum + question.marks, 0) +
-            parsed.questions.reduce((sum, question) => sum + question.marks, 0),
-        },
-      }),
-    ]);
+    try {
+      await prisma.$transaction(async (tx) => {
+        const draftClaim = await tx.exam.updateMany({
+          where: {
+            id: exam.id,
+            schoolId: context.user.schoolId,
+            teacherProfileId: context.teacherProfile.id,
+            status: ExamStatus.DRAFT,
+            updatedAt: exam.updatedAt,
+          },
+          data: { updatedAt: new Date() },
+        });
+        if (draftClaim.count !== 1) throw new Error("EXAM_NO_LONGER_DRAFT");
+        await tx.examQuestion.createMany({
+          data: parsed.questions.map((question, index) => ({
+            examId: exam.id,
+            type: question.type,
+            questionText: question.questionText,
+            options: question.options
+              ? (question.options as unknown as Prisma.InputJsonValue)
+              : Prisma.JsonNull,
+            correctKey: question.correctKey,
+            correctText: question.correctText,
+            marks: question.marks,
+            sortOrder: startOrder + index + 1,
+          })),
+        });
+        await tx.exam.update({
+          where: { id: exam.id },
+          data: {
+            totalMarks:
+              exam.questions.reduce((sum, question) => sum + question.marks, 0) +
+              parsed.questions.reduce((sum, question) => sum + question.marks, 0),
+          },
+        });
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === "EXAM_NO_LONGER_DRAFT") {
+        return NextResponse.json(
+          { error: "Assessment state changed. Reload before adding questions." },
+          { status: 409 },
+        );
+      }
+      throw error;
+    }
     return NextResponse.json({
       ok: true,
       message: `${parsed.questions.length} question(s) added.`,
@@ -357,6 +385,12 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (payload.action === "UPDATE_SETTINGS") {
+    if (exam.status !== ExamStatus.DRAFT) {
+      return NextResponse.json(
+        { error: "Published assessment settings are frozen. Create a new draft revision instead." },
+        { status: 409 },
+      );
+    }
     if (exam.resultsReleased) {
       return NextResponse.json(
         { error: "Hide released results before changing assessment settings." },
@@ -424,6 +458,7 @@ export async function PATCH(request: NextRequest) {
         schoolId: context.user.schoolId,
         teacherProfileId: context.teacherProfile.id,
         resultsReleased: false,
+        status: ExamStatus.DRAFT,
         updatedAt: exam.updatedAt,
       },
       data,
@@ -462,18 +497,23 @@ export async function PATCH(request: NextRequest) {
         { status: 409 },
       );
     }
-    const publish = await prisma.exam.updateMany({
-      where: {
-        id: exam.id,
-        schoolId: context.user.schoolId,
-        teacherProfileId: context.teacherProfile.id,
-        status: ExamStatus.DRAFT,
-        resultsReleased: false,
-        updatedAt: exam.updatedAt,
-      },
-      data: { status: ExamStatus.PUBLISHED },
+    const publish = await prisma.$transaction(async (tx) => {
+      const claimed = await tx.exam.updateMany({
+        where: {
+          id: exam.id,
+          schoolId: context.user.schoolId,
+          teacherProfileId: context.teacherProfile.id,
+          status: ExamStatus.DRAFT,
+          resultsReleased: false,
+          updatedAt: exam.updatedAt,
+        },
+        data: { status: ExamStatus.PUBLISHED },
+      });
+      if (claimed.count !== 1) return false;
+      await createExamSnapshot(tx, exam.id);
+      return true;
     });
-    if (publish.count !== 1) {
+    if (!publish) {
       return NextResponse.json(
         { error: "Assessment state changed. Reload before publishing." },
         { status: 409 },
@@ -641,6 +681,7 @@ export async function PATCH(request: NextRequest) {
         attemptNumber: true,
         status: true,
         totalScore: true,
+        snapshot: { select: { totalMarks: true } },
         studentProfile: { select: { schoolId: true } },
       },
     });
@@ -666,10 +707,12 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const totalMarks = exam.questions.reduce((sum, question) => sum + question.marks, 0);
+    const totalMarks = exam.snapshots[0]?.totalMarks ?? 0;
     if (
       totalMarks <= 0 ||
-      attempts.some((attempt) => attempt.totalScore < 0 || attempt.totalScore > totalMarks)
+      attempts.some(
+        (attempt) => attempt.totalScore < 0 || attempt.totalScore > attempt.snapshot.totalMarks,
+      )
     ) {
       return NextResponse.json(
         { error: "Stored assessment marks are invalid. Contact an administrator." },
@@ -728,6 +771,7 @@ export async function PATCH(request: NextRequest) {
             attemptNumber: true,
             status: true,
             totalScore: true,
+            snapshot: { select: { totalMarks: true } },
             studentProfile: { select: { schoolId: true } },
           },
         });
@@ -738,7 +782,7 @@ export async function PATCH(request: NextRequest) {
             (attempt) => attempt.studentProfile.schoolId !== context.user.schoolId,
           ) ||
           currentAttempts.some(
-            (attempt) => attempt.totalScore < 0 || attempt.totalScore > totalMarks,
+            (attempt) => attempt.totalScore < 0 || attempt.totalScore > attempt.snapshot.totalMarks,
           )
         ) {
           throw new ExamReleaseConflictError();
@@ -807,7 +851,7 @@ export async function PATCH(request: NextRequest) {
                 exam: existing?.exam ?? 0,
               },
               attempt.totalScore,
-              totalMarks,
+              attempt.snapshot.totalMarks,
               gradebookComponent,
             );
             const entry = await tx.gradebookEntry.upsert({

@@ -191,16 +191,34 @@ describe("finalizeAttempt", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.examAnswer.update.mockResolvedValue({});
+    mockPrisma.examAttempt.updateMany.mockResolvedValue({ count: 1 } as never);
     mockPrisma.examAttempt.update.mockImplementation(({ data }: any) =>
       Promise.resolve({ id: "att_1", ...data }),
     );
   });
 
-  function attempt(answers: any[], essayScore = 0) {
+  function attempt(answers: any[], essayScore = 0, extraQuestions: any[] = []) {
+    const pinnedAnswers = answers.map((answer, index) => {
+      const snapshotQuestionId = `snapshot-question-${index + 1}`;
+      return {
+        ...answer,
+        snapshotQuestionId,
+        snapshotQuestion: { id: snapshotQuestionId, ...answer.snapshotQuestion },
+      };
+    });
+    const questions = [
+      ...pinnedAnswers.map((answer, index) => ({
+        id: answer.snapshotQuestionId,
+        questionId: answer.questionId ?? `question-${index + 1}`,
+        questionVersion: answer.snapshotQuestion.questionVersion,
+      })),
+      ...extraQuestions,
+    ];
     return {
       id: "att_1",
       essayScore,
-      answers,
+      answers: pinnedAnswers,
+      snapshot: { questions },
       exam: { id: "exam_1" },
     };
   }
@@ -218,17 +236,28 @@ describe("finalizeAttempt", () => {
         {
           id: "a1",
           response: "A",
-          question: { type: "MCQ", correctKey: "A", correctText: null, marks: 5 },
+          snapshotQuestion: {
+            questionVersion: { type: "MCQ", correctKey: "A", correctText: null, marks: 5 },
+          },
         },
         {
           id: "a2",
           response: "B",
-          question: { type: "MCQ", correctKey: "C", correctText: null, marks: 5 },
+          snapshotQuestion: {
+            questionVersion: { type: "MCQ", correctKey: "C", correctText: null, marks: 5 },
+          },
         },
         {
           id: "a3",
           response: "TRUE",
-          question: { type: "TRUE_FALSE", correctKey: "TRUE", correctText: null, marks: 2 },
+          snapshotQuestion: {
+            questionVersion: {
+              type: "TRUE_FALSE",
+              correctKey: "TRUE",
+              correctText: null,
+              marks: 2,
+            },
+          },
         },
       ]),
     );
@@ -240,7 +269,9 @@ describe("finalizeAttempt", () => {
     expect(data.autoScore).toBe(7); // 5 + 0 + 2
     expect(data.totalScore).toBe(7);
     expect(data.status).toBe("GRADED");
-    expect(data.submittedAt).toBeInstanceOf(Date);
+    expect(mockPrisma.examAttempt.updateMany.mock.calls[0][0].data.submittedAt).toBeInstanceOf(
+      Date,
+    );
   });
 
   it("holds the attempt at SUBMITTED when an essay needs marking", async () => {
@@ -249,12 +280,16 @@ describe("finalizeAttempt", () => {
         {
           id: "a1",
           response: "A",
-          question: { type: "MCQ", correctKey: "A", correctText: null, marks: 5 },
+          snapshotQuestion: {
+            questionVersion: { type: "MCQ", correctKey: "A", correctText: null, marks: 5 },
+          },
         },
         {
           id: "a2",
           response: "Essay text",
-          question: { type: "ESSAY", correctKey: null, correctText: null, marks: 10 },
+          snapshotQuestion: {
+            questionVersion: { type: "ESSAY", correctKey: null, correctText: null, marks: 10 },
+          },
         },
       ]),
     );
@@ -267,6 +302,40 @@ describe("finalizeAttempt", () => {
     expect(data.autoScore).toBe(5); // essay excluded from auto score
   });
 
+  it("keeps an unanswered essay pending by materializing its snapshot answer", async () => {
+    const essayQuestion = {
+      id: "snapshot-essay",
+      questionId: "question-essay",
+      questionVersion: { type: "ESSAY", correctKey: null, correctText: null, marks: 10 },
+    };
+    mockPrisma.examAttempt.findUnique.mockResolvedValue(attempt([], 0, [essayQuestion]));
+    mockPrisma.examAnswer.create.mockImplementation(({ data }: any) =>
+      Promise.resolve({
+        id: "answer-empty-essay",
+        ...data,
+        snapshotQuestion: {
+          id: data.snapshotQuestionId,
+          questionVersion: essayQuestion.questionVersion,
+        },
+      }),
+    );
+
+    const { finalizeAttempt } = await import("@/lib/exams");
+    await finalizeAttempt("att_1");
+
+    expect(mockPrisma.examAnswer.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          attemptId: "att_1",
+          questionId: "question-essay",
+          snapshotQuestionId: "snapshot-essay",
+          response: null,
+        },
+      }),
+    );
+    expect(mockPrisma.examAttempt.update.mock.calls[0][0].data.status).toBe("SUBMITTED");
+  });
+
   it("adds an existing essayScore into the total", async () => {
     mockPrisma.examAttempt.findUnique.mockResolvedValue(
       attempt(
@@ -274,7 +343,9 @@ describe("finalizeAttempt", () => {
           {
             id: "a1",
             response: "A",
-            question: { type: "MCQ", correctKey: "A", correctText: null, marks: 5 },
+            snapshotQuestion: {
+              questionVersion: { type: "MCQ", correctKey: "A", correctText: null, marks: 5 },
+            },
           },
         ],
         8, // teacher already awarded 8 for the essay
@@ -295,7 +366,9 @@ describe("finalizeAttempt", () => {
         {
           id: "a1",
           response: "Essay",
-          question: { type: "ESSAY", correctKey: null, correctText: null, marks: 10 },
+          snapshotQuestion: {
+            questionVersion: { type: "ESSAY", correctKey: null, correctText: null, marks: 10 },
+          },
         },
       ]),
     );
@@ -316,12 +389,16 @@ describe("finalizeAttempt", () => {
         {
           id: "a1",
           response: null,
-          question: { type: "MCQ", correctKey: "A", correctText: null, marks: 5 },
+          snapshotQuestion: {
+            questionVersion: { type: "MCQ", correctKey: "A", correctText: null, marks: 5 },
+          },
         },
         {
           id: "a2",
           response: null,
-          question: { type: "MCQ", correctKey: "B", correctText: null, marks: 5 },
+          snapshotQuestion: {
+            questionVersion: { type: "MCQ", correctKey: "B", correctText: null, marks: 5 },
+          },
         },
       ]),
     );

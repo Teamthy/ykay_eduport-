@@ -21,14 +21,19 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     },
     include: {
       classroom: { select: { displayName: true } },
-      questions: { orderBy: { sortOrder: "asc" } },
+      snapshots: { orderBy: { revision: "desc" }, take: 1 },
       attempts: {
         orderBy: { startedAt: "desc" },
         include: {
+          snapshot: true,
           studentProfile: { select: { id: true, studentId: true, displayName: true } },
           answers: {
             include: {
-              question: { select: { id: true, type: true, marks: true, questionText: true } },
+              snapshotQuestion: {
+                include: {
+                  questionVersion: { select: { type: true, marks: true, questionText: true } },
+                },
+              },
             },
           },
         },
@@ -37,16 +42,17 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
   });
   if (!exam) return NextResponse.json({ error: "Exam not found." }, { status: 404 });
 
-  const totalMarks = exam.questions.reduce((sum, question) => sum + question.marks, 0);
+  const publishedSnapshot = exam.snapshots[0];
+  const totalMarks = publishedSnapshot?.totalMarks ?? 0;
 
   return NextResponse.json({
     exam: {
       id: exam.id,
-      title: exam.title,
-      subjectName: exam.subjectName,
+      title: publishedSnapshot?.title ?? exam.title,
+      subjectName: publishedSnapshot?.subjectName ?? exam.subjectName,
       className: exam.classroom.displayName,
       totalMarks,
-      passMark: exam.passMark,
+      passMark: publishedSnapshot?.passMark ?? exam.passMark,
       resultsReleased: exam.resultsReleased,
     },
     attempts: exam.attempts.map((attempt) => ({
@@ -60,16 +66,21 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       essayScore: attempt.essayScore,
       totalScore: attempt.totalScore,
       tabSwitches: attempt.tabSwitches,
-      passed: totalMarks > 0 ? (attempt.totalScore / totalMarks) * 100 >= exam.passMark : false,
+      passed:
+        attempt.snapshot.totalMarks > 0
+          ? (attempt.totalScore / attempt.snapshot.totalMarks) * 100 >= attempt.snapshot.passMark
+          : false,
       pendingEssays: attempt.answers.filter(
-        (answer) => answer.question.type === ExamQuestionType.ESSAY && answer.awardedMarks === null,
+        (answer) =>
+          answer.snapshotQuestion.questionVersion.type === ExamQuestionType.ESSAY &&
+          answer.awardedMarks === null,
       ).length,
       essayAnswers: attempt.answers
-        .filter((answer) => answer.question.type === ExamQuestionType.ESSAY)
+        .filter((answer) => answer.snapshotQuestion.questionVersion.type === ExamQuestionType.ESSAY)
         .map((answer) => ({
           answerId: answer.id,
-          questionText: answer.question.questionText,
-          maxMarks: answer.question.marks,
+          questionText: answer.snapshotQuestion.questionVersion.questionText,
+          maxMarks: answer.snapshotQuestion.questionVersion.marks,
           response: answer.response,
           awardedMarks: answer.awardedMarks,
         })),
@@ -106,7 +117,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       },
     },
     include: {
-      question: { select: { type: true, marks: true } },
+      snapshotQuestion: { include: { questionVersion: { select: { type: true, marks: true } } } },
       attempt: { select: { id: true, exam: { select: { resultsReleased: true } } } },
     },
   });
@@ -120,11 +131,11 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       { status: 409 },
     );
   }
-  if (answer.question.type !== ExamQuestionType.ESSAY) {
+  if (answer.snapshotQuestion.questionVersion.type !== ExamQuestionType.ESSAY) {
     return NextResponse.json({ error: "Only essay answers are graded manually." }, { status: 409 });
   }
 
-  const awarded = Math.min(payload.awardedMarks, answer.question.marks);
+  const awarded = Math.min(payload.awardedMarks, answer.snapshotQuestion.questionVersion.marks);
   try {
     await prisma.$transaction(async (tx) => {
       // Lock the same exam row that result release claims. This serializes an
@@ -149,14 +160,22 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       // Recompute attempt totals; mark GRADED when no essay is left ungraded.
       const attempt = await tx.examAttempt.findUnique({
         where: { id: answer.attempt.id },
-        include: { answers: { include: { question: { select: { type: true } } } } },
+        include: {
+          answers: {
+            include: {
+              snapshotQuestion: { include: { questionVersion: { select: { type: true } } } },
+            },
+          },
+        },
       });
       if (attempt) {
         const essayScore = attempt.answers
-          .filter((entry) => entry.question.type === ExamQuestionType.ESSAY)
+          .filter((entry) => entry.snapshotQuestion.questionVersion.type === ExamQuestionType.ESSAY)
           .reduce((sum, entry) => sum + (entry.awardedMarks || 0), 0);
         const pending = attempt.answers.some(
-          (entry) => entry.question.type === ExamQuestionType.ESSAY && entry.awardedMarks === null,
+          (entry) =>
+            entry.snapshotQuestion.questionVersion.type === ExamQuestionType.ESSAY &&
+            entry.awardedMarks === null,
         );
         await tx.examAttempt.update({
           where: { id: attempt.id },
